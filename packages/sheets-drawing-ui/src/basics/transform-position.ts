@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ITransformState, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import type { ITransformState } from '@univerjs/drawing';
 import { precisionTo } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
-import type { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
-export function drawingPositionToTransform(position: ISheetDrawingPosition, skeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
-    const { from, to } = position;
+export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
+    const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = position;
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
 
@@ -50,8 +51,8 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, skel
 
     const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
 
-    const left = precisionTo(startSelectionX + fromColumnOffset, 1);
-    const top = precisionTo(startSelectionY + fromRowOffset, 1);
+    let left = precisionTo(startSelectionX + fromColumnOffset, 1);
+    let top = precisionTo(startSelectionY + fromRowOffset, 1);
 
     let width = precisionTo(endSelectionX + toColumnOffset - left, 1);
     let height = precisionTo(endSelectionY + toRowOffset - top, 1);
@@ -64,7 +65,19 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, skel
         height = 0;
     }
 
+    const skeleton = sheetSkeletonManagerService.getCurrentSkeleton();
+    const sheetWidth = skeleton.rowHeaderWidth + skeleton.columnTotalWidth;
+    const sheetHeight = skeleton.columnHeaderHeight + skeleton.rowTotalHeight;
+
+    if ((left + width) > sheetWidth) {
+        left = sheetWidth - width;
+    }
+    if ((top + height) > sheetHeight) {
+        top = sheetHeight - height;
+    }
+
     return {
+        flipY, flipX, angle, skewX, skewY,
         left,
         top,
         width,
@@ -73,8 +86,8 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, skel
 }
 
 // use transform and originSize convert to  ISheetDrawingPosition
-export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISheetSelectionRenderService): Nullable<ISheetDrawingPosition> {
-    const { left = 0, top = 0, width = 0, height = 0 } = transform;
+export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISelectionRenderService): Nullable<ISheetDrawingPosition> {
+    const { left = 0, top = 0, width = 0, height = 0, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = transform;
 
     const startSelectionCell = selectionRenderService.getSelectionCellByPosition(left, top);
 
@@ -103,6 +116,7 @@ export function transformToDrawingPosition(transform: ITransformState, selection
     };
 
     return {
+        flipY, flipX, angle, skewX, skewY,
         from,
         to,
     };

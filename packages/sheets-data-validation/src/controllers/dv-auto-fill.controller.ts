@@ -17,7 +17,7 @@
 import { DataValidationType, Disposable, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
@@ -27,7 +27,8 @@ import { getDataValidationDiffMutations } from '../commands/commands/data-valida
 export class DataValidationAutoFillController extends Disposable {
     constructor(
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
         this._initAutoFill();
@@ -95,7 +96,7 @@ export class DataValidationAutoFillController extends Disposable {
             });
 
             const diffs = ruleMatrixCopy.diff(manager.getDataValidations());
-            const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs);
+            const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector);
             return {
                 undos: undoMutations,
                 redos: redoMutations,
@@ -131,7 +132,6 @@ export class DataValidationAutoFillController extends Disposable {
                 return noopReturnFunc();
             },
             onAfterFillData: () => {
-                this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, false);
             },
         };
         this.disposeWithMe(this._autoFillService.addHook(hook));

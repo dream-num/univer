@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
+// @ts-ignore
+import numfmt from 'numfmt';
+
 export const DEFAULT_DATE_FORMAT = 'yyyy/mm/dd;@';
+export const DEFAULT_NOW_FORMAT = 'yyyy/mm/dd hh:mm';
+export const DEFAULT_TIME_FORMAT = 'h:mm A/P';
 
 /**
  * Excel stores dates as sequential serial numbers so they can be used in calculations. By default, January 1, 1900 is serial number 1, and January 1, 2008 is serial number 39448 because it is 39,447 days after January 1, 1900.
@@ -41,6 +46,27 @@ export function excelDateSerial(date: Date): number {
     }
 
     return Math.floor(dayDifference) + 1; // Excel serial number starts from 1
+}
+
+/**
+ * Time serial number with date
+ * @param date
+ * @returns
+ */
+export function excelDateTimeSerial(date: Date): number {
+    const baseDate = new Date(Date.UTC(1900, 0, 1, 0, 0, 0)); // January 1, 1900, UTC at midnight
+    const leapDayDate = new Date(Date.UTC(1900, 1, 28, 0, 0, 0)); // February 28, 1900, UTC at midnight
+
+    // Calculate the difference in milliseconds between the input date and the base date
+    const diffMilliseconds = date.getTime() - baseDate.getTime();
+    let dayDifference = diffMilliseconds / (1000 * 3600 * 24);
+
+    // Adjusting for the Excel leap year bug
+    if (date > leapDayDate) {
+        dayDifference += 1;
+    }
+
+    return dayDifference + 1; // Excel serial number starts from 1
 }
 
 export function excelSerialToDate(serial: number): Date {
@@ -107,4 +133,20 @@ export function isValidDateStr(dateStr: string): boolean {
     const dateStrPad = dateStr.replace(/\//g, '-').split('-').map((v) => v.padStart(2, '0')).join('-');
 
     return dateStrPad === reconstructedDateStr;
+}
+
+export function parseFormattedDate(value: string) {
+    return numfmt.parseDate(value);
+}
+
+export function parseFormattedValue(value: string) {
+    return numfmt.parseValue(value);
+}
+
+export function parseFormattedTime(value: string) {
+    return numfmt.parseTime(value);
+}
+
+export function isDate(format: string) {
+    return numfmt.isDate(format);
 }

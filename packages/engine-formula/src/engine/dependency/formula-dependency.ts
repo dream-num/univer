@@ -548,7 +548,7 @@ export class FormulaDependencyGenerator extends Disposable {
         if (dependencyTreeCache.size() > treeList.length) {
             allTree = this._dependencyManagerService.buildDependencyTree(treeList);
         } else {
-            allTree = this._dependencyManagerService.buildDependencyTree(dependencyTreeCache);
+            allTree = this._dependencyManagerService.buildDependencyTree(dependencyTreeCache, treeList);
         }
 
         for (let i = 0, len = allTree.length; i < len; i++) {

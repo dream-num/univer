@@ -27,6 +27,10 @@ export class Day extends BaseFunction {
     override maxParams = 1;
 
     override calculate(serialNumber: BaseValueObject) {
+        if (serialNumber.isError()) {
+            return serialNumber;
+        }
+
         if (serialNumber.isArray()) {
             return serialNumber.map((serialNumberObject) => this._handleSingleObject(serialNumberObject));
         }
@@ -35,10 +39,6 @@ export class Day extends BaseFunction {
     }
 
     private _handleSingleObject(serialNumberObject: BaseValueObject) {
-        if (serialNumberObject.isError()) {
-            return serialNumberObject;
-        }
-
         let date: Date;
         const dateValue = serialNumberObject.getValue();
 

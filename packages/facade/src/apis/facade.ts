@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import type { CommandListener, DocumentDataModel, IDocumentData, IExecutionOptions, IWorkbookData,
+import type {
+    CommandListener,
+    DocumentDataModel,
+    IDocumentData,
+    IExecutionOptions,
+    IWorkbookData,
     Nullable,
-    Workbook } from '@univerjs/core';
+    Workbook,
+} from '@univerjs/core';
 import {
     BorderStyleTypes,
     debounce,
@@ -28,6 +34,7 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
+import type { ISocket } from '@univerjs/network';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
@@ -40,9 +47,9 @@ import type {
     RenderComponentType,
     SheetComponent,
     SheetExtension, SpreadsheetColumnHeader,
-    SpreadsheetRowHeader } from '@univerjs/engine-render';
-import {
-    IRenderManagerService } from '@univerjs/engine-render';
+    SpreadsheetRowHeader,
+} from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FDocument } from './docs/f-document';
@@ -51,45 +58,9 @@ import { FSheetHooks } from './sheets/f-sheet-hooks';
 import { FHooks } from './f-hooks';
 
 export class FUniver {
-    /**
-     * Get dependencies for FUniver, you can override newAPI to add more dependencies.
-     * @param injector
-     * @param derivedDependencies
-     * @returns
-     */
-    protected static getDependencies(injector: Injector, derivedDependencies?: []): Dependency[] {
-        const dependencies: Dependency[] = derivedDependencies || [];
-        // Is unified registration required?
-        const socketService = injector.get(ISocketService, Quantity.OPTIONAL);
-        if (!socketService) {
-            dependencies.push([ISocketService, { useClass: WebSocketService }]);
-        }
-        return dependencies;
-    }
-
-    /**
-     * Create a FUniver instance, if the injector is not provided, it will create a new Univer instance.
-     * @param wrapped The Univer instance or injector.
-     * @returns FUniver instance.
-     *
-     * @zh 创建一个 FUniver 实例，如果未提供注入器，将创建一个新的 Univer 实例。
-     * @param_zh wrapped Univer 实例或注入器。
-     * @returns_zh FUniver 实例。
-     */
-    static newAPI(wrapped: Univer | Injector): FUniver {
-        const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
-        const dependencies = FUniver.getDependencies(injector);
-        dependencies.forEach((dependency) => injector.add(dependency));
-        return injector.createInstance(FUniver);
-    }
-
     static BorderStyle = BorderStyleTypes;
-    static WrapStrategy = WrapStrategy;
 
-    /**
-     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
-     */
-    private _debouncedFormulaCalculation: () => void;
+    static WrapStrategy = WrapStrategy;
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -102,9 +73,70 @@ export class FUniver {
     }
 
     /**
+     * Initialize the FUniver instance.
+     *
+     * @private
+     */
+    private _initialize(): void {
+        this._debouncedFormulaCalculation = debounce(() => {
+            this._commandService.executeCommand(
+                SetFormulaCalculationStartMutation.id,
+                {
+                    commands: [],
+                    forceCalculation: true,
+                },
+                {
+                    onlyLocal: true,
+                }
+            );
+        }, 10);
+    }
+
+    /**
+     * Get dependencies for FUniver, you can override newAPI to add more dependencies.
+     *
+     * @static
+     * @protected
+     *
+     * @param {Injector} injector - The injector instance used to retrieve dependencies.
+     * @param {Dependency[]} [derivedDependencies] - Optional array of pre-derived dependencies.
+     * @returns {Dependency[]} - An array of dependencies required by the service.
+     */
+    protected static getDependencies(injector: Injector, derivedDependencies?: []): Dependency[] {
+        const dependencies: Dependency[] = derivedDependencies || [];
+        // Is unified registration required?
+        const socketService = injector.get(ISocketService, Quantity.OPTIONAL);
+        if (!socketService) {
+            dependencies.push([ISocketService, { useClass: WebSocketService }]);
+        }
+        return dependencies;
+    }
+
+    /**
+     * Create an FUniver instance, if the injector is not provided, it will create a new Univer instance.
+     *
+     * @static
+     *
+     * @param {Univer | Injector} wrapped - The Univer instance or injector instance.
+     * @returns {FUniver} - The FUniver instance.
+     */
+    static newAPI(wrapped: Univer | Injector): FUniver {
+        const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
+        const dependencies = FUniver.getDependencies(injector);
+        dependencies.forEach((dependency) => injector.add(dependency));
+        return injector.createInstance(FUniver);
+    }
+
+    /**
+     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
+     */
+    private _debouncedFormulaCalculation: () => void;
+
+    /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
-     * @param data The snapshot of the spreadsheet.
-     * @returns Spreadsheet API instance.
+     *
+     * @param {Partial<IWorkbookData>} data The snapshot of the spreadsheet.
+     * @returns {FWorkbook} FWorkbook API instance.
      */
     createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
         const workbook = this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
@@ -113,8 +145,9 @@ export class FUniver {
 
     /**
      * Create a new document and get the API handler of that document.
-     * @param data The snapshot of the document.
-     * @returns Document API instance.
+     *
+     * @param {Partial<IDocumentData>} data The snapshot of the document.
+     * @returns {FDocument} FDocument API instance.
      */
     createUniverDoc(data: Partial<IDocumentData>): FDocument {
         const document = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
@@ -123,8 +156,9 @@ export class FUniver {
 
     /**
      * Dispose the UniverSheet by the `unitId`. The UniverSheet would be unload from the application.
-     * @param unitId The `unitId` of the UniverSheet.
-     * @returns If the UniverSheet is disposed successfully, return `true`, otherwise return `false`.
+     *
+     * @param unitId The unit id of the UniverSheet.
+     * @returns Whether the Univer instance is disposed successfully.
      */
     disposeUnit(unitId: string): boolean {
         return this._univerInstanceService.disposeUnit(unitId);
@@ -132,8 +166,9 @@ export class FUniver {
 
     /**
      * Get the spreadsheet API handler by the spreadsheet id.
-     * @param id The spreadsheet id.
-     * @returns Spreadsheet API instance.
+     *
+     * @param {string} id The spreadsheet id.
+     * @returns {FWorkbook | null} The spreadsheet API instance.
      */
     getUniverSheet(id: string): FWorkbook | null {
         const workbook = this._univerInstanceService.getUniverSheetInstance(id);
@@ -146,8 +181,9 @@ export class FUniver {
 
     /**
      * Get the document API handler by the document id.
-     * @param id The document id.
-     * @returns Document API instance.
+     *
+     * @param {string} id The document id.
+     * @returns {FDocument | null} The document API instance.
      */
     getUniverDoc(id: string): FDocument | null {
         const document = this._univerInstanceService.getUniverDocInstance(id);
@@ -160,7 +196,8 @@ export class FUniver {
 
     /**
      * Get the currently focused Univer spreadsheet.
-     * @returns the currently focused Univer spreadsheet.
+     *
+     * @returns {FWorkbook | null} The currently focused Univer spreadsheet.
      */
     getActiveWorkbook(): FWorkbook | null {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -173,7 +210,8 @@ export class FUniver {
 
     /**
      * Get the currently focused Univer document.
-     * @returns the currently focused Univer document.
+     *
+     * @returns {FDocument | null} The currently focused Univer document.
      */
     getActiveDocument(): FDocument | null {
         const document = this._univerInstanceService.getCurrentUniverDocInstance();
@@ -186,7 +224,9 @@ export class FUniver {
 
     /**
      * Register a function to the spreadsheet.
-     * @param config
+     *
+     * @param {IRegisterFunctionParams} config The configuration of the function.
+     * @returns {IDisposable} The disposable instance.
      */
     registerFunction(config: IRegisterFunctionParams): IDisposable {
         let registerFunctionService = this._injector.get(IRegisterFunctionService);
@@ -208,8 +248,10 @@ export class FUniver {
 
     /**
      * Register sheet row header render extensions.
-     * @param unitId
-     * @param extensions
+     *
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SheetExtension[]} extensions The extensions to register.
+     * @returns {IDisposable} The disposable instance.
      */
     registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
@@ -223,8 +265,10 @@ export class FUniver {
 
     /**
      * Register sheet column header render extensions.
-     * @param unitId
-     * @param extensions
+     *
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SheetExtension[]} extensions The extensions to register.
+     * @returns {IDisposable} The disposable instance.
      */
     registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
@@ -238,8 +282,10 @@ export class FUniver {
 
     /**
      * Register sheet main render extensions.
-     * @param unitId
-     * @param uKeys
+     *
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SheetExtension[]} extensions The extensions to register.
+     * @returns {IDisposable} The disposable instance.
      */
     registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
@@ -255,7 +301,8 @@ export class FUniver {
 
     /**
      * Undo an editing on the currently focused document.
-     * @returns redo result
+     *
+     * @returns {Promise<boolean>} undo result
      */
     undo(): Promise<boolean> {
         return this._commandService.executeCommand(UndoCommand.id);
@@ -263,7 +310,8 @@ export class FUniver {
 
     /**
      * Redo an editing on the currently focused document.
-     * @returns redo result
+     *
+     * @returns {Promise<boolean>} redo result
      */
     redo(): Promise<boolean> {
         return this._commandService.executeCommand(UndoCommand.id);
@@ -275,8 +323,9 @@ export class FUniver {
 
     /**
      * Register a callback that will be triggered before invoking a command.
-     * @param callback the callback.
-     * @returns A function to dispose the listening.
+     *
+     * @param {CommandListener} callback The callback.
+     * @returns {IDisposable} The disposable instance.
      */
     onBeforeCommandExecute(callback: CommandListener): IDisposable {
         return this._commandService.beforeCommandExecuted((command, options?: IExecutionOptions) => {
@@ -286,8 +335,9 @@ export class FUniver {
 
     /**
      * Register a callback that will be triggered when a command is invoked.
-     * @param callback the callback.
-     * @returns A function to dispose the listening.
+     *
+     * @param {CommandListener} callback The callback.
+     * @returns {IDisposable} The disposable instance.
      */
     onCommandExecuted(callback: CommandListener): IDisposable {
         return this._commandService.onCommandExecuted((command, options?: IExecutionOptions) => {
@@ -299,10 +349,11 @@ export class FUniver {
 
     /**
      * Execute command
-     * @param id Command id
-     * @param params Command params
-     * @param options Command options
-     * @returns Command Promise
+     *
+     * @param {string} id Command ID
+     * @param {object} params Command parameters
+     * @param {IExecutionOptions} options Command execution options
+     * @returns {Promise<R>} Command execution result
      */
     executeCommand<P extends object = object, R = boolean>(
         id: string,
@@ -314,10 +365,11 @@ export class FUniver {
 
     /**
      * Set WebSocket URL for WebSocketService
-     * @param url WebSocketService URL
-     * @returns WebSocket info and callback
+     *
+     * @param {string} url WebSocket URL
+     * @returns {ISocket} WebSocket instance
      */
-    createSocket(url: string) {
+    createSocket(url: string): ISocket {
         const ws = this._ws.createSocket(url);
 
         if (!ws) {
@@ -329,23 +381,30 @@ export class FUniver {
 
     /**
      * Get sheet hooks
-     * @returns
+     *
+     * @returns {FSheetHooks} FSheetHooks instance
      */
-    getSheetHooks() {
+    getSheetHooks(): FSheetHooks {
         return this._injector.createInstance(FSheetHooks);
     }
 
     /**
      * Get hooks
+     *
+     * @returns {FHooks} FHooks instance
      */
-    getHooks() {
+    getHooks(): FHooks {
         return this._injector.createInstance(FHooks);
     }
 
     /**
      * Get sheet render component from render by unitId and view key.
-     * @param unitId
-     * @returns
+     *
+     * @private
+     *
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SHEET_VIEW_KEY} viewKey The view key of the spreadsheet.
+     * @returns {Nullable<RenderComponentType>} The render component.
      */
     private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
         const render = this._renderManagerService.getRenderById(unitId);
@@ -364,10 +423,14 @@ export class FUniver {
     }
 
     /**
-     * customizeColumnHeader
-     * @param cfg
-     * cfg example
-     ({ headerStyle:{backgroundColor: 'pink', fontSize: 9}, columnsCfg: ['MokaII', undefined, null, {text: 'Size', textAlign: 'left'}]})
+     * Customize the column header of the spreadsheet.
+     *
+     * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
+     *
+     * @example
+     * ```typescript
+     * customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+     * ```
      */
     customizeColumnHeader(cfg: IColumnsHeaderCfgParam) {
         const wb = this.getActiveWorkbook();
@@ -380,6 +443,16 @@ export class FUniver {
         sheetColumn.setCustomHeader(cfg);
     }
 
+    /**
+     * Customize the row header of the spreadsheet.
+     *
+     * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
+     *
+     * @example
+     * ```typescript
+     * customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+     * ```
+     */
     customizeRowHeader(cfg: IRowsHeaderCfgParam) {
         const wb = this.getActiveWorkbook();
         if (!wb) {
@@ -389,20 +462,5 @@ export class FUniver {
         const unitId = wb?.getId();
         const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
         sheetRow.setCustomHeader(cfg);
-    }
-
-    private _initialize(): void {
-        this._debouncedFormulaCalculation = debounce(() => {
-            this._commandService.executeCommand(
-                SetFormulaCalculationStartMutation.id,
-                {
-                    commands: [],
-                    forceCalculation: true,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        }, 10);
     }
 }

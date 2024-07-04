@@ -70,7 +70,9 @@ describe('test text-x utils', () => {
             paragraphs: [{
                 startIndex: 2,
             }],
-        });
+            customDecorations: [],
+            customRanges: [],
+        } as IDocumentBody);
     });
 
     it('test getBodySlice fn with a larger range', () => {
@@ -107,6 +109,8 @@ describe('test text-x utils', () => {
 
         const sliceBody = getBodySlice(body, 2, 8);
         expect(sliceBody).toEqual({
+            customDecorations: [],
+            customRanges: [],
             dataStream: 'llo\nwo',
             textRuns: [
                 {

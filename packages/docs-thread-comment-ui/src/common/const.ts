@@ -14,24 +14,8 @@
  * limitations under the License.
  */
 
-import type { Meta } from '@storybook/react';
-import React from 'react';
+export const PLUGIN_NAME = 'DOC_THREAD_COMMENT_UI_PLUGIN';
 
-import { Container } from './Container';
+export const DEFAULT_DOC_SUBUNIT_ID = 'default_doc';
 
-const meta: Meta<typeof Container> = {
-    title: 'Components / Container',
-    component: Container,
-    parameters: {
-        layout: 'centered',
-    },
-    tags: ['autodocs'],
-};
-
-export default meta;
-
-export const Playground = {
-    render() {
-        return <Container>main container</Container>;
-    },
-};
+export const DEFAULT_TEMP_COMMENT_ID = 'default_comment';

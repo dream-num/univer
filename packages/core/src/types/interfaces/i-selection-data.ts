@@ -54,6 +54,10 @@ export interface ISelection {
     primary: Nullable<ISelectionCell>;
 }
 
+/**
+ * Selection range Info, contains selectionrange & primaryrange
+ * primaryrange is the range of the highlighted cell.
+ */
 export interface ISelectionWithCoord {
     rangeWithCoord: IRangeWithCoord;
     primaryWithCoord: Nullable<ISelectionCellWithMergeInfo>;

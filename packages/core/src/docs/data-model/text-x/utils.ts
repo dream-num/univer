@@ -16,7 +16,7 @@
 
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import type { IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { ICustomDecoration, ICustomRange, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
 import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
@@ -93,7 +93,64 @@ export function getBodySlice(
         }));
     }
 
+    docBody.customRanges = getDeleteCustomRange(body, startOffset, endOffset);
+    docBody.customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
     return docBody;
+}
+
+export function getDeleteCustomRange(body: IDocumentBody, startOffset: number, endOffset: number) {
+    const { customRanges = [] } = body;
+
+    const deletedCustomRange: ICustomRange[] = [];
+    customRanges.forEach((range) => {
+        // custom-range contain slice-range
+        if (startOffset <= range.startIndex && endOffset > range.endIndex) {
+            const copy = Tools.deepClone(range);
+            deletedCustomRange.push({
+                ...copy,
+                startIndex: copy.startIndex - startOffset,
+                endIndex: copy.endIndex - startOffset,
+            });
+        // delete custom-range start tag, only happened in cancel custom-range
+        } else if (startOffset <= range.startIndex && endOffset > range.startIndex) {
+            const copy = Tools.deepClone(range);
+            deletedCustomRange.push({
+                ...copy,
+                startIndex: copy.startIndex - startOffset,
+                endIndex: copy.startIndex - startOffset,
+            });
+            // slice-range contain custom-range
+        } else if (endOffset > range.endIndex && range.endIndex >= startOffset) {
+            const copy = Tools.deepClone(range);
+            deletedCustomRange.push({
+                ...copy,
+                startIndex: copy.endIndex - startOffset,
+                endIndex: copy.endIndex - startOffset,
+            });
+        }
+    });
+
+    return deletedCustomRange;
+}
+
+export function getCustomDecorationSlice(body: IDocumentBody, startOffset: number, endOffset: number) {
+    const { customDecorations = [] } = body;
+
+    const customDecorationSlice: ICustomDecoration[] = [];
+    customDecorations.forEach((range) => {
+        // 34 35
+        // ranges and selection has overlap
+        if (Math.max(range.startIndex, startOffset) <= Math.min(range.endIndex, endOffset - 1)) {
+            const copy = Tools.deepClone(range);
+            customDecorationSlice.push({
+                ...copy,
+                startIndex: Math.max(copy.startIndex - startOffset, 0),
+                endIndex: Math.min(copy.endIndex, endOffset) - startOffset,
+            });
+        }
+    });
+
+    return customDecorationSlice;
 }
 
 export function composeBody(
@@ -153,7 +210,6 @@ export function composeBody(
     if (paragraphs.length) {
         retBody.paragraphs = paragraphs;
     }
-
     return retBody;
 }
 

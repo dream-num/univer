@@ -18,27 +18,6 @@ export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryService, DataValidatorRegistryScope } from './services/data-validator-registry.service';
 export { DataValidationModel } from './models/data-validation-model';
 
-export type {
-    IRemoveDataValidationCommandParams,
-    IAddDataValidationCommandParams,
-    IUpdateDataValidationOptionsCommandParams,
-    IUpdateDataValidationSettingCommandParams,
-    IRemoveAllDataValidationCommandParams,
-} from './commands/commands/data-validation.command';
-
-export {
-    AddDataValidationMutation,
-    RemoveDataValidationMutation,
-    UpdateDataValidationMutation,
-
-} from './commands/mutations/data-validation.mutation';
-
-export type {
-    IAddDataValidationMutationParams,
-    IRemoveDataValidationMutationParams,
-    IUpdateDataValidationMutationParams,
-} from './commands/mutations/data-validation.mutation';
-
 export {
     createDefaultNewRule,
     getRuleOptions,
@@ -69,6 +48,18 @@ export {
     UpdateDataValidationSettingCommand,
     RemoveAllDataValidationCommand,
     removeDataValidationUndoFactory,
+    type IRemoveDataValidationCommandParams,
+    type IAddDataValidationCommandParams,
+    type IRemoveAllDataValidationCommandParams,
 } from './commands/commands/data-validation.command';
+
+export {
+    AddDataValidationMutation,
+    RemoveDataValidationMutation,
+    UpdateDataValidationMutation,
+    type IAddDataValidationMutationParams,
+    type IRemoveDataValidationMutationParams,
+    type IUpdateDataValidationMutationParams,
+} from './commands/mutations/data-validation.mutation';
 
 // #endregion

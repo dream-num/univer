@@ -86,7 +86,8 @@ export class Layer extends Disposable {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);
         for (const o of this._objects) {
-            if (!(o.classType === RENDER_CLASS_TYPE.GROUP) && o.visible) {
+            // TODO @lumixraku
+            if (!(o.classType === RENDER_CLASS_TYPE.GROUP) && o.visible && o.evented) {
                 objects.push(o);
             }
         }
@@ -97,6 +98,12 @@ export class Layer extends Disposable {
         return this._objects;
     }
 
+    /**
+     * insert o to _objects[]
+     * if o is a group, insert all its children and group itself to _objects[]
+     * @param o
+     * @returns
+     */
     addObject(o: BaseObject) {
         if (o.classType === RENDER_CLASS_TYPE.GROUP) {
             const objects = (o as BaseObject).getObjects();
@@ -123,6 +130,7 @@ export class Layer extends Disposable {
         if (object instanceof BaseObject) {
             for (let i = 0; i < objectsLength; i++) {
                 const o = objects[i];
+
                 if (o === object) {
                     objects.splice(i, 1);
                     return;

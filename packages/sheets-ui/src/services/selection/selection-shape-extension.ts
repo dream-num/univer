@@ -27,6 +27,7 @@ import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionControl } from './selection-shape';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
+import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 
@@ -37,6 +38,10 @@ export interface ISelectionShapeTargetSelection {
     targetSelection: IRangeWithCoord;
 }
 
+/**
+ * for auto-fill (crosshair expand selection range)
+ * drag selection range
+ */
 export class SelectionShapeExtension {
     private _startOffsetX: number = 0;
 
@@ -827,6 +832,7 @@ export class SelectionShapeExtension {
             this._fillControlColors.push(o.fill as string);
         });
 
+        // Controls the border of the expanding selection area
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));

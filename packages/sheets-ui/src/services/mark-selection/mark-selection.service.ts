@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, ThemeService, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -53,6 +53,11 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
+
+        const selectionMovingStartOb = this._selectionRenderService.selectionMoveStart$.subscribe(() => {
+            this.removeAllShapes();
+        });
+        this.disposeWithMe(toDisposable(selectionMovingStartOb));
     }
 
     addShape(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, isInternalEditorID, LifecycleService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { Disposable, IConfigService, isInternalEditorID, LifecycleService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
@@ -27,7 +27,7 @@ import { DesktopApp } from '../../views/DesktopApp';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
-import type { IUniverUIConfig, IWorkbenchOptions } from './ui.controller';
+import { type IUniverUIConfig, type IWorkbenchOptions, UI_CONFIG_KEY } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
 
@@ -39,10 +39,12 @@ export class DesktopUIController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
+        @IConfigService private readonly _configService: IConfigService,
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
 
+        this._configService.setConfig(UI_CONFIG_KEY, this._config);
         this._initBuiltinComponents();
 
         Promise.resolve().then(() => this._bootstrapWorkbench());
@@ -68,8 +70,14 @@ export class DesktopUIController extends Disposable {
                 });
 
                 setTimeout(() => {
-                    const engine = this._renderManagerService.getFirst()?.engine;
-                    engine?.setContainer(canvasElement);
+                    const allRenders = this._renderManagerService.getRenderAll();
+
+                    for (const [key, render] of allRenders) {
+                        if (isInternalEditorID(key)) continue;
+
+                        render.engine.setContainer(canvasElement);
+                    }
+
                     this._lifecycleService.stage = LifecycleStages.Rendered;
                     setTimeout(() => this._lifecycleService.stage = LifecycleStages.Steady, STEADY_TIMEOUT);
                 }, 300);

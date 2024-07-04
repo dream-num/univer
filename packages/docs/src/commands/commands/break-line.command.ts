@@ -71,16 +71,7 @@ export const BreakLineCommand: ICommand = {
         }
 
         const unitId = docDataModel.getUnitId();
-        const { startOffset, segmentId, style } = activeRange;
-
-        // move selection
-        const textRanges = [
-            {
-                startOffset: startOffset + 1,
-                endOffset: startOffset + 1,
-                style,
-            },
-        ];
+        const { startOffset, segmentId } = activeRange;
 
         const paragraphs = docDataModel.getBody()?.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
@@ -93,7 +84,6 @@ export const BreakLineCommand: ICommand = {
                 paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
             },
             range: activeRange,
-            textRanges,
             segmentId,
         });
 

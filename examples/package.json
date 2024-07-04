@@ -19,6 +19,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-drawing": "workspace:*",
         "@univerjs/docs-drawing-ui": "workspace:*",
+        "@univerjs/docs-thread-comment-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
@@ -26,7 +27,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "^0.1.57",
+        "@univerjs/icons": "^0.1.58",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
@@ -52,7 +53,7 @@
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@wendellhu/redi": "0.15.4",
+        "@wendellhu/redi": "0.15.5",
         "clsx": "^2.1.1",
         "monaco-editor": "0.49.0",
         "react": "18.3.1",
@@ -71,6 +72,6 @@
         "esbuild-style-plugin": "^1.6.3",
         "less": "^4.2.0",
         "minimist": "^1.2.8",
-        "typescript": "^5.4.5"
+        "typescript": "^5.5.3"
     }
 }

@@ -31,6 +31,9 @@ const locale: ILocale = {
             ...dajsEnUS,
             ...PickerEnUs,
         },
+        CascaderList: {
+            empty: 'None',
+        },
     },
 };
 

@@ -123,7 +123,7 @@ export class DataValidationController extends RxDisposable {
 
                     selections && ruleMatrix.removeRange(selections);
                     const diffs = ruleMatrix.diff(manager.getDataValidations());
-                    const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs);
+                    const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector);
 
                     return {
                         undos: undoMutations,

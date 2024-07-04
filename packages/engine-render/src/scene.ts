@@ -63,7 +63,6 @@ export class Scene extends ThinScene {
         state?: ISceneTransformState
     ) {
         super(sceneKey);
-
         if (state) {
             this.transformByState(state);
         }
@@ -371,12 +370,22 @@ export class Scene extends ThinScene {
         this._layers.push(...argument);
     }
 
+    override addObjects(objects: BaseObject[], zIndex: number = 1) {
+        this.getLayer(zIndex)?.addObjects(objects);
+        this._addObject$.next(this);
+        return this;
+    }
+
     override addObject(o: BaseObject, zIndex: number = 1) {
         this.getLayer(zIndex)?.addObject(o);
         this._addObject$.next(this);
         return this;
     }
 
+    /**
+     * make object parent to scene
+     * @param o
+     */
     override setObjectBehavior(o: BaseObject) {
         if (!o.parent) {
             o.parent = this;
@@ -385,12 +394,6 @@ export class Scene extends ThinScene {
         //     o.scaleCacheCanvas();
         // });
         o.onIsAddedToParent$.emitEvent(this);
-    }
-
-    override addObjects(objects: BaseObject[], zIndex: number = 1) {
-        this.getLayer(zIndex)?.addObjects(objects);
-        this._addObject$.next(this);
-        return this;
     }
 
     removeObject(object?: BaseObject | string) {
@@ -428,6 +431,17 @@ export class Scene extends ThinScene {
     //     });
     //     return this;
     // }
+
+    getObjectsByLayer(zIndex: number) {
+        const objects: BaseObject[] = [];
+        this._layers.sort(sortRules);
+        for (const layer of this._layers) {
+            if (layer.zIndex === zIndex) {
+                objects.push(...layer.getObjects());
+            }
+        }
+        return objects;
+    }
 
     getAllObjects() {
         const objects: BaseObject[] = [];
@@ -513,7 +527,7 @@ export class Scene extends ThinScene {
         return this._viewports;
     }
 
-    getViewport(key: string) {
+    getViewport(key: string): Viewport | undefined {
         for (const viewport of this._viewports) {
             if (viewport.viewportKey === key) {
                 return viewport;
@@ -740,8 +754,8 @@ export class Scene extends ThinScene {
     }
 
     // Determine the only object selected
-    override pick(coord: Vector2): Nullable<BaseObject | Scene | ThinScene> {
-        let pickedViewport = this.getActiveViewportByCoord(coord);
+    override pick(vec: Vector2): Nullable<BaseObject | Scene | ThinScene> {
+        let pickedViewport = this.getActiveViewportByCoord(vec);
 
         if (!pickedViewport) {
             pickedViewport = this._viewports[0];
@@ -751,12 +765,12 @@ export class Scene extends ThinScene {
             return;
         }
 
-        const scrollBarRect = pickedViewport.pickScrollBar(coord);
+        const scrollBarRect = pickedViewport.pickScrollBar(vec);
         if (scrollBarRect) {
             return scrollBarRect;
         }
 
-        const svCoordOrigin = pickedViewport.getRelativeVector(coord);
+        const vecFromSheetContent = pickedViewport.transformVector2SceneCoord(vec);
 
         let isPickedObject: Nullable<BaseObject | Scene | ThinScene> = null;
 
@@ -768,7 +782,7 @@ export class Scene extends ThinScene {
             if (!o.visible || !o.evented || o.classType === RENDER_CLASS_TYPE.GROUP) {
                 continue;
             }
-            const svCoord = svCoordOrigin;
+            const svCoord = vecFromSheetContent;
             // if (o.isInGroup && o.parent?.classType === RENDER_CLASS_TYPE.GROUP) {
             //     const { cumLeft, cumTop } = this._getGroupCumLeftRight(o);
             //     svCoord = svCoord.clone().add(Vector2.FromArray([-cumLeft, -cumTop]));

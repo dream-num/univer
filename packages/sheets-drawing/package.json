@@ -60,16 +60,16 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@wendellhu/redi": "0.15.4"
+        "@wendellhu/redi": "0.15.5"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.15.4",
-        "typescript": "^5.4.5",
-        "vite": "^5.3.1",
+        "@wendellhu/redi": "0.15.5",
+        "typescript": "^5.5.3",
+        "vite": "^5.3.3",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

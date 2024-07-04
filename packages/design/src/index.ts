@@ -37,7 +37,6 @@ export { CheckboxGroup, type ICheckboxGroupProps } from './components/checkbox-g
 export { ColorPicker, type IColorPickerProps } from './components/color-picker';
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider';
 export { Confirm, type IConfirmProps } from './components/confirm';
-export { Container, type IContainerProps } from './components/container';
 export { DatePicker, type IDatePickerProps, DatePanel, type IDatePanelProps } from './components/date-picker';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { Dropdown, type IDropdownProps } from './components/dropdown';

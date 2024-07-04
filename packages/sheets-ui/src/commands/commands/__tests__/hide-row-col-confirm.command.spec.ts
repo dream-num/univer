@@ -25,6 +25,7 @@ import {
     SetRangeValuesMutation,
     SetRowHiddenCommand,
     SetRowHiddenMutation,
+    SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
@@ -88,6 +89,7 @@ describe('Test hide row col confirm commands', () => {
         commandService.registerCommand(SetRowHiddenMutation);
         commandService.registerCommand(SetColHiddenCommand);
         commandService.registerCommand(SetColHiddenMutation);
+        commandService.registerCommand(SetSelectionsOperation);
 
         get(LocaleService).load({});
     });

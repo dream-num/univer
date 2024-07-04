@@ -665,15 +665,15 @@ describe("Test commands used for updating cells' styles", () => {
                         value: WrapStrategy.WRAP,
                     })
                 ).toBeTruthy();
-                expect(getTextWrap()).toBe(WrapStrategy.WRAP);
+                expect(getTextWrap()).toBe(BooleanNumber.TRUE);
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getTextWrap()).toBe(WrapStrategy.UNSPECIFIED);
+                expect(getTextWrap()).toBe(BooleanNumber.FALSE);
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getTextWrap()).toBe(WrapStrategy.WRAP);
+                expect(getTextWrap()).toBe(BooleanNumber.TRUE);
             });
         });
 

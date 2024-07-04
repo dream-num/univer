@@ -135,6 +135,8 @@ export interface ISelectionStyle {
     columnHeaderFill?: string;
     columnHeaderStroke?: string;
     columnHeaderStrokeWidth?: number;
+
+    expandCornerSize?: number;
 }
 
 export interface ISelectionWithCoordAndStyle extends ISelectionWithCoord {
@@ -180,6 +182,8 @@ export function getNormalSelectionStyle(themeService: ThemeService): ISelectionS
         columnHeaderFill: fill,
         columnHeaderStroke: styleSheet.primaryColor,
         columnHeaderStrokeWidth: 1,
+
+        expandCornerSize: 40,
     };
 }
 

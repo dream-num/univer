@@ -45,7 +45,7 @@ export default {
         },
     },
     DATEVALUE: {
-        description: '将文本格式的日期转换为序列号',
+        description: '将文本格式的日期转换为序列号。',
         abstract: '将文本格式的日期转换为序列号',
         links: [
             {
@@ -54,8 +54,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dateText: { name: '日期文本', detail: '表示 Excel 日期格式的日期的文本，或对包含表示 Excel 日期格式的日期的文本的单元格的引用。 例如，“1/30/2008”或“30-Jan-2008”是表示日期的引号内的文本字符串。\n使用 Microsoft Excel for Windows 中的默认日期系统， date_text 参数必须表示 1900 年 1 月 1 日至 9999 年 12 月 31 日的日期。 DATEVALUE 函数返回 #VALUE！ 如果 date_text 参数的值超出此范围，则为 error 值。\n如果省略参数 date_text 中的年份部分，则 DATEVALUE 函数会使用计算机内置时钟的当前年份。 参数 date_text 中的时间信息将被忽略。' },
         },
     },
     DAY: {
@@ -211,7 +210,7 @@ export default {
         },
     },
     NOW: {
-        description: '返回当前日期和时间的序列号',
+        description: '返回当前日期和时间的序列号。',
         abstract: '返回当前日期和时间的序列号',
         links: [
             {
@@ -220,8 +219,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     SECOND: {
@@ -239,7 +236,7 @@ export default {
         },
     },
     TIME: {
-        description: '返回特定时间的序列号',
+        description: '返回特定时间的序列号。',
         abstract: '返回特定时间的序列号',
         links: [
             {
@@ -248,12 +245,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            hour: { name: '小时', detail: '0（零）到 32767 之间的数字，代表小时。 任何大于 23 的值都会除以 24，余数将作为小时值。 例如，TIME(27,0,0) = TIME(3,0,0) = .125 或 3:00 AM。' },
+            minute: { name: '分钟', detail: ' 0 到 32767 之间的数字，代表分钟。 任何大于 59 的值将转换为小时和分钟。 例如，TIME(0,750,0) = TIME(12,30,0) = .520833 或 12:30 PM。' },
+            second: { name: '秒', detail: '0 到 32767 之间的数字，代表秒。 任何大于 59 的值将转换为小时、分钟和秒。 例如，TIME(0,0,2000) = TIME(0,33,22) = .023148 或 12:33:20 AM。' },
         },
     },
     TIMEVALUE: {
-        description: '将文本格式的时间转换为序列号',
+        description: '将文本格式的时间转换为序列号。',
         abstract: '将文本格式的时间转换为序列号',
         links: [
             {
@@ -262,8 +260,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            timeText: { name: 'time_text', detail: '一个文本字符串，代表以任一 Microsoft Excel 时间格式表示的时间（例如，代表时间的具有引号的文本字符串 "6:45 PM" 和 "18:45"）。' },
         },
     },
     TODAY: {

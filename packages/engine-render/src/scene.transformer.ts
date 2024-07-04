@@ -379,7 +379,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 });
             });
 
-            // const upObserver = scene.onPointerUpObserver.add(() => {
             const scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
                 scenePointerMoveSub?.unsubscribe();
                 scenePointerUpSub?.unsubscribe();
@@ -706,7 +705,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             case TransformerManagerType.RESIZE_LB:
                 state.width = width - moveLeft < MINI_WIDTH_LIMIT ? MINI_WIDTH_LIMIT : width - moveLeft;
                 state.height = height + moveTop < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : height + moveTop;
-                state.left = left + moveLeft;
+                state.left = state.width <= MINI_WIDTH_LIMIT ? left : left + moveLeft;
                 break;
             case TransformerManagerType.RESIZE_CB:
                 state.height = moveTop + height < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : moveTop + height;
@@ -924,7 +923,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         topScene.setCursor(cursor);
                     });
 
-                    // this._upObserver = topScene.onPointerUpObserver.add(() => {
                     this._topScenePointerUpSub = topScene.onPointerUp$.subscribeEvent(() => {
                         // topScene.onPointerMove$.remove(this._moveObserver);
                         // topScene.onPointerUp$.remove(this._topScenePointerUpSub);

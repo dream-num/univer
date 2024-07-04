@@ -1064,7 +1064,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return offsetY;
     }
 
-    getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+    getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 

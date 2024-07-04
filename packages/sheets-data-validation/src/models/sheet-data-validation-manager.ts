@@ -126,6 +126,10 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         super.removeRule(ruleId);
     }
 
+    getValidator(type: DataValidationType) {
+        return this._dataValidatorRegistryService.getValidatorItem(type);
+    }
+
     getRuleIdByLocation(row: number, col: number): string | undefined {
         return this._ruleMatrix.getValue(row, col);
     }
@@ -142,7 +146,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
     override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocationBase, onCompete: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId } = pos;
         const ruleId = rule.uid;
-        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+        const validator = this.getValidator(rule.type);
         if (validator) {
             const current = this._cache.getValue(row, col);
             if (!current || current.value !== cellValue) {

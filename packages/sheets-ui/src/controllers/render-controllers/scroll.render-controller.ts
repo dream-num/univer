@@ -19,6 +19,7 @@ import {
     Direction,
     Disposable,
     ICommandService,
+    IUniverInstanceService,
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
@@ -49,7 +50,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -166,9 +169,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             // set scrollInfo, the event is triggered in viewport@_scrollToScrollbarPos
-            viewportMain.onScrollAfter$.subscribeEvent((param: IScrollObserverParam) => {
+            viewportMain.onScrollAfter$.subscribeEvent((scrollAfterParam: IScrollObserverParam) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                if (skeleton == null || param.isTrigger === false) {
+                if (skeleton == null || scrollAfterParam.isTrigger === false) {
                     return;
                 }
 
@@ -177,7 +180,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     return;
                 }
 
-                const { viewportScrollX = 0, viewportScrollY = 0 } = param;
+                const { viewportScrollX = 0, viewportScrollY = 0 } = scrollAfterParam;
 
                 // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
                 const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
@@ -193,8 +196,16 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     sheetViewStartColumn: column,
                     offsetX: columnOffset,
                     offsetY: rowOffset,
+                    viewportScrollX,
+                    viewportScrollY,
                 };
-                this._scrollManagerService.setScrollInfoToCurrSheetWithoutNotify(lastestScrollInfo);
+                this._scrollManagerService.justSetScrollInfoToCurrSheet(lastestScrollInfo);
+                this._scrollManagerService.validViewportScrollInfo$.next({
+                    scrollX: scrollAfterParam.scrollX || 0,
+                    scrollY: scrollAfterParam.scrollY || 0,
+                    viewportScrollX: scrollAfterParam.viewportScrollX || 0,
+                    viewportScrollY: scrollAfterParam.viewportScrollY || 0,
+                });
                 // snapshot is diff by diff people!
                 // this._scrollManagerService.setScrollInfoToSnapshot({ ...lastestScrollInfo, viewportScrollX, viewportScrollY });
             })
@@ -230,25 +241,22 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _scrollSubscribeBinding() {
+        const { unitId } = this._context;
+        const scene = this._renderManagerService.getRenderById(unitId)?.scene;
+        if (!scene) return;
+        const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewMain) return;
+
         this.disposeWithMe(
             toDisposable(
                 // wheel event --> set-scroll.command('sheet.operation.set-scroll') --> scroll.operation.ts --> scrollManagerService.setScrollInfo(raw value, may be negative)  --> scrollInfo$.next --> current fn() --> viewport.scrollTo
                 // --> onScrollAfterObserver.notify ---> scrollManagerService.setScrollInfo again!(valid scroll value)
-                this._scrollManagerService.scrollInfo$.subscribe((param) => {
+                this._scrollManagerService.rawScrollInfo$.subscribe((param) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                    const sheetObject = this._getSheetObject();
-                    if (skeleton == null || sheetObject == null) {
-                        return;
-                    }
+                    if (!skeleton) return;
 
-                    const scene = sheetObject.scene;
-                    const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-
-                    if (viewportMain == null) {
-                        return;
-                    }
                     if (param == null) {
-                        viewportMain.scrollTo({
+                        viewMain.scrollTo({
                             x: 0,
                             y: 0,
                         });
@@ -267,8 +275,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     const viewportScrollXByEvent = startX + offsetX;
                     const viewportScrollYByEvent = startY + offsetY;
 
-                    const config = viewportMain.transViewportScroll2ScrollValue(viewportScrollXByEvent, viewportScrollYByEvent);
-                    viewportMain.scrollTo(config);
+                    const config = viewMain.transViewportScroll2ScrollValue(viewportScrollXByEvent, viewportScrollYByEvent);
+                    viewMain.scrollTo({ x: config.x, y: config.y });
                 })
             )
         );
@@ -287,10 +295,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
                 const currScrollInfo = this._scrollManagerService.getScrollInfoByParam(param as unknown as IScrollManagerSearchParam);
                 if (viewportMain) {
-                    if (currScrollInfo) {
-                        viewportMain.viewportScrollX = currScrollInfo.viewportScrollX || 0;
-                        viewportMain.viewportScrollY = currScrollInfo.viewportScrollY || 0;
-                    }
+                    viewportMain.viewportScrollX = currScrollInfo?.viewportScrollX || 0;
+                    viewportMain.viewportScrollY = currScrollInfo?.viewportScrollY || 0;
                     this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
                 }
             })));

@@ -53,7 +53,7 @@ import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.serv
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
-import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
+// import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { DragManagerService } from './services/drag-manager.service';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
@@ -69,6 +69,7 @@ import { SheetPrintInterceptorService } from './services/print-interceptor.servi
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
 import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+import { MobileSelectionRenderService } from './services/selection/mobile-selection-render.service';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 
 /**
@@ -104,7 +105,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [ScrollManagerService],
                 // This would be removed from global injector and moved into RenderUnit provider.
                 // [SheetSkeletonManagerService],
-                [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
+                [ISheetSelectionRenderService, { useClass: MobileSelectionRenderService }],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
@@ -178,8 +179,11 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
             [HeaderMoveRenderController],
             [HeaderFreezeRenderController],
-            [SheetsZoomRenderController],
+            // Caution: ScrollRenderController should placed before ZoomRenderController
+            // because ZoomRenderController would change scrollInfo in currentSkeletonBefore$
+            // currentSkeletonBefore$ --> ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
             [SheetsScrollRenderController],
+            [SheetsZoomRenderController],
             [FormatPainterRenderController],
             [CellAlertRenderController],
             [ForceStringAlertRenderController],

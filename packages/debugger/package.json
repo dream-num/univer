@@ -61,7 +61,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.4",
+        "@wendellhu/redi": "0.15.5",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
@@ -76,10 +76,10 @@
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@vitejs/plugin-vue": "^5.0.4",
-        "@wendellhu/redi": "0.15.4",
+        "@wendellhu/redi": "0.15.5",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.5",
-        "vite": "^5.3.1",
+        "typescript": "^5.5.3",
+        "vite": "^5.3.3",
         "vitest": "^1.6.0",
         "vue": "^3.4.27"
     },

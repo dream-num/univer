@@ -181,6 +181,7 @@ export interface IDocumentSkeletonGlyph {
     left: number; // left
     count: number; // count, content length，default 1
     content: string; // content
+    raw: string;
     adjustability: IAdjustability; // The adjustability of the glyph.
     isJustifiable: boolean; // Whether this glyph is justifiable for CJK scripts.
     ts?: ITextStyle; // text style

@@ -15,7 +15,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { excelDateSerial, excelSerialToDate, formatDateDefault, isValidDateStr } from '../date';
+import { excelDateSerial, excelDateTimeSerial, excelSerialToDate, formatDateDefault, isValidDateStr } from '../date';
+import { stripErrorMargin } from '../../engine/utils/math-kit';
 
 describe('Test date', () => {
     it('Function excelDateSerial', () => {
@@ -24,6 +25,16 @@ describe('Test date', () => {
         expect(excelDateSerial(new Date(1900, 2, 1))).toBe(61);
         expect(excelDateSerial(new Date(1901, 0, 1))).toBe(367);
         expect(excelDateSerial(new Date(2024, 1, 2))).toBe(45324);
+    });
+
+    it('Function excelDateSerial should account for hours, minutes, and seconds', () => {
+        // Testing midday, which is exactly half of a day
+        expect(excelDateTimeSerial(new Date(Date.UTC(2024, 0, 2, 12, 0, 0)))).toBe(45293.5);
+        // Testing exact hour, which is a quarter of a day
+        expect(excelDateTimeSerial(new Date(Date.UTC(2024, 0, 2, 6, 0, 0)))).toBe(45293.25);
+        // Testing minutes and seconds
+        expect(stripErrorMargin(excelDateTimeSerial(new Date(Date.UTC(2024, 0, 2, 1, 2, 3))))).toBe(45293.0430902778);
+        expect(stripErrorMargin(excelDateTimeSerial(new Date(Date.UTC(2024, 5, 24, 15, 10, 0))))).toBe(45467.6319444444);
     });
 
     it('Function excelSerialToDate', () => {

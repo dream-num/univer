@@ -66,6 +66,7 @@ export class ActionIterator {
                 });
             } else {
                 // handle condition: (nextAction.t === TextXActionType.INSERT || nextAction.t === TextXActionType.RETAIN && nextAction.body)
+
                 return Tools.deepClone({
                     ...nextAction,
                     len: length,

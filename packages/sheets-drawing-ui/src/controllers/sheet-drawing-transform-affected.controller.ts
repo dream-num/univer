@@ -1159,34 +1159,38 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetWorksheetActiveOperation.id) {
-                    const params = command.params as ISetWorksheetActiveOperationParams;
-                    const { unitId: showUnitId, subUnitId: showSubunitId } = params;
+                    setTimeout(() => {
+                        const params = command.params as ISetWorksheetActiveOperationParams;
+                        const { unitId: showUnitId, subUnitId: showSubunitId } = params;
 
-                    const drawingMap = this._drawingManagerService.drawingManagerData;
+                        const drawingMap = this._drawingManagerService.drawingManagerData;
 
-                    const insertDrawings: IDrawingParam[] = [];
+                        const insertDrawings: IDrawingParam[] = [];
 
-                    const removeDrawings: IDrawingParam[] = [];
+                        const removeDrawings: IDrawingParam[] = [];
 
-                    Object.keys(drawingMap).forEach((unitId) => {
-                        const subUnitMap = drawingMap[unitId];
-                        Object.keys(subUnitMap).forEach((subUnitId) => {
-                            const drawingData = subUnitMap[subUnitId].data;
-                            if (drawingData == null) {
-                                return;
-                            }
-                            Object.keys(drawingData).forEach((drawingId) => {
-                                if (unitId === showUnitId && subUnitId === showSubunitId) {
-                                    insertDrawings.push(drawingData[drawingId]);
-                                } else {
-                                    removeDrawings.push(drawingData[drawingId]);
+                        Object.keys(drawingMap).forEach((unitId) => {
+                            const subUnitMap = drawingMap[unitId];
+                            Object.keys(subUnitMap).forEach((subUnitId) => {
+                                const drawingData = subUnitMap[subUnitId].data;
+                                if (drawingData == null) {
+                                    return;
                                 }
+                                Object.keys(drawingData).forEach((drawingId) => {
+                                    if (unitId === showUnitId && subUnitId === showSubunitId) {
+                                        const drawing = drawingData[drawingId] as ISheetDrawing;
+                                        drawing.transform = drawingPositionToTransform(drawing.sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+                                        insertDrawings.push(drawingData[drawingId]);
+                                    } else {
+                                        removeDrawings.push(drawingData[drawingId]);
+                                    }
+                                });
                             });
                         });
-                    });
 
-                    this._drawingManagerService.removeNotification(removeDrawings);
-                    this._drawingManagerService.addNotification(insertDrawings);
+                        this._drawingManagerService.removeNotification(removeDrawings);
+                        this._drawingManagerService.addNotification(insertDrawings);
+                    }, 0);
                 }
             })
         );

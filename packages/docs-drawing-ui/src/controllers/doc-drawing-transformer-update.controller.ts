@@ -150,7 +150,7 @@ export class DocDrawingTransformerController extends Disposable {
                         }
 
                         if (drawingCache && drawingCache.drawing.layoutType !== PositionedObjectLayoutType.INLINE) {
-                            throttleNonInlineMoveUpdate(drawingCache.drawing, object, true);
+                            // throttleNonInlineMoveUpdate(drawingCache.drawing, object, true);
                         }
                     }
                 })

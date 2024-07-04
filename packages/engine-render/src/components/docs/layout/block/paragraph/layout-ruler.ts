@@ -546,6 +546,21 @@ function _lineOperator(
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
         _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
+
+        if (paragraphStart && paragraphAffectSkeDrawings && paragraphAffectSkeDrawings.size > 0) {
+            for (const drawing of paragraphAffectSkeDrawings.values()) {
+                if (lastPage.skeDrawings.has(drawing.drawingId)) {
+                    lastPage.skeDrawings.delete(drawing.drawingId);
+                }
+
+                if (ctx.drawingsCache.has(drawing.drawingId)) {
+                    ctx.drawingsCache.delete(drawing.drawingId);
+                    ctx.isDirty = false;
+                    ctx.layoutStartPointer.paragraphIndex = null;
+                }
+            }
+        }
+
         return;
     }
 
@@ -668,13 +683,14 @@ function _reLayoutCheck(
 
             lineIterator([drawingCache.page], (line) => {
                 const { lineHeight, top } = line;
-                const width = line.parent?.width ?? 0;
+                const column = line.parent;
 
-                if (needBreakLineIterator) {
+                if (needBreakLineIterator || column == null) {
                     return;
                 }
 
-                const collision = collisionDetection(drawingCache.drawing, lineHeight, top, width);
+                const { width: columnWidth, left: columnLeft } = column;
+                const collision = collisionDetection(drawingCache.drawing, lineHeight, top, columnLeft, columnWidth);
                 if (collision) {
                     // No need to loop next line.
                     needBreakLineIterator = true;
@@ -690,7 +706,7 @@ function _reLayoutCheck(
 
     lineIterator([page], (line) => {
         const { lineHeight, top } = line;
-        const width = column.width;
+        const { width: columnWidth, left: columnLeft } = column;
 
         if (needBreakLineIterator) {
             return;
@@ -709,9 +725,9 @@ function _reLayoutCheck(
                 }
             }
 
-            const collision = collisionDetection(targetDrawing, lineHeight, top, width);
+            const collision = collisionDetection(targetDrawing, lineHeight, top, columnLeft, columnWidth);
             if (collision) {
-                // console.log(line.top + line.lineHeight, line.divides[0].glyphGroup[0].content);
+                // console.log(page, line.top + line.lineHeight, line.divides[0].glyphGroup[0].content);
                 // console.log('drawing: ', targetDrawing, 'lineHeight: ', lineHeight, 'top: ', top, 'width: ', width);
                 // No need to loop next line.
                 needBreakLineIterator = true;

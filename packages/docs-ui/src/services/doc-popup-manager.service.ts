@@ -144,14 +144,15 @@ export class DocCanvasPopManagerService extends Disposable {
             const { docsLeft, docsTop } = documentOffsetConfig;
 
             const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-            const { contentBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
-            const bounds = getLineBounding(contentBoxPointGroup);
-            return bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
+            const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
+            const bounds = getLineBounding(borderBoxPointGroup);
+            const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
                 left: i.left + docsLeft,
                 right: i.right + docsLeft,
                 top: i.top + docsTop,
                 bottom: i.bottom + docsTop,
             }));
+            return res;
         };
 
         const positions = calc() ?? [];

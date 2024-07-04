@@ -18,7 +18,9 @@ import type {
     IInterceptor,
     IRange,
     IRangeWithCoord,
-    ISelectionCellWithMergeInfo,
+    ISelectionCell,
+    ISelectionCell as ISelectionCellWithMergeInfo,
+
     ISelectionWithCoord,
     Nullable,
     ThemeService,
@@ -37,7 +39,7 @@ import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
-import { attachSelectionWithCoord } from './util';
+import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
 
 export interface IControlFillConfig {
     oldRange: IRange;
@@ -68,7 +70,7 @@ export interface ISheetSelectionRenderService {
     /** @deprecated Use the function `attachSelectionWithCoord` instead. */
     attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
-    // attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithMergeInfo>;
 
     getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithMergeInfo>; // drawing
 }
@@ -88,9 +90,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     readonly controlFillConfig$ = this._controlFillConfig$.asObservable();
 
-    private _selectionControls: SelectionControl[] = []; // sheetID:Controls
+    protected _selectionControls: SelectionControl[] = []; // sheetID:Controls
 
-    private _activeCellRangeOfCurrSelection: IRangeWithCoord = {
+    protected _activeCellRangeOfCurrSelection: IRangeWithCoord = {
         startY: 0,
         endY: 0,
         startX: 0,
@@ -104,14 +106,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     /**
      * the posX of viewport when the pointer down
      */
-    private _startViewportPosX: number = 0;
+    protected _startViewportPosX: number = 0;
 
     /**
      * the posY of viewport when the pointer down
      */
-    private _startViewportPosY: number = 0;
+    protected _startViewportPosY: number = 0;
 
-    private _scrollTimer!: ScrollTimer;
+    protected _scrollTimer!: ScrollTimer;
 
     private _cancelDownSubscription: Nullable<Subscription>;
     private _cancelUpSubscription: Nullable<Subscription>;
@@ -120,13 +122,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected _scene!: Scene;
 
     // The type of selector determines the type of data range and the highlighting style of the title bar
-    private _isHeaderHighlight: boolean = true;
+    protected _isHeaderHighlight: boolean = true;
 
     // If true, the selector will respond to the range of merged cells and automatically extend the selected range. If false, it will ignore the merged cells.
-    private _shouldDetectMergedCells: boolean = true;
+    protected _shouldDetectMergedCells: boolean = true;
 
     // The style of the selection area, including dashed lines, color, thickness, autofill, other points for modifying the range of the selection area, title highlighting, and so on, can all be customized.
-    private _selectionStyle!: ISelectionStyle;
+    protected _selectionStyle!: ISelectionStyle;
 
     // #region For ref range selection - we put the properties here for simplicity
     // Used in the formula selection feature, a new selection string is added by drawing a box with the mouse.
@@ -135,14 +137,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected _singleSelectionEnabled: boolean = false;
     // #endregion
 
-    private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
+    protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-    private readonly _selectionMoving$ = new Subject<ISelectionWithCoordAndStyle[]>();
+    protected readonly _selectionMoving$ = new Subject<ISelectionWithCoordAndStyle[]>();
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
-    private readonly _selectionMoveStart$ = new Subject<ISelectionWithCoordAndStyle[]>();
+    protected readonly _selectionMoveStart$ = new Subject<ISelectionWithCoordAndStyle[]>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
-    private _activeViewport: Nullable<Viewport>;
+    protected _activeViewport: Nullable<Viewport>;
 
     readonly interceptor = new InterceptorManager({ RANGE_MOVE_PERMISSION_CHECK, RANGE_FILL_PERMISSION_CHECK });
 
@@ -254,7 +256,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         return this._selectionControls;
     }
 
-    private _clearSelectionControls() {
+    protected _clearSelectionControls() {
         const allSelectionControls = this.getSelectionControls();
         for (const control of allSelectionControls) {
             control.dispose();
@@ -269,7 +271,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         return freeze;
     }
 
-    private _getViewportByCell(row?: number, column?: number) {
+    protected _getViewportByCell(row?: number, column?: number) {
         if (row === undefined || column === undefined) {
             return null;
         }
@@ -317,7 +319,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * get active selection control
      * @returns
      */
-    getActiveSelection(): Nullable<SelectionControl> {
+    getActiveSelectionControl(): Nullable<SelectionControl> {
         const controls = this.getSelectionControls();
         return controls && controls[controls.length - 1];
     }
@@ -355,7 +357,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
      */
     // eslint-disable-next-line max-lines-per-function, complexity
-    protected _onPointerDown(
+    protected _onPointerUp(
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,
         rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
@@ -397,7 +399,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         this._activeCellRangeOfCurrSelection = cursorCellRangeWithRangeType;
 
-        let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelection();
+        let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
         const curControls = this.getSelectionControls();
         for (const control of curControls) {
             // right click
@@ -511,7 +513,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             let scrollOffsetX = newMoveOffsetX;
             let scrollOffsetY = newMoveOffsetY;
 
-            const currentSelection = this.getActiveSelection();
+            const currentSelection = this.getActiveSelectionControl();
             const freeze = this._getFreeze();
 
             const selection = currentSelection?.model;
@@ -638,9 +640,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
-    // attachPrimaryWithCoord(primary: ISelectionCell): ISelectionCellWithCoord {
-    //     return attachPrimaryWithCoord(primary, this._skeleton);
-    // }
+    attachPrimaryWithCoord(primary: ISelectionCell): ISelectionCellWithMergeInfo {
+        return attachPrimaryWithCoord(primary, this._skeleton) as unknown as ISelectionCellWithMergeInfo;
+    }
 
     getSelectionCellByPosition(x: number, y: number) {
         const scene = this._scene;
@@ -654,7 +656,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             scaleX,
             scaleY,
             scrollXY
-        );
+        ) as Nullable<ISelectionCellWithMergeInfo>;
     }
 
     /**

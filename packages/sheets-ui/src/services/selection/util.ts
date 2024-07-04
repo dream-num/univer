@@ -36,8 +36,8 @@ export function attachSelectionWithCoord(selection: ISelectionWithStyle, skeleto
     const rangeWithCoord = attachRangeWithCoord(skeleton, range);
 
     return {
-        rangeWithCoord,
-        primaryWithCoord: primary ? attachPrimaryWithCoord(primary, skeleton) : null,
+        range: rangeWithCoord,
+        primary: primary ? attachPrimaryWithCoord(primary, skeleton) : null,
         style,
     };
 }

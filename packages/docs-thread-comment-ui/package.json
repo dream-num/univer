@@ -64,12 +64,12 @@
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.4",
+        "@wendellhu/redi": "0.15.5",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.56",
+        "@univerjs/icons": "^0.1.58",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*"
     },
@@ -81,12 +81,12 @@
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.4",
+        "@wendellhu/redi": "0.15.5",
         "clsx": "^2.1.1",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.5",
-        "vite": "^5.2.12",
+        "typescript": "^5.5.3",
+        "vite": "^5.3.3",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

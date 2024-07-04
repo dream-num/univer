@@ -135,7 +135,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
                 const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
                 const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
-                scale = Math.max(scaleWidth, scaleHeight);
+                scale = Math.min(scaleWidth, scaleHeight);
             }
 
             const docTransform = this._getImagePosition(width * scale, height * scale);

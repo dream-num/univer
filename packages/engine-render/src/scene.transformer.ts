@@ -921,6 +921,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     this._topScenePointerMoveSub = topScene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                         this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject);
+
                         scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
                             this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject);
                         });
@@ -967,15 +968,15 @@ export class Transformer extends Disposable implements ITransformerConfig {
             if (left + ancestorLeft < this.zeroLeft) {
                 newTransform.left = -ancestorLeft;
                 newTransform.width = width + left;
-            } else if (left + width + ancestorLeft > topSceneWidth) {
-                newTransform.width = topSceneWidth - left - ancestorLeft;
+            } else if (left + width + ancestorLeft > topSceneWidth + this.zeroLeft) {
+                newTransform.width = this.zeroLeft + topSceneWidth - left - ancestorLeft;
             }
 
             if (top + ancestorTop < this.zeroTop) {
                 newTransform.top = -ancestorTop;
                 newTransform.height = height + top;
-            } else if (top + height + ancestorTop > topSceneHeight) {
-                newTransform.height = topSceneHeight - top - ancestorTop;
+            } else if (top + height + ancestorTop > topSceneHeight + this.zeroTop) {
+                newTransform.height = this.zeroTop + topSceneHeight - top - ancestorTop;
             }
 
             moveObject.transformByState(newTransform);

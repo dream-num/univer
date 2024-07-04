@@ -26,6 +26,20 @@ import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
 import styles from './index.module.less';
 
+function hasProtocol(urlString: string) {
+    const pattern = /^[a-zA-Z]+:\/\//;
+    return pattern.test(urlString);
+}
+
+function isEmail(url: string) {
+    const pattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    return pattern.test(url);
+}
+
+function transformUrl(urlStr: string) {
+    return hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `https://${urlStr}`;
+}
+
 export const DocHyperLinkEdit = () => {
     const hyperLinkService = useDependency(DocHyperLinkService);
     const hyperLinkModel = useDependency(DocHyperLinkModel);
@@ -51,16 +65,17 @@ export const DocHyperLinkEdit = () => {
         if (!isLegal || !doc) {
             return;
         }
+        const linkFinal = transformUrl(link);
 
         if (!editingId) {
             commandService.executeCommand(AddDocHyperLinkCommand.id, {
                 unitId: doc.getUnitId(),
-                payload: link,
+                payload: linkFinal,
             });
         } else {
             commandService.executeCommand(UpdateDocHyperLinkCommand.id, {
                 unitId: doc.getUnitId(),
-                payload: link,
+                payload: linkFinal,
                 linkId: editingId.linkId,
             });
         }

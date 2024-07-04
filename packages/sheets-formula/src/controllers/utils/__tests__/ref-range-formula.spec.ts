@@ -30,6 +30,7 @@ describe('Ref range formula test', () => {
 
             expect(result).toStrictEqual({
                 f: '=SUM(1)',
+                si: null,
             });
 
             formulaDataItem = {
@@ -41,6 +42,7 @@ describe('Ref range formula test', () => {
 
             expect(result).toStrictEqual({
                 si: 'id1',
+                f: null,
             });
 
             formulaDataItem = {
@@ -80,6 +82,7 @@ describe('Ref range formula test', () => {
 
             expect(result).toStrictEqual({
                 si: 'id1',
+                f: null,
             });
 
             formulaDataItem = {
@@ -103,6 +106,7 @@ describe('Ref range formula test', () => {
 
             expect(result).toStrictEqual({
                 f: '=SUM(1)',
+                si: null,
             });
 
             formulaDataItem = {
@@ -114,6 +118,7 @@ describe('Ref range formula test', () => {
 
             expect(result).toStrictEqual({
                 si: 'id1',
+                f: null,
             });
 
             formulaDataItem = {
@@ -125,6 +130,7 @@ describe('Ref range formula test', () => {
 
             expect(result).toStrictEqual({
                 f: '=SUM(1)',
+                si: null,
             });
 
             formulaDataItem = {
@@ -138,6 +144,7 @@ describe('Ref range formula test', () => {
 
             expect(result).toStrictEqual({
                 f: '=SUM(1)',
+                si: null,
             });
 
             formulaDataItem = {
@@ -151,6 +158,7 @@ describe('Ref range formula test', () => {
 
             expect(result).toStrictEqual({
                 f: '=SUM(1)',
+                si: null,
             });
 
             formulaDataItem = {

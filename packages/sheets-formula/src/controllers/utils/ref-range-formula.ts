@@ -538,6 +538,14 @@ export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaData
         cellData.f = f;
     }
 
+    if (cellData.f === undefined) {
+        cellData.f = null;
+    }
+
+    if (cellData.si === undefined) {
+        cellData.si = null;
+    }
+
     return cellData;
 }
 
@@ -580,6 +588,14 @@ export function formulaDataItemToCellDataFormula(formulaDataItem: Nullable<IForm
 
     if (checkFormulaId && !checkFormulaString) {
         cellData.si = si;
+    }
+
+    if (cellData.f === undefined) {
+        cellData.f = null;
+    }
+
+    if (cellData.si === undefined) {
+        cellData.si = null;
     }
 
     return cellData;

@@ -17,8 +17,8 @@
 import type { Workbook } from '@univerjs/core';
 import { Disposable, RANGE_TYPE, Tools } from '@univerjs/core';
 import { type IPointerEvent, type IRenderContext, type IRenderModule, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { type ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
-import type { ISelectionWithCoordAndStyle, type ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 
@@ -43,7 +43,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
     private _init(): void {
         let listenToSelectionChangeEvent = false;
         this.disposeWithMe(this._selectionManagerService.selectionMoveStart$.subscribe(() => listenToSelectionChangeEvent = true));
-        this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selectionsList: ISelectionWithCoordAndStyle[]) => {
+        this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selectionsList: ISelectionWithStyle[]) => {
             if (!selectionsList || listenToSelectionChangeEvent === false) {
                 return;
             }
@@ -55,11 +55,11 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
                 // return;
             // }
 
-            if (!selectionRangeWithStyle.primaryWithCoord) return;
+            if (!selectionRangeWithStyle.primary) return;
 
             const canvasRect = this._layoutService.getCanvasElement().getBoundingClientRect();
             const range = this._selectionRenderService.attachSelectionWithCoord(selectionRangeWithStyle as unknown as ISelectionWithStyle);
-            const rangeType = selectionRangeWithStyle.rangeWithCoord.rangeType;
+            const rangeType = selectionRangeWithStyle.range.rangeType;
 
             const { scene } = this._context;
             const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);

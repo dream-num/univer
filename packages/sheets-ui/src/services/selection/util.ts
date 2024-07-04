@@ -16,7 +16,7 @@
 
 import type { ISelectionCell, ISelectionCellWithMergeInfo } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
+import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { attachRangeWithCoord } from '../sheet-skeleton-manager.service';
 
 // const nilSelection = {
@@ -36,10 +36,10 @@ export function attachSelectionWithCoord(selection: ISelectionWithStyle, skeleto
     const rangeWithCoord = attachRangeWithCoord(skeleton, range);
 
     return {
-        range: rangeWithCoord,
-        primary: primary ? attachPrimaryWithCoord(primary, skeleton) : null,
+        rangeWithCoord,
+        primaryWithCoord: primary ? attachPrimaryWithCoord(primary, skeleton) : null,
         style,
-    };
+    } as ISelectionWithCoordAndStyle;
 }
 
 export function attachPrimaryWithCoord(primary: ISelectionCell, skeleton: SpreadsheetSkeleton): ISelectionCellWithMergeInfo {

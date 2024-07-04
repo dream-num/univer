@@ -26,7 +26,7 @@ import {
 } from '@univerjs/core';
 import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
+import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
@@ -49,7 +49,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
     ) {

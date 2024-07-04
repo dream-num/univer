@@ -52,6 +52,7 @@ import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.serv
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
+import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
 // import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { DragManagerService } from './services/drag-manager.service';
@@ -182,7 +183,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             // Caution: ScrollRenderController should placed before ZoomRenderController
             // because ZoomRenderController would change scrollInfo in currentSkeletonBefore$
             // currentSkeletonBefore$ --> ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
-            [SheetsScrollRenderController],
+            [MobileSheetsScrollRenderController],
             [SheetsZoomRenderController],
             [FormatPainterRenderController],
             [CellAlertRenderController],

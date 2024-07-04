@@ -64,7 +64,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     if (direction === 'vertical' || direction === 'top' || direction === 'bottom') {
         const { left: startX, top: startY, right: endX, bottom: endY } = position;
         const verticalStyle = direction === 'top'
-        // const verticalStyle = ((endY + height) > containerHeight || direction === 'top')
+            // const verticalStyle = ((endY + height) > containerHeight || direction === 'top')
             ? { top: Math.max(startY - height, PUSHING_MINIMUM_GAP) }
             : { top: Math.min(endY, containerHeight - height - PUSHING_MINIMUM_GAP) };
 
@@ -165,9 +165,7 @@ function RectPopup(props: IRectPopupProps) {
             ref={nodeRef}
             style={style}
             className={styles.popupAbsolute}
-            onClick={(e) => {
-                e.stopPropagation();
-            }}
+            onPointerDown={(e) => e.stopPropagation()}
         >
             <RectPopupContext.Provider value={anchorRect}>
                 {children}

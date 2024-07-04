@@ -150,11 +150,8 @@ function RectPopup(props: IRectPopupProps) {
             clickOtherFn(e);
         };
 
-        window.addEventListener('click', handleClickOther);
-
-        return () => {
-            window.removeEventListener('click', handleClickOther);
-        };
+        window.addEventListener('pointerdown', handleClickOther);
+        return () => window.removeEventListener('pointerdown', handleClickOther);
     }, [anchorRect, anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);
 
     return (

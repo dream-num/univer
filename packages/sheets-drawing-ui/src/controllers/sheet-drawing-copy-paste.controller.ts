@@ -16,12 +16,12 @@
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import { Disposable, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
-import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
-import { COPY_TYPE, ISelectionRenderService, ISheetClipboardService, PREDEFINED_HOOK_NAME, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME, SheetSkeletonManagerService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsDrawingCopyPasteController)
 export class SheetsDrawingCopyPasteController extends Disposable {
@@ -33,9 +33,12 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
     constructor(
         @ISheetClipboardService private _sheetClipboardService: ISheetClipboardService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
-        @Inject(Injector) private _injector: Injector
+        // @Inject(ISheetSelectionRenderService) private readonly _selectionRenderService: ISheetSelectionRenderService,
+
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+
+        @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService
+        // @Inject(Injector) private _injector: Injector
     ) {
         super();
         this._initCopyPaste();
@@ -58,7 +61,10 @@ export class SheetsDrawingCopyPasteController extends Disposable {
     }
 
     private _collect(unitId: string, subUnitId: string, range: IRange) {
-        const selectionRect = this._selectionRenderService.attachRangeWithCoord(range);
+        const skeletonManagetService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+        if (!skeletonManagetService) return;
+
+        const selectionRect = skeletonManagetService.attachRangeWithCoord(range);
         if (!selectionRect) {
             return;
         }
@@ -133,13 +139,19 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         const { row: copyRow, col: copyCol } = mapFunc(vCopyRange.startRow, vCopyRange.startColumn);
         const { row: pasteRow, col: pasteCol } = mapFunc(vPastedRange.startRow, vPastedRange.startColumn);
 
-        const copyRect = this._selectionRenderService.attachRangeWithCoord({
+        const skeletonManagetService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+
+        if (!skeletonManagetService) {
+            return { redos: [], undos: [] };
+        }
+
+        const copyRect = skeletonManagetService.attachRangeWithCoord({
             startRow: copyRow,
             endRow: copyRow,
             startColumn: copyCol,
             endColumn: copyCol,
         });
-        const pasteRect = this._selectionRenderService.attachRangeWithCoord({
+        const pasteRect = skeletonManagetService.attachRangeWithCoord({
             startRow: pasteRow,
             endRow: pasteRow,
             startColumn: pasteCol,

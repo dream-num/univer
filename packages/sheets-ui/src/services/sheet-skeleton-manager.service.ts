@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { Disposable, IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -89,6 +90,10 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
     getCurrent(): Nullable<ISheetSkeletonManagerParam> {
         return this._getSkeleton(this._currentSkeletonSearchParam);
+    }
+
+    getWorksheetSkeleton(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+        return this._getSkeleton({ sheetId });
     }
 
     /**

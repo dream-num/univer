@@ -36,10 +36,11 @@ import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import type { SelectionRenderModel } from './selection-render-model';
-import type { SelectionControl } from './selection-shape';
-import { type IControlFillConfig, type ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
 import { MobileSelectionControl } from './mobile-selection-shape';
+import type { SelectionRenderModel } from './selection-render-model';
+import type { IControlFillConfig } from './base-selection-render.service';
+import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
+import type { SelectionControl } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 
 enum ExpandingControl {
@@ -50,7 +51,7 @@ enum ExpandingControl {
     TOP = 'top',
     BOTTOM = 'bottom',
 }
-export class MobileSelectionRenderService implements ISelectionRenderService {
+export class MobileSelectionRenderService {
     hasSelection: boolean = false;
 
     private _pointerdownSub: Nullable<Subscription>;

@@ -19,7 +19,6 @@ import {
     Direction,
     Disposable,
     ICommandService,
-    IUniverInstanceService,
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
@@ -50,9 +49,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
-        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
+        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService
     ) {
         super();
 

@@ -225,6 +225,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         const updatePosition = () => position$.next(this._calcCellPositionByCell(row, col, currentRender, skeleton, activeViewport));
 
         const disposable = new DisposableCollection();
+        disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
                 const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
@@ -265,7 +266,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         skeleton: SpreadsheetSkeleton,
         activeViewport: Viewport
     ): IBoundRectNoAngle {
-        const { scene } = currentRender;
+        const { scene, engine } = currentRender;
 
         const primaryWithCoord = skeleton.getCellByIndex(row, col);
         const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
@@ -276,11 +277,14 @@ export class SheetCanvasPopManagerService extends Disposable {
             y: activeViewport.viewportScrollY,
         };
 
+        const canvasClientRect = engine.getCanvasElement().getBoundingClientRect();
+        const { top, left } = canvasClientRect;
+
         return {
-            left: ((cellInfo.startX - scrollXY.x) * scaleX),
-            right: (cellInfo.endX - scrollXY.x) * scaleX,
-            top: ((cellInfo.startY - scrollXY.y) * scaleY),
-            bottom: ((cellInfo.endY - scrollXY.y) * scaleY),
+            left: ((cellInfo.startX - scrollXY.x) * scaleX) + left,
+            right: (cellInfo.endX - scrollXY.x) * scaleX + left,
+            top: ((cellInfo.startY - scrollXY.y) * scaleY) + top,
+            bottom: ((cellInfo.endY - scrollXY.y) * scaleY) + top,
         };
     }
 

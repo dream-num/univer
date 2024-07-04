@@ -65,6 +65,8 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@floating-ui/dom": "^1.6.7",
+        "@floating-ui/utils": "^0.2.4",
         "cjk-regex": "^3.1.0",
         "franc-min": "^6.2.0",
         "opentype.js": "^1.3.4"

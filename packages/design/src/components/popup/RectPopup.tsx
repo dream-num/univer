@@ -106,10 +106,9 @@ function RectPopup(props: IRectPopupProps) {
             if (!nodeRef.current) return;
 
             const { clientWidth, clientHeight } = nodeRef.current;
-            const parent = nodeRef.current.parentElement;
-            if (!parent) return;
+            const innerWidth = window.innerWidth;
+            const innerHeight = window.innerHeight;
 
-            const { clientWidth: innerWidth, clientHeight: innerHeight } = parent;
             setPosition(calcPopupPosition(
                 {
                     position: anchorRect,

@@ -19,14 +19,14 @@ import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, O
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { Inject } from '@wendellhu/redi';
-import { DocHyperLinkService } from '../services/hyper-link.service';
+import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkSelectionController)
 export class DocHyperLinkSelectionController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocHyperLinkService) private readonly _docHyperLinkService: DocHyperLinkService
+        @Inject(DocHyperLinkPopupService) private readonly _docHyperLinkService: DocHyperLinkPopupService
     ) {
         super();
 

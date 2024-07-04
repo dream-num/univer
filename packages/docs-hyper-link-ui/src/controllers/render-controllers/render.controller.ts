@@ -21,13 +21,13 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
 import { DocRenderController } from '@univerjs/docs-ui';
 import { Inject } from '@wendellhu/redi';
-import { DocHyperLinkService } from '../../services/hyper-link.service';
+import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export class DocHyperLinkRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocInterceptorService) private readonly _docInterceptorService: DocInterceptorService,
-        @Inject(DocHyperLinkService) private readonly _hyperLinkService: DocHyperLinkService,
+        @Inject(DocHyperLinkPopupService) private readonly _hyperLinkService: DocHyperLinkPopupService,
         @Inject(DocRenderController) private readonly _docRenderController: DocRenderController,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocHyperLinkModel) private readonly _hyperLinkModel: DocHyperLinkModel
@@ -44,7 +44,7 @@ export class DocHyperLinkRenderController extends Disposable implements IRenderM
                     return next(data);
                 }
                 const { unitId } = pos;
-                const activeLink = this._hyperLinkService.getEditing();
+                const activeLink = this._hyperLinkService.editing;
                 const { linkId, unitId: linkUnitId } = activeLink || {};
 
                 const isActive = linkUnitId === unitId && data.rangeId === linkId;

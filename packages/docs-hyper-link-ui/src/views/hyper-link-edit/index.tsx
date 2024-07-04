@@ -21,7 +21,7 @@ import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { DocumentDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
-import { DocHyperLinkService } from '../../services/hyper-link.service';
+import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
 import styles from './index.module.less';
@@ -41,7 +41,7 @@ function transformUrl(urlStr: string) {
 }
 
 export const DocHyperLinkEdit = () => {
-    const hyperLinkService = useDependency(DocHyperLinkService);
+    const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const hyperLinkModel = useDependency(DocHyperLinkModel);
     const editingId = useObservable(hyperLinkService.editingLink$);
     const commandService = useDependency(ICommandService);

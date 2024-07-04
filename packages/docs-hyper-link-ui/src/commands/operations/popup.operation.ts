@@ -17,7 +17,7 @@
 import type { ICommand, Nullable } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
-import { DocHyperLinkService } from '../../services/hyper-link.service';
+import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export interface IShowDocHyperLinkEditPopupOperationParams {
     link?: {
@@ -31,7 +31,7 @@ export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditP
     id: 'docs.operation.show-hyper-link-edit-popup',
     handler(accessor, params) {
         const linkInfo = params?.link;
-        const hyperLinkService = accessor.get(DocHyperLinkService);
+        const hyperLinkService = accessor.get(DocHyperLinkPopupService);
         hyperLinkService.showEditPopup(linkInfo);
         return true;
     },
@@ -49,7 +49,7 @@ export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IToggleDocHyperLinkI
     id: 'docs.operation.toggle-hyper-link-info-popup',
     handler(accessor, params) {
         const link = params?.link;
-        const hyperLinkService = accessor.get(DocHyperLinkService);
+        const hyperLinkService = accessor.get(DocHyperLinkPopupService);
         if (link) {
             hyperLinkService.showInfoPopup(link.unitId, link.linkId);
         } else {

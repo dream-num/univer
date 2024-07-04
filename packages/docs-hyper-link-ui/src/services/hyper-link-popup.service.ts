@@ -25,7 +25,7 @@ import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { DocLinkPopup } from '../views/hyper-link-popup';
 
-export class DocHyperLinkService extends Disposable {
+export class DocHyperLinkPopupService extends Disposable {
     private readonly _editingLink$ = new BehaviorSubject<Nullable<{ unitId: string; linkId: string }>>(null);
     private readonly _showingLink$ = new BehaviorSubject<Nullable<{ unitId: string; linkId: string }>>(null);
     readonly editingLink$ = this._editingLink$.asObservable();
@@ -44,11 +44,11 @@ export class DocHyperLinkService extends Disposable {
         super();
     }
 
-    getEditing() {
+    get editing() {
         return this._editingLink$.value;
     }
 
-    getShowing() {
+    get showing() {
         return this._showingLink$.value;
     }
 
@@ -95,6 +95,10 @@ export class DocHyperLinkService extends Disposable {
     }
 
     showInfoPopup(unitId: string, linkId: string): Nullable<IDisposable> {
+        if (this.showing?.linkId === linkId && this.showing?.unitId === unitId) {
+            return;
+        }
+
         if (this._infoPopup) {
             this._infoPopup.dispose();
         }

@@ -22,7 +22,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
 import type { IDocHyperLinkUIConfig } from './controllers/ui.controller';
 import { DocHyperLinkUIController } from './controllers/ui.controller';
-import { DocHyperLinkService } from './services/hyper-link.service';
+import { DocHyperLinkPopupService } from './services/hyper-link-popup.service';
 import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
 import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { DocHyperLinkClipboardController } from './controllers/doc-hyper-link-clipboard.controller';
@@ -42,7 +42,7 @@ export class UniverDocHyperLinkUIPlugin extends Plugin {
 
     override onStarting(injector: Injector): void {
         const deps: Dependency[] = [
-            [DocHyperLinkService],
+            [DocHyperLinkPopupService],
             [DocHyperLinkUIController,
                 {
                     useFactory: () => this._injector.createInstance(DocHyperLinkUIController, this._config),

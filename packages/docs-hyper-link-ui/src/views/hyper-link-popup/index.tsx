@@ -22,13 +22,13 @@ import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { IMessageService, useObservable } from '@univerjs/ui';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
-import { DocHyperLinkService } from '../../services/hyper-link.service';
+import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
 import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
 import styles from './index.module.less';
 
 export const DocLinkPopup = () => {
-    const hyperLinkService = useDependency(DocHyperLinkService);
+    const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const hyperLinkModel = useDependency(DocHyperLinkModel);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);

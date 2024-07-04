@@ -220,7 +220,7 @@ export const CellLinkEdit = () => {
                 subUnitId: editing.subUnitId,
             });
 
-            const GAP = 5;
+            const GAP = 1;
             await commandService.executeCommand(ScrollToRangeOperation.id, {
                 range: {
                     startRow: Math.max(editing.row - GAP, 0),

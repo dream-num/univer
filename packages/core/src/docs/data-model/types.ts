@@ -42,8 +42,8 @@ export enum DataStreamTreeTokenType {
     TABLE_ROW_START = '\x1B', // 表格开始
     TABLE_CELL_START = '\x1C', // 表格开始
     TABLE_CELL_END = '\x1D', // 表格开始
-    TABLE_ROW_END = '\x1E', // 表格开始
-    TABLE_END = '\x1F', // 表格结束
+    TABLE_ROW_END = '\x2A', // 表格开始
+    TABLE_END = '\x2B', // 表格结束
     CUSTOM_RANGE_START = '\x1F', // 自定义范围开始
     CUSTOM_RANGE_END = '\x1E', // 自定义范围结束
 

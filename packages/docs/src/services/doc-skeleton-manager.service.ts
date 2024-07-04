@@ -36,6 +36,9 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
     private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<DocumentSkeleton>>(null);
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
+    private readonly _currentViewModel$ = new BehaviorSubject<Nullable<DocumentViewModel>>(null);
+    readonly currentViewModel$ = this._currentViewModel$.asObservable();
+
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
@@ -92,6 +95,7 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
 
         this._currentSkeletonBefore$.next(skeleton);
         this._currentSkeleton$.next(skeleton);
+        this._currentViewModel$.next(this._docViewModel);
     }
 
     getSkeleton(): DocumentSkeleton {

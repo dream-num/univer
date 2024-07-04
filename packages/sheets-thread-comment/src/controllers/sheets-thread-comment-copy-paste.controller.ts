@@ -18,7 +18,7 @@ import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import { Disposable, LifecycleStages, OnLifecycle, Range } from '@univerjs/core';
 import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
-import { AddCommentMutation, DeleteCommentMutation, type IThreadComment } from '@univerjs/thread-comment';
+import { AddCommentMutation, DeleteCommentMutation, type IThreadComment, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { SHEETS_THREAD_COMMENT } from '../types/const';
@@ -46,7 +46,8 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
 
     constructor(
         @Inject(ISheetClipboardService) private _sheetClipboardService: ISheetClipboardService,
-        @Inject(SheetsThreadCommentModel) private _sheetsThreadCommentModel: SheetsThreadCommentModel
+        @Inject(SheetsThreadCommentModel) private _sheetsThreadCommentModel: SheetsThreadCommentModel,
+        @IThreadCommentDataSourceService private _threadCommentDataSourceService: IThreadCommentDataSourceService
     ) {
         super();
         this._initClipboardHook();
@@ -79,12 +80,20 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                             column: range.startColumn,
                         };
                         if (!(targetUnitId === sourceUnitId && targetSubUnitId === sourceSubUnitId)) {
-                            const roots: { root: IThreadComment; children: IThreadComment[] }[] = [];
+                            const roots: IThreadComment[] = [];
 
                             Range.foreach(range, (row, col) => {
-                                const root = this._sheetsThreadCommentModel.getCommentWithChildren(sourceUnitId, sourceSubUnitId, row, col);
-                                if (root) {
-                                    roots.push(root);
+                                const comments = this._sheetsThreadCommentModel.getAllByLocation(sourceUnitId, sourceSubUnitId, row, col);
+                                if (this._threadCommentDataSourceService.syncUpdateMutationToColla) {
+                                    comments.forEach((comment) => {
+                                        roots.push(comment);
+                                    });
+                                } else {
+                                    comments.forEach(({ children, ...comment }) => {
+                                        if (!comment.parentId) {
+                                            roots.push(comment);
+                                        }
+                                    });
                                 }
                             });
 
@@ -113,6 +122,7 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                                             unitId: targetUnitId,
                                             subUnitId: targetSubUnitId,
                                         },
+                                        sync: true,
                                     },
                                 });
                                 sourceUndos.push({
@@ -121,6 +131,7 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                                         unitId: sourceUnitId,
                                         subUnitId: sourceSubUnitId,
                                         comment: item,
+                                        sync: true,
                                     },
                                 });
                                 targetUndos.unshift({
@@ -134,10 +145,7 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                             };
 
                             roots.forEach((root) => {
-                                handleCommentItem(root.root);
-                                root.children.forEach((child) => {
-                                    handleCommentItem(child);
-                                });
+                                handleCommentItem(root);
                             });
 
                             return {

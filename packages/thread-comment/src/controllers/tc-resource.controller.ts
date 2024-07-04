@@ -44,7 +44,7 @@ export class ThreadCommentResourceController extends Disposable {
                     resultMap[key] = v;
                 });
 
-                return JSON.stringify(this._threadCommentDataSourceService.saveToSnapshot(resultMap));
+                return JSON.stringify(this._threadCommentDataSourceService.saveToSnapshot(resultMap, unitID));
             }
             return '';
         };
@@ -62,19 +62,20 @@ export class ThreadCommentResourceController extends Disposable {
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
                 pluginName: `SHEET_${TC_PLUGIN_NAME}`,
-                businesses: [UniverType.UNIVER_SHEET],
+                businesses: [UniverType.UNIVER_SHEET, UniverType.UNIVER_DOC],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {
                     this._threadCommentModel.deleteUnit(unitID);
                 },
                 onLoad: async (unitID, value) => {
-                    const unitComments = await this._threadCommentDataSourceService.loadFormSnapshot(value);
-                    Object.keys(unitComments).forEach((subunitId) => {
+                    Object.keys(value).forEach((subunitId) => {
                         const commentList = value[subunitId];
-                        commentList.forEach((comment) => {
+                        commentList.forEach((comment: IThreadComment) => {
                             this._threadCommentModel.addComment(unitID, subunitId, comment);
                         });
+
+                        this._threadCommentModel.syncThreadComments(unitID, subunitId, commentList.map((i) => i.threadId));
                     });
                 },
             })

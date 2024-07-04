@@ -18,6 +18,7 @@ import { insertTextToContent } from '../../../../shared';
 import type { IDocumentBody } from '../../../../types/interfaces';
 import {
     insertCustomBlocks,
+    insertCustomDecorations,
     insertCustomRanges,
     insertParagraphs,
     insertSectionBreaks,
@@ -44,4 +45,6 @@ export function updateAttributeByInsert(
     insertTables(body, insertBody, textLength, currentIndex);
 
     insertCustomRanges(body, insertBody, textLength, currentIndex);
+
+    insertCustomDecorations(body, insertBody, textLength, currentIndex);
 }

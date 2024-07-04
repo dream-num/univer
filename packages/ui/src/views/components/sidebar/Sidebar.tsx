@@ -77,7 +77,6 @@ export function Sidebar() {
         sidebarService.sidebarOptions$.next(options);
         options?.onClose?.();
     }
-
     return (
         <section className={_className} style={{ width }}>
             <section className={styles.sidebarContainer}>

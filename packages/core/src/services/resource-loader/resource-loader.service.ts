@@ -22,6 +22,7 @@ import { IResourceManagerService } from '../resource-manager/type';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { UniverInstanceType } from '../../common/unit';
+import type { DocumentDataModel } from '../../docs';
 import type { IResourceLoaderService } from './type';
 
 export class ResourceLoaderService extends Disposable implements IResourceLoaderService {
@@ -41,7 +42,18 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
                     case UniverInstanceType.UNIVER_UNKNOWN:
                     case UniverInstanceType.UNIVER_SLIDE:
                     case UniverInstanceType.UNIVER_DOC: {
-                        // TODO@gggpound: wait to support.
+                        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).forEach((doc) => {
+                            const snapshotResource = doc.getSnapshot().resources || [];
+                            const plugin = snapshotResource.find((r) => r.name === hook.pluginName);
+                            if (plugin) {
+                                try {
+                                    const data = hook.parseJson(plugin.data);
+                                    hook.onLoad(doc.getUnitId(), data);
+                                } catch (err) {
+                                    console.error(`Load Document{${doc.getUnitId()}} Resources{${hook.pluginName}} Data Error.`);
+                                }
+                            }
+                        });
                         break;
                     }
                     case UniverInstanceType.UNIVER_SHEET: {
@@ -92,6 +104,14 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         const unitId = workbook.getUnitId();
         const resources = this._resourceManagerService.getResources(unitId) || [];
         const snapshot = workbook.getSnapshot();
+        snapshot.resources = resources;
+        return snapshot;
+    };
+
+    saveDoc(doc: DocumentDataModel) {
+        const unitId = doc.getUnitId();
+        const resources = this._resourceManagerService.getResourcesByType(unitId, UniverInstanceType.UNIVER_DOC) || [];
+        const snapshot = doc.getSnapshot();
         snapshot.resources = resources;
         return snapshot;
     };

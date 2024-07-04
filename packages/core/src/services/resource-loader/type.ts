@@ -18,9 +18,12 @@ import { createIdentifier } from '@wendellhu/redi';
 import type { Workbook } from '../../sheets/workbook';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { LifecycleStages, runOnLifecycle } from '../lifecycle/lifecycle';
+import type { IDocumentData } from '../../types/interfaces';
+import type { DocumentDataModel } from '../../docs';
 
 export interface IResourceLoaderService {
     saveWorkbook: (workbook: Workbook) => IWorkbookData;
+    saveDoc: (doc: DocumentDataModel) => IDocumentData;
 }
 export const IResourceLoaderService = createIdentifier<IResourceLoaderService>('resource-loader-service');
 runOnLifecycle(LifecycleStages.Ready, IResourceLoaderService);

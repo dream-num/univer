@@ -14,18 +14,32 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { MentionProps } from '@univerjs/design';
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
 import { createIdentifier } from '@wendellhu/redi';
 
+export interface IThreadCommentMentionDataSource {
+    getMentions(search: string, unitId: string, subUnitId: string): Promise<IThreadCommentMention[]>;
+}
+
 export interface IThreadCommentMentionDataService {
-    getMentions: (search: string) => Promise<IThreadCommentMention[]>;
+    dataSource: Nullable<IThreadCommentMentionDataSource>;
+
+    getMentions: (search: string, unitId: string, subUnitId: string) => Promise<IThreadCommentMention[]>;
     trigger: string;
     renderSuggestion?: MentionProps['renderSuggestion'];
 }
 
 export class ThreadCommentMentionDataService implements IThreadCommentMentionDataService {
-    async getMentions(search: string) {
+    dataSource: Nullable<IThreadCommentMentionDataSource>;
+
+    renderSuggestion: MentionProps['renderSuggestion'];
+
+    async getMentions(search: string, unitId: string, subUnitId: string) {
+        if (this.dataSource) {
+            return this.dataSource.getMentions(search, unitId, subUnitId);
+        }
         return [];
     }
 

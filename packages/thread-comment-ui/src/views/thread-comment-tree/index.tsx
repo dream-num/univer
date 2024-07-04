@@ -17,16 +17,17 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { ICommandService, type IUser, LocaleService, Tools, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
-import dayjs from 'dayjs';
 import { Dropdown, Menu, MenuItem } from '@univerjs/design';
 import cs from 'clsx';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
+import { getDT } from '../../common/utils';
+import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import styles from './index.module.less';
 
 export interface IThreadCommentTreeProps {
@@ -44,6 +45,9 @@ export interface IThreadCommentTreeProps {
     autoFocus?: boolean;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
+    onAddComment?: (comment: IThreadComment) => boolean;
+    onDeleteComment?: (comment: IThreadComment) => boolean;
+    onResolve?: (resolved: boolean) => void;
 }
 
 export interface IThreadCommentItemProps {
@@ -57,12 +61,14 @@ export interface IThreadCommentItemProps {
     onReply: (user: IUser | undefined) => void;
     isRoot?: boolean;
     onClose?: () => void;
+    onAddComment?: (comment: IThreadComment) => boolean;
+    onDeleteComment?: (comment: IThreadComment) => boolean;
 }
 
 const MOCK_ID = '__mock__';
 
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
-    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose } = props;
+    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose, onDeleteComment } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const userManagerService = useDependency(UserManagerService);
@@ -71,7 +77,12 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const isCommentBySelf = currentUser?.userID === item.personId;
     const isMock = item.id === MOCK_ID;
     const [showReply, setShowReply] = useState(false);
+
     const handleDeleteItem = () => {
+        if (onDeleteComment?.(item) === false) {
+            return;
+        }
+
         commandService.executeCommand(
             isRoot ? DeleteCommentTreeCommand.id : DeleteCommentCommand.id,
             {
@@ -130,6 +141,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         comment={item}
                         onCancel={() => onEditingChange?.(false)}
                         autoFocus
+                        unitId={unitId}
+                        subUnitId={subUnitId}
                         onSave={({ text, attachments }) => {
                             onEditingChange?.(false);
                             commandService.executeCommand(
@@ -184,6 +197,9 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         autoFocus,
         onMouseEnter,
         onMouseLeave,
+        onAddComment,
+        onDeleteComment,
+        onResolve,
     } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [isHover, setIsHover] = useState(false);
@@ -195,7 +211,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const resolved = comments?.root.resolved;
     const currentUser = useObservable(userManagerService.currentUser$);
     const editorRef = useRef<IThreadCommentEditorInstance>(null);
-    const renderComments = [
+    const renderComments: IThreadComment[] = [
         ...comments ?
             [comments.root] :
             // mock empty comment
@@ -209,20 +225,39 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 dT: '',
                 unitId,
                 subUnitId,
+                threadId: '',
             }],
-        ...comments?.children ?? [],
+        ...(comments?.children ?? []) as IThreadComment[],
     ];
-    const handleResolve = () => {
+    const handleResolve: React.MouseEventHandler<HTMLDivElement> = (e) => {
+        e.stopPropagation();
+        if (!resolved) {
+            commandService.executeCommand(SetActiveCommentOperation.id);
+        } else {
+            commandService.executeCommand(SetActiveCommentOperation.id, {
+                unitId,
+                subUnitId,
+                commentId: id,
+            });
+        }
+
         commandService.executeCommand(ResolveCommentCommand.id, {
             unitId,
             subUnitId,
             commentId: id,
             resolved: !resolved,
         });
-        onClose?.();
+
+        onResolve?.(!resolved);
     };
 
-    const handleDeleteRoot = () => {
+    const handleDeleteRoot: React.MouseEventHandler<HTMLDivElement> = (e) => {
+        e.stopPropagation();
+        commandService.executeCommand(SetActiveCommentOperation.id);
+        if (comments?.root && (onDeleteComment?.(comments.root) === false)) {
+            return;
+        }
+
         commandService.executeCommand(
             DeleteCommentTreeCommand.id,
             {
@@ -233,6 +268,14 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         );
         onClose?.();
     };
+
+    useEffect(() => {
+        return onMouseLeave?.();
+    }, []);
+
+    const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
+    const editorVisible = showEdit && !editingId && !resolved;
+    const title = `${refStr || comments?.root.ref}${subUnitName ? ' · ' : ''}${subUnitName}`;
 
     return (
         <div
@@ -254,9 +297,9 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             <div className={styles.threadCommentTitle}>
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />
-                    {refStr || comments?.root.ref}
-                    {' · '}
-                    {getSubUnitName(comments?.root.subUnitId ?? subUnitId)}
+                    <div className={styles.threadCommentTitlePositionText}>
+                        {title}
+                    </div>
                 </div>
                 {comments
                     ? (
@@ -302,41 +345,54 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                 if (!user) {
                                     return;
                                 }
-                                editorRef.current?.reply(transformTextNodes2Document([{
-                                    type: 'mention',
-                                    content: {
-                                        id: user.userID,
-                                        label: user.name,
-                                    },
-                                }]));
+                                requestAnimationFrame(() => {
+                                    editorRef.current?.reply(transformTextNodes2Document([{
+                                        type: 'mention',
+                                        content: {
+                                            id: user.userID,
+                                            label: user.name,
+                                        },
+                                    }]));
+                                });
                             }}
+                            onAddComment={onAddComment}
+                            onDeleteComment={onDeleteComment}
                         />
                     )
                 )}
             </div>
-            {showEdit && !editingId && !resolved
+            {editorVisible
                 ? (
                     <div>
                         <ThreadCommentEditor
                             key={`${autoFocus}`}
                             ref={editorRef}
+                            unitId={unitId}
+                            subUnitId={subUnitId}
                             onSave={({ text, attachments }) => {
+                                const comment: IThreadComment = {
+                                    text,
+                                    attachments,
+                                    dT: getDT(),
+                                    id: Tools.generateRandomId(),
+                                    ref: refStr!,
+                                    personId: currentUser?.userID!,
+                                    parentId: comments?.root.id,
+                                    unitId,
+                                    subUnitId,
+                                    threadId: comments?.root.threadId!,
+                                };
+
+                                if (onAddComment?.(comment) === false) {
+                                    return;
+                                }
+
                                 commandService.executeCommand(
                                     AddCommentCommand.id,
                                     {
                                         unitId,
                                         subUnitId,
-                                        comment: {
-                                            text,
-                                            attachments,
-                                            dT: dayjs().format('YYYY/MM/DD HH:mm'),
-                                            id: Tools.generateRandomId(),
-                                            ref: refStr,
-                                            personId: currentUser?.userID,
-                                            parentId: comments?.root.id,
-                                            unitId,
-                                            subUnitId,
-                                        },
+                                        comment,
                                     } as IAddCommentCommandParams
                                 );
                             }}

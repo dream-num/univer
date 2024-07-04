@@ -16,13 +16,13 @@
 
 import type { ITextRange } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { getAnchorBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
 import { ICanvasPopupService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { DocSkeletonManagerService, SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs';
 
 export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene: Scene): IBoundRectNoAngle {
@@ -129,7 +129,7 @@ export class DocCanvasPopManagerService extends Disposable {
     }
 
     private _createRangePositionObserver(range: ITextRange, currentRender: IRender) {
-        const calc = () => {
+        const calc = (): IBoundRectNoAngle[] | undefined => {
             const { scene, mainComponent } = currentRender;
             const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
             const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset);
@@ -145,38 +145,24 @@ export class DocCanvasPopManagerService extends Disposable {
 
             const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
             const { contentBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
-            const { left: aLeft, top: aTop, height, width } = getAnchorBounding(contentBoxPointGroup);
-
-            const left = aLeft + docsLeft;
-            const top = aTop + docsTop;
-
-            const bound: IBoundRectNoAngle = {
-                left,
-                right: left + width,
-                top,
-                bottom: top + height,
-            };
-
-            const offsetBound = transformBound2OffsetBound(bound, scene);
-
-            const position = {
-                left: offsetBound.left,
-                right: offsetBound.right,
-                top: offsetBound.top,
-                bottom: offsetBound.bottom,
-            };
-            return position;
+            const bounds = getLineBounding(contentBoxPointGroup);
+            return bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
+                left: i.left + docsLeft,
+                right: i.right + docsLeft,
+                top: i.top + docsTop,
+                bottom: i.bottom + docsTop,
+            }));
         };
 
-        const position = calc() ?? { top: -9999, left: -9999, right: -9999, bottom: -9999 };
-        const position$ = new BehaviorSubject(position!);
+        const positions = calc() ?? [];
+        const positions$ = new BehaviorSubject(positions);
         const disposable = new DisposableCollection();
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetDocZoomRatioOperation.id) {
                 const position = calc();
                 if (position) {
-                    position$.next(position);
+                    positions$.next(position);
                 }
             }
         }));
@@ -186,14 +172,14 @@ export class DocCanvasPopManagerService extends Disposable {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => {
                 const position = calc();
                 if (position) {
-                    position$.next(position);
+                    positions$.next(position);
                 }
             }));
         }
 
         return {
-            position,
-            position$,
+            positions,
+            positions$,
             disposable,
         };
     }
@@ -240,6 +226,7 @@ export class DocCanvasPopManagerService extends Disposable {
     attachPopupToRange(range: ITextRange, popup: IDocCanvasPopup): IDisposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
         const unitId = workbook.getUnitId();
+        const { direction = 'top' } = popup;
 
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
@@ -250,20 +237,22 @@ export class DocCanvasPopManagerService extends Disposable {
             };
         }
 
-        const { position, position$, disposable } = this._createRangePositionObserver(range, currentRender);
-
+        const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
+        const position$ = bounds$.pipe(map((bounds) => direction === 'top' ? bounds[0] : bounds[bounds.length - 1]));
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
-            anchorRect: position,
+            anchorRect: direction === 'top' ? bounds[0] : bounds[bounds.length - 1],
             anchorRect$: position$,
+            excludeRects: bounds,
+            excludeRects$: bounds$,
+            direction: direction === 'top' ? 'top' : 'bottom',
         });
-
         return {
             dispose: () => {
                 this._globalPopupManagerService.removePopup(id);
-                position$.complete();
+                bounds$.complete();
                 disposable.dispose();
             },
         };

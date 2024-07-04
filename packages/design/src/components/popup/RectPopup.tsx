@@ -34,7 +34,7 @@ export interface IRectPopupProps {
      * the anchor element bounding rect
      */
     anchorRect: IAbsolutePosition;
-
+    excludeRects?: IAbsolutePosition[];
     direction?: 'vertical' | 'horizontal' | 'left' | 'top' | 'right' | 'left' | 'bottom';
 
     // #region closing behavior
@@ -92,13 +92,15 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside } = props;
+    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, excludeRects } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
         top: -9999,
         left: -9999,
     });
+    const excludeRectsRef = useRef(excludeRects);
+    excludeRectsRef.current = excludeRects;
 
     const style = useMemo(() => ({ ...position }), [position]);
     useEffect(() => {
@@ -145,9 +147,13 @@ function RectPopup(props: IRectPopupProps) {
             }
             const x = e.offsetX;
             const y = e.offsetY;
-            if (x <= anchorRect.right && x >= anchorRect.left && y <= anchorRect.bottom && y >= anchorRect.top) {
-                return;
+            const rects = [anchorRect, ...excludeRectsRef.current ?? []];
+            for (const rect of rects) {
+                if (x <= rect.right && x >= rect.left && y <= rect.bottom && y >= rect.top) {
+                    return;
+                }
             }
+
             clickOtherFn(e);
         };
 

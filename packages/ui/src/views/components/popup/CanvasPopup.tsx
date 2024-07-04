@@ -25,6 +25,7 @@ import type { IPopup } from '../../../services/popup/canvas-popup.service';
 
 const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
     const anchorRect = useObservable(popup.anchorRect$, popup.anchorRect);
+    const excludeRects = useObservable(popup.excludeRects$, popup.excludeRects);
     const { bottom, left, right, top } = anchorRect;
     const { offset } = popup;
 
@@ -45,6 +46,7 @@ const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: Reac
             direction={popup.direction}
             onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}
+            excludeRects={excludeRects}
             closeOnSelfTarget={popup.closeOnSelfTarget}
         >
             {children}

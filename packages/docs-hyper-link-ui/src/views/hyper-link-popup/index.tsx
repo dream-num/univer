@@ -79,7 +79,7 @@ export const DocLinkPopup = () => {
                     className={styles.docLinkOperation}
                     onClick={() => {
                         commandService.executeCommand(ShowDocHyperLinkEditPopupOperation.id, {
-                            link: { unitId, linkId },
+                            link: currentPopup,
                         });
                     }}
                 >

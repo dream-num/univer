@@ -43,19 +43,19 @@ export class DocHyperLinkSelectionController extends Disposable {
                     const primary = ranges[0];
                     if (primary && doc) {
                         const { startOffset, endOffset, collapsed } = primary;
-                        let customRange;
-
+                        const customRanges = doc.getBody()?.customRanges;
                         if (collapsed) { // cursor
-                            customRange = doc.getBody()?.customRanges?.find((value) => (value.startIndex + 1) < startOffset && value.endIndex > endOffset);
-                        } else { // range
-                            customRange = doc.getBody()?.customRanges?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
-                        }
+                            const index = customRanges?.findIndex((value) => (value.startIndex + 1) < startOffset && value.endIndex > endOffset) ?? -1;
+                            if (index > -1) {
+                                const customRange = customRanges![index];
+                                this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId, rangeIndex: index });
 
-                        if (customRange) {
-                            if (collapsed) {
-                                this._docHyperLinkService.showInfoPopup(unitId, customRange.rangeId);
+                                return;
                             }
-                            return;
+                        } else { // range
+                            if (customRanges?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1))) {
+                                return;
+                            }
                         }
                     }
 

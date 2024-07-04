@@ -23,6 +23,7 @@ export interface IShowDocHyperLinkEditPopupOperationParams {
     link?: {
         unitId: string;
         linkId: string;
+        rangeIndex: number;
     };
 }
 
@@ -33,29 +34,6 @@ export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditP
         const linkInfo = params?.link;
         const hyperLinkService = accessor.get(DocHyperLinkPopupService);
         hyperLinkService.showEditPopup(linkInfo);
-        return true;
-    },
-};
-
-export interface IToggleDocHyperLinkInfoPopupOperationParams {
-    link?: Nullable<{
-        unitId: string;
-        linkId: string;
-    }>;
-}
-
-export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IToggleDocHyperLinkInfoPopupOperationParams> = {
-    type: CommandType.OPERATION,
-    id: 'docs.operation.toggle-hyper-link-info-popup',
-    handler(accessor, params) {
-        const link = params?.link;
-        const hyperLinkService = accessor.get(DocHyperLinkPopupService);
-        if (link) {
-            hyperLinkService.showInfoPopup(link.unitId, link.linkId);
-        } else {
-            hyperLinkService.hideInfoPopup();
-        }
-
         return true;
     },
 };

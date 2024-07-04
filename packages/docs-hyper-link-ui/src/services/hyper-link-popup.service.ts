@@ -25,9 +25,13 @@ import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { DocLinkPopup } from '../views/hyper-link-popup';
 
+export interface ILinkInfo {
+    unitId: string; linkId: string; rangeIndex: number;
+}
+
 export class DocHyperLinkPopupService extends Disposable {
-    private readonly _editingLink$ = new BehaviorSubject<Nullable<{ unitId: string; linkId: string }>>(null);
-    private readonly _showingLink$ = new BehaviorSubject<Nullable<{ unitId: string; linkId: string }>>(null);
+    private readonly _editingLink$ = new BehaviorSubject<Nullable<ILinkInfo>>(null);
+    private readonly _showingLink$ = new BehaviorSubject<Nullable<ILinkInfo>>(null);
     readonly editingLink$ = this._editingLink$.asObservable();
     readonly showingLink$ = this._showingLink$.asObservable();
 
@@ -52,7 +56,7 @@ export class DocHyperLinkPopupService extends Disposable {
         return this._showingLink$.value;
     }
 
-    showEditPopup(linkInfo: Nullable<{ unitId: string; linkId: string }>): Nullable<IDisposable> {
+    showEditPopup(linkInfo: Nullable<ILinkInfo>): Nullable<IDisposable> {
         if (this._editPopup) {
             this._editPopup.dispose();
         }
@@ -94,8 +98,13 @@ export class DocHyperLinkPopupService extends Disposable {
         this._editPopup?.dispose();
     }
 
-    showInfoPopup(unitId: string, linkId: string): Nullable<IDisposable> {
-        if (this.showing?.linkId === linkId && this.showing?.unitId === unitId) {
+    showInfoPopup(info: ILinkInfo): Nullable<IDisposable> {
+        const { linkId, unitId, rangeIndex } = info;
+        if (
+            this.showing?.linkId === linkId &&
+            this.showing?.unitId === unitId &&
+            this.showing.rangeIndex === rangeIndex
+        ) {
             return;
         }
 
@@ -107,8 +116,8 @@ export class DocHyperLinkPopupService extends Disposable {
         if (!doc || !link) {
             return;
         }
-        const range = doc.getBody()?.customRanges?.find((i) => i.rangeId === linkId);
-        this._showingLink$.next({ unitId, linkId });
+        const range = doc.getBody()?.customRanges?.[rangeIndex];
+        this._showingLink$.next({ unitId, linkId, rangeIndex });
         if (!range) {
             return;
         }

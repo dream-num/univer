@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
-export { UniverDocHyperLinkUIPlugin } from './plugin';
+const zhCN = {
+    docLink: {
+        edit: {
+            confirm: '确认',
+            cancel: '取消',
+            title: '链接',
+            address: '链接地址',
+            placeholder: '请输入合法的链接',
+            addressError: '请输入合法的链接',
+        },
+        info: {
+            copy: '复制',
+            edit: '编辑',
+            cancel: '取消链接',
+            coped: '链接已被复制到剪贴板',
+        },
+    },
+};
 
-// export {} from './'
+export default zhCN;

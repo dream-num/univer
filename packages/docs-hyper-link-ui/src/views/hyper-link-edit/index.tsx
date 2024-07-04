@@ -20,7 +20,7 @@ import { CloseSingle } from '@univerjs/icons';
 import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { DocumentDataModel } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
@@ -42,6 +42,7 @@ function transformUrl(urlStr: string) {
 
 export const DocHyperLinkEdit = () => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
+    const localeService = useDependency(LocaleService);
     const hyperLinkModel = useDependency(DocHyperLinkModel);
     const editingId = useObservable(hyperLinkService.editingLink$);
     const commandService = useDependency(ICommandService);
@@ -89,13 +90,13 @@ export const DocHyperLinkEdit = () => {
     return (
         <div className={styles.docsLinkEdit}>
             <div className={styles.docsLinkEditTitle}>
-                <span>Link</span>
+                <span>{localeService.t('docLink.edit.title')}</span>
                 <CloseSingle className={styles.docsLinkEditClose} onClick={handleCancel} />
             </div>
             <div>
                 <FormLayout
-                    label="Link address"
-                    error={showError && !isLegal ? 'Please input a legal link' : ''}
+                    label={localeService.t('docLink.edit.address')}
+                    error={showError && !isLegal ? localeService.t('docLink.edit.addressError') : ''}
                 >
                     <Input value={link} onChange={setLink} autoFocus />
                 </FormLayout>
@@ -105,7 +106,7 @@ export const DocHyperLinkEdit = () => {
                     className={styles.docsLinkEditButton}
                     onClick={handleCancel}
                 >
-                    Cancel
+                    {localeService.t('docLink.edit.cancel')}
                 </Button>
                 <Button
                     disabled={!link}
@@ -113,7 +114,7 @@ export const DocHyperLinkEdit = () => {
                     type="primary"
                     onClick={handleConfirm}
                 >
-                    Confirm
+                    {localeService.t('docLink.edit.confirm')}
                 </Button>
             </div>
         </div>

@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
-export { UniverDocHyperLinkUIPlugin } from './plugin';
+import type zhCN from './zh-CN';
 
-// export {} from './'
+const enUS: typeof zhCN = {
+    docLink: {
+        edit: {
+            confirm: 'Confirm',
+            cancel: 'Cancel',
+            title: 'Link',
+            address: 'Link address',
+            placeholder: 'Please input a link url',
+            addressError: 'Url is illegal!',
+        },
+        info: {
+            copy: 'Copy',
+            edit: 'Edit',
+            cancel: 'Cancel link',
+            coped: 'Link copied to clipboard',
+        },
+    },
+};
+
+export default enUS;

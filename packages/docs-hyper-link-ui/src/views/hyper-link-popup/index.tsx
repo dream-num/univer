@@ -65,12 +65,12 @@ export const DocLinkPopup = () => {
                     onClick={() => {
                         navigator.clipboard.writeText(link.payload);
                         messageService.show({
-                            content: localeService.t('hyperLink.message.coped'),
+                            content: localeService.t('docLink.info.coped'),
                             type: MessageType.Info,
                         });
                     }}
                 >
-                    <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.copy')}>
+                    <Tooltip placement="bottom" title={localeService.t('docLink.info.copy')}>
                         <CopySingle />
                     </Tooltip>
 
@@ -83,7 +83,7 @@ export const DocLinkPopup = () => {
                         });
                     }}
                 >
-                    <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.edit')}>
+                    <Tooltip placement="bottom" title={localeService.t('docLink.info.edit')}>
                         <WriteSingle />
                     </Tooltip>
                 </div>
@@ -96,7 +96,7 @@ export const DocLinkPopup = () => {
                         });
                     }}
                 >
-                    <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.cancel')}>
+                    <Tooltip placement="bottom" title={localeService.t('docLink.info.cancel')}>
                         <UnlinkSingle />
                     </Tooltip>
                 </div>

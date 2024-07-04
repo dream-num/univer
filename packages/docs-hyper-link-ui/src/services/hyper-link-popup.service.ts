@@ -63,9 +63,9 @@ export class DocHyperLinkPopupService extends Disposable {
         this._editingLink$.next(linkInfo);
         let activeRange: Nullable<ITextRange> = this._textSelectionManagerService.getActiveRange();
         if (linkInfo) {
-            const { unitId, linkId } = linkInfo;
+            const { unitId, rangeIndex } = linkInfo;
             const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-            const range = doc?.getBody()?.customRanges?.find((i) => i.rangeId === linkId);
+            const range = doc?.getBody()?.customRanges?.[rangeIndex];
             if (range) {
                 activeRange = {
                     collapsed: false,

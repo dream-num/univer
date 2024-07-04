@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun, JSONXActions } from '@univerjs/core';
+import type { ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRun, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
     getCustomDecorationSlice,
@@ -561,53 +561,65 @@ export const DeleteRightCommand: ICommand = {
     },
 };
 
-function getParagraphBody(body: IDocumentBody, startIndex: number, endIndex: number): IDocumentBody {
-    const { textRuns: originTextRuns } = body;
-    const dataStream = body.dataStream.substring(startIndex, endIndex);
+function getParagraphBody(body: IDocumentBody, start: number, end: number): IDocumentBody {
+    const { textRuns: originTextRuns = [], customBlocks: originCustomBlocks = [] } = body;
+    const dataStream = body.dataStream.substring(start, end);
 
-    if (originTextRuns == null) {
-        return {
-            dataStream,
-            customRanges: getCustomRangeSlice(body, startIndex, endIndex).customRanges,
-            customDecorations: getCustomDecorationSlice(body, startIndex, endIndex),
-        };
-    }
+    const bodySlice: IDocumentBody = {
+        dataStream,
+        customRanges: getCustomRangeSlice(body, start, end).customRanges,
+        customDecorations: getCustomDecorationSlice(body, start, end),
+    };
 
     const textRuns: ITextRun[] = [];
 
     for (const textRun of originTextRuns) {
         const { st, ed } = textRun;
-        if (ed <= startIndex || st >= endIndex) {
+        if (ed <= start || st >= end) {
             continue;
         }
 
-        if (st < startIndex) {
+        if (st < start) {
             textRuns.push({
                 ...textRun,
                 st: 0,
-                ed: ed - startIndex,
+                ed: ed - start,
             });
-        } else if (ed > endIndex) {
+        } else if (ed > end) {
             textRuns.push({
                 ...textRun,
-                st: st - startIndex,
-                ed: endIndex - startIndex,
+                st: st - start,
+                ed: end - start,
             });
         } else {
             textRuns.push({
                 ...textRun,
-                st: st - startIndex,
-                ed: ed - startIndex,
+                st: st - start,
+                ed: ed - start,
             });
         }
     }
 
-    return {
-        dataStream,
-        textRuns,
-        customRanges: getCustomRangeSlice(body, startIndex, endIndex).customRanges,
-        customDecorations: getCustomDecorationSlice(body, startIndex, endIndex),
-    };
+    if (textRuns.length > 0) {
+        bodySlice.textRuns = textRuns;
+    }
+
+    const customBlocks: ICustomBlock[] = [];
+    for (const block of originCustomBlocks) {
+        const { startIndex } = block;
+        if (startIndex >= start && startIndex <= end) {
+            customBlocks.push({
+                ...block,
+                startIndex: startIndex - start,
+            });
+        }
+    }
+
+    if (customBlocks.length > 0) {
+        bodySlice.customBlocks = customBlocks;
+    }
+
+    return bodySlice;
 }
 
 // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.

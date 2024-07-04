@@ -515,7 +515,7 @@ function _lineOperator(
                 .filter((drawing) => drawingsInLine.includes(drawing.drawingId));
 
             if (relativeLineDrawings.length > 0) {
-                __updateAndPositionDrawings(ctx, preLine.top, preLine.lineHeight, column, relativeLineDrawings, preLine.paragraphIndex);
+                __updateAndPositionDrawings(ctx, preLine.top, preLine.lineHeight, column, relativeLineDrawings, preLine.paragraphIndex, paragraphStart);
             }
         }
 
@@ -530,7 +530,7 @@ function _lineOperator(
         const targetDrawings = [...paragraphAffectSkeDrawings.values()]
             .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
 
-        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, drawingAnchor?.get(paragraphIndex)?.top);
+        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, paragraphStart, drawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -612,6 +612,7 @@ function __updateAndPositionDrawings(
     column: IDocumentSkeletonColumn,
     targetDrawings: IDocumentSkeletonDrawing[],
     paragraphIndex: number,
+    paragraphStart: boolean,
     drawingAnchorTop?: number
 ) {
     if (targetDrawings.length === 0) {
@@ -622,6 +623,7 @@ function __updateAndPositionDrawings(
         lineTop,
         lineHeight,
         column,
+        paragraphStart,
         drawingAnchorTop,
         targetDrawings
     );
@@ -1009,6 +1011,7 @@ function __getDrawingPosition(
     lineTop: number,
     lineHeight: number,
     column: IDocumentSkeletonColumn,
+    paragraphStart: boolean,
     blockAnchorTop?: number,
     needPositionDrawings: IDocumentSkeletonDrawing[] = []
 ) {
@@ -1023,8 +1026,8 @@ function __getDrawingPosition(
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const isPageBreak = __checkPageBreak(column);
 
-    // TODO: @jocs 在跨页场景，默认将 drawing 放到上一页，下一页不处理 drawing?
-    if (isPageBreak) {
+    // TODO: @jocs 在段落跨页场景(一个段落在两页)，默认将 drawing 放到上一页，下一页不处理 drawing?
+    if (isPageBreak && !paragraphStart) {
         return;
     }
 

@@ -237,11 +237,30 @@ export function collisionDetection(
     drawing: IDocumentSkeletonDrawing,
     lineHeight: number,
     lineTop: number,
+    columnLeft: number,
     columnWidth: number
 ) {
-    const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
-    // TODO: handle angle is not 0.
-    return !!__getSplitWidthNoAngle(aTop, height, aLeft, width, lineTop, lineHeight, columnWidth, drawingOrigin);
+    const { aTop, height: oHeight, aLeft, width: oWidth, angle = 0, drawingOrigin } = drawing;
+    const { layoutType } = drawingOrigin;
+
+    if (
+        layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+        layoutType === PositionedObjectLayoutType.INLINE // drawing will never be inline here, just double check here.
+    ) {
+        return false;
+    }
+
+    const { top = 0, left = 0, width = 0, height = 0 } = getBoundingBox(angle, aLeft, oWidth, aTop, oHeight);
+
+    if (top + height < lineTop || top > lineHeight + lineTop) {
+        return false;
+    }
+
+    if (left + width < columnLeft || left > columnLeft + columnWidth) {
+        return false;
+    }
+
+    return true;
 }
 
 function _calculateSplit(

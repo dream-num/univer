@@ -185,6 +185,6 @@ export { createDefaultUser } from './services/user-manager/const';
 export { skipParseTagNames } from './types/const/clipboard';
 export { normalizeBody, getCustomRangeSlice, getCustomDecorationSlice } from './docs/data-model/text-x/utils';
 export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
+export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
 export { nameCharacterCheck } from './shared/name';
 installShims();
-

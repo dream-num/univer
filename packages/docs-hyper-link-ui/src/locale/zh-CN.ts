@@ -30,6 +30,9 @@ const zhCN = {
             cancel: '取消链接',
             coped: '链接已被复制到剪贴板',
         },
+        menu: {
+            tooltip: '添加链接',
+        },
     },
 };
 

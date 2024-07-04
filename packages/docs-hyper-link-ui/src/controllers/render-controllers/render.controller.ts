@@ -15,11 +15,9 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, IUniverInstanceService } from '@univerjs/core';
-import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
+import { Disposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
-import { DocRenderController } from '@univerjs/docs-ui';
 import { Inject } from '@wendellhu/redi';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
@@ -27,10 +25,7 @@ export class DocHyperLinkRenderController extends Disposable implements IRenderM
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocInterceptorService) private readonly _docInterceptorService: DocInterceptorService,
-        @Inject(DocHyperLinkPopupService) private readonly _hyperLinkService: DocHyperLinkPopupService,
-        @Inject(DocRenderController) private readonly _docRenderController: DocRenderController,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocHyperLinkModel) private readonly _hyperLinkModel: DocHyperLinkModel
+        @Inject(DocHyperLinkPopupService) private readonly _hyperLinkService: DocHyperLinkPopupService
     ) {
         super();
 

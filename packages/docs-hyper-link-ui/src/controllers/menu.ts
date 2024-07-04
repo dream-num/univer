@@ -31,8 +31,8 @@ export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: DOC_LINK_ICON,
-        title: 'hyperLinkUI.panel.addComment',
-        tooltip: 'hyperLinkUI.panel.addComment',
+        title: 'docLink.menu.tooltip',
+        tooltip: 'docLink.menu.tooltip',
         positions: [MenuPosition.TOOLBAR_START, MenuPosition.CONTEXT_MENU],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         disabled$: new Observable(function (subscribe) {

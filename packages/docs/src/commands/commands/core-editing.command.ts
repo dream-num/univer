@@ -38,6 +38,7 @@ export interface IInsertCommandParams {
     range: ITextRange;
     textRanges?: ITextRangeWithStyle[];
     segmentId?: string;
+    cursorOffset?: number;
 }
 
 export const EditorInsertTextCommandId = 'doc.command.insert-text';
@@ -53,7 +54,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
 
-        const { range, segmentId, body, unitId, textRanges: propTextRanges } = params;
+        const { range, segmentId, body, unitId, textRanges: propTextRanges, cursorOffset } = params;
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
@@ -64,10 +65,11 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         }
         const actualRange = getInsertSelection(range, originBody);
         const { startOffset, collapsed } = actualRange;
+        const cursorMove = cursorOffset ?? body.dataStream.length;
         const textRanges = [
             {
-                startOffset: startOffset + body.dataStream.length,
-                endOffset: startOffset + body.dataStream.length,
+                startOffset: startOffset + cursorMove,
+                endOffset: startOffset + cursorMove,
                 style: activeRange?.style,
                 collapsed,
             },
@@ -97,11 +99,13 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         } else {
             const { dos, retain } = getRetainAndDeleteFromReplace(actualRange, segmentId, 0, originBody);
             textX.push(...dos);
-            doMutation.params.textRanges = [{
-                startOffset: startOffset + body.dataStream.length + retain,
-                endOffset: startOffset + body.dataStream.length + retain,
-                collapsed,
-            }];
+            if (!propTextRanges) {
+                doMutation.params.textRanges = [{
+                    startOffset: startOffset + cursorMove + retain,
+                    endOffset: startOffset + cursorMove + retain,
+                    collapsed,
+                }];
+            }
         }
 
         textX.push({

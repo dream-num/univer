@@ -32,6 +32,9 @@ const enUS: typeof zhCN = {
             cancel: 'Cancel link',
             coped: 'Link copied to clipboard',
         },
+        menu: {
+            tooltip: 'Add link',
+        },
     },
 };
 

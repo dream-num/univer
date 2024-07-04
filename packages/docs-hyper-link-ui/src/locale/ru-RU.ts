@@ -32,6 +32,9 @@ const ruRU: typeof zhCN = {
             cancel: 'Отменить ссылку',
             coped: 'Link copied to clipboard',
         },
+        menu: {
+            tooltip: 'Добавить ссылку',
+        },
     },
 };
 

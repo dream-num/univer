@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange, IDocumentBody, IParagraph } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, toDisposable } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -54,6 +54,7 @@ export interface IClipboardPropertyItem { }
 export interface IDocClipboardHook {
     onCopyProperty?(start: number, end: number): IClipboardPropertyItem;
     onCopyContent?(start: number, end: number): string;
+    onBeforePaste?: (body: IDocumentBody) => IDocumentBody;
 }
 
 export interface IDocClipboardService {
@@ -164,8 +165,15 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     private async _paste(_body: IDocumentBody): Promise<boolean> {
-        const body = normalizeBody(_body);
-        const { segmentId, endOffset: activeEndOffset, style } = this._textSelectionManagerService.getActiveRange() ?? {};
+        let body = normalizeBody(_body);
+
+        this._clipboardHooks.forEach((hook) => {
+            if (hook.onBeforePaste) {
+                body = hook.onBeforePaste(body);
+            }
+        });
+        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
         const ranges = this._textSelectionManagerService.getSelections();
 
         if (segmentId == null) {

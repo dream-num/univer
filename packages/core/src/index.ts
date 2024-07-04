@@ -179,13 +179,12 @@ export { DataValidationType } from './types/enum/data-validation-type';
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export type { IPermissionTypes, WorkbookPermissionPointConstructor } from './services/permission/type';
 export { PermissionService } from './services/permission/permission.service';
-
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';
 export { createDefaultUser } from './services/user-manager/const';
 export { skipParseTagNames } from './types/const/clipboard';
 export { normalizeBody } from './docs/data-model/text-x/utils';
-
+export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
 export { nameCharacterCheck } from './shared/name';
 installShims();
 

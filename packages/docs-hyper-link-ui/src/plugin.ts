@@ -25,6 +25,7 @@ import { DocHyperLinkUIController } from './controllers/ui.controller';
 import { DocHyperLinkService } from './services/hyper-link.service';
 import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
 import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
+import { DocHyperLinkClipboardController } from './controllers/doc-hyper-link-clipboard.controller';
 
 @DependentOn(UniverDocHyperLinkPlugin)
 export class UniverDocHyperLinkUIPlugin extends Plugin {
@@ -48,6 +49,7 @@ export class UniverDocHyperLinkUIPlugin extends Plugin {
                 },
             ],
             [DocHyperLinkSelectionController],
+            [DocHyperLinkClipboardController],
         ];
 
         deps.forEach((dep) => {

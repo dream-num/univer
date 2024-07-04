@@ -101,7 +101,7 @@ export function getBodySlice(
     return docBody;
 }
 
-export function normalizeBody(body: IDocumentBody) {
+export function normalizeBody(body: IDocumentBody): IDocumentBody {
     const { dataStream, textRuns, paragraphs, customRanges, customDecorations } = body;
     let leftOffset = 0;
     let rightOffset = 0;

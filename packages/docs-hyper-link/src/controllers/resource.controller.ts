@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle, ResourceManagerService, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel } from '@univerjs/core';
+import { CustomRangeType, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, ResourceManagerService, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { DOC_HYPER_LINK_PLUGIN } from '../types/const';
 import { DocHyperLinkModel } from '../models/hyper-link.model';
@@ -29,10 +30,10 @@ interface IDocHyperLinkJSON {
 export class DocHyperLinkResourceController extends Disposable {
     constructor(
         @Inject(ResourceManagerService) private readonly _resourceManagerService: ResourceManagerService,
-        @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel
+        @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
-
         this._init();
     }
 
@@ -50,8 +51,12 @@ export class DocHyperLinkResourceController extends Disposable {
             },
             toJson: (unitID: string) => {
                 const links = this._docHyperLinkModel.getUnit(unitID);
+                const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitID, UniverInstanceType.UNIVER_DOC);
+                const customRanges = doc?.getBody()?.customRanges;
+                const set = new Set(customRanges?.filter((i) => i.rangeType === CustomRangeType.HYPERLINK).map((i) => i.rangeId));
+
                 return JSON.stringify({
-                    links,
+                    links: links.filter((link) => set.has(link.id)),
                 });
             },
             parseJson(bytes: string): IDocHyperLinkJSON {

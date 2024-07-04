@@ -18,7 +18,7 @@ import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import { Disposable, LifecycleStages, OnLifecycle, Range } from '@univerjs/core';
 import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
-import { AddCommentMutation, DeleteCommentMutation, IThreadCommentDataSourceService, type IThreadComment } from '@univerjs/thread-comment';
+import { AddCommentMutation, DeleteCommentMutation, type IThreadComment, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { SHEETS_THREAD_COMMENT } from '../types/const';
@@ -86,14 +86,14 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                                 const comments = this._sheetsThreadCommentModel.getAllByLocation(sourceUnitId, sourceSubUnitId, row, col);
                                 if (this._threadCommentDataSourceService.syncUpdateMutationToColla) {
                                     comments.forEach((comment) => {
-                                        roots.push(comment)
+                                        roots.push(comment);
                                     });
                                 } else {
                                     comments.forEach(({ children, ...comment }) => {
                                         if (!comment.parentId) {
-                                            roots.push(comment)
+                                            roots.push(comment);
                                         }
-                                    })
+                                    });
                                 }
                             });
 
@@ -122,7 +122,7 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                                             unitId: targetUnitId,
                                             subUnitId: targetSubUnitId,
                                         },
-                                        sync: true
+                                        sync: true,
                                     },
                                 });
                                 sourceUndos.push({
@@ -131,7 +131,7 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                                         unitId: sourceUnitId,
                                         subUnitId: sourceSubUnitId,
                                         comment: item,
-                                        sync: true
+                                        sync: true,
                                     },
                                 });
                                 targetUndos.unshift({

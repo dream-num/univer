@@ -59,9 +59,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const originBody = doc?.getBody();
         const activeRange = textSelectionManagerService.getActiveRange();
-        if (activeRange == null) {
-            return false;
-        }
         if (!originBody) {
             return false;
         }
@@ -71,7 +68,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             {
                 startOffset: startOffset + body.dataStream.length,
                 endOffset: startOffset + body.dataStream.length,
-                style: activeRange.style,
+                style: activeRange?.style,
                 collapsed,
             },
         ];

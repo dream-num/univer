@@ -19,8 +19,8 @@ import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Unive
 import { Inject } from '@wendellhu/redi';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
-import { IDeleteCommentMutationParams, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
-import { AddCommentMutation, DeleteCommentMutation, ThreadCommentModel } from '@univerjs/thread-comment';
+import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
+import { AddCommentMutation, DeleteCommentMutation, IThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 
 @OnLifecycle(LifecycleStages.Ready, ThreadCommentRemoveSheetsController)
 export class ThreadCommentRemoveSheetsController extends Disposable {
@@ -51,8 +51,8 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
                         }
                         const { commentMap } = this._threadCommentModel.ensureMap(unitId, subUnitId);
 
-                        const comments = Array.from(Object.values(commentMap)).filter(comment => !comment.parentId);
-                        const ids = comments.map(comment => comment.id);
+                        const comments = Array.from(Object.values(commentMap)).filter((comment) => !comment.parentId);
+                        const ids = comments.map((comment) => comment.id);
                         const shouldSync = this._threadCommentDataSourceService.syncUpdateMutationToColla;
 
                         const redos = ids.map((id) => ({
@@ -71,9 +71,9 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
                                 subUnitId,
                                 comment: {
                                     ...comment,
-                                    children: shouldSync ? children : undefined
+                                    children: shouldSync ? children : undefined,
                                 },
-                                sync: !shouldSync
+                                sync: !shouldSync,
                             },
                         }));
                         return { redos, undos };

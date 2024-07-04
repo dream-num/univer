@@ -198,6 +198,7 @@ describe('test TextX static methods invert and makeInvertible', () => {
                         bl: BooleanNumber.TRUE,
                     },
                 }],
+                customDecorations: [],
             },
             coverType: UpdateDocsAttributeType.COVER,
             segmentId: '',
@@ -237,6 +238,8 @@ describe('test TextX static methods invert and makeInvertible', () => {
             line: 0,
             body: {
                 dataStream: 'lo',
+                customRanges: [],
+                customDecorations: [],
                 textRuns: [{
                     st: 0,
                     ed: 2,

@@ -204,5 +204,15 @@ describe('Test indirect', () => {
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(3);
         });
+
+        it('Error #NAME?', async () => {
+            const lexerNode = lexer.treeBuilder('=A1:A');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+        });
     });
 });

@@ -262,6 +262,25 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 continue;
             }
 
+            if (docBody.customRanges) {
+                const deleteRange: ICustomRange[] = [];
+                docBody.customRanges.forEach((range) => {
+                    // should be delete
+                    if (range.startIndex === range.endIndex) {
+                        deleteRange.push(range);
+                    }
+                });
+                docBody.customRanges = docBody.customRanges.filter((range) => deleteRange.indexOf(range) === -1);
+                let text = '';
+                let cursor = 0;
+                deleteRange.forEach((range) => {
+                    text += docBody.dataStream.slice(cursor, range.endIndex);
+                    cursor = range.endIndex + 1;
+                });
+                text += docBody.dataStream.slice(cursor, docBody.dataStream.length);
+                docBody.dataStream = text;
+            }
+
             results.push(docBody);
         }
 

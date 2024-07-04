@@ -737,8 +737,8 @@ importers:
         specifier: workspace:*
         version: link:../docs-ui
       '@univerjs/icons':
-        specifier: ^0.1.56
-        version: 0.1.57(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.58
+        version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -756,8 +756,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.4
-        version: 0.15.4
+        specifier: 0.15.5
+        version: 0.15.5
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -769,13 +769,13 @@ importers:
         version: 7.8.1
       typescript:
         specifier: ^5.4.5
-        version: 5.4.5
+        version: 5.5.3
       vite:
         specifier: ^5.2.12
-        version: 5.3.1(@types/node@20.14.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 5.3.3(@types/node@20.14.9)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
       vitest:
         specifier: ^1.6.0
-        version: 1.6.0(@types/node@20.14.4)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 1.6.0(@types/node@20.14.9)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/docs-hyper-link-ui:
     dependencies:
@@ -786,8 +786,8 @@ importers:
         specifier: workspace:*
         version: link:../docs-ui
       '@univerjs/icons':
-        specifier: ^0.1.56
-        version: 0.1.57(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.58
+        version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -814,8 +814,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.4
-        version: 0.15.4
+        specifier: 0.15.5
+        version: 0.15.5
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -827,13 +827,13 @@ importers:
         version: 7.8.1
       typescript:
         specifier: ^5.4.5
-        version: 5.4.5
+        version: 5.5.3
       vite:
         specifier: ^5.2.12
-        version: 5.3.1(@types/node@20.14.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 5.3.3(@types/node@20.14.9)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
       vitest:
         specifier: ^1.6.0
-        version: 1.6.0(@types/node@20.14.4)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 1.6.0(@types/node@20.14.9)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/docs-thread-comment-ui:
     dependencies:
@@ -848,7 +848,7 @@ importers:
         version: link:../engine-render
       '@univerjs/icons':
         specifier: ^0.1.56
-        version: 0.1.57(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -872,8 +872,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.4
-        version: 0.15.4
+        specifier: 0.15.5
+        version: 0.15.5
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -885,13 +885,13 @@ importers:
         version: 7.8.1
       typescript:
         specifier: ^5.4.5
-        version: 5.4.5
+        version: 5.5.3
       vite:
         specifier: ^5.2.12
-        version: 5.3.1(@types/node@20.14.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 5.3.3(@types/node@20.14.9)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
       vitest:
         specifier: ^1.6.0
-        version: 1.6.0(@types/node@20.14.4)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 1.6.0(@types/node@20.14.9)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/docs-ui:
     devDependencies:

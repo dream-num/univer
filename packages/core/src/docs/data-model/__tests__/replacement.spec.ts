@@ -92,6 +92,8 @@ describe('test case in replaceInDocumentBody utils', () => {
     it('Should replace all `query` to `target`', () => {
         const documentBody = getTestDocumentBody();
         const expectedBody = {
+            customRanges: [],
+            customDecorations: [],
             dataStream: '荷塘Jocs\r作者：朱Jocs\r\n',
             textRuns: [
                 {

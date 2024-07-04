@@ -21,6 +21,7 @@ import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { DocumentDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
@@ -47,6 +48,7 @@ export const DocHyperLinkEdit = () => {
     const editingId = useObservable(hyperLinkService.editingLink$);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const textSelectionRenderManager = useDependency(ITextSelectionRenderManager);
     const [link, setLink] = useState('');
     const [showError, setShowError] = useState(false);
     const isLegal = Tools.isLegalUrl(link);
@@ -57,6 +59,13 @@ export const DocHyperLinkEdit = () => {
         const linkDetail = editingId ? hyperLinkModel.getLink(editingId.unitId, editingId.linkId) : null;
         setLink(linkDetail?.payload ?? '');
     }, [editingId, hyperLinkModel]);
+
+    useEffect(() => {
+        textSelectionRenderManager.blur();
+        return () => {
+            textSelectionRenderManager.focus();
+        };
+    }, [textSelectionRenderManager]);
 
     const handleCancel = () => {
         hyperLinkService.hideEditPopup();

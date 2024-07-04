@@ -261,7 +261,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
         retainPoints.add(paragraphIndex);
     }
 
-    const sortedRetains = [...retainPoints].sort();
+    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
 
     let cursor = textStart;
     sortedRetains.forEach((pos) => {

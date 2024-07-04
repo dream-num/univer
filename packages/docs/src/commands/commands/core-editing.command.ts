@@ -167,7 +167,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         toDeleteRanges?.forEach((range) => {
             deleteIndexes.push(range.startIndex, range.endIndex);
         });
-        deleteIndexes.sort();
+        deleteIndexes.sort((pre, aft) => pre - aft);
         const deleteStart = deleteIndexes[0];
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,

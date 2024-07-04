@@ -147,8 +147,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
             break;
         }
     }
-    const deletes = relativeCustomRanges.map((i) => [i.startIndex, i.endIndex]).flat().sort();
-    // console.log('===deletes', relativeCustomRanges, deletes);
+    const deletes = relativeCustomRanges.map((i) => [i.startIndex, i.endIndex]).flat().sort((pre, aft) => pre - aft);
 
     let cursor = 0;
     const textX = new TextX();

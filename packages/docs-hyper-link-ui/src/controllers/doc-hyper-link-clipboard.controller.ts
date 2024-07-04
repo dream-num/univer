@@ -58,7 +58,7 @@ export class DocHyperLinkClipboardController extends Disposable {
                 if (matchedRange) {
                     const { customRanges = [], ...extBody } = body;
                     const deleteRanges = customRanges.filter((range) => range.rangeType === CustomRangeType.HYPERLINK);
-                    const deleteIndexes = deleteRanges.map((i) => [i.startIndex, i.endIndex]).flat().sort();
+                    const deleteIndexes = deleteRanges.map((i) => [i.startIndex, i.endIndex]).flat().sort((pre, aft) => pre - aft);
                     const bodyWithoutLink = {
                         ...extBody,
                         customRanges: customRanges.filter((range) => range.rangeType !== CustomRangeType.HYPERLINK),

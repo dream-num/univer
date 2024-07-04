@@ -38,6 +38,12 @@ export class NumberCellDisplayController extends Disposable {
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 11,
                 handler: (cell, location, next) => {
+                    // Skip if the cell contains a numfmt pattern
+                    const style = location.workbook.getStyles().getStyleByCell(cell);
+                    if (style?.n?.pattern) {
+                        return next({ ...cell });
+                    }
+
                     // Dealing with precision issues
                     if (cell?.t === CellValueType.NUMBER && typeof cell?.v === 'number') {
                         return next({

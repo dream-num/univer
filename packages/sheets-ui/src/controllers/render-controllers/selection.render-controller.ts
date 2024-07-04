@@ -79,7 +79,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         }
         const sheetObject = this._getSheetObject();
 
-        this._initViewMainListener(sheetObject);
+        this._initSpreadsheetEvent(sheetObject);
         this._initRowHeader(sheetObject);
         this._initColumnHeader(sheetObject);
         this._initLeftTop(sheetObject);
@@ -194,7 +194,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
     }
 
-    private _initViewMainListener(sheetObject: ISheetObjectParam) {
+    private _initSpreadsheetEvent(sheetObject: ISheetObjectParam) {
         const { spreadsheet } = sheetObject;
 
         this.disposeWithMe(
@@ -304,7 +304,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                 const selectionWithStyle = this._getAllRange(skeleton);
 
                 const selectionData = this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+                this._selectionRenderService.addSelectionControlBySelectionData(selectionData);
 
                 this._selectionRenderService.refreshSelectionMoveStart();
 
@@ -321,6 +321,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoveEndBefore$.subscribe((params) => {
+                    // clear selection controls
                     this._selectionRenderService.reset();
                     if (params == null) {
                         return;
@@ -332,7 +333,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                         }
                         const selectionData =
                             this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                        this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+
+                        // then add a new selection control.
+                        this._selectionRenderService.addSelectionControlBySelectionData(selectionData);
                     }
 
                     this._syncDefinedNameRange(params);

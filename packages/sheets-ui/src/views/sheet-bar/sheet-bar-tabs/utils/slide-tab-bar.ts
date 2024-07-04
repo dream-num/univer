@@ -133,7 +133,7 @@ export class SlideTabItem {
 
                 if (input) {
                     input.removeAttribute('contentEditable');
-                    input.removeEventListener('blur', blurAction);
+                    input.removeEventListener('focusout', blurAction);
                     input.removeEventListener('compositionstart', compositionstartAction);
                     input.removeEventListener('compositionend', compositionendAction);
                     input.removeEventListener('input', inputAction);
@@ -174,7 +174,7 @@ export class SlideTabItem {
 
             const inputAction = (e: Event) => {
                 if (!input) return;
-                const maxLength = 50;
+                const maxLength = 31;
 
                 setTimeout(() => {
                     if (compositionFlag) {
@@ -189,7 +189,7 @@ export class SlideTabItem {
 
             if (input) {
                 input.setAttribute('contentEditable', 'true');
-                input.addEventListener('blur', blurAction);
+                input.addEventListener('focusout', blurAction);
                 input.addEventListener('compositionstart', compositionstartAction);
                 input.addEventListener('compositionend', compositionendAction);
                 input.addEventListener('input', inputAction);

@@ -25,13 +25,13 @@ import {
 import { type IRange, RANGE_TYPE } from '../types/interfaces';
 import type { ICellData, ICellDataForSheetInterceptor } from '../types/interfaces/i-cell-data';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
-import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../types/interfaces/i-selection-data';
+import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithMergeInfo } from '../types/interfaces/i-selection-data';
 import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
 import { ColorBuilder } from './color/color';
 import { Tools } from './tools';
 import type { Nullable } from './types';
 
-export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithCoord>): Nullable<IRangeWithCoord> {
+export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithMergeInfo>): Nullable<IRangeWithCoord> {
     if (!cellInfo) {
         return;
     }
@@ -166,49 +166,6 @@ export function isFormulaString(value: any): boolean {
  */
 export function isFormulaId(value: any): boolean {
     return Tools.isString(value) && value.length > 0;
-}
-
-/**
- * Convert rich text json to DOM
- * @param p
- */
-export function handleJsonToDom(p: IDocumentData): string {
-    // let span = '';
-    // // let span = `<span id="${p.id}">`;
-    // if (p.body?.blockElements) {
-    //     for (let k in p.body.blockElements) {
-    //         const section = p.body.blockElements[k];
-    //         if (
-    //             section.blockType !== BlockType.PARAGRAPH &&
-    //             section.blockType !== BlockType.SECTION_BREAK
-    //         ) {
-    //             continue;
-    //         }
-    //         if (section.blockType === BlockType.PARAGRAPH) {
-    //             for (let i in section.paragraph) {
-    //                 const element = section.paragraph[i];
-    //                 for (let j in element) {
-    //                     const item = element[j];
-    //                     if (item.et === ParagraphElementType.TEXT_RUN) {
-    //                         let style = `display:inline-block;${handleStyleToString(
-    //                             item.tr.ts
-    //                         )}`;
-    //                         span += `<span id='${item.eId}' ${
-    //                             style.length ? `style="${style}"` : ''
-    //                         } >${item.tr.ct}</span>`;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         // else if (section.blockType === BlockType.SECTION_BREAK) {
-    //         //     span += '<br/>';
-    //         // }
-    //     }
-    // }
-
-    // // span += '</span>';
-    // return span;
-    return '';
 }
 
 /**

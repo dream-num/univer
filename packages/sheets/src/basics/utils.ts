@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Worksheet } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
-import type { Nullable } from 'vitest';
 import type { IExpandParams } from '../commands/commands/utils/selection-utils';
 
 export const groupByKey = <T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') => {

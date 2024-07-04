@@ -61,7 +61,7 @@ export enum SelectionMoveType {
 export class SelectionManagerService implements IDisposable {
     private readonly _selectionInfo: ISelectionInfo = new Map();
 
-    private _currentSelection: Nullable<ISelectionManagerSearchParam> = null;
+    private _searchParamForSelection: Nullable<ISelectionManagerSearchParam> = null;
 
     private readonly _selectionMoveStart$ = new Subject<Nullable<ISelectionWithStyle[]>>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
@@ -83,41 +83,41 @@ export class SelectionManagerService implements IDisposable {
     }
 
     getCurrent() {
-        return this._currentSelection;
+        return this._searchParamForSelection;
     }
 
     getLastByPlugin(pluginName: string) {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
-        return this._getLastByParam({ ...this._currentSelection, pluginName });
+        return this._getLastByParam({ ...this._searchParamForSelection, pluginName });
     }
 
     changePlugin(pluginName: string) {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
-        this._currentSelection = {
+        this._searchParamForSelection = {
             pluginName,
-            unitId: this._currentSelection?.unitId,
-            sheetId: this._currentSelection?.sheetId,
+            unitId: this._searchParamForSelection?.unitId,
+            sheetId: this._searchParamForSelection?.sheetId,
         };
 
-        this._refresh(this._currentSelection);
+        this._refresh(this._searchParamForSelection);
     }
 
     changePluginNoRefresh(pluginName: string) {
-        if (this._currentSelection == null || this._currentSelection.pluginName === pluginName) {
+        if (this._searchParamForSelection == null || this._searchParamForSelection.pluginName === pluginName) {
             return;
         }
 
         // Fetch the old selections.
-        const selections = this.getSelectionDatasByParam(this._currentSelection);
+        const selections = this.getSelectionDatasByParam(this._searchParamForSelection);
 
-        this._currentSelection = {
+        this._searchParamForSelection = {
             pluginName,
-            unitId: this._currentSelection?.unitId,
-            sheetId: this._currentSelection?.sheetId,
+            unitId: this._searchParamForSelection?.unitId,
+            sheetId: this._searchParamForSelection?.sheetId,
         };
 
         if (selections != null) {
@@ -126,26 +126,26 @@ export class SelectionManagerService implements IDisposable {
     }
 
     reset() {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
-        this._currentSelection = {
+        this._searchParamForSelection = {
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: this._currentSelection?.unitId,
-            sheetId: this._currentSelection?.sheetId,
+            unitId: this._searchParamForSelection?.unitId,
+            sheetId: this._searchParamForSelection?.sheetId,
         };
         this._selectionInfo.clear();
 
-        this._refresh(this._currentSelection);
+        this._refresh(this._searchParamForSelection);
     }
 
     resetPlugin() {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
 
-        this._currentSelection.pluginName = NORMAL_SELECTION_PLUGIN_NAME;
-        this._refresh(this._currentSelection);
+        this._searchParamForSelection.pluginName = NORMAL_SELECTION_PLUGIN_NAME;
+        this._refresh(this._searchParamForSelection);
     }
 
     dispose(): void {
@@ -159,11 +159,11 @@ export class SelectionManagerService implements IDisposable {
     }
 
     refreshSelection() {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
 
-        this._refresh(this._currentSelection);
+        this._refresh(this._searchParamForSelection);
     }
 
     setCurrentSelection(param: ISelectionManagerSearchParam) {
@@ -171,12 +171,12 @@ export class SelectionManagerService implements IDisposable {
             return;
         }
 
-        this._currentSelection = param;
+        this._searchParamForSelection = param;
         this._refresh(param);
     }
 
     setCurrentSelectionNotRefresh(param: ISelectionManagerSearchParam) {
-        this._currentSelection = param;
+        this._searchParamForSelection = param;
     }
 
     getSelectionInfo(): Readonly<ISelectionInfo> {
@@ -188,7 +188,7 @@ export class SelectionManagerService implements IDisposable {
     }
 
     getSelections(): Readonly<Nullable<ISelectionWithStyle[]>> {
-        return this._getSelectionDatas(this._currentSelection);
+        return this._getSelectionDatas(this._searchParamForSelection);
     }
 
     getSelectionRanges(): Nullable<IRange[]> {
@@ -201,23 +201,23 @@ export class SelectionManagerService implements IDisposable {
     }
 
     getFirst(): Readonly<Nullable<ISelectionWithStyle>> {
-        return this._getFirstByParam(this._currentSelection);
+        return this._getFirstByParam(this._searchParamForSelection);
     }
 
     getLast(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
         // The last selection position must have a primary.
-        return this._getLastByParam(this._currentSelection) as Readonly<
+        return this._getLastByParam(this._searchParamForSelection) as Readonly<
             Nullable<ISelectionWithStyle & { primary: ISelectionCell }>
         >;
     }
 
     addNoRefresh(selectionDatas: ISelectionWithStyle[]) {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
         this._addByParam(
             {
-                ...this._currentSelection,
+                ...this._searchParamForSelection,
                 selectionDatas,
             },
             false
@@ -225,58 +225,59 @@ export class SelectionManagerService implements IDisposable {
     }
 
     add(selectionDatas: ISelectionWithStyle[]) {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
 
         this._addByParam({
-            ...this._currentSelection,
+            ...this._searchParamForSelection,
             selectionDatas,
         });
     }
 
     replace(selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
 
         this._replaceByParam({
-            ...this._currentSelection,
+            ...this._searchParamForSelection,
             selectionDatas,
         });
 
         if (type === SelectionMoveType.MOVE_START) {
-            this._refreshStart(this._currentSelection);
+            this._refreshStart(this._searchParamForSelection);
         } else if (type === SelectionMoveType.MOVING) {
-            this._refreshMoving(this._currentSelection);
+            this._refreshMoving(this._searchParamForSelection);
         } else {
-            this._refresh(this._currentSelection);
+            // type == SelectionMoveType.MOVE_END
+            this._refresh(this._searchParamForSelection);
         }
     }
 
     replaceWithNoRefresh(selectionDatas: ISelectionWithStyle[]) {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
         this._replaceByParam({
-            ...this._currentSelection,
+            ...this._searchParamForSelection,
             selectionDatas,
         });
     }
 
     clear(): void {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
-        this._clearByParam(this._currentSelection);
+        this._clearByParam(this._searchParamForSelection);
     }
 
     remove(index: number): void {
-        if (this._currentSelection == null) {
+        if (this._searchParamForSelection == null) {
             return;
         }
 
-        this._removeByParam(index, this._currentSelection);
+        this._removeByParam(index, this._searchParamForSelection);
     }
 
     createDefaultAutoFillSelection(): ISelectionStyle {
@@ -343,6 +344,10 @@ export class SelectionManagerService implements IDisposable {
     }
 
     private _refresh(param?: ISelectionManagerSearchParam): void {
+        // _selectionMoveEndBefore$ listener:
+        // selection.render-controller _selectionManagerService.selectionMoveEndBefore$.subscribe
+        // --> _selectionRenderService.reset() --> _clearSelectionControls()
+        // --> _selectionRenderService.addCellSelectionControlBySelectionData()
         this._selectionMoveEndBefore$.next(this._getSelectionDatas(param));
         this._selectionMoveEnd$.next(this._getSelectionDatas(param));
     }

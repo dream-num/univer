@@ -17,14 +17,15 @@
 import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
+import type { IDrawingSearch, IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { SelectionManagerService } from '@univerjs/sheets';
-import { ISelectionRenderService } from '@univerjs/sheets-ui';
+import { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
@@ -38,8 +39,9 @@ import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-d
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUpdateController)
-export class SheetDrawingUpdateController extends Disposable {
+export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
@@ -50,7 +52,8 @@ export class SheetDrawingUpdateController extends Disposable {
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -67,6 +70,8 @@ export class SheetDrawingUpdateController extends Disposable {
         this._groupDrawingListener();
 
         this._focusDrawingListener();
+
+        this._drawingAddListener();
     }
 
     /**
@@ -177,7 +182,7 @@ export class SheetDrawingUpdateController extends Disposable {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService),
+            transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService),
             sheetTransform,
         };
 
@@ -333,7 +338,7 @@ export class SheetDrawingUpdateController extends Disposable {
 
                 const newDrawing: Partial<ISheetDrawing> = {
                     ...param,
-                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService) },
+                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService) },
                     sheetTransform: { ...sheetTransform },
                 };
 
@@ -373,5 +378,31 @@ export class SheetDrawingUpdateController extends Disposable {
                 }
             })
         );
+    }
+
+    private _drawingAddListener() {
+        this.disposeWithMe(
+            this._sheetDrawingService.add$.subscribe((params) => {
+                this._registerDrawing(params);
+            })
+        );
+    }
+
+    private _registerDrawing(params: IDrawingSearch[]) {
+        (params).forEach((param) => {
+            const drawingParam = this._sheetDrawingService.getDrawingByParam(param) as ISheetDrawing;
+
+            if (drawingParam == null) {
+                return;
+            }
+
+            const { sheetTransform } = drawingParam;
+
+            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+        });
+
+        const unitId = params[0].unitId;
+
+        this._drawingManagerService.registerDrawingData(unitId, this._sheetDrawingService.getDrawingDataForUnit(unitId));
     }
 }

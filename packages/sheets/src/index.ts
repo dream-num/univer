@@ -322,7 +322,7 @@ export {
 export { RemoveRowMutation, RemoveColMutation } from './commands/mutations/remove-row-col.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
 export { RemoveWorksheetMergeMutation, RemoveMergeUndoMutationFactory } from './commands/mutations/remove-worksheet-merge.mutation';
-export { ReorderRangeMutation, type IReorderRangeMutationParams } from './commands/mutations/reorder-range.mutation';
+export { ReorderRangeMutation, ReorderRangeUndoMutationFactory, type IReorderRangeMutationParams } from './commands/mutations/reorder-range.mutation';
 export {
     SetColHiddenMutation,
     SetColVisibleMutation,

@@ -86,6 +86,7 @@ export class Tools {
         return value;
     }
 
+    // eslint-disable-next-line complexity
     static getSystemType(): string {
         const sUserAgent = navigator.userAgent;
         const isWin = navigator.platform === 'Win32' || navigator.platform === 'Windows';
@@ -698,5 +699,9 @@ export class Tools {
         if (key) {
             data[key] = value;
         }
+    }
+
+    static clamp(value: number, min: number, max: number) {
+        return Math.max(min, Math.min(max, value));
     }
 }

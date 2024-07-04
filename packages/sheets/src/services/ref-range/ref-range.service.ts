@@ -65,7 +65,7 @@ class WatchRange extends Disposable {
     }
 
     onMutation(mutation: IMutationInfo<ISheetCommandSharedParams>) {
-        if (mutation.params.unitId !== this._unitId || mutation.params.subUnitId !== this._subUnitId) {
+        if (mutation.params?.unitId !== this._unitId || mutation.params?.subUnitId !== this._subUnitId) {
             return;
         }
         if (!this._range) {

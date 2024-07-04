@@ -186,5 +186,6 @@ export { createDefaultUser } from './services/user-manager/const';
 export { skipParseTagNames } from './types/const/clipboard';
 export { normalizeBody } from './docs/data-model/text-x/utils';
 
+export { nameCharacterCheck } from './shared/name';
 installShims();
 

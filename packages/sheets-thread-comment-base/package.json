@@ -61,7 +61,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
-        "@wendellhu/redi": "0.15.4",
+        "@wendellhu/redi": "0.15.5",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -73,11 +73,11 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.4",
-        "react": "18.2.0",
+        "@wendellhu/redi": "0.15.5",
+        "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.5",
-        "vite": "^5.3.1",
+        "typescript": "^5.5.3",
+        "vite": "^5.3.3",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

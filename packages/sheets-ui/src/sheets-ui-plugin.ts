@@ -178,6 +178,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     private _registerRenderBasics(): void {
         ([
             SheetSkeletonManagerService,
+            // SelectionRenderService,// still can not get renderContext
             SheetRenderController,
         ]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
@@ -198,7 +199,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             HeaderUnhideRenderController,
             HeaderResizeRenderController,
             // Caution: ScrollRenderController should placed before ZoomRenderController
-            // because ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
+            // because ZoomRenderController would change scrollInfo in currentSkeletonBefore$
+            // currentSkeletonBefore$ --> ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
             SheetsScrollRenderController,
             SheetsZoomRenderController,
             FormatPainterRenderController,

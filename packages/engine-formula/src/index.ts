@@ -139,6 +139,7 @@ export {
     type ISetFormulaCalculationStartMutation,
     type ISetFormulaCalculationNotificationMutation,
     type ISetFormulaCalculationResultMutation,
+    type IFormulaDirtyData,
 } from './commands/mutations/set-formula-calculation.mutation';
 export { SetFormulaDataMutation, type ISetFormulaDataMutationParams } from './commands/mutations/set-formula-data.mutation';
 export { SetOtherFormulaMutation, RemoveOtherFormulaMutation, type ISetOtherFormulaMutationParams, type IRemoveOtherFormulaMutationParams } from './commands/mutations/set-other-formula.mutation';

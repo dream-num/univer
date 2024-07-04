@@ -391,12 +391,26 @@ export function insertCustomRanges(
 
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
-            if (
-                oldCustomRange &&
-                oldCustomRange.startIndex <= customRange.startIndex &&
-                oldCustomRange.endIndex >= customRange.endIndex
-            ) {
-                continue;
+            if (oldCustomRange) {
+                if (oldCustomRange.startIndex <= customRange.startIndex &&
+                    oldCustomRange.endIndex >= customRange.endIndex) {
+                    continue;
+                }
+
+                const isClosed = body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
+                    body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
+                if (isClosed) {
+                    continue;
+                }
+                // old is start
+                if (body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+                    oldCustomRange.endIndex = customRange.endIndex;
+                    continue;
+                }
+                if (body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+                    oldCustomRange.startIndex = customRange.startIndex;
+                    continue;
+                }
             }
             insertCustomRanges.push(customRange);
         }

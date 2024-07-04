@@ -22,7 +22,7 @@ import {
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
-import { getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import { getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 
@@ -37,7 +37,7 @@ interface IDrawingCache {
 
 interface IDrawingAnchor {
     offset: number;
-    docTransform: IDocDrawingPosition;
+    docTransform?: IDocDrawingPosition;
 }
 
 // Listen doc drawing transformer change, and update drawing data.
@@ -53,7 +53,6 @@ export class DocDrawingTransformerController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
@@ -301,11 +300,65 @@ export class DocDrawingTransformerController extends Disposable {
         const anchor = this._getDrawingAnchor(drawingCache.drawing, object);
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
-    private _getDrawingAnchor(drawing: IDocDrawingBase, object: BaseObject, isInline = true): Nullable<IDrawingAnchor> {
-        const skeleton = this._renderManagerSrv.getRenderById(drawing.unitId)
-            ?.with(DocSkeletonManagerService).getSkeleton();
+    private _getInlineDrawingAnchor(drawing: IDocDrawingBase, object: BaseObject): Nullable<IDrawingAnchor> {
         const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+        const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
+
+        if (currentRender == null) {
+            return;
+        }
+
+        const { mainComponent } = currentRender;
+        const documentComponent = mainComponent as Documents;
+        const {
+            pageLayoutType = PageLayoutType.VERTICAL,
+            pageMarginLeft, pageMarginTop, docsLeft, docsTop,
+        } = documentComponent.getOffsetConfig();
+        const { left, top } = object;
+        let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
+        let isBack = false;
+        const HALF = 0.5;
+        const nodeInfo = skeleton?.findNodeByCoord(Vector2.create(left - docsLeft, top - docsTop), pageLayoutType, pageMarginLeft, pageMarginTop);
+        if (nodeInfo) {
+            const { node, ratioX } = nodeInfo;
+            isBack = ratioX < HALF;
+            glyphAnchor = node;
+        }
+
+        if (glyphAnchor == null) {
+            return;
+        }
+
+        const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor);
+        const docObject = this._getDocObject();
+
+        if (nodePosition == null || skeleton == null || docObject == null) {
+            return;
+        }
+
+        const positionWithIsBack = {
+            ...nodePosition,
+            isBack,
+        };
+
+        const documentOffsetConfig = docObject.document.getOffsetConfig();
+        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
+        const { cursorList } = convertor.getRangePointData(positionWithIsBack, positionWithIsBack);
+        const { startOffset } = getOneTextSelectionRange(cursorList) ?? {};
+
+        if (startOffset == null) {
+            return;
+        }
+
+        // Put drawing before the anchor.
+        return { offset: startOffset };
+    }
+
+    // eslint-disable-next-line max-lines-per-function, complexity
+    private _getDrawingAnchor(drawing: IDocDrawingBase, object: BaseObject): Nullable<IDrawingAnchor> {
+        const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+        const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
+
         const skeletonData = skeleton?.getSkeletonData();
 
         if (skeletonData == null || currentRender == null) {
@@ -314,14 +367,13 @@ export class DocDrawingTransformerController extends Disposable {
 
         const { mainComponent } = currentRender;
         const documentComponent = mainComponent as Documents;
-        const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
-
-        this._liquid.reset();
+        const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documentComponent.getOffsetConfig();
         const { pages } = skeletonData;
         const { left, top, width, height, angle } = object;
         const { positionV, positionH } = drawing.docTransform;
 
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
+        const isBack = false;
         const docTransform = {
             ...drawing.docTransform,
             size: {
@@ -330,6 +382,8 @@ export class DocDrawingTransformerController extends Disposable {
             },
             angle,
         };
+
+        this._liquid.reset();
 
         for (const page of pages) {
             this._liquid.translatePagePadding(page);
@@ -399,29 +453,6 @@ export class DocDrawingTransformerController extends Disposable {
                             }
                         }
 
-                        if (isInline) {
-                            for (const divide of line.divides) {
-                                const { glyphGroup } = divide;
-
-                                for (const glyph of glyphGroup) {
-                                    const { left: glyphLeft, width: glyphWidth } = glyph;
-                                    if (
-                                        left > glyphLeft + this._liquid.x + docsLeft &&
-                                        left <= glyphLeft + this._liquid.x + glyphWidth + docsLeft &&
-                                        top > lineTop + this._liquid.y + docsTop &&
-                                        top <= lineTop + this._liquid.y + lineHeight + docsTop
-                                    ) {
-                                        glyphAnchor = glyph;
-                                        break;
-                                    }
-                                }
-
-                                if (glyphAnchor) {
-                                    break;
-                                }
-                            }
-                        }
-
                         if (glyphAnchor) {
                             break;
                         }
@@ -446,22 +477,19 @@ export class DocDrawingTransformerController extends Disposable {
         }
 
         const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor);
-
         const docObject = this._getDocObject();
-
         if (nodePosition == null || skeleton == null || docObject == null) {
             return;
         }
 
         const positionWithIsBack = {
             ...nodePosition,
-            isBack: false,
+            isBack,
         };
 
         const documentOffsetConfig = docObject.document.getOffsetConfig();
         const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
         const { cursorList } = convertor.getRangePointData(positionWithIsBack, positionWithIsBack);
-
         const { startOffset } = getOneTextSelectionRange(cursorList) ?? {};
 
         if (startOffset == null) {
@@ -469,7 +497,7 @@ export class DocDrawingTransformerController extends Disposable {
         }
 
         // Put drawing before the anchor.
-        return { offset: startOffset - 1, docTransform };
+        return { offset: startOffset, docTransform };
     }
 
     // Update drawing when use transformer to resize it.
@@ -509,7 +537,7 @@ export class DocDrawingTransformerController extends Disposable {
 
     // Update inline drawing when use transformer to move it.
     private _moveInlineDrawing(drawing: IDocDrawingBase, object: BaseObject) {
-        const anchor = this._getDrawingAnchor(drawing, object);
+        const anchor = this._getInlineDrawingAnchor(drawing, object);
         const { offset } = anchor ?? {};
 
         if (offset == null) {
@@ -527,10 +555,10 @@ export class DocDrawingTransformerController extends Disposable {
     // Limit the drawing to the page area, mainly in the vertical direction,
     // and the upper and lower limits cannot exceed the page margin area.
     private _limitDrawingInPage(drawing: IDocDrawingBase, object: BaseObject) {
-        const { left, top, width, height, angle } = object;
-        const skeleton = this._renderManagerSrv.getRenderById(drawing.unitId)
-            ?.with(DocSkeletonManagerService).getSkeleton();
         const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+        const { left, top, width, height, angle } = object;
+        const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
+
         const skeletonData = skeleton?.getSkeletonData();
         const { pages } = skeletonData ?? {};
 
@@ -600,10 +628,11 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const anchor = this._getDrawingAnchor(drawing, objectPosition as BaseObject, false);
+        const anchor = this._getDrawingAnchor(drawing, objectPosition as BaseObject);
         const { offset, docTransform } = anchor ?? {};
         if (offset == null || docTransform == null) {
-            return;
+            // No need to change the anchor ,when the new anchor is not found. reuse the `_updateMultipleDrawingDocTransform` to modify the transform.
+            return this._updateMultipleDrawingDocTransform(new Map([[drawing.drawingId, object]]));
         }
 
         return this._commandService.executeCommand(ITransformNonInlineDrawingCommand.id, {

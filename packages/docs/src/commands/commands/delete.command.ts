@@ -34,7 +34,7 @@ import { TextSelectionManagerService } from '../../services/text-selection-manag
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getDeleteSelection, getInsertSelection } from '../../basics/selection';
-import { getCommandSkeleton, getRichTextEditPath } from '../util';
+import { getCommandSkeleton } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
 

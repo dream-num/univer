@@ -16,7 +16,7 @@
 
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import type { ICustomBlock, ICustomDecoration, ICustomRange, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { ICustomBlock, ICustomDecoration, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
 import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
@@ -98,6 +98,7 @@ export function getBodySlice(
     docBody.customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
     const { customRanges } = getCustomRangeSlice(body, startOffset, endOffset);
     docBody.customRanges = customRanges;
+
     const newCustomBlocks: ICustomBlock[] = [];
 
     for (const block of customBlocks) {

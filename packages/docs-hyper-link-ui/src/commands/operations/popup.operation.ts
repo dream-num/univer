@@ -64,7 +64,7 @@ export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditP
     id: 'docs.operation.show-hyper-link-edit-popup',
     handler(accessor, params) {
         const linkInfo = params?.link;
-        if (shouldDisableAddLink(accessor)) {
+        if (shouldDisableAddLink(accessor) && !linkInfo) {
             return false;
         }
         const hyperLinkService = accessor.get(DocHyperLinkPopupService);

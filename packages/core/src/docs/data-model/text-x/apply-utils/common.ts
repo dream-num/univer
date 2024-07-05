@@ -388,17 +388,34 @@ export function insertCustomRanges(
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
             const oldCustomRange = customRangeMap[customRange.rangeId];
+
+            customRange.startIndex += currentIndex;
+            customRange.endIndex += currentIndex;
             if (oldCustomRange) {
-                if (insertBody.dataStream === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
-                    oldCustomRange.endIndex = customRange.endIndex + currentIndex;
-                } else if (insertBody.dataStream === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
-                    oldCustomRange.startIndex = customRange.startIndex + currentIndex;
+                if (oldCustomRange.startIndex <= customRange.startIndex &&
+                    oldCustomRange.endIndex >= customRange.endIndex) {
+                    continue;
                 }
-            } else {
-                insertCustomRanges.push(customRange);
-                customRange.startIndex += currentIndex;
-                customRange.endIndex += currentIndex;
+
+                const isClosed =
+                    body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
+                    body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
+
+                if (isClosed) {
+                    insertCustomRanges.push(customRange);
+                    continue;
+                }
+                // old is start
+                if (body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+                    oldCustomRange.endIndex = customRange.endIndex;
+                    continue;
+                }
+                if (body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+                    oldCustomRange.startIndex = customRange.startIndex;
+                    continue;
+                }
             }
+            insertCustomRanges.push(customRange);
         }
 
         customRanges.push(...insertCustomRanges);
@@ -764,7 +781,6 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
                 continue;
             } else if (st <= startIndex && ed >= endIndex) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
-
                 customRange.startIndex = segments[0];
                 customRange.endIndex = segments[1];
             } else if (endIndex < st) {

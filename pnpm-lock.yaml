@@ -222,6 +222,9 @@ importers:
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
         version: link:../packages/docs-drawing-ui
+      '@univerjs/docs-hyper-link-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-hyper-link-ui
       '@univerjs/docs-thread-comment-ui':
         specifier: workspace:*
         version: link:../packages/docs-thread-comment-ui
@@ -728,6 +731,113 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.14.9)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
+  packages/docs-hyper-link:
+    dependencies:
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
+      '@univerjs/icons':
+        specifier: ^0.1.58
+        version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../thread-comment-ui
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@wendellhu/redi':
+        specifier: 0.15.5
+        version: 0.15.5
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.5.3
+      vite:
+        specifier: ^5.2.12
+        version: 5.3.3(@types/node@20.14.9)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.14.9)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+
+  packages/docs-hyper-link-ui:
+    dependencies:
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
+      '@univerjs/icons':
+        specifier: ^0.1.58
+        version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../thread-comment-ui
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/docs-hyper-link':
+        specifier: workspace:*
+        version: link:../docs-hyper-link
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@wendellhu/redi':
+        specifier: 0.15.5
+        version: 0.15.5
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.5.3
+      vite:
+        specifier: ^5.2.12
+        version: 5.3.3(@types/node@20.14.9)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.14.9)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+
   packages/docs-thread-comment-ui:
     dependencies:
       '@univerjs/docs':
@@ -975,6 +1085,12 @@ importers:
 
   packages/engine-render:
     dependencies:
+      '@floating-ui/dom':
+        specifier: ^1.6.7
+        version: 1.6.7
+      '@floating-ui/utils':
+        specifier: ^0.2.4
+        version: 0.2.4
       cjk-regex:
         specifier: ^3.1.0
         version: 3.1.0
@@ -3915,6 +4031,15 @@ packages:
 
   '@fal-works/esbuild-plugin-global-externals@2.1.2':
     resolution: {integrity: sha512-cEee/Z+I12mZcFJshKcCqC8tuX5hG3s+d+9nZ3LabqKF1vKdF41B92pJVCBggjAGORAeOzyyDDKrZwIkLffeOQ==}
+
+  '@floating-ui/core@1.6.4':
+    resolution: {integrity: sha512-a4IowK4QkXl4SCWTGUR0INAfEOX3wtsYw3rKK5InQEHMGObkR8Xk44qYQD9P4r6HHw0iIfK6GUKECmY8sTkqRA==}
+
+  '@floating-ui/dom@1.6.7':
+    resolution: {integrity: sha512-wmVfPG5o2xnKDU4jx/m4w5qva9FWHcnZ8BvzEe90D/RpwsJaTAVYPEPdQ8sbr/N8zZTAHlZUTQdqg8ZUbzHmng==}
+
+  '@floating-ui/utils@0.2.4':
+    resolution: {integrity: sha512-dWO2pw8hhi+WrXq1YJy2yCuWoL20PddgGaqTgVe4cOS9Q6qklXCiA1tJEqX6BEwRNSCP84/afac9hd4MS+zEUA==}
 
   '@grpc/grpc-js@1.10.9':
     resolution: {integrity: sha512-5tcgUctCG0qoNyfChZifz2tJqbRbXVO9J7X6duFcOjY3HUNCxg5D0ZCK7EP9vIcZ0zRpLU9bWkyCqVCLZ46IbQ==}
@@ -12232,6 +12357,17 @@ snapshots:
   '@eslint/js@8.57.0': {}
 
   '@fal-works/esbuild-plugin-global-externals@2.1.2': {}
+
+  '@floating-ui/core@1.6.4':
+    dependencies:
+      '@floating-ui/utils': 0.2.4
+
+  '@floating-ui/dom@1.6.7':
+    dependencies:
+      '@floating-ui/core': 1.6.4
+      '@floating-ui/utils': 0.2.4
+
+  '@floating-ui/utils@0.2.4': {}
 
   '@grpc/grpc-js@1.10.9':
     dependencies:

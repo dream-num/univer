@@ -15,8 +15,10 @@
  */
 
 import type { ICommand, IParagraph } from '@univerjs/core';
-import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, Tools, updateAttributeByInsert } from '@univerjs/core';
+
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { getInsertSelection } from '../../basics/selection';
 import { InsertCommand } from './core-editing.command';
 
 function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
@@ -51,9 +53,7 @@ function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IPa
 
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
-
     type: CommandType.COMMAND,
-
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -65,27 +65,57 @@ export const BreakLineCommand: ICommand = {
         }
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (docDataModel == null) {
+        const body = docDataModel?.getBody();
+        if (!docDataModel || !body) {
             return false;
         }
 
         const unitId = docDataModel.getUnitId();
-        const { startOffset, segmentId } = activeRange;
+        const { startOffset, endOffset } = getInsertSelection(activeRange, body);
+        const { segmentId } = activeRange;
 
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
+        // line breaks to 2
+        if (prevParagraph && prevParagraph.startIndex > endOffset) {
+            const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex));
+            const deleteRange = {
+                startOffset,
+                endOffset: prevParagraph.startIndex,
+                collapsed: false,
+            };
+            updateAttributeByInsert(
+                bodyAfter,
+                {
+                    dataStream: DataStreamTreeTokenType.PARAGRAPH,
+                    paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
+                },
+                1,
+                0
+            );
+            const result = await commandService.executeCommand(InsertCommand.id, {
+                unitId,
+                body: bodyAfter,
+                range: deleteRange,
+                segmentId,
+                cursorOffset: 1,
+            });
 
-        // split paragraph into two.
-        const result = await commandService.executeCommand(InsertCommand.id, {
-            unitId,
-            body: {
-                dataStream: DataStreamTreeTokenType.PARAGRAPH,
-                paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
-            },
-            range: activeRange,
-            segmentId,
-        });
+            return result;
+        } else {
+            // split paragraph into two.
+            const result = await commandService.executeCommand(InsertCommand.id, {
+                unitId,
+                body: {
+                    dataStream: DataStreamTreeTokenType.PARAGRAPH,
+                    paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
+                },
+                range: activeRange,
+                segmentId,
+            });
 
-        return result;
+            return result;
+        }
     },
 };
+

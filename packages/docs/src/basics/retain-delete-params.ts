@@ -57,7 +57,7 @@ export function getRetainAndDeleteFromReplace(
         });
     }
 
-    const sortedRetains = [...retainPoints].sort();
+    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
     let cursor = textStart;
     sortedRetains.forEach((pos) => {
         const len = pos - cursor;

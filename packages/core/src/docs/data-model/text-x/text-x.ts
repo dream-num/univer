@@ -156,7 +156,7 @@ export class TextX {
         for (const action of actions) {
             if (action.t === TextXActionType.DELETE && action.body == null) {
                 const body = getBodySlice(doc, index, index + action.len, false);
-
+                action.len = body.dataStream.length;
                 action.body = body;
             }
 
@@ -167,6 +167,7 @@ export class TextX {
                     ...body,
                     dataStream: '',
                 };
+                action.len = body.dataStream.length;
             }
 
             invertibleActions.push(action);

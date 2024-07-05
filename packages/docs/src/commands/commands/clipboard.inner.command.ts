@@ -50,11 +50,11 @@ export interface IInnerPasteCommandParams {
 // Actually, the command is to handle paste event.
 export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',
-
     type: CommandType.COMMAND,
 
     handler: async (accessor, params: IInnerPasteCommandParams) => {
-        const { segmentId, body, textRanges } = params;
+        const { segmentId, textRanges } = params;
+        const body = params.body;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -101,11 +101,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             } else {
                 const { dos } = getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor, originBody);
                 textX.push(...dos);
-                // doMutation.params.textRanges = [{
-                //     startOffset: cursor + body.dataStream.length,
-                //     endOffset: cursor + body.dataStream.length,
-                //     collapsed,
-                // }];
             }
 
             textX.push({
@@ -267,7 +262,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
         retainPoints.add(paragraphIndex);
     }
 
-    const sortedRetains = [...retainPoints].sort();
+    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
 
     let cursor = textStart;
     sortedRetains.forEach((pos) => {

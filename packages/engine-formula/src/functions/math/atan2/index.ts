@@ -17,20 +17,29 @@
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Abs extends BaseFunction {
-    override minParams = 1;
+export class Atan2 extends BaseFunction {
+    override minParams = 2;
 
-    override maxParams = 1;
+    override maxParams = 2;
 
-    override calculate(variant: BaseValueObject) {
-        if (variant.isString()) {
-            variant = variant.convertToNumberObjectValue();
+    override calculate(xNum: BaseValueObject, yNum: BaseValueObject) {
+        if (xNum.isString()) {
+            xNum = xNum.convertToNumberObjectValue();
         }
 
-        if (variant.isError()) {
-            return variant;
+        if (xNum.isError()) {
+            return xNum;
         }
 
-        return variant.abs();
+        if (yNum.isString()) {
+            yNum = yNum.convertToNumberObjectValue();
+        }
+
+        if (yNum.isError()) {
+            return yNum;
+        }
+
+        // Note that the order of parameters is different from JavaScript
+        return yNum.atan2(xNum);
     }
 }

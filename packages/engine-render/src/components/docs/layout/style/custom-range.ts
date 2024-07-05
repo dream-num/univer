@@ -18,16 +18,14 @@ import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs
 import { BooleanNumber, CustomRangeType } from '@univerjs/core';
 
 export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
-    if (customRange.rangeType === CustomRangeType.COMMENT) {
+    if (customRange.rangeType === CustomRangeType.HYPERLINK) {
         return {
-            bbl: {
+            ul: {
                 s: BooleanNumber.TRUE,
-                cl: {
-                    rgb: '#fcdf7e',
-                },
-                c: BooleanNumber.FALSE,
             },
-            ...customRange.active ? { bg: { rgb: '#faedc2' } } : null,
+            cl: {
+                rgb: '#274fee',
+            },
         };
     }
 

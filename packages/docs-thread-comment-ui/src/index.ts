@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { UniverDocsCommentUIPlugin } from './plugin';
+export { UniverDocsThreadCommentUIPlugin } from './plugin';
 
 // #region - all commands
 export { AddDocCommentComment } from './commands/commands/add-doc-comment.command';

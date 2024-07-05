@@ -61,33 +61,6 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
     }
 
     private _interceptorViewModel() {
-        this._docInterceptorService.intercept(DOC_INTERCEPTOR_POINT.CUSTOM_RANGE, {
-            handler: (data, pos, next) => {
-                if (!data) {
-                    return next(data);
-                }
-                const { unitId, index, customRanges } = pos;
-                const activeComment = this._threadCommentPanelService.activeCommentId;
-                const { commentId, unitId: commentUnitID } = activeComment || {};
-                const activeCustomRange = customRanges.find((i) => i.rangeId === commentId);
-                const comment = this._threadCommentModel.getComment(unitId, DEFAULT_DOC_SUBUNIT_ID, data.rangeId);
-                if (!comment) {
-                    return next({
-                        ...data,
-                        show: false,
-                    });
-                }
-
-                const isActiveIndex = activeCustomRange && index >= activeCustomRange.startIndex && index <= activeCustomRange.endIndex;
-                const isActive = commentUnitID === unitId && data.rangeId === commentId;
-                return next({
-                    ...data,
-                    active: isActive || isActiveIndex,
-                    show: !comment.resolved,
-                });
-            },
-        });
-
         this._docInterceptorService.intercept(DOC_INTERCEPTOR_POINT.CUSTOM_DECORATION, {
             handler: (data, pos, next) => {
                 if (!data) {

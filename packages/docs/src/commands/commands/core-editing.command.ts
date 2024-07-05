@@ -39,6 +39,7 @@ export interface IInsertCommandParams {
     range: ITextRange;
     textRanges?: ITextRangeWithStyle[];
     segmentId?: string;
+    cursorOffset?: number;
 }
 
 export const EditorInsertTextCommandId = 'doc.command.insert-text';
@@ -50,19 +51,20 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: EditorInsertTextCommandId,
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
+
+        const { range, segmentId, body, unitId, textRanges: propTextRanges, cursorOffset } = params;
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const { range, segmentId, body, unitId, textRanges: propTextRanges } = params;
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
             return false;
         }
 
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const activeRange = textSelectionManagerService.getActiveRange();
-
         const originBody = docDataModel.getSelfOrHeaderFooterModel(activeRange?.segmentId ?? '').getBody();
 
         if (!originBody) {
@@ -70,10 +72,11 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         }
         const actualRange = getInsertSelection(range, originBody);
         const { startOffset, collapsed } = actualRange;
+        const cursorMove = cursorOffset ?? body.dataStream.length;
         const textRanges = [
             {
-                startOffset: startOffset + body.dataStream.length,
-                endOffset: startOffset + body.dataStream.length,
+                startOffset: startOffset + cursorMove,
+                endOffset: startOffset + cursorMove,
                 style: activeRange?.style,
                 collapsed,
             },
@@ -103,11 +106,13 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         } else {
             const { dos, retain } = getRetainAndDeleteFromReplace(actualRange, segmentId, 0, originBody);
             textX.push(...dos);
-            doMutation.params.textRanges = [{
-                startOffset: startOffset + body.dataStream.length + retain,
-                endOffset: startOffset + body.dataStream.length + retain,
-                collapsed,
-            }];
+            if (!propTextRanges) {
+                doMutation.params.textRanges = [{
+                    startOffset: startOffset + cursorMove + retain,
+                    endOffset: startOffset + cursorMove + retain,
+                    collapsed,
+                }];
+            }
         }
 
         textX.push({
@@ -173,7 +178,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         toDeleteRanges?.forEach((range) => {
             deleteIndexes.push(range.startIndex, range.endIndex);
         });
-        deleteIndexes.sort();
+        deleteIndexes.sort((pre, aft) => pre - aft);
         const deleteStart = deleteIndexes[0];
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,

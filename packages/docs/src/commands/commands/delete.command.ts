@@ -17,6 +17,8 @@
 import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } from '@univerjs/core';
 import {
     CommandType,
+    getCustomDecorationSlice,
+    getCustomRangeSlice,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -55,35 +57,37 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const { direction, range } = params;
 
         const activeRange = textSelectionManagerService.getActiveRange();
+        const ranges = textSelectionManagerService.getSelections();
 
-        if (activeRange == null) {
+        if (activeRange == null || ranges == null) {
             return false;
         }
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (docDataModel == null) {
+        const originBody = docDataModel?.getBody();
+        if (!docDataModel || !originBody) {
             return false;
         }
-        const unitId = docDataModel.getUnitId();
-        const { startOffset, collapsed, segmentId, style } = activeRange;
+
+        const actualRange = getDeleteSelection(activeRange, originBody);
+
+        const { segmentId, style } = activeRange;
+        const { startOffset, collapsed } = actualRange;
 
         if (!collapsed) {
             return false;
         }
 
-        const segmentDataModel = docDataModel.getSelfOrHeaderFooterModel(segmentId);
-        const documentBody = segmentDataModel?.getBody();
-
-        if (documentBody == null) {
-            return false;
-        }
-
         const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
-
-        const endIndex = (documentBody.paragraphs ?? []).find((p) => p.startIndex >= startIndex)!.startIndex;
-        const body = getParagraphBody(documentBody, startIndex, endIndex);
+        const endIndex = docDataModel
+            .getBody()
+            ?.paragraphs
+            ?.find((p) => p.startIndex >= startIndex)?.startIndex!;
+        const body = getParagraphBody(docDataModel.getBody()!, startIndex, endIndex);
 
         const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
+
+        const unitId = docDataModel.getUnitId();
 
         const textRanges = [
             {
@@ -266,10 +270,13 @@ export const DeleteLeftCommand: ICommand = {
                     return true;
                 }
                 if (preGlyph.content === '\r') {
-                    result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
-                        direction: DeleteDirection.LEFT,
-                        range: actualRange,
-                    });
+                    result = await commandService.executeCommand(
+                        MergeTwoParagraphCommand.id,
+                        {
+                            direction: DeleteDirection.LEFT,
+                            range: actualRange,
+                        }
+                    );
                 } else {
                     cursor -= preGlyph.count;
                     result = await commandService.executeCommand(DeleteCommand.id, {
@@ -388,6 +395,8 @@ function getParagraphBody(body: IDocumentBody, startIndex: number, endIndex: num
     if (originTextRuns == null) {
         return {
             dataStream,
+            customRanges: getCustomRangeSlice(body, startIndex, endIndex).customRanges,
+            customDecorations: getCustomDecorationSlice(body, startIndex, endIndex),
         };
     }
 
@@ -423,6 +432,8 @@ function getParagraphBody(body: IDocumentBody, startIndex: number, endIndex: num
     return {
         dataStream,
         textRuns,
+        customRanges: getCustomRangeSlice(body, startIndex, endIndex).customRanges,
+        customDecorations: getCustomDecorationSlice(body, startIndex, endIndex),
     };
 }
 

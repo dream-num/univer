@@ -62,6 +62,7 @@ import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
 import { getCustomDecorationStyle } from './style/custom-decoration';
+import { getCustomRangeStyle } from './style/custom-range';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -765,16 +766,19 @@ export function getFontCreateConfig(
     const customDecoration = viewModel.getCustomDecoration(index + startIndex);
     const showCustomDecoration = customDecoration && (customDecoration.show !== false);
     const customDecorationStyle = showCustomDecoration ? getCustomDecorationStyle(customDecoration) : null;
-
+    const customRange = viewModel.getCustomRange(index + startIndex);
+    const showCustomRange = customRange && (customRange.show !== false);
+    const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
+    const hasAddonStyle = showCustomRange || showCustomDecoration;
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
-    if (cache && !customDecoration) {
+    if (cache && !hasAddonStyle) {
         return cache;
     }
 
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
-    textStyle = { ...documentTextStyle, ...textStyle, ...customDecorationStyle };
+    textStyle = { ...documentTextStyle, ...textStyle, ...customDecorationStyle, ...customRangeStyle };
 
     const fontStyle = getFontStyleString(textStyle, localeService);
 
@@ -794,7 +798,7 @@ export function getFontCreateConfig(
         pageWidth,
     };
 
-    if (!showCustomDecoration) {
+    if (!hasAddonStyle) {
         fontCreateConfigCache.setValue(st, ed, result);
     }
 

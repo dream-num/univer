@@ -80,6 +80,28 @@ export function getAnchorBounding(pointsGroup: IPoint[][]) {
     };
 }
 
+export function getLineBounding(pointsGroup: IPoint[][]) {
+    return pointsGroup.map((line) => {
+        let xMin = Infinity;
+        let xMax = -Infinity;
+        let yMin = Infinity;
+        let yMax = -Infinity;
+        line.forEach((point) => {
+            xMin = Math.min(point.x, xMin);
+            xMax = Math.max(point.x, xMax);
+
+            yMax = Math.max(point.y, yMax);
+            yMin = Math.min(point.y, yMin);
+        });
+        return {
+            left: xMin,
+            right: xMax,
+            top: yMin,
+            bottom: yMax,
+        };
+    });
+}
+
 export class TextRange {
     // Identifies whether the range is the current one, most of which is the last range.
     private _current = false;

@@ -31,7 +31,6 @@ export enum BuiltInUIPart {
     CONTENT = 'content',
     FOOTER = 'footer',
     LEFT_SIDEBAR = 'left-sidebar',
-    FLOATING = 'floating',
 }
 
 export interface IUIPartsService {

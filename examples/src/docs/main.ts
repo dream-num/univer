@@ -24,7 +24,7 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
-import { UniverDocsCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
+import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 import { UniverDocHyperLinkUIPlugin } from '@univerjs/docs-hyper-link-ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
@@ -70,7 +70,7 @@ univer.registerPlugin(UniverDocsUIPlugin, {
 });
 
 univer.registerPlugin(UniverDocsDrawingUIPlugin);
-univer.registerPlugin(UniverDocsCommentUIPlugin);
+univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 univer.registerPlugin(UniverDocHyperLinkUIPlugin);
 
 univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);

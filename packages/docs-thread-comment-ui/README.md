@@ -22,7 +22,7 @@ pnpm add @univerjs/sheets-thread-comment
 
 ### use
 ```js
-import { UniverDocsCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
+import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 
-univer.registerPlugin(UniverDocsCommentUIPlugin);
+univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 ```

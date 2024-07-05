@@ -27,7 +27,7 @@ import { DocThreadCommentSelectionController } from './controllers/doc-thread-co
 import { DocThreadCommentRenderController } from './controllers/render-controllers/render.controller';
 
 @DependentOn(UniverThreadCommentUIPlugin)
-export class UniverDocsCommentUIPlugin extends Plugin {
+export class UniverDocsThreadCommentUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_DOC;
 

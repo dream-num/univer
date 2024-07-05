@@ -22,7 +22,7 @@ pnpm add @univerjs/docs-thread-comment-ui
 
 ### 使用
 ```js
-import { UniverDocsCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
+import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 
-univer.registerPlugin(UniverDocsCommentUIPlugin);
+univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 ```

@@ -27,7 +27,7 @@ import {
 } from '@univerjs/engine-render';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { ObjectProvider } from './object-provider';
 
 export enum SLIDE_KEY {
@@ -40,6 +40,7 @@ export class CanvasView extends RxDisposable {
     private _objectProvider: ObjectProvider | null = null;
 
     private _activePageId: string = '';
+    readonly activePageId$ = new Subject<string>();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -92,6 +93,8 @@ export class CanvasView extends RxDisposable {
         const slide = render.mainComponent as Slide;
 
         this._activePageId = pageId;
+
+        this.activePageId$.next(pageId);
 
         if (slide?.hasPage(id)) {
             slide.changePage(id);

@@ -161,8 +161,7 @@ export const DeleteLeftCommand: ICommand = {
         let result = true;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getBody();
-        if (!docDataModel || !body) {
+        if (!docDataModel) {
             return false;
         }
 
@@ -175,15 +174,21 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
+        const { segmentId, style, segmentPage } = activeRange;
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (body == null) {
+            return false;
+        }
+
         const actualRange = getDeleteSelection(activeRange, body);
         const { startOffset, collapsed } = actualRange;
-        const { segmentId, style, segmentPage } = activeRange;
         const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
 
         // is in bullet list?
         const isBullet = hasListGlyph(curGlyph);
         // is in indented paragraph?
-        const isIndent = isIndentByGlyph(curGlyph, docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody());
+        const isIndent = isIndentByGlyph(curGlyph, body);
 
         let cursor = startOffset;
 
@@ -316,16 +321,17 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
-        const body = docDataModel?.getBody();
+        const { segmentId, style, segmentPage } = activeRange;
+
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (!docDataModel || !body) {
             return false;
         }
 
         const actualRange = getInsertSelection(activeRange, body);
         const { startOffset, collapsed } = actualRange;
-        const { segmentId, style, segmentPage } = activeRange;
         // No need to delete when the cursor is at the last position of the last paragraph.
-        if (startOffset === docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length - 2 && collapsed) {
+        if (startOffset === body.dataStream.length - 2 && collapsed) {
             return true;
         }
 

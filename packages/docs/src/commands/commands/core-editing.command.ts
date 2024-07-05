@@ -49,6 +49,7 @@ export const EditorInsertTextCommandId = 'doc.command.insert-text';
 export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: EditorInsertTextCommandId,
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -60,8 +61,13 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         }
 
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const originBody = docDataModel?.getBody();
         const activeRange = textSelectionManagerService.getActiveRange();
+
+        if (activeRange == null) {
+            return false;
+        }
+
+        const originBody = docDataModel.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody();
 
         if (!originBody) {
             return false;
@@ -72,7 +78,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             {
                 startOffset: startOffset + body.dataStream.length,
                 endOffset: startOffset + body.dataStream.length,
-                style: activeRange?.style,
+                style: activeRange.style,
                 collapsed,
             },
         ];
@@ -165,7 +171,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             return false;
         }
 
-        const body = documentDataModel.getBody();
+        const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (!body) {
             return false;
         }

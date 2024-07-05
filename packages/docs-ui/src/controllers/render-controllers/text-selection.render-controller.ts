@@ -164,7 +164,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
             return;
         }
 
-        const originCoord = activeViewport.getRelativeVector(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const originCoord = activeViewport.transformVector2SceneCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         return documentTransform.clone().invert().applyPoint(originCoord);
     }

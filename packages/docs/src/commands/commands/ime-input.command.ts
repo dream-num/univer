@@ -52,14 +52,19 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         }
 
         const previousActiveRange = imeInputManagerService.getActiveRange();
-        const body = docDataModel?.getBody();
-        if (!previousActiveRange || !body) {
+        if (!previousActiveRange) {
             return false;
         }
+        const { startOffset, style, segmentId } = previousActiveRange;
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (body == null) {
+            return false;
+        }
+
         const insertRange = getInsertSelection(previousActiveRange, body);
         Object.assign(previousActiveRange, insertRange);
 
-        const { startOffset, style, segmentId } = previousActiveRange;
         const len = newText.length;
 
         const textRanges: ITextRangeWithStyle[] = [

@@ -45,11 +45,10 @@ export class DocHyperLinkSelectionController extends Disposable {
                         const { startOffset, endOffset, collapsed } = primary;
                         const customRanges = doc.getBody()?.customRanges;
                         if (collapsed) { // cursor
-                            const index = customRanges?.findIndex((value) => (value.startIndex + 1) < startOffset && value.endIndex > endOffset) ?? -1;
+                            const index = customRanges?.findIndex((value) => (value.startIndex) < startOffset && value.endIndex > endOffset - 1) ?? -1;
                             if (index > -1) {
                                 const customRange = customRanges![index];
                                 this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId, rangeIndex: index });
-
                                 return;
                             }
                         } else { // range

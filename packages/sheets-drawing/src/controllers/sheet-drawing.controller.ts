@@ -91,14 +91,16 @@ export class SheetsDrawingController extends Disposable {
     }
 
     private _drawingInitializeListener() {
-        this._lifecycleService.lifecycle$.subscribe((stage) => {
-            if (stage === LifecycleStages.Steady) {
-                const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
-                if (!unitId) {
-                    return;
+        this.disposeWithMe(
+            this._lifecycleService.lifecycle$.subscribe((stage) => {
+                if (stage === LifecycleStages.Steady) {
+                    const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+                    if (!unitId) {
+                        return;
+                    }
+                    this._sheetDrawingService.initializeNotification(unitId);
                 }
-                this._sheetDrawingService.initializeNotification(unitId);
-            }
-        });
+            })
+        );
     }
 }

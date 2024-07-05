@@ -77,8 +77,7 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.58",
-        "@univerjs/protocol": "0.1.38-alpha.6",
-        "@univerjs/thread-comment": "workspace:*"
+        "@univerjs/protocol": "0.1.38-alpha.11"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -86,6 +85,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
+        "@univerjs/thread-comment": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.5",
         "clsx": "^2.1.1",

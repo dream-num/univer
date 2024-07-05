@@ -74,16 +74,14 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.58",
-        "@univerjs/sheets-thread-comment-base": "workspace:*",
-        "@univerjs/thread-comment": "workspace:*",
-        "@univerjs/thread-comment-ui": "workspace:*"
+        "@univerjs/icons": "^0.1.58"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/shared": "workspace:*",
+        "@univerjs/sheets-thread-comment-base": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

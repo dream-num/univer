@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-thread-comment-ui",
-    "version": "0.1.14",
+    "version": "0.1.17",
     "private": false,
     "description": "Univer thread comment plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -69,9 +69,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.58",
-        "@univerjs/thread-comment": "workspace:*",
-        "@univerjs/thread-comment-ui": "workspace:*"
+        "@univerjs/icons": "^0.1.58"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

@@ -29,7 +29,7 @@ import { MoveConditionalRuleMutation } from './commands/mutations/move-condition
 import { ConditionalFormattingFormulaService } from './services/conditional-formatting-formula.service';
 import { ConditionalFormattingFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
 
-export class SheetsConditionalFormattingPlugin extends Plugin {
+export class UniverSheetsConditionalFormattingPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
 

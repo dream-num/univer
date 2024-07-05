@@ -14,10 +14,42 @@
  * limitations under the License.
  */
 
-import type { ICommand, Nullable } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
+import type { IAccessor } from '@wendellhu/redi';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
+
+export const shouldDisableAddLink = (accessor: IAccessor) => {
+    const textSelectionService = accessor.get(TextSelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const activeRange = textSelectionService.getActiveRange();
+    const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    if (!doc || !activeRange || activeRange.collapsed) {
+        return (true);
+        return;
+    }
+
+    const paragraphs = doc.getBody()?.paragraphs;
+    if (!paragraphs) {
+        return (true);
+        return;
+    }
+
+    for (let i = 0, len = paragraphs.length; i < len; i++) {
+        const p = paragraphs[i];
+        if ((activeRange.startOffset - 1) <= p.startIndex && activeRange.endOffset > p.startIndex) {
+            return (true);
+            return;
+        }
+
+        if (p.startIndex > activeRange.endOffset) {
+            break;
+        }
+    }
+
+    return (false);
+};
 
 export interface IShowDocHyperLinkEditPopupOperationParams {
     link?: {
@@ -32,6 +64,9 @@ export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditP
     id: 'docs.operation.show-hyper-link-edit-popup',
     handler(accessor, params) {
         const linkInfo = params?.link;
+        if (shouldDisableAddLink(accessor)) {
+            return false;
+        }
         const hyperLinkService = accessor.get(DocHyperLinkPopupService);
         hyperLinkService.showEditPopup(linkInfo);
         return true;

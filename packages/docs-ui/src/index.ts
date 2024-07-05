@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export * from './basics';

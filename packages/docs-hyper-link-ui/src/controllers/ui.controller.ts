@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { LinkSingle } from '@univerjs/icons';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
@@ -25,7 +25,7 @@ import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.comm
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 import { DocLinkPopup } from '../views/hyper-link-popup';
-import { AddHyperLinkMenuItemFactory, DOC_LINK_ICON } from './menu';
+import { AddHyperLinkMenuItemFactory, addLinkShortcut, DOC_LINK_ICON } from './menu';
 
 export interface IDocHyperLinkUIConfig {
     menu: MenuConfig;
@@ -38,13 +38,15 @@ export class DocHyperLinkUIController extends Disposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuService private readonly _menuService: IMenuService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
 
         this._initComponents();
         this._initCommands();
         this._initMenus();
+        this._initShortcut();
     }
 
     private _initComponents() {
@@ -65,6 +67,12 @@ export class DocHyperLinkUIController extends Disposable {
             ShowDocHyperLinkEditPopupOperation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
+        });
+    }
+
+    private _initShortcut() {
+        [addLinkShortcut].forEach((shortcut) => {
+            this._shortcutService.registerShortcut(shortcut);
         });
     }
 

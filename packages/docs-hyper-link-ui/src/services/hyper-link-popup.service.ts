@@ -130,7 +130,7 @@ export class DocHyperLinkPopupService extends Disposable {
             },
             {
                 componentKey: DocLinkPopup.componentKey,
-                direction: 'bottom',
+                direction: 'top',
                 closeOnSelfTarget: true,
                 onClickOutside: () => {
                     this.hideInfoPopup();

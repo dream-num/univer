@@ -642,9 +642,6 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
-      '@univerjs/docs-ui':
-        specifier: workspace:*
-        version: link:../docs-ui
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing

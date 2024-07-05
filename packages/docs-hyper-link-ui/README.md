@@ -5,7 +5,7 @@
 
 ## Introduction
 
-`@univerjs/docs-hyper-link-ui` provides the comment/annotation function of Univer Sheets.
+`@univerjs/docs-hyper-link-ui` provides the link function of Univer Docs.
 
 
 ## Usage
@@ -22,39 +22,7 @@ pnpm add @univerjs/docs-hyper-link-ui
 
 ### use
 ```js
-import { UniverSheetsThreadCommentPlugin, IThreadCommentMentionDataService} from '@univerjs/docs-hyper-link-ui';
+import { UniverDocHyperLinkUIPlugin} from '@univerjs/docs-hyper-link-ui';
 
-const mockUser = {
-    userID: 'mockId',
-    name: 'MockUser',
-    avatar: 'icon-url',
-    anonymous: false,
-    canBindAnonymous: false,
-};
-
-class CustomMentionDataService implements IThreadCommentMentionDataService {
-    trigger: string = '@';
-
-     // Get the common interface implementation of the mentioned user
-    async getMentions(search: string) {
-        return [
-            {
-                id: mockUser.userID,
-                label: mockUser.name,
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-            {
-                id: '2',
-                label: 'User2',
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-        ];
-    }
-}
-
-univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
-    overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
-});
+univer.registerPlugin(UniverDocHyperLinkUIPlugin);
 ```

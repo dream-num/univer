@@ -22,39 +22,7 @@ pnpm add @univerjs/sheets-thread-comment
 
 ### use
 ```js
-import { UniverSheetsThreadCommentPlugin, IThreadCommentMentionDataService} from '@univerjs/sheets-thread-comment';
+import { UniverDocsCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 
-const mockUser = {
-    userID: 'mockId',
-    name: 'MockUser',
-    avatar: 'icon-url',
-    anonymous: false,
-    canBindAnonymous: false,
-};
-
-class CustomMentionDataService implements IThreadCommentMentionDataService {
-    trigger: string = '@';
-
-     // Get the common interface implementation of the mentioned user
-    async getMentions(search: string) {
-        return [
-            {
-                id: mockUser.userID,
-                label: mockUser.name,
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-            {
-                id: '2',
-                label: 'User2',
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-        ];
-    }
-}
-
-univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
-    overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
-});
+univer.registerPlugin(UniverDocsCommentUIPlugin);
 ```

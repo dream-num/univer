@@ -22,39 +22,7 @@ pnpm add @univerjs/docs-thread-comment-ui
 
 ### 使用
 ```js
-import { UniverSheetsThreadCommentPlugin, IThreadCommentMentionDataService } from '@univerjs/docs-thread-comment-ui';
+import { UniverDocsCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 
-const mockUser = {
-    userID: 'mockId',
-    name: 'MockUser',
-    avatar: 'avatar-icon-url',
-    anonymous: false,
-    canBindAnonymous: false,
-};
-
-class CustomMentionDataService implements IThreadCommentMentionDataService {
-    trigger: string = '@';
-
-    // 获取提及用户的通用接口实现
-    async getMentions(search: string) {
-        return [
-            {
-                id: mockUser.userID,
-                label: mockUser.name,
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-            {
-                id: '2',
-                label: 'User2',
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-        ];
-    }
-}
-
-univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
-    overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
-});
+univer.registerPlugin(UniverDocsCommentUIPlugin);
 ```

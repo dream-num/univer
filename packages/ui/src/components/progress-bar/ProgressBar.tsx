@@ -78,7 +78,7 @@ export function ProgressBar(props: IProgressBarProps) {
                     }}
                 />
             </div>
-            <div className={styles.closeButton} onClick={handleClose}><CloseSingle /></div>
+            <div className={styles.progressBarCloseButton} onClick={handleClose}><CloseSingle /></div>
 
         </div>
     );

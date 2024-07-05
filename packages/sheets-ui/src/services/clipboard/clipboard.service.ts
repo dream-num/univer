@@ -60,7 +60,7 @@ import type {
 } from './type';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { clipboardItemIsFromExcel, discreteRangeContainsRange, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
+import { clipboardItemIsFromExcel, convertTextToTable, discreteRangeContainsRange, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -235,7 +235,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (html) {
             return this._pasteHTML(html, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
         } else if (text) {
-            return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+            // Converts text with tabs and newlines into an HTML table
+            if (/[\n\t]/.test(text)) {
+                return this._pasteHTML(convertTextToTable(text), PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+            } else {
+                return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+            }
         }
 
         return Promise.resolve(false);

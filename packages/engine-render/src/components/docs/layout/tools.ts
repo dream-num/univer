@@ -766,7 +766,7 @@ export function getFontCreateConfig(
     const customDecoration = viewModel.getCustomDecoration(index + startIndex);
     const showCustomDecoration = customDecoration && (customDecoration.show !== false);
     const customDecorationStyle = showCustomDecoration ? getCustomDecorationStyle(customDecoration) : null;
-    const customRange = bodyModel.getCustomRange(index + startIndex);
+    const customRange = viewModel.getCustomRange(index + startIndex);
     const showCustomRange = customRange && (customRange.show !== false);
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
     const hasAddonStyle = showCustomRange || showCustomDecoration;

@@ -94,7 +94,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                 const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), row, RANGE_TYPE.ROW);
                 if (matchSelectionData) return;
 
-                this._onPointerUp(evt, (spreadsheet.zIndex || 1) + 1, RANGE_TYPE.ROW, this._getActiveViewport(evt), ScrollTimerType.Y);
+                this._onPointerDown(evt, (spreadsheet.zIndex || 1) + 1, RANGE_TYPE.ROW, this._getActiveViewport(evt), ScrollTimerType.Y);
                 if (evt.button !== 2) {
                     state.stopPropagation();
                 }
@@ -109,7 +109,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), column, RANGE_TYPE.COLUMN);
             if (matchSelectionData) return;
 
-            this._onPointerUp(evt, (spreadsheet.zIndex || 1) + 1, RANGE_TYPE.COLUMN, this._getActiveViewport(evt), ScrollTimerType.X);
+            this._onPointerDown(evt, (spreadsheet.zIndex || 1) + 1, RANGE_TYPE.COLUMN, this._getActiveViewport(evt), ScrollTimerType.X);
 
             if (evt.button !== 2) {
                 state.stopPropagation();

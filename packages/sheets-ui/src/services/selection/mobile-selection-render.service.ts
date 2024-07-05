@@ -677,18 +677,22 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
                 case ExpandingControl.LEFT:
                     primaryCursorCellRangeByControlShape =
                         skeleton.getCellByIndex(startRow, endColumn);
+                    primaryCursorCellRangeByControlShape.isMergedMainCell = false;
                     break;
                 case ExpandingControl.RIGHT:
                     primaryCursorCellRangeByControlShape =
                         skeleton.getCellByIndex(startRow, startColumn);
+                    primaryCursorCellRangeByControlShape.isMergedMainCell = false;
                     break;
                 case ExpandingControl.TOP:
                     primaryCursorCellRangeByControlShape =
                         skeleton.getCellByIndex(endRow, startColumn);
+                    primaryCursorCellRangeByControlShape.isMergedMainCell = false;
                     break;
                 case ExpandingControl.BOTTOM:
                     primaryCursorCellRangeByControlShape =
                         skeleton.getCellByIndex(startRow, startColumn);
+                    primaryCursorCellRangeByControlShape.isMergedMainCell = false;
                     break;
                 default:
                     primaryCursorCellRangeByControlShape =
@@ -890,17 +894,18 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     private _movingForMobile(
         offsetX: number,
         offsetY: number,
-        activeSelectionControl: Nullable<SelectionControl>,
+        activeSelectionControl: SelectionControl,
         rangeType: RANGE_TYPE
     ) {
+        this._shouldDetectMergedCells = rangeType === RANGE_TYPE.NORMAL;
         const skeleton = this._skeleton;
         const scene = this._scene;
 
         const currSelectionRange: IRange = {
-            startRow: activeSelectionControl?.model.startRow ?? -1,
-            endRow: activeSelectionControl?.model.endRow ?? -1,
-            startColumn: activeSelectionControl?.model.startColumn ?? -1,
-            endColumn: activeSelectionControl?.model.endColumn ?? -1,
+            startRow: activeSelectionControl.model.startRow,
+            endRow: activeSelectionControl.model.endRow,
+            startColumn: activeSelectionControl.model.startColumn,
+            endColumn: activeSelectionControl.model.endColumn,
         };
 
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
@@ -929,11 +934,11 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         const { rangeWithCoord: cursorCellRange } = cursorCellRangeInfo;
 
-        const activeCellRange = activeSelectionControl?.model.currentCell;
-        const startRowOfActiveCell = activeCellRange?.mergeInfo.startRow ?? -1;
-        const endRowOfActiveCell = activeCellRange?.mergeInfo.endRow ?? -1;
-        const startColumnOfActiveCell = activeCellRange?.mergeInfo.startColumn ?? -1;
-        const endColOfActiveCell = activeCellRange?.mergeInfo.endColumn ?? -1;
+        const currCellRange = activeSelectionControl.model.currentCell;
+        const startRowOfActiveCell = currCellRange?.mergeInfo.startRow ?? -1;
+        const endRowOfActiveCell = currCellRange?.mergeInfo.endRow ?? -1;
+        const startColumnOfActiveCell = currCellRange?.mergeInfo.startColumn ?? -1;
+        const endColOfActiveCell = currCellRange?.mergeInfo.endColumn ?? -1;
 
         let newSelectionRange: IRange = {
             startRow: Math.min(cursorCellRange.startRow, startRowOfActiveCell),
@@ -942,8 +947,24 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             endColumn: Math.max(cursorCellRange.endColumn, endColOfActiveCell),
         };
 
-        if (this._shouldDetectMergedCells) {
+        if (rangeType === RANGE_TYPE.NORMAL) {
             newSelectionRange = skeleton.getSelectionMergeBounding(newSelectionRange.startRow, newSelectionRange.startColumn, newSelectionRange.endRow, newSelectionRange.endColumn);
+        } else if (rangeType === RANGE_TYPE.COLUMN) {
+            newSelectionRange = {
+                startRow: Math.min(cursorCellRange.startRow, currCellRange?.actualRow ?? -1),
+                startColumn: Math.min(cursorCellRange.startColumn, currCellRange?.actualColumn ?? -1),
+                endRow: Math.max(cursorCellRange.endRow, currCellRange?.actualRow ?? -1),
+                endColumn: Math.max(cursorCellRange.endColumn, currCellRange?.actualColumn ?? -1),
+
+            };
+        } else if (rangeType === RANGE_TYPE.ROW) {
+            newSelectionRange = {
+                startRow: Math.min(cursorCellRange.startRow, currCellRange?.actualRow ?? -1),
+                startColumn: Math.min(cursorCellRange.startColumn, currCellRange?.actualColumn ?? -1),
+                endRow: Math.max(cursorCellRange.endRow, currCellRange?.actualRow ?? -1),
+                endColumn: Math.max(cursorCellRange.endColumn, currCellRange?.actualColumn ?? -1),
+
+            };
         }
 
         if (!newSelectionRange) {

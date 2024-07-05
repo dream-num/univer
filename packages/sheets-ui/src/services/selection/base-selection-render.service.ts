@@ -866,6 +866,78 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         };
     }
 
+    protected _getRowRangeByCursorPosition(
+        offsetX: number,
+        offsetY: number,
+        scaleX: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number }
+    ): Nullable<ISelectionWithCoord> {
+        // if (this._shouldDetectMergedCells) {
+        //     const primaryWithCoord = this._skeleton?.calculateCellIndexByPosition(
+        //         offsetX,
+        //         offsetY,
+        //         scaleX,
+        //         scaleY,
+        //         scrollXY
+        //     );
+
+        //     if (!primaryWithCoord) return;
+
+        //     const rangeWithCoord = makeCellToSelection(primaryWithCoord);
+        //     return {
+        //         primaryWithCoord,
+        //         rangeWithCoord,
+        //     };
+        // }
+
+        const skeleton = this._skeleton;
+
+        if (skeleton == null) {
+            return;
+        }
+
+        const moveActualSelection = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+
+        const { row, column } = moveActualSelection;
+
+        const startCell = skeleton.getNoMergeCellPositionByIndex(row, column);
+
+        const { startX, startY, endX, endY } = startCell;
+
+        const rangeWithCoord = {
+            startY,
+            endY,
+            startX,
+            endX,
+            startRow: row,
+            endRow: row,
+            startColumn: column,
+            endColumn: column,
+        };
+
+        const primaryWithCoord = {
+            actualRow: row,
+            actualColumn: column,
+
+            isMerged: false,
+
+            isMergedMainCell: false,
+
+            startY,
+            endY,
+            startX,
+            endX,
+
+            mergeInfo: rangeWithCoord,
+        };
+
+        return {
+            primaryWithCoord,
+            rangeWithCoord,
+        };
+    }
+
     protected _checkClearPreviousControls(evt: IPointerEvent | IMouseEvent) {
         const curControls = this.getSelectionControls();
         if (curControls.length === 0) return;

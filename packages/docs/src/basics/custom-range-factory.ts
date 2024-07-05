@@ -20,7 +20,7 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
-import { getSelectionForAddCustomRange } from './selection';
+import { getSelectionForAddCustomRange, normalizeSelection } from './selection';
 
 interface IAddCustomRangeParam {
     unitId: string;
@@ -131,7 +131,8 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     if (!body) {
         return false;
     }
-    const { startOffset, endOffset } = selection;
+    const { startOffset, endOffset } = normalizeSelection(selection);
+
     const customRanges = body.customRanges ?? [];
 
     const relativeCustomRanges = [];

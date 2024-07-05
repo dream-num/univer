@@ -153,28 +153,18 @@ export interface IDeleteCommandParams {
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor, params: IDeleteCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-
-        if (docDataModel == null) {
+        const { range, segmentId, unitId, direction, len = 1 } = params;
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        if (docDataModel == null || body == null) {
             return false;
         }
-
-        const { range, segmentId, unitId, direction, len = 1 } = params;
 
         const { startOffset } = range;
-        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        if (!documentDataModel) {
-            return false;
-        }
-
-        const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
-        if (!body) {
-            return false;
-        }
         const dataStream = body.dataStream;
         const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
         const end = start + len - 1;

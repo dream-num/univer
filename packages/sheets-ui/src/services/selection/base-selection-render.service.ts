@@ -158,6 +158,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         super();
 
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
+
+        if (!window.srs) window.srs = this;
     }
 
     protected _setStyle(style: ISelectionStyle) {
@@ -396,8 +398,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const { rangeWithCoord: cursorCellRange, primaryWithCoord: primaryCursorCellRange } = cursorCellRangeInfo;
         const cursorCellRangeWithRangeType: IRangeWithCoord = { ...cursorCellRange, rangeType };
-
-        this._activeCellRangeOfCurrSelection = cursorCellRangeWithRangeType;
+        this._activeCellRangeOfCurrSelection = { ...cursorCellRange, rangeType };
 
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
         const curControls = this.getSelectionControls();
@@ -663,7 +664,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * When mousedown and mouseup need to go to the coordination and undo stack, when mousemove does not need to go to the coordination and undo stack
      */
     // eslint-disable-next-line max-lines-per-function
-    private _moving(
+    protected _moving(
         offsetX: number,
         offsetY: number,
         currSelectionControl: Nullable<SelectionControl>,
@@ -712,7 +713,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         };
 
         if (this._shouldDetectMergedCells) {
-            newSelectionRange = skeleton.getSelectionBounding(newSelectionRange.startRow, newSelectionRange.startColumn, newSelectionRange.endRow, newSelectionRange.endColumn);
+            newSelectionRange = skeleton.getSelectionMergeBounding(newSelectionRange.startRow, newSelectionRange.startColumn, newSelectionRange.endRow, newSelectionRange.endColumn);
         }
 
         if (!newSelectionRange) {

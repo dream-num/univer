@@ -71,7 +71,6 @@ import { SheetContextMenuMobileRenderController } from './controllers/render-con
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 import { MobileSheetsSelectionRenderService } from './services/selection/mobile-selection-render.service';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
-import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 
 /**
  * @ignore

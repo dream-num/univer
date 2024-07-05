@@ -671,17 +671,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected _moving(
         offsetX: number,
         offsetY: number,
-        currSelectionControl: Nullable<SelectionControl>,
+        activeSelectionControl: Nullable<SelectionControl>,
         rangeType: RANGE_TYPE
     ) {
         const skeleton = this._skeleton;
         const scene = this._scene;
 
         const currSelectionRange: IRange = {
-            startRow: currSelectionControl?.model.startRow ?? -1,
-            endRow: currSelectionControl?.model.endRow ?? -1,
-            startColumn: currSelectionControl?.model.startColumn ?? -1,
-            endColumn: currSelectionControl?.model.endColumn ?? -1,
+            startRow: activeSelectionControl?.model.startRow ?? -1,
+            endRow: activeSelectionControl?.model.endRow ?? -1,
+            startColumn: activeSelectionControl?.model.startColumn ?? -1,
+            endColumn: activeSelectionControl?.model.endColumn ?? -1,
         };
 
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
@@ -744,9 +744,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             currSelectionRange.startColumn !== newSelectionRange.startColumn ||
             currSelectionRange.endRow !== newSelectionRange.endRow ||
             currSelectionRange.endColumn !== newSelectionRange.endColumn;
-        if (currSelectionControl != null && rangeChanged) {
+        if (activeSelectionControl != null && rangeChanged) {
             // selectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
-            this._updateSelectionControlRange(currSelectionControl, newSelectionRangeWithCoord);
+            this._updateSelectionControlRange(activeSelectionControl, newSelectionRangeWithCoord);
             this._selectionMoving$.next(this.getSelectionDataWithStyle());
         }
     }

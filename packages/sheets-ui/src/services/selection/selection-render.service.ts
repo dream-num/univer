@@ -228,6 +228,12 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                     selections: [getTopLeftSelection(skeleton)],
                 } as ISetSelectionsOperationParams);
             }
+
+            // for col width & row height resize
+            const currentSelections = this._workbookSelections.getCurrentSelections();
+            if (currentSelections != null) {
+                this._refreshSelection(currentSelections);
+            }
         }));
     }
 

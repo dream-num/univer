@@ -302,7 +302,7 @@ export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentD
 
     const { unitID, rev, name, originalMeta } = documentMeta;
 
-    const { body, documentStyle = {}, settings = {} } = decodeDocOriginalMeta(originalMeta);
+    const { body, documentStyle = {}, settings = {}, drawings = {}, drawingsOrder = [] } = decodeDocOriginalMeta(originalMeta);
 
     const documentData: IDocumentData = {
         id: unitID,
@@ -312,6 +312,8 @@ export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentD
         body,
         documentStyle,
         settings,
+        drawings,
+        drawingsOrder,
     };
 
     return documentData;

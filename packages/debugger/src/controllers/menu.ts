@@ -53,6 +53,14 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 label: 'Русский',
                 value: LocaleType.RU_RU,
             },
+            {
+                label: '繁體中文',
+                value: LocaleType.ZH_TW,
+            },
+            {
+                label: 'Tiếng Việt',
+                value: LocaleType.VI_VN,
+            },
         ],
     };
 }

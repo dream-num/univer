@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-}
+import PickerZhTw from 'rc-picker/lib/locale/zh_TW';
+import dajsZhTw from 'dayjs/locale/zh-tw';
+import type { ILocale } from './interface';
 
-export type LocaleTypes = `${LocaleType}`;
+const locale: ILocale = {
+    design: {
+        Confirm: {
+            cancel: '取消',
+            confirm: '確定',
+        },
+        Slider: {
+            resetTo: '恢復至',
+        },
+        Picker: {
+            ...dajsZhTw,
+            ...PickerZhTw,
+        },
+        CascaderList: {
+            empty: '無',
+        },
+    },
+};
+
+export default locale;

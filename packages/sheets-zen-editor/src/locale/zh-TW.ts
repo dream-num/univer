@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-}
+import type zhCN from './zh-CN';
 
-export type LocaleTypes = `${LocaleType}`;
+const locale: typeof zhCN = {
+    shortcut: {
+        sheet: {
+            'zen-edit-cancel': '取消編輯(禪模式狀態)',
+            'zen-edit-confirm': '放棄編輯(禪模式狀態)',
+        },
+    },
+};
+
+export default locale;

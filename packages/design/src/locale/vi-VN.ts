@@ -14,12 +14,28 @@
  * limitations under the License.
  */
 
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-}
+import PickerViVN from 'rc-picker/lib/locale/vi_VN';
+import dajsViVN from 'dayjs/locale/vi';
+import type { ILocale } from './interface';
 
-export type LocaleTypes = `${LocaleType}`;
+const locale: ILocale = {
+    design: {
+        Confirm: {
+            cancel: 'Hủy bỏ',
+            confirm: 'Xác nhận',
+        },
+        Slider: {
+            resetTo: 'Khôi phục đến',
+        },
+        Picker: {
+            ...dajsViVN,
+            ...PickerViVN,
+        },
+        CascaderList: {
+            empty: 'Không có',
+        },
+    },
+
+};
+
+export default locale;

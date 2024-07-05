@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-}
+import type zhCN from './zh-CN';
 
-export type LocaleTypes = `${LocaleType}`;
+const locale: typeof zhCN = {
+    'script-panel': {
+        title: 'Uniscript',
+        tooltip: {
+            'menu-button': 'Mở/Thu gọn bảng điều khiển Uniscript',
+        },
+        panel: {
+            execute: 'Thực thi Uniscript',
+        },
+    },
+    uniscript: {
+        message: {
+            success: 'Thực thi thành công',
+            failed: 'Thực thi thất bại',
+        },
+    },
+
+};
+
+export default locale;

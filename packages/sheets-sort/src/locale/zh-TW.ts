@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-}
+import type zhCN from './zh-CN';
 
-export type LocaleTypes = `${LocaleType}`;
+const locale: typeof zhCN = {
+    sheetsSort: {
+        title: 'Sắp xếp',
+        toolbar: {
+            'sort-asc': 'Tăng dần',
+            'sort-desc': 'Giảm dần',
+            'sort-custom': 'Sắp xếp tùy chỉnh',
+        },
+        'context-menu': {
+            'sort-asc': 'Tăng dần',
+            'sort-desc': 'Giảm dần',
+            'sort-custom': 'Sắp xếp tùy chỉnh',
+        },
+    },
+};
+
+export default locale;

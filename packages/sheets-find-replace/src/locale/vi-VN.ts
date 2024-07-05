@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-}
+import type zhCN from './zh-CN';
 
-export type LocaleTypes = `${LocaleType}`;
+const locale: typeof zhCN = {
+    'sheet-find-replace': {
+        replace: {
+            'partial-failure': 'Thay thế một phần ô thất bại',
+            failure: 'Thay thế thất bại',
+        },
+    },
+};
+
+export default locale;

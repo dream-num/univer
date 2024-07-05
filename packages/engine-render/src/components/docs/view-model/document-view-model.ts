@@ -18,6 +18,7 @@ import type { ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IDocu
 import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
+import { BehaviorSubject } from 'rxjs';
 import { DataStreamTreeNode } from './data-stream-tree-node';
 
 export interface ICustomRangeInterceptor {
@@ -25,25 +26,28 @@ export interface ICustomRangeInterceptor {
     getCustomDecoration: (index: number) => Nullable<ICustomDecorationForInterceptor>;
 }
 
+export enum DocumentEditArea {
+    BODY = 'BODY',
+    HEADER = 'HEADER',
+    FOOTER = 'FOOTER',
+}
+
 export class DocumentViewModel implements IDisposable {
     private _interceptor: Nullable<ICustomRangeInterceptor> = null;
 
     children: DataStreamTreeNode[] = [];
-
     private _sectionBreakCurrentIndex = 0;
-
     private _paragraphCurrentIndex = 0;
-
     private _textRunCurrentIndex = 0;
-
     private _customBlockCurrentIndex = 0;
-
     private _tableBlockCurrentIndex = 0;
-
     private _customRangeCurrentIndex = 0;
+    private _editArea: DocumentEditArea = DocumentEditArea.BODY;
+
+    private readonly _editAreaChange$ = new BehaviorSubject<Nullable<DocumentEditArea>>(null);
+    readonly editAreaChange$ = this._editAreaChange$.asObservable();
 
     headerTreeMap: Map<string, DocumentViewModel> = new Map();
-
     footerTreeMap: Map<string, DocumentViewModel> = new Map();
 
     constructor(private _documentDataModel: DocumentDataModel) {
@@ -69,6 +73,17 @@ export class DocumentViewModel implements IDisposable {
 
     selfPlus(len: number, index: number) {
         // empty
+    }
+
+    getEditArea() {
+        return this._editArea;
+    }
+
+    setEditArea(editArea: DocumentEditArea) {
+        if (editArea !== this._editArea) {
+            this._editArea = editArea;
+            this._editAreaChange$.next(editArea);
+        }
     }
 
     getPositionInParent() {
@@ -232,6 +247,18 @@ export class DocumentViewModel implements IDisposable {
         this._customBlockCurrentIndex = 0;
         this._tableBlockCurrentIndex = 0;
         this._customRangeCurrentIndex = 0;
+
+        if (this.headerTreeMap.size > 0) {
+            for (const header of this.headerTreeMap.values()) {
+                header.resetCache();
+            }
+        }
+
+        if (this.footerTreeMap.size > 0) {
+            for (const footer of this.footerTreeMap.values()) {
+                footer.resetCache();
+            }
+        }
     }
 
     getSectionBreak(index: number) {
@@ -323,7 +350,7 @@ export class DocumentViewModel implements IDisposable {
      * textRun matches according to the selection. If the text length is 10, then the range of textRun is from 0 to 11.
      */
     getTextRun(index: number) {
-        const textRuns = this.getBody()!.textRuns;
+        const textRuns = this.getBody()?.textRuns;
         if (textRuns == null) {
             return;
         }

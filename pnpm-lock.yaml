@@ -812,6 +812,9 @@ importers:
       '@wendellhu/redi':
         specifier: 0.15.5
         version: 0.15.5
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       less:
         specifier: ^4.2.0
         version: 4.2.0

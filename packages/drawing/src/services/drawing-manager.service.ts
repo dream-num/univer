@@ -185,6 +185,8 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IUnitNorma
     removeDrawingDataForUnit(unitId: string): void;
     registerDrawingData(unitId: string, data: IDrawingSubunitMap<T>): void;
 
+    initializeNotification(unitId: string): void;
+
     getDrawingData(unitId: string, subUnitId: string): IDrawingMapItemData<T>;
 
     getDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;

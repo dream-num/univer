@@ -209,10 +209,16 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const removedCustomBlockIds = getCustomBlockIdsInSelections(originBody, selections);
 
         if (removedCustomBlockIds.length > 0) {
+            const drawings = docDataModel.getDrawings() ?? {};
+            const drawingOrder = docDataModel.getDrawingsOrder() ?? [];
+
             for (const blockId of removedCustomBlockIds) {
-                const drawing = (docDataModel.getDrawings() ?? {})[blockId];
-                const drawingOrder = docDataModel.getDrawingsOrder();
-                const drawingIndex = drawingOrder!.indexOf(blockId);
+                const drawing = drawings[blockId];
+                const drawingIndex = drawingOrder.indexOf(blockId);
+
+                if (drawing == null || drawingIndex < 0) {
+                    continue;
+                }
 
                 const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
                 const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
@@ -250,7 +256,7 @@ function getCustomBlockIdsInSelections(body: IDocumentBody, selections: TextRang
             const { startIndex } = customBlock;
 
             if (startIndex >= startOffset && startIndex < endOffset) {
-                customBlockIds.push(customBlock.blockId);
+                customBlockIds.unshift(customBlock.blockId);
             }
         }
     }

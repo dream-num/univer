@@ -176,6 +176,7 @@ export class TextX {
                 index += action.len;
             }
         }
+
         return invertibleActions;
     }
 

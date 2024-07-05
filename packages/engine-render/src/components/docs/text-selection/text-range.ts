@@ -52,10 +52,9 @@ export function cursorConvertToTextRange(
     docSkeleton: DocumentSkeleton,
     document: Documents
 ): Nullable<TextRange> {
-    const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE } = range;
-
-    const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset);
-    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset) : null;
+    const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE, segmentId = '', segmentPage } = range;
+    const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
+    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage) : null;
 
     const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style);
 
@@ -401,7 +400,7 @@ export class TextRange {
             return;
         }
 
-        const OPACITY = 0.2;
+        const OPACITY = 0.3;
         const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
             pointsGroup,
             fill: this.style?.fill || getColor(COLORS.black, OPACITY),

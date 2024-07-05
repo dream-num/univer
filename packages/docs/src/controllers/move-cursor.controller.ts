@@ -106,7 +106,10 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        const { startOffset, endOffset, style, collapsed, direction: rangeDirection } = activeRange;
+        const {
+            startOffset, endOffset, style, collapsed, direction: rangeDirection,
+            segmentId, startNodePosition, endNodePosition, segmentPage,
+        } = activeRange;
 
         if (allRanges.length > 1) {
             let min = Number.POSITIVE_INFINITY;
@@ -135,14 +138,14 @@ export class MoveCursorController extends Disposable {
                 : endOffset;
 
         let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
-        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
-            const preSpan = skeleton.findNodeByCharIndex(focusOffset - 1);
-            const curSpan = skeleton.findNodeByCharIndex(focusOffset)!;
+            const preGlyph = skeleton.findNodeByCharIndex(focusOffset - 1, segmentId, segmentPage);
+            const curGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage)!;
 
             focusOffset =
-                direction === Direction.RIGHT ? focusOffset + curSpan.count : focusOffset - (preSpan?.count ?? 0);
+                direction === Direction.RIGHT ? focusOffset + curGlyph.count : focusOffset - (preGlyph?.count ?? 0);
 
             focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
 
@@ -154,11 +157,12 @@ export class MoveCursorController extends Disposable {
                 },
             ], false);
         } else {
-            const focusSpan = skeleton.findNodeByCharIndex(focusOffset);
-
+            const focusGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage);
             const documentOffsetConfig = docObject.document.getOffsetConfig();
+            const focusNodePosition = collapsed ? startNodePosition : rangeDirection === RANGE_DIRECTION.FORWARD ? endNodePosition : startNodePosition;
 
-            const newPos = this._getTopOrBottomPosition(skeleton, focusSpan, direction === Direction.DOWN);
+            const newPos = this._getTopOrBottomPosition(skeleton, focusGlyph, focusNodePosition, direction === Direction.DOWN);
+
             if (newPos == null) {
                 // move selection
                 const newFocusOffset = direction === Direction.UP ? 0 : dataStreamLength - 2;
@@ -194,7 +198,7 @@ export class MoveCursorController extends Disposable {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _handleMoveCursor(direction: Direction) {
         const activeRange = this._textSelectionManagerService.getActiveRange();
         const allRanges = this._textSelectionManagerService.getSelections();
@@ -211,9 +215,9 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        const { startOffset, endOffset, style, collapsed } = activeRange;
+        const { startOffset, endOffset, style, collapsed, segmentId, startNodePosition, endNodePosition, segmentPage } = activeRange;
 
-        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor;
@@ -229,8 +233,8 @@ export class MoveCursorController extends Disposable {
 
                 cursor = direction === Direction.LEFT ? min : max;
             } else {
-                const preSpan = skeleton.findNodeByCharIndex(startOffset - 1);
-                const curSpan = skeleton.findNodeByCharIndex(startOffset)!;
+                const preSpan = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
+                const curSpan = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
 
                 if (direction === Direction.LEFT) {
                     cursor = Math.max(0, startOffset - (preSpan?.count ?? 0));
@@ -248,14 +252,15 @@ export class MoveCursorController extends Disposable {
                 },
             ], false);
         } else {
-            const startNode = skeleton.findNodeByCharIndex(startOffset);
-            const endNode = skeleton.findNodeByCharIndex(endOffset);
+            const startNode = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
+            const endNode = skeleton.findNodeByCharIndex(endOffset, segmentId, segmentPage);
 
             const documentOffsetConfig = docObject.document.getOffsetConfig();
 
             const newPos = this._getTopOrBottomPosition(
                 skeleton,
                 direction === Direction.UP ? startNode : endNode,
+                direction === Direction.UP ? startNodePosition : endNodePosition,
                 direction === Direction.DOWN
             );
 
@@ -300,13 +305,14 @@ export class MoveCursorController extends Disposable {
     private _getTopOrBottomPosition(
         docSkeleton: DocumentSkeleton,
         glyph: Nullable<IDocumentSkeletonGlyph>,
+        nodePosition: Nullable<INodePosition>,
         direction: boolean
     ): Nullable<INodePosition> {
-        if (glyph == null) {
+        if (glyph == null || nodePosition == null) {
             return;
         }
 
-        const offsetLeft = this._getSpanLeftOffsetInLine(glyph);
+        const offsetLeft = this._getGlyphLeftOffsetInLine(glyph);
 
         const line = this._getNextOrPrevLine(glyph, direction);
 
@@ -314,7 +320,7 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        const position: Nullable<INodeSearch> = this._matchPositionByLeftOffset(docSkeleton, line, offsetLeft);
+        const position: Nullable<INodeSearch> = this._matchPositionByLeftOffset(docSkeleton, line, offsetLeft, nodePosition);
 
         if (position == null) {
             return;
@@ -324,7 +330,7 @@ export class MoveCursorController extends Disposable {
         return { ...position, isBack: true };
     }
 
-    private _getSpanLeftOffsetInLine(glyph: IDocumentSkeletonGlyph) {
+    private _getGlyphLeftOffsetInLine(glyph: IDocumentSkeletonGlyph) {
         const divide = glyph.parent;
 
         if (divide == null) {
@@ -332,15 +338,13 @@ export class MoveCursorController extends Disposable {
         }
 
         const divideLeft = divide.left;
-
         const { left } = glyph;
-
         const start = divideLeft + left;
 
         return start;
     }
 
-    private _matchPositionByLeftOffset(docSkeleton: DocumentSkeleton, line: IDocumentSkeletonLine, offsetLeft: number) {
+    private _matchPositionByLeftOffset(docSkeleton: DocumentSkeleton, line: IDocumentSkeletonLine, offsetLeft: number, nodePosition: INodePosition) {
         const nearestNode: {
             glyph?: IDocumentSkeletonGlyph;
             distance: number;
@@ -368,9 +372,12 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        return docSkeleton.findPositionByGlyph(nearestNode.glyph);
+        const { segmentPage } = nodePosition;
+
+        return docSkeleton.findPositionByGlyph(nearestNode.glyph, segmentPage);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _getNextOrPrevLine(glyph: IDocumentSkeletonGlyph, direction: boolean) {
         const divide = glyph.parent;
         if (divide == null) {

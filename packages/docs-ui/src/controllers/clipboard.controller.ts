@@ -60,6 +60,7 @@ export class DocClipboardController extends RxDisposable {
             const clipboardEvent = config!.event as ClipboardEvent;
             const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
             const textContent = clipboardEvent.clipboardData?.getData('text/plain');
+
             this._docClipboardService.legacyPaste(htmlContent, textContent);
         });
     }

@@ -31,6 +31,7 @@ import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { getInsertSelection } from '../../basics/selection';
+import { getRichTextEditPath } from '../util';
 
 export interface IInsertCommandParams {
     unitId: string;
@@ -48,18 +49,24 @@ export const EditorInsertTextCommandId = 'doc.command.insert-text';
  */
 export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: EditorInsertTextCommandId,
-
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
 
         const { range, segmentId, body, unitId, textRanges: propTextRanges, cursorOffset } = params;
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const originBody = doc?.getBody();
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+
+        if (docDataModel == null) {
+            return false;
+        }
+
         const activeRange = textSelectionManagerService.getActiveRange();
+        const originBody = docDataModel.getSelfOrHeaderFooterModel(activeRange?.segmentId ?? '').getBody();
+
         if (!originBody) {
             return false;
         }
@@ -115,7 +122,9 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             line: 0,
             segmentId,
         });
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -145,20 +154,18 @@ export interface IDeleteCommandParams {
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',
     type: CommandType.COMMAND,
+
     handler: async (accessor, params: IDeleteCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const { range, segmentId, unitId, direction, len = 1 } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const { startOffset } = range;
-        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        if (!documentDataModel) {
+        const { range, segmentId, unitId, direction, len = 1 } = params;
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        if (docDataModel == null || body == null) {
             return false;
         }
 
-        const body = documentDataModel.getBody();
-        if (!body) {
-            return false;
-        }
+        const { startOffset } = range;
         const dataStream = body.dataStream;
         const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
         const end = start + len - 1;
@@ -209,7 +216,8 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             cursor = deleteIndex + 1;
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -240,6 +248,12 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
     handler: async (accessor, params: IUpdateCommandParams) => {
         const { range, segmentId, updateBody, coverType, unitId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+        if (docDataModel == null) {
+            return false;
+        }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -269,7 +283,8 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             coverType,
         });
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

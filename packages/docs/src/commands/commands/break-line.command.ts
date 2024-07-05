@@ -73,7 +73,8 @@ export const BreakLineCommand: ICommand = {
         const unitId = docDataModel.getUnitId();
         const { startOffset, endOffset } = getInsertSelection(activeRange, body);
         const { segmentId } = activeRange;
-        const paragraphs = body.paragraphs ?? [];
+
+        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
         // line breaks to 2
         if (prevParagraph && prevParagraph.startIndex > endOffset) {

@@ -34,9 +34,121 @@ import { TextSelectionManagerService } from '../../services/text-selection-manag
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getDeleteSelection, getInsertSelection } from '../../basics/selection';
-import { getCommandSkeleton } from '../util';
+import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
+
+interface IMergeTwoParagraphParams {
+    direction: DeleteDirection;
+    range: IActiveTextRange;
+}
+
+export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
+    id: 'doc.command.merge-two-paragraph',
+
+    type: CommandType.COMMAND,
+
+    // eslint-disable-next-line max-lines-per-function
+    handler: async (accessor, params: IMergeTwoParagraphParams) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const { direction, range } = params;
+
+        const activeRange = textSelectionManagerService.getActiveRange();
+        const ranges = textSelectionManagerService.getSelections();
+
+        if (activeRange == null || ranges == null) {
+            return false;
+        }
+
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const originBody = docDataModel?.getBody();
+        if (!docDataModel || !originBody) {
+            return false;
+        }
+
+        const actualRange = getDeleteSelection(activeRange, originBody);
+
+        const { segmentId, style } = activeRange;
+        const { startOffset, collapsed } = actualRange;
+
+        if (!collapsed) {
+            return false;
+        }
+
+        const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
+        const endIndex = docDataModel
+            .getBody()
+            ?.paragraphs
+            ?.find((p) => p.startIndex >= startIndex)?.startIndex!;
+        const body = getParagraphBody(docDataModel.getBody()!, startIndex, endIndex);
+
+        const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
+
+        const unitId = docDataModel.getUnitId();
+
+        const textRanges = [
+            {
+                startOffset: cursor,
+                endOffset: cursor,
+                style,
+            },
+        ] as ITextRangeWithStyle[];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+                prevTextRanges: [range],
+            },
+        };
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
+            segmentId,
+        });
+
+        if (body.dataStream.length) {
+            textX.push({
+                t: TextXActionType.INSERT,
+                body,
+                len: body.dataStream.length,
+                line: 0,
+                segmentId,
+            });
+        }
+
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId,
+        });
+
+        textX.push({
+            t: TextXActionType.DELETE,
+            len: endIndex + 1 - startIndex,
+            line: 0,
+            segmentId,
+        });
+
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
 
 // Handle BACKSPACE key.
 export const DeleteLeftCommand: ICommand = {
@@ -52,8 +164,7 @@ export const DeleteLeftCommand: ICommand = {
         let result = true;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getBody();
-        if (!docDataModel || !body) {
+        if (!docDataModel) {
             return false;
         }
 
@@ -66,26 +177,32 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
+        const { segmentId, style, segmentPage } = activeRange;
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (body == null) {
+            return false;
+        }
+
         const actualRange = getDeleteSelection(activeRange, body);
         const { startOffset, collapsed } = actualRange;
-        const { segmentId, style } = activeRange;
-        const curGlyph = skeleton.findNodeByCharIndex(startOffset);
+        const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
 
         // is in bullet list?
         const isBullet = hasListGlyph(curGlyph);
         // is in indented paragraph?
-        const isIndent = isIndentByGlyph(curGlyph, docDataModel.getBody());
+        const isIndent = isIndentByGlyph(curGlyph, body);
 
         let cursor = startOffset;
 
         // Get the deleted glyph. It maybe null or undefined when the curGlyph is first glyph in skeleton.
-        const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1);
+        const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
 
         const isUpdateParagraph =
             isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
 
         if (isUpdateParagraph && collapsed) {
-            const paragraph = getParagraphByGlyph(curGlyph, docDataModel.getBody());
+            const paragraph = getParagraphByGlyph(curGlyph, docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody());
 
             if (paragraph == null) {
                 return false;
@@ -210,25 +327,25 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
-        const body = docDataModel?.getBody();
+        const { segmentId, style, segmentPage } = activeRange;
+
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (!docDataModel || !body) {
             return false;
         }
 
         const actualRange = getInsertSelection(activeRange, body);
         const { startOffset, collapsed } = actualRange;
-        const { segmentId, style } = activeRange;
         // No need to delete when the cursor is at the last position of the last paragraph.
-        if (startOffset === docDataModel.getBody()!.dataStream.length - 2 && collapsed) {
+        if (startOffset === body.dataStream.length - 2 && collapsed) {
             return true;
         }
 
         let result: boolean = false;
         if (collapsed === true) {
-            const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset)!;
+            const needDeleteGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
 
-            // skip custom-range-split-symbol
-            if (needDeleteSpan.content === '\r') {
+            if (needDeleteGlyph.content === '\r') {
                 result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                     direction: DeleteDirection.RIGHT,
                     range: activeRange,
@@ -252,7 +369,7 @@ export const DeleteRightCommand: ICommand = {
                     segmentId,
                     direction: DeleteDirection.RIGHT,
                     textRanges,
-                    len: needDeleteSpan.count,
+                    len: needDeleteGlyph.count,
                 });
             }
         } else {
@@ -267,118 +384,6 @@ export const DeleteRightCommand: ICommand = {
         }
 
         return result;
-    },
-};
-
-interface IMergeTwoParagraphParams {
-    direction: DeleteDirection;
-    range: IActiveTextRange;
-}
-
-export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
-    id: 'doc.command.merge-two-paragraph',
-
-    type: CommandType.COMMAND,
-
-    // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor, params: IMergeTwoParagraphParams) => {
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const commandService = accessor.get(ICommandService);
-
-        const { direction, range } = params;
-
-        const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getSelections();
-
-        if (activeRange == null || ranges == null) {
-            return false;
-        }
-
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const originBody = docDataModel?.getBody();
-        if (!docDataModel || !originBody) {
-            return false;
-        }
-
-        const actualRange = getDeleteSelection(activeRange, originBody);
-
-        const { segmentId, style } = activeRange;
-        const { startOffset, collapsed } = actualRange;
-
-        if (!collapsed) {
-            return false;
-        }
-
-        const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
-        const endIndex = docDataModel
-            .getBody()
-            ?.paragraphs
-            ?.find((p) => p.startIndex >= startIndex)?.startIndex!;
-        const body = getParagraphBody(docDataModel.getBody()!, startIndex, endIndex);
-
-        const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
-
-        const unitId = docDataModel.getUnitId();
-
-        const textRanges = [
-            {
-                startOffset: cursor,
-                endOffset: cursor,
-                style,
-            },
-        ] as ITextRangeWithStyle[];
-
-        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
-            id: RichTextEditingMutation.id,
-            params: {
-                unitId,
-                actions: [],
-                textRanges,
-                prevTextRanges: [range],
-            },
-        };
-
-        const textX = new TextX();
-        const jsonX = JSONX.getInstance();
-
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
-            segmentId,
-        });
-
-        if (body.dataStream.length) {
-            textX.push({
-                t: TextXActionType.INSERT,
-                body,
-                len: body.dataStream.length,
-                line: 0,
-                segmentId,
-            });
-        }
-
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: 1,
-            segmentId,
-        });
-
-        textX.push({
-            t: TextXActionType.DELETE,
-            len: endIndex + 1 - startIndex,
-            line: 0,
-            segmentId,
-        });
-
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
-
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
-
-        return Boolean(result);
     },
 };
 

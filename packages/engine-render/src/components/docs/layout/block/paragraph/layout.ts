@@ -46,6 +46,7 @@ export function dealWidthParagraph(
     // Step 2: Line Breaking.
     const allPages = lineBreaking(
         ctx,
+        viewModel,
         shapedTextList,
         curPage,
         paragraphNode,

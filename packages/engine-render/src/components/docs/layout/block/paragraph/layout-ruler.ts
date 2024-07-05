@@ -70,7 +70,7 @@ export function layoutParagraph(
         if (paragraphConfig.bulletSkeleton) {
             const { bulletSkeleton, paragraphStyle = {} } = paragraphConfig;
             // 如果是一个段落的开头，需要加入bullet
-            const { gridType = GridType.LINES, charSpace = 0, defaultTabStop = 1 } = sectionBreakConfig;
+            const { gridType = GridType.LINES, charSpace = 0, defaultTabStop = 10.5 } = sectionBreakConfig;
 
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
@@ -491,6 +491,7 @@ function _lineOperator(
     );
 
     const lineHeight = marginTop + paddingTop + contentHeight + paddingBottom;
+
     let section = column.parent;
     if (!section) {
         // 做一个兜底，指向当前页最后一个section
@@ -786,7 +787,7 @@ function _pageOperator(
     const curSkeletonPage: IDocumentSkeletonPage = getLastPage(pages);
     const { skeHeaders, skeFooters } = paragraphConfig;
 
-    pages.push(createSkeletonPage(ctx, sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber));
+    pages.push(createSkeletonPage(ctx, sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber + 1));
     _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
 }
 

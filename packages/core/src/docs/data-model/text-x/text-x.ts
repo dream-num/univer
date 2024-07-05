@@ -161,13 +161,13 @@ export class TextX {
             }
 
             if (action.t === TextXActionType.RETAIN && action.body != null) {
-                const { textRuns, customDecorations, dataStream } = getBodySlice(doc, index, index + action.len, true);
+                const body = getBodySlice(doc, index, index + action.len, true);
+
                 action.oldBody = {
+                    ...body,
                     dataStream: '',
-                    textRuns,
-                    customDecorations,
                 };
-                action.len = dataStream.length;
+                action.len = body.dataStream.length;
             }
 
             invertibleActions.push(action);

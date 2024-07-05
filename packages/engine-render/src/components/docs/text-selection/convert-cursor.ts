@@ -30,6 +30,7 @@ import type { IPoint } from '../../../basics/vector2';
 import type { DocumentSkeleton } from '../layout/doc-skeleton';
 import type { IDocumentOffsetConfig } from '../document';
 import { Liquid } from '../liquid';
+import { DocumentEditArea } from '../view-model/document-view-model';
 
 export enum NodePositionStateType {
     NORMAL,
@@ -153,22 +154,22 @@ export function getOneTextSelectionRange(rangeList: ITextRange[]): Nullable<ITex
 
 function getOffsetInDivide(
     glyphGroup: IDocumentSkeletonGlyph[],
-    startSpanIndex: number,
-    endSpanIndex: number,
+    startGlyphIndex: number,
+    endGlyphIndex: number,
     st: number
 ) {
     let startOffset = st;
     let endOffset = st;
 
     for (let i = 0; i < glyphGroup.length; i++) {
-        const span = glyphGroup[i];
-        const contentLength = span.count;
+        const glyph = glyphGroup[i];
+        const contentLength = glyph.count;
 
-        if (i < startSpanIndex) {
+        if (i < startGlyphIndex) {
             startOffset += contentLength;
         }
 
-        if (i < endSpanIndex) {
+        if (i < endGlyphIndex) {
             endOffset += contentLength;
         }
     }
@@ -443,8 +444,8 @@ export class NodePositionConvertToCursor {
         startPosition: INodePosition,
         endPosition: INodePosition,
         func: (
-            startSpanIndex: number,
-            endSpanIndex: number,
+            startGlyphIndex: number,
+            endGlyphIndex: number,
             isFirst: boolean,
             isLast: boolean,
             divide: IDocumentSkeletonDivide,
@@ -459,6 +460,9 @@ export class NodePositionConvertToCursor {
             return [];
         }
 
+        const viewModel = this._docSkeleton.getViewModel();
+        const editArea = viewModel.getEditArea();
+
         this._liquid.reset();
 
         const skeletonData = skeleton.getSkeletonData();
@@ -467,11 +471,10 @@ export class NodePositionConvertToCursor {
             return [];
         }
 
-        const pages = skeletonData.pages;
+        const { pages, skeHeaders, skeFooters } = skeletonData;
 
-        const { page: pageIndex } = startPosition;
-
-        const { page: endPageIndex } = endPosition;
+        const { page: pageIndex, segmentPage } = startPosition;
+        const { page: endPageIndex, segmentPage: endSegmentPage } = endPosition;
 
         this._resetCurrentNodePositionState();
 
@@ -481,24 +484,58 @@ export class NodePositionConvertToCursor {
 
         const { pageLayoutType, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
 
-        for (let p = 0; p <= pageIndex - 1; p++) {
+        const skipPageIndex = editArea === DocumentEditArea.BODY ? pageIndex : segmentPage;
+
+        for (let p = 0; p < skipPageIndex; p++) {
             const page = pages[p];
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        for (let p = pageIndex; p <= endPageIndex; p++) {
+        const endIndex = editArea === DocumentEditArea.BODY ? endPageIndex : endSegmentPage;
+
+        for (let p = skipPageIndex; p <= endIndex; p++) {
             const page = pages[p];
-            const sections = page.sections;
+            const { headerId, footerId, pageWidth } = page;
+            let segmentPage: Nullable<IDocumentSkeletonPage> = page;
+
+            if (editArea === DocumentEditArea.HEADER) {
+                segmentPage = skeHeaders.get(headerId)?.get(pageWidth);
+            } else if (editArea === DocumentEditArea.FOOTER) {
+                segmentPage = skeFooters.get(footerId)?.get(pageWidth);
+            }
+
+            if (segmentPage == null) {
+                this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+                continue;
+            }
+
+            const sections = segmentPage.sections;
 
             const { start_next: start_s, end_next: end_s } = this._getSelectionRuler(
                 NodePositionMap.page,
                 startPosition,
                 endPosition,
                 sections.length - 1,
-                p
+                editArea === DocumentEditArea.BODY ? p : 0
             );
             this._liquid.translateSave();
-            this._liquid.translatePagePadding(page);
+
+            switch (editArea) {
+                case DocumentEditArea.HEADER:
+                    this._liquid.translatePagePadding({
+                        ...segmentPage,
+                        marginLeft: page.marginLeft, // Because header or footer margin Left is 0.
+                    });
+                    break;
+                case DocumentEditArea.FOOTER: {
+                    const footerTop = page.pageHeight - segmentPage.height - segmentPage.marginBottom;
+                    this._liquid.translate(page.marginLeft, footerTop);
+                    break;
+                }
+                default:
+                    this._liquid.translatePagePadding(page);
+                    break;
+            }
 
             for (let s = start_s; s <= end_s; s++) {
                 const section = sections[s];
@@ -558,15 +595,15 @@ export class NodePositionConvertToCursor {
                             let isFirst = false;
                             let isLast = false;
 
-                            if (p === pageIndex && s === start_s && c === start_c && l === start_l && d === start_d) {
+                            if (p === skipPageIndex && s === start_s && c === start_c && l === start_l && d === start_d) {
                                 isFirst = true;
                             }
 
-                            if (p === endPageIndex && s === end_s && c === end_c && l === end_l && d === end_d) {
+                            if (p === endIndex && s === end_s && c === end_c && l === end_l && d === end_d) {
                                 isLast = true;
                             }
 
-                            func && func(start_sp, end_sp, isFirst, isLast, divide, line, column, section, page);
+                            func && func(start_sp, end_sp, isFirst, isLast, divide, line, column, section, segmentPage);
 
                             this._liquid.translateRestore();
                         }
@@ -575,8 +612,8 @@ export class NodePositionConvertToCursor {
                     }
                 }
             }
-
             this._liquid.translateRestore();
+
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
     }

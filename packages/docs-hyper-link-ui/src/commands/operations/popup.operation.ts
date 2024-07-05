@@ -38,7 +38,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
 
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const p = paragraphs[i];
-        if ((activeRange.startOffset - 1) <= p.startIndex && activeRange.endOffset > p.startIndex) {
+        if ((activeRange.startOffset) <= p.startIndex && activeRange.endOffset > p.startIndex) {
             return (true);
             return;
         }

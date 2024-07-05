@@ -17,7 +17,7 @@
 import { Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IDrawingSubunitMap } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';

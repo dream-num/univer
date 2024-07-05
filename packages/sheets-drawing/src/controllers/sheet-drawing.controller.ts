@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IResourceManagerService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IDrawingSubunitMap } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { Inject, Injector } from '@wendellhu/redi';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
@@ -34,12 +35,14 @@ export class SheetsDrawingLoadController extends Disposable {
     }
 }
 
-@OnLifecycle(LifecycleStages.Steady, SheetsDrawingController)
+@OnLifecycle(LifecycleStages.Ready, SheetsDrawingController)
 export class SheetsDrawingController extends Disposable {
     constructor(
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IResourceManagerService private _resourceManagerService: IResourceManagerService
+        @IResourceManagerService private _resourceManagerService: IResourceManagerService,
+        @Inject(LifecycleService) private _lifecycleService: LifecycleService,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -48,6 +51,8 @@ export class SheetsDrawingController extends Disposable {
 
     private _init(): void {
         this._initSnapshot();
+
+        this._drawingInitializeListener();
     }
 
     private _initSnapshot() {
@@ -83,5 +88,17 @@ export class SheetsDrawingController extends Disposable {
                 },
             })
         );
+    }
+
+    private _drawingInitializeListener() {
+        this._lifecycleService.lifecycle$.subscribe((stage) => {
+            if (stage === LifecycleStages.Steady) {
+                const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+                if (!unitId) {
+                    return;
+                }
+                this._sheetDrawingService.initializeNotification(unitId);
+            }
+        });
     }
 }

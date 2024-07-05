@@ -215,13 +215,6 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             cursor = deleteIndex + 1;
         }
 
-        textX.push({
-            t: TextXActionType.DELETE,
-            len,
-            line: 0,
-            segmentId,
-        });
-
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 

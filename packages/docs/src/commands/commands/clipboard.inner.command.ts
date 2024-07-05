@@ -29,7 +29,6 @@ import {
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
-    normalizeBody,
     TextX,
     TextXActionType,
 } from '@univerjs/core';

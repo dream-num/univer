@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { aF } from 'vitest/dist/reporters-yx5ZTtEV.js';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import type { ICustomDecoration, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, ICommandService } from '@univerjs/core';
 import { deleteCustomRangeFactory } from '@univerjs/docs';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 

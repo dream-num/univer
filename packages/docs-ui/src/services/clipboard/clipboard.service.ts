@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange, IDocumentBody, IParagraph } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, toDisposable } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';

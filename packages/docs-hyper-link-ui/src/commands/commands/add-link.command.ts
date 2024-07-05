@@ -16,7 +16,6 @@
 
 import { CommandType, CustomRangeType, type ICommand, ICommandService, sequenceExecuteAsync, Tools } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
-import type { DocHyperLinkType } from '@univerjs/docs-hyper-link';
 import { AddDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
 
 export interface IAddDocHyperLinkCommandParams {

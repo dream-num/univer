@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody, IParagraph, ITextRange } from '@univerjs/core';
-import { CommandType, composeBody, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, Tools, updateAttributeByInsert } from '@univerjs/core';
+import type { ICommand, IParagraph } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, Tools, updateAttributeByInsert } from '@univerjs/core';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { getInsertSelection } from '../../basics/selection';

@@ -61,7 +61,7 @@ export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
     };
 }
 
-function getParagraphInfoBySpan(node: IDocumentSkeletonGlyph) {
+function getParagraphInfoByGlyph(node: IDocumentSkeletonGlyph) {
     const line = node.parent?.parent;
     const column = line?.parent;
 
@@ -103,6 +103,7 @@ export interface ITextSelectionInnerParam {
     segmentId: string;
     isEditing: boolean;
     style: ITextSelectionStyle;
+    segmentPage: number;
 }
 
 export interface IActiveTextRange {
@@ -113,6 +114,7 @@ export interface IActiveTextRange {
     endNodePosition: Nullable<INodePosition>;
     direction: RANGE_DIRECTION;
     segmentId: string;
+    segmentPage: number;
     style: ITextSelectionStyle;
 }
 
@@ -130,42 +132,27 @@ export interface ITextSelectionRenderManager {
     readonly textSelectionInner$: Observable<Nullable<ITextSelectionInnerParam>>;
 
     __getEditorContainer(): HTMLElement;
-
     getViewPort(): Viewport;
-
     enableSelection(): void;
-
     disableSelection(): void;
-
     setSegment(id: string): void;
-
+    setSegmentPage(pageIndex: number): void;
+    getSegmentPage(): number;
     setStyle(style: ITextSelectionStyle): void;
-
     resetStyle(): void;
-
     removeAllTextRanges(): void;
-
     addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean): void;
-
     sync(): void;
-
     activate(x: number, y: number): void;
     deactivate(): void;
-
     hasFocus(): boolean;
     focus(): void;
     blur(): void;
-
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, document: Documents): void;
-
     dispose(): void;
-
     handleDblClick(evt: IPointerEvent | IMouseEvent): void;
-
     handleTripleClick(evt: IPointerEvent | IMouseEvent): void;
-
     eventTrigger(evt: IPointerEvent | IMouseEvent): void;
-
     setCursorManually(evtOffsetX: number, evtOffsetY: number): void;
 }
 
@@ -209,23 +196,17 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private readonly _onBlur$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onBlur$ = this._onBlur$.asObservable();
-
     private _container!: HTMLDivElement;
-
     private _inputParent!: HTMLDivElement;
-
     private _input!: HTMLDivElement;
-
     private _scrollTimers: ScrollTimer[] = [];
-
+    private _viewportScrollX: number = 0;
+    private _viewportScrollY: number = 0;
     private _rangeList: TextRange[] = [];
-
     private _currentSegmentId: string = '';
-
+    private _currentSegmentPage: number = -1;
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
-
     private _isSelectionEnabled: boolean = true;
-
     private _viewPortObserverMap = new Map<
         string,
         {
@@ -235,13 +216,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     >();
 
     private _isIMEInputApply = false;
-
     private _activeViewport!: Viewport;
-
     private _docSkeleton: Nullable<DocumentSkeleton>;
-
     private _scene: Nullable<Scene>;
-
     private _document: Nullable<Documents>;
     private _scenePointerMoveSubs: Array<Subscription> = [];
     private _scenePointerUpSubs: Array<Subscription> = [];
@@ -266,6 +243,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._currentSegmentId = id;
     }
 
+    setSegmentPage(pageIndex: number) {
+        this._currentSegmentPage = pageIndex;
+    }
+
+    getSegmentPage() {
+        return this._currentSegmentPage;
+    }
+
     setStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
         this._selectionStyle = style;
     }
@@ -283,25 +268,61 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true) {
-        const { _scene: scene, _docSkeleton: docSkeleton } = this;
+        const {
+            _scene: scene, _docSkeleton: docSkeleton, _document: document,
+            _currentSegmentId: segmentId, _currentSegmentPage: segmentPage,
+            _selectionStyle: style,
+        } = this;
 
         for (const range of ranges) {
             const textSelection = cursorConvertToTextRange(scene!, {
                 style: this._selectionStyle,
                 ...range,
-            }, docSkeleton!, this._document!);
+                segmentId,
+                segmentPage,
+            }, docSkeleton!, document!);
 
             this._add(textSelection);
         }
 
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
-            segmentId: this._currentSegmentId,
-            style: this._selectionStyle,
+            segmentId,
+            segmentPage,
+            style,
             isEditing,
         });
 
         this._updateInputPosition();
+    }
+
+    setCursorManually(evtOffsetX: number, evtOffsetY: number) {
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+
+        const position = this._getNodePosition(startNode);
+
+        if (position == null) {
+            this._removeAllTextRanges();
+
+            return;
+        }
+
+        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+            position.isBack = true;
+        }
+
+        // TODO: @Jocs It's better to create a new textRange after remove all text ranges? because segment id will change.
+        this._updateTextRangeAnchorPosition(position);
+
+        this._activeSelectionRefresh();
+
+        this._textSelectionInner$.next({
+            textRanges: this._getAllTextRanges(),
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+            style: this._selectionStyle,
+            isEditing: false,
+        });
     }
 
     // Sync canvas selection to dom selection.
@@ -365,7 +386,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const paragraphInfo = getParagraphInfoBySpan(startNode.node);
+        const paragraphInfo = getParagraphInfoByGlyph(startNode.node);
         if (paragraphInfo == null) {
             return;
         }
@@ -423,7 +444,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const paragraphInfo = getParagraphInfoBySpan(startNode.node);
+        const paragraphInfo = getParagraphInfoByGlyph(startNode.node);
         if (paragraphInfo == null) {
             return;
         }
@@ -443,26 +464,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this.addTextRanges(textRanges, false);
     }
 
-    setCursorManually(evtOffsetX: number, evtOffsetY: number) {
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
-
-        const position = this._getNodePosition(startNode);
-
-        if (position == null) {
-            this._removeAllTextRanges();
-
-            return;
-        }
-
-        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
-            position.isBack = true;
-        }
-
-        this._updateTextRangeAnchorPosition(position);
-
-        this._activeSelectionRefresh();
-    }
-
     // Handle pointer down.
     eventTrigger(evt: IPointerEvent | IMouseEvent) {
         if (!this._scene || !this._isSelectionEnabled) {
@@ -477,10 +478,19 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const position = this._getNodePosition(startNode);
 
-        if (position == null) {
+        if (position == null || startNode == null) {
             this._removeAllTextRanges();
 
             return;
+        }
+        const { segmentId, segmentPage } = startNode;
+
+        if (segmentId && this._currentSegmentId && segmentId !== this._currentSegmentId) {
+            this.setSegment(segmentId);
+        }
+
+        if (segmentId && segmentPage !== this._currentSegmentPage) {
+            this.setSegmentPage(segmentPage);
         }
 
         if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
@@ -540,12 +550,15 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             scene.enableEvent();
 
-            this._textSelectionInner$.next({
+            const selectionInfo = {
                 textRanges: this._getAllTextRanges(),
                 segmentId: this._currentSegmentId,
+                segmentPage: this._currentSegmentPage,
                 style: this._selectionStyle,
                 isEditing: false,
-            });
+            };
+
+            this._textSelectionInner$.next(selectionInfo);
 
             this._scrollTimers.forEach((timer) => {
                 timer?.dispose();
@@ -570,7 +583,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             strokeWidth: 1.5,
             stroke: 'rgba(0, 0, 0, 0)',
             strokeActive: 'rgba(0, 0, 0, 1)',
-            fill: `rgba(${r}, ${g}, ${b}, ${a ?? 0.2})`,
+            fill: `rgba(${r}, ${g}, ${b}, ${a ?? 0.3})`,
         };
 
         this.setStyle(style);
@@ -601,6 +614,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             endNodePosition,
             direction,
             segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
             style: this._selectionStyle,
         };
     }
@@ -680,9 +694,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const { node: glyph, ratioX } = node;
+        const { node: glyph, ratioX, segmentPage } = node;
 
-        const position = this._docSkeleton?.findPositionByGlyph(glyph);
+        const position = this._docSkeleton?.findPositionByGlyph(glyph, segmentPage);
 
         if (position == null) {
             return;
@@ -1031,7 +1045,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             pageMarginTop,
         } = this._document!.getOffsetConfig();
 
-        return this._docSkeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
+        const nodeInfo = this._docSkeleton?.findNodeByCoord(
+            coord, pageLayoutType, pageMarginLeft, pageMarginTop
+        );
+
+        return nodeInfo;
     }
 
     private _detachEvent() {

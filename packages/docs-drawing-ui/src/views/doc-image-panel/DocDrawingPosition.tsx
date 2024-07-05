@@ -228,7 +228,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
         const { startIndex } = drawing;
 
-        const glyph = skeleton.findGlyphByCharIndex(startIndex);
+        const glyph = skeleton.findNodeByCharIndex(startIndex);
         const line = glyph?.parent?.parent;
         const column = line?.parent;
         const paragraphStartLine = column?.lines.find((l) => l.paragraphIndex === line?.paragraphIndex && l.paragraphStart);

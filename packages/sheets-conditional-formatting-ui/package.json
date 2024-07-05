@@ -81,7 +81,7 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.58",
-        "@univerjs/protocol": "0.1.38-alpha.6",
+        "@univerjs/protocol": "0.1.38-alpha.11",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",
         "react-grid-layout": "^1.4.4",

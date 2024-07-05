@@ -386,8 +386,8 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       nanoid:
         specifier: 5.0.7
         version: 5.0.7
@@ -423,8 +423,8 @@ importers:
   packages/data-validation:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -531,8 +531,8 @@ importers:
         specifier: ^9.14.1
         version: 9.14.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-picker:
-        specifier: ^4.6.6
-        version: 4.6.6(dayjs@1.11.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^4.6.7
+        version: 4.6.7(dayjs@1.11.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-segmented:
         specifier: ^2.3.0
         version: 2.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -742,12 +742,6 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.58
         version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@univerjs/thread-comment':
-        specifier: workspace:*
-        version: link:../thread-comment
-      '@univerjs/thread-comment-ui':
-        specifier: workspace:*
-        version: link:../thread-comment-ui
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -761,6 +755,12 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../thread-comment-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1170,8 +1170,8 @@ importers:
   packages/sheets:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1207,8 +1207,8 @@ importers:
   packages/sheets-conditional-formatting:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1256,8 +1256,8 @@ importers:
         specifier: ^0.1.58
         version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       lodash.get:
         specifier: ^4.4.2
         version: 4.4.2
@@ -1344,8 +1344,8 @@ importers:
         specifier: ^0.1.58
         version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1526,8 +1526,8 @@ importers:
         specifier: ^0.1.58
         version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-virtual-list:
-        specifier: ^3.11.5
-        version: 3.14.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^3.14.5
+        version: 3.14.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
         version: 18.3.1(react@18.3.1)
@@ -1587,8 +1587,8 @@ importers:
   packages/sheets-find-replace:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1704,8 +1704,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1943,18 +1943,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-thread-comment-base':
-        specifier: workspace:*
-        version: link:../sheets-thread-comment-base
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
-      '@univerjs/thread-comment':
-        specifier: workspace:*
-        version: link:../thread-comment
-      '@univerjs/thread-comment-ui':
-        specifier: workspace:*
-        version: link:../thread-comment-ui
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1968,6 +1959,15 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets-thread-comment-base':
+        specifier: workspace:*
+        version: link:../sheets-thread-comment-base
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../thread-comment-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1998,9 +1998,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/thread-comment':
-        specifier: workspace:*
-        version: link:../thread-comment
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2014,6 +2011,9 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../thread-comment
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -2045,8 +2045,8 @@ importers:
         specifier: ^0.1.58
         version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -2236,8 +2236,8 @@ importers:
   packages/thread-comment:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2267,11 +2267,8 @@ importers:
         specifier: ^0.1.58
         version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
-      '@univerjs/thread-comment':
-        specifier: workspace:*
-        version: link:../thread-comment
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2288,6 +2285,9 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../thread-comment
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -2419,6 +2419,9 @@ importers:
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
         version: link:../docs-drawing-ui
+      '@univerjs/docs-thread-comment-ui':
+        specifier: workspace:*
+        version: link:../docs-thread-comment-ui
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
@@ -2447,8 +2450,8 @@ importers:
         specifier: workspace:*
         version: link:../network
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2540,8 +2543,8 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
       monaco-editor:
-        specifier: 0.49.0
-        version: 0.49.0
+        specifier: 0.50.0
+        version: 0.50.0
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -2555,11 +2558,8 @@ importers:
   packages/uniscript:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.38-alpha.6
-        version: 0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
+        specifier: 0.1.38-alpha.11
+        version: 0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       react:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
         version: 18.3.1
@@ -2579,6 +2579,9 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -2592,8 +2595,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       monaco-editor:
-        specifier: 0.49.0
-        version: 0.49.0
+        specifier: 0.50.0
+        version: 0.50.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -5256,8 +5259,8 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/protocol@0.1.38-alpha.6':
-    resolution: {integrity: sha512-CVA3iDkhh4KWdE+zHryIoFJlUluNLJPpSW2gfe6KKYnZrM87vWlgx2CqV13HeXpnwpqi9S+2qjpUNqWtRAd0jw==}
+  '@univerjs/protocol@0.1.38-alpha.11':
+    resolution: {integrity: sha512-oeq9nLUnilGCZOZnDXc2LJ01byTgTHhtqhZ4OkBJbIXcDxZ7K4J4Ag9rD4eNchUEYiUAAQoWhMq5knoxQpH8Xg==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': ^1.9.14
@@ -8493,9 +8496,6 @@ packages:
   mlly@1.7.1:
     resolution: {integrity: sha512-rrVRZRELyQzrIUAVMHxP97kv+G786pHmOKzuFII8zDYahFBS7qnHh2AlYSl1GAHhaMPCz6/oHjVMcfFYgFYHgA==}
 
-  monaco-editor@0.49.0:
-    resolution: {integrity: sha512-2I8/T3X/hLxB2oPHgqcNYUVdA/ZEFShT7IAujifIPMfKkNbLOqY8XCoyHCXrsdjb36dW9MwoTwBCFpXKMwNwaQ==}
-
   monaco-editor@0.50.0:
     resolution: {integrity: sha512-8CclLCmrRRh+sul7C08BmPBP3P8wVWfBHomsTcndxg5NRCEPfu/mc2AGU8k37ajjDVXcXFc12ORAMUkmk+lkFA==}
 
@@ -9197,8 +9197,8 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
 
-  rc-picker@4.6.6:
-    resolution: {integrity: sha512-sEWARCNlodubP7/IM6nXHDDIuKZ3gYd5CpS2cYcNORa2telX3nAfllqnGSGjGEFvdtyW+IqGAVatLOmFT0lKYg==}
+  rc-picker@4.6.7:
+    resolution: {integrity: sha512-ZntxLH863jdNPZq2i6e2+1iXpRfYKHjNfUGgoObA1YExuWAnTCHpZzOkBuS43GnVcnp2MPDp78pH9OZJFd2hLw==}
     engines: {node: '>=8.x'}
     peerDependencies:
       date-fns: '>= 2.x'
@@ -14052,7 +14052,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@univerjs/protocol@0.1.38-alpha.6(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.38-alpha.11(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
@@ -17693,8 +17693,6 @@ snapshots:
       pkg-types: 1.1.1
       ufo: 1.5.3
 
-  monaco-editor@0.49.0: {}
-
   monaco-editor@0.50.0: {}
 
   moo-color@1.0.3:
@@ -18448,7 +18446,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  rc-picker@4.6.6(dayjs@1.11.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  rc-picker@4.6.7(dayjs@1.11.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.7
       '@rc-component/trigger': 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

@@ -404,5 +404,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         const unitId = params[0].unitId;
 
         this._drawingManagerService.registerDrawingData(unitId, this._sheetDrawingService.getDrawingDataForUnit(unitId));
+        this._drawingManagerService.initializeNotification(unitId);
     }
 }

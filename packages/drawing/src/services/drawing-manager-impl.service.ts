@@ -169,7 +169,16 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     registerDrawingData(unitId: string, data: IDrawingSubunitMap<T>) {
         this.drawingManagerData[unitId] = data;
+    }
+
+    initializeNotification(unitId: string) {
         const drawings: T[] = [];
+        const data = this.drawingManagerData[unitId];
+
+        if (data == null) {
+            return;
+        }
+
         Object.keys(data).forEach((subUnitId) => {
             this._establishDrawingMap(unitId, subUnitId);
 
@@ -177,6 +186,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
             Object.keys(subUnitData.data).forEach((drawingId) => {
                 const drawing = subUnitData.data[drawingId];
+                drawing.unitId = unitId;
+                drawing.subUnitId = subUnitId;
                 drawings.push(drawing);
             });
         });

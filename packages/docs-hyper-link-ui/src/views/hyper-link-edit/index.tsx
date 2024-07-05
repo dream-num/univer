@@ -22,6 +22,7 @@ import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { DocumentDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
@@ -49,16 +50,31 @@ export const DocHyperLinkEdit = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const textSelectionRenderManager = useDependency(ITextSelectionRenderManager);
+    const textSelectionManagerService = useDependency(TextSelectionManagerService);
     const [link, setLink] = useState('');
     const [showError, setShowError] = useState(false);
     const isLegal = Tools.isLegalUrl(link);
     const doc = editingId
         ? univerInstanceService.getUnit<DocumentDataModel>(editingId.unitId, UniverInstanceType.UNIVER_DOC) :
         univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+
     useEffect(() => {
-        const linkDetail = editingId ? hyperLinkModel.getLink(editingId.unitId, editingId.linkId) : null;
-        setLink(linkDetail?.payload ?? '');
-    }, [editingId, hyperLinkModel]);
+        if (editingId) {
+            const linkDetail = editingId ? hyperLinkModel.getLink(editingId.unitId, editingId.linkId) : null;
+            setLink(linkDetail?.payload ?? '');
+            return;
+        }
+        const activeRange = textSelectionManagerService.getActiveRange();
+        if (!activeRange) {
+            return;
+        }
+        const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const matchedRange = doc?.getBody()?.customRanges?.find((i) => Math.max(activeRange.startOffset, i.startIndex) <= Math.min(activeRange.endOffset - 1, i.endIndex));
+        if (doc && matchedRange) {
+            const linkDetail = hyperLinkModel.getLink(doc.getUnitId(), matchedRange.rangeId);
+            setLink(linkDetail?.payload ?? '');
+        }
+    }, [editingId, hyperLinkModel, textSelectionManagerService, univerInstanceService]);
 
     useEffect(() => {
         textSelectionRenderManager.blur();

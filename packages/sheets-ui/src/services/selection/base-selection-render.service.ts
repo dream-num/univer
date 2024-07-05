@@ -82,8 +82,8 @@ export const ISheetSelectionRenderService = createIdentifier<ISheetSelectionRend
  */
 export class BaseSelectionRenderService extends Disposable implements ISheetSelectionRenderService, IRenderModule {
     private _downObserver: Nullable<Subscription>;
-    private _moveEventSubscription: Nullable<Subscription>;
-    private _upEventSubscription: Nullable<Subscription>;
+    protected _scenePointerMoveSub: Nullable<Subscription>;
+    protected _scenePointerUpSub: Nullable<Subscription>;
 
     private _controlFillConfig$: BehaviorSubject<IControlFillConfig | null> =
         new BehaviorSubject<IControlFillConfig | null>(null);
@@ -92,7 +92,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     protected _selectionControls: SelectionControl[] = []; // sheetID:Controls
 
-    protected _activeCellRangeOfCurrSelection: IRangeWithCoord = {
+    protected _startRangeWhenPointerDown: IRangeWithCoord = {
         startY: 0,
         endY: 0,
         startX: 0,
@@ -328,6 +328,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     endSelection() {
         this._clearEndingListeners();
+
+        // ---> _updateSelections --> executeCommand(SetSelectionsOperation.id --> selectionManager.setSelections
+        // ---> _selectionMoveEnd$.next --> _initSelectionChangeListener _reset --> _clearSelectionControls
+
         this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
         // when selection mouse up, enable the short cut service
@@ -340,8 +344,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         this._downObserver?.unsubscribe();
         this._downObserver = null;
-        this._upEventSubscription?.unsubscribe();
-        this._upEventSubscription = null;
+        this._scenePointerUpSub?.unsubscribe();
+        this._scenePointerUpSub = null;
     }
 
     resetAndEndSelection() {
@@ -398,7 +402,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const { rangeWithCoord: cursorCellRange, primaryWithCoord: primaryCursorCellRange } = cursorCellRangeInfo;
         const cursorCellRangeWithRangeType: IRangeWithCoord = { ...cursorCellRange, rangeType };
-        this._activeCellRangeOfCurrSelection = { ...cursorCellRange, rangeType };
+        this._startRangeWhenPointerDown = { ...cursorCellRange, rangeType };
 
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
         const curControls = this.getSelectionControls();
@@ -480,7 +484,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._setupPointerMoveListener(viewportMain, activeSelectionControl!, scrollTimer, rangeType, startViewportPosX, startViewportPosY);
 
         this._shortcutService.setDisable(true);
-        this._upEventSubscription = scene.onPointerUp$.subscribeEvent(() => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             this._clearEndingListeners();
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
             this._shortcutService.setDisable(false);
@@ -504,7 +508,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const scene = this._scene;
         const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([startViewportPosX, startViewportPosY]));
         // eslint-disable-next-line max-lines-per-function, complexity
-        this._moveEventSubscription = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
@@ -703,7 +707,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
 
         const { rangeWithCoord: cursorCellRange } = cursorCellRangeInfo;
-        const activeCellRange = this._activeCellRangeOfCurrSelection;
+        const activeCellRange = this._startRangeWhenPointerDown;
 
         let newSelectionRange: IRange = {
             startRow: Math.min(cursorCellRange.startRow, activeCellRange.startRow),
@@ -754,17 +758,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     private _clearMove(): void {
-        this._moveEventSubscription?.unsubscribe();
-        this._moveEventSubscription = null;
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerMoveSub = null;
     }
 
-    private _clearEndingListeners() {
+    protected _clearEndingListeners() {
         const scene = this._scene;
         scene.enableEvent();
 
         this._clearMove();
-        this._upEventSubscription?.unsubscribe();
-        this._upEventSubscription = null;
+        this._scenePointerUpSub?.unsubscribe();
+        this._scenePointerUpSub = null;
 
         this._scrollTimer?.dispose();
 
@@ -774,7 +778,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._cancelUpSubscription = null;
     }
 
-    private _addEndingListeners() {
+    protected _addEndingListeners() {
         const scene = this._scene!;
         const mainScene = scene.getEngine()?.activeScene;
         if (!mainScene || mainScene === scene) {
@@ -922,7 +926,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
          */
         const activeCell = skeleton.getCellByIndex(actualRow, actualColumn);
 
-        this._activeCellRangeOfCurrSelection = {
+        this._startRangeWhenPointerDown = {
             startColumn: activeCell.mergeInfo.startColumn,
             startRow: activeCell.mergeInfo.startRow,
             endColumn: activeCell.mergeInfo.endColumn,

@@ -22,7 +22,7 @@ import {
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
-import { getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import { DocumentEditArea, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 
@@ -317,19 +317,21 @@ export class DocDrawingTransformerController extends Disposable {
         const { left, top } = object;
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
         let isBack = false;
+        let segmentPageIndex = -1;
         const HALF = 0.5;
         const nodeInfo = skeleton?.findNodeByCoord(Vector2.create(left - docsLeft, top - docsTop), pageLayoutType, pageMarginLeft, pageMarginTop);
         if (nodeInfo) {
-            const { node, ratioX } = nodeInfo;
+            const { node, ratioX, segmentPage } = nodeInfo;
             isBack = ratioX < HALF;
             glyphAnchor = node;
+            segmentPageIndex = segmentPage;
         }
 
         if (glyphAnchor == null) {
             return;
         }
 
-        const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor);
+        const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor, segmentPageIndex);
         const docObject = this._getDocObject();
 
         if (nodePosition == null || skeleton == null || docObject == null) {
@@ -358,13 +360,15 @@ export class DocDrawingTransformerController extends Disposable {
     private _getDrawingAnchor(drawing: IDocDrawingBase, object: BaseObject): Nullable<IDrawingAnchor> {
         const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
+        const viewModel = skeleton?.getViewModel();
 
         const skeletonData = skeleton?.getSkeletonData();
 
-        if (skeletonData == null || currentRender == null) {
+        if (skeletonData == null || currentRender == null || viewModel == null) {
             return;
         }
 
+        const editArea = viewModel.getEditArea();
         const { mainComponent } = currentRender;
         const documentComponent = mainComponent as Documents;
         const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documentComponent.getOffsetConfig();
@@ -373,6 +377,7 @@ export class DocDrawingTransformerController extends Disposable {
         const { positionV, positionH } = drawing.docTransform;
 
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
+        let segmentPage = -1;
         const isBack = false;
         const docTransform = {
             ...drawing.docTransform,
@@ -385,6 +390,7 @@ export class DocDrawingTransformerController extends Disposable {
 
         this._liquid.reset();
 
+        // TODO: 兼容页眉页脚
         for (const page of pages) {
             this._liquid.translatePagePadding(page);
             const { sections } = page;
@@ -412,8 +418,10 @@ export class DocDrawingTransformerController extends Disposable {
 
                             if (positionV.relativeFrom === ObjectRelativeFromV.LINE) {
                                 glyphAnchor = line.divides[0].glyphGroup[0];
+                                segmentPage = editArea === DocumentEditArea.BODY ? -1 : pages.indexOf(page);
                             } else {
                                 glyphAnchor = paragraphStartLine.divides[0].glyphGroup[0];
+                                segmentPage = editArea === DocumentEditArea.BODY ? -1 : pages.indexOf(page);
                             }
 
                             docTransform.positionH = {
@@ -476,7 +484,7 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor);
+        const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor, segmentPage);
         const docObject = this._getDocObject();
         if (nodePosition == null || skeleton == null || docObject == null) {
             return;

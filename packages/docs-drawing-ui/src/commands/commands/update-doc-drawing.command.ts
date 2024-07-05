@@ -386,6 +386,15 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
+        const renderManagerService = accessor.get(IRenderManagerService);
+
+        const renderObject = renderManagerService.getRenderById(params.unitId);
+        const scene = renderObject?.scene;
+        if (scene == null) {
+            return false;
+        }
+        const transformer = scene.getTransformerByCreate();
+
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (documentDataModel == null) {
             return false;
@@ -429,6 +438,8 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
+
+        transformer.refreshControls();
 
         return Boolean(result);
     },

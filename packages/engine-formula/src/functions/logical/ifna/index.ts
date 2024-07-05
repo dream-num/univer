@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
+import { ErrorType } from '../../../basics/error-type';
 
 export class Ifna extends BaseFunction {
     override minParams = 2;
@@ -34,24 +34,31 @@ export class Ifna extends BaseFunction {
             return valueIfNa;
         }
 
-        const singleValue = this._getSingleValueObject(value);
-        const singleValueIfNa = this._getSingleValueObject(valueIfNa);
-
-        if (singleValue.isNull()) {
-            return NumberValueObject.create(0);
+        if (!value.isArray()) {
+            return value.isError() && (value as ErrorValueObject).getErrorType() === ErrorType.NA ? valueIfNa : value;
         }
 
-        if (singleValue.isArray() || singleValueIfNa.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
-        }
+        // get max row length
+        const maxRowLength = Math.max(
+            value.isArray() ? (value as ArrayValueObject).getRowCount() : 1,
+            valueIfNa.isArray() ? (valueIfNa as ArrayValueObject).getRowCount() : 1
+        );
 
-        return singleValue.isError() && (singleValue as ErrorValueObject).getErrorType() === ErrorType.NA ? singleValueIfNa : singleValue;
-    }
+        // get max column length
+        const maxColumnLength = Math.max(
+            value.isArray() ? (value as ArrayValueObject).getColumnCount() : 1,
+            valueIfNa.isArray() ? (valueIfNa as ArrayValueObject).getColumnCount() : 1
+        );
 
-    private _getSingleValueObject(valueObject: BaseValueObject) {
-        if (valueObject.isArray() && (valueObject as ArrayValueObject).getRowCount() === 1 && (valueObject as ArrayValueObject).getColumnCount() === 1) {
-            return (valueObject as ArrayValueObject).getFirstCell();
-        }
-        return valueObject;
+        const valueArray = expandArrayValueObject(maxRowLength, maxColumnLength, value);
+        const valueIfNaArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfNa);
+
+        valueArray.iterator((cellValue, rowIndex, columnIndex) => {
+            if (cellValue?.isError() && (cellValue as ErrorValueObject).getErrorType() === ErrorType.NA) {
+                valueArray.set(rowIndex, columnIndex, valueIfNaArray.get(rowIndex, columnIndex));
+            }
+        });
+
+        return valueArray;
     }
 }

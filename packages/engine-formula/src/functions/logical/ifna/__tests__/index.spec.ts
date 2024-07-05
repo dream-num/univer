@@ -29,31 +29,31 @@ describe('Test ifna function', () => {
     describe('Ifna', () => {
         it('Value is normal', () => {
             const value = NumberValueObject.create(1);
-            const valueIfNa = StringValueObject.create('error');
+            const valueIfNa = StringValueObject.create('N/A');
             const result = textFunction.calculate(value, valueIfNa);
             expect(result.getValue()).toBe(1);
         });
 
         it('Value is #N/A error', () => {
             const value = ErrorValueObject.create(ErrorType.NA);
-            const valueIfNa = StringValueObject.create('error');
+            const valueIfNa = StringValueObject.create('N/A');
             const result = textFunction.calculate(value, valueIfNa);
-            expect(result.getValue()).toBe('error');
+            expect(result.getValue()).toBe('N/A');
         });
 
-        it('Value is other error', () => {
-            const value = ErrorValueObject.create(ErrorType.NAME);
-            const valueIfNa = StringValueObject.create('error');
+        it('Value is another error type', () => {
+            const value = ErrorValueObject.create(ErrorType.VALUE);
+            const valueIfNa = StringValueObject.create('N/A');
             const result = textFunction.calculate(value, valueIfNa);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
-        it('Value is array', () => {
+        it('Value is array with #N/A error', () => {
             const value = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     ['#N/A'],
-                    [1],
+                    [3],
                 ]),
                 rowCount: 3,
                 columnCount: 1,
@@ -62,20 +62,23 @@ describe('Test ifna function', () => {
                 row: 0,
                 column: 0,
             });
-            const valueIfNa = StringValueObject.create('error');
+            const valueIfNa = StringValueObject.create('N/A');
             const result = textFunction.calculate(value, valueIfNa);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                [1],
+                ['N/A'],
+                [3],
+            ]);
         });
 
         it('Value is array and valueIfNa is array', () => {
             const value = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [1],
-                    ['#N/A'],
-                    ['#N/A'],
+                    [1, '#N/A', 3],
+                    ['#N/A', 5, '#N/A'],
                 ]),
-                rowCount: 3,
-                columnCount: 1,
+                rowCount: 2,
+                columnCount: 3,
                 unitId: '',
                 sheetId: '',
                 row: 0,
@@ -84,8 +87,9 @@ describe('Test ifna function', () => {
             const valueIfNa = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['a1', 'a2', 'a3'],
+                    ['b1', 'b2', 'b3'],
                 ]),
-                rowCount: 1,
+                rowCount: 2,
                 columnCount: 3,
                 unitId: '',
                 sheetId: '',
@@ -93,36 +97,10 @@ describe('Test ifna function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(value, valueIfNa);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
-        });
-
-        it('Mixed array with different dimensions', () => {
-            const value = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    ['#N/A', 2, 3],
-                    [4, '#N/A', 6],
-                    [7, 8, '#N/A'],
-                ]),
-                rowCount: 3,
-                columnCount: 3,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const valueIfNa = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    ['a', 'b', 'c'],
-                ]),
-                rowCount: 1,
-                columnCount: 3,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = textFunction.calculate(value, valueIfNa);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                [1, 'a2', 3],
+                ['b1', 5, 'b3'],
+            ]);
         });
     });
 });

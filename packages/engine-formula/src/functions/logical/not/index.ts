@@ -31,11 +31,20 @@ export class Not extends BaseFunction {
         }
 
         if (logicalValue.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            const resultArray = (logicalValue as ArrayValueObject).map((value) => {
+                if (value?.isError()) {
+                    return value;
+                } else if (value?.isBoolean() || value?.isNumber()) {
+                    return BooleanValueObject.create(!value.getValue());
+                } else {
+                    return ErrorValueObject.create(ErrorType.VALUE);
+                }
+            });
+            return resultArray;
         } else if (logicalValue.isBoolean() || logicalValue.isNumber()) {
-            return new BooleanValueObject(!logicalValue.getValue());
+            return BooleanValueObject.create(!logicalValue.getValue());
         } else {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
     }
 }

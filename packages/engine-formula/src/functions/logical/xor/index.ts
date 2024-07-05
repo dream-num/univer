@@ -17,7 +17,7 @@
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject, type StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Xor extends BaseFunction {
@@ -40,13 +40,8 @@ export class Xor extends BaseFunction {
                     if (value?.isError()) {
                         errorValue = value;
                         return false;
-                    } else if (value?.isBoolean() || value?.isNumber() || value?.isString()) {
-                        const result = this._isTruthy(value);
-                        if (result instanceof ErrorValueObject) {
-                            errorValue = result;
-                            return false;
-                        }
-                        if (result) {
+                    } else if (value?.isBoolean() || value?.isNumber()) {
+                        if (value.getValue()) {
                             trueCount++;
                         }
                         noBoolean = false;
@@ -56,34 +51,14 @@ export class Xor extends BaseFunction {
                 if (errorValue) {
                     return errorValue;
                 }
-            } else if (logicalValue.isBoolean() || logicalValue.isNumber() || logicalValue.isString()) {
-                const result = this._isTruthy(logicalValue);
-                if (result instanceof ErrorValueObject) {
-                    return result;
-                }
-                if (result) {
+            } else if (logicalValue.isBoolean() || logicalValue.isNumber()) {
+                if (logicalValue.getValue()) {
                     trueCount++;
                 }
                 noBoolean = false;
             }
         }
 
-        return noBoolean ? new ErrorValueObject(ErrorType.VALUE) : new BooleanValueObject(trueCount % 2 === 1);
-    }
-
-    private _isTruthy(value: BaseValueObject): boolean | ErrorValueObject {
-        if (value.isBoolean() || value.isNumber()) {
-            return !!value.getValue();
-        } else if (value.isString()) {
-            const stringValue = (value as StringValueObject).getValue().toLowerCase();
-            if (stringValue === 'true') {
-                return true;
-            } else if (stringValue === 'false') {
-                return false;
-            } else {
-                return new ErrorValueObject(ErrorType.VALUE);
-            }
-        }
-        return false;
+        return noBoolean ? ErrorValueObject.create(ErrorType.VALUE) : BooleanValueObject.create(trueCount % 2 === 1);
     }
 }

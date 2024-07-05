@@ -17,11 +17,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { BooleanValueObject, NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { Ifs } from '../index';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { Ifs } from '../index';
 
 describe('Test ifs function', () => {
     const textFunction = new Ifs(FUNCTION_NAMES_LOGICAL.IFS);
@@ -41,7 +41,7 @@ describe('Test ifs function', () => {
             expect(result.getValue()).toBe(ErrorType.NA);
         });
 
-        it('Multiple conditions with first true', () => {
+        it('Multiple conditions first true', () => {
             const condition1 = BooleanValueObject.create(true);
             const result1 = NumberValueObject.create(1);
             const condition2 = BooleanValueObject.create(false);
@@ -50,7 +50,7 @@ describe('Test ifs function', () => {
             expect(result.getValue()).toBe(1);
         });
 
-        it('Multiple conditions with second true', () => {
+        it('Multiple conditions second true', () => {
             const condition1 = BooleanValueObject.create(false);
             const result1 = NumberValueObject.create(1);
             const condition2 = BooleanValueObject.create(true);
@@ -59,79 +59,17 @@ describe('Test ifs function', () => {
             expect(result.getValue()).toBe(2);
         });
 
-        it('Condition array', () => {
-            const conditionArray = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [false],
-                    [true],
-                    [false],
-                ]),
-                rowCount: 3,
-                columnCount: 1,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result1 = NumberValueObject.create(1);
-            const result = textFunction.calculate(conditionArray, result1);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
-        });
-
-        it('Result array', () => {
-            const condition1 = BooleanValueObject.create(true);
-            const resultArray = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1],
-                    [2],
-                    [3],
-                ]),
-                rowCount: 3,
-                columnCount: 1,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = textFunction.calculate(condition1, resultArray);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
-        });
-
-        it('Condition and result arrays', () => {
-            const conditionArray = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [true],
-                    [false],
-                    [true],
-                ]),
-                rowCount: 3,
-                columnCount: 1,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const resultArray = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1],
-                    [2],
-                    [3],
-                ]),
-                rowCount: 3,
-                columnCount: 1,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = textFunction.calculate(conditionArray, resultArray);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
-        });
-
-        it('Mixed conditions and results', () => {
+        it('All conditions false', () => {
             const condition1 = BooleanValueObject.create(false);
             const result1 = NumberValueObject.create(1);
-            const conditionArray = ArrayValueObject.create({
+            const condition2 = BooleanValueObject.create(false);
+            const result2 = NumberValueObject.create(2);
+            const result = textFunction.calculate(condition1, result1, condition2, result2);
+            expect(result.getValue()).toBe(ErrorType.NA);
+        });
+
+        it('Condition is array', () => {
+            const condition1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [false],
                     [true],
@@ -144,11 +82,21 @@ describe('Test ifs function', () => {
                 row: 0,
                 column: 0,
             });
-            const resultArray = ArrayValueObject.create({
+            const result1 = NumberValueObject.create(1);
+            const result = textFunction.calculate(condition1, result1);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                [ErrorType.NA],
+                [1],
+                [ErrorType.NA],
+            ]);
+        });
+
+        it('Multiple conditions as arrays', () => {
+            const condition1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [2],
-                    [3],
-                    [4],
+                    [false],
+                    [true],
+                    [false],
                 ]),
                 rowCount: 3,
                 columnCount: 1,
@@ -157,29 +105,104 @@ describe('Test ifs function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(condition1, result1, conditionArray, resultArray);
+            const result1 = NumberValueObject.create(1);
+            const condition2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [true],
+                    [false],
+                    [true],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = NumberValueObject.create(2);
+            const result = textFunction.calculate(condition1, result1, condition2, result2);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                [2],
+                [1],
+                [2],
+            ]);
+        });
+
+        it('Conditions and results are arrays', () => {
+            const condition1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [false, true],
+                    [true, false],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                    [3, 4],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const condition2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [true, false],
+                    [false, true],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [5, 6],
+                    [7, 8],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = textFunction.calculate(condition1, result1, condition2, result2);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                [5, 2],
+                [3, 8],
+            ]);
+        });
+
+        it('Handles null values correctly', () => {
+            const condition1 = NullValueObject.create();
+            const result1 = NumberValueObject.create(1);
+            const result = textFunction.calculate(condition1, result1);
+            expect(result.getValue()).toBe(ErrorType.NA);
+        });
+
+        it('Handles error values in conditions', () => {
+            const condition1 = ErrorValueObject.create(ErrorType.VALUE);
+            const result1 = NumberValueObject.create(1);
+            const result = textFunction.calculate(condition1, result1);
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
-        it('Condition with error', () => {
-            const condition1 = ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-            const result1 = NumberValueObject.create(1);
-            const result = textFunction.calculate(condition1, result1);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
-        });
-
-        it('Result with error', () => {
+        it('Handles error values in results', () => {
             const condition1 = BooleanValueObject.create(true);
-            const result1 = ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            const result1 = ErrorValueObject.create(ErrorType.VALUE);
             const result = textFunction.calculate(condition1, result1);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
-        });
-
-        it('Unmatched condition and result lengths', () => {
-            const condition1 = BooleanValueObject.create(true);
-            const result1 = NumberValueObject.create(1);
-            const result = textFunction.calculate(condition1, result1, condition1);
-            expect(result.getValue()).toBe(ErrorType.NA);
+            expect(result.getValue()).toBe(ErrorType.VALUE);
         });
     });
 });

@@ -18,7 +18,6 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { False } from '../index';
-import { BooleanValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test false function', () => {
     const textFunction = new False(FUNCTION_NAMES_LOGICAL.FALSE);

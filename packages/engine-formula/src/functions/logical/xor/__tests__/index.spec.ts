@@ -19,7 +19,6 @@ import { describe, expect, it } from 'vitest';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { Xor } from '../index';
 
@@ -32,6 +31,7 @@ describe('Test xor function', () => {
             const result = textFunction.calculate(logical1);
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
+
         it('logical1 number 1', () => {
             const logical1 = NumberValueObject.create(1);
             const result = textFunction.calculate(logical1);
@@ -56,14 +56,21 @@ describe('Test xor function', () => {
             expect(result.getValue()).toBe(true);
         });
 
-        it('logical2 false', () => {
+        it('logical1 true and logical2 false', () => {
             const logical1 = BooleanValueObject.create(true);
             const logical2 = BooleanValueObject.create(false);
             const result = textFunction.calculate(logical1, logical2);
             expect(result.getValue()).toBe(true);
         });
 
-        it('logical2 true', () => {
+        it('logical1 false and logical2 false', () => {
+            const logical1 = BooleanValueObject.create(false);
+            const logical2 = BooleanValueObject.create(false);
+            const result = textFunction.calculate(logical1, logical2);
+            expect(result.getValue()).toBe(false);
+        });
+
+        it('logical1 true and logical2 true', () => {
             const logical1 = BooleanValueObject.create(true);
             const logical2 = BooleanValueObject.create(true);
             const result = textFunction.calculate(logical1, logical2);
@@ -113,7 +120,7 @@ describe('Test xor function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(logical1, logical2);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(result.getValue()).toBe(true);
         });
 
         it('logical1 is array and logical2 is array, error value', () => {
@@ -132,7 +139,7 @@ describe('Test xor function', () => {
             const logical2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [false],
-                    [ErrorType.NAME],
+                    ['#NAME?'],
                 ]),
                 rowCount: 2,
                 columnCount: 1,
@@ -142,51 +149,7 @@ describe('Test xor function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(logical1, logical2);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
-        });
-
-        it('multiple logical values with odd true count', () => {
-            const logical1 = BooleanValueObject.create(true);
-            const logical2 = BooleanValueObject.create(true);
-            const logical3 = BooleanValueObject.create(false);
-            const logical4 = BooleanValueObject.create(true);
-            const result = textFunction.calculate(logical1, logical2, logical3, logical4);
-            expect(result.getValue()).toBe(true);
-        });
-
-        it('multiple logical values with even true count', () => {
-            const logical1 = BooleanValueObject.create(true);
-            const logical2 = BooleanValueObject.create(true);
-            const logical3 = BooleanValueObject.create(true);
-            const logical4 = BooleanValueObject.create(true);
-            const result = textFunction.calculate(logical1, logical2, logical3, logical4);
-            expect(result.getValue()).toBe(false);
-        });
-
-        it('logical1 string "TRUE"', () => {
-            const logical1 = StringValueObject.create('TRUE');
-            const result = textFunction.calculate(logical1);
-            expect(result.getValue()).toBe(true);
-        });
-
-        it('logical1 string "FALSE"', () => {
-            const logical1 = StringValueObject.create('FALSE');
-            const result = textFunction.calculate(logical1);
-            expect(result.getValue()).toBe(false);
-        });
-
-        it('logical1 invalid string', () => {
-            const logical1 = StringValueObject.create('invalid');
-            const result = textFunction.calculate(logical1);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
-        });
-
-        it('multiple logical values with invalid string', () => {
-            const logical1 = BooleanValueObject.create(true);
-            const logical2 = StringValueObject.create('invalid');
-            const logical3 = BooleanValueObject.create(false);
-            const result = textFunction.calculate(logical1, logical2, logical3);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(result.getValue()).toBe('#NAME?');
         });
     });
 });

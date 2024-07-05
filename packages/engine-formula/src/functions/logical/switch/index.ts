@@ -15,74 +15,90 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NullValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Switch extends BaseFunction {
     override minParams = 3;
 
-    override maxParams = 255;
-
-    override calculate(expression: BaseValueObject, ...casesAndResults: BaseValueObject[]): BaseValueObject {
+    override calculate(expression: BaseValueObject, ...args: BaseValueObject[]) {
         if (expression.isError()) {
             return expression;
         }
 
-        // Check if the expression is an array and whether it has more than one cell
-        if (expression.isArray()) {
-            const arrayValueObject = expression as ArrayValueObject;
-            if (arrayValueObject.getRowCount() > 1 || arrayValueObject.getColumnCount() > 1) {
-                return new ErrorValueObject(ErrorType.VALUE);
-            }
+        const hasDefault = args.length % 2 !== 0;
+        const defaultValue = hasDefault ? args[args.length - 1] : NullValueObject.create();
+
+        if (!expression.isArray() && !args.some((arg) => arg.isArray())) {
+            return this._handleNonArrayInputs(expression, args, defaultValue, hasDefault);
         }
 
-        const expressionValue = this._getSingleValue(expression);
-        let defaultValue: BaseValueObject | null = null;
-
-        // Iterate over the cases and results
-        for (let i = 0; i < casesAndResults.length; i += 2) {
-            if (i + 1 >= casesAndResults.length) {
-                // Handle default case
-                defaultValue = casesAndResults[i];
-                if (defaultValue.isError()) {
-                    return defaultValue;
-                }
-                break;
-            }
-
-            const caseValue = casesAndResults[i];
-            const resultValue = casesAndResults[i + 1];
-
-            if (caseValue.isError()) {
-                return caseValue;
-            }
-
-            if (resultValue.isError()) {
-                return resultValue;
-            }
-
-            const caseValueSingle = this._getSingleValue(caseValue);
-
-            if (expressionValue === caseValueSingle) {
-                return resultValue;
-            }
-        }
-
-        // Return default value if no match found
-        return defaultValue || new ErrorValueObject(ErrorType.NA);
+        return this._handleArrayInputs(expression, args, defaultValue, hasDefault);
     }
 
-    private _getSingleValue(valueObject: BaseValueObject): string | number | boolean {
-        if (valueObject.isArray()) {
-            const arrayValueObject = valueObject as ArrayValueObject;
-            if (arrayValueObject.getRowCount() === 1 && arrayValueObject.getColumnCount() === 1) {
-                return arrayValueObject.getFirstCell().getValue();
+    private _handleNonArrayInputs(expression: BaseValueObject, args: BaseValueObject[], defaultValue: BaseValueObject, hasDefault: boolean) {
+        for (let i = 0; i < args.length - (hasDefault ? 1 : 0); i += 2) {
+            const switchValue = args[i];
+            const resultValue = args[i + 1];
+
+            if (switchValue.isNull()) {
+                continue;
             }
-            // In case it's an array, but we are only handling single cell arrays here
-            return arrayValueObject.getValue();
+
+            if (switchValue.isError()) {
+                return switchValue;
+            }
+
+            if (expression.getValue() === switchValue.getValue()) {
+                return resultValue.isNull() ? ErrorValueObject.create(ErrorType.NA) : resultValue;
+            }
         }
-        return valueObject.getValue();
+
+        return defaultValue.isNull() ? ErrorValueObject.create(ErrorType.NA) : defaultValue;
+    }
+
+    private _handleArrayInputs(expression: BaseValueObject, args: BaseValueObject[], defaultValue: BaseValueObject, hasDefault: boolean) {
+        const maxRowLength = Math.max(
+            expression.isArray() ? (expression as ArrayValueObject).getRowCount() : 1,
+            ...args.map((arg) => (arg.isArray() ? (arg as ArrayValueObject).getRowCount() : 1)),
+            defaultValue.isArray() ? (defaultValue as ArrayValueObject).getRowCount() : 1
+        );
+
+        const maxColumnLength = Math.max(
+            expression.isArray() ? (expression as ArrayValueObject).getColumnCount() : 1,
+            ...args.map((arg) => (arg.isArray() ? (arg as ArrayValueObject).getColumnCount() : 1)),
+            defaultValue.isArray() ? (defaultValue as ArrayValueObject).getColumnCount() : 1
+        );
+
+        const expandedExpression = expandArrayValueObject(maxRowLength, maxColumnLength, expression);
+        const expandedArgs = args.map((arg) =>
+            expandArrayValueObject(maxRowLength, maxColumnLength, arg, ErrorValueObject.create(ErrorType.NA))
+        );
+        const expandedDefault = expandArrayValueObject(maxRowLength, maxColumnLength, defaultValue, ErrorValueObject.create(ErrorType.NA));
+
+        return expandedExpression.map((expValue, rowIndex, columnIndex) => {
+            for (let i = 0; i < expandedArgs.length - (hasDefault ? 1 : 0); i += 2) {
+                const switchValue = expandedArgs[i].get(rowIndex, columnIndex) || NullValueObject.create();
+                const resultValue = expandedArgs[i + 1].get(rowIndex, columnIndex) || NullValueObject.create();
+
+                if (switchValue.isNull()) {
+                    continue;
+                }
+
+                if (switchValue.isError() || expValue.isError()) {
+                    return switchValue.isError() ? switchValue : expValue;
+                }
+
+                if (expValue.getValue() === switchValue.getValue()) {
+                    return resultValue.isNull() ? ErrorValueObject.create(ErrorType.NA) : resultValue;
+                }
+            }
+
+            const defaultCellValue = expandedDefault.get(rowIndex, columnIndex) || NullValueObject.create();
+            return defaultCellValue.isNull() ? ErrorValueObject.create(ErrorType.NA) : defaultCellValue;
+        });
     }
 }

@@ -18,7 +18,6 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { True } from '../index';
-import { BooleanValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test true function', () => {
     const textFunction = new True(FUNCTION_NAMES_LOGICAL.TRUE);

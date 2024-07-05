@@ -15,51 +15,79 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NullValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Ifs extends BaseFunction {
     override minParams = 2;
 
+    override maxParams = 255;
+
     override calculate(...params: BaseValueObject[]) {
         if (params.length % 2 !== 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        for (let i = 0; i < params.length; i += 2) {
-            const condition = params[i];
-            const result = params[i + 1];
-
-            if (condition.isError()) {
-                return condition;
-            }
-
-            if (result.isError()) {
-                return result;
-            }
-
-            // get single value object for condition
-            const singleCondition = this._getSingleValueObject(condition);
-            const singleResult = this._getSingleValueObject(result);
-
-            // Check if condition or result is an array (range), which should return a VALUE error
-            if (singleCondition.isArray() || singleResult.isArray()) {
-                return new ErrorValueObject(ErrorType.VALUE);
-            }
-
-            if (singleCondition.getValue()) {
-                return singleResult;
+        // Check for errors in input parameters
+        for (let i = 0; i < params.length; i++) {
+            if (params[i].isError()) {
+                return params[i];
             }
         }
 
-        return new ErrorValueObject(ErrorType.NA);
-    }
+        if (!params.some((param) => param.isArray())) {
+            // Handle non-array inputs
+            for (let i = 0; i < params.length; i += 2) {
+                const condition = params[i];
+                const result = params[i + 1];
 
-    private _getSingleValueObject(valueObject: BaseValueObject) {
-        if (valueObject.isArray() && (valueObject as ArrayValueObject).getRowCount() === 1 && (valueObject as ArrayValueObject).getColumnCount() === 1) {
-            return (valueObject as ArrayValueObject).getFirstCell();
+                if (condition.isNull()) {
+                    continue;
+                }
+
+                const conditionValue = condition.getValue();
+                if (conditionValue) {
+                    return result.isNull() ? ErrorValueObject.create(ErrorType.NA) : result;
+                }
+            }
+            return ErrorValueObject.create(ErrorType.NA);
         }
-        return valueObject;
+
+        // Determine max row and column length
+        const maxRowLength = Math.max(
+            ...params.map((param) => (param.isArray() ? (param as ArrayValueObject).getRowCount() : 1))
+        );
+        const maxColumnLength = Math.max(
+            ...params.map((param) => (param.isArray() ? (param as ArrayValueObject).getColumnCount() : 1))
+        );
+
+        // Expand all array values to the same size
+        const expandedParams = params.map((param) =>
+            expandArrayValueObject(maxRowLength, maxColumnLength, param, ErrorValueObject.create(ErrorType.NA))
+        );
+
+        return expandedParams[0].map((_, rowIndex, columnIndex) => {
+            for (let i = 0; i < expandedParams.length; i += 2) {
+                const condition = expandedParams[i].get(rowIndex, columnIndex) || NullValueObject.create();
+                const result = expandedParams[i + 1].get(rowIndex, columnIndex) || NullValueObject.create();
+
+                if (condition.isNull()) {
+                    continue;
+                }
+
+                if (condition.isError()) {
+                    return condition;
+                }
+
+                const conditionValue = condition.getValue();
+                if (conditionValue) {
+                    return result.isNull() ? ErrorValueObject.create(ErrorType.NA) : result;
+                }
+            }
+            return ErrorValueObject.create(ErrorType.NA);
+        });
     }
 }

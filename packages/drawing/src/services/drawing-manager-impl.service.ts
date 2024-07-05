@@ -181,6 +181,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
             Object.keys(subUnitData.data).forEach((drawingId) => {
                 const drawing = subUnitData.data[drawingId];
+                drawing.unitId = unitId;
                 drawings.push(drawing);
             });
         });

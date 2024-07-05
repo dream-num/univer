@@ -71,7 +71,8 @@ export const InsertDocDrawingCommand: ICommand = {
                 });
             }
         } else {
-            textX.push(...getRetainAndDeleteFromReplace(activeTextRange, segmentId));
+            const { dos } = getRetainAndDeleteFromReplace(activeTextRange, segmentId, 0, documentDataModel.getBody()!);
+            textX.push(...dos);
         }
 
         textX.push({

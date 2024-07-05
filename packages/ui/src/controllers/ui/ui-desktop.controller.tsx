@@ -15,6 +15,7 @@
  */
 
 import { Disposable, IConfigService, isInternalEditorID, LifecycleService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
@@ -73,7 +74,7 @@ export class DesktopUIController extends Disposable {
                     const allRenders = this._renderManagerService.getRenderAll();
 
                     for (const [key, render] of allRenders) {
-                        if (isInternalEditorID(key)) continue;
+                        if (isInternalEditorID(key) || !((render) as RenderUnit).isRenderUnit) continue;
 
                         render.engine.setContainer(canvasElement);
                     }

@@ -178,3 +178,22 @@ export function discreteRangeContainsRange(discrete: IDiscreteRange, range: IRan
     }
     return true;
 }
+
+export function convertTextToTable(text: string): string {
+    const rows = text.trim().split('\n');
+
+    let html = '<table>';
+
+    rows.forEach((row) => {
+        const columns = row.split('\t');
+        html += '<tr>';
+        columns.forEach((column) => {
+            html += `<td>${column}</td>`;
+        });
+        html += '</tr>';
+    });
+
+    html += '</table>';
+
+    return html;
+}

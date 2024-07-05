@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { SheetsConditionalFormattingPlugin } from './plugin';
+export { UniverSheetsConditionalFormattingPlugin } from './plugin';
 export * from './base/const';
 export * from './models/type';
 export * from './models/conditional-formatting-rule-model';

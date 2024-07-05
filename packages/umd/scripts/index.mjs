@@ -196,6 +196,7 @@ function buildJS() {
         '@univerjs/thread-comment-ui',
         '@univerjs/sheets-thread-comment-base',
         '@univerjs/sheets-thread-comment',
+        '@univerjs/docs-thread-comment-ui',
         '@univerjs/drawing',
         '@univerjs/drawing-ui',
         '@univerjs/sheets-hyper-link',

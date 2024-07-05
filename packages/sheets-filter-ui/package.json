@@ -77,7 +77,7 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.58",
-        "rc-virtual-list": "^3.11.5"
+        "rc-virtual-list": "^3.14.5"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

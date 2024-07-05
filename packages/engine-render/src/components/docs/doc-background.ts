@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DocumentFlavor } from '@univerjs/core';
 import type { IViewportInfo } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { IPathProps } from '../../shape';
@@ -44,11 +45,13 @@ export class DocBackground extends DocComponent {
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
+        const docDataModel = this.getSkeleton()?.getViewModel().getDataModel();
 
-        if (skeletonData == null) {
+        if (skeletonData == null || docDataModel == null) {
             return;
         }
 
+        const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
         this._drawLiquid.reset();
 
         const { pages } = skeletonData;
@@ -87,51 +90,53 @@ export class DocBackground extends DocComponent {
                 zIndex: 3,
             };
 
-            const IDENTIFIER_WIDTH = 15;
-            const marginIdentification: IPathProps = {
-                dataArray: [{
-                    command: 'M',
-                    points: [marginLeft - IDENTIFIER_WIDTH, originMarginTop],
-                }, {
-                    command: 'L',
-                    points: [marginLeft, originMarginTop],
-                }, {
-                    command: 'L',
-                    points: [marginLeft, originMarginTop - IDENTIFIER_WIDTH],
-                }, {
-                    command: 'M',
-                    points: [pageWidth - marginRight + IDENTIFIER_WIDTH, originMarginTop],
-                }, {
-                    command: 'L',
-                    points: [pageWidth - marginRight, originMarginTop],
-                }, {
-                    command: 'L',
-                    points: [pageWidth - marginRight, originMarginTop - IDENTIFIER_WIDTH],
-                }, {
-                    command: 'M',
-                    points: [marginLeft - IDENTIFIER_WIDTH, pageHeight - originMarginBottom],
-                }, {
-                    command: 'L',
-                    points: [marginLeft, pageHeight - originMarginBottom],
-                }, {
-                    command: 'L',
-                    points: [marginLeft, pageHeight - originMarginBottom + IDENTIFIER_WIDTH],
-                }, {
-                    command: 'M',
-                    points: [pageWidth - marginRight + IDENTIFIER_WIDTH, pageHeight - originMarginBottom],
-                }, {
-                    command: 'L',
-                    points: [pageWidth - marginRight, pageHeight - originMarginBottom],
-                }, {
-                    command: 'L',
-                    points: [pageWidth - marginRight, pageHeight - originMarginBottom + IDENTIFIER_WIDTH],
-                }] as unknown as IPathProps['dataArray'],
-                strokeWidth: 1.5,
-                stroke: MARGIN_STROKE_COLOR,
-            };
-
             Rect.drawWith(ctx, backgroundOptions);
-            Path.drawWith(ctx, marginIdentification);
+
+            if (documentFlavor === DocumentFlavor.TRADITIONAL) {
+                const IDENTIFIER_WIDTH = 15;
+                const marginIdentification: IPathProps = {
+                    dataArray: [{
+                        command: 'M',
+                        points: [marginLeft - IDENTIFIER_WIDTH, originMarginTop],
+                    }, {
+                        command: 'L',
+                        points: [marginLeft, originMarginTop],
+                    }, {
+                        command: 'L',
+                        points: [marginLeft, originMarginTop - IDENTIFIER_WIDTH],
+                    }, {
+                        command: 'M',
+                        points: [pageWidth - marginRight + IDENTIFIER_WIDTH, originMarginTop],
+                    }, {
+                        command: 'L',
+                        points: [pageWidth - marginRight, originMarginTop],
+                    }, {
+                        command: 'L',
+                        points: [pageWidth - marginRight, originMarginTop - IDENTIFIER_WIDTH],
+                    }, {
+                        command: 'M',
+                        points: [marginLeft - IDENTIFIER_WIDTH, pageHeight - originMarginBottom],
+                    }, {
+                        command: 'L',
+                        points: [marginLeft, pageHeight - originMarginBottom],
+                    }, {
+                        command: 'L',
+                        points: [marginLeft, pageHeight - originMarginBottom + IDENTIFIER_WIDTH],
+                    }, {
+                        command: 'M',
+                        points: [pageWidth - marginRight + IDENTIFIER_WIDTH, pageHeight - originMarginBottom],
+                    }, {
+                        command: 'L',
+                        points: [pageWidth - marginRight, pageHeight - originMarginBottom],
+                    }, {
+                        command: 'L',
+                        points: [pageWidth - marginRight, pageHeight - originMarginBottom + IDENTIFIER_WIDTH],
+                    }] as unknown as IPathProps['dataArray'],
+                    strokeWidth: 1.5,
+                    stroke: MARGIN_STROKE_COLOR,
+                };
+                Path.drawWith(ctx, marginIdentification);
+            }
             ctx.restore();
 
             const { x, y } = this._drawLiquid.translatePage(

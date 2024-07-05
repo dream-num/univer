@@ -238,10 +238,6 @@ export class CanvasView extends RxDisposable {
 
         engine.runRenderLoop(() => {
             scene.render();
-            const app = document.getElementById('app');
-            if (app) {
-                app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
-            }
         });
     }
 

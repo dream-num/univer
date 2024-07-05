@@ -108,10 +108,9 @@ function RectPopup(props: IRectPopupProps) {
             if (!nodeRef.current) return;
 
             const { clientWidth, clientHeight } = nodeRef.current;
-            const parent = nodeRef.current.parentElement;
-            if (!parent) return;
+            const innerWidth = window.innerWidth;
+            const innerHeight = window.innerHeight;
 
-            const { clientWidth: innerWidth, clientHeight: innerHeight } = parent;
             setPosition(calcPopupPosition(
                 {
                     position: anchorRect,
@@ -157,11 +156,8 @@ function RectPopup(props: IRectPopupProps) {
             clickOtherFn(e);
         };
 
-        window.addEventListener('click', handleClickOther);
-
-        return () => {
-            window.removeEventListener('click', handleClickOther);
-        };
+        window.addEventListener('pointerdown', handleClickOther);
+        return () => window.removeEventListener('pointerdown', handleClickOther);
     }, [anchorRect, anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);
 
     return (

@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import { toDisposable } from '@univerjs/core';
 
-import { Subject } from 'rxjs';
+import { Observable, shareReplay, Subject } from 'rxjs';
 import type { CURSOR_TYPE } from './basics/const';
 import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
 import { DeviceType, PointerInput } from './basics/i-events';
@@ -27,14 +27,32 @@ import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './ba
 import { Canvas, CanvasRenderMode } from './canvas';
 import type { Scene } from './scene';
 import { ThinEngine } from './thin-engine';
+import { observeClientRect } from './floating/util';
 
 export class Engine extends ThinEngine<Scene> {
     renderEvenInBackground = true;
 
     private readonly _beginFrame$ = new Subject<void>();
     readonly beginFrame$ = this._beginFrame$.asObservable();
+
     private readonly _endFrame$ = new Subject<void>();
     readonly endFrame$ = this._endFrame$.asObservable();
+
+    private _rect$: Nullable<Observable<void>> = null;
+    public get clientRect$(): Observable<void> {
+        return this._rect$ || (this._rect$ = new Observable((subscriber) => {
+            if (!this._container) {
+                throw new Error('[Engine]: cannot subscribe to rect changes when container is not set!');
+            }
+
+            const sub = observeClientRect(this._container).subscribe(() => subscriber.next());
+
+            return () => {
+                sub.unsubscribe();
+                this._rect$ = null;
+            };
+        })).pipe(shareReplay(1));
+    }
 
     private _container: Nullable<HTMLElement>;
 

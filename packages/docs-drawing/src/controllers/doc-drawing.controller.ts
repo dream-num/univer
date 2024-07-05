@@ -17,7 +17,6 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import type { IDrawingMapItem, IDrawingMapItemData, IDrawingSubunitMap } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { type IDocDrawing, IDocDrawingService } from '../services/doc-drawing.service';
@@ -122,10 +121,10 @@ export class DocDrawingController extends Disposable {
 
         Object.keys(drawingDataModels).forEach((drawingId) => {
             const drawingDataModel = drawingDataModels[drawingId];
-            const docTransform = drawingDataModel.docTransform;
-            const transform = docDrawingPositionToTransform(docTransform);
+            // const docTransform = drawingDataModel.docTransform;
+            // const transform = docDrawingPositionToTransform(docTransform);
 
-            drawingDataModels[drawingId] = { ...drawingDataModel, transform } as IDocDrawing;
+            drawingDataModels[drawingId] = { ...drawingDataModel } as IDocDrawing;
         });
 
         const subDrawings = {

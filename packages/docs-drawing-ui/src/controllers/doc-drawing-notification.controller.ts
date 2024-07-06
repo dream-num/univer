@@ -17,12 +17,15 @@
 /* eslint-disable ts/no-explicit-any */
 
 import type { ICommandInfo, JSONXActions, Nullable } from '@univerjs/core';
-import { Disposable,
+import {
+    Disposable,
     ICommandService,
     IUniverInstanceService,
     JSONX,
     LifecycleStages,
     OnLifecycle,
+    RedoCommand,
+    UndoCommand,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { RichTextEditingMutation } from '@univerjs/docs';
@@ -30,6 +33,7 @@ import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingOrderMapParam, IDrawingSearch } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 
 interface IAddOrRemoveDrawing {
     type: 'add' | 'remove';
@@ -119,7 +123,8 @@ export class DocDrawingAddRemoveController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IDocDrawingService private readonly _docDrawingService: IDocDrawingService
+        @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -166,6 +171,30 @@ export class DocDrawingAddRemoveController extends Disposable {
                 if (reOrderedDrawings.length > 0) {
                     this._updateDrawingsOrder(unitId, reOrderedDrawings);
                 }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== UndoCommand.id && command.id !== RedoCommand.id) {
+                    return;
+                }
+
+                const unitId = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
+                const focusedDrawings = this._drawingManagerService.getFocusDrawings();
+
+                if (unitId == null || focusedDrawings.length === 0) {
+                    return;
+                }
+
+                const renderObject = this._renderManagerService.getRenderById(unitId);
+                const scene = renderObject?.scene;
+                if (scene == null) {
+                    return false;
+                }
+                const transformer = scene.getTransformerByCreate();
+
+                transformer.refreshControls();
             })
         );
     }

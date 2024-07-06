@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export { UniverDocHyperLinkUIPlugin } from './plugin';
+export { UniverDocsHyperLinkUIPlugin } from './plugin';
 
 // export {} from './'

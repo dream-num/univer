@@ -22,7 +22,7 @@ pnpm add @univerjs/docs-hyper-link-ui
 
 ### 使用
 ```js
-import { UniverDocHyperLinkUIPlugin} from '@univerjs/docs-hyper-link-ui';
+import { UniverDocsHyperLinkUIPlugin} from '@univerjs/docs-hyper-link-ui';
 
-univer.registerPlugin(UniverDocHyperLinkUIPlugin);
+univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 ```

@@ -22,7 +22,7 @@ import { DocHyperLinkModel } from './models/hyper-link.model';
 import { DocHyperLinkController } from './controllers/hyper-link.controller';
 import { DocHyperLinkResourceController } from './controllers/resource.controller';
 
-export class UniverDocHyperLinkPlugin extends Plugin {
+export class UniverDocsHyperLinkPlugin extends Plugin {
     static override pluginName = DOC_HYPER_LINK_PLUGIN;
     static override type = UniverInstanceType.UNIVER_DOC;
 

@@ -50,6 +50,7 @@ import { FUniver } from '@univerjs/facade';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
+import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { enUS, ruRU, zhCN } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 /* eslint-disable-next-line node/prefer-global/process */
@@ -113,6 +114,7 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // drawing
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
+univer.registerPlugin(UniverDocsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {

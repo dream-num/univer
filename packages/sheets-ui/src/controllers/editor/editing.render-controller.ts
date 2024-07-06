@@ -752,6 +752,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const { keycode } = param;
 
@@ -1045,11 +1046,12 @@ export function getCellDataByInput(
 }
 
 function isRichText(body: IDocumentBody) {
-    const { textRuns = [], paragraphs = [] } = body;
+    const { textRuns = [], paragraphs = [], customBlocks = [] } = body;
 
     return (
         textRuns.some((textRun) => textRun.ts && !Tools.isEmptyObject(textRun.ts)) ||
         paragraphs.some((paragraph) => paragraph.bullet) ||
-        paragraphs.length >= 2
+        paragraphs.length >= 2 ||
+        customBlocks.length > 0
     );
 }

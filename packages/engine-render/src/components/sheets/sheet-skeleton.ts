@@ -1159,6 +1159,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                     wrapStrategy,
                 }
             );
+            // console.log(cell.p);
         } else if (cell.v != null) {
             const textStyle = this._getFontFormat(style);
             fontString = getFontStyleString(textStyle, this._localService).fontCache;
@@ -1921,6 +1922,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                     cellValueType,
                 },
             },
+            drawings: {},
+            drawingsOrder: [],
         };
 
         return new DocumentDataModel(documentData);

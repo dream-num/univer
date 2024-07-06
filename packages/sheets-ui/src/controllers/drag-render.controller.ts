@@ -43,18 +43,18 @@ export class DragRenderController extends Disposable implements IRenderModule, I
             }
 
             const { scene } = this._context;
-            const dragOverObserver = scene.onDragOverObserver.add((evt) => {
+            const dragOverSub = scene.onDragOver$.subscribeEvent((evt) => {
                 this._dragManagerService.onDragOver(evt);
             });
 
-            const dropObserver = scene.onDropObserver.add((evt) => {
+            const dropSub = scene.onDrop$.subscribeEvent((evt) => {
                 this._dragManagerService.onDrop(evt);
             });
 
             disposeSet.add({
                 dispose() {
-                    scene.onDragOverObserver.remove(dragOverObserver);
-                    scene.onDropObserver.remove(dropObserver);
+                    dragOverSub.unsubscribe();
+                    dropSub.unsubscribe();
                 },
             });
         };

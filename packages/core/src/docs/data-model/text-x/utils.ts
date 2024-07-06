@@ -16,7 +16,8 @@
 
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import type { IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { ICustomDecoration, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
+import { DataStreamTreeTokenType } from '../types';
 import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
@@ -93,7 +94,131 @@ export function getBodySlice(
         }));
     }
 
+    docBody.customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
+    const { customRanges } = getCustomRangeSlice(body, startOffset, endOffset);
+    docBody.customRanges = customRanges;
     return docBody;
+}
+
+export function normalizeBody(body: IDocumentBody): IDocumentBody {
+    const { dataStream, textRuns, paragraphs, customRanges, customDecorations } = body;
+    let leftOffset = 0;
+    let rightOffset = 0;
+
+    customRanges?.forEach((range) => {
+        if (range.startIndex < 0) {
+            leftOffset = Math.max(leftOffset, -range.startIndex);
+        }
+
+        if (range.endIndex > dataStream.length - 1) {
+            rightOffset = Math.max(rightOffset, range.endIndex - dataStream.length + 1);
+        }
+    });
+
+    const newData = `${DataStreamTreeTokenType.CUSTOM_RANGE_START.repeat(leftOffset)}${dataStream}${DataStreamTreeTokenType.CUSTOM_RANGE_END.repeat(rightOffset)}`;
+
+    if (textRuns) {
+        if (textRuns[0]) {
+            textRuns[0].st = textRuns[0].st - leftOffset;
+        }
+
+        if (textRuns[textRuns.length - 1]) {
+            textRuns[textRuns.length - 1].ed = textRuns[textRuns.length - 1].ed + rightOffset;
+        }
+    }
+
+    textRuns?.forEach((textRun) => {
+        textRun.st += leftOffset;
+        textRun.ed += leftOffset;
+    });
+
+    paragraphs?.forEach((p) => {
+        p.startIndex += leftOffset;
+    });
+    customRanges?.forEach((range) => {
+        range.startIndex += leftOffset;
+        range.endIndex += leftOffset;
+    });
+
+    customDecorations?.forEach((d) => {
+        d.startIndex += leftOffset;
+        d.endIndex += rightOffset;
+    });
+
+    return {
+        ...body,
+        dataStream: newData,
+        textRuns,
+        paragraphs,
+        customRanges,
+        customDecorations,
+    };
+}
+
+export function getCustomRangeSlice(body: IDocumentBody, startOffset: number, endOffset: number) {
+    const { customRanges = [] } = body;
+    let leftOffset = 0;
+    let rightOffset = 0;
+    const relativeCustomRanges = customRanges
+        .filter((customRange) => Math.max(customRange.startIndex, startOffset) <= Math.min(customRange.endIndex, endOffset - 1))
+        .map((range) => ({
+            ...range,
+            startIndex: range.startIndex,
+            endIndex: range.endIndex,
+        }));
+
+    if (relativeCustomRanges.length) {
+        relativeCustomRanges.forEach((customRange) => {
+            if (customRange.startIndex < startOffset) {
+                leftOffset += 1;
+            }
+            if (customRange.endIndex > (endOffset - 1)) {
+                rightOffset += 1;
+            }
+        });
+
+        for (let i = 0; i < leftOffset; i++) {
+            const range = relativeCustomRanges[i];
+            range.startIndex = startOffset - leftOffset + i;
+        }
+        if (rightOffset) {
+            const sorted = [...relativeCustomRanges].sort((pre, aft) => aft.endIndex - pre.endIndex);
+            for (let i = 0; i < rightOffset; i++) {
+                const range = sorted[i];
+                range.endIndex = endOffset + rightOffset - i - 1;
+            }
+        }
+    }
+
+    return {
+        customRanges: relativeCustomRanges.map((range) => ({
+            ...range,
+            startIndex: range.startIndex - startOffset,
+            endIndex: range.endIndex - startOffset,
+        })),
+        leftOffset,
+        rightOffset,
+    };
+}
+
+export function getCustomDecorationSlice(body: IDocumentBody, startOffset: number, endOffset: number) {
+    const { customDecorations = [] } = body;
+
+    const customDecorationSlice: ICustomDecoration[] = [];
+    customDecorations.forEach((range) => {
+        // 34 35
+        // ranges and selection has overlap
+        if (Math.max(range.startIndex, startOffset) <= Math.min(range.endIndex, endOffset - 1)) {
+            const copy = Tools.deepClone(range);
+            customDecorationSlice.push({
+                ...copy,
+                startIndex: Math.max(copy.startIndex - startOffset, 0),
+                endIndex: Math.min(copy.endIndex, endOffset) - startOffset,
+            });
+        }
+    });
+
+    return customDecorationSlice;
 }
 
 export function composeBody(
@@ -153,7 +278,6 @@ export function composeBody(
     if (paragraphs.length) {
         retBody.paragraphs = paragraphs;
     }
-
     return retBody;
 }
 

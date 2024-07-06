@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { UniverSheetsFormulaPlugin } from './formula-ui-plugin';
+export { UniverSheetsFormulaPlugin, UniverSheetsFormulaMobilePlugin } from './formula-ui-plugin';
 export { IDescriptionService } from './services/description.service';
 export { DescriptionService } from './services/description.service';
 export {
@@ -25,6 +25,19 @@ export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './servi
 export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
-export { SPECIAL_PASTE_FORMULA } from './commands/commands/formula-clipboard.command';
 export { RegisterOtherFormulaService } from './services/register-other-formula.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
+
+// #region - all commands
+
+export { SheetOnlyPasteFormulaCommand } from './commands/commands/formula-clipboard.command';
+export { InsertFunctionCommand } from './commands/commands/insert-function.command';
+export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
+export { SelectEditorFormulaOperation } from './commands/operations/editor-formula.operation';
+export { HelpFunctionOperation } from './commands/operations/help-function.operation';
+export { InsertFunctionOperation } from './commands/operations/insert-function.operation';
+export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';
+export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
+export { SearchFunctionOperation } from './commands/operations/search-function.operation';
+
+// #endregion

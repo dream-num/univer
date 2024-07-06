@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ITextStyle, Nullable } from '@univerjs/core';
+import { type IDocumentBody, type ITextStyle, type Nullable, skipParseTagNames } from '@univerjs/core';
 
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
@@ -82,6 +82,10 @@ export class HtmlToUDMService {
     private _process(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: IDocumentBody) {
         for (const node of nodes) {
             if (node.nodeType === Node.TEXT_NODE) {
+                if (node.nodeValue?.trim() === '') {
+                    continue;
+                }
+
                 // TODO: @JOCS, More characters need to be replaced, like `\b`
                 const text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
@@ -99,6 +103,8 @@ export class HtmlToUDMService {
                         ts: style,
                     });
                 }
+            } else if (skipParseTagNames.includes(node.nodeName.toLowerCase())) {
+                continue;
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const parentStyles = parent ? this._styleCache.get(parent) : {};
                 const styleRule = this._styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));

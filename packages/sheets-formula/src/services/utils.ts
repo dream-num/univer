@@ -21,8 +21,9 @@ export function getFunctionTypeValues(
     enumObj: any,
     localeService: LocaleService
 ): Array<{ label: string; value: string }> {
+    // Exclude the DefinedName key
     return Object.keys(enumObj)
-        .filter((key) => isNaN(Number(key)))
+        .filter((key) => isNaN(Number(key)) && key !== 'DefinedName')
         .map((key) => ({
             label: localeService.t(`formula.functionType.${key.toLocaleLowerCase()}`),
             value: `${enumObj[key]}`,

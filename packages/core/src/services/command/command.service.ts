@@ -124,6 +124,8 @@ export interface IExecutionOptions {
     /** This command is from collaboration peers. */
     fromCollab?: boolean;
 
+    fromChangeset?: boolean;
+
     [key: PropertyKey]: string | number | boolean | undefined;
 }
 
@@ -276,27 +278,31 @@ export class CommandService implements ICommandService {
         params?: P,
         options?: IExecutionOptions
     ): Promise<R> {
-        const item = this._commandRegistry.getCommand(id);
-        if (item) {
-            const [command] = item;
-            const commandInfo: ICommandInfo = {
-                id: command.id,
-                type: command.type,
-                params,
-            };
+        try {
+            const item = this._commandRegistry.getCommand(id);
+            if (item) {
+                const [command] = item;
+                const commandInfo: ICommandInfo = {
+                    id: command.id,
+                    type: command.type,
+                    params,
+                };
 
-            const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
+                const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
 
-            this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
-            const result = await this._execute<P, R>(command as ICommand<P, R>, params, options);
-            this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
+                this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
+                const result = await this._execute<P, R>(command as ICommand<P, R>, params, options);
+                this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
 
-            stackItemDisposable.dispose();
+                stackItemDisposable.dispose();
 
-            return result;
+                return result;
+            }
+            throw new Error(`[CommandService]: command "${id}" is not registered.`);
+        } catch (error) {
+            this._logService.error(error);
+            throw error;
         }
-
-        throw new Error(`[CommandService]: command "${id}" is not registered.`);
     }
 
     syncExecuteCommand<P extends object = object, R = boolean>(

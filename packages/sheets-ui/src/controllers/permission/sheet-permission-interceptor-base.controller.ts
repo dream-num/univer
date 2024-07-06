@@ -23,7 +23,7 @@ import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandP
 import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
-import { InsertCommand } from '@univerjs/docs';
+import { IMEInputCommand, InsertCommand } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { deserializeRangeWithSheet, IDefinedNamesService, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../../views/permission/error-msg-dialog/interface';
@@ -34,6 +34,7 @@ import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit
 import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
+import { PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams;
@@ -85,6 +86,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
 
         switch (id) {
             case InsertCommand.id:
+            case IMEInputCommand.id:
             case SetCellEditVisibleOperation.id:
                 if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true) {
                     break;
@@ -480,13 +482,13 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
     }
 
     private _permissionCheckByPaste(params: ISheetPasteParams) {
-        if (params.value === 'special-paste-value' || params.value === 'special-paste-formula') {
+        if (params.value === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE || params.value === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA) {
             return this.permissionCheckWithRanges({
                 workbookTypes: [WorkbookEditablePermission],
                 rangeTypes: [RangeProtectionPermissionEditPoint],
                 worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
             });
-        } else if (params.value === 'special-paste-format') {
+        } else if (params.value === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT) {
             return this.permissionCheckWithRanges({
                 workbookTypes: [WorkbookEditablePermission],
                 rangeTypes: [RangeProtectionPermissionEditPoint],

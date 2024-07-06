@@ -16,7 +16,7 @@
 
 import type { ICellData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import { COPY_TYPE, ISelectionRenderService, PREDEFINED_HOOK_NAME, SelectionRenderService } from '@univerjs/sheets-ui';
@@ -31,6 +31,7 @@ describe('Test paste with formula', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let lexerTreeBuilder: LexerTreeBuilder;
+    let formulaDataModel: FormulaDataModel;
     let getValues: (
         startRow: number,
         startColumn: number,
@@ -46,6 +47,7 @@ describe('Test paste with formula', () => {
         get = testBed.get;
         commandService = get(ICommandService);
         lexerTreeBuilder = get(LexerTreeBuilder);
+        formulaDataModel = get(FormulaDataModel);
 
         getValues = (
             startRow: number,
@@ -160,7 +162,10 @@ describe('Test paste with formula', () => {
                 matrix,
                 accessor,
                 copyInfo,
-                lexerTreeBuilder
+                lexerTreeBuilder,
+                formulaDataModel,
+                false,
+                null
             );
 
             expect(redoUndoList).toStrictEqual(result);
@@ -614,7 +619,10 @@ describe('Test paste with formula', () => {
                 matrix,
                 accessor,
                 copyInfo,
-                lexerTreeBuilder
+                lexerTreeBuilder,
+                formulaDataModel,
+                false,
+                null
             );
 
             // Randomly generated id, no comparison is made

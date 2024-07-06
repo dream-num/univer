@@ -100,17 +100,13 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             limitTop = -ancestorTop;
         }
 
-        if (limitLeft + width + ancestorLeft > topSceneWidth) {
-            limitWidth = topSceneWidth - limitLeft - ancestorLeft;
-        }
+        limitWidth = topSceneWidth - limitLeft - ancestorLeft;
 
         if (limitWidth < MIN_DRAWING_WIDTH_LIMIT) {
             limitWidth = MIN_DRAWING_WIDTH_LIMIT;
         }
 
-        if (limitTop + height + ancestorTop > topSceneHeight) {
-            limitHeight = topSceneHeight - limitTop - ancestorTop;
-        }
+        limitHeight = topSceneHeight - limitTop - ancestorTop;
 
         if (limitHeight < MIN_DRAWING_WIDTH_LIMIT) {
             limitHeight = MIN_DRAWING_WIDTH_LIMIT;
@@ -182,15 +178,15 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     };
 
     useEffect(() => {
-        const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
+        const chagneStartSub = transformer.changeStart$.subscribe((state) => {
             changeObs(state);
         });
 
-        const onChangingObserver = transformer.onChangingObservable.add((state) => {
+        const changingSub = transformer.changing$.subscribe((state) => {
             changeObs(state);
         });
 
-        const onFocusObserver = drawingManagerService.focus$.subscribe((drawings) => {
+        const focusSub = drawingManagerService.focus$.subscribe((drawings) => {
             if (drawings.length !== 1) {
                 return;
             }
@@ -237,9 +233,9 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
         });
 
         return () => {
-            onChangingObserver?.dispose();
-            onChangeStartObserver?.dispose();
-            onFocusObserver?.unsubscribe();
+            changingSub.unsubscribe();
+            chagneStartSub.unsubscribe();
+            focusSub.unsubscribe();
         };
     }, []);
 
@@ -250,15 +246,18 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         val = Math.max(val, MIN_DRAWING_WIDTH_LIMIT);
 
-        const { limitWidth } = checkMoveBoundary(xPosition, yPosition, val, height);
+        const { limitWidth, limitHeight } = checkMoveBoundary(xPosition, yPosition, val, height);
 
-        val = limitWidth;
+        val = Math.min(val, limitWidth);
 
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { width: val } };
 
         if (lockRatio) {
             let heightFix = (val / width) * height;
             heightFix = Math.max(heightFix, MIN_DRAWING_HEIGHT_LIMIT);
+            if (heightFix > limitHeight) {
+                return;
+            }
             setHeight(heightFix);
             updateParam.transform!.height = heightFix;
         }
@@ -274,18 +273,20 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
         if (val == null) {
             return;
         }
-
         val = Math.max(val, MIN_DRAWING_WIDTH_LIMIT);
 
-        const { limitHeight } = checkMoveBoundary(xPosition, yPosition, width, val);
+        const { limitHeight, limitWidth } = checkMoveBoundary(xPosition, yPosition, width, val);
 
-        val = limitHeight;
+        val = Math.min(val, limitHeight); ;
 
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { height: val } };
 
         if (lockRatio) {
             let widthFix = (val / height) * width;
             widthFix = Math.max(widthFix, MIN_DRAWING_WIDTH_LIMIT);
+            if (widthFix > limitWidth) {
+                return;
+            }
             setWidth(widthFix);
             updateParam.transform!.width = widthFix;
         }

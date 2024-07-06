@@ -64,7 +64,7 @@ export default {
         },
     },
     CHOOSE: {
-        description: 'Chooses a value from a list of values',
+        description: 'Chooses a value from a list of values.',
         abstract: 'Chooses a value from a list of values',
         links: [
             {
@@ -73,8 +73,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            indexNum: { name: 'index_num', detail: 'Specifies which value argument is selected. Index_num must be a number between 1 and 254, or a formula or reference to a cell containing a number between 1 and 254.\nIf index_num is 1, CHOOSE returns value1; if it is 2, CHOOSE returns value2; and so on.\nIf index_num is less than 1 or greater than the number of the last value in the list, CHOOSE returns the #VALUE! error value.\nIf index_num is a fraction, it is truncated to the lowest integer before being used.' },
+            value1: { name: 'value1', detail: 'CHOOSE selects a value or an action to perform based on index_num. The arguments can be numbers, cell references, defined names, formulas, functions, or text.' },
+            value2: { name: 'value2', detail: '1 to 254 value arguments.' },
         },
     },
     CHOOSECOLS: {

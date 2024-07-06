@@ -22,13 +22,13 @@ import { ArrayValueObject, transformToValue, transformToValueObject } from '../.
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test if function', () => {
-    const textFunction = new If(FUNCTION_NAMES_LOGICAL.IF);
+    const testFunction = new If(FUNCTION_NAMES_LOGICAL.IF);
 
     describe('If', () => {
         it('LogicalTest and valueIfTrue', () => {
             const logicTest = BooleanValueObject.create(true);
             const valueIfTrue = NumberValueObject.create(1);
-            const result = textFunction.calculate(logicTest, valueIfTrue);
+            const result = testFunction.calculate(logicTest, valueIfTrue);
             expect(result.getValue()).toBe(1);
         });
 
@@ -36,7 +36,7 @@ describe('Test if function', () => {
             const logicTest = BooleanValueObject.create(false);
             const valueIfTrue = NumberValueObject.create(1);
             const valueIfFalse = NumberValueObject.create(2);
-            const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(result.getValue()).toBe(2);
         });
 
@@ -55,7 +55,7 @@ describe('Test if function', () => {
                 column: 0,
             });
             const valueIfTrue = NumberValueObject.create(1);
-            const result = textFunction.calculate(logicTest, valueIfTrue);
+            const result = testFunction.calculate(logicTest, valueIfTrue);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [false],
                 [1],
@@ -78,7 +78,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue);
+            const result = testFunction.calculate(logicTest, valueIfTrue);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1],
                 [2],
@@ -100,7 +100,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue);
+            const result = testFunction.calculate(logicTest, valueIfTrue);
             expect(result.getValue()).toBe(false);
         });
 
@@ -120,7 +120,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1],
                 [2],
@@ -158,7 +158,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue);
+            const result = testFunction.calculate(logicTest, valueIfTrue);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1],
                 [false],
@@ -199,7 +199,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 ['yes'],
                 [2],
@@ -241,7 +241,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1],
                 [2],
@@ -298,7 +298,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1],
                 [7],
@@ -346,7 +346,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 ['no1', 'yes2', '#N/A', '#N/A'],
                 ['yes1', 'yes2', '#N/A', '#N/A'],
@@ -396,7 +396,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 ['no1', 'no2', 'no3', '#N/A'],
                 ['yes2', 'yes3', 'yes4', 'yes5'],
@@ -446,7 +446,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 ['no1', 'yes2', '#N/A', '#N/A'],
                 ['no2', 'yes3', '#N/A', '#N/A'],
@@ -493,7 +493,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
+            const result = testFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 ['no1', 'no2', 'no3', '#N/A'],
                 ['yes1', 'yes2', 'yes3', 'yes4'],

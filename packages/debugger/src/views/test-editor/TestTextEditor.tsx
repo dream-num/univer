@@ -22,14 +22,6 @@ import { createInternalEditorID, IUniverInstanceService, UniverInstanceType } fr
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Input } from '@univerjs/design';
 
-const containerStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: '10px',
-    top: '300px',
-    width: 'calc(100% - 20px)',
-    height: 'calc(100% - 300px)',
-};
-
 const editorStyle: React.CSSProperties = {
     width: '100%',
 };
@@ -52,9 +44,7 @@ export const TestEditorContainer = () => {
     const [readonly, setReadonly] = useState(false);
 
     return (
-        <div
-            style={containerStyle}
-        >
+        <div>
             <TextEditor id={createInternalEditorID('test-editor-1')} placeholder="please input value" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
             <br></br>
             <TextEditor id={createInternalEditorID('test-editor-2')} placeholder="please input value" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />

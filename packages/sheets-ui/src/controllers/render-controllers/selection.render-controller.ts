@@ -79,7 +79,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         }
         const sheetObject = this._getSheetObject();
 
-        this._initViewMainListener(sheetObject);
+        this._initSpreadsheetEvent(sheetObject);
         this._initRowHeader(sheetObject);
         this._initColumnHeader(sheetObject);
         this._initLeftTop(sheetObject);
@@ -194,12 +194,12 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
     }
 
-    private _initViewMainListener(sheetObject: ISheetObjectParam) {
+    private _initSpreadsheetEvent(sheetObject: ISheetObjectParam) {
         const { spreadsheet } = sheetObject;
 
         this.disposeWithMe(
             toDisposable(
-                spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                     this._selectionRenderService.enableDetectMergedCell();
 
                     this._selectionRenderService.eventTrigger(
@@ -249,7 +249,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         const { spreadsheetRowHeader, spreadsheet } = sheetObject;
 
         this.disposeWithMe(
-            spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
                 this._selectionRenderService.eventTrigger(
                     evt,
@@ -272,7 +272,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
 
         this.disposeWithMe(
-            spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
 
                 this._selectionRenderService.eventTrigger(
@@ -293,7 +293,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
     private _initLeftTop(sheetObject: ISheetObjectParam) {
         const { spreadsheetLeftTopPlaceholder } = sheetObject;
         this.disposeWithMe(
-            spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
                     return;
@@ -304,7 +304,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                 const selectionWithStyle = this._getAllRange(skeleton);
 
                 const selectionData = this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+                this._selectionRenderService.addSelectionControlBySelectionData(selectionData);
 
                 this._selectionRenderService.refreshSelectionMoveStart();
 
@@ -320,7 +320,8 @@ export class SelectionRenderController extends Disposable implements IRenderModu
     private _initSelectionChangeListener() {
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+                this._selectionManagerService.selectionMoveEndBefore$.subscribe((params) => {
+                    // clear selection controls
                     this._selectionRenderService.reset();
                     if (params == null) {
                         return;
@@ -332,7 +333,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                         }
                         const selectionData =
                             this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                        this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+
+                        // then add a new selection control.
+                        this._selectionRenderService.addSelectionControlBySelectionData(selectionData);
                     }
 
                     this._syncDefinedNameRange(params);

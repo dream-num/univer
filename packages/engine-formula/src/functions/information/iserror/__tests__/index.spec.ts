@@ -23,12 +23,12 @@ import { ErrorType } from '../../../../basics/error-type';
 import { Iserror } from '../index';
 
 describe('Test iserror function', () => {
-    const textFunction = new Iserror(FUNCTION_NAMES_INFORMATION.ISERROR);
+    const testFunction = new Iserror(FUNCTION_NAMES_INFORMATION.ISERROR);
 
     describe('Iserror', () => {
         it('value error', () => {
             const value = ErrorValueObject.create(ErrorType.NA);
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(true);
         });
 
@@ -45,7 +45,7 @@ describe('Test iserror function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [false, false, false, false, false, false, true, true, true, true],
                 [false, false, false, false, false, true, true, true, true, false],

@@ -92,6 +92,12 @@ export function HelpFunction() {
         setParamIndex(paramIndex);
     }
 
+    function handleClose() {
+        setHelpVisible(!helpVisible);
+
+        // TODO focus editor
+    }
+
     return (
         <>
             {helpVisible
@@ -117,7 +123,7 @@ export function HelpFunction() {
                                             </div>
                                             <div
                                                 className={styles.formulaHelpFunctionTitleIcon}
-                                                onClick={() => setHelpVisible(!helpVisible)}
+                                                onClick={handleClose}
                                             >
                                                 <CloseSingle />
                                             </div>

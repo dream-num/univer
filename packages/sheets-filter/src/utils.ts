@@ -15,8 +15,8 @@
  */
 
 import type { IMutationInfo, Nullable } from '@univerjs/core';
-import type { ISetSheetsFilterCriteriaMutationParams } from './commands/sheets-filter.mutation';
-import { SetSheetsFilterCriteriaMutation } from './commands/sheets-filter.mutation';
+import type { ISetSheetsFilterCriteriaMutationParams } from './commands/mutations/sheets-filter.mutation';
+import { SetSheetsFilterCriteriaMutation } from './commands/mutations/sheets-filter.mutation';
 
 interface ILine {
     start: number;

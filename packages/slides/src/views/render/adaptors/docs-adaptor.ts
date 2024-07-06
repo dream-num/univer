@@ -21,7 +21,6 @@ import {
     Documents,
     DocumentSkeleton,
     DocumentViewModel,
-    EVENT_TYPE,
     Image,
     Liquid,
     PageLayoutType,
@@ -121,7 +120,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         scene.attachControl();
 
-        scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
+        scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);
@@ -163,7 +162,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         const pageSize = documents.getSkeleton()?.getPageSize();
 
-        documents.onPageRenderObservable.add((config: IPageRenderConfig) => {
+        documents.pageRender$.subscribe((config: IPageRenderConfig) => {
             const { page, pageLeft, pageTop, ctx } = config;
             const { width, height, marginBottom, marginLeft, marginRight, marginTop } = page;
             ctx.save();
@@ -236,7 +235,7 @@ export class DocsAdaptor extends ObjectAdaptor {
             scene.attachTransformerTo(object);
         });
 
-        scene.getTransformer()?.onChangingObservable.add((state) => {
+        scene.getTransformer()?.changing$.subscribe((state) => {
             const { objects } = state;
 
             objects.forEach((object) => {

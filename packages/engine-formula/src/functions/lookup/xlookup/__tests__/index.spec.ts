@@ -63,11 +63,11 @@ const arrayValueObject4 = ArrayValueObject.create(/*ts*/ `{
 }`);
 
 describe('Test vlookup', () => {
-    const textFunction = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
+    const testFunction = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
 
     describe('The value of the lookup', () => {
         it('Search normal', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('Second'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [3, 4])!
@@ -76,7 +76,7 @@ describe('Test vlookup', () => {
         });
 
         it('Search normal2', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('Second'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [0, 1])!
@@ -85,7 +85,7 @@ describe('Test vlookup', () => {
         });
 
         it('Search horizon', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('Second'),
                 arrayValueObject1.transpose().slice([1, 2])!,
                 arrayValueObject1.transpose().slice([0, 1])!
@@ -94,7 +94,7 @@ describe('Test vlookup', () => {
         });
 
         it('Search array', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 arrayValueObject2.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [3, 4])!
@@ -103,7 +103,7 @@ describe('Test vlookup', () => {
         });
 
         it('Search across multiple columns', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(5),
                 arrayValueObject1.slice(undefined, [0, 1])!,
                 arrayValueObject1.slice(undefined, [1])!
@@ -114,7 +114,7 @@ describe('Test vlookup', () => {
 
     describe('Approximate match test', () => {
         it('Approximate match1', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('s*'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [3, 4])!,
@@ -125,7 +125,7 @@ describe('Test vlookup', () => {
         });
 
         it('Approximate asc', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('???th'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [3, 4])!,
@@ -136,7 +136,7 @@ describe('Test vlookup', () => {
         });
 
         it('Approximate desc', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('???th'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [3, 4])!,
@@ -148,7 +148,7 @@ describe('Test vlookup', () => {
         });
 
         it('match_mode is -1', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(110),
                 arrayValueObject3.slice(undefined, [0, 1])!,
                 arrayValueObject3.slice(undefined, [1])!,
@@ -159,7 +159,7 @@ describe('Test vlookup', () => {
         });
 
         it('match_mode 1', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(110),
                 arrayValueObject3.slice(undefined, [0, 1])!,
                 arrayValueObject3.slice(undefined, [1])!,
@@ -170,7 +170,7 @@ describe('Test vlookup', () => {
         });
 
         it('match_mode binary asc', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
                 arrayValueObject4.slice(undefined, [1])!,
@@ -182,7 +182,7 @@ describe('Test vlookup', () => {
         });
 
         it('match_mode binary desc', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
                 arrayValueObject4.slice(undefined, [1])!,

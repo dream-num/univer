@@ -16,10 +16,14 @@
 
 export { UniverSheetsSortPlugin } from './plugin';
 
+export { SheetsSortService } from './services/sheets-sort.service';
+export { type ISortOption, SortType, type IOrderRule } from './services/interface';
+
+// #region - all commands
+
 export {
     type ISortRangeCommandParams,
     SortRangeCommand,
-} from './commands/sheets-sort.command';
+} from './commands/commands/sheets-sort.command';
 
-export { SheetsSortService } from './services/sheets-sort.service';
-export { type ISortOption, SortType, type IOrderRule } from './services/interface';
+// #endregion

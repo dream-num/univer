@@ -74,7 +74,7 @@ export class Path extends Shape<IPathProps> {
 
         this._setFixBoundingBox();
 
-        this.onTransformChangeObservable.add((changeState) => {
+        this.onTransformChange$.subscribeEvent((changeState) => {
             const { type, preValue } = changeState;
             if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
                 this._reCalculateCache = true;
@@ -337,6 +337,7 @@ export class Path extends Shape<IPathProps> {
      *  rendering
      */
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     static parsePathData(data: string) {
         // Path Data Segment must begin with a moveTo
         //m (x y)+  Relative moveTo (subsequent points are treated as lineTo)

@@ -26,9 +26,9 @@ import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '
 import {
     createBooleanValueObjectByRawValue,
     createNumberValueObjectByRawValue,
-    createStringValueObjectByRawValue,
     NullValueObject,
     NumberValueObject,
+    StringValueObject,
 } from '../value-object/primitive-object';
 import { getCellValue } from '../utils/cell';
 
@@ -170,12 +170,16 @@ export class BaseReferenceObject extends ObjectClassType {
                     continue;
                 }
 
-                const resultObjectValue = this.getCellValueObject(cell);
+                let resultObjectValue = this.getCellValueObject(cell);
 
-                // Set numfmt pattern for first cell, it does not have to be a number, the string can also be set a number format
+                // Set numfmt pattern for first cell
+                // TODO@Dushusir it does not have to be a number, the string can also be set a number format
                 if (r === startRow && c === startColumn) {
                     const pattern = this.getCellPattern(unitId, sheetId, r, c);
-                    pattern && resultObjectValue.setPattern(pattern);
+                    if (pattern && resultObjectValue.isNumber()) {
+                        const value = Number(resultObjectValue.getValue());
+                        resultObjectValue = NumberValueObject.create(value, pattern);
+                    }
                 }
 
                 result = callback(resultObjectValue, r, c);
@@ -195,13 +199,17 @@ export class BaseReferenceObject extends ObjectClassType {
             return NumberValueObject.create(0);
         }
 
-        const cellValueObject = this.getCellValueObject(cell);
+        let cellValueObject = this.getCellValueObject(cell);
 
-        // Set numfmt pattern, it does not have to be a number, the string can also be set a number format
+        // Set numfmt pattern,
+        // TODO@Dushusir it does not have to be a number, the string can also be set a number format
         const unitId = this._forcedUnitId || this._defaultUnitId;
         const sheetId = this._forcedSheetId || this._defaultSheetId;
         const pattern = this.getCellPattern(unitId, sheetId, startRow, startColumn);
-        pattern && cellValueObject.setPattern(pattern);
+        if (pattern && cellValueObject.isNumber()) {
+            const value = Number(cellValueObject.getValue());
+            cellValueObject = NumberValueObject.create(value, pattern);
+        }
 
         return cellValueObject;
     }
@@ -393,7 +401,8 @@ export class BaseReferenceObject extends ObjectClassType {
             return createNumberValueObjectByRawValue(value);
         }
         if (cell.t === CellValueType.STRING || cell.t === CellValueType.FORCE_STRING) {
-            return createStringValueObjectByRawValue(value);
+            // A1 is `"test"`, =A1 also needs to get `"test"`
+            return StringValueObject.create(value.toString());
         }
         if (cell.t === CellValueType.BOOLEAN) {
             return createBooleanValueObjectByRawValue(value);

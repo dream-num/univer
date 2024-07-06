@@ -749,7 +749,7 @@ export class DrawingUpdateController extends Disposable {
         }) as IDrawingParam[];
     }
 
-        // group?.getObjects().forEach((o) => {
+    // group?.getObjects().forEach((o) => {
     //     const drawing = this._drawingManagerService.getDrawingOKey(o.oKey);
     //     if (drawing != null) {
     //         const { unitId, subUnitId, drawingId } = drawing;
@@ -763,7 +763,7 @@ export class DrawingUpdateController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                transformer.onChangeStartObservable.add((state) => {
+                transformer.changeStart$.subscribe((state) => {
                     const { objects } = state;
                     const objectArray = Array.from(objects.values());
                     const drawings: IDrawingSearch[] = [];
@@ -807,24 +807,7 @@ export class DrawingUpdateController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                transformer.onChangingObservable.add((state) => {
-                    const { objects } = state;
-                    const params = getUpdateParams(objects, this._drawingManagerService);
-                    if (params.length > 0) {
-                        // this._drawingManagerService.batchUpdate(params.filter((param) => {
-                        //     if (param == null) {
-                        //         return false;
-                        //     }
-                        //     return true;
-                        // }) as IDrawingParam[]);
-                    }
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            toDisposable(
-                transformer.onChangeEndObservable.add((state) => {
+                transformer.changeEnd$.subscribe((state) => {
                     const { objects } = state;
                     const params = this._filterUpdateParams(getUpdateParams(objects, this._drawingManagerService), startTransforms);
 

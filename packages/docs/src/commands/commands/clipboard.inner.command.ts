@@ -33,11 +33,13 @@ import {
     TextXActionType,
 } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
+import { getDeleteSelection } from '../../basics/selection';
+import { getRichTextEditPath } from '../util';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
@@ -48,11 +50,11 @@ export interface IInnerPasteCommandParams {
 // Actually, the command is to handle paste event.
 export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',
-
     type: CommandType.COMMAND,
 
     handler: async (accessor, params: IInnerPasteCommandParams) => {
-        const { segmentId, body, textRanges } = params;
+        const { segmentId, textRanges } = params;
+        const body = params.body;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -62,12 +64,13 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return false;
         }
 
-        const docsModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docsModel) {
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        if (docDataModel == null || originBody == null) {
             return false;
         }
 
-        const unitId = docsModel.getUnitId();
+        const unitId = docDataModel.getUnitId();
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -79,7 +82,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         };
 
         const memoryCursor = new MemoryCursor();
-
         memoryCursor.reset();
 
         const textX = new TextX();
@@ -97,7 +99,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     segmentId,
                 });
             } else {
-                textX.push(...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor));
+                const { dos } = getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor, originBody);
+                textX.push(...dos);
             }
 
             textX.push({
@@ -112,7 +115,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -150,9 +154,9 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             return false;
         }
 
-        const documentModel = univerInstanceService.getUniverDocInstance(unitId);
-        const originBody = getDocsUpdateBody(documentModel!.getSnapshot(), segmentId);
-        if (originBody == null) {
+        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const originBody = getDocsUpdateBody(docDataModel!.getSnapshot(), segmentId);
+        if (docDataModel == null || originBody == null) {
             return false;
         }
 
@@ -191,7 +195,8 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -204,16 +209,17 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
 // If the selection contains line breaks,
 // paragraph information needs to be preserved when performing the CUT operation
+// eslint-disable-next-line max-lines-per-function
 function getRetainAndDeleteAndExcludeLineBreak(
-    range: ITextRange,
+    selection: ITextRange,
     body: IDocumentBody,
     segmentId: string = '',
     memoryCursor: number = 0
 ): Array<IRetainAction | IDeleteAction> {
-    const { startOffset, endOffset } = range;
+    const { startOffset, endOffset } = getDeleteSelection(selection, body);
     const dos: Array<IRetainAction | IDeleteAction> = [];
 
-    const { paragraphs = [] } = body;
+    const { paragraphs = [], dataStream } = body;
 
     const textStart = startOffset - memoryCursor;
     const textEnd = endOffset - memoryCursor;
@@ -221,6 +227,27 @@ function getRetainAndDeleteAndExcludeLineBreak(
     const paragraphInRange = paragraphs?.find(
         (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor <= textEnd
     );
+
+    const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset));
+    const toDeleteRanges = new Set(relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(startOffset, endOffset - startOffset, customRange, dataStream)));
+    const retainPoints = new Set<number>();
+
+    relativeCustomRanges?.forEach((range) => {
+        if (toDeleteRanges.has(range)) {
+            return;
+        }
+
+        if (range.startIndex - memoryCursor >= textStart &&
+            range.startIndex - memoryCursor <= textEnd &&
+            range.endIndex - memoryCursor > textEnd) {
+            retainPoints.add(range.startIndex);
+        }
+        if (range.endIndex - memoryCursor >= textStart &&
+            range.endIndex - memoryCursor <= textEnd &&
+            range.startIndex < textStart) {
+            retainPoints.add(range.endIndex);
+        }
+    });
 
     if (textStart > 0) {
         dos.push({
@@ -232,36 +259,37 @@ function getRetainAndDeleteAndExcludeLineBreak(
 
     if (paragraphInRange && paragraphInRange.startIndex - memoryCursor > textStart) {
         const paragraphIndex = paragraphInRange.startIndex - memoryCursor;
+        retainPoints.add(paragraphIndex);
+    }
 
-        dos.push({
-            t: TextXActionType.DELETE,
-            len: paragraphIndex - textStart,
-            line: 0,
-            segmentId,
-        });
+    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
 
+    let cursor = textStart;
+    sortedRetains.forEach((pos) => {
+        const len = pos - cursor;
+        if (len > 0) {
+            dos.push({
+                t: TextXActionType.DELETE,
+                len,
+                line: 0,
+                segmentId,
+            });
+        }
         dos.push({
             t: TextXActionType.RETAIN,
             len: 1,
             segmentId,
         });
+        cursor = pos + 1;
+    });
 
-        if (textEnd > paragraphIndex + 1) {
-            dos.push({
-                t: TextXActionType.DELETE,
-                len: textEnd - paragraphIndex - 1,
-                line: 0,
-                segmentId,
-            });
-        }
-    } else {
+    if (cursor < textEnd) {
         dos.push({
             t: TextXActionType.DELETE,
-            len: textEnd - textStart,
+            len: textEnd - cursor,
             line: 0,
             segmentId,
         });
     }
-
     return dos;
 }

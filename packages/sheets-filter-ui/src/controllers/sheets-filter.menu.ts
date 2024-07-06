@@ -23,7 +23,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import { map, of, switchMap } from 'rxjs';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetFilterPermission } from '@univerjs/sheets';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggleSheetsFilterCommand } from '../commands/sheets-filter.command';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
 
 export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     const sheetsFilterService = accessor.get(SheetsFilterService);

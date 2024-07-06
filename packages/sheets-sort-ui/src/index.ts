@@ -15,3 +15,20 @@
  */
 
 export { UniverSheetsSortUIPlugin } from './plugin';
+
+// #region - all commands
+
+export {
+    SortRangeAscCommand,
+    SortRangeAscExtCommand,
+    SortRangeDescCommand,
+    SortRangeDescExtCommand,
+    SortRangeCustomCommand,
+    SortRangeAscInCtxMenuCommand,
+    SortRangeAscExtInCtxMenuCommand,
+    SortRangeDescInCtxMenuCommand,
+    SortRangeDescExtInCtxMenuCommand,
+    SortRangeCustomInCtxMenuCommand,
+} from './commands/commands/sheets-sort.command';
+
+// #endregion

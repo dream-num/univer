@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IParagraph } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import type { ICustomRange, IDocumentBody, IParagraph } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, toDisposable } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
-import { CutContentCommand, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
+import { CutContentCommand, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
@@ -54,6 +54,7 @@ export interface IClipboardPropertyItem { }
 export interface IDocClipboardHook {
     onCopyProperty?(start: number, end: number): IClipboardPropertyItem;
     onCopyContent?(start: number, end: number): string;
+    onBeforePaste?: (body: IDocumentBody) => IDocumentBody;
 }
 
 export interface IDocClipboardService {
@@ -91,7 +92,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         try {
-            this._setClipboardData(documentBodyList);
+            const activeRange = this._textSelectionManagerService.getActiveRange();
+            const isCopyInHeaderFooter = !!activeRange?.segmentId;
+            this._setClipboardData(documentBodyList, !isCopyInHeaderFooter);
         } catch (e) {
             this._logService.error('[DocClipboardService] copy failed', e);
             return false;
@@ -112,6 +115,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     async legacyPaste(html?: string, text?: string): Promise<boolean> {
         const body = this._generateBodyFromHtmlAndText(html, text);
+
         return this._paste(body);
     }
 
@@ -131,7 +135,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             return false;
         }
 
-            // Set content to clipboard.
+        // Set content to clipboard.
         this.copy();
 
         try {
@@ -163,8 +167,16 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private async _paste(body: IDocumentBody): Promise<boolean> {
-        const { segmentId, endOffset: activeEndOffset, style } = this._textSelectionManagerService.getActiveRange() ?? {};
+    private async _paste(_body: IDocumentBody): Promise<boolean> {
+        let body = normalizeBody(_body);
+
+        this._clipboardHooks.forEach((hook) => {
+            if (hook.onBeforePaste) {
+                body = hook.onBeforePaste(body);
+            }
+        });
+        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
         const ranges = this._textSelectionManagerService.getSelections();
 
         if (segmentId == null) {
@@ -176,7 +188,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         try {
-                // When doc has multiple selections, the cursor moves to the last pasted content's end.
+            // When doc has multiple selections, the cursor moves to the last pasted content's end.
             let cursor = activeEndOffset;
             for (const range of ranges) {
                 const { startOffset, endOffset } = range;
@@ -205,16 +217,16 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private async _setClipboardData(documentBodyList: IDocumentBody[]): Promise<void> {
+    private async _setClipboardData(documentBodyList: IDocumentBody[], needCache = true): Promise<void> {
         const copyId = genId();
         const text =
-                documentBodyList.length > 1
-                    ? documentBodyList.map((body) => body.dataStream).join('\n')
-                    : documentBodyList[0].dataStream;
+            documentBodyList.length > 1
+                ? documentBodyList.map((body) => body.dataStream).join('\n')
+                : documentBodyList[0].dataStream;
         let html = this._umdToHtml.convert(documentBodyList);
 
             // Only cache copy content when the range is 1.
-        if (documentBodyList.length === 1) {
+        if (documentBodyList.length === 1 && needCache) {
             html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
             copyContentCache.set(copyId, documentBodyList[0]);
         }
@@ -236,12 +248,20 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     private _getDocumentBodyInRanges(): IDocumentBody[] {
         const ranges = this._textSelectionManagerService.getSelections();
-        const doc = this._univerInstanceService.getCurrentUniverDocInstance();
+        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         const results: IDocumentBody[] = [];
+        const body = docDataModel?.getBody();
 
-        if (ranges == null || !doc) {
+        if (ranges == null || docDataModel == null || body == null) {
             return results;
         }
+
+        if (activeRange == null) {
+            return results;
+        }
+
+        const { segmentId } = activeRange;
 
         for (const range of ranges) {
             const { startOffset, endOffset, collapsed } = range;
@@ -253,10 +273,30 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             if (startOffset == null || endOffset == null) {
                 continue;
             }
+            const deleteRange = getDeleteSelection({ startOffset, endOffset, collapsed }, body);
 
-            const docBody = doc.sliceBody(startOffset, endOffset);
+            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).sliceBody(deleteRange.startOffset, deleteRange.endOffset);
             if (docBody == null) {
                 continue;
+            }
+
+            if (docBody.customRanges) {
+                const deleteRange: ICustomRange[] = [];
+                docBody.customRanges.forEach((range) => {
+                    // should be delete
+                    if (range.startIndex === range.endIndex) {
+                        deleteRange.push(range);
+                    }
+                });
+                docBody.customRanges = docBody.customRanges.filter((range) => deleteRange.indexOf(range) === -1);
+                let text = '';
+                let cursor = 0;
+                deleteRange.forEach((range) => {
+                    text += docBody.dataStream.slice(cursor, range.endIndex);
+                    cursor = range.endIndex + 1;
+                });
+                text += docBody.dataStream.slice(cursor, docBody.dataStream.length);
+                docBody.dataStream = text;
             }
 
             results.push(docBody);
@@ -267,7 +307,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     private async _generateBodyFromClipboardItems(items: ClipboardItem[]): Promise<IDocumentBody> {
         try {
-                // TODO: support paste image.
+            // TODO: support paste image.
 
             let html = '';
             let text = '';

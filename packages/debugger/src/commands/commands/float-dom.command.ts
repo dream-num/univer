@@ -32,6 +32,9 @@ export const CreateFloatDomCommand: ICommand = {
                 endY: 400,
             },
             componentKey: 'ImageDemo',
+            props: {
+                a: 1,
+            },
         });
         return true;
     },

@@ -20,22 +20,23 @@ import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Concatenate } from '../index';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test concatenate function', () => {
-    const textFunction = new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE);
+    const testFunction = new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE);
 
     describe('Concatenate', () => {
         it('Text is single cell', () => {
             const text1 = StringValueObject.create('Start ');
             const text2 = StringValueObject.create('End');
-            const result = textFunction.calculate(text1, text2);
+            const result = testFunction.calculate(text1, text2);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['Start End']]);
         });
 
         it('Text is single cell with quotation marks', () => {
             const text1 = StringValueObject.create('"Hello ""World"');
-            const result = textFunction.calculate(text1);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([['Hello "World']]);
+            const result = testFunction.calculate(text1);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([['"Hello ""World"']]);
         });
 
         it('Text1 is single cell, text2 is array', () => {
@@ -53,7 +54,7 @@ describe('Test concatenate function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(text1, text2);
+            const result = testFunction.calculate(text1, text2);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['a1', 'a2', 'a3'], ['a2', 'a3', 'a4'], ['a3', 'a4', 'a5']]);
         });
 
@@ -72,7 +73,7 @@ describe('Test concatenate function', () => {
                 column: 0,
             });
             const text2 = StringValueObject.create('a');
-            const result = textFunction.calculate(text1, text2);
+            const result = testFunction.calculate(text1, text2);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['1a', '2a', '3a'], ['2a', '3a', '4a'], ['3a', '4a', '5a']]);
         });
 
@@ -101,7 +102,7 @@ describe('Test concatenate function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(text1, text2);
+            const result = testFunction.calculate(text1, text2);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['a1', 'a2', 'a3'], ['b1', 'b2', 'b3'], ['c1', 'c2', 'c3']]);
         });
 
@@ -131,8 +132,26 @@ describe('Test concatenate function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(text1, text2);
+            const result = testFunction.calculate(text1, text2);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['a1', 'd2', '#N/A'], ['00', '', '#N/A'], ['#N/A', '#N/A', '#N/A']]);
+        });
+
+        it('Text1 is array with multi type cells, includes error', () => {
+            const text = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null],
+                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const text2 = StringValueObject.create('test');
+            const result = testFunction.calculate(text, text2);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([['1test', ' test', '1.23test', 'TRUEtest', 'FALSEtest', 'test'], ['0test', '100test', '2.34test', 'testtest', '-3test', '#NAME?']]);
         });
     });
 });

@@ -22,17 +22,17 @@ import { NumberValueObject, StringValueObject } from '../../../../engine/value-o
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test year function', () => {
-    const textFunction = new Year(FUNCTION_NAMES_DATE.YEAR);
+    const testFunction = new Year(FUNCTION_NAMES_DATE.YEAR);
 
     describe('Year', () => {
         it('Serial number is normal', () => {
             const serialNumber = NumberValueObject.create(43831);
-            const result = textFunction.calculate(serialNumber);
+            const result = testFunction.calculate(serialNumber);
             expect(result.getValue()).toStrictEqual(2020);
         });
         it('Serial number is date string', () => {
             const serialNumber = StringValueObject.create('2020-01-02');
-            const result = textFunction.calculate(serialNumber);
+            const result = testFunction.calculate(serialNumber);
             expect(result.getValue()).toStrictEqual(2020);
         });
 
@@ -47,7 +47,7 @@ describe('Test year function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(serialNumber);
+            const result = testFunction.calculate(serialNumber);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[1900, '#VALUE!', 1900, 1900, 1900, 1900], [1900, 1900, 1900, '#VALUE!', '#NUM!', 1905]]);
         });
     });

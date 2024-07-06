@@ -37,8 +37,8 @@ export const SidebarOperation: ICommand = {
                 editorService.setOperationSheetUnitId(unit.getUnitId());
                 editorService.setOperationSheetSubUnitId(unit.getActiveSheet()?.getSheetId());
                 sidebarService.open({
-                    header: { title: 'debugger.sidebar.title' },
-                    children: { title: 'Sidebar Content', label: TEST_EDITOR_CONTAINER_COMPONENT },
+                    header: { title: 'Sidebar title' },
+                    children: { label: TEST_EDITOR_CONTAINER_COMPONENT },
                     footer: { title: 'Sidebar Footer' },
                     onClose: () => {
                         editorService.setOperationSheetUnitId(null);

@@ -24,6 +24,7 @@ import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighligh
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import stylesBase from '../index.module.less';
 import { Preview } from '../../preview';
+import { WrapperError } from '../../wrapper-error/WrapperError';
 import styles from './index.module.less';
 import type { IStyleEditorProps } from './type';
 
@@ -43,15 +44,18 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         }
         return '=';
     });
+    const [formulaError, formulaErrorSet] = useState('');
 
     const getResult = (config: {
         style: IHighlightCell['style'];
         formula: string;
     }) => {
-        return { style: config.style,
-                 value: formula,
-                 type: CFRuleType.highlightCell,
-                 subType: CFSubRuleType.formula };
+        return {
+            style: config.style,
+            value: formula,
+            type: CFRuleType.highlightCell,
+            subType: CFSubRuleType.formula,
+        };
     };
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, {
@@ -61,6 +65,18 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         });
         return dispose as () => void;
     }, [style, formula, interceptorManager]);
+
+    useEffect(() => {
+        interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
+            handler: (v, _c, next) => {
+                if (!formula || formula.length === 1 || !formulaError.startsWith('=')) {
+                    formulaErrorSet(localeService.t('sheet.cf.errorMessage.formulaError'));
+                    return false;
+                }
+                return next(v);
+            },
+        });
+    }, [formula]);
 
     const _onChange = (config: {
         formula: string;
@@ -72,19 +88,23 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         <div>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <div className={`${stylesBase.mTSm}`}>
-                <TextEditor
-                    id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_formula`)}
-                    openForSheetSubUnitId={worksheet?.getSheetId()}
-                    openForSheetUnitId={workbook.getUnitId()}
-                    value={formula}
-                    canvasStyle={{ fontSize: 10 }}
-                    onlyInputFormula={true}
-                    onChange={(v = '') => {
-                        const formula = v || '';
-                        formulaSet(formula);
-                        _onChange({ style, formula });
-                    }}
-                />
+                <WrapperError errorText={formulaError}>
+                    <TextEditor
+                        id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_formula`)}
+                        openForSheetSubUnitId={worksheet?.getSheetId()}
+                        openForSheetUnitId={workbook.getUnitId()}
+                        value={formula}
+                        canvasStyle={{ fontSize: 10 }}
+                        onlyInputFormula={true}
+                        onChange={(v = '') => {
+                            const formula = v || '';
+                            formulaSet(formula);
+                            _onChange({ style, formula });
+                            formulaErrorSet('');
+                        }}
+                    />
+                </WrapperError>
+
             </div>
 
             <div className={`${styles.cfPreviewWrap} `}>

@@ -29,7 +29,7 @@ export class Average extends BaseFunction {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isString()) {
+            if (variant.isString() || variant.isBoolean()) {
                 variant = variant.convertToNumberObjectValue();
             }
 

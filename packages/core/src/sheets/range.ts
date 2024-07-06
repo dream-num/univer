@@ -17,8 +17,8 @@
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import { ObjectMatrix, Tools } from '../shared';
 import { DEFAULT_STYLES } from '../types/const';
-import type { HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
-import { BooleanNumber, FontItalic, FontWeight } from '../types/enum';
+import type { HorizontalAlign, VerticalAlign } from '../types/enum';
+import { BooleanNumber, FontItalic, FontWeight, WrapStrategy } from '../types/enum';
 import {
     type IBorderData,
     type ICellData,
@@ -707,14 +707,7 @@ export class Range {
      * Returns whether the text in the cell wraps.
      */
     getWrap(): BooleanNumber {
-        return this.getWraps()[0][0];
-    }
-
-    /**
-     * Returns whether the text in the cells wrap.
-     */
-    getWraps(): BooleanNumber[][] {
-        return this._getStyles('tb') as BooleanNumber[][];
+        return this.getWrapStrategy() === WrapStrategy.WRAP ? BooleanNumber.TRUE : BooleanNumber.FALSE;
     }
 
     /**

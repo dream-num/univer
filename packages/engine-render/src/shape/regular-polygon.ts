@@ -36,7 +36,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         super(key, props);
         this._pointsGroup = props?.pointsGroup || [[]];
         this._setFixBoundingBox();
-        this.onTransformChangeObservable.add((changeState) => {
+        this.onTransformChange$.subscribeEvent((changeState) => {
             const { type, value, preValue } = changeState;
             if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
                 this.resizePolygon(preValue as IObjectFullState);

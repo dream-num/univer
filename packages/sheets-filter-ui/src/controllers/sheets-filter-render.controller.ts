@@ -93,7 +93,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                         skeleton: skeletonParams.skeleton,
                     });
 
-                    return fromCallback(this._commandService.onCommandExecuted).pipe(
+                    return fromCallback(this._commandService.onCommandExecuted.bind(this._commandService)).pipe(
                         filter(([command]) =>
                             command.type === CommandType.MUTATION
                             && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()

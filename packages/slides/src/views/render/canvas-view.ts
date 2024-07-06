@@ -18,7 +18,6 @@ import type { EventState, IColorStyle, ISlidePage, Nullable, SlideDataModel } fr
 import { debounce, getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import {
-    EVENT_TYPE,
     IRenderManagerService,
     Rect,
     Scene,
@@ -28,7 +27,7 @@ import {
 } from '@univerjs/engine-render';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { ObjectProvider } from './object-provider';
 
 export enum SLIDE_KEY {
@@ -41,6 +40,7 @@ export class CanvasView extends RxDisposable {
     private _objectProvider: ObjectProvider | null = null;
 
     private _activePageId: string = '';
+    readonly activePageId$ = new Subject<string>();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -93,6 +93,8 @@ export class CanvasView extends RxDisposable {
         const slide = render.mainComponent as Slide;
 
         this._activePageId = pageId;
+
+        this.activePageId$.next(pageId);
 
         if (slide?.hasPage(id)) {
             slide.changePage(id);
@@ -155,13 +157,13 @@ export class CanvasView extends RxDisposable {
 
         const { scene, engine } = currentRender;
 
-        const observer = engine.onTransformChangeObservable.add(() => {
+        const observer = engine.onTransformChange$.subscribeEvent(() => {
             this._scrollToCenter();
             // add once
-            observer?.dispose();
+            observer?.unsubscribe();
         });
 
-        engine.onTransformChangeObservable.add(() => {
+        engine.onTransformChange$.subscribeEvent(() => {
             setTimeout(() => {
                 this.createThumbs();
             }, 300);
@@ -185,7 +187,7 @@ export class CanvasView extends RxDisposable {
 
         scene.attachControl();
 
-        scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
+        scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);
@@ -209,7 +211,7 @@ export class CanvasView extends RxDisposable {
             }
         });
 
-        scene.onFileLoadedObservable.add(() => {
+        scene.onFileLoaded$.subscribeEvent(() => {
             this._refreshThumb();
         });
 
@@ -239,10 +241,6 @@ export class CanvasView extends RxDisposable {
 
         engine.runRenderLoop(() => {
             scene.render();
-            const app = document.getElementById('app');
-            if (app) {
-                app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
-            }
         });
     }
 
@@ -439,11 +437,11 @@ export class CanvasView extends RxDisposable {
 
         const transformer = scene.getTransformer();
 
-        transformer?.onChangeEndObservable.add(() => {
+        transformer?.changeEnd$.subscribe(() => {
             this._thumbSceneRender(this._activePageId, slide);
         });
 
-        transformer?.onClearControlObservable.add(() => {
+        transformer?.clearControl$.subscribe(() => {
             this._thumbSceneRender(this._activePageId, slide);
         });
 

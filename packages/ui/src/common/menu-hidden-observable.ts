@@ -15,7 +15,7 @@
  */
 
 import type { UniverInstanceType } from '@univerjs/core';
-import { IUniverInstanceService } from '@univerjs/core';
+import { DocumentFlavor, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
@@ -43,6 +43,35 @@ export function getMenuHiddenObservable(
 
         const univerType = univerInstanceService.getUnitType(focusedUniverInstance.getUnitId());
         subscriber.next(univerType !== targetUniverType);
+
+        return () => subscription.unsubscribe();
+    });
+}
+
+export function getHeaderFooterMenuHiddenObservable(
+    accessor: IAccessor
+): Observable<boolean> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    return new Observable((subscriber) => {
+        const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            if (unitId == null) {
+                return subscriber.next(true);
+            }
+            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
+
+            subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
+        });
+
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+        if (docDataModel == null) {
+            return subscriber.next(true);
+        }
+
+        const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
+        subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
 
         return () => subscription.unsubscribe();
     });

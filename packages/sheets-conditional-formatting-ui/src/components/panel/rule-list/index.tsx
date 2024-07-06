@@ -33,7 +33,7 @@ import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from 
 import type { IDeleteCfCommandParams } from '../../../commands/commands/delete-cf.command';
 import { DeleteCfCommand } from '../../../commands/commands/delete-cf.command';
 import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
-import { moveCfCommand } from '../../../commands/commands/move-cf.command';
+import { MoveCfCommand } from '../../../commands/commands/move-cf.command';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { Preview } from '../../preview';
@@ -299,7 +299,7 @@ export const RuleList = (props: IRuleListProps) => {
         const cfId = ruleList[getSaveIndex(from.y)].cfId;
         const targetCfId = ruleList[getSaveIndex(to.y)].cfId;
         if (cfId !== targetCfId) {
-            commandService.executeCommand(moveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommand);
+            commandService.executeCommand(MoveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommand);
         }
     };
 

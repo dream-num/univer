@@ -20,6 +20,7 @@ const locale: typeof zhCN = {
     dataValidation: {
         title: 'Проверка данных',
         validFail: {
+            value: 'Пожалуйста, введите значение',
             common: 'Пожалуйста, введите значение или формулу',
             number: 'Пожалуйста, введите число или формулу',
             formula: 'Пожалуйста, введите формулу',
@@ -30,6 +31,7 @@ const locale: typeof zhCN = {
             checkboxEqual: 'Для выбранных и не выбранных ячеек введите разные значения',
             formulaError: 'Диапазон ссылок содержит невидимые данные, пожалуйста, пересмотрите диапазон',
             listIntersects: 'Выбранный диапазон не может пересекаться с диапазоном правила.',
+            primitive: 'Formulas are not permitted for custom ticked and unticked values.',
         },
         panel: {
             title: 'Управление проверкой данных',
@@ -43,6 +45,7 @@ const locale: typeof zhCN = {
             removeRule: 'Удалить',
             done: 'Готово',
             formulaPlaceholder: 'Пожалуйста, введите значение или формулу',
+            valuePlaceholder: 'Пожалуйста, введите значение',
             formulaAnd: 'и',
             invalid: 'Недопустимо',
             showWarning: 'Показать предупреждение',

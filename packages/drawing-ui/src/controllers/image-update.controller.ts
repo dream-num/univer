@@ -198,8 +198,9 @@ export class ImageUpdateController extends Disposable {
         (params).forEach(async (param) => {
             const { unitId, subUnitId, drawingId } = param;
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+            const currentSubUnitId = getCurrentUnitInfo(this._currentUniverService)?.subUnitId;
 
-            if (renderObject == null) {
+            if (renderObject == null || currentSubUnitId !== subUnitId) {
                 return;
             }
 
@@ -267,7 +268,7 @@ export class ImageUpdateController extends Disposable {
     private _addHoverForImage(o: Image) {
         this.disposeWithMe(
             toDisposable(
-                o.onPointerEnterObserver.add(() => {
+                o.onPointerEnter$.subscribeEvent(() => {
                     o.cursor = CURSOR_TYPE.GRAB;
                 })
             )
@@ -275,7 +276,7 @@ export class ImageUpdateController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                o.onPointerLeaveObserver.add(() => {
+                o.onPointerLeave$.subscribeEvent(() => {
                     o.cursor = CURSOR_TYPE.DEFAULT;
                 })
             )
@@ -285,7 +286,7 @@ export class ImageUpdateController extends Disposable {
     private _addDialogForImage(o: Image) {
         this.disposeWithMe(
             toDisposable(
-                o.onDblclickObserver.add(() => {
+                o.onDblclick$.subscribeEvent(() => {
                     const dialogId = `${o.oKey}-viewer-dialog`;
 
                     const nativeSize = o.getNativeSize();

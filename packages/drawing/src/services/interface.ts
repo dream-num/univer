@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform, IOffset } from '@univerjs/core';
+import type { IAbsoluteTransform } from '@univerjs/core';
 
 export interface IRotationSkewFlipTransform {
     angle?: number;
@@ -22,11 +22,6 @@ export interface IRotationSkewFlipTransform {
     skewY?: number;
     flipX?: boolean;
     flipY?: boolean;
-}
-
-export interface ISrcRect extends IOffset {
-    right?: number;
-    bottom?: number;
 }
 
 export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}

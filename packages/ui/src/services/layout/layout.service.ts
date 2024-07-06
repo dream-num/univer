@@ -15,7 +15,7 @@
  */
 
 import type { ContextService, Nullable } from '@univerjs/core';
-import { Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, ILogService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
+import { Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
 import { createIdentifier, type IDisposable } from '@wendellhu/redi';
 import { fromEvent } from 'rxjs';
 import { IEditorService } from '../editor/editor.service';
@@ -48,6 +48,8 @@ export interface ILayoutService {
     /** Register an element as a container, especially floating components like Dialogs and Notifications. */
     registerContainerElement(container: HTMLElement): IDisposable;
 
+    getCanvasElement(): HTMLCanvasElement;
+
     checkElementInCurrentContainers(element: HTMLElement): boolean;
     checkCanvasIsFocused(): boolean;
 }
@@ -74,7 +76,6 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
     constructor(
         @IContextService private readonly _contextService: ContextService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ILogService private readonly _logService: ILogService,
         @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
@@ -123,6 +124,10 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         }
 
         throw new Error('[DesktopLayoutService]: canvas container already registered!');
+    }
+
+    getCanvasElement(): HTMLCanvasElement {
+        return this._canvasContainers[0];
     }
 
     registerRootContainerElement(container: HTMLElement): IDisposable {

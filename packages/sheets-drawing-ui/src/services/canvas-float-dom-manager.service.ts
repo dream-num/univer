@@ -298,7 +298,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         props: map.get(drawingId)?.props,
                     });
 
-                    const listener = rect.onTransformChangeObservable.add(() => {
+                    const listener = rect.onTransformChange$.subscribeEvent(() => {
                         const newPosition = calcPosition(rect, renderObject.renderObject, skeleton.skeleton, target.worksheet);
                         position$.next(
                             newPosition

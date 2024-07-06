@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -25,7 +25,7 @@ export class Isref extends BaseFunction {
 
     override needsReferenceObject = true;
 
-    override calculate(value: BaseValueObject) {
+    override calculate(value: FunctionVariantType) {
         if (value.isReferenceObject()) {
             return BooleanValueObject.create(true);
         }

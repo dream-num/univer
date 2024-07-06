@@ -21,8 +21,8 @@ import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
 import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import type { ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingAutoFillController)
 export class ConditionalFormattingAutoFillController extends Disposable {
@@ -175,11 +175,19 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                     return;
                 }
                 const ranges = findAllRectangle(createTopMatrixFromMatrix(item));
-                const params: ISetConditionalRuleMutationParams = {
-                    unitId, subUnitId, rule: { ...rule, ranges },
-                };
-                redos.push({ id: SetConditionalRuleMutation.id, params });
-                undos.push(...setConditionalRuleMutationUndoFactory(this._injector, params));
+                if (ranges.length) {
+                    const params: ISetConditionalRuleMutationParams = {
+                        unitId, subUnitId, rule: { ...rule, ranges },
+                    };
+                    redos.push({ id: SetConditionalRuleMutation.id, params });
+                    undos.push(...setConditionalRuleMutationUndoFactory(this._injector, params));
+                } else {
+                    const params: IDeleteConditionalRuleMutationParams = {
+                        unitId, subUnitId, cfId: rule.cfId,
+                    };
+                    redos.push({ id: DeleteConditionalRuleMutation.id, params });
+                    undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, params));
+                }
             });
             return {
                 undos,

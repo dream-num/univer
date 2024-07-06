@@ -19,7 +19,7 @@ import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuP
 import type { IAccessor } from '@wendellhu/redi';
 import { getCurrentRangeDisable$, SheetMenuPosition } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSortPermission } from '@univerjs/sheets';
-import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
+import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/commands/sheets-sort.command';
 
 const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
 const SHEETS_SORT_CTX_MENU_ID = 'sheet.menu.sheets-sort-ctx';

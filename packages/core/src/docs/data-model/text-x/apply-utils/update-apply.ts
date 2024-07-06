@@ -18,6 +18,7 @@ import type { Nullable } from '../../../../shared';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import type {
     ICustomBlock,
+    ICustomDecoration,
     ICustomRange,
     IDocumentBody,
     IParagraph,
@@ -28,12 +29,15 @@ import type {
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteCustomBlocks,
+    deleteCustomDecorations,
     deleteCustomRanges,
     deleteParagraphs,
     deleteSectionBreaks,
     deleteTables,
     deleteTextRuns,
     insertCustomBlocks,
+    insertCustomDecorations,
+    insertCustomRanges,
     insertParagraphs,
     insertTables,
     insertTextRuns,
@@ -53,6 +57,7 @@ export function updateAttribute(
     const removeCustomBlocks = updateCustomBlocks(body, updateBody, textLength, currentIndex, coverType);
     const removeTables = updateTables(body, updateBody, textLength, currentIndex, coverType);
     const removeCustomRanges = updateCustomRanges(body, updateBody, textLength, currentIndex, coverType);
+    const removeCustomDecorations = updateCustomDecorations(body, updateBody, textLength, currentIndex, coverType);
 
     return {
         dataStream: '',
@@ -62,6 +67,7 @@ export function updateAttribute(
         customBlocks: removeCustomBlocks,
         tables: removeTables,
         customRanges: removeCustomRanges,
+        customDecorations: removeCustomDecorations,
     };
 }
 
@@ -431,6 +437,7 @@ function updateTables(
     return removeTables;
 }
 
+// retain
 function updateCustomRanges(
     body: IDocumentBody,
     updateBody: IDocumentBody,
@@ -438,43 +445,44 @@ function updateCustomRanges(
     currentIndex: number,
     coverType: UpdateDocsAttributeType
 ) {
+    if (!body.customRanges) {
+        body.customRanges = [];
+    }
     const { customRanges } = body;
 
-    const { tables: updateDataCustomRanges } = updateBody;
+    const { customRanges: updateDataCustomRanges } = updateBody;
 
     if (customRanges == null || updateDataCustomRanges == null) {
         return;
     }
 
-    const removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
-    if (coverType !== UpdateDocsAttributeType.REPLACE) {
-        const newUpdateCustomRanges: ICustomRange[] = [];
-        for (const updateCustomRange of updateDataCustomRanges) {
-            const { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateCustomRange;
-            let splitUpdateCustomRanges: ICustomRange[] = [];
-            for (const removeCustomRange of removeCustomRanges) {
-                const { startIndex: removeStartIndex, endIndex: removeEndIndex } = removeCustomRange;
-                if (removeStartIndex >= updateStartIndex && removeEndIndex <= updateEndIndex) {
-                    if (coverType === UpdateDocsAttributeType.COVER) {
-                        splitUpdateCustomRanges.push({
-                            ...removeCustomRange,
-                            ...updateCustomRange,
-                        });
-                    } else {
-                        splitUpdateCustomRanges.push({
-                            ...updateCustomRange,
-                            ...removeCustomRange,
-                        });
-                    }
-                    break;
-                }
-            }
-            newUpdateCustomRanges.push(...splitUpdateCustomRanges);
-            splitUpdateCustomRanges = [];
-        }
-        updateBody.customRanges = newUpdateCustomRanges;
+    let removeCustomRanges: ICustomRange[] = [];
+    if (coverType === UpdateDocsAttributeType.REPLACE) {
+        removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
     }
-    insertTables(body, updateBody, textLength, currentIndex);
 
+    // retain
+    insertCustomRanges(body, updateBody, 0, currentIndex);
     return removeCustomRanges;
+}
+
+// retain
+function updateCustomDecorations(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
+    if (!body.customDecorations) {
+        body.customDecorations = [];
+    }
+
+    let removeCustomDecorations: ICustomDecoration[] = [];
+    if (coverType === UpdateDocsAttributeType.REPLACE) {
+        removeCustomDecorations = deleteCustomDecorations(body, textLength, currentIndex, false);
+    }
+
+    insertCustomDecorations(body, updateBody, 0, currentIndex);
+    return removeCustomDecorations;
 }

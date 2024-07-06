@@ -86,6 +86,7 @@ export class Custom extends SheetExtension {
                 row,
                 col,
                 worksheet,
+                unitId: worksheet.unitId,
             };
 
                 // current cell is hidden

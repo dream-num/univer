@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getRichTextEditPath } from '../util';
 
 interface IReplaceContentCommandParams {
     unitId: string;
@@ -41,10 +42,11 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
-        const prevBody = univerInstanceService.getUniverDocInstance(unitId)?.getSnapshot().body;
+        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const prevBody = docDataModel?.getSnapshot().body;
         const selections = textSelectionManagerService.getSelections();
 
-        if (prevBody == null) {
+        if (docDataModel == null || prevBody == null) {
             return false;
         }
 
@@ -52,7 +54,7 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
             return false;
         }
 
-        const doMutation = getMutationParams(unitId, segmentId, prevBody, body);
+        const doMutation = getMutationParams(unitId, segmentId, docDataModel, prevBody, body);
 
         doMutation.params.textRanges = textRanges;
 
@@ -83,13 +85,15 @@ export const CoverContentCommand: ICommand<ICoverContentCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const prevBody = univerInstanceService.getUniverDocInstance(unitId)?.getSnapshot().body;
+        const docDatModel = univerInstanceService.getUniverDocInstance(unitId);
 
-        if (prevBody == null) {
+        const prevBody = docDatModel?.getSnapshot().body;
+
+        if (docDatModel == null || prevBody == null) {
             return false;
         }
 
-        const doMutation = getMutationParams(unitId, segmentId, prevBody, body);
+        const doMutation = getMutationParams(unitId, segmentId, docDatModel, prevBody, body);
 
         // No need to set the cursor or selection.
         doMutation.params.noNeedSetTextRange = true;
@@ -106,7 +110,7 @@ export const CoverContentCommand: ICommand<ICoverContentCommandParams> = {
     },
 };
 
-function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumentBody, body: IDocumentBody) {
+function getMutationParams(unitId: string, segmentId: string, docDatModel: DocumentDataModel, prevBody: IDocumentBody, body: IDocumentBody) {
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
@@ -139,7 +143,8 @@ function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumen
         });
     }
 
-    doMutation.params.actions = jsonX.editOp(textX.serialize());
+    const path = getRichTextEditPath(docDatModel, segmentId);
+    doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
     return doMutation;
 }

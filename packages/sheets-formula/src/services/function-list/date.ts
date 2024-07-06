@@ -75,16 +75,9 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.DATEVALUE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.DATEVALUE.functionParameter.number1.name',
-                detail: 'formula.functionList.DATEVALUE.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.DATEVALUE.functionParameter.number2.name',
-                detail: 'formula.functionList.DATEVALUE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.DATEVALUE.functionParameter.dateText.name',
+                detail: 'formula.functionList.DATEVALUE.functionParameter.dateText.detail',
+                example: '"2024-8-8"',
                 require: 1,
                 repeat: 0,
             },
@@ -324,20 +317,6 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         description: 'formula.functionList.NOW.description',
         abstract: 'formula.functionList.NOW.abstract',
         functionParameter: [
-            {
-                name: 'formula.functionList.NOW.functionParameter.number1.name',
-                detail: 'formula.functionList.NOW.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.NOW.functionParameter.number2.name',
-                detail: 'formula.functionList.NOW.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
         ],
     },
     {
@@ -369,16 +348,23 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.TIME.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.TIME.functionParameter.number1.name',
-                detail: 'formula.functionList.TIME.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.TIME.functionParameter.hour.name',
+                detail: 'formula.functionList.TIME.functionParameter.hour.detail',
+                example: '15',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.TIME.functionParameter.number2.name',
-                detail: 'formula.functionList.TIME.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.TIME.functionParameter.minute.name',
+                detail: 'formula.functionList.TIME.functionParameter.minute.detail',
+                example: '20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.TIME.functionParameter.second.name',
+                detail: 'formula.functionList.TIME.functionParameter.second.detail',
+                example: '59',
                 require: 1,
                 repeat: 0,
             },
@@ -391,16 +377,9 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.TIMEVALUE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.TIMEVALUE.functionParameter.number1.name',
-                detail: 'formula.functionList.TIMEVALUE.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.TIMEVALUE.functionParameter.number2.name',
-                detail: 'formula.functionList.TIMEVALUE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.TIMEVALUE.functionParameter.timeText.name',
+                detail: 'formula.functionList.TIMEVALUE.functionParameter.timeText.detail',
+                example: '"15:20:59"',
                 require: 1,
                 repeat: 0,
             },

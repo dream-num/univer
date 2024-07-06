@@ -22,13 +22,13 @@ import { NumberValueObject } from '../../../../engine/value-object/primitive-obj
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test edate function', () => {
-    const textFunction = new Edate(FUNCTION_NAMES_DATE.EDATE);
+    const testFunction = new Edate(FUNCTION_NAMES_DATE.EDATE);
 
     describe('Edate', () => {
         it('All value is normal', () => {
             const startDate = NumberValueObject.create(43831);
             const months = NumberValueObject.create(1);
-            const result = textFunction.calculate(startDate, months);
+            const result = testFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[43862]]);
         });
 
@@ -43,7 +43,7 @@ describe('Test edate function', () => {
                 column: 0,
             });
             const months = NumberValueObject.create(1);
-            const result = textFunction.calculate(startDate, months);
+            const result = testFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[43863], [43864]]);
         });
 
@@ -61,7 +61,7 @@ describe('Test edate function', () => {
                 column: 0,
             });
             const months = NumberValueObject.create(1);
-            const result = textFunction.calculate(startDate, months);
+            const result = testFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[32, '#VALUE!', 32, '#VALUE!', '#VALUE!', 31], [31, 130, 33, '#VALUE!', '#NUM!', 1931]]);
         });
 
@@ -76,7 +76,7 @@ describe('Test edate function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(startDate, months);
+            const result = testFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[43862], [43891]]);
         });
 
@@ -92,7 +92,7 @@ describe('Test edate function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(startDate, months);
+            const result = testFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[43862, '#VALUE!', 43862, '#VALUE!', '#VALUE!', 43831], [43831, 46874, 43891, '#VALUE!', 43739, 101660]]);
         });
     });

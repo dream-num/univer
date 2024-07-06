@@ -37,7 +37,7 @@ export class SheetsRenderService extends RxDisposable {
 
     constructor(
         @IContextService private readonly _contextService: IContextService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
@@ -71,13 +71,13 @@ export class SheetsRenderService extends RxDisposable {
     }
 
     private _initWorkbookListener(): void {
-        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+        this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => this._createRenderer(workbook));
-        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+        this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .forEach((workbook) => this._createRenderer(workbook));
 
-        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+        this._instanceSrv.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => this._disposeRenderer(workbook));
     }
@@ -85,12 +85,13 @@ export class SheetsRenderService extends RxDisposable {
     private _createRenderer(workbook: Workbook): void {
         const unitId = workbook.getUnitId();
         this._renderManagerService.createRender(unitId);
-        this._renderManagerService.setCurrent(unitId); // NOTE@wzhudev: maybe not in uni mode
+
+        // NOTE@wzhudev: maybe not in univer mode
+        this._renderManagerService.setCurrent(unitId);
     }
 
     private _disposeRenderer(workbook: Workbook): void {
         const unitId = workbook.getUnitId();
-
         this._renderManagerService.removeRender(unitId);
     }
 

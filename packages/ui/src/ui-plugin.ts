@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, IContextService, ILocalStorageService, LocaleService, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { DependentOn, IContextService, ILocalStorageService, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -34,18 +34,18 @@ import { DesktopBeforeCloseService, IBeforeCloseService } from './services/befor
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
 import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
-import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
+import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
+import { IMenuService, MenuService } from './services/menu/menu.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
 import { IMessageService } from './services/message/message.service';
 import { DesktopNotificationService } from './services/notification/desktop-notification.service';
 import { INotificationService } from './services/notification/notification.service';
-import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
-import { DesktopShortcutService, IShortcutService } from './services/shortcut/shortcut.service';
+import { IPlatformService, PlatformService } from './services/platform/platform.service';
+import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
@@ -73,8 +73,7 @@ export class UniverUIPlugin extends Plugin {
     constructor(
         private _config: Partial<IUniverUIConfig> = {},
         @IContextService private readonly _contextService: IContextService,
-        @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
 
@@ -85,16 +84,7 @@ export class UniverUIPlugin extends Plugin {
         }
     }
 
-    override onStarting(_injector: Injector): void {
-        this._initDependencies(_injector);
-    }
-
-    override onReady(): void {
-        // TODO@Jocs: this has to be on Ready hook because of editor related modules' sequence problem.
-        this._initUI();
-    }
-
-    private _initDependencies(injector: Injector): void {
+    override onStarting(injector: Injector): void {
         const dependencies: Dependency[] = mergeOverrideWithDependencies([
             [ComponentManager],
             [ZIndexManager],
@@ -103,10 +93,10 @@ export class UniverUIPlugin extends Plugin {
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
-            [IShortcutService, { useClass: DesktopShortcutService }],
-            [IPlatformService, { useClass: DesktopPlatformService }],
-            [IMenuService, { useClass: DesktopMenuService }],
-            [IContextMenuService, { useClass: DesktopContextMenuService }],
+            [IShortcutService, { useClass: ShortcutService }],
+            [IPlatformService, { useClass: PlatformService }],
+            [IMenuService, { useClass: MenuService }],
+            [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],
@@ -122,8 +112,14 @@ export class UniverUIPlugin extends Plugin {
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
+
             // controllers
-            [IUIController, { useClass: DesktopUIController }],
+            [
+                IUIController, {
+                    useFactory: (injector: Injector) => injector.createInstance(DesktopUIController, this._config),
+                    deps: [Injector],
+                },
+            ],
             [
                 SharedController,
                 {
@@ -140,10 +136,5 @@ export class UniverUIPlugin extends Plugin {
         ], this._config.override);
 
         dependencies.forEach((dependency) => injector.add(dependency));
-    }
-
-    private _initUI(): void {
-        // We need to run this async to let other modules do their `onReady` jobs first.
-        Promise.resolve().then(() => this._injector.get(IUIController).bootstrapWorkbench(this._config));
     }
 }

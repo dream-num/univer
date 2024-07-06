@@ -23,12 +23,12 @@ import { Isnumber } from '../index';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test isnumber function', () => {
-    const textFunction = new Isnumber(FUNCTION_NAMES_INFORMATION.ISNUMBER);
+    const testFunction = new Isnumber(FUNCTION_NAMES_INFORMATION.ISNUMBER);
 
     describe('Isnumber', () => {
         it('value number', () => {
             const value = NumberValueObject.create(1);
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(true);
         });
 
@@ -45,7 +45,7 @@ describe('Test isnumber function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [true, false, true, false, false, false, false, false, false, false],
                 [true, true, true, false, true, false, false, false, false, false],

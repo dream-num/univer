@@ -32,7 +32,7 @@ import {
     RemoveSheetsFilterMutation,
     SetSheetsFilterCriteriaMutation,
     SetSheetsFilterRangeMutation,
-} from '../commands/sheets-filter.mutation';
+} from '../commands/mutations/sheets-filter.mutation';
 import type { IAutoFilter } from '../models/types';
 
 export const FILTER_MUTATIONS = new Set([
@@ -152,7 +152,7 @@ export class SheetsFilterService extends Disposable {
         this.disposeWithMe(
             merge(
                 // source1: executing filter related mutations
-                fromCallback(this._commandService.onCommandExecuted)
+                fromCallback(this._commandService.onCommandExecuted.bind(this._commandService))
                     .pipe(filter(([command]) => command.type === CommandType.MUTATION && FILTER_MUTATIONS.has(command.id))),
 
                 // source2: activate sheet changes

@@ -444,7 +444,7 @@ export function forecast(x: number, yArr: number[], xArr: number[], forward = tr
 
     let b;
     if (sum_n === 0) {
-        b = 0;
+        b = forward ? 1 : -1;
     } else {
         b = sum_d / sum_n;
     }

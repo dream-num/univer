@@ -97,6 +97,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
         });
 
         setMenu(worksheetMenuItems);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [workbook, worksheetProtectionRuleModel]);
 
     const setupStatusUpdate = useCallback(() =>

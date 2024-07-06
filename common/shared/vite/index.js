@@ -46,7 +46,13 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
 
     const dirname = process.cwd();
 
+    /** @type {import('vite').UserConfig} */
     const originalConfig = {
+        // optimizeDeps: {
+        //     esbuildOptions: {
+        //         keepNames: true,
+        //     },
+        // },
         build: {
             target: 'chrome70',
             outDir: 'lib',
@@ -71,10 +77,37 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
             'process.env.BUNDLE_TYPE': JSON.stringify(process.env.BUNDLE_TYPE ?? ''),
         },
         test: {
+            css: {
+                modules: {
+                    classNameStrategy: 'non-scoped',
+                },
+            },
             coverage: {
                 reporter: ['html', 'json'],
                 provider: 'custom',
                 customProviderModule: require.resolve('@vitest/coverage-istanbul'),
+                exclude: [
+                    'coverage/**',
+                    'dist/**',
+                    '**/[.]**',
+                    'packages/*/test?(s)/**',
+                    '**/*.d.ts',
+                    '**/virtual:*',
+                    '**/__x00__*',
+                    '**/\x00*',
+                    'cypress/**',
+                    'test?(s)/**',
+                    'test?(-*).?(c|m)[jt]s?(x)',
+                    '**/*{.,-}{test,spec}?(-d).?(c|m)[jt]s?(x)',
+                    '**/__test?(s)__/**',
+                    '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
+                    '**/vitest.{workspace,projects}.[jt]s?(on)',
+                    '**/.{eslint,mocha,prettier}rc.{?(c|m)js,yml}',
+                    'lib/**',
+                    'src/locale/**',
+                    '**/*.stories.tsx',
+                    '**/__testing__/**',
+                ],
             },
         },
     };

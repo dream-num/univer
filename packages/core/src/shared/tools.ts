@@ -16,6 +16,7 @@
 
 import { customAlphabet, nanoid } from 'nanoid';
 
+import { isLegalUrl } from '../common/url';
 import type { Class, IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
@@ -85,6 +86,7 @@ export class Tools {
         return value;
     }
 
+    // eslint-disable-next-line complexity
     static getSystemType(): string {
         const sUserAgent = navigator.userAgent;
         const isWin = navigator.platform === 'Win32' || navigator.platform === 'Windows';
@@ -441,6 +443,10 @@ export class Tools {
         return /iPhone/i.test(navigator.userAgent);
     }
 
+    static isLegalUrl(url: string): boolean {
+        return isLegalUrl(url);
+    }
+
     static itCount(count: number): Function {
         return (callback: Function) => {
             for (let i = 0; i < count; i++) {
@@ -693,5 +699,9 @@ export class Tools {
         if (key) {
             data[key] = value;
         }
+    }
+
+    static clamp(value: number, min: number, max: number) {
+        return Math.max(min, Math.min(max, value));
     }
 }

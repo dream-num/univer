@@ -23,13 +23,13 @@ import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { CustomFilterOperator, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import { ByConditionsModel, ByValuesModel, FilterBy, SheetsFilterPanelService } from '../sheets-filter-panel.service';
-import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
-import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { E_ITEMS, ITEMS, WithCustomFilterModelFactory, WithMergedCellFilterFactory, WithMultiEmptyCellsModelFactory, WithTwoFilterColumnsFactory, WithValuesAndEmptyFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import type { IFilterConditionFormParams } from '../../models/conditions';
 import { FilterConditionItems } from '../../models/conditions';
 import { ExtendCustomFilterOperator } from '../../models/extended-operators';
-import { SetSheetsFilterCriteriaCommand } from '../../commands/sheets-filter.command';
+import { SetSheetsFilterCriteriaCommand } from '../../commands/commands/sheets-filter.command';
 
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',

@@ -99,7 +99,9 @@ describe('replace or cover content of document', () => {
         ]);
     });
 
-    afterEach(() => univer.dispose());
+    afterEach(() => {
+        univer.dispose();
+    });
 
     describe('replace content of document and reserve undo and redo stack', () => {
         it('Should pass the test case when replace content', async () => {
@@ -155,3 +157,4 @@ describe('replace or cover content of document', () => {
         });
     });
 });
+

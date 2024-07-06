@@ -42,7 +42,7 @@ import {
     transformCellsToRange,
 } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Optional } from '@wendellhu/redi';
 
 import { getPatternType } from '../utils/pattern';
 
@@ -77,7 +77,7 @@ export class NumfmtEditorController extends Disposable {
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
-        @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService
+        @Optional(IEditorBridgeService) private _editorBridgeService?: IEditorBridgeService
     ) {
         super();
         this._initInterceptorEditorStart();
@@ -86,6 +86,10 @@ export class NumfmtEditorController extends Disposable {
     }
 
     private _initInterceptorEditorStart() {
+        if (!this._editorBridgeService) {
+            return;
+        }
+
         this.disposeWithMe(
             toDisposable(
                 this._editorBridgeService.interceptor.intercept(
@@ -133,6 +137,10 @@ export class NumfmtEditorController extends Disposable {
      * @memberof NumfmtService
      */
     private _initInterceptorEditorEnd() {
+        if (!this._editorBridgeService) {
+            return;
+        }
+
         this.disposeWithMe(
             toDisposable(
                 this._editorBridgeService.interceptor.intercept(

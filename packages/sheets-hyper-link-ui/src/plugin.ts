@@ -69,6 +69,6 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
 
         dependencies.forEach((dep) => injector.add(dep));
 
-        this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, SheetsHyperLinkRenderController);
+        this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, SheetsHyperLinkRenderController);
     }
 }

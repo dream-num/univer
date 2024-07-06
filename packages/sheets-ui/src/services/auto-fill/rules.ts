@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { CellValueType, Direction } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { CellValueType, Direction, IUniverInstanceService } from '@univerjs/core';
+import numfmt from '@univerjs/engine-numfmt';
 
 import {
     chineseToNumber,
@@ -34,6 +36,43 @@ import {
 } from './tools';
 import type { IAutoFillRule } from './type';
 import { APPLY_TYPE, DATA_TYPE } from './type';
+
+export const dateRule: IAutoFillRule = {
+    type: DATA_TYPE.DATE,
+    priority: 1100,
+    match: (cellData, accessor) => {
+        if ((typeof cellData?.v === 'number' || cellData?.t === CellValueType.NUMBER)
+            && cellData.s) {
+            if (typeof cellData.s === 'string') {
+                const workbook = accessor.get(IUniverInstanceService).getFocusedUnit() as Workbook;
+                const style = workbook.getStyles().get(cellData.s);
+                const pattern = style?.n?.pattern;
+                if (pattern) {
+                    return numfmt.getInfo(pattern).isDate;
+                }
+            } else if (cellData.s.n && numfmt.getInfo(cellData.s.n.pattern).isDate) {
+                return true;
+            }
+        }
+        return false;
+    },
+    isContinue: (prev, cur) => {
+        if (prev.type === DATA_TYPE.DATE) {
+            return true;
+        }
+        return false;
+    },
+    applyFunctions: {
+        [APPLY_TYPE.SERIES]: (dataWithIndex, len, direction) => {
+            const { data } = dataWithIndex;
+            if (direction === Direction.LEFT || direction === Direction.UP) {
+                data.reverse();
+                return fillSeries(data, len, direction).reverse();
+            }
+            return fillSeries(data, len, direction);
+        },
+    },
+};
 
 export const numberRule: IAutoFillRule = {
     type: DATA_TYPE.NUMBER,

@@ -16,7 +16,7 @@
 
 export default {
     AVEDEV: {
-        description: '返回数据点与它们的平均值的绝对偏差平均值',
+        description: '返回数据点与它们的平均值的绝对偏差平均值。',
         abstract: '返回数据点与它们的平均值的绝对偏差平均值',
         links: [
             {
@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '要计算平均值的第一个数字、单元格引用或单元格区域。' },
+            number2: { name: '数值 2', detail: '要计算平均值的其他数字、单元格引用或单元格区域，最多可包含 255 个。' },
         },
     },
     AVERAGE: {
@@ -50,7 +50,7 @@ export default {
         },
     },
     AVERAGEA: {
-        description: '返回其参数的平均值，包括数字、文本和逻辑值',
+        description: '返回其参数的平均值，包括数字、文本和逻辑值。',
         abstract: '返回其参数的平均值，包括数字、文本和逻辑值',
         links: [
             {
@@ -59,12 +59,18 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: {
+                name: '值 1',
+                detail: '要计算平均值的第一个数字、单元格引用或单元格区域。',
+            },
+            value2: {
+                name: '值 2',
+                detail: '要计算平均值的其他数字、单元格引用或单元格区域，最多可包含 255 个。',
+            },
         },
     },
     AVERAGEIF: {
-        description: '返回区域中满足给定条件的所有单元格的平均值（算术平均值）',
+        description: '返回区域中满足给定条件的所有单元格的平均值（算术平均值）。',
         abstract: '返回区域中满足给定条件的所有单元格的平均值（算术平均值）',
         links: [
             {
@@ -73,12 +79,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '范围', detail: '要计算平均值的一个或多个单元格，其中包含数字或包含数字的名称、数组或引用。' },
+            criteria: { name: '条件', detail: '形式为数字、表达式、单元格引用或文本的条件，用来定义将计算平均值的单元格。 例如，条件可以表示为 32、"32"、">32"、"苹果" 或 B4。' },
+            averageRange: { name: '平均范围', detail: '计算平均值的实际单元格组。 如果省略，则使用 range。' },
         },
     },
     AVERAGEIFS: {
-        description: '返回满足多个条件的所有单元格的平均值（算术平均值）',
+        description: '返回满足多个条件的所有单元格的平均值（算术平均值）。',
         abstract: '返回满足多个条件的所有单元格的平均值（算术平均值）',
         links: [
             {
@@ -87,8 +94,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            averageRange: { name: '平均值范围', detail: '要计算平均值的一个或多个单元格，其中包含数字或包含数字的名称、数组或引用。' },
+            criteriaRange1: { name: '条件范围 1', detail: '是一组用于条件计算的单元格。' },
+            criteria1: { name: '条件 1', detail: '用来定义将计算平均值的单元格。 例如，条件可以表示为 32、"32"、">32"、"苹果" 或 B4' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 127 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 127 个条件。' },
         },
     },
     BETA_DIST: {
@@ -315,7 +325,7 @@ export default {
         },
     },
     COUNTBLANK: {
-        description: '计算区域内空白单元格的数量',
+        description: '计算区域内空白单元格的数量。',
         abstract: '计算区域内空白单元格的数量',
         links: [
             {
@@ -324,12 +334,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '范围', detail: '需要计算其中空白单元格个数的区域。' },
         },
     },
     COUNTIF: {
-        description: '计算区域内符合给定条件的单元格的数量',
+        description: '计算区域内符合给定条件的单元格的数量。',
         abstract: '计算区域内符合给定条件的单元格的数量',
         links: [
             {
@@ -338,12 +347,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '范围', detail: '要进行计数的单元格组。 区域可以包括数字、数组、命名区域或包含数字的引用。 空白和文本值将被忽略。' },
+            criteria: { name: '条件', detail: '用于决定要统计哪些单元格的数量的数字、表达式、单元格引用或文本字符串。\n例如，可以使用 32 之类数字，“>32”之类比较，B4 之类单元格，或“苹果”之类单词。\nCOUNTIF 仅使用一个条件。 如果要使用多个条件，请使用 COUNTIFS。' },
         },
     },
     COUNTIFS: {
-        description: '计算区域内符合多个条件的单元格的数量',
+        description: '计算区域内符合多个条件的单元格的数量。',
         abstract: '计算区域内符合多个条件的单元格的数量',
         links: [
             {
@@ -352,8 +361,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            criteriaRange1: { name: '条件范围 1', detail: '在其中计算关联条件的第一个区域。' },
+            criteria1: { name: '条件 1', detail: '条件的形式为数字、表达式、单元格引用或文本，它定义了要计数的单元格范围。 例如，条件可以表示为 32、">32"、B4、"apples"或 "32"。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 127 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 127 个条件。' },
         },
     },
     COVARIANCE_P: {
@@ -867,7 +878,7 @@ export default {
         },
     },
     MAXA: {
-        description: '返回参数列表中的最大值，包括数字、文本和逻辑值',
+        description: '返回参数列表中的最大值，包括数字、文本和逻辑值。',
         abstract: '返回参数列表中的最大值，包括数字、文本和逻辑值',
         links: [
             {
@@ -876,8 +887,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '值 1', detail: '要从中找出最大值的第一个数值参数。' },
+            value2: { name: '值 2', detail: '要从中找出最大值的 2 到 255 个数值参数。' },
         },
     },
     MAXIFS: {
@@ -891,10 +902,10 @@ export default {
         ],
         functionParameter: {
             maxRange: { name: '最大值范围', detail: '确定最大值的实际单元格区域。' },
-            criteriaRange1: { name: '条件范围 1', detail: '条件1 一组用于条件计算的单元格。' },
-            criteria1: { name: '条件 1', detail: '条件 1 用于确定哪些单元格是最大值的条件，格式为数字、表达式或文本。' },
-            criteriaRange2: { name: '条件范围 2', detail: '附加区域及其关联条件。 最多可以输入 127 个区域/条件对。' },
-            criteria2: { name: '条件 2', detail: '附加区域及其关联条件。 最多可以输入 127 个区域/条件对。' },
+            criteriaRange1: { name: '条件范围 1', detail: '是一组用于条件计算的单元格。' },
+            criteria1: { name: '条件 1', detail: '用于确定哪些单元格是最大值的条件，格式为数字、表达式或文本。 一组相同的条件适用于 MINIFS、SUMIFS 和 AVERAGEIFS 函数。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 127 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 127 个条件。' },
         },
     },
     MEDIAN: {
@@ -932,7 +943,7 @@ export default {
         },
     },
     MINA: {
-        description: '返回参数列表中的最小值，包括数字、文本和逻辑值',
+        description: '返回参数列表中的最小值，包括数字、文本和逻辑值。',
         abstract: '返回参数列表中的最小值，包括数字、文本和逻辑值',
         links: [
             {
@@ -941,13 +952,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '值 1', detail: '要计算最小值的第一个数字、单元格引用或单元格区域。' },
+            value2: { name: '值 2', detail: '要计算最小值的其他数字、单元格引用或单元格区域，最多可包含 255 个。' },
         },
     },
     MINIFS: {
         description: '返回一组给定条件或标准指定的单元格之间的最小值。',
-        abstract: '返回一组给定条件或标准指定的单元格之间的最小值。',
+        abstract: '返回一组给定条件或标准指定的单元格之间的最小值',
         links: [
             {
                 title: '教学',
@@ -955,8 +966,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            minRange: { name: '最小值范围', detail: '确定最小值的实际单元格区域。' },
+            criteriaRange1: { name: '条件范围 1', detail: '是一组用于条件计算的单元格。' },
+            criteria1: { name: '条件 1', detail: '用于确定哪些单元格是最小值的条件，格式为数字、表达式或文本。 一组相同的条件适用于 MAXIFS、SUMIFS 和 AVERAGEIFS 函数。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 127 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 127 个条件。' },
         },
     },
     MODE_MULT: {

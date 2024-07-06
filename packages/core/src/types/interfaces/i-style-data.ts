@@ -147,6 +147,11 @@ export interface IStyleBase {
      * underline
      */
     ul?: ITextDecoration;
+
+    /**
+     * bottomBorerLine
+     */
+    bbl?: ITextDecoration;
     /**
      * strikethrough
      */

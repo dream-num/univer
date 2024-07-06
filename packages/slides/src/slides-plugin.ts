@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
 import { IRenderingEngine } from '@univerjs/engine-render';
 import type { Dependency } from '@wendellhu/redi';
@@ -40,8 +40,6 @@ export class UniverSlidesPlugin extends Plugin {
 
     constructor(
         config: Partial<IUniverSlidesConfig> = {},
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
     ) {
         super();

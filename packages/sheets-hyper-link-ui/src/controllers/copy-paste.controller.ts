@@ -20,7 +20,6 @@ import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@
 import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
-import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 import { isLegalLink, serializeUrl } from '../common/util';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
@@ -167,7 +166,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                 PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
                 PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
                 PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-                SPECIAL_PASTE_FORMULA,
+                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
             ].includes(
                 copyInfo.pasteType
             )

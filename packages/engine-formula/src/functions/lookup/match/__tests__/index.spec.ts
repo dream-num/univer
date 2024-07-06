@@ -25,7 +25,7 @@ import { Match } from '../index';
 import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test match', () => {
-    const textFunction = new Match(FUNCTION_NAMES_LOOKUP.MATCH);
+    const testFunction = new Match(FUNCTION_NAMES_LOOKUP.MATCH);
 
     describe('The value of the match', () => {
         it('LookupArray asc, default matchType', async () => {
@@ -42,7 +42,7 @@ describe('Test match', () => {
                 column: 0,
             });
 
-            const resultObject = textFunction.calculate(lookupValue, lookupArray);
+            const resultObject = testFunction.calculate(lookupValue, lookupArray);
             expect(resultObject.getValue()).toBe(2);
         });
         it('LookupArray asc, matchType is 1', async () => {
@@ -60,7 +60,7 @@ describe('Test match', () => {
             });
             const matchType = NumberValueObject.create(1);
 
-            const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
+            const resultObject = testFunction.calculate(lookupValue, lookupArray, matchType);
             expect(resultObject.getValue()).toBe(2);
         });
         it('LookupArray desc, matchType is 1', async () => {
@@ -78,7 +78,7 @@ describe('Test match', () => {
             });
             const matchType = NumberValueObject.create(1);
 
-            const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
+            const resultObject = testFunction.calculate(lookupValue, lookupArray, matchType);
 
             // FIXME: fix this test
             // expect(resultObject.getValue()).toBe(ErrorType.NA);
@@ -99,7 +99,7 @@ describe('Test match', () => {
             });
             const matchType = NumberValueObject.create(0);
 
-            const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
+            const resultObject = testFunction.calculate(lookupValue, lookupArray, matchType);
             expect(resultObject.getValue()).toBe(ErrorType.NA);
         });
 
@@ -118,7 +118,7 @@ describe('Test match', () => {
             });
             const matchType = NumberValueObject.create(-1);
 
-            const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
+            const resultObject = testFunction.calculate(lookupValue, lookupArray, matchType);
 
              // FIXME: fix this test
             // expect(resultObject.getValue()).toBe(ErrorType.NA);
@@ -138,7 +138,7 @@ describe('Test match', () => {
             });
             const matchType = NumberValueObject.create(-1);
 
-            const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
+            const resultObject = testFunction.calculate(lookupValue, lookupArray, matchType);
 
             expect(resultObject.getValue()).toBe(2);
         });

@@ -15,5 +15,10 @@
  */
 
 export { UniverDocsDrawingPlugin } from './plugin';
-export { DocDrawingApplyType, SetDocDrawingApplyMutation, type ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
 export { type IDocDrawing, IDocDrawingService, DocDrawingService } from './services/doc-drawing.service';
+
+// #region - all commands
+
+export { SetDocDrawingApplyMutation, DocDrawingApplyType, type ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
+
+// #endregion

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor,
-    Workbook } from '@univerjs/core';
+import type {
+    ICellData,
+    ICellDataForSheetInterceptor,
+    Workbook,
+} from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
@@ -29,8 +32,8 @@ import {
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
-import { INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
+import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { of, skip, switchMap } from 'rxjs';
@@ -111,6 +114,11 @@ export class SheetsNumfmtCellContentController extends Disposable {
                             renderCache.realDeleteValue(row, col);
                         });
                     });
+                });
+            } else if (commandInfo.id === SetRangeValuesMutation.id) {
+                const params = commandInfo.params as ISetRangeValuesMutationParams;
+                new ObjectMatrix(params.cellValue).forValue((row, col) => {
+                    renderCache.realDeleteValue(row, col);
                 });
             }
         }));

@@ -20,6 +20,7 @@ const locale: typeof zhCN = {
     dataValidation: {
         title: 'Data validation',
         validFail: {
+            value: 'Please input a value',
             common: 'Please input value or formula',
             number: 'Please input number or formula',
             formula: 'Please input formula',
@@ -30,6 +31,7 @@ const locale: typeof zhCN = {
             checkboxEqual: 'Enter different values for ticked and unticked cell contents.',
             formulaError: 'The reference range contains invisible data, please readjust the range',
             listIntersects: 'The selected range cannot intersect with the scope of the rules',
+            primitive: 'Formulas are not permitted for custom ticked and unticked values.',
         },
         panel: {
             title: 'Data validation management',
@@ -43,6 +45,7 @@ const locale: typeof zhCN = {
             removeRule: 'Remove',
             done: 'Done',
             formulaPlaceholder: 'Please input value or formula',
+            valuePlaceholder: 'Please input value',
             formulaAnd: 'and',
             invalid: 'Invalid',
             showWarning: 'Show warning',

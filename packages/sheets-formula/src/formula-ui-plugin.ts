@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
@@ -41,7 +42,7 @@ import { IRegisterFunctionService, RegisterFunctionService } from './services/re
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { RegisterOtherFormulaService } from './services/register-other-formula.service';
-import { FormulaAlertController } from './controllers/formula-alert.controller';
+import { FormulaAlertRenderController } from './controllers/formula-alert-render.controller';
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 
 /**
@@ -55,7 +56,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -64,6 +65,19 @@ export class UniverSheetsFormulaPlugin extends Plugin {
 
     override onStarting(): void {
         this._init();
+    }
+
+    override onRendered(): void {
+        this._registerRenderModules();
+    }
+
+    private _registerRenderModules(): void {
+        ([
+
+            FormulaAlertRenderController,
+        ]).forEach((controller) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
+        });
     }
 
     _init(): void {
@@ -99,7 +113,50 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [ActiveDirtyController],
             [DefinedNameController],
             [FormulaRenderManagerController],
-            [FormulaAlertController],
+        ];
+
+        dependencies.forEach((dependency) => this._injector.add(dependency));
+    }
+}
+
+export class UniverSheetsFormulaMobilePlugin extends Plugin {
+    static override pluginName = FORMULA_UI_PLUGIN_NAME;
+    static override type = UniverInstanceType.UNIVER_SHEET;
+
+    constructor(
+        private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
+        @Inject(Injector) override readonly _injector: Injector
+    ) {
+        super();
+
+        this._config = Tools.deepMerge({}, DefaultSheetFormulaConfig, this._config);
+    }
+
+    override onStarting(): void {
+        this._init();
+    }
+
+    _init(): void {
+        const dependencies: Dependency[] = [
+            // services
+            [IFormulaPromptService, { useClass: FormulaPromptService }],
+            [
+                IDescriptionService,
+                {
+                    useFactory: () => this._injector.createInstance(DescriptionService, this._config?.description),
+                },
+            ],
+            [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
+            [IRegisterFunctionService, { useClass: RegisterFunctionService }],
+            [FormulaRefRangeService],
+            [RegisterOtherFormulaService],
+            [FormulaClipboardController],
+            [ArrayFormulaDisplayController],
+            [TriggerCalculationController],
+            [UpdateFormulaController],
+            [ActiveDirtyController],
+            [DefinedNameController],
+            [FormulaRenderManagerController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

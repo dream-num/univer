@@ -19,11 +19,11 @@ import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandSer
 import { NORMAL_SELECTION_PLUGIN_NAME, RangeProtectionRuleModel, RefRangeService, SelectionManagerService, SetWorksheetActiveOperation, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { DesktopMenuService, DesktopPlatformService, DesktopShortcutService, IMenuService, IPlatformService, IShortcutService } from '@univerjs/ui';
+import { IMenuService, IPlatformService, IShortcutService, MenuService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggleSheetsFilterCommand } from '../../commands/sheets-filter.command';
-import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggleSheetsFilterCommand } from '../../commands/commands/sheets-filter.command';
+import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory, SmartToggleFilterMenuItemFactory } from '../sheets-filter.menu';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -61,11 +61,11 @@ function createSheetsFilterMenuTestBed() {
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([IPlatformService, { useClass: DesktopPlatformService }]);
+            injector.add([IPlatformService, { useClass: PlatformService }]);
             injector.add([RefRangeService]);
             injector.add([SelectionManagerService]);
-            injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
-            injector.add([IMenuService, { useClass: DesktopMenuService }]);
+            injector.add([IShortcutService, { useClass: ShortcutService }]);
+            injector.add([IMenuService, { useClass: MenuService }]);
             injector.add([WorksheetPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([WorkbookPermissionService]);

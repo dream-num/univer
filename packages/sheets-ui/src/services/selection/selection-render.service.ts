@@ -23,24 +23,24 @@ import type {
     IRangeWithCoord,
     ISelection,
     ISelectionCell,
-    ISelectionCellWithCoord,
+    ISelectionCellWithMergeInfo,
     ISelectionWithCoord,
     Nullable,
-    Observer,
 } from '@univerjs/core';
-import { createInterceptorKey, InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { createInterceptorKey, InterceptorManager, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+// import { SHEET_VIEWPORT_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionRenderModel } from './selection-render-model';
-import { SelectionShape } from './selection-shape';
+import { SelectionControl as SelectionShape } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 
 export interface IControlFillConfig {
@@ -75,21 +75,21 @@ export interface ISelectionRenderService {
     enableSkipRemainLast(): void;
     disableSkipRemainLast(): void;
 
-    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
+    addSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle): void;
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void;
     changeRuntime(skeleton: Nullable<SpreadsheetSkeleton>, scene: Nullable<Scene>, viewport?: Viewport): void;
 
     /** @deprecated This should not be provided by the selection render service. */
     getViewPort(): Viewport;
-    getCurrentControls(): SelectionShape[];
+    getSelectionControls(): SelectionShape[];
     getActiveSelections(): Nullable<ISelection[]>;
     getActiveRange(): Nullable<IRange>;
-    getActiveSelection(): Nullable<SelectionShape>;
+    getActiveSelectionControl(): Nullable<SelectionShape>;
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[];
     attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord>;
-    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
-    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>;
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithMergeInfo>;
+    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithMergeInfo>;
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex: number,
@@ -127,11 +127,13 @@ export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: nu
 export class SelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
 
-    private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _pointerdownSub: Nullable<Subscription>;
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _mainScenePointerUpSub: Nullable<Subscription>;
 
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
+
+    private _scenePointerUpSub: Nullable<Subscription>;
 
     private _controlFillConfig$: BehaviorSubject<IControlFillConfig | null> =
         new BehaviorSubject<IControlFillConfig | null>(null);
@@ -156,10 +158,6 @@ export class SelectionRenderService implements ISelectionRenderService {
     private _startOffsetY: number = 0;
 
     private _scrollTimer!: ScrollTimer;
-
-    private _cancelDownObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _cancelUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _skeleton: Nullable<SpreadsheetSkeleton>;
 
@@ -221,7 +219,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
@@ -297,11 +294,10 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     /**
      * add a selection
-     * @param selectionRange
-     * @param curCellRange
+     * @param data
      */
-    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle) {
-        const currentControls = this.getCurrentControls();
+    addSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle) {
+        const currentControls = this.getSelectionControls();
 
         if (!currentControls) {
             return;
@@ -341,7 +337,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     }
 
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
-        const currentControls = this.getCurrentControls();
+        const currentControls = this.getSelectionControls();
         if (!currentControls) {
             return;
         }
@@ -379,7 +375,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         return selectionControls.map((control) => control.getValue());
     }
 
-    getCurrentControls() {
+    getSelectionControls() {
         return this._selectionControls;
     }
 
@@ -396,15 +392,12 @@ export class SelectionRenderService implements ISelectionRenderService {
     // }
 
     private _clearSelectionControls() {
-        const curControls = this.getCurrentControls();
-
-        if (curControls.length > 0) {
-            for (const control of curControls) {
-                control.dispose();
-            }
-
-            curControls.length = 0; // clear currentSelectionControls
+        const allSelectionControls = this.getSelectionControls();
+        for (const control of allSelectionControls) {
+            control.dispose();
         }
+
+        allSelectionControls.length = 0; // clear currentSelectionControls
     }
 
     private _getFreeze() {
@@ -446,7 +439,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @returns
      */
     getActiveSelections(): Nullable<ISelection[]> {
-        const controls = this.getCurrentControls();
+        const controls = this.getSelectionControls();
         if (controls && controls.length > 0) {
             const selections = controls?.map((control: SelectionShape) => {
                 const model: SelectionRenderModel = control.model;
@@ -484,7 +477,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @returns
      */
     getActiveRange(): Nullable<IRange> {
-        const controls = this.getCurrentControls();
+        const controls = this.getSelectionControls();
         const model = controls && controls[controls.length - 1].model;
         return (
             model && {
@@ -500,8 +493,8 @@ export class SelectionRenderService implements ISelectionRenderService {
      * get active selection control
      * @returns
      */
-    getActiveSelection(): Nullable<SelectionShape> {
-        const controls = this.getCurrentControls();
+    getActiveSelectionControl(): Nullable<SelectionShape> {
+        const controls = this.getSelectionControls();
         return controls && controls[controls.length - 1];
     }
 
@@ -513,16 +506,18 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._shortcutService.setDisable(false);
     }
 
+    /**
+     * first, clear All selection controls
+     * then unsubscribe all events
+     */
     reset() {
         this._clearSelectionControls();
 
-        this._moveObserver?.dispose();
-        this._upObserver?.dispose();
-        this._downObserver?.dispose();
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerUpSub?.unsubscribe();
 
-        this._moveObserver = null;
-        this._upObserver = null;
-        this._downObserver = null;
+        this._scenePointerMoveSub = null;
+        this._scenePointerUpSub = null;
     }
 
     resetAndEndSelection() {
@@ -606,9 +601,9 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._startSelectionRange = startSelectionRange;
 
-        let selectionControl: Nullable<SelectionShape> = this.getActiveSelection();
+        let selectionControl: Nullable<SelectionShape> = this.getActiveSelectionControl();
 
-        const curControls = this.getCurrentControls();
+        const curControls = this.getSelectionControls();
 
         if (!curControls) {
             return false;
@@ -638,13 +633,10 @@ export class SelectionRenderService implements ISelectionRenderService {
                 !evt.ctrlKey &&
                 !evt.shiftKey &&
                 !this._isShowPreviousEnable &&
-                !this._isRemainLastEnable) || (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
+                !this._isRemainLastEnable) ||
+                (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
         ) {
-            for (const control of curControls) {
-                control.dispose();
-            }
-
-            curControls.length = 0;
+            this._clearSelectionControls();
         }
 
         const currentCell = selectionControl && selectionControl.model.currentCell;
@@ -743,6 +735,7 @@ export class SelectionRenderService implements ISelectionRenderService {
                 this._themeService
             );
 
+            // eslint-disable-next-line no-new
             new SelectionShapeExtension(selectionControl, skeleton, scene, this._themeService, this._injector);
 
             selectionControl.update(
@@ -784,7 +777,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         let lastX = newEvtOffsetX;
         let lastY = newEvtOffsetY;
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
@@ -796,7 +789,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             let scrollOffsetX = newMoveOffsetX;
             let scrollOffsetY = newMoveOffsetY;
 
-            const currentSelection = this.getActiveSelection();
+            const currentSelection = this.getActiveSelectionControl();
             const freeze = this._getFreeze();
 
             const selection = currentSelection?.model;
@@ -915,7 +908,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((_upEvt: IPointerEvent | IMouseEvent) => {
             this._endSelection();
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
@@ -974,7 +967,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         };
     }
 
-    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord> {
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithMergeInfo> {
         if (primary == null) {
             return;
         }
@@ -1158,15 +1151,20 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        scene.onPointerMoveObserver.remove(this._moveObserver);
-        scene.onPointerUpObserver.remove(this._upObserver);
+        // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        // scene.onPointerUp$.remove(this._scenePointerUpSub);
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerUpSub?.unsubscribe();
         scene.enableEvent();
 
         this._scrollTimer?.dispose();
 
-        const mainScene = scene.getEngine()?.activeScene;
-        mainScene?.onPointerDownObserver.remove(this._cancelDownObserver);
-        mainScene?.onPointerUpObserver.remove(this._cancelUpObserver);
+        // const mainScene = scene.getEngine()?.activeScene;
+        // mainScene?.onPointerUp$.remove(this._mainScenePointerUpSub);
+        this._mainScenePointerUpSub?.unsubscribe();
+
+        this._pointerdownSub?.unsubscribe();
+        this._pointerdownSub = null;
     }
 
     private _addCancelObserver() {
@@ -1180,10 +1178,12 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        mainScene.onPointerDownObserver.remove(this._cancelDownObserver);
-        mainScene.onPointerUpObserver.remove(this._cancelUpObserver);
-        this._cancelDownObserver = mainScene.onPointerDownObserver.add(() => this._endSelection());
-        this._cancelUpObserver = mainScene.onPointerUpObserver.add(() => this._endSelection());
+        // mainScene.onPointerUp$.remove(this._mainScenePointerUpSub);
+        this._mainScenePointerUpSub?.unsubscribe();
+        this._mainScenePointerUpSub = mainScene.onPointerUp$.subscribeEvent(() => this._endSelection());
+
+        this._pointerdownSub?.unsubscribe();
+        this._pointerdownSub = mainScene.onPointerDown$.subscribeEvent(() => this._endSelection());
     }
 
     private _getSelectedRangeWithMerge(

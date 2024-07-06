@@ -23,15 +23,10 @@ import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBa
 import { permissionLockIconKey, permissionMenuIconKey } from '../../basics/const/permission';
 import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../../commands/commands/worksheet-protection.command';
 import { getAddPermissionDisableBase$, getAddPermissionFromSheetBarDisable$, getAddPermissionHidden$, getEditPermissionHidden$, getPermissionDisableBase$, getRemovePermissionDisable$, getRemovePermissionFromSheetBarDisable$, getSetPermissionFromSheetBarDisable$, getViewPermissionDisable$ } from './permission-menu-util';
+import { SheetMenuPosition } from './menu';
 
 export const tmpIcon = 'data-validation-single';
 const SHEET_PERMISSION_CONTEXT_MENU_ID = 'sheet.contextMenu.permission';
-
-enum SheetMenuPosition {
-    ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
-    COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
-    SHEET_BAR = 'sheetBar',
-}
 
 export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuItem {
     return {
@@ -48,7 +43,7 @@ export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuIte
     };
 }
 
-export function sheetPermissionContextMenuFactory(): IMenuSelectorItem<string> {
+export function sheetPermissionContextMenuFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: SHEET_PERMISSION_CONTEXT_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
@@ -56,6 +51,7 @@ export function sheetPermissionContextMenuFactory(): IMenuSelectorItem<string> {
         title: 'rightClick.protectRange',
         icon: permissionLockIconKey,
         positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -88,6 +84,7 @@ export function sheetPermissionRemoveProtectContextMenuFactory(accessor: IAccess
         title: 'rightClick.removeProtectRange',
         positions: [SHEET_PERMISSION_CONTEXT_MENU_ID],
         disabled$: getRemovePermissionDisable$(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -98,6 +95,7 @@ export function sheetPermissionViewAllProtectRuleContextMenuFactory(accessor: IA
         title: 'rightClick.viewAllProtectArea',
         positions: [SHEET_PERMISSION_CONTEXT_MENU_ID],
         disabled$: getViewPermissionDisable$(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -108,6 +106,7 @@ export function sheetPermissionProtectSheetInSheetBarMenuFactory(accessor: IAcce
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.addProtectSheet',
         disabled$: getAddPermissionFromSheetBarDisable$(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -118,6 +117,7 @@ export function sheetPermissionRemoveProtectionSheetBarMenuFactory(accessor: IAc
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.removeProtectSheet',
         disabled$: getRemovePermissionFromSheetBarDisable$(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -128,6 +128,7 @@ export function sheetPermissionChangeSheetPermissionSheetBarMenuFactory(accessor
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.changeSheetPermission',
         disabled$: getSetPermissionFromSheetBarDisable$(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -138,5 +139,6 @@ export function sheetPermissionViewAllProtectRuleSheetBarMenuFactory(accessor: I
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.viewAllProtectArea',
         disabled$: getViewPermissionDisable$(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

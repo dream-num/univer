@@ -25,9 +25,13 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
 import { ConditionalFormattingService } from '../conditional-formatting.service';
 import { ConditionalFormattingFormulaService } from '../conditional-formatting-formula.service';
-import { SheetsConditionalFormattingPlugin } from '../../plugin';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from '../../models/conditional-formatting-view-model';
+import { AddConditionalRuleMutation } from '../../commands/mutations/add-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation } from '../../commands/mutations/delete-conditional-rule.mutation';
+import { ConditionalFormattingFormulaMarkDirty } from '../../commands/mutations/formula-mark-dirty.mutation';
+import { MoveConditionalRuleMutation } from '../../commands/mutations/move-conditional-rule.mutation';
+import { SetConditionalRuleMutation } from '../../commands/mutations/set-conditional-rule.mutation';
 
 const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     id: 'test',
@@ -92,7 +96,13 @@ export const createTestBed = (dependencies?: Dependency[]) => {
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     const commandService = injector.get(ICommandService);
-    [...SheetsConditionalFormattingPlugin.mutationList].forEach((commandInfo) => {
+    [
+        AddConditionalRuleMutation,
+        DeleteConditionalRuleMutation,
+        SetConditionalRuleMutation,
+        MoveConditionalRuleMutation,
+        ConditionalFormattingFormulaMarkDirty,
+    ].forEach((commandInfo) => {
         commandService.registerCommand(commandInfo);
     });
     const unitId = workbookJson.id;

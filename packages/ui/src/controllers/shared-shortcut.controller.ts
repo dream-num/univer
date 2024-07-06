@@ -94,7 +94,7 @@ export const RedoShortcutItem: IShortcutItem = {
 @OnLifecycle(LifecycleStages.Ready, SharedController)
 export class SharedController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverUIConfig>,
+        private readonly _config: Pick<IUniverUIConfig, 'menu'> | undefined,
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
@@ -112,7 +112,7 @@ export class SharedController extends Disposable {
     }
 
     private _registerMenus(): void {
-        const { menu = {} } = this._config;
+        const menu = this._config?.menu ?? {};
 
         [UndoMenuItemFactory, RedoMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));

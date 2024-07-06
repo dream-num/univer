@@ -20,9 +20,11 @@ import { ArrayValueObject, transformToValue } from '../../../../engine/value-obj
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumif } from '../index';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test sumif function', () => {
-    const textFunction = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
+    const testFunction = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
 
     describe('Sumif', () => {
         it('Range and criteria', async () => {
@@ -35,8 +37,23 @@ describe('Test sumif function', () => {
 
             const criteria = StringValueObject.create('>40');
 
-            const resultObject = textFunction.calculate(range, criteria);
+            const resultObject = testFunction.calculate(range, criteria);
             expect(resultObject.getValue()).toBe(488);
+        });
+
+        it('Range and criteria, different type', async () => {
+            const range = ArrayValueObject.create(/*ts*/ `{
+                true
+            }`);
+
+            const criteria = StringValueObject.create('>');
+
+            const sumRange = ArrayValueObject.create(/*ts*/ `{
+                1
+            }`);
+
+            const resultObject = testFunction.calculate(range, criteria, sumRange);
+            expect(resultObject.getValue()).toBe(0);
         });
 
         it('Sum range with wildcard asterisk', async () => {
@@ -56,7 +73,7 @@ describe('Test sumif function', () => {
                 1
             }`);
 
-            const resultObject = textFunction.calculate(range, criteria, sumRange);
+            const resultObject = testFunction.calculate(range, criteria, sumRange);
             expect(resultObject.getValue()).toBe(2);
         });
 
@@ -75,8 +92,21 @@ describe('Test sumif function', () => {
                 444
             }`);
 
-            const resultObject = textFunction.calculate(range, criteria);
+            const resultObject = testFunction.calculate(range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[4], [4], [44], [444]]);
+        });
+        it('Includes REF error', async () => {
+            const range = ErrorValueObject.create(ErrorType.REF);
+
+            const criteria = ArrayValueObject.create(/*ts*/ `{
+                4;
+                4;
+                44;
+                444
+            }`);
+
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(resultObject.getValue()).toStrictEqual(ErrorType.REF);
         });
     });
 });

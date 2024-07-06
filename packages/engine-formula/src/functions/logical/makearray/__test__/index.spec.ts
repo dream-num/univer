@@ -33,7 +33,7 @@ import { Makearray } from '../index';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test makearray', () => {
-    // const textFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
+    // const testFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;

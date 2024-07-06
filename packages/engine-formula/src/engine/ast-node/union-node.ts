@@ -76,7 +76,8 @@ export class UnionNode extends BaseAstNode {
             return variant1.unionBy(variant2);
         }
 
-        return ErrorValueObject.create(ErrorType.REF);
+        // =A1:A gets #NAME?
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 }
 

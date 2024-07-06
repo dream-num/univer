@@ -16,7 +16,7 @@
 
 export default {
     AVEDEV: {
-        description: 'Returns the average of the absolute deviations of data points from their mean',
+        description: 'Returns the average of the absolute deviations of data points from their mean.',
         abstract: 'Returns the average of the absolute deviations of data points from their mean',
         links: [
             {
@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the average.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the average, up to a maximum of 255.' },
         },
     },
     AVERAGE: {
@@ -50,7 +50,7 @@ export default {
         },
     },
     AVERAGEA: {
-        description: 'Returns the average of its arguments, including numbers, text, and logical values',
+        description: 'Returns the average of its arguments, including numbers, text, and logical values.',
         abstract: 'Returns the average of its arguments, including numbers, text, and logical values',
         links: [
             {
@@ -59,12 +59,18 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: {
+                name: 'value1',
+                detail: 'The first number, cell reference, or range for which you want the average.',
+            },
+            value2: {
+                name: 'value2',
+                detail: 'Additional numbers, cell references or ranges for which you want the average, up to a maximum of 255.',
+            },
         },
     },
     AVERAGEIF: {
-        description: 'Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria',
+        description: 'Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria.',
         abstract: 'Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria',
         links: [
             {
@@ -73,12 +79,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: 'range', detail: 'One or more cells to average, including numbers or names, arrays, or references that contain numbers.' },
+            criteria: { name: 'criteria', detail: 'The criteria in the form of a number, expression, cell reference, or text that defines which cells are averaged. For example, criteria can be expressed as 32, "32", ">32", "apples", or B4.' },
+            averageRange: { name: 'average_range', detail: 'The actual set of cells to average. If omitted, range is used.' },
         },
     },
     AVERAGEIFS: {
-        description: 'Returns the average (arithmetic mean) of all cells that meet multiple criteria',
+        description: 'Returns the average (arithmetic mean) of all cells that meet multiple criteria.',
         abstract: 'Returns the average (arithmetic mean) of all cells that meet multiple criteria',
         links: [
             {
@@ -87,8 +94,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            averageRange: { name: 'average_range', detail: 'One or more cells to average, including numbers or names, arrays, or references that contain numbers.' },
+            criteriaRange1: { name: 'criteria_range1', detail: 'Is the set of cells to evaluate with the criteria.' },
+            criteria1: { name: 'criteria1', detail: 'Used to define the cells for which the average will be calculated. For example, the criteria can be expressed as 32, "32", ">32", "apple", or B4' },
+            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 127 range.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria.' },
         },
     },
     BETA_DIST: {
@@ -315,7 +325,7 @@ export default {
         },
     },
     COUNTBLANK: {
-        description: 'Counts the number of blank cells within a range',
+        description: 'Counts the number of blank cells within a range.',
         abstract: 'Counts the number of blank cells within a range',
         links: [
             {
@@ -324,12 +334,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: 'range', detail: 'The range from which you want to count the blank cells.' },
         },
     },
     COUNTIF: {
-        description: 'Counts the number of cells within a range that meet the given criteria',
+        description: 'Counts the number of cells within a range that meet the given criteria.',
         abstract: 'Counts the number of cells within a range that meet the given criteria',
         links: [
             {
@@ -338,12 +347,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: 'range', detail: 'The group of cells you want to count. Range can contain numbers, arrays, a named range, or references that contain numbers. Blank and text values are ignored.' },
+            criteria: { name: 'criteria', detail: 'A number, expression, cell reference, or text string that determines which cells will be counted.\nFor example, you can use a number like 32, a comparison like ">32", a cell like B4, or a word like "apples".\nCOUNTIF uses only a single criteria. Use COUNTIFS if you want to use multiple criteria.' },
         },
     },
     COUNTIFS: {
-        description: 'Counts the number of cells within a range that meet multiple criteria',
+        description: 'Counts the number of cells within a range that meet multiple criteria.',
         abstract: 'Counts the number of cells within a range that meet multiple criteria',
         links: [
             {
@@ -352,8 +361,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            criteriaRange1: { name: 'criteria_range1', detail: 'The first range in which to evaluate the associated criteria.' },
+            criteria1: { name: 'criteria1', detail: 'The criteria in the form of a number, expression, cell reference, or text that define which cells will be counted. For example, criteria can be expressed as 32, ">32", B4, "apples", or "32".' },
+            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 127 range.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria.' },
         },
     },
     COVARIANCE_P: {
@@ -867,7 +878,7 @@ export default {
         },
     },
     MAXA: {
-        description: 'Returns the maximum value in a list of arguments, including numbers, text, and logical values',
+        description: 'Returns the maximum value in a list of arguments, including numbers, text, and logical values.',
         abstract: 'Returns the maximum value in a list of arguments, including numbers, text, and logical values',
         links: [
             {
@@ -876,12 +887,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: 'value1', detail: 'The first number argument for which you want to find the largest value.' },
+            value2: { name: 'value2', detail: 'Number arguments 2 to 255 for which you want to find the largest value.' },
         },
     },
     MAXIFS: {
-        description: 'Returns the maximum value among cells specified by a given set of conditions or criteria',
+        description: 'Returns the maximum value among cells specified by a given set of conditions or criteria.',
         abstract: 'Returns the maximum value among cells specified by a given set of conditions or criteria',
         links: [
             {
@@ -893,8 +904,8 @@ export default {
             maxRange: { name: 'sum_range', detail: 'The range of cells to max.' },
             criteriaRange1: { name: 'criteria_range1 ', detail: 'Is the set of cells to evaluate with the criteria.' },
             criteria1: { name: 'criteria1', detail: 'Is the criteria in the form of a number, expression, or text that defines which cells will be evaluated as maximum. ' },
-            criteriaRange2: { name: 'criteriaRange2', detail: 'Additional ranges. You can enter up to 127 range pairs.' },
-            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria pairs.' },
+            criteriaRange2: { name: 'criteriaRange2', detail: 'Additional ranges. You can enter up to 127 ranges.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria.' },
         },
     },
     MEDIAN: {
@@ -941,13 +952,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: 'value1', detail: 'The first number, cell reference, or range to calculate the minimum value from.' },
+            value2: { name: 'value2', detail: 'Additional numbers, cell references or ranges to calculate the minimum value from, up to a maximum of 255.' },
         },
     },
     MINIFS: {
         description: 'Returns the minimum value among cells specified by a given set of conditions or criteria.',
-        abstract: 'Returns the minimum value among cells specified by a given set of conditions or criteria.',
+        abstract: 'Returns the minimum value among cells specified by a given set of conditions or criteria',
         links: [
             {
                 title: 'Instruction',
@@ -955,8 +966,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            minRange: { name: 'min_range', detail: 'The actual range of cells in which the minimum value will be determined.' },
+            criteriaRange1: { name: 'criteria_range1', detail: 'Is the set of cells to evaluate with the criteria.' },
+            criteria1: { name: 'criteria1', detail: 'Is the criteria in the form of a number, expression, or text that defines which cells will be evaluated as minimum. The same set of criteria works for the MAXIFS, SUMIFS and AVERAGEIFS functions.' },
+            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 127 range.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria.' },
         },
     },
     MODE_MULT: {

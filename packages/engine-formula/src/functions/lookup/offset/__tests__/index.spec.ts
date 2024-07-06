@@ -139,7 +139,7 @@ describe('Test offset', () => {
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
     let interpreter: Interpreter;
-    let calculate: (formula: string) => Promise<(string | number | boolean | null)[][] | string | number | boolean>;
+    let calculate: (formula: string) => (string | number | boolean | null)[][] | string | number | boolean;
 
     beforeEach(() => {
         const testBed = createFunctionTestBed(getTestWorkbookData());
@@ -186,12 +186,12 @@ describe('Test offset', () => {
             new Offset(FUNCTION_NAMES_LOOKUP.OFFSET)
         );
 
-        calculate = async (formula: string) => {
+        calculate = (formula: string) => {
             const lexerNode = lexer.treeBuilder(formula);
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             return getObjectValue(result);
         };

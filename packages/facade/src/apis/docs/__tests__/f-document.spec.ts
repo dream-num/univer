@@ -34,16 +34,14 @@ describe('Test FDocument', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(InsertCommand);
-        commandService.registerCommand(RichTextEditingMutation as any);
+        commandService.registerCommand(RichTextEditingMutation);
     });
 
     it('Document appendText', async () => {
-        const activeDoc = univerAPI.getActiveDocument();
+        const activeDoc = univerAPI.getActiveDocument()!;
+        expect(await activeDoc.appendText('Univer')).toBeTruthy();
 
-        expect(await activeDoc?.appendText('Univer')).toBeTruthy();
-
-        const dataStream = activeDoc?.getSnapshot().body?.dataStream;
-
-        expect(dataStream?.substring(0, dataStream.length - 2)).toEqual('Hello,Univer');
+        const dataStream = activeDoc.getSnapshot().body!.dataStream;
+        expect(dataStream.substring(0, dataStream.length - 2)).toEqual('Hello,Univer');
     });
 });

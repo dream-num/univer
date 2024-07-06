@@ -60,7 +60,7 @@ import type {
 } from './type';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { clipboardItemIsFromExcel, discreteRangeContainsRange, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
+import { clipboardItemIsFromExcel, convertTextToTable, discreteRangeContainsRange, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -69,6 +69,7 @@ export const PREDEFINED_HOOK_NAME = {
     SPECIAL_PASTE_FORMAT: 'special-paste-format',
     SPECIAL_PASTE_COL_WIDTH: 'special-paste-col-width',
     SPECIAL_PASTE_BESIDES_BORDER: 'special-paste-besides-border',
+    SPECIAL_PASTE_FORMULA: 'special-paste-formula',
 };
 
 interface ICopyContent {
@@ -234,7 +235,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (html) {
             return this._pasteHTML(html, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
         } else if (text) {
-            return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+            // Converts text with tabs and newlines into an HTML table
+            if (/[\n\t]/.test(text)) {
+                return this._pasteHTML(convertTextToTable(text), PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+            } else {
+                return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+            }
         }
 
         return Promise.resolve(false);
@@ -306,6 +312,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     });
                 } else {
                     matrixFragment.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
+                    matrix.setValue(r, c, getEmptyCell());
                 }
             }
             rowIndex += 1;
@@ -441,7 +448,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const mergeData = worksheet?.getMergeData();
 
-        if (mergeData) {
+        if (mergeData.length) {
             const pastedRangeLapWithMergedCell = mergeData.some((m) => {
                 return rangeIntersectWithDiscreteRange(m, pasteTarget.pastedRange) && !discreteRangeContainsRange(pasteTarget.pastedRange, m);
             });
@@ -483,15 +490,21 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 newValue.s = styles?.getStyleByCell(value);
                 cellMatrix.setValue(row, col, newValue);
             }
+
+            if (value.colSpan || value.rowSpan) {
+                for (let rStart = 0; rStart < value.rowSpan!; rStart++) {
+                    for (let cStart = 0; cStart < value.colSpan!; cStart++) {
+                        if (rStart === 0 && cStart === 0) continue;
+
+                        const r = row + rStart;
+                        const c = col + cStart;
+                        cellMatrix.setValue(r, c, { s: styles?.getStyleByCell(value) });
+                    }
+                }
+            }
         });
-
-        const pasteTarget = this._getPastedRange(
-            cellMatrix
-        );
-
-        if (!pasteTarget) {
-            return false;
-        }
+        const pasteTarget = this._getPastedRange(cellMatrix);
+        if (!pasteTarget) return false;
 
         const worksheet = this._univerInstanceService
             .getUniverSheetInstance(pasteTarget.unitId)
@@ -715,12 +728,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             unitId,
             subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            selections: [{ range: {
-                startRow,
-                endRow,
-                startColumn,
-                endColumn,
-            }, primary, style: null }],
+            selections: [{
+                range: {
+                    startRow,
+                    endRow,
+                    startColumn,
+                    endColumn,
+                }, primary, style: null,
+            }],
         };
         return {
             id: SetSelectionsOperation.id,

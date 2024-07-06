@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { KeyCode, ProgressBar, TextEditor } from '@univerjs/ui';
@@ -115,6 +115,7 @@ export function FormulaBar() {
                 width: Number.POSITIVE_INFINITY,
                 height: Number.POSITIVE_INFINITY,
             },
+            documentFlavor: DocumentFlavor.MODERN,
             marginTop: 5,
             marginBottom: 5,
             marginRight: 0,

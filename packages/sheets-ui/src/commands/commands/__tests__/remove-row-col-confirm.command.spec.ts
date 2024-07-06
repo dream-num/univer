@@ -27,6 +27,7 @@ import {
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
     SetRangeValuesMutation,
+    SetSelectionsOperation,
 } from '@univerjs/sheets';
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import type { IDisposable, Injector } from '@wendellhu/redi';
@@ -89,6 +90,7 @@ describe('Test remove row col confirm commands', () => {
         commandService.registerCommand(RemoveColConfirmCommand);
         commandService.registerCommand(RemoveColCommand);
         commandService.registerCommand(RemoveColMutation);
+        commandService.registerCommand(SetSelectionsOperation);
 
         get(LocaleService).load({});
     });

@@ -147,13 +147,13 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
         }
         const transformer = scene.getTransformerByCreate();
 
-        const onClearControlObserver = transformer.onClearControlObservable.add((changeSelf) => {
+        const onClearControlObserver = transformer.clearControl$.subscribe((changeSelf) => {
             if (changeSelf === true) {
                 setGroupShow(false);
             }
         });
 
-        const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
+        const onChangeStartObserver = transformer.changeStart$.subscribe((state) => {
             const { objects } = state;
             const params = getUpdateParams(objects, drawingManagerService);
             const groupParams = params.filter((o) => o?.drawingType === DrawingTypeEnum.DRAWING_GROUP) as IDrawingParam[];
@@ -177,8 +177,8 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
         });
 
         return () => {
-            onChangeStartObserver?.dispose();
-            onClearControlObserver?.dispose();
+            onChangeStartObserver.unsubscribe();
+            onClearControlObserver.unsubscribe();
         };
     }, []);
 
@@ -198,14 +198,6 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                         </span>
                     </Button>
                 </div>
-                {/* <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
-                    <Button size="small" onClick={() => { onGroupBtnClick(GroupType.regroup); }} style={{ display: gridDisplay(groupBtnShow) }}>
-                        <span className={styles.imageCommonPanelInline}>
-                            <CreateCopySingle />
-                            {localeService.t('image-panel.group.reGroup')}
-                        </span>
-                    </Button>
-                </div> */}
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
                     <Button size="small" onClick={() => { onUngroupBtnClick(); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
                         <span className={styles.imageCommonPanelInline}>

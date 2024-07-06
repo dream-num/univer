@@ -39,6 +39,7 @@ import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 import { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
+import { NumberCellDisplayController } from './controllers/number-cell.controller';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -96,6 +97,7 @@ export class UniverSheetsPlugin extends Plugin {
             // controllers
             [BasicWorksheetController],
             [MergeCellController],
+            [NumberCellDisplayController],
             [DefinedNameDataController],
 
             // permission

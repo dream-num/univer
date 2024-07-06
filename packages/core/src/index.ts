@@ -23,7 +23,7 @@ export { Univer } from './univer';
 export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { isBooleanString } from './common/boolean';
-export { dedupe, remove, rotate, groupBy } from './common/array';
+export { dedupe, remove, rotate, groupBy, makeArray } from './common/array';
 export { mergeSets } from './common/set';
 export {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -52,7 +52,7 @@ export type { TPriority } from './docs/data-model/text-x/text-x';
 export { JSONX, JSON1 } from './docs/data-model/json-x/json-x';
 export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
-export * from './observer';
+export { type IEventObserver, EventState, EventSubject } from './observer/observable';
 export { Plugin } from './services/plugin/plugin';
 export { PluginService, DependentOn } from './services/plugin/plugin.service';
 export {
@@ -179,10 +179,12 @@ export { DataValidationType } from './types/enum/data-validation-type';
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export type { IPermissionTypes, WorkbookPermissionPointConstructor } from './services/permission/type';
 export { PermissionService } from './services/permission/permission.service';
-
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';
 export { createDefaultUser } from './services/user-manager/const';
-
+export { skipParseTagNames } from './types/const/clipboard';
+export { normalizeBody, getCustomRangeSlice, getCustomDecorationSlice } from './docs/data-model/text-x/utils';
+export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
+export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
+export { nameCharacterCheck } from './shared/name';
 installShims();
-

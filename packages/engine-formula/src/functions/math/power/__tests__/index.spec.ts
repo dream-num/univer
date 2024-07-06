@@ -24,19 +24,19 @@ import { ErrorType } from '../../../../basics/error-type';
 import { stripArrayValue } from '../../../__tests__/create-function-test-bed';
 
 describe('Test power function', () => {
-    const textFunction = new Power(FUNCTION_NAMES_MATH.POWER);
+    const testFunction = new Power(FUNCTION_NAMES_MATH.POWER);
 
     describe('Power', () => {
         it('Number is single cell, power is single cell', () => {
             const number = NumberValueObject.create(5);
             const power = NumberValueObject.create(2);
-            const result = textFunction.calculate(number, power);
+            const result = testFunction.calculate(number, power);
             expect(result.getValue()).toBe(25);
         });
         it('Number is single string number, power is single string number', () => {
             const number = new StringValueObject('5');
             const power = new StringValueObject('2');
-            const result = textFunction.calculate(number, power);
+            const result = testFunction.calculate(number, power);
             expect(result.getValue()).toBe(25);
         });
 
@@ -54,7 +54,7 @@ describe('Test power function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(number, power);
+            const result = testFunction.calculate(number, power);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [2, ErrorType.VALUE, 2.3456698984637576, 2, 1, 1],
                 [1, 1.2676506002282294e+30, 5.063026375881119, ErrorType.VALUE, 0.125, ErrorType.VALUE],
@@ -75,7 +75,7 @@ describe('Test power function', () => {
                 column: 0,
             });
             const power = NumberValueObject.create(2);
-            const result = textFunction.calculate(number, power);
+            const result = testFunction.calculate(number, power);
             expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([
                 [1, ErrorType.VALUE, 1.5129, 1, 0, 0],
                 [0, 10000, 5.4756, ErrorType.VALUE, 9, ErrorType.VALUE],
@@ -108,7 +108,7 @@ describe('Test power function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(number, power);
+            const result = testFunction.calculate(number, power);
             expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([
                 [1, ErrorType.VALUE, 1.23, 1, 0, 0],
                 [0, 10000, 5.4756, ErrorType.VALUE, 9, ErrorType.VALUE],

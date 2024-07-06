@@ -19,7 +19,7 @@ import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
 import type { IAccessor } from '@wendellhu/redi';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetDeleteColumnPermission, WorksheetDeleteRowPermission, WorksheetEditPermission } from '@univerjs/sheets';
-import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command ';
+import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
 import {
     RemoveColConfirmCommand,

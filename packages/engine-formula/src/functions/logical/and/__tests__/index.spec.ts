@@ -22,42 +22,42 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test and function', () => {
-    const textFunction = new And(FUNCTION_NAMES_LOGICAL.AND);
+    const testFunction = new And(FUNCTION_NAMES_LOGICAL.AND);
 
     describe('And', () => {
         it('logical1 string', () => {
             const logical1 = StringValueObject.create('a1');
-            const result = textFunction.calculate(logical1);
+            const result = testFunction.calculate(logical1);
             expect(result.getValue()).toBe('#VALUE!');
         });
         it('logical1 number 1', () => {
             const logical1 = NumberValueObject.create(1);
-            const result = textFunction.calculate(logical1);
+            const result = testFunction.calculate(logical1);
             expect(result.getValue()).toBe(true);
         });
 
         it('logical1 number 0', () => {
             const logical1 = NumberValueObject.create(0);
-            const result = textFunction.calculate(logical1);
+            const result = testFunction.calculate(logical1);
             expect(result.getValue()).toBe(false);
         });
 
         it('logical1 null', () => {
             const logical1 = NullValueObject.create();
-            const result = textFunction.calculate(logical1);
+            const result = testFunction.calculate(logical1);
             expect(result.getValue()).toBe('#VALUE!');
         });
 
         it('logical1 true', () => {
             const logical1 = BooleanValueObject.create(true);
-            const result = textFunction.calculate(logical1);
+            const result = testFunction.calculate(logical1);
             expect(result.getValue()).toBe(true);
         });
 
         it('logical2 false', () => {
             const logical1 = BooleanValueObject.create(true);
             const logical2 = BooleanValueObject.create(false);
-            const result = textFunction.calculate(logical1, logical2);
+            const result = testFunction.calculate(logical1, logical2);
             expect(result.getValue()).toBe(false);
         });
 
@@ -74,7 +74,7 @@ describe('Test and function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logical1);
+            const result = testFunction.calculate(logical1);
             expect(result.getValue()).toBe('#VALUE!');
         });
 
@@ -103,7 +103,7 @@ describe('Test and function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logical1, logical2);
+            const result = testFunction.calculate(logical1, logical2);
             expect(result.getValue()).toBe(true);
         });
 
@@ -132,7 +132,7 @@ describe('Test and function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(logical1, logical2);
+            const result = testFunction.calculate(logical1, logical2);
             expect(result.getValue()).toBe('#NAME?');
         });
     });

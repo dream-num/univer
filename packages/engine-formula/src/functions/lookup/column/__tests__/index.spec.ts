@@ -85,66 +85,66 @@ describe('Test column', () => {
     });
 
     describe('Column', () => {
-        it('No reference', async () => {
+        it('No reference', () => {
             const lexerNode = lexer.treeBuilder('=COLUMN()');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(1);
         });
-        it('Reference single cell', async () => {
+        it('Reference single cell', () => {
             const lexerNode = lexer.treeBuilder('=COLUMN(C1)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as ArrayValueObject).toValue()).toStrictEqual([[3]]);
         });
-        it('Reference array cell', async () => {
+        it('Reference array cell', () => {
             const lexerNode = lexer.treeBuilder('=COLUMN(C2:F3)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as ArrayValueObject).toValue()).toStrictEqual([[3, 4, 5, 6]]);
         });
-        it('Text parameters', async () => {
+        it('Text parameters', () => {
             const lexerNode = lexer.treeBuilder('=COLUMN("A5")');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
-        it('Boolean params TRUE', async () => {
+        it('Boolean params TRUE', () => {
             const lexerNode = lexer.treeBuilder('=COLUMN(TRUE)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
-        it('Boolean params FALSE', async () => {
+        it('Boolean params FALSE', () => {
             const lexerNode = lexer.treeBuilder('=COLUMN(FALSE)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
-        it('Number params', async () => {
+        it('Number params', () => {
             const lexerNode = lexer.treeBuilder('=COLUMN(11)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });

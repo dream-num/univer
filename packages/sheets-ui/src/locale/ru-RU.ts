@@ -292,7 +292,7 @@ const locale: typeof zhCN = {
         noHide: 'Нельзя скрыть, оставьте хотя бы одну вкладку листа',
         chartEditNoOpt: 'Эта операция недоступна в режиме редактирования диаграммы!',
         sheetNameErrorTitle: 'Произошла ошибка',
-        sheetNameSpecCharError: 'Имя не может содержать: [ ] : ? * / \' "',
+        sheetNameSpecCharError: "Имя не может превышать 31 символов, начало и конец имени не могут быть ' и имя не может содержать: [ ] : \\ ? * /",
         sheetNameCannotIsEmptyError: 'Имя листа не может быть пустым.',
         sheetNameAlreadyExistsError: 'Имя листа уже существует. Пожалуйста, введите другое имя.',
         deleteSheet: 'Удалить лист',

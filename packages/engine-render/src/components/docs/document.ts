@@ -16,19 +16,19 @@
 
 import './extensions';
 
-import type { Nullable, Observer } from '@univerjs/core';
-import { CellValueType, HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univerjs/core';
-
+import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { degToRad } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
-import type { IViewportInfo } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
-import type { IExtensionConfig } from '../extension';
+import type { ComponentExtension, IExtensionConfig } from '../extension';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { Liquid } from './liquid';
@@ -51,7 +51,8 @@ export interface IDocumentOffsetConfig extends IPageMarginLayout {
 }
 
 export class Documents extends DocComponent {
-    onPageRenderObservable = new Observable<IPageRenderConfig>();
+    private readonly _pageRender$ = new Subject<IPageRenderConfig>();
+    readonly pageRender$ = this._pageRender$.asObservable();
 
     docsLeft: number = 0;
 
@@ -59,22 +60,10 @@ export class Documents extends DocComponent {
 
     private _drawLiquid: Nullable<Liquid> = new Liquid();
 
-    // private _findLiquid: Nullable<Liquid> = new Liquid();
-
-    // private _hasEditor = false;
-
-    // private _editor: Nullable<DocsEditor>;
-
-    private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
-
-    // private _textAngleRotateOffset: number = 0;
-
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config);
 
         this._initialDefaultExtension();
-
-        // this._addSkeletonChangeObserver(documentSkeleton);
 
         this.makeDirty(true);
     }
@@ -86,11 +75,8 @@ export class Documents extends DocComponent {
     override dispose() {
         super.dispose();
 
-        this._skeletonObserver?.dispose();
-        this._skeletonObserver = null;
-        this.onPageRenderObservable.clear();
+        this._pageRender$.complete();
         this._drawLiquid = null;
-        // this._findLiquid = null;
     }
 
     getOffsetConfig(): IDocumentOffsetConfig {
@@ -113,51 +99,18 @@ export class Documents extends DocComponent {
         };
     }
 
-    // calculatePagePosition() {
-    //     const scene = this.getScene() as Scene;
-
-    //     const parent = scene?.getParent();
-    //     const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
-    //     if (parent == null || docsWidth === Infinity || docsHeight === Infinity) {
-    //         return this;
-    //     }
-    //     const { width: engineWidth, height: engineHeight } = parent;
-    //     let docsLeft = 0;
-    //     let docsTop = 0;
-
-    //     let sceneWidth = 0;
-
-    //     let sceneHeight = 0;
-
-    //     if (engineWidth > docsWidth) {
-    //         docsLeft = engineWidth / 2 - docsWidth / 2;
-    //         sceneWidth = engineWidth - 30;
-    //     } else {
-    //         docsLeft = pageMarginLeft;
-    //         sceneWidth = docsWidth + pageMarginLeft * 2;
-    //     }
-
-    //     if (engineHeight > docsHeight) {
-    //         docsTop = engineHeight / 2 - docsHeight / 2;
-    //         sceneHeight = engineHeight - 30;
-    //     } else {
-    //         docsTop = pageMarginTop;
-    //         sceneHeight = docsHeight + pageMarginTop * 2;
-    //     }
-
-    //     this.docsLeft = docsLeft;
-
-    //     this.docsTop = docsTop;
-
-    //     scene.resize(sceneWidth, sceneHeight + 200);
-
-    //     this.translate(docsLeft, docsTop);
-
-    //     return this;
-    // }
-
     override getEngine() {
         return (this.getScene() as Scene).getEngine();
+    }
+
+    changeSkeleton(newSkeleton: DocumentSkeleton) {
+        this.setSkeleton(newSkeleton);
+
+        return this;
+    }
+
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+        this.draw(ctx, bounds);
     }
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
@@ -169,7 +122,7 @@ export class Documents extends DocComponent {
 
         this._drawLiquid.reset();
 
-        const { pages } = skeletonData;
+        const { pages, skeHeaders, skeFooters } = skeletonData;
         const parentScale = this.getParentScale();
         // const scale = getScale(parentScale);
         const extensions = this.getExtensionsByOrder();
@@ -179,7 +132,8 @@ export class Documents extends DocComponent {
         }
 
         const backgroundExtension = extensions.find((e) => e.uKey === 'DefaultDocsBackgroundExtension');
-        const glyphExtensionsExcludeBackground = extensions.filter((e) => e.type === DOCS_EXTENSION_TYPE.SPAN && e.uKey !== 'DefaultDocsBackgroundExtension');
+        const glyphExtensionsExcludeBackground = extensions
+            .filter((e) => e.type === DOCS_EXTENSION_TYPE.SPAN && e.uKey !== 'DefaultDocsBackgroundExtension');
 
         // broadcasting the pageTop and pageLeft for each page in the document with multiple pages.
         let pageTop = 0;
@@ -195,6 +149,9 @@ export class Documents extends DocComponent {
                 marginRight: pagePaddingRight = 0,
                 width: actualWidth,
                 height: actualHeight,
+                pageWidth,
+                headerId,
+                footerId,
                 renderConfig = {},
             } = page;
             const {
@@ -241,15 +198,33 @@ export class Documents extends DocComponent {
                 );
                 pageLeft += x;
                 pageTop += y;
+
                 continue;
             }
 
-            this.onPageRenderObservable.notifyObservers({
-                page,
-                pageLeft,
-                pageTop,
-                ctx,
-            });
+            const headerSkeletonPage = skeHeaders.get(headerId)?.get(pageWidth);
+
+            const headerAlignOffsetNoAngle = Vector2.create(
+                horizontalOffsetNoAngle,
+                headerSkeletonPage?.marginTop ?? 0
+            );
+
+            if (headerSkeletonPage) {
+                this._drawHeaderFooter(
+                    headerSkeletonPage,
+                    ctx,
+                    extensions,
+                    backgroundExtension,
+                    glyphExtensionsExcludeBackground,
+                    headerAlignOffsetNoAngle,
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale,
+                    page,
+                    true
+                );
+            }
 
             this._startRotation(ctx, finalAngle);
 
@@ -450,6 +425,37 @@ export class Documents extends DocComponent {
 
             this._resetRotation(ctx, finalAngle);
 
+            const footerSkeletonPage = skeFooters.get(footerId)?.get(pageWidth);
+
+            if (footerSkeletonPage) {
+                const footerAlignOffsetNoAngle = Vector2.create(
+                    horizontalOffsetNoAngle,
+                    page.pageHeight - footerSkeletonPage?.height - footerSkeletonPage.marginBottom
+                );
+
+                this._drawHeaderFooter(
+                    footerSkeletonPage,
+                    ctx,
+                    extensions,
+                    backgroundExtension,
+                    glyphExtensionsExcludeBackground,
+                    footerAlignOffsetNoAngle,
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale,
+                    page,
+                    false
+                );
+            }
+
+            this._pageRender$.next({
+                page,
+                pageLeft,
+                pageTop,
+                ctx,
+            });
+
             const { x, y } = this._drawLiquid.translatePage(
                 page,
                 this.pageLayoutType,
@@ -461,14 +467,183 @@ export class Documents extends DocComponent {
         }
     }
 
-    changeSkeleton(newSkeleton: DocumentSkeleton) {
-        this.setSkeleton(newSkeleton);
+    private _drawHeaderFooter(
+        page: IDocumentSkeletonPage,
+        ctx: UniverRenderingContext,
+        extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        alignOffsetNoAngle: Vector2,
+        centerAngle: number,
+        vertexAngle: number,
+        renderConfig: IDocumentRenderConfig,
+        parentScale: IScale,
+        parentPage: IDocumentSkeletonPage,
+        isHeader = true
+    ) {
+        if (this._drawLiquid == null) {
+            return;
+        }
+        const { sections } = page;
+        const { y: originY } = this._drawLiquid;
 
-        return this;
-    }
+        for (const section of sections) {
+            const { columns } = section;
 
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
-        this.draw(ctx, bounds);
+            this._drawLiquid.translateSave();
+            this._drawLiquid.translateSection(section);
+
+            for (const column of columns) {
+                const { lines } = column;
+
+                this._drawLiquid.translateSave();
+                this._drawLiquid.translateColumn(column);
+
+                const linesCount = lines.length;
+
+                const alignOffset = alignOffsetNoAngle;
+
+                for (let i = 0; i < linesCount; i++) {
+                    const line = lines[i];
+                    const { divides, asc = 0, type, lineHeight = 0 } = line;
+
+                    const maxLineAsc = asc;
+
+                    const maxLineAscSin = maxLineAsc * Math.sin(centerAngle);
+                    const maxLineAscCos = maxLineAsc * Math.cos(centerAngle);
+
+                    if (type === LineType.BLOCK) {
+                        for (const extension of extensions) {
+                            if (extension.type === DOCS_EXTENSION_TYPE.LINE) {
+                                extension.extensionOffset = {
+                                    alignOffset,
+                                    renderConfig,
+                                };
+                                extension.draw(ctx, parentScale, line);
+                            }
+                        }
+                    } else {
+                        this._drawLiquid.translateSave();
+                        this._drawLiquid.translateLine(line, true);
+                        const { y } = this._drawLiquid;
+
+                        if (isHeader) {
+                            if ((y - originY + alignOffset.y) > (parentPage.pageHeight - 100) / 2) {
+                                this._drawLiquid.translateRestore();
+                                continue;
+                            }
+                        } else {
+                            if ((y - originY + alignOffset.y + lineHeight) < (parentPage.pageHeight - 100) / 2 + 100) {
+                                this._drawLiquid.translateRestore();
+                                continue;
+                            }
+                        }
+
+                        const divideLength = divides.length;
+
+                        for (let i = 0; i < divideLength; i++) {
+                            const divide = divides[i];
+                            const { glyphGroup } = divide;
+
+                            this._drawLiquid.translateSave();
+                            this._drawLiquid.translateDivide(divide);
+
+                            // Draw text background.
+                            for (const glyph of glyphGroup) {
+                                if (!glyph.content || glyph.content.length === 0) {
+                                    continue;
+                                }
+
+                                const { width: spanWidth, left: spanLeft } = glyph;
+
+                                const { x: translateX, y: translateY } = this._drawLiquid;
+
+                                const originTranslate = Vector2.create(translateX, translateY);
+
+                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+
+                                const spanStartPoint = calculateRectRotate(
+                                    originTranslate.addByPoint(spanLeft, 0),
+                                    centerPoint,
+                                    centerAngle,
+                                    vertexAngle,
+                                    alignOffset
+                                );
+
+                                const extensionOffset: IExtensionConfig = {
+                                    spanStartPoint,
+                                };
+
+                                if (backgroundExtension) {
+                                    backgroundExtension.extensionOffset = extensionOffset;
+                                    backgroundExtension.draw(ctx, parentScale, glyph);
+                                }
+                            }
+
+                            // Draw text\border\lines etc.
+                            for (const glyph of glyphGroup) {
+                                if (!glyph.content || glyph.content.length === 0) {
+                                    continue;
+                                }
+
+                                const { width: spanWidth, left: spanLeft, xOffset } = glyph;
+
+                                const { x: translateX, y: translateY } = this._drawLiquid;
+
+                                const originTranslate = Vector2.create(translateX, translateY);
+
+                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+
+                                const spanStartPoint = calculateRectRotate(
+                                    originTranslate.addByPoint(spanLeft + xOffset, 0),
+                                    centerPoint,
+                                    centerAngle,
+                                    vertexAngle,
+                                    alignOffset
+                                );
+
+                                const spanPointWithFont = calculateRectRotate(
+                                    originTranslate.addByPoint(
+                                        spanLeft + maxLineAscSin + xOffset,
+                                        maxLineAscCos
+                                    ),
+                                    centerPoint,
+                                    centerAngle,
+                                    vertexAngle,
+                                    alignOffset
+                                );
+
+                                const extensionOffset: IExtensionConfig = {
+                                    originTranslate,
+                                    spanStartPoint,
+                                    spanPointWithFont,
+                                    centerPoint,
+                                    alignOffset,
+                                    renderConfig,
+                                };
+
+                                for (const extension of glyphExtensionsExcludeBackground) {
+                                    extension.extensionOffset = extensionOffset;
+                                    extension.draw(ctx, parentScale, glyph);
+                                }
+                            }
+
+                            this._drawLiquid.translateRestore();
+                        }
+
+                        this._drawLiquid.translateRestore();
+                    }
+                }
+
+                this._drawLiquid.translateRestore();
+            }
+
+            this._drawLiquid.translateRestore();
+        }
+
+        // if (!isEditHeaderFooter) {
+        //     ctx.restore();
+        // }
     }
 
     private _horizontalHandler(
@@ -552,69 +727,4 @@ export class Documents extends DocComponent {
             this.register(extension);
         });
     }
-
-    // private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-    //     if (!skeleton) {
-    //         return;
-    //     }
-
-    //     this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
-    //         const pages = data.pages;
-    //         let width = 0;
-    //         let height = 0;
-    //         for (let i = 0, len = pages.length; i < len; i++) {
-    //             const page = pages[i];
-    //             const { pageWidth, pageHeight } = page;
-    //             if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-    //                 height += pageHeight;
-    //                 if (i !== len - 1) {
-    //                     height += this.pageMarginTop;
-    //                 }
-    //                 width = Math.max(width, pageWidth);
-    //             } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-    //                 width += pageWidth;
-    //                 if (i !== len - 1) {
-    //                     width += this.pageMarginLeft;
-    //                 }
-    //                 height = Math.max(height, pageHeight);
-    //             }
-    //         }
-
-    //         this.resize(width, height);
-    //         this.calculatePagePosition();
-    //     });
-    // }
-
-    // private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-    //     if (!skeleton) {
-    //         return;
-    //     }
-    //     skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
-    // }
-
-    // private _getPageBoundingBox(page: IDocumentSkeletonPage) {
-    //     const { pageWidth, pageHeight } = page;
-    //     const { x: startX, y: startY } = this._findLiquid;
-
-    //     let endX = -1;
-    //     let endY = -1;
-    //     if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-    //         endX = pageWidth;
-    //         endY = startY + pageHeight;
-    //     } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-    //         endX = startX + pageWidth;
-    //         endY = pageHeight;
-    //     }
-
-    //     return {
-    //         startX,
-    //         startY,
-    //         endX,
-    //         endY,
-    //     };
-    // }
-
-    // private _translatePage(page: IDocumentSkeletonPage) {
-    //     this._findLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
-    // }
 }

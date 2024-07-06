@@ -56,6 +56,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
             const currentRender = this._renderManagerService.getRenderById(unitId);
             if (currentRender && currentRender.mainComponent) {
                 const spreadsheet = currentRender.mainComponent as Spreadsheet;
+                // eslint-disable-next-line max-lines-per-function
                 const getActiveRender = (evt: IPointerEvent | IMouseEvent) => {
                     const { offsetX, offsetY } = evt;
                     const scene = currentRender.scene;
@@ -138,7 +139,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     return [activeRender, info] as const;
                 };
 
-                const disposable = spreadsheet.onPointerDownObserver.add((evt) => {
+                const disposable = spreadsheet.onPointerDown$.subscribeEvent((evt) => {
                     const activeRenderInfo = getActiveRender(evt);
                     if (activeRenderInfo) {
                         const [activeRender, cellContext] = activeRenderInfo;
@@ -146,7 +147,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     }
                 });
 
-                const moveDisposable = spreadsheet.onPointerMoveObserver.add((evt) => {
+                const moveDisposable = spreadsheet.onPointerMove$.subscribeEvent((evt) => {
                     const activeRenderInfo = getActiveRender(evt);
                     if (activeRenderInfo) {
                         const [activeRender, cellContext] = activeRenderInfo;

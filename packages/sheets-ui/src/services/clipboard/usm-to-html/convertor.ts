@@ -17,7 +17,6 @@
 import type { ICellData, IRange, ObjectMatrix } from '@univerjs/core';
 
 import type { ICellDataWithSpanInfo, IClipboardPropertyItem, ISheetClipboardHook } from '../type';
-import { escapeSpecialCode } from '../clipboard.service';
 
 /**
  *
@@ -76,9 +75,7 @@ function getTDContent(
     const mergedProperties = mergeProperties(properties);
     const str = zipClipboardPropertyItemToString(mergedProperties);
     const content = hooks.reduce((acc, hook) => acc || hook.onCopyCellContent?.(row, col) || '', '');
-    const escapedContent = escapeSpecialCode(content);
-
-    return `<td${str}>${escapedContent}</td>`;
+    return `<td${str}>${content}</td>`;
 }
 
 function getColStyle(cols: number[], hooks: ISheetClipboardHook[]) {

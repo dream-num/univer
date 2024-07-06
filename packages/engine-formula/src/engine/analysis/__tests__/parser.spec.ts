@@ -36,7 +36,6 @@ import { Minus } from '../../../functions/meta/minus';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test indirect', () => {
-    // const textFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
@@ -188,6 +187,26 @@ describe('Test indirect', () => {
 
         it('Not exist formula', async () => {
             const lexerNode = lexer.treeBuilder('=notExistFormula(A:A)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+        });
+
+        it('Reference row', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(1:1)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(3);
+        });
+
+        it('Error #NAME?', async () => {
+            const lexerNode = lexer.treeBuilder('=A1:A');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 

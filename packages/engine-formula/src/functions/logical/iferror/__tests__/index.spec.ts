@@ -24,20 +24,20 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test iferror function', () => {
-    const textFunction = new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR);
+    const testFunction = new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR);
 
     describe('Iferror', () => {
         it('Value is normal', () => {
             const value = NumberValueObject.create(1);
             const valueIfError = StringValueObject.create('error');
-            const result = textFunction.calculate(value, valueIfError);
+            const result = testFunction.calculate(value, valueIfError);
             expect(result.getValue()).toBe(1);
         });
 
         it('Value is error', () => {
             const value = ErrorValueObject.create(ErrorType.NA);
             const valueIfError = StringValueObject.create('error');
-            const result = textFunction.calculate(value, valueIfError);
+            const result = testFunction.calculate(value, valueIfError);
             expect(result.getValue()).toBe(ErrorType.NA);
         });
 
@@ -56,7 +56,7 @@ describe('Test iferror function', () => {
                 column: 0,
             });
             const valueIfError = StringValueObject.create('error');
-            const result = textFunction.calculate(value, valueIfError);
+            const result = testFunction.calculate(value, valueIfError);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1],
                 ['error'],
@@ -89,7 +89,7 @@ describe('Test iferror function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(value, valueIfError);
+            const result = testFunction.calculate(value, valueIfError);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[1, 1, 1], ['a1', 'a2', 'a3'], ['a1', 'a2', 'a3']]);
         });
     });

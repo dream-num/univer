@@ -16,3 +16,21 @@
 
 export { UniverSheetsDrawingUIPlugin } from './plugin';
 export { SheetCanvasFloatDomManagerService, type ICanvasFloatDom } from './services/canvas-float-dom-manager.service';
+
+// #region - all commands
+
+export { DeleteDrawingsCommand } from './commands/commands/delete-drawings.command';
+export { GroupSheetDrawingCommand } from './commands/commands/group-sheet-drawing.command';
+export { InsertSheetDrawingCommand } from './commands/commands/insert-sheet-drawing.command';
+export { MoveDrawingsCommand } from './commands/commands/move-drawings.command';
+export { RemoveSheetDrawingCommand } from './commands/commands/remove-sheet-drawing.command';
+export { SetDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
+export { SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';
+export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-drawing.command';
+
+export { ClearSheetDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
+export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-drawing.operation';
+export { InsertFloatImageOperation, InsertCellImageOperation } from './commands/operations/insert-image.operation';
+export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
+
+// #endregion

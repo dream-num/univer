@@ -80,8 +80,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The absolute value of Number must be greater than 1.' },
         },
     },
     AGGREGATE: {
@@ -113,7 +112,7 @@ export default {
         },
     },
     ASIN: {
-        description: 'Returns the arcsine of a number',
+        description: 'Returns the arcsine of a number.',
         abstract: 'Returns the arcsine of a number',
         links: [
             {
@@ -122,12 +121,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The sine of the angle you want and must be from -1 to 1.' },
         },
     },
     ASINH: {
-        description: 'Returns the inverse hyperbolic sine of a number',
+        description: 'Returns the inverse hyperbolic sine of a number.',
         abstract: 'Returns the inverse hyperbolic sine of a number',
         links: [
             {
@@ -136,12 +134,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number.' },
         },
     },
     ATAN: {
-        description: 'Returns the arctangent of a number',
+        description: 'Returns the arctangent of a number.',
         abstract: 'Returns the arctangent of a number',
         links: [
             {
@@ -150,12 +147,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The tangent of the angle you want.' },
         },
     },
     ATAN2: {
-        description: 'Returns the arctangent from x- and y-coordinates',
+        description: 'Returns the arctangent from x- and y-coordinates.',
         abstract: 'Returns the arctangent from x- and y-coordinates',
         links: [
             {
@@ -164,12 +160,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xNum: { name: 'x_num', detail: 'The x-coordinate of the point.' },
+            yNum: { name: 'y_num', detail: 'The y-coordinate of the point.' },
         },
     },
     ATANH: {
-        description: 'Returns the inverse hyperbolic tangent of a number',
+        description: 'Returns the inverse hyperbolic tangent of a number.',
         abstract: 'Returns the inverse hyperbolic tangent of a number',
         links: [
             {
@@ -178,8 +174,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number between 1 and -1.' },
         },
     },
     BASE: {
@@ -192,8 +187,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number that you want to convert. Must be an integer greater than or equal to 0 and less than 2^53.' },
+            radix: { name: 'radix', detail: 'The base radix that you want to convert the number into. Must be an integer greater than or equal to 2 and less than or equal to 36.' },
+            minLength: { name: 'min_length', detail: 'The minimum length of the returned string. Must be an integer greater than or equal to 0.' },
         },
     },
     CEILING: {
@@ -267,7 +263,7 @@ export default {
         },
     },
     COS: {
-        description: 'Returns the cosine of a number',
+        description: 'Returns the cosine of a number.',
         abstract: 'Returns the cosine of a number',
         links: [
             {
@@ -276,8 +272,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the cosine.' },
         },
     },
     COSH: {
@@ -290,8 +285,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number for which you want to find the hyperbolic cosine.' },
         },
     },
     COT: {
@@ -304,8 +298,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the cotangent.' },
         },
     },
     COTH: {
@@ -318,8 +311,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number for which you want to find the hyperbolic cotangent.' },
         },
     },
     CSC: {
@@ -332,8 +324,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the cosecant.' },
         },
     },
     CSCH: {
@@ -346,8 +337,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the hyperbolic cosecant.' },
         },
     },
     DECIMAL: {
@@ -948,8 +938,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the sine.' },
         },
     },
     SINH: {
@@ -962,8 +951,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number.' },
         },
     },
     SQRT: {
@@ -1141,7 +1129,7 @@ export default {
         },
     },
     TAN: {
-        description: 'Returns the tangent of a number',
+        description: 'Returns the tangent of a number.',
         abstract: 'Returns the tangent of a number',
         links: [
             {
@@ -1150,12 +1138,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the tangent.' },
         },
     },
     TANH: {
-        description: 'Returns the hyperbolic tangent of a number',
+        description: 'Returns the hyperbolic tangent of a number.',
         abstract: 'Returns the hyperbolic tangent of a number',
         links: [
             {
@@ -1164,8 +1151,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number.' },
         },
     },
     TRUNC: {

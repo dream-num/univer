@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IContextService } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IContextService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -67,7 +67,9 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 },
             ],
         },
-        documentStyle: {},
+        documentStyle: {
+            documentFlavor: DocumentFlavor.MODERN,
+        },
     };
 
     useEffect(() => {

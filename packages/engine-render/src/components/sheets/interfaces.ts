@@ -17,7 +17,7 @@
 import type {
     BorderStyleTypes,
     HorizontalAlign,
-    ISelectionCellWithCoord,
+    ISelectionCellWithMergeInfo,
     ObjectMatrix,
     VerticalAlign,
     WrapStrategy,
@@ -28,8 +28,7 @@ import type { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 
-export
-interface BorderCache {
+export interface BorderCache {
     [key: string]: BorderCacheItem | {};
 }
 
@@ -63,7 +62,7 @@ interface fontCache {
 
 export interface IStylesCache {
     background?: backgroundCache;
-    backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>;
+    backgroundPositions?: ObjectMatrix<ISelectionCellWithMergeInfo>;
     font?: fontCache;
     border?: ObjectMatrix<BorderCache>;
 }
@@ -108,7 +107,6 @@ export interface IPaintForScrolling {
     scaleX: number;
     scaleY: number;
 }
-
 export interface IColumnStyleCfg {
     fontFamily: string;
     fontColor: string;
@@ -121,3 +119,16 @@ export interface IColumnStyleCfg {
 
 export type IAColumnCfgObj = IColumnStyleCfg & { text: string };
 export type IAColumnCfg = undefined | null | string | Partial<IAColumnCfgObj>;
+
+export interface IRowStyleCfg {
+    fontFamily: string;
+    fontColor: string;
+    fontSize: number;
+    borderColor: string;
+    textAlign: CanvasTextAlign;
+    textBaseline: CanvasTextBaseline;
+    backgroundColor: string;
+}
+
+export type IARowCfgObj = IColumnStyleCfg & { text: string };
+export type IARowCfg = undefined | null | string | Partial<IARowCfgObj>;

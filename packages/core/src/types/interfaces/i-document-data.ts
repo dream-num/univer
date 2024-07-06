@@ -129,6 +129,7 @@ export interface IDocumentBody {
     // links?: { [index: number]: IHyperlink }; // links
 
     customRanges?: ICustomRange[]; // plugin register，implement special logic for streams， hyperlink, field，structured document tags， bookmark，comment
+    customDecorations?: ICustomDecoration[];
 }
 
 export interface IDocStyle {
@@ -272,6 +273,16 @@ export interface ICustomRange {
     rangeType: CustomRangeType;
 }
 
+export interface ICustomRangeForInterceptor extends ICustomRange {
+    active?: boolean;
+    show?: boolean;
+}
+
+export interface ICustomDecorationForInterceptor extends ICustomDecoration {
+    active?: boolean;
+    show?: boolean;
+}
+
 export enum CustomRangeType {
     HYPERLINK,
     FIELD, // 17.16 Fields and Hyperlinks
@@ -292,6 +303,17 @@ export interface ICustomBlock {
     blockId: string;
 }
 
+export enum CustomDecorationType {
+    COMMENT,
+}
+
+export interface ICustomDecoration {
+    startIndex: number;
+    endIndex: number;
+    id: string;
+    type: CustomDecorationType;
+}
+
 /**
  * Type of block
  */
@@ -301,14 +323,19 @@ export enum BlockType {
 }
 
 export interface IHeaderAndFooterBase {
-    defaultHeaderId?: string; // defaultHeaderId
-    defaultFooterId?: string; // defaultFooterId
+    defaultHeaderId?: string; // defaultHeaderId or the odd page header id
+    defaultFooterId?: string; // defaultFooterId or the odd page footer id
     evenPageHeaderId?: string; // evenPageHeaderId
     evenPageFooterId?: string; // evenPageFooterId
     firstPageHeaderId?: string; // firstPageHeaderId
     firstPageFooterId?: string; // firstPageFooterId
     useFirstPageHeaderFooter?: BooleanNumber; // useFirstPageHeaderFooter
-    useEvenPageHeaderFooter?: BooleanNumber; // useEvenPageHeaderFooter,
+    evenAndOddHeaders?: BooleanNumber; // useEvenPageHeaderFooter,
+}
+
+export enum DocumentFlavor {
+    TRADITIONAL,
+    MODERN,
 }
 
 /**
@@ -319,6 +346,8 @@ export interface IDocStyleBase extends IMargin {
     pageSize?: ISize; // pageSize
 
     pageOrient?: PageOrientType;
+
+    documentFlavor?: DocumentFlavor; // DocumentFlavor: TRADITIONAL, MODERN
 
     marginHeader?: number; // marginHeader
     marginFooter?: number; // marginFooter

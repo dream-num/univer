@@ -83,7 +83,7 @@ export const CopyableStatisticItem: React.FC<IStatisticItem> = (item: IStatistic
 export function formatNumber(item: IStatisticItem) {
     const { pattern, value: num } = item;
     if (typeof num !== 'number') {
-        return 'Invalid input';
+        return 0;
     }
 
     if (num >= 1e8) {

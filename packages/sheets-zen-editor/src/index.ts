@@ -15,3 +15,10 @@
  */
 
 export { UniverSheetsZenEditorPlugin } from './plugin';
+
+// #region - all commands
+
+export { OpenZenEditorOperation } from './commands/operations/zen-editor.operation';
+export { CancelZenEditCommand, ConfirmZenEditCommand } from './commands/commands/zen-editor.command';
+
+// #endregion

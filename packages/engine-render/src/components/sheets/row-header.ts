@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { SheetRowHeaderExtensionRegistry } from '../extension';
-import type { RowHeaderLayout } from './extensions/row-header-layout';
+import type { IRowsHeaderCfgParam, RowHeaderLayout } from './extensions/row-header-layout';
 import { SpreadsheetHeader } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
@@ -62,6 +62,10 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 
+        if (!segment) {
+            return;
+        }
+
         if (segment.startRow === -1 && segment.endRow === -1) {
             return;
         }
@@ -96,5 +100,10 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
             this.register(extension);
         });
         this._rowHeaderLayoutExtension = this.getExtensionByKey('DefaultRowHeaderLayoutExtension') as RowHeaderLayout;
+    }
+
+    setCustomHeader(cfg: IRowsHeaderCfgParam) {
+        this.makeDirty(true);
+        this._rowHeaderLayoutExtension.configHeaderRow(cfg);
     }
 }

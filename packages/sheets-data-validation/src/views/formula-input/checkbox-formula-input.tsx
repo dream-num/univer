@@ -55,7 +55,7 @@ export function CheckboxFormulaInput(props: IFormulaInputProps) {
                     <FormLayout label={localeService.t('dataValidation.checkbox.checked')} error={formula1Res}>
                         <Input
                             className={styles.dataValidationFormula}
-                            placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
+                            placeholder={localeService.t('dataValidation.panel.valuePlaceholder')}
                             value={value?.formula1}
                             onChange={(newValue) => {
                                 onChange?.({
@@ -72,7 +72,7 @@ export function CheckboxFormulaInput(props: IFormulaInputProps) {
                     <FormLayout label={localeService.t('dataValidation.checkbox.unchecked')} error={formula2Res}>
                         <Input
                             className={styles.dataValidationFormula}
-                            placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
+                            placeholder={localeService.t('dataValidation.panel.valuePlaceholder')}
                             value={value?.formula2}
                             onChange={(newValue) => {
                                 onChange?.({

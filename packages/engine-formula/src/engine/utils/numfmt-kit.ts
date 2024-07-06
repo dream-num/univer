@@ -233,6 +233,12 @@ function isAccounting(pattern: string) {
  * @param nextPattern
  */
 export function comparePatternPriority(previousPattern: string, nextPattern: string, operator: operatorToken) {
+    if (previousPattern === '') {
+        return nextPattern;
+    } else if (nextPattern === '') {
+        return previousPattern;
+    }
+
     const previousPatternType = getNumberFormatType(previousPattern);
     const nextPatternType = getNumberFormatType(nextPattern);
 

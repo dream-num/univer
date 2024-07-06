@@ -30,6 +30,11 @@ export class Offset extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    override isAddress() {
+        return true;
+    }
+
+    // eslint-disable-next-line max-lines-per-function, complexity
     override calculate(
         reference: FunctionVariantType,
         rows: FunctionVariantType,

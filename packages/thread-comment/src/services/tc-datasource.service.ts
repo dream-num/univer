@@ -15,44 +15,142 @@
  */
 
 import { createIdentifier } from '@wendellhu/redi';
-import type { IThreadComment } from '../types/interfaces/i-thread-comment';
+import type { Nullable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
+import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
 
-export type ThreadCommentJSON = { id: string } & Partial<Omit<IThreadComment, 'id'>>;
+export type ThreadCommentJSON = {
+    id: string;
+    threadId: string;
+    ref: string;
+} & Partial<Omit<IThreadComment, 'id' | 'threadId' | 'ref'>>;
+
+type Success = boolean;
+
+export interface IThreadCommentDataSource {
+    /**
+     * handler for add-comment, throw error means fail and stop the process.
+     */
+    addComment: (comment: IThreadComment) => Promise<IThreadComment>;
+    /**
+     * handler for update-comment, throw error means fail and stop the process.
+     */
+    updateComment: (comment: IThreadComment) => Promise<Success>;
+    resolveComment: (comment: IThreadComment) => Promise<Success>;
+    /**
+     * handler for delete-comment, throw error means fail and stop the process.
+     */
+    deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId: string,) => Promise<Success>;
+    /**
+     * handler for batch-fetch-comment, throw error means fail and stop the process.
+     */
+    listComments: (unitId: string, subUnitId: string, threadId: string[]) => Promise<IBaseComment[]>;
+    saveCommentToSnapshot: (comment: IThreadComment) => ThreadCommentJSON;
+}
 
 export interface IThreadCommentDataSourceService {
+    dataSource: Nullable<IThreadCommentDataSource>;
+
+    /**
+     * should sync update mutations to collaboration-server
+     */
+    syncUpdateMutationToColla: boolean;
+
+    /**
+     * handler for add-comment, throw error means fail and stop the process.
+     */
     addComment: (comment: IThreadComment) => Promise<IThreadComment>;
-    updateComment: (comment: IThreadComment) => Promise<boolean>;
-    deleteComment: (commentId: string) => Promise<boolean>;
-    deleteCommentBatch: (commentIds: string[]) => Promise<boolean>;
-    loadFormSnapshot: (unitComments: Record<string, ThreadCommentJSON[]>) => Promise<Record<string, IThreadComment[]>>;
-    saveToSnapshot: (unitComments: Record<string, IThreadComment[]>) => Record<string, ThreadCommentJSON[]>;
+    /**
+     * handler for update-comment, throw error means fail and stop the process.
+     */
+    updateComment: (comment: IThreadComment) => Promise<Success>;
+    /**
+     * handler for resolve-comment, throw error means fail and stop the process.
+     */
+    resolveComment: (comment: IThreadComment) => Promise<Success>;
+    /**
+     * handler for delete-comment, throw error means fail and stop the process.
+     */
+    deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId: string) => Promise<Success>;
+    saveToSnapshot: (unitComments: Record<string, IThreadComment[]>, unitId: string) => Record<string, ThreadCommentJSON[]>;
+    getThreadComment: (unitId: string, subUnitId: string, threadId: string) => Promise<Nullable<IBaseComment>>;
+    listThreadComments: (unitId: string, subUnitId: string, threadId: string[]) => Promise<IBaseComment[]>;
 }
 
 /**
  * Preserve for import async comment system
  */
-export class ThreadCommentDataSourceService implements IThreadCommentDataSourceService {
+export class ThreadCommentDataSourceService extends Disposable implements IThreadCommentDataSourceService {
+    private _dataSource: Nullable<IThreadCommentDataSource> = null;
+    syncUpdateMutationToColla = true;
+
+    set dataSource(dataSource: Nullable<IThreadCommentDataSource>) {
+        this._dataSource = dataSource;
+    }
+
+    get dataSource() {
+        return this._dataSource;
+    }
+
+    constructor() {
+        super();
+    }
+
+    async getThreadComment(unitId: string, subUnitId: string, threadId: string): Promise<Nullable<IBaseComment>> {
+        if (this._dataSource) {
+            const comments = await this._dataSource.listComments(unitId, subUnitId, [threadId]);
+            return comments[0];
+        }
+
+        return null;
+    }
+
     async addComment(comment: IThreadComment) {
+        if (this._dataSource) {
+            return this._dataSource.addComment(comment);
+        }
         return comment;
     }
 
-    async updateComment(_comment: IThreadComment) {
+    async updateComment(comment: IThreadComment) {
+        if (this._dataSource) {
+            return this._dataSource.updateComment(comment);
+        }
         return true;
     }
 
-    async deleteComment(_commentId: string) {
+    async resolveComment(comment: IThreadComment) {
+        if (this._dataSource) {
+            return this._dataSource.resolveComment(comment);
+        }
         return true;
     }
 
-    async deleteCommentBatch(_commentIds: string[]) {
+    async deleteComment(unitId: string, subUnitId: string, threadId: string, commentId: string) {
+        if (this._dataSource) {
+            return this._dataSource.deleteComment(unitId, subUnitId, threadId, commentId);
+        }
         return true;
     }
 
-    async loadFormSnapshot(unitComments: Record<string, ThreadCommentJSON[]>) {
-        return unitComments as Record<string, IThreadComment[]>;
+    async listThreadComments(unitId: string, subUnitId: string, threadIds: string[]) {
+        if (this.dataSource) {
+            return this.dataSource.listComments(unitId, subUnitId, threadIds);
+        }
+
+        return [];
     }
 
-    saveToSnapshot(unitComments: Record<string, IThreadComment[]>) {
+    saveToSnapshot(unitComments: Record<string, IThreadComment[]>, unitId: string) {
+        if (this._dataSource) {
+            const map: Record<string, ThreadCommentJSON[]> = {};
+            Object.keys(unitComments).forEach((subUnitId) => {
+                const comments = unitComments[subUnitId];
+                map[subUnitId] = comments.map(this.dataSource!.saveCommentToSnapshot);
+            });
+            return map;
+        }
+
         return unitComments;
     }
 }

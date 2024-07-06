@@ -156,7 +156,47 @@ describe('Test clipboard', () => {
             expect(res).toBeTruthy();
             expect(worksheet.getMergeData().length).toBe(3);
             expect(getValues(2, 2, 2, 2)?.[0]?.[0]?.v).toEqual('Univer');
-            expect(getStyles(2, 2, 2, 2)?.[0]?.[0]).toStrictEqual({ vt: 3, bl: 1, it: 1 });
+            expect(getStyles(2, 2, 2, 2)?.[0]?.[0]).toStrictEqual({
+                bl: 1,
+                cl: {
+                    rgb: '#000',
+                },
+                ff: 'Arial',
+                fs: 10,
+                ht: 0,
+                it: 1,
+                ol: {
+                    cl: {
+                        rgb: '#000',
+                    },
+                    s: 0,
+                },
+                pd: {
+                    b: 1,
+                    l: 2,
+                    r: 2,
+                    t: 0,
+                },
+                st: {
+                    cl: {
+                        rgb: '#000',
+                    },
+                    s: 0,
+                },
+                tb: 0,
+                td: 0,
+                tr: {
+                    a: 0,
+                    v: 0,
+                },
+                ul: {
+                    cl: {
+                        rgb: '#000',
+                    },
+                    s: 0,
+                },
+                vt: 3,
+            });
         });
 
         it('test style with paste rich text style', async () => {
@@ -172,17 +212,17 @@ describe('Test clipboard', () => {
             expect(richTextStyle?.body?.dataStream).toBe('univer\r\n');
             expect(richTextStyle?.body?.paragraphs).toStrictEqual([{ startIndex: 6 }]);
             expect(richTextStyle?.body?.textRuns).toStrictEqual([
-                { ed: 1, st: 0, ts: { fs: 9.75, ff: 'Arial' } },
+                { ed: 1, st: 0, ts: { fs: 10, ff: 'Arial' } },
                 {
                     st: 1, ed: 4, ts: {
                         bl: 1,
                         cl:
                             { rgb: 'rgb(217,210,233)' },
-                        ff: 'Arial', fs: 17.25, it: 1,
+                        ff: 'Arial', fs: 18, it: 1,
                     },
                 },
                 {
-                    ed: 6, st: 4, ts: { fs: 9.75, ff: 'Arial' },
+                    ed: 6, st: 4, ts: { fs: 10, ff: 'Arial' },
                 },
             ]);
         });

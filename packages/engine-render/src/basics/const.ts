@@ -20,33 +20,6 @@ export enum SHAPE_TYPE {
     PATH = 'path',
 }
 
-// MOUSEOUT = 'mouseout',
-// MOUSELEAVE = 'mouseleave',
-// MOUSEOVER = 'mouseover',
-// MOUSEENTER = 'mouseenter',
-// MOUSEMOVE = 'mousemove',
-// MOUSEDOWN = 'mousedown',
-// MOUSEUP = 'mouseup',
-// TOUCHSTART = 'touchstart',
-// TOUCHEND = 'touchend',
-// TOUCHMOVE = 'touchmove',
-// TOUCHCANCEL = 'touchcancel',
-// POINTERCANCEL = 'pointercancel',
-// LOSTPOINTERCAPTURE = 'lostpointercapture',
-
-export enum EVENT_TYPE {
-    PointerMove = 'PointerMove',
-    PointerDown = 'PointerDown',
-    PointerUp = 'PointerUp',
-    PointerOut = 'PointerOut',
-    PointerLeave = 'PointerLeave',
-    PointerOver = 'PointerOver',
-    PointerEnter = 'PointerEnter',
-    wheel = 'MouseWheel',
-    KeyDown = 'KeyDown',
-    KeyUp = 'KeyUp',
-}
-
 export enum LINK_VIEW_PORT_TYPE {
     XY = 0,
     X = 1,

@@ -115,14 +115,14 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
         onValid,
 
-        placeholder = '',
-
         isValueValid = true,
     } = props;
 
     const editorService = useDependency(IEditorService);
 
     const localeService = useDependency(LocaleService);
+
+    const [placeholder, placeholderSet] = useState('');
 
     const [validationContent, setValidationContent] = useState<string>('');
 
@@ -171,6 +171,9 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         },
         editor);
 
+        editorService.setValueNoRefresh(value || '', id);
+        placeholderSet(placeholder || '');
+
         const activeChange = debounce((state: boolean) => {
             setActive(state);
             onActive && onActive(state);
@@ -184,6 +187,8 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             activeChange(state);
         });
 
+        // !IMPORTANT: Set a delay of 160ms to ensure that the position is corrected after the sidebar animation ends @jikkai
+        const ANIMATION_DELAY = 160;
         const valueChange = debounce((editor: Readonly<Editor>) => {
             const unitId = editor.editorUnitId;
             const isLegality = editorService.checkValueLegality(unitId);
@@ -200,7 +205,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 } else {
                     setValidationContent(localeService.t('textEditor.rangeError'));
                 }
-            }, 100);
+            }, ANIMATION_DELAY);
 
             const currentValue = editorService.getValue(unitId);
 

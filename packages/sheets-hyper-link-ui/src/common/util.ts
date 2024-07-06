@@ -15,20 +15,10 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '@univerjs/core';
-
-const expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-const regex = new RegExp(expression);
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Tools } from '@univerjs/core';
 
 export function isLegalLink(link: string) {
-    if (!Number.isNaN(+link)) {
-        return false;
-    }
-
-    if (link.startsWith('http://localhost:3002') || link.startsWith('localhost:3002')) {
-        return true;
-    }
-    return Boolean(link.match(regex));
+    return Tools.isLegalUrl(link);
 }
 
 export function hasProtocol(urlString: string) {

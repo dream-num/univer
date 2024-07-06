@@ -111,6 +111,7 @@ export function createSkeletonCustomBlockGlyph(config: IFontCreateConfig, glyphW
 
     return {
         content: '',
+        raw: content,
         ts: textStyle,
         fontStyle,
         width: glyphWidth,
@@ -165,6 +166,7 @@ export function _createSkeletonWordOrLetter(
     if (skipWidthList.indexOf(content) > -1) {
         return {
             content: '',
+            raw: content,
             ts: textStyle,
             fontStyle,
             width: 0,
@@ -237,6 +239,7 @@ export function _createSkeletonWordOrLetter(
         isJustifiable: isJustifiable(content),
         adjustability: baseAdjustability(content, width),
         count: content.length,
+        raw: content,
     };
 }
 
@@ -288,6 +291,7 @@ export function createSkeletonBulletGlyph(
         streamType: DT.LETTER,
         // Deliberately set to 0 so that there is no need to count when calculating the cursor.
         count: 0,
+        raw: content,
     };
 }
 

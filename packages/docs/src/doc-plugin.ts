@@ -52,12 +52,11 @@ import { SetTextSelectionsOperation } from './commands/operations/text-selection
 import { IMEInputController } from './controllers/ime-input.controller';
 import { MoveCursorController } from './controllers/move-cursor.controller';
 import { NormalInputController } from './controllers/normal-input.controller';
-import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
-import { DocViewModelManagerService } from './services/doc-view-model-manager.service';
 import { IMEInputManagerService } from './services/ime-input-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
+import { DocCustomRangeService } from './services/doc-custom-range.service';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -130,8 +129,6 @@ export class UniverDocsPlugin extends Plugin {
         (
             [
                 // services
-                [DocSkeletonManagerService],
-                [DocViewModelManagerService],
                 [DocStateChangeManagerService],
                 [IMEInputManagerService],
                 [
@@ -141,11 +138,12 @@ export class UniverDocsPlugin extends Plugin {
                     },
                 ],
                 [TextSelectionManagerService],
-
+                [DocCustomRangeService],
                 // controllers
                 [NormalInputController],
                 [IMEInputController],
                 [MoveCursorController],
+
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
     }

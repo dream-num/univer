@@ -41,7 +41,7 @@ const wordPastePlugin: IPastePlugin = {
     afterProcessRules: [
         {
             filter(el: HTMLElement) {
-                return el.tagName === 'P' && /mso/i.test(el.className);
+                return el.tagName === 'P';
             },
             handler(doc, el) {
                 if (doc.paragraphs == null) {

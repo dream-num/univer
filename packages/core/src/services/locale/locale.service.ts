@@ -74,7 +74,7 @@ export class LocaleService extends Disposable {
      * t('foo.bar', 'World') => 'Hello World'
      */
     t = (key: string, ...args: string[]): string => {
-        if (!this._locales) throw new Error('Locale not initialized');
+        if (!this._locales) throw new Error('[LocaleService]: Locale not initialized');
 
         const keys = key.split('.');
         const resolvedValue = this.resolveKeyPath(this._locales[this._currentLocale], keys);

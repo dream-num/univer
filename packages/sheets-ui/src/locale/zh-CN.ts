@@ -291,7 +291,7 @@ const locale = {
         noHide: '不能隐藏, 至少保留一个sheet标签',
         chartEditNoOpt: '图表编辑模式下不允许该操作！',
         sheetNameErrorTitle: '错误',
-        sheetNameSpecCharError: "名称不能超过31个字符，首尾不能是' 且名称不能包含:\r\n[ ] : \\ ? * /",
+        sheetNameSpecCharError: "名称不能超过 31 个字符，首尾不能是' 且名称不能包含: [ ] : \\ ? * /",
         sheetNameCannotIsEmptyError: '名称不能为空。',
         sheetNameAlreadyExistsError: '工作表已存在，请输入其它名称。',
         deleteSheet: '删除工作表',

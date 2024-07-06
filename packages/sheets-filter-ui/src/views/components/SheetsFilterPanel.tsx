@@ -25,7 +25,7 @@ import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
 import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
-import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/sheets-filter.operation';
+import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import styles from './index.module.less';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';

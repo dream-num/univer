@@ -101,7 +101,7 @@ export default {
     },
     CONCAT: {
         description: 'Combines the text from multiple ranges and/or strings, but it doesn\'t provide the delimiter or IgnoreEmpty arguments.',
-        abstract: 'Combines the text from multiple ranges and/or strings, but it doesn\'t provide the delimiter or IgnoreEmpty arguments.',
+        abstract: 'Combines the text from multiple ranges and/or strings, but it doesn\'t provide the delimiter or IgnoreEmpty arguments',
         links: [
             {
                 title: 'Instruction',
@@ -109,8 +109,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: 'text1', detail: 'Text item to be joined. A string, or array of strings, such as a range of cells.' },
+            text2: { name: 'text2', detail: 'Additional text items to be joined. There can be a maximum of 253 text arguments for the text items. Each can be a string, or array of strings, such as a range of cells.' },
         },
     },
     CONCATENATE: {

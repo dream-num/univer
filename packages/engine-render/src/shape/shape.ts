@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, IScale, Nullable } from '@univerjs/core';
+import type { IKeyValue, IOffset, IScale, ISize, Nullable } from '@univerjs/core';
 
 import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
@@ -26,7 +26,7 @@ export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
 export type PaintFirst = 'fill' | 'stroke';
 
-export interface IShapeProps extends IObjectFullState {
+export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
     hoverCursor?: Nullable<string>;
     moveCursor?: string | null;
     fillRule?: string;

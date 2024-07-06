@@ -25,3 +25,10 @@ export type {
     IReplaceAllResult,
 } from './services/find-replace.service';
 export { FindModel, IFindReplaceService, FindBy, FindScope, FindDirection } from './services/find-replace.service';
+
+// #region - all commands
+
+export { ReplaceCurrentMatchCommand, ReplaceAllMatchesCommand } from './commands/commands/replace.command';
+export { OpenFindDialogOperation, OpenReplaceDialogOperation, GoToNextMatchOperation, GoToPreviousMatchOperation } from './commands/operations/find-replace.operation';
+
+// #endregion

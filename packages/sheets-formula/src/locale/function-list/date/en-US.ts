@@ -45,7 +45,7 @@ export default {
         },
     },
     DATEVALUE: {
-        description: 'Converts a date in the form of text to a serial number',
+        description: 'Converts a date in the form of text to a serial number.',
         abstract: 'Converts a date in the form of text to a serial number',
         links: [
             {
@@ -54,8 +54,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dateText: { name: 'date_text', detail: 'Text that represents a date in an Excel date format, or a reference to a cell that contains text that represents a date in an Excel date format. For example, "1/30/2008" or "30-Jan-2008" are text strings within quotation marks that represent dates.\nUsing the default date system in Microsoft Excel for Windows, the date_text argument must represent a date between January 1, 1900 and December 31, 9999. The DATEVALUE function returns the #VALUE! error value if the value of the date_text argument falls outside of this range.\nIf the year portion of the date_text argument is omitted, the DATEVALUE function uses the current year from your computer\'s built-in clock. Time information in the date_text argument is ignored.' },
         },
     },
     DAY: {
@@ -211,7 +210,7 @@ export default {
         },
     },
     NOW: {
-        description: 'Returns the serial number of the current date and time',
+        description: 'Returns the serial number of the current date and time.',
         abstract: 'Returns the serial number of the current date and time',
         links: [
             {
@@ -220,8 +219,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     SECOND: {
@@ -239,7 +236,7 @@ export default {
         },
     },
     TIME: {
-        description: 'Returns the serial number of a particular time',
+        description: 'Returns the serial number of a particular time.',
         abstract: 'Returns the serial number of a particular time',
         links: [
             {
@@ -248,12 +245,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            hour: { name: 'hour', detail: 'A number from 0 (zero) to 32767 representing the hour. Any value greater than 23 will be divided by 24 and the remainder will be treated as the hour value. For example, TIME(27,0,0) = TIME(3,0,0) = .125 or 3:00 AM.' },
+            minute: { name: 'minute', detail: 'A number from 0 to 32767 representing the minute. Any value greater than 59 will be converted to hours and minutes. For example, TIME(0,750,0) = TIME(12,30,0) = .520833 or 12:30 PM.' },
+            second: { name: 'second', detail: 'A number from 0 to 32767 representing the second. Any value greater than 59 will be converted to hours, minutes, and seconds. For example, TIME(0,0,2000) = TIME(0,33,22) = .023148 or 12:33:20 AM.' },
         },
     },
     TIMEVALUE: {
-        description: 'Converts a time in the form of text to a serial number',
+        description: 'Converts a time in the form of text to a serial number.',
         abstract: 'Converts a time in the form of text to a serial number',
         links: [
             {
@@ -262,8 +260,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            timeText: { name: 'time_text', detail: 'A text string that represents a time in any one of the Microsoft Excel time formats; for example, "6:45 PM" and "18:45" text strings within quotation marks that represent time.' },
         },
     },
     TODAY: {

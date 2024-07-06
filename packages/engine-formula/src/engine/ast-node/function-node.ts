@@ -34,6 +34,7 @@ import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '..
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
 import { prefixHandler } from '../utils/prefixHandler';
 import { IDefinedNamesService } from '../../services/defined-names.service';
+import { matchToken } from '../../basics/token';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -301,7 +302,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
 
         const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._injector);
 
-        if (!Number.isNaN(Number(tokenTrim))) {
+        if (!Number.isNaN(Number(tokenTrim)) && !this._isParentUnionNode(param)) {
             return ErrorNode.create(ErrorType.VALUE);
         }
 
@@ -318,5 +319,9 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             }
             return functionNode;
         }
+    }
+
+    private _isParentUnionNode(param: LexerNode) {
+        return param.getParent()?.getParent()?.getToken() === matchToken.COLON;
     }
 }

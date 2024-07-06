@@ -26,7 +26,7 @@ import clsx from 'clsx';
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { useObservable } from '../../../components/hooks/observable';
-import { Menu } from '../../../components/menu/Menu';
+import { Menu } from '../../../components/menu/desktop/Menu';
 import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 import { MenuItemType } from '../../../services/menu/menu';
 import { ILayoutService } from '../../../services/layout/layout.service';

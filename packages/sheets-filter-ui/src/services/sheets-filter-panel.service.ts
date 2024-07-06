@@ -26,8 +26,7 @@ import { RefRangeService } from '@univerjs/sheets';
 
 import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
 import { FilterConditionItems } from '../models/conditions';
-import type { ISetSheetsFilterCriteriaCommandParams } from '../commands/sheets-filter.command';
-import { SetSheetsFilterCriteriaCommand } from '../commands/sheets-filter.command';
+import { type ISetSheetsFilterCriteriaCommandParams, SetSheetsFilterCriteriaCommand } from '../commands/commands/sheets-filter.command';
 import { statisticFilterByValueItems } from '../models/utils';
 
 export enum FilterBy {

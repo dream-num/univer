@@ -211,7 +211,7 @@ export class SheetFindModel extends FindModel {
         }));
 
         this.disposeWithMe(
-            fromCallback(this._commandService.onCommandExecuted)
+            fromCallback(this._commandService.onCommandExecuted.bind(this._commandService.onCommandExecuted))
                 .pipe(
                     filter(([command, options]) => command.id === SetWorksheetActiveOperation.id && !options?.fromFindReplace)
                 )
@@ -232,7 +232,7 @@ export class SheetFindModel extends FindModel {
 
         // When the sheet model changes, we should re-search.
         this.disposeWithMe(
-            fromCallback(this._commandService.onCommandExecuted)
+            fromCallback(this._commandService.onCommandExecuted.bind(this._commandService))
                 .pipe(
                     filter(([command]) => command.type === CommandType.MUTATION
                         && (command.params as ISheetCommandSharedParams).unitId === this._workbook.getUnitId()
@@ -325,7 +325,7 @@ export class SheetFindModel extends FindModel {
 
         this.disposeWithMe(
             merge(
-                fromCallback(this._commandService.onCommandExecuted).pipe(
+                fromCallback(this._commandService.onCommandExecuted.bind(this._commandService)).pipe(
                     filter(([command]) => {
                         // If there mutations happens on this unit, we should re-search.
                         if (command.type === CommandType.MUTATION && (command.params as ISheetCommandSharedParams).unitId === this._workbook.getUnitId()) {

@@ -61,6 +61,10 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 
+        if (!segment) {
+            return;
+        }
+
         if (segment.startColumn === -1 && segment.endColumn === -1) {
             return;
         }

@@ -20,8 +20,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IUniverDebuggerConfig } from './controllers/debugger.controller';
 import { DebuggerController, DefaultDebuggerConfig } from './controllers/debugger.controller';
-import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
 import { E2EMemoryController } from './controllers/e2e/e2e-memory.controller';
+import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
 
 export class UniverDebuggerPlugin extends Plugin {
     static override pluginName = 'DEBUGGER_PLUGIN';

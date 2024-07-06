@@ -20,7 +20,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
-import { SetSlidePageThumbOperation } from '../commands/operations/setThumb.operation';
+import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
 
 /**
  * This controller registers UI parts of slide workbench to the base-ui workbench.

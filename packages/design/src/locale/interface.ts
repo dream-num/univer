@@ -21,5 +21,6 @@ export interface ILocale {
         Confirm: Record<string, any>;
         Slider: Record<string, any>;
         Picker: typeof PickerZhCN;
+        CascaderList: Record<string, any>;
     };
 }

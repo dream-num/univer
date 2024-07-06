@@ -400,7 +400,9 @@ export class ObjectMatrix<T> {
     insertColumns(start: number, count: number): void {
         for (let c = start; c < start + count; c++) {
             this.forEach((row, data) => {
-                insertMatrixArray(c, undefined, data);
+                if (data) {
+                    insertMatrixArray(c, undefined, data);
+                }
             });
         }
     }
@@ -411,7 +413,9 @@ export class ObjectMatrix<T> {
 
     removeColumns(start: number, count: number): void {
         this.forEach((row, value) => {
-            spliceArray(start, count, value);
+            if (value) {
+                spliceArray(start, count, value);
+            }
         });
     }
 

@@ -19,7 +19,8 @@ import type {
     ICellData,
     IColorStyle,
     IObjectMatrixPrimitiveType,
-    IRange, ISelectionCellWithCoord,
+    IRange,
+    ISelectionCellWithMergeInfo,
     IStyleData,
     ITextDecoration,
     Workbook,
@@ -102,7 +103,7 @@ export class FRange {
      * Return this cell information, including whether it is merged and cell coordinates
      * @returns The cell information
      */
-    getCell(): ISelectionCellWithCoord {
+    getCell(): ISelectionCellWithMergeInfo {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const skeleton = this._renderManagerService.getRenderById(unitId)!

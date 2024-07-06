@@ -15,13 +15,15 @@
  */
 
 import type { ICommand, ICommandInfo } from '@univerjs/core';
-import { CommandType, ICommandService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { IMEInputManagerService } from '../../services/ime-input-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getInsertSelection } from '../../basics/selection';
+import { getRichTextEditPath } from '../util';
 
 export interface IIMEInputCommandParams {
     unitId: string;
@@ -36,17 +38,33 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IIMEInputCommandParams) => {
         const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart } = params;
+        // console.log('===ime', params);
         const commandService = accessor.get(ICommandService);
         const imeInputManagerService = accessor.get(IMEInputManagerService);
-        const previousActiveRange = imeInputManagerService.getActiveRange();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
-        if (previousActiveRange == null) {
+        if (docDataModel == null) {
             return false;
         }
 
+        const previousActiveRange = imeInputManagerService.getActiveRange();
+        if (!previousActiveRange) {
+            return false;
+        }
         const { startOffset, style, segmentId } = previousActiveRange;
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (body == null) {
+            return false;
+        }
+
+        const insertRange = getInsertSelection(previousActiveRange, body);
+        Object.assign(previousActiveRange, insertRange);
+
         const len = newText.length;
 
         const textRanges: ITextRangeWithStyle[] = [
@@ -70,14 +88,23 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
+        let memoryCursor = 0;
         if (!previousActiveRange.collapsed && isCompositionStart) {
-            textX.push(...getRetainAndDeleteFromReplace(previousActiveRange, segmentId));
+            const { dos, retain, cursor } = getRetainAndDeleteFromReplace(previousActiveRange, segmentId, 0, body);
+            textX.push(...dos);
+            doMutation.params!.textRanges = [{
+                startOffset: startOffset + len + retain,
+                endOffset: startOffset + len + retain,
+                collapsed: true,
+            }];
+            memoryCursor = cursor;
         } else {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startOffset,
                 segmentId,
             });
+            memoryCursor = startOffset;
         }
 
         if (oldTextLen > 0) {
@@ -99,7 +126,8 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             segmentId,
         });
 
-        doMutation.params!.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params!.actions = jsonX.editOp(textX.serialize(), path);
 
         doMutation.params!.noHistory = !isCompositionEnd;
 

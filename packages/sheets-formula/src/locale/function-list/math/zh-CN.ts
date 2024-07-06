@@ -70,7 +70,7 @@ export default {
         },
     },
     ACOTH: {
-        description: '返回一个数的双曲反余切值',
+        description: '返回数字的反双曲余切值。',
         abstract: '返回一个数的双曲反余切值',
         links: [
             {
@@ -79,8 +79,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: 'Number 的绝对值必须大于 1。' },
         },
     },
     AGGREGATE: {
@@ -112,7 +111,7 @@ export default {
         },
     },
     ASIN: {
-        description: '返回数字的反正弦值',
+        description: '返回数字的反正弦值。',
         abstract: '返回数字的反正弦值',
         links: [
             {
@@ -121,12 +120,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: ' 所求角度的正弦值，必须介于 -1 到 1 之间。' },
         },
     },
     ASINH: {
-        description: '返回数字的反双曲正弦值',
+        description: '返回数字的反双曲正弦值。',
         abstract: '返回数字的反双曲正弦值',
         links: [
             {
@@ -135,12 +133,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '任意实数。' },
         },
     },
     ATAN: {
-        description: '返回数字的反正切值',
+        description: '返回数字的反正切值。',
         abstract: '返回数字的反正切值',
         links: [
             {
@@ -149,12 +146,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '所求角度的正切值。' },
         },
     },
     ATAN2: {
-        description: '返回 X 和 Y 坐标的反正切值',
+        description: '返回 X 和 Y 坐标的反正切值。',
         abstract: '返回 X 和 Y 坐标的反正切值',
         links: [
             {
@@ -163,12 +159,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xNum: { name: 'x 坐标', detail: '点的 x 坐标。' },
+            yNum: { name: 'y 坐标', detail: '点的 y 坐标。' },
         },
     },
     ATANH: {
-        description: '返回数字的反双曲正切值',
+        description: '返回数字的反双曲正切值。',
         abstract: '返回数字的反双曲正切值',
         links: [
             {
@@ -177,8 +173,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '-1 到 1 之间的任意实数。' },
         },
     },
     BASE: {
@@ -191,8 +186,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要转换的数字。 必须是大于或等于 0 且小于 2^53 的整数。' },
+            radix: { name: '基数', detail: '要将数字转换为的基数。 必须是大于或等于 2 且小于或等于 36 的整数。' },
+            minLength: { name: '最小长度', detail: '返回的字符串的最小长度。 必须是大于或等于 0 的整数。' },
         },
     },
     CEILING: {
@@ -266,7 +262,7 @@ export default {
         },
     },
     COS: {
-        description: '返回数字的余弦值',
+        description: '返回数字的余弦值。',
         abstract: '返回数字的余弦值',
         links: [
             {
@@ -275,8 +271,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要求余弦的角度，以弧度表示。' },
         },
     },
     COSH: {
@@ -289,13 +284,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要求双曲余弦的任意实数。' },
         },
     },
     COT: {
-        description: '返回角度的余弦值',
-        abstract: '返回角度的余弦值',
+        description: '返回以弧度表示的角度的余切值。',
+        abstract: '指定角度的余切值（以弧度表示）',
         links: [
             {
                 title: '教学',
@@ -303,8 +297,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要余切值的角度（以弧度为单位）。' },
         },
     },
     COTH: {
@@ -317,12 +310,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要求双曲余切的任意实数。' },
         },
     },
     CSC: {
-        description: '返回角度的余割值',
+        description: '返回角度的余割值，以弧度表示。',
         abstract: '返回角度的余割值',
         links: [
             {
@@ -331,8 +323,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要求余割的角度，以弧度表示。' },
         },
     },
     CSCH: {
@@ -345,8 +336,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要求双曲余割值的角度，以弧度表示。' },
         },
     },
     DECIMAL: {
@@ -949,8 +939,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要求正弦的角度，以弧度表示。' },
         },
     },
     SINH: {
@@ -963,8 +952,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '任意实数。' },
         },
     },
     SQRT: {
@@ -1142,7 +1130,7 @@ export default {
         },
     },
     TAN: {
-        description: '返回数字的正切值',
+        description: '返回数字的正切值。',
         abstract: '返回数字的正切值',
         links: [
             {
@@ -1151,12 +1139,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要求正切的角度，以弧度表示。' },
         },
     },
     TANH: {
-        description: '返回数字的双曲正切值',
+        description: '返回数字的双曲正切值。',
         abstract: '返回数字的双曲正切值',
         links: [
             {
@@ -1165,8 +1152,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '任意实数。' },
         },
     },
     TRUNC: {

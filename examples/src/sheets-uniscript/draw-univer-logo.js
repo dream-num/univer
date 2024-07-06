@@ -16,6 +16,7 @@
 
 /* eslint-disable */
 
+ 
 const newSheet = univerAPI.getActiveWorkbook().create("Draw Univer Logo", 80, 80);
 newSheet.setRowHeights(0, 80, 6);
 newSheet.setColumnWidths(0, 80, 6);
@@ -1549,3 +1550,4 @@ const key = setInterval(() => {
 
     index += 1;
 }, 23);
+

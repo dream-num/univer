@@ -35,7 +35,7 @@ import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Indirect } from '../index';
 
 describe('Test indirect', () => {
-    // const textFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
+    // const testFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
@@ -89,32 +89,32 @@ describe('Test indirect', () => {
     });
 
     describe('normal', () => {
-        it('string', async () => {
+        it('string', () => {
             const lexerNode = lexer.treeBuilder('=Indirect("B2")');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
         });
 
-        it('ref', async () => {
+        it('ref', () => {
             const lexerNode = lexer.treeBuilder('=Indirect(C2)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
         });
 
-        it('array', async () => {
+        it('array', () => {
             const lexerNode = lexer.treeBuilder('=Indirect(A1:D3)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as ArrayValueObject).toValue()).toStrictEqual([
                 [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
@@ -125,22 +125,22 @@ describe('Test indirect', () => {
     });
 
     describe('r1c1', () => {
-        it('r1c1 string', async () => {
+        it('r1c1 string', () => {
             const lexerNode = lexer.treeBuilder('=Indirect("R2C2", 0)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
         });
 
-        it('r1c1 ref', async () => {
+        it('r1c1 ref', () => {
             const lexerNode = lexer.treeBuilder('=Indirect(D2, 0)');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
         });

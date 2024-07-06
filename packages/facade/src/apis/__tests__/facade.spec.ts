@@ -20,8 +20,15 @@ import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 
-import type { ColumnHeaderLayout, RenderComponentType, SheetComponent, SpreadsheetColumnHeader } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type {
+    ColumnHeaderLayout,
+    RenderComponentType,
+    RowHeaderLayout,
+    SheetComponent,
+    SpreadsheetColumnHeader,
+    SpreadsheetRowHeader } from '@univerjs/engine-render';
+import {
+    IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { RegisterFunctionMutation, SetFormulaCalculationStartMutation, UnregisterFunctionMutation } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';
@@ -295,10 +302,30 @@ describe('Test FUniver', () => {
         const spy = vi.spyOn(columnHeaderExt, 'draw');
 
         univerAPI.customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['ASC', 'MokaII', undefined, { text: 'Size', textAlign: 'left' }, { text: 'MUJI', fontSize: 15, textAlign: 'right' }, { text: 'SRI-RESOLVE', fontSize: 10, textAlign: 'left', fontColor: 'blue', backgroundColor: 'wheat' }, null, null, 'ss', { fontSize: 29, fontColor: 'red', text: 'hash' }] });
+        univerAPI.customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['ASC', 'MokaII', undefined, { text: 'Size', textAlign: 'left' }, { text: 'MUJI', fontSize: 15, textAlign: 'right' }, { text: 'SRI-RESOLVE', fontSize: 10, textAlign: 'left', fontColor: 'blue', backgroundColor: 'wheat' }, null, null, 'ss', { fontSize: 29, fontColor: 'red', text: 'hash' }] });
         expect(columnHeaderExt.headerStyle.backgroundColor).toBe('pink');
         expect(columnHeaderExt.headerStyle.fontSize).toBe(9);
         expect(columnHeaderExt.headerStyle.borderColor).toBe('rgb(217,217,217)');
         expect(columnHeaderExt.columnsCfg.length).toBe(10);
+
+        vi.advanceTimersByTime(16); // mock time pass by
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('Function customizeRowHeader', () => {
+        const unitId = univerAPI.getActiveWorkbook()?.getId() || '';
+        const rowRenderComp = getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        if (!rowRenderComp) return;
+        const rowHeaderExt = rowRenderComp.extensions.get('DefaultRowHeaderLayoutExtension')! as RowHeaderLayout;
+
+        const spy = vi.spyOn(rowHeaderExt, 'draw');
+
+        univerAPI.customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['ASC', 'MokaII', undefined, { text: 'Size', textAlign: 'left' }, { text: 'MUJI', fontSize: 15, textAlign: 'right' }, { text: 'SRI-RESOLVE', fontSize: 10, textAlign: 'left', fontColor: 'blue', backgroundColor: 'wheat' }, null, null, 'ss', { fontSize: 29, fontColor: 'red', text: 'hash' }] });
+        univerAPI.customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['ASC', 'MokaII', undefined, { text: 'Size', textAlign: 'left' }, { text: 'MUJI', fontSize: 15, textAlign: 'right' }, { text: 'SRI-RESOLVE', fontSize: 10, textAlign: 'left', fontColor: 'blue', backgroundColor: 'wheat' }, null, null, 'ss', { fontSize: 29, fontColor: 'red', text: 'hash' }] });
+        expect(rowHeaderExt.headerStyle.backgroundColor).toBe('pink');
+        expect(rowHeaderExt.headerStyle.fontSize).toBe(9);
+        expect(rowHeaderExt.headerStyle.borderColor).toBe('rgb(217,217,217)');
+        expect(rowHeaderExt.rowsCfg.length).toBe(10);
 
         vi.advanceTimersByTime(16); // mock time pass by
         expect(spy).toHaveBeenCalled();

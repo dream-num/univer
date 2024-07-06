@@ -54,7 +54,7 @@ export default {
         },
     },
     CHOOSE: {
-        description: '从值的列表中选择值',
+        description: '从值的列表中选择值。',
         abstract: '从值的列表中选择值',
         links: [
             {
@@ -63,8 +63,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            indexNum: { name: '索引', detail: '用于指定所选定的数值参数。 index_num 必须是介于 1 到 254 之间的数字，或是包含 1 到 254 之间的数字的公式或单元格引用。\n如果 index_num 为 1，则 CHOOSE 返回 value1；如果为 2，则 CHOOSE 返回 value2，以此类推。\n如果 index_num 小于 1 或大于列表中最后一个值的索引号，则 CHOOSE 返回 #VALUE! 错误值。\n如果 index_num 为小数，则在使用前将被截尾取整。' },
+            value1: { name: '值 1', detail: 'CHOOSE 将根据 index_num 从中选择一个数值或一项要执行的操作。 参数可以是数字、单元格引用、定义的名称、公式、函数或文本。' },
+            value2: { name: '值 2', detail: '1 到 254 个值参数。' },
         },
     },
     CHOOSECOLS: {

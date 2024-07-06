@@ -24,7 +24,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import type { IEditorInputConfig } from '@univerjs/engine-render';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 
@@ -45,8 +45,8 @@ export class IMEInputController extends Disposable {
     private _onEndSubscription: Nullable<Subscription>;
 
     constructor(
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(IMEInputManagerService) private readonly _imeInputManagerService: IMEInputManagerService,
         @ICommandService private readonly _commandService: ICommandService
@@ -101,9 +101,7 @@ export class IMEInputController extends Disposable {
     }
 
     private async _updateContent(config: Nullable<IEditorInputConfig>, isUpdate: boolean) {
-        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
-
-        if (config == null || skeleton == null) {
+        if (config == null) {
             return;
         }
 
@@ -111,6 +109,9 @@ export class IMEInputController extends Disposable {
         if (!documentModel) {
             return;
         }
+
+        const skeleton = this._renderManagerSrv.getRenderById(documentModel.getUnitId())
+            ?.with(DocSkeletonManagerService).getSkeleton();
 
         const { event, activeRange } = config;
 

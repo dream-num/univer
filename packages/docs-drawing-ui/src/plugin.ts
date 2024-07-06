@@ -14,41 +14,44 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
-import { DocDrawingUpdateController } from './controllers/doc-drawing-update.controller';
+import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
 
-const PLUGIN_NAME = 'Docs_Drawing_UI_PLUGIN';
+const PLUGIN_NAME = 'DOCS_DRAWING_UI_PLUGIN';
 
+@DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin)
 export class UniverDocsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
     static override pluginName = PLUGIN_NAME;
+
     constructor(
-        config: undefined,
+        _config: undefined,
         @Inject(Injector) protected _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService
     ) {
         super();
     }
 
-    override onStarting(_injector: Injector): void {
-        this._initDependencies(_injector);
-    }
-
-    private _initDependencies(injector: Injector): void {
+    override onStarting(injector: Injector): void {
         const dependencies: Dependency[] = [
-
-            // services
-
-            // controllers
             [DocDrawingUIController],
-            [DocDrawingUpdateController],
             [DocDrawingPopupMenuController],
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));
+    }
+
+    override onReady(): void {
+        ([
+            DocDrawingUpdateRenderController,
+        ]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
     }
 }

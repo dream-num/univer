@@ -23,7 +23,7 @@ import { RangeProtectionRefRangeService, RangeProtectionRenderModel, RangeProtec
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { DesktopMenuService, DesktopPlatformService, DesktopShortcutService, IMenuService, IPlatformService, IShortcutService } from '@univerjs/ui';
+import { IMenuService, IPlatformService, IShortcutService, MenuService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 
@@ -67,10 +67,10 @@ export function createMenuTestBed() {
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([IPlatformService, { useClass: DesktopPlatformService }]);
+            injector.add([IPlatformService, { useClass: PlatformService }]);
             injector.add([SelectionManagerService]);
-            injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
-            injector.add([IMenuService, { useClass: DesktopMenuService }]);
+            injector.add([IShortcutService, { useClass: ShortcutService }]);
+            injector.add([IMenuService, { useClass: MenuService }]);
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetPermissionService]);
             injector.add([WorksheetProtectionPointModel]);

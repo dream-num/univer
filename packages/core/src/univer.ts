@@ -78,7 +78,6 @@ export class Univer {
         logLevel && this._injector.get(ILogService).setLogLevel(logLevel);
 
         this._init(injector);
-        const _a = this._pluginService;
     }
 
     __getInjector(): Injector {
@@ -174,7 +173,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [IUniverInstanceService, { useClass: UniverInstanceService }],
         [IPermissionService, { useClass: PermissionService }],
         [ILogService, { useClass: DesktopLogService, lazy: true }],
-        [ICommandService, { useClass: CommandService, lazy: true }],
+        [ICommandService, { useClass: CommandService }],
         [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
         [IConfigService, { useClass: ConfigService }],
         [IContextService, { useClass: ContextService }],

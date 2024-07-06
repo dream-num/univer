@@ -94,7 +94,7 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
             case 'font-weight': {
                 const MIDDLE_FONT_WEIGHT = 400;
 
-                if (Number(cssValue) > MIDDLE_FONT_WEIGHT) {
+                if (Number(cssValue) > MIDDLE_FONT_WEIGHT || String(cssValue) === 'bold') {
                     docStyles.bl = BooleanNumber.TRUE;
                 }
 

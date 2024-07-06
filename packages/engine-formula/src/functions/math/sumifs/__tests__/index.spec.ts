@@ -20,9 +20,11 @@ import { ArrayValueObject, transformToValue } from '../../../../engine/value-obj
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sumifs } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test sumifs function', () => {
-    const textFunction = new Sumifs(FUNCTION_NAMES_MATH.SUMIF);
+    const testFunction = new Sumifs(FUNCTION_NAMES_MATH.SUMIF);
 
     describe('Sumifs', () => {
         it('Range and criteria', async () => {
@@ -39,8 +41,25 @@ describe('Test sumifs function', () => {
 
             const criteria = StringValueObject.create('>2');
 
-            const resultObject = textFunction.calculate(sumRange, range, criteria);
+            const resultObject = testFunction.calculate(sumRange, range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2]]);
+        });
+
+        it('Range and criteria, compare string', async () => {
+            const sumRange = ArrayValueObject.create(`{
+                1;
+                2;
+                3
+            }`);
+            const range = ArrayValueObject.create(`{
+                a;
+                b;
+                c
+            }`);
+
+            const criteria = StringValueObject.create('>2');
+            const resultObject = testFunction.calculate(sumRange, range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[0]]);
         });
 
         it('Range and array criteria', async () => {
@@ -61,7 +80,7 @@ describe('Test sumifs function', () => {
                 >4
             }`);
 
-            const resultObject = textFunction.calculate(sumRange, range, criteria);
+            const resultObject = testFunction.calculate(sumRange, range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2], [1], [0]]);
         });
 
@@ -88,7 +107,7 @@ describe('Test sumifs function', () => {
 
             const criteria2 = StringValueObject.create('<5');
 
-            const resultObject = textFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1]]);
         });
 
@@ -119,7 +138,7 @@ describe('Test sumifs function', () => {
 
             const criteria2 = NumberValueObject.create(5);
 
-            const resultObject = textFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1], [1], [0]]);
         });
 
@@ -155,8 +174,22 @@ describe('Test sumifs function', () => {
                 4
             }`);
 
-            const resultObject = textFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1], [0], [0], [0]]);
+        });
+
+        it('Includes REF error', async () => {
+            const range = ErrorValueObject.create(ErrorType.REF);
+
+            const criteria = ArrayValueObject.create(/*ts*/ `{
+                4;
+                4;
+                44;
+                444
+            }`);
+
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(resultObject.getValue()).toStrictEqual(ErrorType.REF);
         });
     });
 });

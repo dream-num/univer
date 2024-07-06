@@ -15,10 +15,9 @@
  */
 
 import { DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, LocaleService, Nullable } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
-import type { ISheetLocation } from '@univerjs/sheets';
 import { CheckboxRender } from '../widgets/checkbox-widget';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
@@ -26,6 +25,18 @@ import { CHECKBOX_FORMULA_INPUT_NAME } from '../views/formula-input';
 
 export const CHECKBOX_FORMULA_1 = 1;
 export const CHECKBOX_FORMULA_2 = 0;
+
+function getFailMessage(formula: string | undefined, localeService: LocaleService) {
+    if (Tools.isBlank(formula)) {
+        return localeService.t('dataValidation.validFail.value');
+    }
+
+    if (isFormulaString(formula)) {
+        return localeService.t('dataValidation.validFail.primitive');
+    }
+
+    return '';
+}
 
 export class CheckboxValidator extends BaseDataValidator {
     override id: string = DataValidationType.CHECKBOX;
@@ -38,31 +49,40 @@ export class CheckboxValidator extends BaseDataValidator {
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
-    override skipDefaultFontRender(rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: ISheetLocation) {
+    override skipDefaultFontRender(rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string }) {
         const { formula1, formula2 } = this.parseFormulaSync(rule, pos.unitId, pos.subUnitId);
 
         const valueStr = `${cellValue ?? ''}`;
-        return !valueStr || (valueStr === (`${formula1}`) || valueStr === `${formula2}`);
+
+        const res = !valueStr || (valueStr === (`${formula1}`) || valueStr === `${formula2}`);
+        return res;
     }
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const { formula1, formula2 } = rule;
-        const formula1Success = !Tools.isBlank(formula1);
-        const formula2Success = !Tools.isBlank(formula2);
         const isEqual = formula1 === formula2;
 
+        if (Tools.isBlank(formula1) && Tools.isBlank(formula2)) {
+            return {
+                success: true,
+            };
+        }
+
+        if (isEqual) {
+            return {
+                success: false,
+                formula1: this.localeService.t('dataValidation.validFail.checkboxEqual'),
+                formula2: this.localeService.t('dataValidation.validFail.checkboxEqual'),
+            };
+        }
+
+        const error1 = getFailMessage(formula1, this.localeService);
+        const error2 = getFailMessage(formula2, this.localeService);
+
         return {
-            success: (formula1Success && formula2Success && !isEqual) || (!formula1Success && !formula2Success),
-            formula1: !formula1Success ?
-                this.localeService.t('dataValidation.validFail.common')
-                : isEqual ?
-                    this.localeService.t('dataValidation.validFail.checkboxEqual')
-                    : '',
-            formula2: !formula2Success ?
-                this.localeService.t('dataValidation.validFail.common')
-                : isEqual ?
-                    this.localeService.t('dataValidation.validFail.checkboxEqual')
-                    : '',
+            success: (!error1 && !error2),
+            formula1: error1,
+            formula2: error2,
         };
     }
 

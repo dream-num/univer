@@ -127,6 +127,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
     buildDependencyTree(shouldBeBuildTrees: FormulaDependencyTree[] | FormulaDependencyTreeCache, dependencyTrees?: FormulaDependencyTree[]): FormulaDependencyTree[] {
         const allTrees = this.getAllTree();
         if (shouldBeBuildTrees.length === 0) {
+            this._buildReverseDependency(allTrees, dependencyTrees);
             return allTrees;
         }
         if (shouldBeBuildTrees instanceof FormulaDependencyTreeCache) {
@@ -159,10 +160,17 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 });
             }
         });
+        this._buildReverseDependency(allTrees, dependencyTrees);
+    }
 
-        // Build the reverse dependency relationship between the trees.
+    /**
+     * Build the reverse dependency relationship between the trees.
+     * @param allTrees
+     * @param dependencyTrees
+     */
+    private _buildReverseDependency(allTrees: FormulaDependencyTree[], dependencyTrees?: FormulaDependencyTree[]) {
         allTrees.forEach((tree) => {
-            dependencyTrees.forEach((dependencyTree) => {
+            dependencyTrees?.forEach((dependencyTree) => {
                 if (tree === dependencyTree || tree.children.includes(dependencyTree)) {
                     return true;
                 }

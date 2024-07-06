@@ -30,6 +30,7 @@ import type {
     ITextRun,
     ITextStyle,
     Nullable,
+    Styles,
 } from '@univerjs/core';
 import { CellValueType, CommandType, isBooleanString, isSafeNumeric, IUniverInstanceService, normalizeTextRuns, ObjectMatrix, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
@@ -157,7 +158,6 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
     type: CommandType.MUTATION,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         const { cellValue, subUnitId, unitId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -175,7 +175,6 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
         const styles = workbook.getStyles();
         const newValues = new ObjectMatrix(cellValue);
 
-        // eslint-disable-next-line complexity
         newValues.forValue((row, col, newVal) => {
             // clear all
             if (!newVal) {
@@ -218,39 +217,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
                 // handle style
                 if (newVal.s !== undefined) {
-                    // use null to clear style
-                    const oldStyle = styles.getStyleByCell(oldVal);
-
-                    if (oldStyle == null) {
-                        // clear
-                        delete oldVal.s;
-                    }
-
-                    if (typeof newVal.s === 'string') {
-                        newVal.s = styles.get(newVal.s);
-                    }
-
-                    // set style
-                    const merge = mergeStyle(oldStyle, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
-
-                    // then remove null
-                    merge && Tools.removeNull(merge);
-
-                    if (Tools.isEmptyObject(merge)) {
-                        delete oldVal.s;
-                    } else {
-                        oldVal.s = styles.setValue(merge);
-                    }
-
-                    const newValueStream = newVal.v ? `${newVal.v}\r\n` : '';
-                    // Only need to copy newValue.s to oldValue.p when you modify the cell style, not when you modify the cell value.
-                    if (!newVal.p && oldVal.p) {
-                        if (newValueStream && newValueStream !== oldVal.p.body?.dataStream) {
-                            delete oldVal.p;
-                        } else {
-                            mergeRichTextStyle(oldVal.p, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
-                        }
-                    }
+                    handleStyle(styles, oldVal, newVal);
                 }
 
                 if (newVal.custom !== undefined) {
@@ -264,6 +231,42 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
         return true;
     },
 };
+
+function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData) {
+    // use null to clear style
+    const oldStyle = styles.getStyleByCell(oldVal);
+
+    if (oldStyle == null) {
+        // clear
+        delete oldVal.s;
+    }
+
+    if (typeof newVal.s === 'string') {
+        newVal.s = styles.get(newVal.s);
+    }
+
+    // set style
+    const merge = mergeStyle(oldStyle, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+
+    // then remove null
+    merge && Tools.removeNull(merge);
+
+    if (Tools.isEmptyObject(merge)) {
+        delete oldVal.s;
+    } else {
+        oldVal.s = styles.setValue(merge);
+    }
+
+    const newValueStream = newVal.v ? `${newVal.v}\r\n` : '';
+    // Only need to copy newValue.s to oldValue.p when you modify the cell style, not when you modify the cell value.
+    if (!newVal.p && oldVal.p) {
+        if (newValueStream && newValueStream !== oldVal.p.body?.dataStream) {
+            delete oldVal.p;
+        } else {
+            mergeRichTextStyle(oldVal.p, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+        }
+    }
+}
 
 /**
  * Get the correct type after setting values to a cell.

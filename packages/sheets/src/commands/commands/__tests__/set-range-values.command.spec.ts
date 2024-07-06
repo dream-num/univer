@@ -51,6 +51,12 @@ const getTestWorkbookDataDemo = (): IWorkbookData => ({
                     1: {
                         v: 'A2',
                     },
+                    2: {
+                        s: 's5',
+                    },
+                    3: {
+                        s: 's5',
+                    },
                 },
                 1: {},
                 2: {
@@ -94,6 +100,11 @@ const getTestWorkbookDataDemo = (): IWorkbookData => ({
         s2: { bl: 0 },
         s3: { bl: 1 },
         s4: { fs: 12 },
+        s5: {
+            n: {
+                pattern: '@@@', // text
+            },
+        },
     },
 });
 
@@ -696,6 +707,27 @@ describe('Test set range values commands', () => {
                     },
                 })).toBeTruthy();
                 expect(getValue()?.p).toBeTruthy();
+            });
+
+            it('set value when origin cell has text number format', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 2: { v: '01' }, 3: { v: '0.20' }, 4: { v: '001', t: CellValueType.FORCE_STRING } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+                expect(getValues(0, 2, 0, 3)).toStrictEqual([[{ s: 's2', v: '01' }, { s: 's2', v: '0.20' }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 2, 0, 3)).toStrictEqual([[{ s: 's2' }, { s: 's2' }]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValues(0, 2, 0, 3)).toStrictEqual([[{ s: 's2', v: '01' }, { s: 's2', v: '0.20' }]]);
             });
         });
 

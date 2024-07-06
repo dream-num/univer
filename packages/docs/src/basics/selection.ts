@@ -98,16 +98,6 @@ export function getInsertSelection(selection: ITextRange, body: IDocumentBody): 
             startOffset -= 1;
         }
 
-        // while (body.dataStream[endOffset - 1] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
-        //     endOffset -= 1;
-        //     startOffset -= 1;
-        // }
-
-        // while (body.dataStream[endOffset] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
-        //     endOffset += 1;
-        //     startOffset += 1;
-        // }
-
         return {
             startOffset,
             endOffset,

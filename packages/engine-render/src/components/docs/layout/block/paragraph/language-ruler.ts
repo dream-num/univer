@@ -28,7 +28,7 @@ import type { DocumentViewModel } from '../../../view-model/document-view-model'
 export function otherHandler(
     index: number,
     charArray: string,
-    bodyModel: DocumentViewModel,
+    viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
@@ -43,7 +43,7 @@ export function otherHandler(
             break;
         }
 
-        const config = getFontCreateConfig(index + i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+        const config = getFontCreateConfig(index + i, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
         const glyph = createSkeletonLetterGlyph(newChar, config);
 
         glyphGroup.push(glyph);
@@ -59,13 +59,13 @@ export function otherHandler(
 export function ArabicHandler(
     index: number,
     charArray: string,
-    bodyModel: DocumentViewModel,
+    viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
 ) {
     // 组合阿拉伯语的词组
-    const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+    const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     const glyph = [];
     let step = 0;
 
@@ -88,12 +88,12 @@ export function ArabicHandler(
 export function emojiHandler(
     index: number,
     charArray: string,
-    bodyModel: DocumentViewModel,
+    viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
 ) {
-    const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+    const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     const match = charArray.match(EMOJI_REG);
 
     return {
@@ -105,13 +105,13 @@ export function emojiHandler(
 export function TibetanHandler(
     index: number,
     charArray: string,
-    bodyModel: DocumentViewModel,
+    viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
 ) {
     // 组合藏语词组
-    const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+    const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
     const glyph = [];
     let step = 0;
     for (let i = 0; i < charArray.length; i++) {

@@ -52,10 +52,9 @@ export function cursorConvertToTextRange(
     docSkeleton: DocumentSkeleton,
     document: Documents
 ): Nullable<TextRange> {
-    const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE } = range;
-
-    const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset);
-    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset) : null;
+    const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE, segmentId = '', segmentPage } = range;
+    const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
+    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage) : null;
 
     const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style);
 
@@ -79,6 +78,28 @@ export function getAnchorBounding(pointsGroup: IPoint[][]) {
         width: endX - startX,
         height: endY - startY,
     };
+}
+
+export function getLineBounding(pointsGroup: IPoint[][]) {
+    return pointsGroup.map((line) => {
+        let xMin = Infinity;
+        let xMax = -Infinity;
+        let yMin = Infinity;
+        let yMax = -Infinity;
+        line.forEach((point) => {
+            xMin = Math.min(point.x, xMin);
+            xMax = Math.max(point.x, xMax);
+
+            yMax = Math.max(point.y, yMax);
+            yMin = Math.min(point.y, yMin);
+        });
+        return {
+            left: xMin,
+            right: xMax,
+            top: yMin,
+            bottom: yMax,
+        };
+    });
 }
 
 export class TextRange {
@@ -379,7 +400,7 @@ export class TextRange {
             return;
         }
 
-        const OPACITY = 0.2;
+        const OPACITY = 0.3;
         const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
             pointsGroup,
             fill: this.style?.fill || getColor(COLORS.black, OPACITY),

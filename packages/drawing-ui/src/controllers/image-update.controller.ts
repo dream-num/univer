@@ -198,8 +198,9 @@ export class ImageUpdateController extends Disposable {
         (params).forEach(async (param) => {
             const { unitId, subUnitId, drawingId } = param;
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+            const currentSubUnitId = getCurrentUnitInfo(this._currentUniverService)?.subUnitId;
 
-            if (renderObject == null) {
+            if (renderObject == null || currentSubUnitId !== subUnitId) {
                 return;
             }
 

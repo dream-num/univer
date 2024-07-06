@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
-import { ICommandService, IContextService, RxDisposable } from '@univerjs/core';
+import { ICommandService, RxDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -24,9 +24,9 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import { merge, takeUntil } from 'rxjs';
-import { IEditorService, ILayoutService, IRangeSelectorService } from '@univerjs/ui';
+import { IRangeSelectorService } from '@univerjs/ui';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
@@ -37,12 +37,8 @@ import { getSheetObject } from '../utils/component-tools';
 export class EditorBridgeRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @ILayoutService private readonly _layoutService: ILayoutService,
-        @IEditorService private readonly _editorService: IEditorService,
-        @IContextService private readonly _contextService: IContextService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
     ) {

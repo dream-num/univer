@@ -27,12 +27,17 @@ export const SelectAllOperation: ICommand<ISelectAllOperationParams> = {
     handler: async (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const activeTextRange = textSelectionManagerService.getActiveRange();
+        if (docDataModel == null || activeTextRange == null) {
+            return false;
+        }
 
-        const currentDoc = univerInstanceService.getCurrentUniverDocInstance();
-        if (!currentDoc) return false;
-
-        const prevBody = currentDoc.getSnapshot().body;
-        if (prevBody == null) return false;
+        const { segmentId } = activeTextRange;
+        const prevBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getSnapshot().body;
+        if (prevBody == null) {
+            return false;
+        }
 
         const textRanges = [
             {

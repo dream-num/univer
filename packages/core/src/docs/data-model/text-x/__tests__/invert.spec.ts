@@ -198,6 +198,7 @@ describe('test TextX static methods invert and makeInvertible', () => {
                         bl: BooleanNumber.TRUE,
                     },
                 }],
+                customRanges: [],
                 customDecorations: [],
             },
             coverType: UpdateDocsAttributeType.COVER,

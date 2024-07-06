@@ -1022,6 +1022,11 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
+            // ATAN2(y, x) calculates the angle of the point (x, y) relative to the positive x-axis. When x and y are both 0, the point is actually the origin itself, and there is no concept of the angle "starting from" the origin to the origin.
+            if (currentValue === 0 && value === 0) {
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            }
+
             const result = Math.atan2(currentValue, value);
 
             if (!Number.isFinite(result)) {

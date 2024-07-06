@@ -62,10 +62,7 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
         }
 
         textX.delete(queryLen);
-
-        const actions = textX.serialize();
-
-        documentDataModel.apply(jsonX.editOp(actions));
+        documentDataModel.apply(jsonX.editOp(textX.serialize()));
     }
 
     const newBody = documentDataModel.getBody()!;

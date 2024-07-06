@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides-ui",
-    "version": "0.1.17",
+    "version": "0.2.0",
     "private": false,
     "description": "Univer normal ui-plugin-slides",
     "author": "DreamNum <developer@univer.ai>",
@@ -66,6 +66,7 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*",

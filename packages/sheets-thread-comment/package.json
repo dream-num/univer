@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-thread-comment",
-    "version": "0.1.17",
+    "version": "0.2.0",
     "private": false,
     "description": "Univer thread comment plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -74,16 +74,14 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.58",
-        "@univerjs/sheets-thread-comment-base": "workspace:*",
-        "@univerjs/thread-comment": "workspace:*",
-        "@univerjs/thread-comment-ui": "workspace:*"
+        "@univerjs/icons": "^0.1.58"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/shared": "workspace:*",
+        "@univerjs/sheets-thread-comment-base": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

@@ -17,11 +17,13 @@
 import type { SlideDataModel } from '@univerjs/core';
 import clsx from 'clsx';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Scrollbar } from '@univerjs/design';
 import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useObservable } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { CanvasView } from '@univerjs/slides';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
 import { SetSlidePageThumbOperation } from '../../commands/operations/set-thumb.operation';
 import styles from './index.module.less';
@@ -34,6 +36,7 @@ export function SlideSideBar() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const canvasView = useDependency(CanvasView);
 
     const slideBarRef = useRef<HTMLDivElement>(null);
     const currentSlide = useObservable(
@@ -52,10 +55,18 @@ export function SlideSideBar() {
     const slideList = pageOrder.map((id) => pages[id]);
 
     const [divRefs, setDivRefs] = useState<RefObject<HTMLDivElement>[]>([]);
+    const [activatePageId, setActivatePageId] = useState<string | null>(pageOrder[0]);
 
     useEffect(() => {
         setDivRefs(slideList.map((_) => React.createRef()));
-    }, [slideList.length]);
+    }, [slideList]);
+
+    useEffect(() => {
+        canvasView.activePageId$.subscribe((id) => {
+            setActivatePageId(id);
+        });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         divRefs.forEach((ref, index) => {
@@ -76,23 +87,25 @@ export function SlideSideBar() {
 
     return (
         <div className={styles.slideBar} ref={slideBarRef}>
-            <div className={styles.slideBarContent}>
-                {slideList.map((item, index) => (
-                    <div
-                        key={index}
-                        className={clsx(styles.slideBarItem, {
-                            [styles.slideBarItemActive]: false, // TODO: If the slide is active, add the class slideBarItemActive
-                        })}
-                        onClick={() => activatePage(item.id)}
-                    >
-                        <span>{index + 1}</span>
-                        <div ref={divRefs[index]} className={styles.slideBarBox} />
-                    </div>
-                ))}
-            </div>
-            {/* <div className={styles.slideAddButton}>
+            <Scrollbar>
+                <div className={styles.slideBarContent}>
+                    {slideList.map((item, index) => (
+                        <div
+                            key={item.id}
+                            className={clsx(styles.slideBarItem, {
+                                [styles.slideBarItemActive]: item.id === activatePageId,
+                            })}
+                            onClick={() => activatePage(item.id)}
+                        >
+                            <span>{index + 1}</span>
+                            <div ref={divRefs[index]} className={styles.slideBarBox} />
+                        </div>
+                    ))}
+                </div>
+                {/* <div className={styles.slideAddButton}>
                     <Button onClick={addSlide}>+</Button>
                 </div> */}
+            </Scrollbar>
         </div>
     );
 }

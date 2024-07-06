@@ -31,7 +31,6 @@ import {
 } from '@univerjs/engine-formula';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetInterceptorService } from '@univerjs/sheets';
 import {
     IEditorBridgeService,
     ISheetSelectionRenderService,
@@ -50,8 +49,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._initInterceptorEditorStart();

@@ -387,4 +387,31 @@ export class SheetDrawingUpdateController extends Disposable {
             })
         );
     }
+
+    private _drawingAddListener() {
+        this.disposeWithMe(
+            this._sheetDrawingService.add$.subscribe((params) => {
+                this._registerDrawing(params);
+            })
+        );
+    }
+
+    private _registerDrawing(params: IDrawingSearch[]) {
+        (params).forEach((param) => {
+            const drawingParam = this._sheetDrawingService.getDrawingByParam(param) as ISheetDrawing;
+
+            if (drawingParam == null) {
+                return;
+            }
+
+            const { sheetTransform } = drawingParam;
+
+            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+        });
+
+        const unitId = params[0].unitId;
+
+        this._drawingManagerService.registerDrawingData(unitId, this._sheetDrawingService.getDrawingDataForUnit(unitId));
+        this._drawingManagerService.initializeNotification(unitId);
+    }
 }

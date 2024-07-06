@@ -62,6 +62,7 @@ import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
 import { getCustomDecorationStyle } from './style/custom-decoration';
+import { getCustomRangeStyle } from './style/custom-range';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -737,7 +738,7 @@ export function getFontConfigFromLastGlyph(
 
 export function getFontCreateConfig(
     index: number,
-    bodyModel: DocumentViewModel,
+    viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
@@ -758,22 +759,26 @@ export function getFontCreateConfig(
     } = sectionBreakConfig;
     const { isRenderStyle } = renderConfig;
     const { startIndex } = paragraphNode;
+
     const textRun = isRenderStyle === BooleanNumber.FALSE
         ? { ts: {}, st: 0, ed: 0 }
-        : bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
-    const customDecoration = bodyModel.getCustomDecoration(index + startIndex);
+        : viewModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
+    const customDecoration = viewModel.getCustomDecoration(index + startIndex);
     const showCustomDecoration = customDecoration && (customDecoration.show !== false);
     const customDecorationStyle = showCustomDecoration ? getCustomDecorationStyle(customDecoration) : null;
-
+    const customRange = viewModel.getCustomRange(index + startIndex);
+    const showCustomRange = customRange && (customRange.show !== false);
+    const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
+    const hasAddonStyle = showCustomRange || showCustomDecoration;
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
-    if (cache && !customDecoration) {
+    if (cache && !hasAddonStyle) {
         return cache;
     }
 
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
-    textStyle = { ...documentTextStyle, ...textStyle, ...customDecorationStyle };
+    textStyle = { ...documentTextStyle, ...textStyle, ...customDecorationStyle, ...customRangeStyle };
 
     const fontStyle = getFontStyleString(textStyle, localeService);
 
@@ -793,7 +798,7 @@ export function getFontCreateConfig(
         pageWidth,
     };
 
-    if (!showCustomDecoration) {
+    if (!hasAddonStyle) {
         fontCreateConfigCache.setValue(st, ed, result);
     }
 
@@ -884,7 +889,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         firstPageHeaderId: global_firstPageHeaderId,
         firstPageFooterId: global_firstPageFooterId,
         useFirstPageHeaderFooter: global_useFirstPageHeaderFooter,
-        useEvenPageHeaderFooter: global_useEvenPageHeaderFooter,
+        evenAndOddHeaders: global_evenAndOddHeaders,
 
         marginTop: global_marginTop = 0,
         marginBottom: global_marginBottom = 0,
@@ -924,7 +929,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         firstPageHeaderId = global_firstPageHeaderId,
         firstPageFooterId = global_firstPageFooterId,
         useFirstPageHeaderFooter = global_useFirstPageHeaderFooter,
-        useEvenPageHeaderFooter = global_useEvenPageHeaderFooter,
+        evenAndOddHeaders = global_evenAndOddHeaders,
 
         columnProperties = [],
         columnSeparatorType = ColumnSeparatorType.NONE,
@@ -963,7 +968,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         footerIds,
 
         useFirstPageHeaderFooter,
-        useEvenPageHeaderFooter,
+        evenAndOddHeaders,
 
         columnProperties,
         columnSeparatorType,

@@ -24,6 +24,8 @@ import { BehaviorSubject } from 'rxjs';
 export interface IPopup extends Pick<IRectPopupProps, 'closeOnSelfTarget' | 'direction' | 'excludeOutside' | 'onClickOutside' > {
     anchorRect: IBoundRectNoAngle;
     anchorRect$: Observable<IBoundRectNoAngle>;
+    excludeRects?: IBoundRectNoAngle[];
+    excludeRects$?: Observable<IBoundRectNoAngle[]>;
     componentKey: string;
 
     unitId: string;

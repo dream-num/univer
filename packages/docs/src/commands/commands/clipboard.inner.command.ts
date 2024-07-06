@@ -39,6 +39,7 @@ import type { IRichTextEditingMutationParams } from '../mutations/core-editing.m
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
 import { getDeleteSelection } from '../../basics/selection';
+import { getRichTextEditPath } from '../util';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
@@ -49,11 +50,11 @@ export interface IInnerPasteCommandParams {
 // Actually, the command is to handle paste event.
 export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',
-
     type: CommandType.COMMAND,
 
     handler: async (accessor, params: IInnerPasteCommandParams) => {
-        const { segmentId, body, textRanges } = params;
+        const { segmentId, textRanges } = params;
+        const body = params.body;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -63,13 +64,13 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return false;
         }
 
-        const docsModel = univerInstanceService.getCurrentUniverDocInstance();
-        const originBody = docsModel?.getBody();
-        if (!docsModel || !originBody) {
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        if (docDataModel == null || originBody == null) {
             return false;
         }
 
-        const unitId = docsModel.getUnitId();
+        const unitId = docDataModel.getUnitId();
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -81,7 +82,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         };
 
         const memoryCursor = new MemoryCursor();
-
         memoryCursor.reset();
 
         const textX = new TextX();
@@ -101,11 +101,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             } else {
                 const { dos } = getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor, originBody);
                 textX.push(...dos);
-                // doMutation.params.textRanges = [{
-                //     startOffset: cursor + body.dataStream.length,
-                //     endOffset: cursor + body.dataStream.length,
-                //     collapsed,
-                // }];
             }
 
             textX.push({
@@ -120,7 +115,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -158,9 +154,9 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             return false;
         }
 
-        const documentModel = univerInstanceService.getUniverDocInstance(unitId);
-        const originBody = getDocsUpdateBody(documentModel!.getSnapshot(), segmentId);
-        if (originBody == null) {
+        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const originBody = getDocsUpdateBody(docDataModel!.getSnapshot(), segmentId);
+        if (docDataModel == null || originBody == null) {
             return false;
         }
 
@@ -199,7 +195,8 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -265,7 +262,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
         retainPoints.add(paragraphIndex);
     }
 
-    const sortedRetains = [...retainPoints].sort();
+    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
 
     let cursor = textStart;
     sortedRetains.forEach((pos) => {

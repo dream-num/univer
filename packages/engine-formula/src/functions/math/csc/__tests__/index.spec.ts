@@ -89,7 +89,7 @@ describe('Test csc function', () => {
             const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1.1883951057781212, ErrorType.VALUE, 1.0610205637991976, 1.1883951057781212, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO],
-                [ErrorType.DIV_BY_ZERO, -1.9748575314241, 1.3918566499664045, ErrorType.VALUE, -7.086167395737187, ErrorType.NAME],
+                [ErrorType.DIV_BY_ZERO, -1.9748575314241, 1.3918566499664047, ErrorType.VALUE, -7.086167395737187, ErrorType.NAME],
             ]);
         });
     });

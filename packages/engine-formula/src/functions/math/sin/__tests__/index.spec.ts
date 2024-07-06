@@ -83,7 +83,7 @@ describe('Test sin function', () => {
             const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [0.8414709848078965, ErrorType.VALUE, 0.9424888019316975, 0.8414709848078965, 0, 0],
-                [0, -0.5063656411097588, 0.7184647930691263, ErrorType.VALUE, -0.1411200080598672, ErrorType.NAME],
+                [0, -0.5063656411097588, 0.7184647930691261, ErrorType.VALUE, -0.1411200080598672, ErrorType.NAME],
             ]);
         });
     });

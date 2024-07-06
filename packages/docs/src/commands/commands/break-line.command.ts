@@ -63,18 +63,17 @@ export const BreakLineCommand: ICommand = {
         if (activeRange == null) {
             return false;
         }
-
+        const { segmentId } = activeRange;
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getBody();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (!docDataModel || !body) {
             return false;
         }
 
         const unitId = docDataModel.getUnitId();
         const { startOffset, endOffset } = getInsertSelection(activeRange, body);
-        const { segmentId } = activeRange;
 
-        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
+        const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
         // line breaks to 2
         if (prevParagraph && prevParagraph.startIndex > endOffset) {

@@ -19,6 +19,7 @@ import type {
     ICommandInfo,
     IDisposable,
     IInterceptor,
+    IRange,
     IUndoRedoCommandInfosByInterceptor,
     Nullable,
     Workbook,
@@ -43,6 +44,11 @@ export interface ICommandInterceptor {
     getMutations(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor;
 }
 
+export interface ICommandInterceptorOnlyWithRanges {
+    priority?: number;
+    getMutations(ranges: IRange[]): IUndoRedoCommandInfosByInterceptor;
+}
+
 /**
  * This class expose methods for sheet features to inject code to sheet underlying logic.
  *
@@ -52,6 +58,7 @@ export interface ICommandInterceptor {
 export class SheetInterceptorService extends Disposable {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
     private _commandInterceptors: ICommandInterceptor[] = [];
+    private _commandRangesInterceptors: ICommandInterceptorOnlyWithRanges[] = [];
 
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
@@ -102,13 +109,26 @@ export class SheetInterceptorService extends Disposable {
         return this.disposeWithMe(toDisposable(() => remove(this._commandInterceptors, interceptor)));
     }
 
+    interceptRangesCommand(interceptor: ICommandInterceptorOnlyWithRanges): IDisposable {
+        if (this._commandRangesInterceptors.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+
+        this._commandRangesInterceptors.push(interceptor);
+        this._commandRangesInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._commandRangesInterceptors, interceptor)));
+    }
+
     /**
      * When command is executing, call this method to gether undo redo mutations from upper features.
      * @param command
      * @returns
      */
-    onCommandExecute(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
-        const infos = this._commandInterceptors.map((i) => i.getMutations(command));
+
+    onCommandExecute(info: ICommandInfo | IRange[]): IUndoRedoCommandInfosByInterceptor {
+        const isCommandInfo = this._isCommandInfo(info);
+        const infos = isCommandInfo ? this._commandInterceptors.map((i) => i.getMutations(info)) : this._commandRangesInterceptors.map((i) => i.getMutations(info));
 
         return {
             preUndos: infos.map((i) => i.preUndos ?? []).flat(),
@@ -216,6 +236,10 @@ export class SheetInterceptorService extends Disposable {
             disposable.dispose();
             this._worksheetDisposables.delete(disposableId);
         }
+    }
+
+    private _isCommandInfo(info: ICommandInfo | IRange[]): info is ICommandInfo {
+        return !!(info as ICommandInfo).id;
     }
 }
 

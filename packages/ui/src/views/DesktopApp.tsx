@@ -16,11 +16,9 @@
 
 import { LocaleService, ThemeService } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
-import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
 import { BuiltInUIPart } from '../services/parts/parts.service';
@@ -156,14 +154,6 @@ export function DesktopApp(props: IUniverAppProps) {
             <ComponentContainer key="global" components={globalComponents} />
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
             {contextMenu && <DesktopContextMenu />}
-            <FloatingContainer />
         </ConfigProvider>
     );
-}
-
-function FloatingContainer() {
-    const { mountContainer } = useContext(ConfigContext);
-    const floatingComponents = useComponentsOfPart(BuiltInUIPart.FLOATING);
-
-    return createPortal(<ComponentContainer key="floating" components={floatingComponents} />, mountContainer!);
 }

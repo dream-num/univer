@@ -46,7 +46,7 @@ export async function generateTemporarySnap(
     }> {
     const blockMeta: { [key: string]: ISheetBlockMeta } = {};
 
-        // Deal with worksheets and their blocks.
+    // Deal with worksheets and their blocks.
     const sheetMetas: { [key: string]: IWorksheetMeta } = {};
     const blocksSaveSuccess = await Promise.all(
         Object.entries(workbook.sheets).map(async ([sheetID, worksheet]) => {
@@ -61,7 +61,7 @@ export async function generateTemporarySnap(
 
             sheetMetas[sheetID] = sheetMeta;
 
-                // Trigger RPC and store the result in sheetBlocks.
+            // Trigger RPC and store the result in sheetBlocks.
             if (worksheet.cellData) {
                 const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.rowCount!);
                 const responses = await Promise.all(
@@ -300,7 +300,7 @@ export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentD
         throw new Error('transformSnapshotToDocumentData(): snapshot.doc is undefined.');
     }
 
-    const { unitID, rev, name, originalMeta } = documentMeta;
+    const { unitID, rev, name, originalMeta, resources = [] } = documentMeta;
 
     const { body, documentStyle = {}, settings = {}, drawings = {}, drawingsOrder = [] } = decodeDocOriginalMeta(originalMeta);
 
@@ -314,6 +314,7 @@ export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentD
         settings,
         drawings,
         drawingsOrder,
+        resources,
     };
 
     return documentData;

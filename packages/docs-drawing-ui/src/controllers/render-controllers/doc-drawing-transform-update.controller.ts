@@ -61,7 +61,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
             const docsComponent = mainComponent as Documents;
 
-                // TODO: @Jocs, Why NEED change skeleton here?
+            // TODO: @Jocs, Why NEED change skeleton here?
             docsComponent.changeSkeleton(documentSkeleton);
 
             this._refreshDrawing(documentSkeleton);
@@ -159,6 +159,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
+
+        // console.log('updateDrawings', skeleton.getViewModel().getDataModel(), pages, updateDrawings);
 
         if (updateDrawings.length > 0) {
             this._drawingManagerService.refreshTransform(updateDrawings);

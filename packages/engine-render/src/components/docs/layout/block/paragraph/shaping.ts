@@ -34,6 +34,7 @@ import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-e
 import { Lang } from '../../hyphenation/lang';
 import { BreakPointType } from '../../line-breaker/break';
 import { getBoundingBox } from '../../model/line';
+import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
@@ -141,6 +142,7 @@ export function shaping(
 
     // Add custom extension for linebreak.
     tabLineBreakExtension(breaker);
+    customBlockLineBreakExtension(breaker);
 
     const lang = languageDetector.detect(content);
 

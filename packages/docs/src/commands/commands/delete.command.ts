@@ -62,16 +62,14 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         if (activeRange == null || ranges == null) {
             return false;
         }
-
+        const { segmentId, style } = activeRange;
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const originBody = docDataModel?.getBody();
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (!docDataModel || !originBody) {
             return false;
         }
 
         const actualRange = getDeleteSelection(activeRange, originBody);
-
-        const { segmentId, style } = activeRange;
         const { startOffset, collapsed } = actualRange;
 
         if (!collapsed) {
@@ -79,11 +77,9 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         }
 
         const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
-        const endIndex = docDataModel
-            .getBody()
-            ?.paragraphs
+        const endIndex = originBody.paragraphs
             ?.find((p) => p.startIndex >= startIndex)?.startIndex!;
-        const body = getParagraphBody(docDataModel.getBody()!, startIndex, endIndex);
+        const body = getParagraphBody(originBody, startIndex, endIndex);
 
         const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
 
@@ -203,7 +199,7 @@ export const DeleteLeftCommand: ICommand = {
             isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
 
         if (isUpdateParagraph && collapsed) {
-            const paragraph = getParagraphByGlyph(curGlyph, docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody());
+            const paragraph = getParagraphByGlyph(curGlyph, body);
 
             if (paragraph == null) {
                 return false;

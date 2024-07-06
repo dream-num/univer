@@ -175,12 +175,31 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * Add selections for rendering.
+     * add a selection
      *
-     * in PC:init & pointerup --> emitOnEnd would call this function.
+     * in PC:init & pointerup would call this function.
      *
-     * @param selectionRange
-     * @param curCellRange
+     * init
+     * selectionController@_initSkeletonChangeListener --> selectionManagerService.add --> selectionManagerService._selectionMoveEnd$ --> this.addControlToCurrentByRangeData
+     *
+     * selectionMoveEnd$ --> this.addSelectionControlBySelectionData
+     *
+     *
+     *
+     * pointer
+     * engine@_pointerDownEvent --> spreadsheet?.onPointerDownObserve --> eventTrigger --> scene@disableEvent() --> then scene.input-manager currentObject is always scene until scene@enableEvent.
+     * engine@_pointerUpEvent --> scene.input-manager@_onPointerUp --> this._selectionMoveEnd$ --> _selectionManagerService.selectionMoveEnd$ --> this.addControlToCurrentByRangeData
+     *
+     * but in mobile, we do not call disableEvent() in eventTrigger,
+     * so pointerup --> scene.input-manager currentObject is spreadsheet --> this.eventTrigger
+     *
+     *
+     * columnHeader pointerup$ --> selectionMoveEnd$ --> selectionManagerService@setSelections -->
+     * selectionManagerService@_emitOnEnd -->
+     * _workbookSelections.selectionMoveEnd$ --> _addSelectionControlBySelectionData
+     *
+     *
+     * @param selectionData
      */
     protected _addSelectionControlBySelectionData(selection: ISelectionWithCoordAndStyle) {
         const { rangeWithCoord, primaryWithCoord } = selection;
@@ -321,11 +340,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     /**
      * get active selection control
-     * @returns
+     * @returns T extends SelectionControl
      */
-    getActiveSelectionControl(): Nullable<SelectionControl> {
+    getActiveSelectionControl<T extends SelectionControl = SelectionControl>(): Nullable<T> {
         const controls = this.getSelectionControls();
-        return controls && controls[controls.length - 1];
+        if (controls) {
+            return controls[controls.length - 1] as T;
+        }
     }
 
     endSelection() {
@@ -432,7 +453,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             !this._skipLastEnabled &&
             !this._singleSelectionEnabled;
 
-        //#region udpate selection control
+        //#region update selection control
         if (expandByShiftKey && currentCell) {
             // Perform pointer down selection.
             this._performSelectionByTwoCells(
@@ -489,7 +510,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _setupPointerMoveListener(
+    protected _setupPointerMoveListener(
         viewportMain: Nullable<Viewport>,
         activeSelectionControl: SelectionControl,
         rangeType: RANGE_TYPE,
@@ -506,6 +527,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const scene = this._scene;
         const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveStartPosX, moveStartPosY]));
+
+        // #region onPointerMove$
         // eslint-disable-next-line max-lines-per-function, complexity
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -636,6 +659,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 this._moving(newMoveOffsetX, newMoveOffsetY, activeSelectionControl, rangeType);
             });
         });
+        // #endregion
     }
 
     /** @deprecated Use the function `attachSelectionWithCoord` instead`. */

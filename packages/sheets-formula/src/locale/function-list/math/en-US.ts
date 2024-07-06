@@ -80,8 +80,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The absolute value of Number must be greater than 1.' },
         },
     },
     AGGREGATE: {
@@ -188,8 +187,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number that you want to convert. Must be an integer greater than or equal to 0 and less than 2^53.' },
+            radix: { name: 'radix', detail: 'The base radix that you want to convert the number into. Must be an integer greater than or equal to 2 and less than or equal to 36.' },
+            minLength: { name: 'min_length', detail: 'The minimum length of the returned string. Must be an integer greater than or equal to 0.' },
         },
     },
     CEILING: {
@@ -285,8 +285,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number for which you want to find the hyperbolic cosine.' },
         },
     },
     COT: {
@@ -299,8 +298,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the cotangent.' },
         },
     },
     COTH: {
@@ -313,8 +311,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number for which you want to find the hyperbolic cotangent.' },
         },
     },
     CSC: {
@@ -327,8 +324,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the cosecant.' },
         },
     },
     CSCH: {
@@ -341,8 +337,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the hyperbolic cosecant.' },
         },
     },
     DECIMAL: {
@@ -943,8 +938,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the sine.' },
         },
     },
     SINH: {
@@ -957,8 +951,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number.' },
         },
     },
     SQRT: {

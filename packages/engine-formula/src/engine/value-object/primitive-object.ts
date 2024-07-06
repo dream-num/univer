@@ -137,6 +137,10 @@ export class NullValueObject extends BaseValueObject {
         return NumberValueObject.create(0).sin();
     }
 
+    override sinh(): BaseValueObject {
+        return NumberValueObject.create(0).sinh();
+    }
+
     override asin(): BaseValueObject {
         return NumberValueObject.create(0).asin();
     }
@@ -349,6 +353,10 @@ export class BooleanValueObject extends BaseValueObject {
 
     override sin(): BaseValueObject {
         return this._convertToNumber().sin();
+    }
+
+    override sinh(): BaseValueObject {
+        return this._convertToNumber().sinh();
     }
 
     override asin(): BaseValueObject {
@@ -918,6 +926,22 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         const result = Math.sin(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return NumberValueObject.create(result);
+    }
+
+    override sinh(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.sinh(currentValue);
 
         if (!Number.isFinite(result)) {
             return ErrorValueObject.create(ErrorType.NUM);

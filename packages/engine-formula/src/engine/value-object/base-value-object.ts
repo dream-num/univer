@@ -312,6 +312,11 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
+    sinh(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
     asin(): BaseValueObject {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);

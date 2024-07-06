@@ -30,7 +30,7 @@ import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import { DocumentEditArea } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
-import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent, updateBlockIndex } from './tools';
+import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 import { createSkeletonSection } from './model/section';
 import { dealWithSection } from './block/section';
 import { createSkeletonPage } from './model/page';
@@ -790,7 +790,8 @@ export class DocumentSkeleton extends Skeleton {
             this._iteratorCount = 0;
             removeDupPages(ctx);
             updateBlockIndex(skeleton.pages);
-
+            // Calculate inline drawing position and update.
+            updateInlineDrawingCoords(ctx, skeleton.pages);
             setPageParent(skeleton.pages, skeleton);
 
             return skeleton;

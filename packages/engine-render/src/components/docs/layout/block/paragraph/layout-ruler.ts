@@ -506,6 +506,7 @@ function _lineOperator(
     const footersDrawings = skeFooters?.get(footerId)?.get(pageWidth)?.skeDrawings;
 
     // Handle float object relative to line.
+    // FIXME: @jocs, it will not update the last line's drawings.
     if (preLine) {
         const drawingsInLine = _getCustomBlockIdsInLine(preLine);
         if (drawingsInLine.length > 0) {
@@ -517,12 +518,6 @@ function _lineOperator(
             if (relativeLineDrawings.length > 0) {
                 __updateAndPositionDrawings(ctx, preLine.top, preLine.lineHeight, column, relativeLineDrawings, preLine.paragraphIndex, paragraphStart);
             }
-        }
-
-        const affectInlineDrawings = ctx.paragraphConfigCache.get(preLine.paragraphIndex)?.paragraphInlineSkeDrawings;
-        // Update inline drawings after the line is layout.
-        if (affectInlineDrawings && affectInlineDrawings.size > 0) {
-            __updateInlineDrawingPosition(preLine, affectInlineDrawings, drawingAnchor?.get(paragraphIndex)?.top);
         }
     }
 
@@ -949,7 +944,7 @@ function __getLineHeight(
     };
 }
 
-function __updateInlineDrawingPosition(
+export function updateInlineDrawingPosition(
     line: IDocumentSkeletonLine,
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
     blockAnchorTop?: number

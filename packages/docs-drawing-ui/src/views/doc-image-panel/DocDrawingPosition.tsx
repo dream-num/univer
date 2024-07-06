@@ -20,7 +20,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
@@ -42,6 +42,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const textSelectionRenderService = useDependency(ITextSelectionRenderManager);
 
     const { drawings } = props;
 
@@ -99,6 +100,14 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const [followTextMove, setFollowTextMove] = useState(true);
     const [showPanel, setShowPanel] = useState(true);
 
+    function onFocus() {
+        textSelectionRenderService.blur();
+    }
+
+    function onBlur() {
+        textSelectionRenderService.focus();
+    }
+
     function handlePositionChange(
         direction: 'positionH' | 'positionV',
         value: IObjectPositionH | IObjectPositionV
@@ -131,6 +140,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                 value,
             })),
         });
+
+        textSelectionRenderService.blur();
 
         transformer.refreshControls();
     }
@@ -324,7 +335,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             subscription.unsubscribe();
             mutationListener.dispose();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

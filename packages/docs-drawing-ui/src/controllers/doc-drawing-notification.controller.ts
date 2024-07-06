@@ -48,6 +48,14 @@ function getAddOrRemoveDrawings(actions: JSONXActions): Nullable<IAddOrRemoveDra
         return null;
     }
 
+    if (typeof drawingsOp[1] === 'string' && typeof drawingsOp[2] !== 'object') {
+        return null;
+    }
+
+    if (Array.isArray(drawingsOp[1]) && typeof drawingsOp[1][1] !== 'object') {
+        return null;
+    }
+
     const drawings: IAddOrRemoveDrawing[] = [];
 
     if (Array.isArray(drawingsOp?.[1])) {

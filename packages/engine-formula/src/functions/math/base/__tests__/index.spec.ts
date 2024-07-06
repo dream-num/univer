@@ -22,6 +22,7 @@ import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObje
 import { ErrorType } from '../../../../basics/error-type';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test base function', () => {
     const testFunction = new Base(FUNCTION_NAMES_MATH.BASE);
@@ -102,6 +103,54 @@ describe('Test base function', () => {
             const minLength = StringValueObject.create('7');
             const result = testFunction.calculate(number, radix, minLength) as BaseValueObject;
             expect(result.getValue()).toBe(ErrorType.NAME);
+        });
+
+        it('Value is array', () => {
+            const number = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null, ErrorType.NAME],
+                ]),
+                rowCount: 1,
+                columnCount: 7,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const radix = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [0],
+                    ['100'],
+                    ['2.34'],
+                    ['test'],
+                    [-3],
+                ]),
+                rowCount: 5,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 8,
+                column: 8,
+            });
+            const minLength = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [-3, 0, 5],
+                ]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 11,
+                column: 11,
+            });
+            const result = testFunction.calculate(number, radix, minLength);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                [ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
+                [ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
+                [ErrorType.NUM, ErrorType.VALUE, '00001', ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
+                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
+                [ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
+            ]);
         });
     });
 });

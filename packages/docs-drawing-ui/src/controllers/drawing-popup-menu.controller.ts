@@ -128,6 +128,14 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                         },
                     })));
 
+                    const focusDrawings = this._drawingManagerService.getFocusDrawings();
+
+                    const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === unitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);
+
+                    if (alreadyFocused) {
+                        return;
+                    }
+
                     this._drawingManagerService.focusDrawing([{
                         unitId,
                         subUnitId,

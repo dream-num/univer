@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IDrawingSearch, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
@@ -406,7 +406,7 @@ export class SheetDrawingUpdateController extends Disposable {
 
             const { sheetTransform } = drawingParam;
 
-            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService);
         });
 
         const unitId = params[0].unitId;

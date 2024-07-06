@@ -63,7 +63,7 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
 
     private _initRenderModule() {
         [DocHyperLinkRenderController].forEach((dep) => {
-            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep);
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep as unknown as Dependency);
         });
     }
 }

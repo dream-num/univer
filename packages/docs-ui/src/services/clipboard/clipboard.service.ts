@@ -177,7 +177,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
         const activeRange = this._textSelectionManagerService.getActiveRange();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
-        const ranges = this._textSelectionManagerService.getSelections();
+        const ranges = this._textSelectionManagerService.getCurrentSelections();
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId does not exist!');
@@ -247,7 +247,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     private _getDocumentBodyInRanges(): IDocumentBody[] {
-        const ranges = this._textSelectionManagerService.getSelections();
+        const ranges = this._textSelectionManagerService.getCurrentSelections();
         const activeRange = this._textSelectionManagerService.getActiveRange();
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         const results: IDocumentBody[] = [];

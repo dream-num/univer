@@ -57,7 +57,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const { direction, range } = params;
 
         const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getSelections();
+        const ranges = textSelectionManagerService.getCurrentSelections();
 
         if (activeRange == null || ranges == null) {
             return false;

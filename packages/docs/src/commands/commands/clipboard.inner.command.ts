@@ -207,15 +207,22 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         rawActions.push(jsonX.editOp(textX.serialize(), path)!);
 
         const removedCustomBlockIds = getCustomBlockIdsInSelections(originBody, selections);
+        const drawings = docDataModel.getDrawings() ?? {};
+        const drawingOrder = docDataModel.getDrawingsOrder() ?? [];
+        const sortedRemovedCustomBlockIds = removedCustomBlockIds.sort((a, b) => {
+            if (drawingOrder.indexOf(a) - drawingOrder.indexOf(b)) {
+                return 1;
+            } else if (drawingOrder.indexOf(b) - drawingOrder.indexOf(a)) {
+                return -1;
+            }
 
-        if (removedCustomBlockIds.length > 0) {
-            const drawings = docDataModel.getDrawings() ?? {};
-            const drawingOrder = docDataModel.getDrawingsOrder() ?? [];
+            return 0;
+        });
 
-            for (const blockId of removedCustomBlockIds) {
+        if (sortedRemovedCustomBlockIds.length > 0) {
+            for (const blockId of sortedRemovedCustomBlockIds) {
                 const drawing = drawings[blockId];
                 const drawingIndex = drawingOrder.indexOf(blockId);
-
                 if (drawing == null || drawingIndex < 0) {
                     continue;
                 }
@@ -256,7 +263,7 @@ function getCustomBlockIdsInSelections(body: IDocumentBody, selections: TextRang
             const { startIndex } = customBlock;
 
             if (startIndex >= startOffset && startIndex < endOffset) {
-                customBlockIds.unshift(customBlock.blockId);
+                customBlockIds.push(customBlock.blockId);
             }
         }
     }

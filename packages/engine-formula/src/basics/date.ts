@@ -150,3 +150,102 @@ export function parseFormattedTime(value: string) {
 export function isDate(format: string) {
     return numfmt.isDate(format);
 }
+
+// Weekend is a weekend number or string that specifies when weekends occur.
+const weekendNumberMap: {
+    [index: number]: number[];
+} = {
+    1: [6, 0], // Saturday, Sunday
+    2: [0, 1], // Sunday, Monday
+    3: [1, 2], // Monday, Tuesday
+    4: [2, 3], // Tuesday, Wednesday
+    5: [3, 4], // Wednesday, Thursday
+    6: [4, 5], // Thursday, Friday
+    7: [5, 6], // Friday, Saturday
+    11: [0], // Sunday only
+    12: [1], // Monday only
+    13: [2], // Tuesday only
+    14: [3], // Wednesday only
+    15: [4], // Thursday only
+    16: [5], // Friday only
+    17: [6], // Saturday only
+};
+
+export function isValidWeekend(weekend: number | string): boolean {
+    if (typeof weekend === 'number' && weekendNumberMap[weekend]) {
+        return true;
+    }
+
+    // Weekend string values are seven characters long and each character in the string represents a day of the week, starting with Monday.
+    if (typeof weekend === 'string' && /^[0|1]{7}/.test(weekend)) {
+        return true;
+    }
+
+    return false;
+}
+
+export function getWeekendArray(weekend: number | string): number[] {
+    if (!isValidWeekend(weekend)) {
+        return [];
+    }
+
+    if (typeof weekend === 'number') {
+        return weekendNumberMap[weekend] || [];
+    }
+
+    if (typeof weekend === 'string') {
+        // 1 represents a non-workday and 0 represents a workday. Only the characters 1 and 0 are permitted in the string. Using 1111111 will always return 0.
+        const result = [];
+
+        for (let i = 1; i <= weekend.length; i++) {
+            if (`${weekend[i]}` === '1') {
+                if (i === weekend.length) {
+                    result.push(0);
+                } else {
+                    result.push(i);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    return [];
+}
+
+export function countWorkingDays(startDate: Date, endDate: Date, weekend: number | string = 1, holidays?: (Date | string)[]): number {
+    const start = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())).getTime();
+    const end = new Date(Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())).getTime();
+    const diffTime = end > start ? end - start : start - end;
+    const startTime = end > start ? start : end;
+
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const daysDiff = Math.floor(diffTime / millisecondsPerDay) + 1;
+    const weekendArray = getWeekendArray(weekend);
+
+    let workingDays = 0;
+
+    for (let i = 0; i < daysDiff; i++) {
+        const currentDate = new Date(startTime + i * millisecondsPerDay);
+
+        if (holidays && holidays.length > 0 && holidays.some((item) => {
+            if (typeof item === 'string') {
+                item = new Date(item);
+            }
+
+            return item.getFullYear() === currentDate.getFullYear() &&
+                item.getMonth() === currentDate.getMonth() &&
+                item.getDate() === currentDate.getDate();
+        })) {
+            continue;
+        }
+
+        if (weekendArray.includes(currentDate.getDay())) {
+            continue;
+        }
+
+        workingDays++;
+    }
+
+    return end > start ? workingDays : 0 - workingDays;
+}

@@ -191,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
+            endDate: { name: 'end_date', detail: 'A date that represents the end date.' },
+            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays. ' },
         },
     },
     NETWORKDAYS_INTL: {

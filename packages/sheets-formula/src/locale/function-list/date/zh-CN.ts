@@ -191,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '一个代表开始日期的日期' },
+            endDate: { name: '终止日期', detail: '一个代表终止日期的日期' },
+            holidays: { name: '休息日期', detail: '不在工作日历中的一个或多个日期所构成的可选区域' },
         },
     },
     NETWORKDAYS_INTL: {

@@ -191,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '起算日を表す日付を指定します。' },
+            endDate: { name: '終了日', detail: '対象期間の最終日を表す日付を指定します。' },
+            holidays: { name: '休日', detail: '国民の祝日や変動休日など、稼働日数の計算から除外する日付のリストを指定します。' },
         },
     },
     NETWORKDAYS_INTL: {

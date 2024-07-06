@@ -189,7 +189,7 @@ export default {
         functionParameter: {
             number: { name: '数値', detail: '変換する数値を指定します。 0 以上、2^53 未満の整数である必要があります。' },
             radix: { name: '基数', detail: ' 数値を変換する基数 (底) の数値を指定します。 2 以上、36 以下の整数である必要があります。' },
-            minLength: { name: 'Min_length', detail: '返される文字列の最小長を指定します。 0 以上の整数である必要があります。' },
+            minLength: { name: '最小の長さです', detail: '返される文字列の最小長を指定します。 0 以上の整数である必要があります。' },
         },
     },
     CEILING: {

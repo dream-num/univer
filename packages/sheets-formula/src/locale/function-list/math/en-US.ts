@@ -189,7 +189,7 @@ export default {
         functionParameter: {
             number: { name: 'number', detail: 'The number that you want to convert. Must be an integer greater than or equal to 0 and less than 2^53.' },
             radix: { name: 'radix', detail: 'The base radix that you want to convert the number into. Must be an integer greater than or equal to 2 and less than or equal to 36.' },
-            minLength: { name: 'Min_length', detail: 'The minimum length of the returned string. Must be an integer greater than or equal to 0.' },
+            minLength: { name: 'min_length', detail: 'The minimum length of the returned string. Must be an integer greater than or equal to 0.' },
         },
     },
     CEILING: {

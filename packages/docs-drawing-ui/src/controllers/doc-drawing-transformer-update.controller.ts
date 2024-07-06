@@ -16,15 +16,18 @@
 
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import {
+    COLORS,
     Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV,
     OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable, Tools,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import type { BaseObject, Documents, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
-import { DocumentEditArea, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import type { BaseObject, Documents, IDocumentSkeletonGlyph, Image, IPoint, Viewport } from '@univerjs/engine-render';
+import { DocumentEditArea, getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
+
+const INLINE_DRAWING_ANCHOR_KEY_PREFIX = '__InlineDrawingAnchor__';
 
 interface IDrawingCache {
     drawing: IDocDrawingBase;
@@ -38,6 +41,7 @@ interface IDrawingCache {
 interface IDrawingAnchor {
     offset: number;
     docTransform?: IDocDrawingPosition;
+    contentBoxPointGroup?: IPoint[][];
 }
 
 // Listen doc drawing transformer change, and update drawing data.
@@ -48,6 +52,8 @@ export class DocDrawingTransformerController extends Disposable {
     private _listenerOnImageMap = new Set();
     // Use to cache the drawings is under transforming or scaling.
     private _transformerCache: Map<string, IDrawingCache> = new Map();
+
+    private _anchorShape: Nullable<Rect>;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -109,6 +115,10 @@ export class DocDrawingTransformerController extends Disposable {
                         const documentDataModel = this._univerInstanceService.getUniverDocInstance(drawing.unitId);
                         const drawingData = documentDataModel?.getSnapshot().drawings?.[drawing.drawingId];
 
+                        if (drawingData?.layoutType === PositionedObjectLayoutType.INLINE) {
+                            (object as Image).setOpacity(0.2);
+                        }
+
                         if (drawingData != null) {
                             this._transformerCache.set(drawing.drawingId, {
                                 drawing: drawingData,
@@ -130,7 +140,7 @@ export class DocDrawingTransformerController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 transformer.changing$.subscribe((state) => {
-                    const { objects } = state;
+                    const { objects, offsetX, offsetY } = state;
 
                     if (objects.size > 1) {
                         throttleMultipleDrawingUpdate(objects);
@@ -152,6 +162,10 @@ export class DocDrawingTransformerController extends Disposable {
                         if (drawingCache && drawingCache.drawing.layoutType !== PositionedObjectLayoutType.INLINE) {
                             // throttleNonInlineMoveUpdate(drawingCache.drawing, object, true);
                         }
+
+                        if (drawingCache && drawingCache.drawing.layoutType === PositionedObjectLayoutType.INLINE && offsetX != null && offsetY != null) {
+                            this._updateInlineDrawingAnchor(drawingCache.drawing, offsetX, offsetY);
+                        }
                     }
                 })
             )
@@ -161,7 +175,24 @@ export class DocDrawingTransformerController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 transformer.changeEnd$.subscribe((state) => {
-                    const { objects } = state;
+                    const { objects, offsetX, offsetY } = state;
+
+                    for (const object of objects.values()) {
+                        const drawing = this._drawingManagerService.getDrawingOKey(object.oKey);
+                        if (drawing == null) {
+                            continue;
+                        }
+                        const drawingCache = this._transformerCache.get(drawing?.drawingId);
+
+                        if (drawingCache?.drawing.layoutType === PositionedObjectLayoutType.INLINE) {
+                            (object as Image).setOpacity(1);
+                        }
+                    }
+
+                    if (this._anchorShape) {
+                        this._anchorShape.hide();
+                    }
+
                     if (objects.size > 1) {
                         this._updateMultipleDrawingDocTransform(objects);
                     } else if (objects.size === 1) {
@@ -184,8 +215,8 @@ export class DocDrawingTransformerController extends Disposable {
 
                             if (width !== drawingCache.width || height !== drawingCache.height || angle !== drawingCache.angle) {
                                 this._updateDrawingSize(drawingCache, object);
-                            } else {
-                                this._moveInlineDrawing(drawingCache.drawing, object);
+                            } else if (offsetX != null && offsetY != null) {
+                                this._moveInlineDrawing(drawingCache.drawing, offsetX, offsetY);
                             }
                         } else if (drawingCache) {
                             // Handle non-inline drawing.
@@ -300,7 +331,21 @@ export class DocDrawingTransformerController extends Disposable {
         const anchor = this._getDrawingAnchor(drawingCache.drawing, object);
     }
 
-    private _getInlineDrawingAnchor(drawing: IDocDrawingBase, object: BaseObject): Nullable<IDrawingAnchor> {
+    private _updateInlineDrawingAnchor(drawing: IDocDrawingBase, offsetX: number, offsetY: number) {
+        if (this._transformerCache.size !== 1) {
+            return;
+        }
+
+        const { contentBoxPointGroup } = this._getInlineDrawingAnchor(drawing, offsetX, offsetY) ?? {};
+
+        if (contentBoxPointGroup == null) {
+            return;
+        }
+
+        this._createOrUpdateInlineAnchor(drawing.unitId, contentBoxPointGroup);
+    }
+
+    private _getInlineDrawingAnchor(drawing: IDocDrawingBase, offsetX: number, offsetY: number): Nullable<IDrawingAnchor> {
         const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
 
@@ -308,18 +353,22 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const { mainComponent } = currentRender;
+        const { mainComponent, scene } = currentRender;
         const documentComponent = mainComponent as Documents;
+        const activeViewport = scene.getViewports()[0];
         const {
             pageLayoutType = PageLayoutType.VERTICAL,
-            pageMarginLeft, pageMarginTop, docsLeft, docsTop,
+            pageMarginLeft, pageMarginTop,
         } = documentComponent.getOffsetConfig();
-        const { left, top } = object;
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
         let isBack = false;
         let segmentPageIndex = -1;
         const HALF = 0.5;
-        const nodeInfo = skeleton?.findNodeByCoord(Vector2.create(left - docsLeft, top - docsTop), pageLayoutType, pageMarginLeft, pageMarginTop);
+        const coord = this._getTransformCoordForDocumentOffset(documentComponent, activeViewport, offsetX, offsetY);
+        if (coord == null) {
+            return;
+        }
+        const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
         if (nodeInfo) {
             const { node, ratioX, segmentPage } = nodeInfo;
             isBack = ratioX < HALF;
@@ -345,15 +394,14 @@ export class DocDrawingTransformerController extends Disposable {
 
         const documentOffsetConfig = docObject.document.getOffsetConfig();
         const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-        const { cursorList } = convertor.getRangePointData(positionWithIsBack, positionWithIsBack);
+        const { cursorList, contentBoxPointGroup } = convertor.getRangePointData(positionWithIsBack, positionWithIsBack);
         const { startOffset } = getOneTextSelectionRange(cursorList) ?? {};
-
         if (startOffset == null) {
             return;
         }
 
         // Put drawing before the anchor.
-        return { offset: startOffset };
+        return { offset: startOffset, contentBoxPointGroup };
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -544,8 +592,8 @@ export class DocDrawingTransformerController extends Disposable {
     }
 
     // Update inline drawing when use transformer to move it.
-    private _moveInlineDrawing(drawing: IDocDrawingBase, object: BaseObject) {
-        const anchor = this._getInlineDrawingAnchor(drawing, object);
+    private _moveInlineDrawing(drawing: IDocDrawingBase, offsetX: number, offsetY: number) {
+        const anchor = this._getInlineDrawingAnchor(drawing, offsetX, offsetY);
         const { offset } = anchor ?? {};
 
         if (offset == null) {
@@ -668,6 +716,55 @@ export class DocDrawingTransformerController extends Disposable {
         const transformer = scene.getTransformerByCreate();
 
         return { scene, transformer };
+    }
+
+    private _getTransformCoordForDocumentOffset(document: Documents, viewport: Viewport, evtOffsetX: number, evtOffsetY: number) {
+        const { documentTransform } = document.getOffsetConfig();
+        const originCoord = viewport.transformVector2SceneCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+
+        if (!originCoord) {
+            return;
+        }
+
+        return documentTransform.clone().invert().applyPoint(originCoord);
+    }
+
+    private _createOrUpdateInlineAnchor(unitId: string, pointsGroup: IPoint[][]) {
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        if (currentRender == null) {
+            return;
+        }
+        const { mainComponent, scene } = currentRender;
+        const documentComponent = mainComponent as Documents;
+        const {
+            docsLeft, docsTop,
+        } = documentComponent.getOffsetConfig();
+        const bounding = getAnchorBounding(pointsGroup);
+        const { left: boundingLeft, top: boundingTop, height } = bounding;
+        const left = boundingLeft + docsLeft;
+        const top = boundingTop + docsTop;
+
+        if (this._anchorShape) {
+            this._anchorShape.transformByState({ left, top, height });
+            this._anchorShape.show();
+
+            return;
+        }
+
+        const ID_LENGTH = 6;
+
+        const anchor = new Rect(INLINE_DRAWING_ANCHOR_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
+            left,
+            top,
+            height,
+            strokeWidth: 2,
+            stroke: getColor(COLORS.darkGray, 1),
+            evented: false,
+        });
+
+        this._anchorShape = anchor;
+
+        scene.addObject(anchor, TEXT_RANGE_LAYER_INDEX);
     }
 
     private _getDocObject() {

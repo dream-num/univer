@@ -27,7 +27,7 @@ import {
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { BaseObject, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
+import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
 import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import type { DrawingTypeEnum, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
@@ -661,7 +661,7 @@ export class DrawingUpdateController extends Disposable {
 
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
-                    const drawingShape = scene.getObject(drawingShapeKey);
+                    const drawingShape = scene.getObject(drawingShapeKey) as Image;
 
                     if (drawingShape == null) {
                         return true;

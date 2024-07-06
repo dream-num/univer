@@ -17,8 +17,9 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import { Inject } from '@wendellhu/redi';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkSelectionController)
@@ -26,7 +27,8 @@ export class DocHyperLinkSelectionController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocHyperLinkPopupService) private readonly _docHyperLinkService: DocHyperLinkPopupService
+        @Inject(DocHyperLinkPopupService) private readonly _docHyperLinkService: DocHyperLinkPopupService,
+        @IRenderManagerService private readonly _renderMangerService: IRenderManagerService
     ) {
         super();
 
@@ -39,6 +41,15 @@ export class DocHyperLinkSelectionController extends Disposable {
                 if (commandInfo.id === SetTextSelectionsOperation.id) {
                     const params = commandInfo.params as ISetTextSelectionsOperationParams;
                     const { unitId, ranges } = params;
+                    const render = this._renderMangerService.getRenderById(unitId);
+                    const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
+                    const editArea = skeleton?.getViewModel().getEditArea();
+                    if (editArea !== DocumentEditArea.BODY) {
+                        this._docHyperLinkService.hideInfoPopup();
+                        this._docHyperLinkService.hideEditPopup();
+                        return;
+                    }
+
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
                     const primary = ranges[0];
                     if (primary && doc) {

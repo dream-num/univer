@@ -387,7 +387,6 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             // cancelInertiaAnimation();
             if (!_pointerScrolling) return;
             if (!viewportMain) return;
-            // console.log('spreadsheet into moving...........');
             const e = evt as IPointerEvent | IMouseEvent;
             const deltaX = -(e.offsetX - lastPointerPos.x);
             const deltaY = -(e.offsetY - lastPointerPos.y);

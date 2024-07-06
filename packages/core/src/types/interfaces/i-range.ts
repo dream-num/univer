@@ -48,6 +48,20 @@ export interface IRowRange {
     endRow: number;
 }
 
+export interface IColumnRange {
+    /**
+     * The start column (inclusive) of the range
+     * startColumn
+     */
+    startColumn: number;
+
+    /**
+     * The end column (exclusive) of the range
+     * endColumn
+     */
+    endColumn: number;
+}
+
 /**
  * Range data structure
  *
@@ -63,18 +77,7 @@ export interface IRowRange {
  *
  * means "A1:B2"
  */
-export interface IRange extends IRowRange {
-    /**
-     * The start column (inclusive) of the range
-     * startColumn
-     */
-    startColumn: number;
-
-    /**
-     * The end column (exclusive) of the range
-     * endColumn
-     */
-    endColumn: number;
+export interface IRange extends IRowRange, IColumnRange {
 
     rangeType?: RANGE_TYPE;
 

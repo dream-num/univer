@@ -16,10 +16,10 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IContextService, ILogService, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
-import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, getNormalSelectionStyle, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService, transformCellDataToSelectionData } from '@univerjs/sheets';
+import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, getNormalSelectionStyle, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -28,7 +28,7 @@ import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { checkInHeaderRanges } from '../../controllers/utils/selections-tools';
-import { BaseSelectionRenderService } from './base-selection-render.service';
+import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
 import { attachSelectionWithCoord } from './util';
 
 /**
@@ -245,43 +245,4 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     private _getSheetObject() {
         return getSheetObject(this._context.unit, this._context)!;
     }
-}
-
-export function getAllSelection(skeleton: SpreadsheetSkeleton): ISelectionWithStyle {
-    return {
-        range: {
-            startRow: 0,
-            startColumn: 0,
-            endRow: skeleton.getRowCount() - 1,
-            endColumn: skeleton.getColumnCount() - 1,
-            rangeType: RANGE_TYPE.ALL,
-        },
-        primary: getTopLeftSelection(skeleton).primary,
-        style: null,
-    };
-}
-
-export function getTopLeftSelection(skeleton: SpreadsheetSkeleton) {
-    const mergeData = skeleton.mergeData;
-    return (
-        transformCellDataToSelectionData(0, 0, mergeData) || {
-            range: {
-                startRow: 0,
-                startColumn: 0,
-                endRow: 0,
-                endColumn: 0,
-            },
-            primary: {
-                actualRow: 0,
-                actualColumn: 0,
-                startRow: 0,
-                startColumn: 0,
-                endRow: 0,
-                endColumn: 0,
-                isMerged: false,
-                isMergedMainCell: false,
-            },
-            style: null,
-        }
-    );
 }

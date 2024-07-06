@@ -87,7 +87,13 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
                     clientX = (canvasRect.width - rowHeaderWidth) / 2 + 20;
                     clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
                     break;
+                case RANGE_TYPE.ALL:
+                    clientX = range.rangeWithCoord.startX + canvasRect.left;
+                    clientY = range.rangeWithCoord.startY + canvasRect.top;
+                    break;
                 default:
+                    clientX = range.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
+                    clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
                     break;
             }
             // in case clientXY is not in screen area.

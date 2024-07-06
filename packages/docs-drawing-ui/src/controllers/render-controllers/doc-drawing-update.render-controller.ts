@@ -25,7 +25,7 @@ import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform, transformToDocDrawingPosition } from '@univerjs/docs-ui';
-import { type Documents, type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
+import { type Documents, type IRenderContext, IRenderManagerService, type IRenderModule, ITextSelectionRenderManager } from '@univerjs/engine-render';
 
 import type { IInsertImageOperationParams } from '../../commands/operations/insert-image.operation';
 import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
@@ -48,7 +48,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
     ) {
         super();
 
@@ -314,6 +315,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                     this._docDrawingService.focusDrawing(params);
                     // Need to remove text selections when focus drawings.
                     this._textSelectionManager.replaceTextRanges([]);
+                    // this._textSelectionRenderManager.blur();
 
                     if (transformer) {
                         transformer.resetProps({

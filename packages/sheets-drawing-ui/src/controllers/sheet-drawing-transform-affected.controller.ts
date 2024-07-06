@@ -258,7 +258,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         }
 
         if (newSheetTransform != null && newTransform != null) {
-            const newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
+            const newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform });
         }
 
@@ -563,7 +563,8 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         }
                     }
 
-                    const newTransform = drawingPositionToTransform({ ...sheetTransform }, this._skeletonManagerService);
+                    const newTransform = drawingPositionToTransform({ ...sheetTransform },
+                        this._selectionRenderService, this._skeletonManagerService);
                     if (newTransform != null) {
                         updateDrawings.push({
                             ...drawing,
@@ -798,7 +799,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, column: toColumn + colCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -837,7 +838,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, column: fromColumn - colCount },
                 to: { ...to, column: toColumn - colCount },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
         } else if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
             // delete drawing
             return null;
@@ -848,7 +849,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, column: toColumn - colCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -882,7 +883,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from },
                 to: { ...to, column: colStartIndex - 1, columnOffset: selectionCell.endX - selectionCell.startX },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -931,7 +932,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         row: toRow + rowCount,
                     },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -974,7 +975,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, row: fromRow - rowCount },
                 to: { ...to, row: toRow - rowCount },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
         } else if (fromRow >= rowStartIndex && toRow <= rowEndIndex) {
             // delete drawing
             return null;
@@ -985,7 +986,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, row: toRow - rowCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -1015,7 +1016,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from },
                 to: { ...to, row: rowStartIndex - 1, rowOffset: selectionCell.endY - selectionCell.startY },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -1109,7 +1110,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 ) || fromRow > endRow || fromColumn > endColumn) {
                     updateDrawings.push({
                         ...drawing,
-                        transform: drawingPositionToTransform(sheetTransform, this._skeletonManagerService),
+                        transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService),
                     });
                     break;
                 }

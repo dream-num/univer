@@ -59,11 +59,11 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._initUserActionSyncListener();
 
         this._setStyle(getRefSelectionStyle(this._themeService));
-        this._refRangeRemainLastEnabled = true; // For ref range selections, we should always remain others.
+        this._remainLastEnabled = true; // For ref range selections, we should always remain others.
     }
 
     setRemainLastEnabled(enabled: boolean): void {
-        this._refRangeRemainLastEnabled = enabled;
+        this._remainLastEnabled = enabled;
     }
 
     setSkipLastEnabled(enabled: boolean): void {

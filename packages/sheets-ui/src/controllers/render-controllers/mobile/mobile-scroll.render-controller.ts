@@ -104,7 +104,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
     private _scrollToSelectionForExpand(param: IExpandSelectionCommandParams) {
         setTimeout(() => {
-            const selection = this._selectionManagerService.getLast();
+            const selection = this._selectionManagerService.getCurrentLastSelection();
             if (selection == null) {
                 return;
             }
@@ -343,8 +343,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             }
 
             const _currentScroll: Readonly<Nullable<IScrollManagerParam>> = scrollManagerService.getCurrentScrollInfo();
-            const { unitId } = this._context;
-            const sheetId = workbook.getActiveSheet()!.getSheetId();
+            // const { unitId } = this._context;
+            // const sheetId = workbook.getActiveSheet()!.getSheetId();
             // const {
             //     sheetViewStartRow = 0,
             //     sheetViewStartColumn = 0,
@@ -515,7 +515,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
     }
 
     private _scrollToSelection(targetIsActualRowAndColumn = true) {
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (selection == null) {
             return;
         }

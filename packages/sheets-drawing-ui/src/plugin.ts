@@ -84,7 +84,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));
-        renderModules.forEach((controller) => this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
+        renderModules.forEach((controller) => this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller as unknown as Dependency));
     }
 
     private _registerRenderModules(): void {

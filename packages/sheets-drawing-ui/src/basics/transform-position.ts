@@ -18,14 +18,17 @@ import type { Nullable } from '@univerjs/core';
 import type { ITransformState } from '@univerjs/drawing';
 import { precisionTo } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
-import type { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
-export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
+export function drawingPositionToTransform(
+    position: ISheetDrawingPosition,
+    selectionRenderService: ISheetSelectionRenderService,
+    sheetSkeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
     const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = position;
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
 
-    const startSelectionCell = skeletonManagerService.attachRangeWithCoord({
+    const startSelectionCell = sheetSkeletonManagerService.attachRangeWithCoord({
         startColumn: fromColumn,
         endColumn: fromColumn,
         startRow: fromRow,
@@ -36,7 +39,7 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
         return;
     }
 
-    const endSelectionCell = skeletonManagerService.attachRangeWithCoord({
+    const endSelectionCell = sheetSkeletonManagerService.attachRangeWithCoord({
         startColumn: toColumn,
         endColumn: toColumn,
         startRow: toRow,
@@ -86,7 +89,7 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
 }
 
 // use transform and originSize convert to  ISheetDrawingPosition
-export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISelectionRenderService): Nullable<ISheetDrawingPosition> {
+export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISheetSelectionRenderService): Nullable<ISheetDrawingPosition> {
     const { left = 0, top = 0, width = 0, height = 0, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = transform;
 
     const startSelectionCell = selectionRenderService.getSelectionCellByPosition(left, top);

@@ -190,7 +190,7 @@ export class SheetDrawingUpdateController extends Disposable {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: drawingPositionToTransform(sheetTransform, this._skeletonManagerService),
+            transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService),
             sheetTransform,
         };
 
@@ -346,7 +346,7 @@ export class SheetDrawingUpdateController extends Disposable {
 
                 const newDrawing: Partial<ISheetDrawing> = {
                     ...param,
-                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._skeletonManagerService) },
+                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService) },
                     sheetTransform: { ...sheetTransform },
                 };
 

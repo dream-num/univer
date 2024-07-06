@@ -70,7 +70,7 @@ export interface ISheetSelectionRenderService {
     /** @deprecated Use the function `attachSelectionWithCoord` instead. */
     attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
-    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithMergeInfo>;
+    attachPrimaryWithCoord(primary: Nullable<Partial<ISelectionCell>>): Nullable<ISelectionCellWithMergeInfo>;
 
     getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithMergeInfo>; // drawing
 }
@@ -130,7 +130,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // The style of the selection area, including dashed lines, color, thickness, autofill, other points for modifying the range of the selection area, title highlighting, and so on, can all be customized.
     protected _selectionStyle!: ISelectionStyle;
 
-    // #region For ref range selection - we put the properties here for simplicity
+    // #region ref range selection
+    // we put the properties here for simplicity
     // Used in the formula selection feature, a new selection string is added by drawing a box with the mouse.
     protected _remainLastEnabled: boolean = false;
     protected _skipLastEnabled: boolean = false;
@@ -157,7 +158,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     ) {
         super();
         this._resetStyle();
-
+        // @ts-expect-error
         if (!window.srs) window.srs = this;
     }
 
@@ -322,8 +323,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     /**
      * Returns the selected range in the active sheet, or null if there is no active range. If multiple ranges are selected this method returns only the last selected range.
-     * TODO: 默认最后一个选区为当前激活选区，或者当前激活单元格所在选区为激活选区
-     * @returns
      */
     getActiveRange(): Nullable<IRange> {
         const controls = this.getSelectionControls();
@@ -498,8 +497,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             }
             this._moving(viewportPosX, viewportPosY, activeSelectionControl, rangeType);
         }
-
+        // #region setup moving
         this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, viewportPosX, viewportPosY);
+        // #endregion
 
         this._shortcutService.setDisable(true);
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {

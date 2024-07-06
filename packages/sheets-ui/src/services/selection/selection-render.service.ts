@@ -28,8 +28,9 @@ import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { checkInHeaderRanges } from '../../controllers/utils/selections-tools';
-import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
 import { attachSelectionWithCoord } from './util';
+
+import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
 
 /**
  * This services controls rendering of normal selections in a render unit.

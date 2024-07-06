@@ -64,6 +64,7 @@ import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
+import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -435,6 +436,17 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
         prePageStartIndex = page.ed;
     }
+}
+
+export function updateInlineDrawingCoords(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
+    lineIterator(pages, (line) => {
+        const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
+        const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(line.paragraphIndex);
+        // Update inline drawings after the line is layout.
+        if (affectInlineDrawings && affectInlineDrawings.size > 0) {
+            updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top);
+        }
+    });
 }
 
 export function glyphIterator(

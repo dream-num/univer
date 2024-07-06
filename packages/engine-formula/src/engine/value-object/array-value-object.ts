@@ -1070,6 +1070,15 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
+    override sinh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return currentValue.sinh();
+        });
+    }
+
     override asin(): BaseValueObject {
         return this.map((currentValue) => {
             if (currentValue.isError()) {

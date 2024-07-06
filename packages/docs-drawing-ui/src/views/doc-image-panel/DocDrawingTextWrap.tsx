@@ -242,6 +242,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                 setShowPanel(false);
                 return;
             }
+
             setShowPanel(true);
             updateState(drawingParams[0]);
         });

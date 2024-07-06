@@ -18,6 +18,7 @@ import { Disposable, ICommandService, IResourceManagerService, IUniverInstanceSe
 import type { IDrawingSubunitMap } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { Inject } from '@wendellhu/redi';
+import { filter, first } from 'rxjs/operators';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
@@ -35,7 +36,7 @@ export class SheetsDrawingLoadController extends Disposable {
     }
 }
 
-@OnLifecycle(LifecycleStages.Ready, SheetsDrawingController)
+@OnLifecycle(LifecycleStages.Starting, SheetsDrawingController)
 export class SheetsDrawingController extends Disposable {
     constructor(
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
@@ -91,16 +92,12 @@ export class SheetsDrawingController extends Disposable {
     }
 
     private _drawingInitializeListener() {
-        this.disposeWithMe(
-            this._lifecycleService.lifecycle$.subscribe((stage) => {
-                if (stage === LifecycleStages.Steady) {
-                    const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
-                    if (!unitId) {
-                        return;
-                    }
-                    this._sheetDrawingService.initializeNotification(unitId);
-                }
-            })
-        );
+        this._lifecycleService.lifecycle$.pipe(filter((e) => e === LifecycleStages.Steady), first()).subscribe(() => {
+            const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+            if (!unitId) {
+                return;
+            }
+            this._sheetDrawingService.initializeNotification(unitId);
+        });
     }
 }

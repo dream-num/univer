@@ -19,8 +19,9 @@ import { BooleanNumber, Disposable, IUniverInstanceService, LifecycleService, Li
 import { Inject } from '@wendellhu/redi';
 import type { IDrawingSearch } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import type { DocumentSkeleton, IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
+import { type DocumentSkeleton, type IRenderContext, IRenderManagerService, type IRenderModule, type Spreadsheet } from '@univerjs/engine-render';
 import { filter } from 'rxjs';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetCellDrawingUpdateController)
 export class SheetCellDrawingUpdateController extends Disposable implements IRenderModule {
@@ -28,7 +29,8 @@ export class SheetCellDrawingUpdateController extends Disposable implements IRen
         private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @Inject(LifecycleService) private _lifecycleService: LifecycleService
+        @Inject(LifecycleService) private _lifecycleService: LifecycleService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -100,6 +102,13 @@ export class SheetCellDrawingUpdateController extends Disposable implements IRen
             return;
         }
 
+        const renderer = this._renderManagerService.getRenderById(unitId);
+        const sheetSkeleton = renderer?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId);
+        if (sheetSkeleton == null) {
+            return;
+        }
+
+        const { rowHeaderWidth, columnHeaderHeight } = sheetSkeleton.skeleton;
         const { pages } = skeletonData;
         const updateDrawings: any[] = []; // IFloatingObjectManagerParam
 
@@ -117,8 +126,8 @@ export class SheetCellDrawingUpdateController extends Disposable implements IRen
                 drawingId,
                 behindText,
                 transform: {
-                    left: aLeft + cellX + 50 + marginLeft,
-                    top: aTop + cellY + 20 + marginTop,
+                    left: aLeft + cellX + rowHeaderWidth + marginLeft,
+                    top: aTop + cellY + columnHeaderHeight + marginTop,
                     width,
                     height,
                     angle,

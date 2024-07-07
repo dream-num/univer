@@ -161,7 +161,6 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         }
 
         // console.log('updateDrawings', skeleton.getViewModel().getDataModel(), pages, updateDrawings);
-
         if (updateDrawings.length > 0) {
             this._drawingManagerService.refreshTransform(updateDrawings);
         }

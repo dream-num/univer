@@ -29,6 +29,7 @@ import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
+import type { Spreadsheet } from '../spreadsheet';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -51,6 +52,10 @@ export class Font extends SheetExtension {
     getDocuments() {
         const parent = this.parent as SheetComponent;
         return parent?.getDocuments();
+    }
+
+    private _getSheetComponent() {
+        return this.parent as Spreadsheet;
     }
 
     override draw(
@@ -290,6 +295,7 @@ export class Font extends SheetExtension {
         overflowCache: ObjectMatrix<IRange>
     ) {
         const documents = this.getDocuments() as Documents;
+        const sheetComponent = this._getSheetComponent();
 
         if (documents == null) {
             throw new Error('documents is null');
@@ -330,6 +336,12 @@ export class Font extends SheetExtension {
         documents.resize(cellWidth, cellHeight);
 
         documents.changeSkeleton(documentSkeleton).render(ctx);
+
+        sheetComponent.notifyCellRender({
+            docSkeleton: documentSkeleton,
+            cellX: startX,
+            cellY: startY,
+        });
     }
 
     private _clipRectangleForOverflow(

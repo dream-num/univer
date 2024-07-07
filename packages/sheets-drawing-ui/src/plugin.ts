@@ -30,6 +30,7 @@ import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-m
 import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
 import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
 import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
+import { SheetCellDrawingUpdateController } from './controllers/sheet-cell-drawing-update.controller';
 
 const PLUGIN_NAME = 'SHEET_IMAGE_UI_PLUGIN';
 
@@ -76,6 +77,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
 
         const renderModules = [
             SheetDrawingUpdateController,
+            SheetCellDrawingUpdateController,
             SheetDrawingTransformAffectedController,
         ];
 

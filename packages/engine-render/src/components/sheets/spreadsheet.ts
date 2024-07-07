@@ -17,6 +17,7 @@
 import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules } from '@univerjs/core';
 
+import { Subject } from 'rxjs';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 
 // import { clearLineByBorderType } from '../../basics/draw';
@@ -29,6 +30,7 @@ import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
+import type { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
@@ -39,6 +41,12 @@ import type { SpreadsheetSkeleton } from './sheet-skeleton';
 import { type IPaintForRefresh, type IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
+
+export interface ICellRenderConfig {
+    docSkeleton: DocumentSkeleton;
+    cellX: number;
+    cellY: number;
+}
 
 export class Spreadsheet extends SheetComponent {
     private _backgroundExtension!: Background;
@@ -52,6 +60,9 @@ export class Spreadsheet extends SheetComponent {
     private _dirtyBounds: IBoundRectNoAngle[] = [];
 
     private _forceDisableGridlines = false;
+
+    private readonly _cellRender$ = new Subject<ICellRenderConfig>();
+    readonly cellRender$ = this._cellRender$.asObservable();
 
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
@@ -68,6 +79,10 @@ export class Spreadsheet extends SheetComponent {
         super(oKey, spreadsheetSkeleton);
         this._initialDefaultExtension();
         this.makeDirty(true);
+    }
+
+    notifyCellRender(param: ICellRenderConfig) {
+        this._cellRender$.next(param);
     }
 
     get backgroundExtension() {

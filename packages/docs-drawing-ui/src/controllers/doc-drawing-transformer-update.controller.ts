@@ -149,6 +149,10 @@ export class DocDrawingTransformerController extends Disposable {
                         const object: BaseObject = objects.values().next().value;
                         const { width, height, top, left, angle } = object;
 
+                        if (drawingCache == null) {
+                            return;
+                        }
+
                         if (
                             width === drawingCache.width &&
                             height === drawingCache.height &&

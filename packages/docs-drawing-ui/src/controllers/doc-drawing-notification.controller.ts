@@ -25,6 +25,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     RedoCommand,
+    Tools,
     UndoCommand,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
@@ -204,6 +205,35 @@ export class DocDrawingAddRemoveController extends Disposable {
         const docDrawingService = this._docDrawingService;
 
         const jsonOp = this._docDrawingService.getBatchAddOp(drawings) as IDrawingJsonUndo1;
+
+        const { subUnitId, redo: op, objects } = jsonOp;
+
+        drawingManagerService.applyJson1(unitId, subUnitId, op);
+        docDrawingService.applyJson1(unitId, subUnitId, op);
+
+        drawingManagerService.addNotification(objects as IDrawingSearch[]);
+        docDrawingService.addNotification(objects as IDrawingSearch[]);
+
+        // const DOCS_ZEN_EDITOR_UNIT_ID_KEY = '__defaultDocumentZenEditorSpecialUnitId_20231218__';
+        // if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+        //     this._addDrawingsToNormalEdit(drawings);
+        // }
+    }
+
+    // This method is only use for demo.
+    private _addDrawingsToNormalEdit(drawings: IDocDrawing[]) {
+        const drawingManagerService = this._drawingManagerService;
+        const docDrawingService = this._docDrawingService;
+        const unitId = 'workbook-01';
+        const sUnitId = '__INTERNAL_EDITOR__DOCS_NORMAL';
+        const newDrawings = Tools.deepClone(drawings);
+
+        for (const drawing of newDrawings) {
+            drawing.unitId = unitId;
+            drawing.subUnitId = sUnitId;
+        }
+
+        const jsonOp = this._docDrawingService.getBatchAddOp(newDrawings) as IDrawingJsonUndo1;
 
         const { subUnitId, redo: op, objects } = jsonOp;
 

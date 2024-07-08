@@ -1,5 +1,12 @@
 
 
+## [0.2.1](https://github.com/dream-num/univer/compare/v0.2.0...v0.2.1) (2024-07-08)
+
+
+### Reverts
+
+* "chore: image menu show on insert position" ([#2714](https://github.com/dream-num/univer/issues/2714)) ([c077cb3](https://github.com/dream-num/univer/commit/c077cb3f71ab767ad8c3383a41adda4a03850336))
+
 # [0.2.0](https://github.com/dream-num/univer/compare/v0.1.17...v0.2.0) (2024-07-06)
 
 

@@ -38,7 +38,7 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
     type: CommandType.COMMAND,
 
     handler: async (accessor, params: IReplaceContentCommandParams) => {
-        const { unitId, body, textRanges, segmentId = '' } = params;
+        const { unitId, body, textRanges, segmentId = '', options } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -58,6 +58,7 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
         const doMutation = getMutationParams(unitId, segmentId, docDataModel, prevBody, body);
 
         doMutation.params.textRanges = textRanges;
+        options && (doMutation.params.options = options);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

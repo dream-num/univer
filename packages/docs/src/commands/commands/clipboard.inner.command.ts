@@ -210,10 +210,10 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const drawings = docDataModel.getDrawings() ?? {};
         const drawingOrder = docDataModel.getDrawingsOrder() ?? [];
         const sortedRemovedCustomBlockIds = removedCustomBlockIds.sort((a, b) => {
-            if (drawingOrder.indexOf(a) - drawingOrder.indexOf(b)) {
-                return 1;
-            } else if (drawingOrder.indexOf(b) - drawingOrder.indexOf(a)) {
+            if (drawingOrder.indexOf(a) > drawingOrder.indexOf(b)) {
                 return -1;
+            } else if (drawingOrder.indexOf(a) < drawingOrder.indexOf(b)) {
+                return 1;
             }
 
             return 0;

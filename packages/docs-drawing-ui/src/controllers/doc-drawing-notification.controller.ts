@@ -169,7 +169,7 @@ export class DocDrawingAddRemoveController extends Disposable {
                 const reOrderedDrawings = getReOrderedDrawings(actions);
 
                 if (reOrderedDrawings.length > 0) {
-                    this._updateDrawingsOrder(unitId, reOrderedDrawings);
+                    this._updateDrawingsOrder(unitId);
                 }
             })
         );
@@ -235,7 +235,7 @@ export class DocDrawingAddRemoveController extends Disposable {
         docDrawingService.removeNotification(objects as IDrawingSearch[]);
     }
 
-    private _updateDrawingsOrder(unitId: string, drawingIndexes: number[]) {
+    private _updateDrawingsOrder(unitId: string) {
         const documentDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
 
         if (documentDataModel == null) {
@@ -254,12 +254,11 @@ export class DocDrawingAddRemoveController extends Disposable {
         drawingManagerService.setDrawingOrder(unitId, unitId, drawingsOrder);
         docDrawingService.setDrawingOrder(unitId, unitId, drawingsOrder);
 
+        // FIXME: @Jocs, Only need to update the affected drawings.
         const objects: IDrawingOrderMapParam = {
             unitId,
             subUnitId: unitId,
-            drawingIds: drawingIndexes.map((index) => {
-                return drawingsOrder[index];
-            }),
+            drawingIds: drawingsOrder,
         };
 
         drawingManagerService.orderNotification(objects);

@@ -15,146 +15,146 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, DocumentFlavor, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',
     drawings: {
-        shapeTest1: {
-            unitId: 'd',
-            subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
-            drawingId: 'shapeTest1',
-            title: 'test shape',
-            description: 'test shape',
-            docTransform: {
-                size: {
-                    width: 1484 * 0.12,
-                    height: 864 * 0.15,
-                },
-                positionH: {
-                    relativeFrom: ObjectRelativeFromH.MARGIN,
-                    posOffset: 100,
-                },
-                positionV: {
-                    relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 230,
-                },
-                angle: 0,
-            },
-            layoutType: PositionedObjectLayoutType.WRAP_NONE,
-            behindDoc: BooleanNumber.TRUE,
-            wrapText: WrapTextType.BOTH_SIDES,
-            distT: 0,
-            distB: 0,
-            distL: 0,
-            distR: 0,
-        },
-        shapeTest2: {
-            unitId: 'd',
-            subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
-            drawingId: 'shapeTest2',
-            title: 'test shape',
-            description: 'test shape',
-            docTransform: {
-                size: {
-                    width: 1484 * 0.3,
-                    height: 864 * 0.3,
-                },
-                positionH: {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
-                    posOffset: 100,
-                },
-                positionV: {
-                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                    posOffset: 20,
-                },
-                angle: 0,
-            },
-            layoutType: PositionedObjectLayoutType.WRAP_NONE,
-            behindDoc: BooleanNumber.FALSE,
-            wrapText: WrapTextType.BOTH_SIDES,
-        },
-        shapeTest3: {
-            unitId: 'd',
-            subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
-            drawingId: 'shapeTest3',
-            title: 'test shape',
-            description: 'test shape',
-            docTransform: {
-                size: {
-                    width: 1484 * 0.3,
-                    height: 864 * 0.3,
-                },
-                positionH: {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
-                    posOffset: 100,
-                },
-                positionV: {
-                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                    posOffset: 200,
-                },
-                angle: 0,
-            },
-            layoutType: PositionedObjectLayoutType.INLINE,
-            behindDoc: BooleanNumber.FALSE,
-            wrapText: WrapTextType.BOTH_SIDES,
-        },
-        shapeTest4: {
-            unitId: 'd',
-            subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
-            drawingId: 'shapeTest4',
-            title: 'test shape',
-            description: 'test shape',
-            docTransform: {
-                size: {
-                    width: 1484 * 0.3,
-                    height: 864 * 0.3,
-                },
-                positionH: {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
-                    posOffset: 100,
-                },
-                positionV: {
-                    relativeFrom: ObjectRelativeFromV.LINE,
-                    posOffset: 200,
-                },
-                angle: 0,
-            },
-            layoutType: PositionedObjectLayoutType.INLINE,
-            behindDoc: BooleanNumber.FALSE,
-            wrapText: WrapTextType.BOTH_SIDES,
-        },
-        shapeTest5: {
-            unitId: 'd',
-            subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
-            drawingId: 'shapeTest5',
-            title: 'test shape',
-            description: 'test shape',
-            docTransform: {
-                size: {
-                    width: 1484 * 0.3,
-                    height: 864 * 0.3,
-                },
-                positionH: {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
-                    posOffset: 100,
-                },
-                positionV: {
-                    relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 200,
-                },
-                angle: 0,
-            },
-            layoutType: PositionedObjectLayoutType.INLINE,
-            behindDoc: BooleanNumber.FALSE,
-            wrapText: WrapTextType.BOTH_SIDES,
-        },
+        // shapeTest1: {
+        //     unitId: 'd',
+        //     subUnitId: 'd',
+        //     drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+        //     drawingId: 'shapeTest1',
+        //     title: 'test shape',
+        //     description: 'test shape',
+        //     docTransform: {
+        //         size: {
+        //             width: 1484 * 0.12,
+        //             height: 864 * 0.15,
+        //         },
+        //         positionH: {
+        //             relativeFrom: ObjectRelativeFromH.MARGIN,
+        //             posOffset: 100,
+        //         },
+        //         positionV: {
+        //             relativeFrom: ObjectRelativeFromV.PAGE,
+        //             posOffset: 230,
+        //         },
+        //         angle: 0,
+        //     },
+        //     layoutType: PositionedObjectLayoutType.WRAP_NONE,
+        //     behindDoc: BooleanNumber.TRUE,
+        //     wrapText: WrapTextType.BOTH_SIDES,
+        //     distT: 0,
+        //     distB: 0,
+        //     distL: 0,
+        //     distR: 0,
+        // },
+        // shapeTest2: {
+        //     unitId: 'd',
+        //     subUnitId: 'd',
+        //     drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+        //     drawingId: 'shapeTest2',
+        //     title: 'test shape',
+        //     description: 'test shape',
+        //     docTransform: {
+        //         size: {
+        //             width: 1484 * 0.3,
+        //             height: 864 * 0.3,
+        //         },
+        //         positionH: {
+        //             relativeFrom: ObjectRelativeFromH.PAGE,
+        //             posOffset: 100,
+        //         },
+        //         positionV: {
+        //             relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+        //             posOffset: 20,
+        //         },
+        //         angle: 0,
+        //     },
+        //     layoutType: PositionedObjectLayoutType.WRAP_NONE,
+        //     behindDoc: BooleanNumber.FALSE,
+        //     wrapText: WrapTextType.BOTH_SIDES,
+        // },
+        // shapeTest3: {
+        //     unitId: 'd',
+        //     subUnitId: 'd',
+        //     drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+        //     drawingId: 'shapeTest3',
+        //     title: 'test shape',
+        //     description: 'test shape',
+        //     docTransform: {
+        //         size: {
+        //             width: 1484 * 0.3,
+        //             height: 864 * 0.3,
+        //         },
+        //         positionH: {
+        //             relativeFrom: ObjectRelativeFromH.PAGE,
+        //             posOffset: 100,
+        //         },
+        //         positionV: {
+        //             relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+        //             posOffset: 200,
+        //         },
+        //         angle: 0,
+        //     },
+        //     layoutType: PositionedObjectLayoutType.INLINE,
+        //     behindDoc: BooleanNumber.FALSE,
+        //     wrapText: WrapTextType.BOTH_SIDES,
+        // },
+        // shapeTest4: {
+        //     unitId: 'd',
+        //     subUnitId: 'd',
+        //     drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+        //     drawingId: 'shapeTest4',
+        //     title: 'test shape',
+        //     description: 'test shape',
+        //     docTransform: {
+        //         size: {
+        //             width: 1484 * 0.3,
+        //             height: 864 * 0.3,
+        //         },
+        //         positionH: {
+        //             relativeFrom: ObjectRelativeFromH.PAGE,
+        //             posOffset: 100,
+        //         },
+        //         positionV: {
+        //             relativeFrom: ObjectRelativeFromV.LINE,
+        //             posOffset: 200,
+        //         },
+        //         angle: 0,
+        //     },
+        //     layoutType: PositionedObjectLayoutType.INLINE,
+        //     behindDoc: BooleanNumber.FALSE,
+        //     wrapText: WrapTextType.BOTH_SIDES,
+        // },
+        // shapeTest5: {
+        //     unitId: 'd',
+        //     subUnitId: 'd',
+        //     drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+        //     drawingId: 'shapeTest5',
+        //     title: 'test shape',
+        //     description: 'test shape',
+        //     docTransform: {
+        //         size: {
+        //             width: 1484 * 0.3,
+        //             height: 864 * 0.3,
+        //         },
+        //         positionH: {
+        //             relativeFrom: ObjectRelativeFromH.PAGE,
+        //             posOffset: 100,
+        //         },
+        //         positionV: {
+        //             relativeFrom: ObjectRelativeFromV.PAGE,
+        //             posOffset: 200,
+        //         },
+        //         angle: 0,
+        //     },
+        //     layoutType: PositionedObjectLayoutType.INLINE,
+        //     behindDoc: BooleanNumber.FALSE,
+        //     wrapText: WrapTextType.BOTH_SIDES,
+        // },
         // zYeeTi: {
         //     unitId: 'd',
         //     subUnitId: 'd',
@@ -189,11 +189,6 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         // },
     },
     drawingsOrder: [
-        'shapeTest1',
-        'shapeTest2',
-        'shapeTest3',
-        'shapeTest4',
-        'shapeTest5',
         // 'zYeeTi',
     ],
     headers: {},

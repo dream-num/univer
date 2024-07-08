@@ -206,8 +206,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
+            endDate: { name: 'end_date', detail: 'A date that represents the end date.' },
+            weekend: { name: 'weekend', detail: 'is a weekend number or string that specifies when weekends occur.' },
+            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays. ' },
         },
     },
     NOW: {
@@ -314,8 +316,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
+            days: { name: 'days', detail: 'The number of nonweekend and nonholiday days before or after start_date. A positive value for days yields a future date; a negative value yields a past date.' },
+            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays. ' },
         },
     },
     WORKDAY_INTL: {
@@ -328,8 +331,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
+            days: { name: 'days', detail: 'The number of nonweekend and nonholiday days before or after start_date. A positive value for days yields a future date; a negative value yields a past date.' },
+            weekend: { name: 'weekend', detail: 'is a weekend number or string that specifies when weekends occur.' },
+            holidays: { name: 'holidays', detail: 'An optional range of one or more dates to exclude from the working calendar, such as state and federal holidays and floating holidays. ' },
         },
     },
     YEAR: {

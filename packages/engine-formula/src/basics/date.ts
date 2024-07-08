@@ -172,12 +172,12 @@ const weekendNumberMap: {
 };
 
 export function isValidWeekend(weekend: number | string): boolean {
-    if (typeof weekend === 'number' && weekendNumberMap[weekend]) {
+    // Weekend string values are seven characters long and each character in the string represents a day of the week, starting with Monday.
+    if (typeof weekend === 'string' && /^[0|1]{7}/.test(weekend)) {
         return true;
     }
 
-    // Weekend string values are seven characters long and each character in the string represents a day of the week, starting with Monday.
-    if (typeof weekend === 'string' && /^[0|1]{7}/.test(weekend)) {
+    if (weekendNumberMap[Number(weekend)]) {
         return true;
     }
 
@@ -189,16 +189,12 @@ export function getWeekendArray(weekend: number | string): number[] {
         return [];
     }
 
-    if (typeof weekend === 'number') {
-        return weekendNumberMap[weekend] || [];
-    }
-
-    if (typeof weekend === 'string') {
+    if (typeof weekend === 'string' && /^[0|1]{7}/.test(weekend)) {
         // 1 represents a non-workday and 0 represents a workday. Only the characters 1 and 0 are permitted in the string. Using 1111111 will always return 0.
         const result = [];
 
         for (let i = 1; i <= weekend.length; i++) {
-            if (`${weekend[i]}` === '1') {
+            if (`${weekend[i - 1]}` === '1') {
                 if (i === weekend.length) {
                     result.push(0);
                 } else {
@@ -210,7 +206,7 @@ export function getWeekendArray(weekend: number | string): number[] {
         return result;
     }
 
-    return [];
+    return weekendNumberMap[Number(weekend)] || [];
 }
 
 export function countWorkingDays(startDate: Date, endDate: Date, weekend: number | string = 1, holidays?: (Date | string)[]): number {
@@ -247,5 +243,41 @@ export function countWorkingDays(startDate: Date, endDate: Date, weekend: number
         workingDays++;
     }
 
-    return end > start ? workingDays : 0 - workingDays;
+    return end > start ? workingDays : -workingDays;
+}
+
+export function getDateByWorkingDays(startDate: Date, workingDays: number, weekend: number | string = 1, holidays?: (Date | string)[]): Date {
+    const start = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())).getTime();
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const weekendArray = getWeekendArray(weekend);
+
+    let days = Math.abs(workingDays);
+    let targetDate: Date = startDate;
+
+    for (let i = 0; i < days; i++) {
+        const dayTimes = (i + 1) * millisecondsPerDay;
+        const currentDate = new Date(workingDays < 0 ? start - dayTimes : start + dayTimes);
+
+        if (holidays && holidays.length > 0 && holidays.some((item) => {
+            if (typeof item === 'string') {
+                item = new Date(item);
+            }
+
+            return item.getFullYear() === currentDate.getFullYear() &&
+                item.getMonth() === currentDate.getMonth() &&
+                item.getDate() === currentDate.getDate();
+        })) {
+            days++;
+            continue;
+        }
+
+        if (weekendArray.includes(currentDate.getDay())) {
+            days++;
+            continue;
+        }
+
+        targetDate = currentDate;
+    }
+
+    return targetDate;
 }

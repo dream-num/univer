@@ -26,6 +26,8 @@ import { Now } from './now';
 import { Time } from './time';
 import { Timevalue } from './timevalue';
 import { Today } from './today';
+import { Workday } from './workday';
+import { WorkdayIntl } from './workday-intl';
 import { Year } from './year';
 
 export const functionDate = [
@@ -40,5 +42,7 @@ export const functionDate = [
     [Time, FUNCTION_NAMES_DATE.TIME],
     [Timevalue, FUNCTION_NAMES_DATE.TIMEVALUE],
     [Today, FUNCTION_NAMES_DATE.TODAY],
+    [Workday, FUNCTION_NAMES_DATE.WORKDAY],
+    [WorkdayIntl, FUNCTION_NAMES_DATE.WORKDAY_INTL],
     [Year, FUNCTION_NAMES_DATE.YEAR],
 ];

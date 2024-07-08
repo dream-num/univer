@@ -106,7 +106,7 @@ export class Networkdays extends BaseFunction {
             endDateObject = excelSerialToDate(dateSerial);
         }
 
-        let result = countWorkingDays(startDateObject, endDateObject);
+        let result: number;
 
         if (holidays) {
             const holidaysValueArray = [];
@@ -172,6 +172,8 @@ export class Networkdays extends BaseFunction {
             }
 
             result = countWorkingDays(startDateObject, endDateObject, 1, holidaysValueArray);
+        } else {
+            result = countWorkingDays(startDateObject, endDateObject);
         }
 
         return NumberValueObject.create(result);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { countWorkingDays, excelSerialToDate, isValidDateStr, isValidWeekend } from '../../../basics/date';
+import { excelDateSerial, excelSerialToDate, getDateByWorkingDays, isValidDateStr, isValidWeekend } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
@@ -22,18 +22,18 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class NetworkdaysIntl extends BaseFunction {
+export class WorkdayIntl extends BaseFunction {
     override minParams = 2;
 
     override maxParams = 4;
 
-    override calculate(startDate: BaseValueObject, endDate: BaseValueObject, weekend?: BaseValueObject, holidays?: BaseValueObject) {
+    override calculate(startDate: BaseValueObject, days: BaseValueObject, weekend?: BaseValueObject, holidays?: BaseValueObject) {
         if (startDate.isError()) {
             return startDate;
         }
 
-        if (endDate.isError()) {
-            return endDate;
+        if (days.isError()) {
+            return days;
         }
 
         if (weekend?.isError()) {
@@ -45,13 +45,13 @@ export class NetworkdaysIntl extends BaseFunction {
         }
 
         if (weekend?.isArray()) {
-            return weekend.map((weekendItem) => this._handleSingleObject(startDate, endDate, weekendItem, holidays));
+            return weekend.map((weekendItem) => this._handleSingleObject(startDate, days, weekendItem, holidays));
         }
 
-        return this._handleSingleObject(startDate, endDate, weekend, holidays);
+        return this._handleSingleObject(startDate, days, weekend, holidays);
     }
 
-    private _handleSingleObject(startDate: BaseValueObject, endDate: BaseValueObject, weekend?: BaseValueObject, holidays?: BaseValueObject) {
+    private _handleSingleObject(startDate: BaseValueObject, days: BaseValueObject, weekend?: BaseValueObject, holidays?: BaseValueObject) {
         let weekendValue: number | string = 1;
 
         if (weekend) {
@@ -61,7 +61,8 @@ export class NetworkdaysIntl extends BaseFunction {
                 weekendValue = +weekendValue;
             }
 
-            if (weekend.isString() && !isValidWeekend(weekendValue)) {
+            // 1111111 is an invalid string.
+            if (weekend.isString() && (!isValidWeekend(weekendValue) || weekendValue === '1111111')) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
@@ -82,19 +83,19 @@ export class NetworkdaysIntl extends BaseFunction {
             }
         }
 
-        if (endDate.isArray()) {
-            if ((endDate as ArrayValueObject).getRowCount() > 1 || (endDate as ArrayValueObject).getColumnCount() > 1) {
+        if (days.isArray()) {
+            if ((days as ArrayValueObject).getRowCount() > 1 || (days as ArrayValueObject).getColumnCount() > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            endDate = (endDate as ArrayValueObject).get(0, 0) as BaseValueObject;
+            days = (days as ArrayValueObject).get(0, 0) as BaseValueObject;
 
-            if (endDate.isError()) {
-                return endDate;
+            if (days.isError()) {
+                return days;
             }
         }
 
-        if (startDate.isBoolean() || endDate.isBoolean()) {
+        if (startDate.isBoolean() || days.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -117,26 +118,17 @@ export class NetworkdaysIntl extends BaseFunction {
             startDateObject = excelSerialToDate(dateSerial);
         }
 
-        let endDateObject: Date;
-        const endDateValue = endDate.getValue();
+        if (days.isString()) {
+            days = days.convertToNumberObjectValue();
 
-        if (endDate.isString()) {
-            if (!isValidDateStr(`${endDateValue}`)) {
-                return ErrorValueObject.create(ErrorType.VALUE);
+            if (days.isError()) {
+                return days;
             }
-
-            endDateObject = new Date(`${endDateValue}`);
-        } else {
-            const dateSerial = +endDateValue;
-
-            if (dateSerial < 0) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            endDateObject = excelSerialToDate(dateSerial);
         }
 
-        let result: number;
+        const workingDays = Number(days.getValue());
+
+        let result: Date;
 
         if (holidays) {
             const holidaysValueArray = [];
@@ -201,11 +193,11 @@ export class NetworkdaysIntl extends BaseFunction {
                 holidaysValueArray.push(holidaysObject);
             }
 
-            result = countWorkingDays(startDateObject, endDateObject, weekendValue, holidaysValueArray);
+            result = getDateByWorkingDays(startDateObject, workingDays, weekendValue, holidaysValueArray);
         } else {
-            result = countWorkingDays(startDateObject, endDateObject, weekendValue);
+            result = getDateByWorkingDays(startDateObject, workingDays, weekendValue);
         }
 
-        return NumberValueObject.create(result);
+        return NumberValueObject.create(excelDateSerial(result));
     }
 }

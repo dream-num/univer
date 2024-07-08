@@ -23,7 +23,7 @@ import {
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph, Image, IPoint, Viewport } from '@univerjs/engine-render';
-import { DocumentEditArea, getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
+import { getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 
@@ -411,16 +411,16 @@ export class DocDrawingTransformerController extends Disposable {
         const viewModel = skeleton?.getViewModel();
 
         const skeletonData = skeleton?.getSkeletonData();
-
         if (skeletonData == null || currentRender == null || viewModel == null) {
             return;
         }
 
-        const editArea = viewModel.getEditArea();
-        const { mainComponent } = currentRender;
-        const documentComponent = mainComponent as Documents;
-        const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documentComponent.getOffsetConfig();
         const { pages } = skeletonData;
+
+        const { mainComponent, scene } = currentRender;
+        const documentComponent = mainComponent as Documents;
+        const activeViewport = scene.getViewports()[0];
+        const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documentComponent.getOffsetConfig();
         const { left, top, width, height, angle } = object;
         const { positionV, positionH } = drawing.docTransform;
 
@@ -436,96 +436,85 @@ export class DocDrawingTransformerController extends Disposable {
             angle,
         };
 
+        const { x, y } = scene.getScrollXY(activeViewport);
+
+        const coord = this._getTransformCoordForDocumentOffset(documentComponent, activeViewport, left - x, top - y);
+        if (coord == null) {
+            return;
+        }
+
+        const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
+        if (nodeInfo) {
+            const { node, segmentPage: segmentPageIndex } = nodeInfo;
+            glyphAnchor = node;
+            segmentPage = segmentPageIndex;
+        }
+
+        if (glyphAnchor == null) {
+            return;
+        }
+
+        const line = glyphAnchor.parent?.parent;
+        const column = line?.parent;
+        const paragraphStartLine = column?.lines.find((l) => l.paragraphIndex === line?.paragraphIndex && l.paragraphStart) ?? column?.lines[0];
+        const page = column?.parent?.parent;
+
         this._liquid.reset();
 
-        // TODO: 兼容页眉页脚
-        for (const page of pages) {
-            this._liquid.translatePagePadding(page);
-            const { sections } = page;
-
-            for (const section of sections) {
-                const { columns } = section;
-
-                for (const column of columns) {
-                    const { lines } = column;
-
-                    for (const line of lines) {
-                        const { top: lineTop, lineHeight } = line;
-                        const { left: columnLeft, width } = column;
-
-                        if (
-                            left > columnLeft + this._liquid.x + docsLeft &&
-                            left <= columnLeft + this._liquid.x + width + docsLeft &&
-                            top > lineTop + this._liquid.y + docsTop &&
-                            top <= lineTop + this._liquid.y + lineHeight + docsTop
-                        ) {
-                            const paragraphStartLine = lines.find((l) => l.paragraphIndex === line.paragraphIndex && l.paragraphStart) ?? lines[0];
-                            if (paragraphStartLine == null) {
-                                continue;
-                            }
-
-                            if (positionV.relativeFrom === ObjectRelativeFromV.LINE) {
-                                glyphAnchor = line.divides[0].glyphGroup[0];
-                                segmentPage = editArea === DocumentEditArea.BODY ? -1 : pages.indexOf(page);
-                            } else {
-                                glyphAnchor = paragraphStartLine.divides[0].glyphGroup[0];
-                                segmentPage = editArea === DocumentEditArea.BODY ? -1 : pages.indexOf(page);
-                            }
-
-                            docTransform.positionH = {
-                                relativeFrom: positionH.relativeFrom,
-                                posOffset: left - this._liquid.x - docsLeft,
-                            };
-
-                            switch (positionH.relativeFrom) {
-                                case ObjectRelativeFromH.MARGIN: {
-                                    docTransform.positionH.posOffset = left - this._liquid.x - docsLeft - page.marginLeft;
-                                    break;
-                                }
-                                case ObjectRelativeFromH.COLUMN: {
-                                    docTransform.positionH.posOffset = left - this._liquid.x - docsLeft - columnLeft;
-                                    break;
-                                }
-                            }
-
-                            docTransform.positionV = {
-                                relativeFrom: positionV.relativeFrom,
-                                posOffset: top - this._liquid.y - docsTop,
-                            };
-
-                            switch (positionV.relativeFrom) {
-                                case ObjectRelativeFromV.PAGE: {
-                                    docTransform.positionV.posOffset = top - this._liquid.y - docsTop - page.marginTop;
-                                    break;
-                                }
-                                case ObjectRelativeFromV.LINE: {
-                                    docTransform.positionV.posOffset = top - this._liquid.y - docsTop - lineTop;
-                                    break;
-                                }
-                                case ObjectRelativeFromV.PARAGRAPH: {
-                                    docTransform.positionV.posOffset = top - this._liquid.y - docsTop - paragraphStartLine.top;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (glyphAnchor) {
-                            break;
-                        }
-                    }
-
-                    if (glyphAnchor) {
-                        break;
-                    }
-                }
-
-                if (glyphAnchor) {
-                    break;
-                }
+        for (const p of pages) {
+            this._liquid.translatePagePadding(p);
+            if (p === page) {
+                break;
             }
 
-            this._liquid.restorePagePadding(page);
-            this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+            this._liquid.restorePagePadding(p);
+            this._liquid.translatePage(p, pageLayoutType, pageMarginLeft, pageMarginTop);
+        }
+
+        if (line == null || column == null || paragraphStartLine == null || page == null) {
+            return;
+        }
+
+        if (positionV.relativeFrom === ObjectRelativeFromV.LINE) {
+            glyphAnchor = line.divides[0].glyphGroup[0];
+        } else {
+            glyphAnchor = paragraphStartLine.divides[0].glyphGroup[0];
+        }
+
+        docTransform.positionH = {
+            relativeFrom: positionH.relativeFrom,
+            posOffset: left - this._liquid.x - docsLeft,
+        };
+
+        switch (positionH.relativeFrom) {
+            case ObjectRelativeFromH.MARGIN: {
+                docTransform.positionH.posOffset = left - this._liquid.x - docsLeft - page.marginLeft;
+                break;
+            }
+            case ObjectRelativeFromH.COLUMN: {
+                docTransform.positionH.posOffset = left - this._liquid.x - docsLeft - column.left;
+                break;
+            }
+        }
+
+        docTransform.positionV = {
+            relativeFrom: positionV.relativeFrom,
+            posOffset: top - this._liquid.y - docsTop,
+        };
+
+        switch (positionV.relativeFrom) {
+            case ObjectRelativeFromV.PAGE: {
+                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - page.marginTop;
+                break;
+            }
+            case ObjectRelativeFromV.LINE: {
+                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - line.top;
+                break;
+            }
+            case ObjectRelativeFromV.PARAGRAPH: {
+                docTransform.positionV.posOffset = top - this._liquid.y - docsTop - paragraphStartLine.top;
+                break;
+            }
         }
 
         if (glyphAnchor == null) {

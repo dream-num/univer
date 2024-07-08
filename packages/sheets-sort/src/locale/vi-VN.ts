@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-const locale = {
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '取消编辑（禅模式状态）',
-            'zen-edit-confirm': '放弃编辑（禅模式状态）',
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    sheetsSort: {
+        title: 'Sort',
+        toolbar: {
+            'sort-asc': 'ascending order',
+            'sort-desc': 'descending order',
+            'sort-custom': 'custom order',
+        },
+        'context-menu': {
+            'sort-asc': 'ascending order',
+            'sort-desc': 'descending order',
+            'sort-custom': 'custom order',
         },
     },
 };

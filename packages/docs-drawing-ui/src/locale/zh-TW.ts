@@ -14,12 +14,32 @@
  * limitations under the License.
  */
 
-const locale = {
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '取消编辑（禅模式状态）',
-            'zen-edit-confirm': '放弃编辑（禅模式状态）',
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    docImage: {
+        title: '圖片',
+
+        upload: {
+            float: '插入圖片',
         },
+
+        panel: {
+            title: '編圖',
+        },
+    },
+    'image-popup': {
+        replace: '替換',
+        delete: '刪除',
+        edit: '編輯',
+        crop: '裁切',
+        reset: '重置大小',
+    },
+    'update-status': {
+        exceedMaxSize: '圖片大小超過限制, 限制為{0}M',
+        invalidImageType: '圖片類型錯誤',
+        exceedMaxCount: '圖片只能一次上傳{0}張',
+        invalidImage: '無效圖片',
     },
 };
 

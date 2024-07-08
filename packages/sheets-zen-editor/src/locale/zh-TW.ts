@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-const locale = {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     shortcut: {
         sheet: {
-            'zen-edit-cancel': '取消编辑（禅模式状态）',
-            'zen-edit-confirm': '放弃编辑（禅模式状态）',
+            'zen-edit-cancel': '取消編輯（禪模式狀態）',
+            'zen-edit-confirm': '放棄編輯（禪模式狀態）',
         },
     },
 };

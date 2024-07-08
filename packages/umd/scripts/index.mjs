@@ -74,7 +74,6 @@ async function generateLocale() {
         '@univerjs/uniscript',
     ];
 
-    // const languages = ['en-US', 'ru-RU', 'zh-CN'];
     const languages = [{
         key: 'en-US',
         dayjsKey: 'en',
@@ -84,6 +83,12 @@ async function generateLocale() {
     }, {
         key: 'zh-CN',
         dayjsKey: 'zh-cn',
+    }, {
+        key: 'vi-VN',
+        dayjsKey: 'vi',
+    }, {
+        key: 'zh-TW',
+        dayjsKey: 'zh-tw',
     }];
 
     const outputDir = path.resolve(__dirname, '../lib/locale');

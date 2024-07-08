@@ -14,13 +14,28 @@
  * limitations under the License.
  */
 
-const locale = {
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '取消编辑（禅模式状态）',
-            'zen-edit-confirm': '放弃编辑（禅模式状态）',
+import PickerViVN from 'rc-picker/lib/locale/vi_VN';
+import dajsViVN from 'dayjs/locale/vi';
+import type { ILocale } from './interface';
+
+const locale: ILocale = {
+    design: {
+        Confirm: {
+            cancel: 'Hủy bỏ',
+            confirm: 'Xác nhận',
+        },
+        Slider: {
+            resetTo: 'Khôi phục đến',
+        },
+        Picker: {
+            ...dajsViVN,
+            ...PickerViVN,
+        },
+        CascaderList: {
+            empty: 'Không có',
         },
     },
+
 };
 
 export default locale;

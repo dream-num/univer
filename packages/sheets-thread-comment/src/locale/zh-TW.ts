@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-const locale = {
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '取消编辑（禅模式状态）',
-            'zen-edit-confirm': '放弃编辑（禅模式状态）',
+export default {
+    sheetThreadComment: {
+        menu: {
+            addComment: '新增評論',
+            commentManagement: '評論管理',
         },
     },
 };
-
-export default locale;

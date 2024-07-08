@@ -14,11 +14,25 @@
  * limitations under the License.
  */
 
-const locale = {
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '取消编辑（禅模式状态）',
-            'zen-edit-confirm': '放弃编辑（禅模式状态）',
+import PickerZhTw from 'rc-picker/lib/locale/zh_TW';
+import dajsZhTw from 'dayjs/locale/zh-tw';
+import type { ILocale } from './interface';
+
+const locale: ILocale = {
+    design: {
+        Confirm: {
+            cancel: '取消',
+            confirm: '確定',
+        },
+        Slider: {
+            resetTo: '恢復至',
+        },
+        Picker: {
+            ...dajsZhTw,
+            ...PickerZhTw,
+        },
+        CascaderList: {
+            empty: '無',
         },
     },
 };

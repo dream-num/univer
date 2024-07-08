@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-const locale = {
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '取消编辑（禅模式状态）',
-            'zen-edit-confirm': '放弃编辑（禅模式状态）',
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    sheets: {
+        tabs: {
+            sheetCopy: '（Bản sao {0}）',
+            sheet: 'Bảng tính',
+        },
+        info: {
+            overlappingSelections: 'Không thể sử dụng lệnh này trên các vùng chọn chồng chéo nhau',
+            acrossMergedCell: 'Không thể vượt qua các ô đã hợp nhất',
+            partOfCell: 'Chỉ chọn một phần của ô đã hợp nhất',
+            hideSheet: 'Không có bảng tính nào hiển thị sau khi ẩn',
         },
     },
 };

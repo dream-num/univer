@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-const locale = {
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '取消编辑（禅模式状态）',
-            'zen-edit-confirm': '放弃编辑（禅模式状态）',
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    'script-panel': {
+        title: 'Uniscript',
+        tooltip: {
+            'menu-button': '打開收起 Uniscript 面板',
+        },
+        panel: {
+            execute: '執行 Uniscript',
+        },
+    },
+    uniscript: {
+        message: {
+            success: '執行成功',
+            failed: '執行失敗',
         },
     },
 };

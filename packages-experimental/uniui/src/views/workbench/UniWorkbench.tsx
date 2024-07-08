@@ -17,7 +17,7 @@
 // Refer to packages/ui/src/views/App.tsx
 
 import { IUniverInstanceService, LocaleService, ThemeService } from '@univerjs/core';
-import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import type { ILocale } from '@univerjs/design';
 import {
     builtInGlobalComponents,
@@ -33,7 +33,8 @@ import {
     ZenZone,
 } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
 import styles from './workbench.module.less';
@@ -181,6 +182,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             <ComponentContainer key="global" components={globalComponents} />
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
             {contextMenu && <ContextMenu />}
+            <FloatingContainer />
         </ConfigProvider>
     );
 }

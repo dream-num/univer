@@ -46,6 +46,16 @@ const locale = {
         exceedMaxCount: '图片只能一次上传{0}张',
         invalidImage: '无效图片',
     },
+    'sheet-drawing-view': '绘图',
+    shortcut: {
+        sheet: {
+            'drawing-move-down': '下移绘图',
+            'drawing-move-up': '上移绘图',
+            'drawing-move-left': '左移绘图',
+            'drawing-move-right': '下移绘图',
+            'drawing-delete': '删除绘图',
+        },
+    },
 };
 
 export default locale;

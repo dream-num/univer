@@ -43,6 +43,18 @@ const locale: typeof zhCN = {
         alignCenter: 'Căn giữa',
         alignRight: 'Căn phải',
         alignJustify: 'Căn đều hai bên',
+        headerFooter: 'Đầu trang và chân trang',
+    },
+    headerFooter: {
+        header: 'Đầu trang',
+        footer: 'Chân trang',
+        panel: 'Cài đặt đầu trang và chân trang',
+        firstPageCheckBox: 'Trang đầu khác biệt',
+        oddEvenCheckBox: 'Trang lẻ chẵn khác biệt',
+        headerTopMargin: 'Khoảng cách đầu trang từ trên cùng (px)',
+        footerBottomMargin: 'Khoảng cách chân trang từ dưới cùng (px)',
+        closeHeaderFooter: 'Đóng đầu trang và chân trang',
+        disableText: 'Cài đặt đầu trang và chân trang không khả dụng',
     },
 };
 

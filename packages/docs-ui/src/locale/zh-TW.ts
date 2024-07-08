@@ -43,6 +43,18 @@ const locale: typeof zhCN = {
         alignCenter: '居中對齊',
         alignRight: '右對齊',
         alignJustify: '兩端對齊',
+        headerFooter: '頁眉頁腳',
+    },
+    headerFooter: {
+        header: '頁眉',
+        footer: '頁腳',
+        panel: '頁眉頁腳設置',
+        firstPageCheckBox: '首頁不同',
+        oddEvenCheckBox: '奇偶頁不同',
+        headerTopMargin: '頁眉頂端距離（px）',
+        footerBottomMargin: '頁腳底端距離（px）',
+        closeHeaderFooter: '關閉頁眉頁腳',
+        disableText: '頁眉頁腳設置不可用',
     },
 };
 

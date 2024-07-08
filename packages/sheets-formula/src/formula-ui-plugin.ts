@@ -20,6 +20,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRefSelectionsService, SheetsSelectionsService } from '@univerjs/sheets';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
@@ -28,7 +29,6 @@ import { FormulaClipboardController } from './controllers/formula-clipboard.cont
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
 import type { IUniverSheetsFormulaConfig } from './controllers/formula-ui.controller';
 import { DefaultSheetFormulaConfig, FormulaUIController } from './controllers/formula-ui.controller';
-import { PromptController } from './controllers/prompt.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 
@@ -44,6 +44,8 @@ import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { RegisterOtherFormulaService } from './services/register-other-formula.service';
 import { FormulaAlertRenderController } from './controllers/formula-alert-render.controller';
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
+import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
+import { PromptController } from './controllers/prompt.controller';
 
 /**
  * The configuration of the formula UI plugin.
@@ -64,7 +66,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._init();
+        this._registerDependencies();
     }
 
     override onRendered(): void {
@@ -73,37 +75,24 @@ export class UniverSheetsFormulaPlugin extends Plugin {
 
     private _registerRenderModules(): void {
         ([
-
-            FormulaAlertRenderController,
-        ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
+            [RefSelectionsRenderService],
+            [FormulaAlertRenderController],
+        ] as Dependency[]).forEach((dep) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
         });
     }
 
-    _init(): void {
+    private _registerDependencies(): void {
+        const j = this._injector;
         const dependencies: Dependency[] = [
-            // services
             [IFormulaPromptService, { useClass: FormulaPromptService }],
-            [
-                IDescriptionService,
-                {
-                    useFactory: () => this._injector.createInstance(DescriptionService, this._config?.description),
-                },
-            ],
+            [IRefSelectionsService, { useClass: SheetsSelectionsService }],
+            [IDescriptionService, { useFactory: () => j.createInstance(DescriptionService, this._config?.description) }],
             [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
-
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
             [FormulaRefRangeService],
             [RegisterOtherFormulaService],
-
-            // controllers
-            [
-                FormulaUIController,
-                {
-                    useFactory: () => this._injector.createInstance(FormulaUIController, this._config),
-                },
-            ],
-            [PromptController],
+            [FormulaUIController, { useFactory: () => j.createInstance(FormulaUIController, this._config) }],
             [FormulaAutoFillController],
             [FormulaClipboardController],
             [ArrayFormulaDisplayController],
@@ -113,9 +102,10 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [ActiveDirtyController],
             [DefinedNameController],
             [FormulaRenderManagerController],
+            [PromptController],
         ];
 
-        dependencies.forEach((dependency) => this._injector.add(dependency));
+        dependencies.forEach((dependency) => j.add(dependency));
     }
 }
 

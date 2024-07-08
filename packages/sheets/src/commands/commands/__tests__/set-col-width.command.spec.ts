@@ -19,7 +19,7 @@ import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoC
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetWorksheetColWidthMutation } from '../../mutations/set-worksheet-col-width.mutation';
 import type { IDeltaColumnWidthCommandParams, ISetColWidthCommandParams } from '../set-worksheet-col-width.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../set-worksheet-col-width.command';
@@ -47,13 +47,8 @@ describe('Test set col width commands', () => {
 
         const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxRow = worksheet.getMaxRows() - 1;
-        const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-        selectionManagerService.add([
+        const selectionManagerService = get(SheetsSelectionsService);
+        selectionManagerService.addSelections([
             {
                 range: { startRow: 0, startColumn: 1, endColumn: 2, endRow: maxRow, rangeType: RANGE_TYPE.COLUMN },
                 primary: {
@@ -69,7 +64,7 @@ describe('Test set col width commands', () => {
                 style: null,
             },
         ]);
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow: 0, startColumn: 5, endColumn: 5, endRow: maxRow, rangeType: RANGE_TYPE.COLUMN },
                 primary: null,

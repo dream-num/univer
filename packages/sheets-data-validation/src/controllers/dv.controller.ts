@@ -20,7 +20,7 @@ import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/dat
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
-import { ClearSelectionAllCommand, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { ClearSelectionAllCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
@@ -38,7 +38,7 @@ export class DataValidationController extends RxDisposable {
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManger: ComponentManager,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
@@ -115,7 +115,7 @@ export class DataValidationController extends RxDisposable {
                     }
 
                     const subUnitId = worksheet.getSheetId();
-                    const selections = this._selectionManagerService.getSelectionRanges();
+                    const selections = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
                     const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
 

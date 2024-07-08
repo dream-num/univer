@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IDrawingSearch, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IDrawingSearch, IImageData, IImageIoServiceParam } from '@univerjs/drawing';
+import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { SelectionManagerService } from '@univerjs/sheets';
-import { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
@@ -39,21 +38,32 @@ import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-d
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUpdateController)
-export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
+export class SheetDrawingUpdateController extends Disposable {
+    // TODO@wzhudev: selection render service would be a render unit, we we cannot
+    // easily access it here.
+    private get _selectionRenderService(): ISheetSelectionRenderService {
+        return this._renderManagerService.getRenderById(
+            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        )!.with(ISheetSelectionRenderService);
+    }
+
+    private get _skeletonManagerService(): SheetSkeletonManagerService {
+        return this._renderManagerService.getRenderById(
+            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        )!.with(SheetSkeletonManagerService);
+    }
+
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -70,8 +80,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         this._groupDrawingListener();
 
         this._focusDrawingListener();
-
-        this._drawingAddListener();
     }
 
     /**
@@ -182,7 +190,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService),
+            transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService),
             sheetTransform,
         };
 
@@ -213,7 +221,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     }
 
     private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<ISheetDrawingPosition> {
-        const selections = this._selectionManagerService.getSelections();
+        const selections = this._selectionManagerService.getCurrentSelections();
         let range: IRange = {
             startRow: 0,
             endRow: 0,
@@ -224,7 +232,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             range = selections[selections.length - 1].range;
         }
 
-        const rangeWithCoord = this._selectionRenderService.attachRangeWithCoord(range);
+        const rangeWithCoord = attachRangeWithCoord(this._skeletonManagerService.getCurrent()!.skeleton, range);
         if (rangeWithCoord == null) {
             return;
         }
@@ -338,7 +346,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
                 const newDrawing: Partial<ISheetDrawing> = {
                     ...param,
-                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService) },
+                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService) },
                     sheetTransform: { ...sheetTransform },
                 };
 
@@ -398,7 +406,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
             const { sheetTransform } = drawingParam;
 
-            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService);
         });
 
         const unitId = params[0].unitId;

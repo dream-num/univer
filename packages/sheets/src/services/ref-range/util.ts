@@ -24,7 +24,7 @@ import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutat
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
-import type { SelectionManagerService } from '../selection-manager.service';
+import type { SheetsSelectionsService } from '../selections/selection-manager.service';
 import type {
     EffectRefRangeParams,
     IDeleteRangeMoveLeftCommand,
@@ -965,7 +965,7 @@ export const handleDefaultRangeChangeWithEffectRefCommands = (range: IRange, com
     return resultRange;
 };
 
-export const handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SelectionManagerService }) => {
+export const handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SheetsSelectionsService }) => {
     const effectRanges = getEffectedRangesOnCommand(commandInfo as EffectRefRangeParams, deps);
     if (effectRanges.some((effectRange) => Rectangle.intersects(effectRange, range))) {
         return handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
@@ -1115,7 +1115,7 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
 }
 
 // eslint-disable-next-line max-lines-per-function
-export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: { selectionManagerService: SelectionManagerService }) {
+export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: { selectionManagerService: SheetsSelectionsService }) {
     const { selectionManagerService } = deps;
     switch (command.id) {
         case EffectRefRangId.MoveColsCommandId: {
@@ -1179,7 +1179,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
         case EffectRefRangId.DeleteRangeMoveUpCommandId:
         case EffectRefRangId.InsertRangeMoveDownCommandId: {
             const params = command;
-            const range = params.params?.range || selectionManagerService.getSelectionRanges()?.[0];
+            const range = params.params?.range || selectionManagerService.getCurrentSelections()?.map((s) => s.range)?.[0];
             if (!range) {
                 return [];
             }
@@ -1188,7 +1188,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
         case EffectRefRangId.DeleteRangeMoveLeftCommandId:
         case EffectRefRangId.InsertRangeMoveRightCommandId: {
             const params = command;
-            const range = params.params?.range || selectionManagerService.getSelectionRanges()?.[0];
+            const range = params.params?.range || selectionManagerService.getCurrentSelections()?.map((s) => s.range)?.[0];
             if (!range) {
                 return [];
             }

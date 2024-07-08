@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import {
     Disposable,
     DisposableCollection,
     ICommandService,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
 import type { IMoveRangeCommandParams } from '@univerjs/sheets';
-import { MoveRangeCommand, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
+import { MoveRangeCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 
-@OnLifecycle(LifecycleStages.Steady, MoveRangeController)
-export class MoveRangeController extends Disposable {
+export class MoveRangeRenderController extends Disposable implements IRenderModule {
     constructor(
-        @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        private readonly _context: IRenderContext<Workbook>,
+        @Inject(ISheetSelectionRenderService) private readonly _selectionRenderService: ISheetSelectionRenderService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(ICommandService) private readonly _commandService: ICommandService
     ) {
         super();
@@ -44,68 +43,56 @@ export class MoveRangeController extends Disposable {
         const disposableCollection = new DisposableCollection();
 
         this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe(() => {
-                    // Each range change requires re-listening
-                    disposableCollection.dispose();
+            this._selectionManagerService.selectionMoveEnd$.subscribe(() => {
+                // Each range change requires re-listening
+                disposableCollection.dispose();
 
-                    const current = this._selectionManagerService.getCurrent();
+                const selectionControls = this._selectionRenderService.getSelectionControls();
+                selectionControls.forEach((controlSelection) => {
+                    disposableCollection.add(
+                        toDisposable(
+                            controlSelection.selectionMoved$.subscribe((_toRange) => {
+                                if (!_toRange) {
+                                    return;
+                                }
+                                const _fromRange = controlSelection.model.getRange();
+                                const fromRange: IRange = {
+                                    startRow: _fromRange.startRow,
+                                    startColumn: _fromRange.startColumn,
+                                    endRow: _fromRange.endRow,
+                                    endColumn: _fromRange.endColumn,
+                                    rangeType: _fromRange.rangeType,
+                                };
+                                const toRange: IRange = {
+                                    startRow: _toRange.startRow,
+                                    startColumn: _toRange.startColumn,
+                                    endRow: _toRange.endRow,
+                                    endColumn: _toRange.endColumn,
+                                    // rangeType must equal to fromRange
+                                    rangeType: _fromRange.rangeType,
+                                };
 
-                    /**
-                     * Moving the selection only responds to regular selections;
-                     * it does not apply to selections for features like formulas or charts.
-                     */
-                    if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                        return;
-                    }
+                                if (
+                                    fromRange.startRow === toRange.startRow &&
+                                    fromRange.startColumn === toRange.startColumn
+                                ) {
+                                    return;
+                                }
 
-                    const selectionControls = this._selectionRenderService.getSelectionControls();
-                    selectionControls.forEach((controlSelection) => {
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionMoved$.subscribe((_toRange) => {
-                                    if (!_toRange) {
-                                        return;
-                                    }
-                                    const _fromRange = controlSelection.model.getRange();
-                                    const fromRange: IRange = {
-                                        startRow: _fromRange.startRow,
-                                        startColumn: _fromRange.startColumn,
-                                        endRow: _fromRange.endRow,
-                                        endColumn: _fromRange.endColumn,
-                                        rangeType: _fromRange.rangeType,
-                                    };
-                                    const toRange: IRange = {
-                                        startRow: _toRange.startRow,
-                                        startColumn: _toRange.startColumn,
-                                        endRow: _toRange.endRow,
-                                        endColumn: _toRange.endColumn,
-                                        // rangeType must equal to fromRange
-                                        rangeType: _fromRange.rangeType,
-                                    };
+                                if (toRange.startRow < 0 || toRange.startColumn < 0) {
+                                    return;
+                                }
 
-                                    if (
-                                        fromRange.startRow === toRange.startRow &&
-                                        fromRange.startColumn === toRange.startColumn
-                                    ) {
-                                        return;
-                                    }
-
-                                    if (toRange.startRow < 0 || toRange.startColumn < 0) {
-                                        return;
-                                    }
-
-                                    const params: IMoveRangeCommandParams = {
-                                        fromRange,
-                                        toRange,
-                                    };
-                                    this._commandService.executeCommand(MoveRangeCommand.id, params);
-                                })
-                            )
-                        );
-                    });
-                })
-            )
+                                const params: IMoveRangeCommandParams = {
+                                    fromRange,
+                                    toRange,
+                                };
+                                this._commandService.executeCommand(MoveRangeCommand.id, params);
+                            })
+                        )
+                    );
+                });
+            })
         );
     };
 }

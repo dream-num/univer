@@ -23,7 +23,7 @@ import {
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { CURSOR_TYPE, Rect } from '@univerjs/engine-render';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
+import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
@@ -70,7 +70,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
     ) {
         super();
 
@@ -240,7 +240,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
 
         this._hoverMenu.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             const currentColumn = this._currentColumn;
-            const currentSelectionDatas = this._selectionManagerService.getSelectionRanges();
+            const currentSelectionDatas = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
             const menuInSelections: boolean = !!currentSelectionDatas
                 ?.filter((range) => range.rangeType === RANGE_TYPE.COLUMN)
                 .find((data) => {
@@ -274,7 +274,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
         return {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [
                 {
                     range: {

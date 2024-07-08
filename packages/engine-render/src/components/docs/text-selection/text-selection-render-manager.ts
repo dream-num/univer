@@ -104,6 +104,7 @@ export interface ITextSelectionInnerParam {
     isEditing: boolean;
     style: ITextSelectionStyle;
     segmentPage: number;
+    options?: { [key: string]: boolean };
 }
 
 export interface IActiveTextRange {
@@ -122,6 +123,7 @@ export interface ITextSelectionRenderManager {
     readonly onInputBefore$: Observable<Nullable<IEditorInputConfig>>;
     readonly onKeydown$: Observable<Nullable<IEditorInputConfig>>;
     readonly onInput$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onPointerDown$: Observable<void>;
     readonly onCompositionstart$: Observable<Nullable<IEditorInputConfig>>;
     readonly onCompositionupdate$: Observable<Nullable<IEditorInputConfig>>;
     readonly onCompositionend$: Observable<Nullable<IEditorInputConfig>>;
@@ -141,7 +143,9 @@ export interface ITextSelectionRenderManager {
     setStyle(style: ITextSelectionStyle): void;
     resetStyle(): void;
     removeAllTextRanges(): void;
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean): void;
+
+    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean, options?: { [key: string]: boolean }): void;
+
     sync(): void;
     activate(x: number, y: number): void;
     deactivate(): void;
@@ -196,6 +200,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private readonly _onBlur$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onBlur$ = this._onBlur$.asObservable();
+
+    private readonly _onPointerDown$ = new Subject<void>();
+    readonly onPointerDown$ = this._onPointerDown$.asObservable();
+
     private _container!: HTMLDivElement;
     private _inputParent!: HTMLDivElement;
     private _input!: HTMLDivElement;
@@ -267,7 +275,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._isSelectionEnabled = false;
     }
 
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true) {
+    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         const {
             _scene: scene, _docSkeleton: docSkeleton, _document: document,
             _currentSegmentId: segmentId, _currentSegmentPage: segmentPage,
@@ -291,6 +299,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             segmentPage,
             style,
             isEditing,
+            options,
         });
 
         this._updateInputPosition();
@@ -988,6 +997,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             fromEvent(this._input, 'focus').subscribe((e) => {
                 this._eventHandle(e, (config) => {
                     this._onFocus$.next(config);
+                });
+            })
+        );
+
+        this.disposeWithMe(
+            fromEvent(this._input, 'pointerdown').subscribe((e) => {
+                this._eventHandle(e, () => {
+                    this._onBlur$.next();
                 });
             })
         );

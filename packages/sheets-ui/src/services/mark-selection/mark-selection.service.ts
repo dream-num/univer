@@ -15,14 +15,15 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ThemeService, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
-import { ISelectionRenderService } from '../selection/selection-render.service';
+// import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SelectionControl } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 
 export interface IMarkSelectionService {
     addShape(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;
@@ -50,15 +51,9 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     constructor(
         @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
-
-        const selectionMovingStartOb = this._selectionRenderService.selectionMoveStart$.subscribe(() => {
-            this.removeAllShapes();
-        });
-        this.disposeWithMe(toDisposable(selectionMovingStartOb));
     }
 
     addShape(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {
@@ -96,15 +91,15 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
             const { style } = selection;
             const renderUnit = this._renderManagerService.getRenderById(unitId);
-            const scene = renderUnit?.scene;
-            const { rangeWithCoord, primaryWithCoord } =
-                this._selectionRenderService.attachSelectionWithCoord(selection);
+            if (!renderUnit) return;
 
             const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
-            if (!scene || !skeleton) return;
+            if (!skeleton) return;
 
+            const { scene } = renderUnit;
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
             const control = new SelectionControl(scene, zIndex, false, this._themeService);
+            const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISheetSelectionRenderService).attachSelectionWithCoord(selection);
             control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
             shape.control = control;
         });

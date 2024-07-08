@@ -61,7 +61,7 @@ export class UniverDocsThreadCommentUIPlugin extends Plugin {
 
     private _initRenderModule() {
         [DocThreadCommentRenderController].forEach((dep) => {
-            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep);
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep as unknown as Dependency);
         });
     }
 }

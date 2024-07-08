@@ -26,7 +26,7 @@ import {
 } from '@univerjs/core';
 import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
+import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
@@ -49,7 +49,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
     ) {
@@ -104,7 +104,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
     private _scrollToSelectionForExpand(param: IExpandSelectionCommandParams) {
         setTimeout(() => {
-            const selection = this._selectionManagerService.getLast();
+            const selection = this._selectionManagerService.getCurrentLastSelection();
             if (selection == null) {
                 return;
             }
@@ -343,8 +343,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             }
 
             const _currentScroll: Readonly<Nullable<IScrollManagerParam>> = scrollManagerService.getCurrentScrollInfo();
-            const { unitId } = this._context;
-            const sheetId = workbook.getActiveSheet()!.getSheetId();
+            // const { unitId } = this._context;
+            // const sheetId = workbook.getActiveSheet()!.getSheetId();
             // const {
             //     sheetViewStartRow = 0,
             //     sheetViewStartColumn = 0,
@@ -387,7 +387,6 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             // cancelInertiaAnimation();
             if (!_pointerScrolling) return;
             if (!viewportMain) return;
-            // console.log('spreadsheet into moving...........');
             const e = evt as IPointerEvent | IMouseEvent;
             const deltaX = -(e.offsetX - lastPointerPos.x);
             const deltaY = -(e.offsetY - lastPointerPos.y);
@@ -516,7 +515,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
     }
 
     private _scrollToSelection(targetIsActualRowAndColumn = true) {
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (selection == null) {
             return;
         }

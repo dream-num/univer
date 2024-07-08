@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { ICommandService, IConfigService, IPermissionService, IUniverInstanceService, LocaleService, nameCharacterCheck, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IPermissionService, IUniverInstanceService, LocaleService, nameCharacterCheck, UniverInstanceType } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import {
     InsertSheetMutation,
@@ -32,7 +32,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { IConfirmService, Menu, UI_CONFIG_KEY, useObservable } from '@univerjs/ui';
+import { IConfirmService, Menu, useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -40,7 +40,6 @@ import { LockSingle } from '@univerjs/icons';
 import { merge } from 'rxjs';
 import { Quantity } from '@wendellhu/redi';
 import { SheetMenuPosition } from '../../../controllers/menu/menu';
-import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { useActiveWorkbook } from '../../../components/hook';
@@ -64,7 +63,6 @@ export function SheetBarTabs() {
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
-    const selectionRenderService = useDependency(ISelectionRenderService);
     const editorBridgeService = useDependency(IEditorBridgeService, Quantity.OPTIONAL);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
@@ -72,11 +70,6 @@ export function SheetBarTabs() {
 
     const workbook = useActiveWorkbook()!;
     const permissionService = useDependency(IPermissionService);
-
-    const configService = useDependency(IConfigService);
-    const uiConfigs = configService.getConfig<{ contextMenu?: boolean }>(UI_CONFIG_KEY);
-
-    const contextMenu = uiConfigs?.contextMenu ?? true;
 
     const updateSheetItems = useCallback(() => {
         const currentSubUnitId = workbook.getActiveSheet()?.getSheetId() || '';
@@ -293,7 +286,8 @@ export function SheetBarTabs() {
     };
 
     const focusTabEditor = () => {
-        selectionRenderService.endSelection();
+        // FIXME@Dushusir: too strongly coupled
+        // selectionRenderService.endSelection();
 
         // There is an asynchronous operation in endSelection, which will trigger blur immediately after focus, so it must be wrapped with setTimeout.
         setTimeout(() => {
@@ -392,8 +386,6 @@ export function SheetBarTabs() {
     };
 
     const onVisibleChange = (visible: boolean) => {
-        if (!contextMenu) return;
-
         if (editorBridgeService?.isForceKeepVisible()) {
             return;
         }
@@ -417,7 +409,6 @@ export function SheetBarTabs() {
             visible={visible}
             align={{ offset }}
             trigger={['contextMenu']}
-            disabled={!contextMenu}
             overlay={(
                 <Menu
                     menuType={SheetMenuPosition.SHEET_BAR}

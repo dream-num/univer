@@ -530,7 +530,6 @@ export class Engine extends ThinEngine<Scene> {
                 deviceEvent.currentState = this.pointer[PointerInput.Horizontal];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
-                // console.log('pointerDownEvent_clientX');
             }
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
@@ -538,7 +537,6 @@ export class Engine extends ThinEngine<Scene> {
                 deviceEvent.currentState = this.pointer[PointerInput.Vertical];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
-                // console.log('pointerDownEvent_clientY');
             }
 
             // evt.button + 2  ---> leftClick: 2, middleClick: 3, rightClick:4
@@ -546,7 +544,6 @@ export class Engine extends ThinEngine<Scene> {
             deviceEvent.previousState = previousButton;
             deviceEvent.currentState = this.pointer[evt.button + 2];
             this.onInputChanged$.emitEvent(deviceEvent);
-            // console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this._pointer);
         };
 
         this._pointerUpEvent = (_evt: Event) => {
@@ -647,11 +644,13 @@ export class Engine extends ThinEngine<Scene> {
             this.onInputChanged$.emitEvent(deviceEvent);
         };
 
-        this._pointerBlurEvent = (evt: any) => {
+        this._pointerBlurEvent = () => {
             if (this._mouseId >= 0 && this.getCanvasElement().hasPointerCapture(this._mouseId)) {
-                this.getCanvasElement().releasePointerCapture(this._mouseId);
-                this._remainCapture = this._mouseId;
-                this._mouseId = -1;
+                // NOTE: @wzhudev comment so the canvas could keep capturing pointer events.
+                // May lead to unknown problems.
+                // this.getCanvasElement().releasePointerCapture(this._mouseId);
+                // this._remainCapture = this._mouseId;
+                // this._mouseId = -1;
             }
 
             this.pointer = {};

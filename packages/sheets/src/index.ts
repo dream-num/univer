@@ -46,6 +46,7 @@ export {
 export { rangeMerge, createTopMatrixFromRanges, createTopMatrixFromMatrix, findAllRectangle, RangeMergeUtil } from './basics/rangeMerge';
 export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationTarget } from './commands/commands/utils/target-util';
 export { alignToMergedCellsBorders, getCellAtRowCol, setEndForRange, isSingleCellSelection } from './commands/commands/utils/selection-utils';
+export { getSelectionsService } from './commands/utils/selection-command-util';
 export { followSelectionOperation, getPrimaryForRange } from './commands/commands/utils/selection-utils';
 export { handleDeleteRangeMutation } from './commands/utils/handle-range-mutation';
 export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/utils/handle-range-mutation';
@@ -57,10 +58,12 @@ export * from './services/permission/permission-point';
 export { WorksheetPermissionService } from './services/permission/worksheet-permission/worksheet-permission.service';
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 export {
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
+    SheetsSelectionsService,
+    WorkbookSelections,
     SelectionMoveType,
-} from './services/selection-manager.service';
+    DISABLE_NORMAL_SELECTIONS,
+} from './services/selections/selection-manager.service';
+export { IRefSelectionsService } from './services/selections/ref-selections.service';
 
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { NumfmtService } from './services/numfmt/numfmt.service';

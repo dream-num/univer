@@ -145,6 +145,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
     }
 
     highlightToSelection() {
+        if (!this._currentCell) return;
         return makeCellToSelection(this._currentCell);
     }
 

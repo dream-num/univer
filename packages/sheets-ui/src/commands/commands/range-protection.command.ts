@@ -17,7 +17,7 @@
 import type { ICommand, Workbook } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import type { IRangeProtectionRule } from '@univerjs/sheets';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, RangeProtectionRuleModel, SelectionManagerService, SetRangeProtectionMutation, SetWorksheetProtectionMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetProtectionMutation, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { UnitObject } from '@univerjs/protocol';
 import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionPanelModel } from '../../services/permission/sheet-permission-panel.model';
@@ -228,7 +228,7 @@ export const DeleteRangeProtectionFromContextMenuCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
 
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -240,7 +240,7 @@ export const DeleteRangeProtectionFromContextMenuCommand: ICommand = {
         if (worksheetRule?.permissionId && worksheetRule?.name) {
             return commandService.executeCommand(DeleteWorksheetProtectionCommand.id, { unitId, subUnitId, rule: worksheetRule });
         } else {
-            const selectRange = selectionManagerService.getLast()?.range;
+            const selectRange = selectionManagerService.getCurrentLastSelection()?.range;
             if (!selectRange) {
                 return false;
             }
@@ -280,7 +280,7 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
@@ -300,7 +300,7 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
             await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: true });
             return true;
         } else {
-            const selectRange = selectionManagerService.getLast()?.range;
+            const selectRange = selectionManagerService.getCurrentLastSelection()?.range;
             if (!selectRange) {
                 return false;
             }

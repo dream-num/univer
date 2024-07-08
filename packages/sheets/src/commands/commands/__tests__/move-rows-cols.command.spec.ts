@@ -31,7 +31,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../mutations/move-rows-cols.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
@@ -62,18 +62,12 @@ describe('Test move rows cols', () => {
             SetSelectionsOperation,
         ].forEach((c) => commandService.registerCommand(c));
         get(MergeCellController);
-        const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
     });
 
     function selectRow(rowStart: number, rowEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionsService);
         const endColumn = getColCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
                 primary: {
@@ -92,9 +86,9 @@ describe('Test move rows cols', () => {
     }
 
     function selectColumn(columnStart: number, columnEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionsService);
         const endRow = getRowCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: {
                     startRow: 0,
@@ -161,8 +155,8 @@ describe('Test move rows cols', () => {
     }
 
     function getCurrentSelection(): IRange {
-        const selectionManagerService = get(SelectionManagerService);
-        const currentSelection = selectionManagerService.getSelections();
+        const selectionManagerService = get(SheetsSelectionsService);
+        const currentSelection = selectionManagerService.getCurrentSelections();
         if (!currentSelection) {
             throw new Error('No current selection');
         }

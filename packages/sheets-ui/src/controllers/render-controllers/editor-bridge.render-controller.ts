@@ -21,9 +21,8 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
     SetWorksheetActiveOperation,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { merge, takeUntil } from 'rxjs';
@@ -40,7 +39,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
     ) {
         super();
@@ -82,10 +81,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _handleSelectionChange(params: Nullable<ISelectionWithStyle[]>) {
-        const current = this._selectionManagerService.getCurrent();
-
         // The editor only responds to regular selections.
-        if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) return;
         if (this._editorBridgeService.isVisible().visible) return;
 
         const primary = params?.[params.length - 1]?.primary;
@@ -104,12 +100,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 return;
             }
 
-            const current = this._selectionManagerService.getCurrent();
-            if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                return;
-            }
-
-            // this._editorBridgeService.show(DeviceInputEventType.Dblclick);
             this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,
@@ -137,25 +127,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             return;
         }
 
-        this._selectionManagerService.makeDirty(false);
         this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
             visible: false,
             eventType: DeviceInputEventType.PointerDown,
         });
-
-        /**
-         * Hiding the editor triggers a SetRangeValuesMutation which saves the content.
-         * This mutation, in turn, triggers a refresh of the skeleton,
-         * causing the selection to update. In most scenarios,
-         * this update is reasonable. However, when clicking on another cell and exiting the edit,
-         * this causes the selection to be reset. Therefore,
-         * a makeDirty method has been added here to block the refresh of selection.
-         * The reason for using setTimeout is that it needs to wait for the process
-         * to finish before allowing the refresh of the selection.
-         */
-        setTimeout(() => {
-            this._selectionManagerService.makeDirty(true);
-        }, 0);
     }
 
     private _initialRangeSelector() {
@@ -169,7 +144,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
          */
         this.disposeWithMe(
             this._rangeSelectorService.openSelector$.subscribe(() => {
-                const selectionWithStyle = this._selectionManagerService.getSelections();
+                const selectionWithStyle = this._selectionManagerService.getCurrentSelections();
                 const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
 
                 if (!sheetId || !sheetName) return;

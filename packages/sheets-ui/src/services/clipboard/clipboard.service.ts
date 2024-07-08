@@ -25,6 +25,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
+    ThemeService,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -32,9 +33,8 @@ import {
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     getPrimaryForRange,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
     SetSelectionsOperation,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -47,6 +47,7 @@ import { IMarkSelectionService } from '../mark-selection/mark-selection.service'
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import { rangeToDiscreteRange, virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
+import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 
@@ -117,7 +118,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     constructor(
         @ILogService private readonly _logService: ILogService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -125,6 +126,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @INotificationService private readonly _notificationService: INotificationService,
         @IPlatformService private readonly _platformService: IPlatformService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ErrorService) private readonly _errorService: ErrorService,
         @Inject(Injector) private readonly _injector: Injector
@@ -153,7 +155,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     async copy(copyType = COPY_TYPE.COPY): Promise<boolean> {
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return false; // maybe we should notify user that there is no selection
         }
@@ -187,7 +189,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // 5. mark the copy range
         this._markSelectionService.removeAllShapes();
 
-        const style = this._selectionManagerService.createCopyPasteSelection();
+        const style = createCopyPasteSelectionStyle(this._themeService);
         this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
 
         return true;
@@ -727,7 +729,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const setSelectionsParam: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [{
                 range: {
                     startRow,
@@ -746,7 +747,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _getPastingTarget() {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         return {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet?.getSheetId(),

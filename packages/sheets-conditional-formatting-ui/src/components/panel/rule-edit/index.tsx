@@ -23,7 +23,7 @@ import { Button, Select } from '@univerjs/design';
 
 import { RangeSelector } from '@univerjs/ui';
 import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
-import { RemoveSheetMutation, SelectionManagerService, setEndForRange, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
@@ -55,7 +55,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
-    const selectionManagerService = useDependency(SelectionManagerService);
+    const selectionManagerService = useDependency(SheetsSelectionsService);
     const unitId = getUnitId(univerInstanceService);
     const subUnitId = getSubUnitId(univerInstanceService);
 
@@ -64,7 +64,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const rangeString = useMemo(() => {
         let ranges = props.rule?.ranges;
         if (!ranges?.length) {
-            ranges = selectionManagerService.getSelectionRanges() ?? [];
+            ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range) ?? [];
         }
         rangeResult.current = ranges;
         if (!ranges?.length) {

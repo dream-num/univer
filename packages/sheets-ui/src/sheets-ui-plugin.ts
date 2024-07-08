@@ -34,7 +34,6 @@ import { HeaderMoveRenderController } from './controllers/render-controllers/hea
 import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
-import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
 import { SheetsRenderService } from './services/sheets-render.service';
 import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
@@ -50,7 +49,7 @@ import { EditorBridgeService, IEditorBridgeService } from './services/editor-bri
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
-import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
+import { SheetSelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
@@ -82,8 +81,9 @@ import { SheetPermissionPanelModel } from './services/permission/sheet-permissio
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
-import { MoveRangeController } from './controllers/move-range.controller';
-import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
+import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
+import { MoveRangeRenderController } from './controllers/move-range.controller';
+import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -102,57 +102,55 @@ export class UniverSheetsUIPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
-        (
+        ([
+            // services
+            [ShortcutExperienceService],
+            [IEditorBridgeService, { useClass: EditorBridgeService }],
+            [ISheetClipboardService, { useClass: SheetClipboardService }],
+            [ISheetBarService, { useClass: SheetBarService }],
+            [IFormatPainterService, { useClass: FormatPainterService }],
+            [ICellEditorManagerService, { useClass: CellEditorManagerService }],
+            [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
+            [IAutoFillService, { useClass: AutoFillService }],
+            [SheetPrintInterceptorService],
+
+            [ScrollManagerService],
+            // This would be removed from global injector and moved into RenderUnit provider.
+            // [SheetSkeletonManagerService],
+            [IStatusBarService, { useClass: StatusBarService }],
+            [IMarkSelectionService, { useClass: MarkSelectionService }],
+            [HoverManagerService],
+            [DragManagerService],
+            [SheetCanvasPopManagerService],
+            [CellAlertManagerService],
+
+            // controllers
+            [ActiveWorksheetController],
+            [AutoHeightController],
+            [FormulaEditorController],
+            [HeaderFreezeRenderController],
+            [SheetClipboardController],
+            [SheetsRenderService],
             [
-                // services
-                [ShortcutExperienceService],
-                [IEditorBridgeService, { useClass: EditorBridgeService }],
-                [ISheetClipboardService, { useClass: SheetClipboardService }],
-                [ISheetBarService, { useClass: SheetBarService }],
-                [IFormatPainterService, { useClass: FormatPainterService }],
-                [ICellEditorManagerService, { useClass: CellEditorManagerService }],
-                [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
-                [IAutoFillService, { useClass: AutoFillService }],
-                [SheetPrintInterceptorService],
+                SheetUIController,
+                {
+                    useFactory: () => this._injector.createInstance(SheetUIController, this._config),
+                },
+            ],
+            [StatusBarController],
+            [AutoFillController],
+            [FormatPainterController],
+            [SheetsDefinedNameController],
 
-                [ScrollManagerService],
-                // This would be removed from global injector and moved into RenderUnit provider.
-                // [SheetSkeletonManagerService],
-                [ISelectionRenderService, { useClass: SelectionRenderService }],
-                [IStatusBarService, { useClass: StatusBarService }],
-                [IMarkSelectionService, { useClass: MarkSelectionService }],
-                [HoverManagerService],
-                [DragManagerService],
-                [SheetCanvasPopManagerService],
-                [CellAlertManagerService],
-
-                // controllers
-                [ActiveWorksheetController],
-                [AutoHeightController],
-                [FormulaEditorController],
-                [HeaderFreezeRenderController],
-                [SheetClipboardController],
-                [SheetsRenderService],
-                [
-                    SheetUIController,
-                    {
-                        useFactory: () => this._injector.createInstance(SheetUIController, this._config),
-                    },
-                ],
-                [StatusBarController],
-                [AutoFillController],
-                [FormatPainterController],
-
-                // permission
-                [SheetPermissionPanelModel],
-                [SheetPermissionUserManagerService],
-                [WorksheetProtectionRenderService],
-                [SheetPermissionInterceptorClipboardController],
-                [SheetPermissionInterceptorBaseController],
-                [SheetPermissionInitController],
-                [MoveRangeController],
-
-            ] as Dependency[]
+            // permission
+            [SheetPermissionPanelModel],
+            [SheetPermissionUserManagerService],
+            [WorksheetProtectionRenderService],
+            [SheetPermissionInterceptorClipboardController],
+            [SheetPermissionInterceptorBaseController],
+            [SheetPermissionInitController],
+            // [MoveRangeController],
+        ] as Dependency[]
         ).forEach((d) => injector.add(d));
 
         this._injector.add(
@@ -177,10 +175,10 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     private _registerRenderBasics(): void {
         ([
-            SheetSkeletonManagerService,
-            // SelectionRenderService,// still can not get renderContext
-            SheetRenderController,
-        ]).forEach((m) => {
+            [SheetSkeletonManagerService],
+            [SheetRenderController],
+            [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
+        ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });
     }
@@ -189,42 +187,37 @@ export class UniverSheetsUIPlugin extends Plugin {
     // a correct skeleton when they get loaded.
     private _registerRenderModules(): void {
         ([
-            // https://github.com/dream-num/univer-pro/issues/669
-            // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).
-            // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
-            // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
-            HeaderMoveRenderController,
-            SelectionRenderController,
-            HeaderFreezeRenderController,
-            HeaderUnhideRenderController,
-            HeaderResizeRenderController,
+            [HeaderMoveRenderController],
+            [HeaderFreezeRenderController],
+            [HeaderUnhideRenderController],
+            [HeaderResizeRenderController],
+
             // Caution: ScrollRenderController should placed before ZoomRenderController
-            // because ZoomRenderController would change scrollInfo in currentSkeletonBefore$
-            // currentSkeletonBefore$ --> ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
-            SheetsScrollRenderController,
-            SheetsZoomRenderController,
-            FormatPainterRenderController,
-            HeaderMenuRenderController,
-            CellAlertRenderController,
-            ForceStringAlertRenderController,
-            MarkSelectionRenderController,
-            HoverRenderController,
-            DragRenderController,
-            ForceStringRenderController,
-            CellCustomRenderController,
-            SheetContextMenuRenderController,
+            // because ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
+            [SheetsScrollRenderController],
+            [SheetsZoomRenderController],
+
+            [FormatPainterRenderController],
+            [HeaderMenuRenderController],
+            [CellAlertRenderController],
+            [ForceStringAlertRenderController],
+            [MarkSelectionRenderController],
+            [HoverRenderController],
+            [DragRenderController],
+            [ForceStringRenderController],
+            [CellCustomRenderController],
+            [SheetContextMenuRenderController],
+            [MoveRangeRenderController],
 
             // editor
-            EditorBridgeRenderController,
-            EditingRenderController,
+            [EditorBridgeRenderController],
+            [EditingRenderController],
 
             // permission
-            SheetPermissionInterceptorCanvasRenderController,
-            SheetPermissionInterceptorFormulaRenderController,
-            SheetPermissionRenderController,
-
-            SheetSkeletonRenderController,
-        ]).forEach((m) => {
+            [SheetPermissionInterceptorCanvasRenderController],
+            [SheetPermissionInterceptorFormulaRenderController],
+            [SheetPermissionRenderController],
+        ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });
     }

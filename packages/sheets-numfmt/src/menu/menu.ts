@@ -19,8 +19,8 @@ import {
     INumfmtService,
     RangeProtectionPermissionEditPoint,
     RemoveNumfmtMutation,
-    SelectionManagerService,
     SetNumfmtMutation,
+    SheetsSelectionsService,
     WorkbookEditablePermission,
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
@@ -104,7 +104,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
     const commandService = accessor.get(ICommandService);
     const localeService = accessor.get(LocaleService);
 
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const value$ = deriveStateFromActiveSheet$(univerInstanceService, '', ({ workbook, worksheet }) => new Observable((subscribe) =>
         merge(
             selectionManagerService.selectionMoveEnd$,
@@ -118,7 +118,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
                 return () => disposable.dispose();
             })
         ).subscribe(() => {
-            const selections = selectionManagerService.getSelections();
+            const selections = selectionManagerService.getCurrentSelections();
             if (selections && selections[0]) {
                 const range = selections[0].range;
                 const row = range.startRow;

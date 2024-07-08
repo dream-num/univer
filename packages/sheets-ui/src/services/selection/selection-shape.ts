@@ -121,9 +121,9 @@ export class SelectionControl extends Disposable {
     private _dispose$ = new BehaviorSubject<SelectionControl>(this);
     readonly dispose$ = this._dispose$.asObservable();
 
-    readonly selectionMoving$ = new Subject<Nullable<IRangeWithCoord>>();
-    readonly selectionMoved$ = new Subject<Nullable<IRangeWithCoord>>();
-    readonly selectionScaling$ = new Subject<Nullable<IRangeWithCoord>>();
+    readonly selectionMoving$ = new Subject<IRangeWithCoord>();
+    readonly selectionMoved$ = new Subject<IRangeWithCoord>();
+    readonly selectionScaling$ = new Subject<IRangeWithCoord>();
     readonly selectionScaled$ = new Subject<Nullable<IRangeWithCoord>>();
     readonly selectionFilling$ = new Subject<Nullable<IRangeWithCoord>>();
 
@@ -306,14 +306,6 @@ export class SelectionControl extends Disposable {
         this.bottomControl.evented = state;
     }
 
-    enableHeaderHighlight() {
-        this._isHelperSelection = true;
-    }
-
-    disableHeaderHighlight() {
-        this._isHeaderHighlight = false;
-    }
-
     refreshSelectionFilled(val: IRangeWithCoord) {
         this._selectionFilled$.next(val);
     }
@@ -343,7 +335,6 @@ export class SelectionControl extends Disposable {
         columnHeaderHeight: number = 0,
         style?: Nullable<ISelectionStyle>,
         highlight?: Nullable<ISelectionCellWithMergeInfo>
-        // rangeType?: RANGE_TYPE
     ) {
         this._selectionModel.setValue(newSelectionRange, highlight);
         if (style == null) {

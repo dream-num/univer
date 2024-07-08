@@ -21,13 +21,14 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetMenuPosition } from '../menu/menu';
 import { SHEET_VIEW_KEY } from '../../common/keys';
+import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
+import { attachSelectionWithCoord } from '../../services/selection/util';
 
 /**
  * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct
@@ -37,8 +38,8 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
         super();
 
@@ -51,13 +52,15 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         // Content range context menu
         const spreadsheetSubscription = spreadsheetPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
-                const selections = this._selectionManagerService.getSelections();
+                const selections = this._selectionManagerService.getCurrentSelections();
                 const currentSelection = selections?.[0];
                 if (!currentSelection) {
                     return;
                 }
                 const rangeType = currentSelection.range.rangeType;
-                const range = this._selectionRenderService.attachSelectionWithCoord(currentSelection).rangeWithCoord;
+                const skeleton = this._selectionRenderService.getSkeleton();
+                const selectionRangeWithCoord = attachSelectionWithCoord(currentSelection, skeleton);
+                const range = selectionRangeWithCoord.rangeWithCoord;
                 const isPointerInRange = () => {
                     if (!range) {
                         return false;

@@ -18,16 +18,15 @@ import type { IRange, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeCommand,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetColHiddenCommand,
     SetColHiddenMutation,
     SetRangeValuesMutation,
     SetRowHiddenCommand,
     SetRowHiddenMutation,
     SetSelectionsOperation,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import type { IDisposable, Injector } from '@wendellhu/redi';
@@ -101,13 +100,8 @@ describe('Test hide row col confirm commands', () => {
 
     describe('Hide row', () => {
         it('Will apply when select some rows', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
                 {
                     range: { startRow: 1, startColumn: Number.NaN, endRow: 1, endColumn: Number.NaN, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -137,13 +131,8 @@ describe('Test hide row col confirm commands', () => {
         });
 
         it('Will not apply when select all rows', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: Number.NaN, endRow: 999, endColumn: Number.NaN, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -166,13 +155,8 @@ describe('Test hide row col confirm commands', () => {
 
     describe('Hide col', () => {
         it('Will apply when select some cols', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
                 {
                     range: { startRow: Number.NaN, startColumn: 1, endRow: Number.NaN, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,
@@ -202,13 +186,8 @@ describe('Test hide row col confirm commands', () => {
         });
 
         it('Will not apply when select all cols', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            const selectionManager = get(SheetsSelectionsService);
+            selectionManager.addSelections([
                 {
                     range: { startRow: Number.NaN, startColumn: 0, endRow: Number.NaN, endColumn: 19, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,

@@ -26,7 +26,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
 import {
     SetColHiddenMutation,
@@ -68,7 +68,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: ranges.map((r) => ({ range: r, primary: getPrimaryForRange(r, worksheet), style: null })),
         };
 
@@ -76,7 +76,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),
@@ -123,10 +123,10 @@ export const SetSelectedColsVisibleCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-selected-cols-visible',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
 
-        const ranges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
         if (!ranges?.length) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -148,12 +148,12 @@ export const SetColHiddenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-hidden',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        let ranges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+        let ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
         if (!ranges?.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService);
@@ -165,7 +165,7 @@ export const SetColHiddenCommand: ICommand = {
 
         const redoMutationParams: ISetColHiddenMutationParams = { unitId, subUnitId, ranges };
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
-            unitId, subUnitId, pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId, subUnitId,
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),
@@ -175,7 +175,7 @@ export const SetColHiddenCommand: ICommand = {
 
         const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
-            unitId, subUnitId, pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId, subUnitId,
             selections: ranges.map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),

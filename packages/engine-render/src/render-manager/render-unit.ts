@@ -16,7 +16,7 @@
 
 import type { Nullable, UnitModel, UnitType } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
-import type { DependencyIdentifier, IDisposable, Injector } from '@wendellhu/redi';
+import { type Dependency, type DependencyIdentifier, type IDisposable, type Injector, isClassDependencyItem } from '@wendellhu/redi';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
@@ -32,8 +32,6 @@ export interface IRender {
     with<T>(dependency: DependencyIdentifier<T>): T;
 }
 
-// eslint-disable-next-line ts/no-explicit-any
-export interface IRenderModuleCtor<T extends UnitModel = UnitModel> { new(unit: IRenderContext<T>, ...args: any[]): IRenderModule }
 export interface IRenderModule extends IDisposable {}
 
 /**
@@ -100,14 +98,28 @@ export class RenderUnit extends Disposable implements IRender {
         return this._injector.get(dependency);
     }
 
-    addRenderControllers(ctors: IRenderModuleCtor[]) {
-        this._initControllers(ctors);
+    addRenderDependencies(dependencies: Dependency[]) {
+        this._initDependencies(dependencies);
     }
 
-    private _initControllers(ctors: IRenderModuleCtor[]): void {
+    private _initDependencies(dependencies: Dependency[]): void {
         const j = this._injector;
 
-        ctors.forEach((ctor) => j.add([ctor, { useFactory: () => j.createInstance(ctor, this._renderContext) }]));
-        ctors.forEach((ctor) => j.get(ctor));
+        dependencies.forEach((dep) => {
+            const [identifier, implOrNull] = Array.isArray(dep) ? dep : [dep, null];
+
+            if (!implOrNull) {
+                j.add([identifier, { useFactory: () => j.createInstance(identifier, this._renderContext) }]);
+            } else if (isClassDependencyItem(implOrNull)) {
+                j.add([identifier, { useFactory: () => j.createInstance(implOrNull.useClass, this._renderContext) }]);
+            } else {
+                throw new Error('[RenderUnit]: render dependency could only be an class!');
+            }
+        });
+
+        dependencies.forEach((dep) => {
+            const [identifier] = Array.isArray(dep) ? dep : [dep, null];
+            j.get(identifier);
+        });
     }
 }

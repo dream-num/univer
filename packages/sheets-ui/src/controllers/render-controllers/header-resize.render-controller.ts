@@ -378,11 +378,11 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     // });
 
                     this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
-                        const relativeCoords = scene.getRelativeCoord(
+                        const relativeCoords = scene.getRelativeToViewportCoord(
                             Vector2.FromArray([this._startOffsetX, this._startOffsetY])
                         );
 
-                        const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords, viewPort);
+                        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords, viewPort);
 
                         const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
 

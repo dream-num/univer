@@ -35,9 +35,9 @@ import {
     INTERCEPTOR_POINT,
     INumfmtService,
     RemoveNumfmtMutation,
-    SelectionManagerService,
     SetNumfmtMutation,
     SheetInterceptorService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -74,7 +74,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         @Inject(ThemeService) private _themeService: ThemeService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @ICommandService private _commandService: ICommandService,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @INumfmtService private _numfmtService: INumfmtService,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
@@ -98,7 +98,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         const numfmtService = this._numfmtService;
         const localeService = this._localeService;
 
-        const selections = selectionManagerService.getSelectionRanges() || [];
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range) || [];
         const range = selections[0];
 
         if (!range) {
@@ -131,7 +131,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     this._previewPattern = config.value;
                     this._forceUpdate();
                 } else if (config.type === 'confirm') {
-                    const selections = selectionManagerService.getSelectionRanges() || [];
+                    const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range) || [];
                     const params: ISetNumfmtCommandParams = { values: [] };
                     const patternType = getPatternType(config.value);
                     selections.forEach((rangeInfo) => {

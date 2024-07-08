@@ -30,7 +30,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
@@ -101,7 +101,7 @@ describe('Test set range values commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManager: SelectionManagerService;
+    let selectionManager: SheetsSelectionsService;
     let getValue: (sheetId?: string) => Nullable<ICellData>;
     let getValues: (
         startRow: number,
@@ -120,13 +120,8 @@ describe('Test set range values commands', () => {
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
 
-        selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-        selectionManager.add([
+        selectionManager = get(SheetsSelectionsService);
+        selectionManager.addSelections([
             {
                 range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
                 primary: null,
@@ -706,7 +701,7 @@ describe('Test set range values commands', () => {
 
         describe('fault situations', () => {
             it('will not apply when there is no selected ranges', async () => {
-                selectionManager.clear();
+                selectionManager.clearCurrentSelections();
                 const params: ISetRangeValuesCommandParams = {
                     value: {
                         v: 'a1',

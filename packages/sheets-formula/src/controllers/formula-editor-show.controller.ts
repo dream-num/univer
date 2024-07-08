@@ -33,7 +33,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     IEditorBridgeService,
-    ISelectionRenderService,
+    ISheetSelectionRenderService,
     SelectionShape,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
@@ -48,7 +48,6 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
@@ -183,8 +182,11 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
             hasColumnHeader: false,
         };
 
-        const { scene } = this._renderManagerService.getRenderById(unitId) || {};
-        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.attachSelectionWithCoord({
+        const renderUnit = this._renderManagerService.getRenderById(unitId);
+        if (!renderUnit) return;
+
+        const { scene } = renderUnit;
+        const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISheetSelectionRenderService).attachSelectionWithCoord({
             range: arrayRange,
             primary: null,
             style,

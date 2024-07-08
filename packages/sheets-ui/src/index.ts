@@ -31,6 +31,7 @@ export {
     getSheetObject,
     getTransformCoord,
 } from './controllers/utils/component-tools';
+export { checkInHeaderRanges } from './controllers/utils/selections-tools';
 export { useActiveWorkbook, useActiveWorksheet } from './components/hook';
 export { whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
@@ -56,11 +57,12 @@ export {
 } from './services/editor-bridge.service';
 export { MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { IMarkSelectionService } from './services/mark-selection/mark-selection.service';
-export { ISelectionRenderService } from './services/selection/selection-render.service';
-export { SelectionRenderService } from './services/selection/selection-render.service';
+export { SheetSelectionRenderService } from './services/selection/selection-render.service';
+export { getAllSelection, getTopLeftSelection } from './services/selection/base-selection-render.service';
+export { BaseSelectionRenderService, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 export { SelectionControl as SelectionShape } from './services/selection/selection-shape';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
-export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
+export { SheetSkeletonManagerService, attachRangeWithCoord } from './services/sheet-skeleton-manager.service';
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { HoverManagerService } from './services/hover-manager.service';

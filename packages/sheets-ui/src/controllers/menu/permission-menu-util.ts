@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
 
@@ -38,7 +38,7 @@ export function getAddPermissionHidden$(accessor: IAccessor) {
                     }
                     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
-                    const selectionManagerService = accessor.get(SelectionManagerService);
+                    const selectionManagerService = accessor.get(SheetsSelectionsService);
                     return merge(
                         selectionManagerService.selectionMoveEnd$,
                         rangeProtectionRuleModel.ruleChange$,
@@ -48,7 +48,7 @@ export function getAddPermissionHidden$(accessor: IAccessor) {
                             const unitId = workbook.getUnitId();
                             const subUnitId = worksheet.getSheetId();
                             const subUnitRuleList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
-                            const selections = selectionManagerService.getSelections();
+                            const selections = selectionManagerService.getCurrentSelections();
                             const selectionsRanges = selections?.map((selection) => selection.range);
                             const ruleRanges = subUnitRuleList.map((rule) => rule.ranges).flat();
                             if (!selectionsRanges) {
@@ -92,7 +92,7 @@ export function getEditPermissionHidden$(accessor: IAccessor) {
                     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
 
-                    const selectionManagerService = accessor.get(SelectionManagerService);
+                    const selectionManagerService = accessor.get(SheetsSelectionsService);
                     return merge(
                         selectionManagerService.selectionMoveEnd$,
                         rangeProtectionRuleModel.ruleChange$,
@@ -102,7 +102,7 @@ export function getEditPermissionHidden$(accessor: IAccessor) {
                             const unitId = workbook.getUnitId();
                             const subUnitId = worksheet.getSheetId();
                             const subUnitRuleList = rangeRuleModel.getSubunitRuleList(unitId, subUnitId);
-                            const selectionRanges = selectionManagerService.getSelections()?.map((selection) => selection.range);
+                            const selectionRanges = selectionManagerService.getCurrentSelections()?.map((selection) => selection.range);
 
                             const ruleRanges = subUnitRuleList.map((rule) => rule.ranges).flat();
                             if (!selectionRanges?.length) {
@@ -149,7 +149,7 @@ export function getPermissionDisableBase$(accessor: IAccessor) {
                         return of(true);
                     }
                     const unitId = workbook.getUnitId();
-                    const selectionManagerService = accessor.get(SelectionManagerService);
+                    const selectionManagerService = accessor.get(SheetsSelectionsService);
                     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
                     const permission$ = permissionService.composePermission$([new WorkbookManageCollaboratorPermission(unitId).id, new WorkbookEditablePermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
@@ -164,7 +164,7 @@ export function getPermissionDisableBase$(accessor: IAccessor) {
                             if (!permission) {
                                 return true;
                             }
-                            const selections = selectionManagerService.getSelections();
+                            const selections = selectionManagerService.getCurrentSelections();
                             const selectionRanges = selections?.map((selection) => selection.range);
                             if (!selectionRanges?.length) {
                                 return false;
@@ -205,7 +205,7 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
                     const subUnitId = worksheet.getSheetId();
                     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
-                    const selectionManagerService = accessor.get(SelectionManagerService);
+                    const selectionManagerService = accessor.get(SheetsSelectionsService);
                     const permission$ = permissionService.composePermission$([new WorkbookManageCollaboratorPermission(unitId).id, new WorkbookEditablePermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
                     const ruleChange$ = merge(
                         selectionProtectionRuleModel.ruleChange$,
@@ -218,7 +218,7 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
                             if (!permission || focus) {
                                 return true;
                             }
-                            const selections = selectionManagerService.getSelections();
+                            const selections = selectionManagerService.getCurrentSelections();
                             const selectionRanges = selections?.map((selection) => selection.range);
                             if (!selectionRanges?.length) {
                                 return true;
@@ -398,7 +398,7 @@ export function getRemovePermissionDisable$(accessor: IAccessor) {
                             if (!permission) {
                                 return true;
                             }
-                            const selections = accessor.get(SelectionManagerService).getSelections();
+                            const selections = accessor.get(SheetsSelectionsService).getCurrentSelections();
                             const selectionRanges = selections?.map((selection) => selection.range);
                             if (!selectionRanges?.length || selectionRanges.length > 1) {
                                 return true;

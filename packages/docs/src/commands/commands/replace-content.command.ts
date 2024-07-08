@@ -28,6 +28,7 @@ interface IReplaceContentCommandParams {
     body: IDocumentBody; // Do not contain `\r\n` at the end.
     textRanges: ITextRangeWithStyle[];
     segmentId?: string;
+    options: { [key: string]: boolean };
 }
 
 // Replace all content with new body, and reserve undo/redo stack.
@@ -44,7 +45,7 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
 
         const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
         const prevBody = docDataModel?.getSnapshot().body;
-        const selections = textSelectionManagerService.getSelections();
+        const selections = textSelectionManagerService.getCurrentSelections();
 
         if (docDataModel == null || prevBody == null) {
             return false;

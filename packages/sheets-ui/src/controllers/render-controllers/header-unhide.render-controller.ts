@@ -118,7 +118,7 @@ export class HeaderUnhideRenderController extends RxDisposable {
     }
 
     private _update(workbook: Workbook, worksheet: Worksheet): void {
-        const skeleton = this._sheetSkeletonManagerService.getUnitSkeleton(workbook.getUnitId(), worksheet.getSheetId())?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(worksheet.getSheetId())?.skeleton;
         if (!skeleton) return;
 
         // steps to render the unhide button for the current worksheet

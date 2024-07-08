@@ -624,7 +624,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
     }
 
-    getMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+    getMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange {
         const mergeData = this._worksheetData.mergeData;
         if (!mergeData) {
             return {
@@ -1064,7 +1064,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return offsetY;
     }
 
-    getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange {
+    getSelectionMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 

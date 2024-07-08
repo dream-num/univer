@@ -20,7 +20,7 @@ import { IRenderManagerService, RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-
 import type { IFindComplete, IFindMatch, IFindMoveParams, IFindQuery, IFindReplaceProvider, IReplaceAllResult } from '@univerjs/find-replace';
 import { FindBy, FindDirection, FindModel, FindReplaceController, FindScope, IFindReplaceService } from '@univerjs/find-replace';
 import type { ISelectionWithStyle, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IScrollToCellCommandParams } from '@univerjs/sheets-ui';
 import { getCoordByCell, getSheetObject, ScrollToCellCommand, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
@@ -126,7 +126,7 @@ export class SheetFindModel extends FindModel {
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
     ) {
         super();
     }
@@ -256,7 +256,7 @@ export class SheetFindModel extends FindModel {
         let globalIndex = 0;
 
         const matchesByWorksheet = this._matchesByWorksheet.get(activeSheet.getSheetId())!;
-        const selections = this._selectionManagerService.getSelections();
+        const selections = this._selectionManagerService.getCurrentSelections();
         if (!selections?.length) {
             match = matchesByWorksheet[0];
             index = 0;
@@ -285,7 +285,7 @@ export class SheetFindModel extends FindModel {
         const checkShouldFindInSelections = (): boolean => {
             const currentWorksheet = this._workbook.getActiveSheet();
             if (!currentWorksheet) return false;
-            const currentSelections = this._selectionManagerService.getSelections();
+            const currentSelections = this._selectionManagerService.getCurrentSelections();
             const shouldFindInSelections = currentSelections?.some((selection) => !isSelectionSingleCell(selection, currentWorksheet)) ?? false;
             return shouldFindInSelections;
         };
@@ -301,7 +301,7 @@ export class SheetFindModel extends FindModel {
             const lastMatch = this.currentMatch; // temporarily store the last match to restore the position after the model changes
 
             findBySelections = checkShouldFindInSelections();
-            const currentSelections = this._selectionManagerService.getSelections();
+            const currentSelections = this._selectionManagerService.getCurrentSelections();
             const newComplete = findBySelections
                 ? this._findInSelections(currentWorksheet, currentSelections as ISelectionWithStyle[], query, unitId)
                 : this._findInWorksheet(currentWorksheet, query, unitId);
@@ -662,7 +662,7 @@ export class SheetFindModel extends FindModel {
 
         // Case 2: if there is no current match, we should find the next match that is closest to the user's current selection.
         // Still need to handle `stayInOnMatch` here.
-        const selections = this._selectionManagerService.getSelections();
+        const selections = this._selectionManagerService.getCurrentSelections();
         if (!selections?.length) {
             return [this._matches[0], 0];
         }
@@ -705,7 +705,7 @@ export class SheetFindModel extends FindModel {
 
         // Case 2: if there is no current match, we should find the next match that is closest to the user's current selection.
         // Still need to handle `stayInOnMatch` here.
-        const selections = this._selectionManagerService.getSelections();
+        const selections = this._selectionManagerService.getCurrentSelections();
         if (!selections?.length) {
             return [this._matches[0], 0];
         }

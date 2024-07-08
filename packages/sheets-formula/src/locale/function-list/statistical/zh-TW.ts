@@ -21,7 +21,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/avedev-%E5%87%BD%E6%95%B0-58fe8d65-2a84-4dc7-8052-f3f87b5c6639',
+                url: 'https://support.microsoft.com/zh-tw/office/avedev-%E5%87%BD%E6%95%B0-58fe8d65-2a84-4dc7-8052-f3f87b5c6639',
             },
         ],
         functionParameter: {
@@ -35,7 +35,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/average-%E5%87%BD%E6%95%B0-047bac88-d466-426c-a32b-8f33eb960cf6',
+                url: 'https://support.microsoft.com/zh-tw/office/average-%E5%87%BD%E6%95%B0-047bac88-d466-426c-a32b-8f33eb960cf6',
             },
         ],
         functionParameter: {
@@ -55,7 +55,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/averagea-%E5%87%BD%E6%95%B0-f5f84098-d453-4f4c-bbba-3d2c66356091',
+                url: 'https://support.microsoft.com/zh-tw/office/averagea-%E5%87%BD%E6%95%B0-f5f84098-d453-4f4c-bbba-3d2c66356091',
             },
         ],
         functionParameter: {
@@ -75,7 +75,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/averageif-%E5%87%BD%E6%95%B0-faec8e2e-0dec-4308-af69-f5576d8ac642',
+                url: 'https://support.microsoft.com/zh-tw/office/averageif-%E5%87%BD%E6%95%B0-faec8e2e-0dec-4308-af69-f5576d8ac642',
             },
         ],
         functionParameter: {
@@ -90,7 +90,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/averageifs-%E5%87%BD%E6%95%B0-48910c45-1fc0-4389-a028-f7c5c3001690',
+                url: 'https://support.microsoft.com/zh-tw/office/averageifs-%E5%87%BD%E6%95%B0-48910c45-1fc0-4389-a028-f7c5c3001690',
             },
         ],
         functionParameter: {
@@ -107,7 +107,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/beta-dist-%E5%87%BD%E6%95%B0-11188c9c-780a-42c7-ba43-9ecb5a878d31',
+                url: 'https://support.microsoft.com/zh-tw/office/beta-dist-%E5%87%BD%E6%95%B0-11188c9c-780a-42c7-ba43-9ecb5a878d31',
             },
         ],
         functionParameter: {
@@ -121,7 +121,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/beta-inv-%E5%87%BD%E6%95%B0-e84cb8aa-8df0-4cf6-9892-83a341d252eb',
+                url: 'https://support.microsoft.com/zh-tw/office/beta-inv-%E5%87%BD%E6%95%B0-e84cb8aa-8df0-4cf6-9892-83a341d252eb',
             },
         ],
         functionParameter: {
@@ -135,7 +135,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/binom-dist-%E5%87%BD%E6%95%B0-c5ae37b6-f39c-4be2-94c2-509a1480770c',
+                url: 'https://support.microsoft.com/zh-tw/office/binom-dist-%E5%87%BD%E6%95%B0-c5ae37b6-f39c-4be2-94c2-509a1480770c',
             },
         ],
         functionParameter: {
@@ -149,7 +149,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/binom-dist-range-%E5%87%BD%E6%95%B0-17331329-74c7-4053-bb4c-6653a7421595',
+                url: 'https://support.microsoft.com/zh-tw/office/binom-dist-range-%E5%87%BD%E6%95%B0-17331329-74c7-4053-bb4c-6653a7421595',
             },
         ],
         functionParameter: {
@@ -163,7 +163,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/binom-inv-%E5%87%BD%E6%95%B0-80a0370c-ada6-49b4-83e7-05a91ba77ac9',
+                url: 'https://support.microsoft.com/zh-tw/office/binom-inv-%E5%87%BD%E6%95%B0-80a0370c-ada6-49b4-83e7-05a91ba77ac9',
             },
         ],
         functionParameter: {
@@ -177,7 +177,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/chisq-dist-%E5%87%BD%E6%95%B0-8486b05e-5c05-4942-a9ea-f6b341518732',
+                url: 'https://support.microsoft.com/zh-tw/office/chisq-dist-%E5%87%BD%E6%95%B0-8486b05e-5c05-4942-a9ea-f6b341518732',
             },
         ],
         functionParameter: {
@@ -191,7 +191,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/chisq-dist-rt-%E5%87%BD%E6%95%B0-dc4832e8-ed2b-49ae-8d7c-b28d5804c0f2',
+                url: 'https://support.microsoft.com/zh-tw/office/chisq-dist-rt-%E5%87%BD%E6%95%B0-dc4832e8-ed2b-49ae-8d7c-b28d5804c0f2',
             },
         ],
         functionParameter: {
@@ -205,7 +205,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/chisq-inv-%E5%87%BD%E6%95%B0-400db556-62b3-472d-80b3-254723e7092f',
+                url: 'https://support.microsoft.com/zh-tw/office/chisq-inv-%E5%87%BD%E6%95%B0-400db556-62b3-472d-80b3-254723e7092f',
             },
         ],
         functionParameter: {
@@ -219,7 +219,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/chisq-inv-rt-%E5%87%BD%E6%95%B0-435b5ed8-98d5-4da6-823f-293e2cbc94fe',
+                url: 'https://support.microsoft.com/zh-tw/office/chisq-inv-rt-%E5%87%BD%E6%95%B0-435b5ed8-98d5-4da6-823f-293e2cbc94fe',
             },
         ],
         functionParameter: {
@@ -233,7 +233,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/chisq-test-%E5%87%BD%E6%95%B0-2e8a7861-b14a-4985-aa93-fb88de3f260f',
+                url: 'https://support.microsoft.com/zh-tw/office/chisq-test-%E5%87%BD%E6%95%B0-2e8a7861-b14a-4985-aa93-fb88de3f260f',
             },
         ],
         functionParameter: {
@@ -247,7 +247,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/confidence-norm-%E5%87%BD%E6%95%B0-7cec58a6-85bb-488d-91c3-63828d4fbfd4',
+                url: 'https://support.microsoft.com/zh-tw/office/confidence-norm-%E5%87%BD%E6%95%B0-7cec58a6-85bb-488d-91c3-63828d4fbfd4',
             },
         ],
         functionParameter: {
@@ -261,7 +261,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/confidence-t-%E5%87%BD%E6%95%B0-e8eca395-6c3a-4ba9-9003-79ccc61d3c53',
+                url: 'https://support.microsoft.com/zh-tw/office/confidence-t-%E5%87%BD%E6%95%B0-e8eca395-6c3a-4ba9-9003-79ccc61d3c53',
             },
         ],
         functionParameter: {
@@ -275,7 +275,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/correl-%E5%87%BD%E6%95%B0-995dcef7-0c0a-4bed-a3fb-239d7b68ca92',
+                url: 'https://support.microsoft.com/zh-tw/office/correl-%E5%87%BD%E6%95%B0-995dcef7-0c0a-4bed-a3fb-239d7b68ca92',
             },
         ],
         functionParameter: {
@@ -289,7 +289,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/count-%E5%87%BD%E6%95%B0-a59cd7fc-b623-4d93-87a4-d23bf411294c',
+                url: 'https://support.microsoft.com/zh-tw/office/count-%E5%87%BD%E6%95%B0-a59cd7fc-b623-4d93-87a4-d23bf411294c',
             },
         ],
         functionParameter: {
@@ -309,7 +309,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/counta-%E5%87%BD%E6%95%B0-7dc98875-d5c1-46f1-9a82-53f3219e2509',
+                url: 'https://support.microsoft.com/zh-tw/office/counta-%E5%87%BD%E6%95%B0-7dc98875-d5c1-46f1-9a82-53f3219e2509',
             },
         ],
         functionParameter: {
@@ -329,7 +329,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/countblank-%E5%87%BD%E6%95%B0-6a92d772-675c-4bee-b346-24af6bd3ac22',
+                url: 'https://support.microsoft.com/zh-tw/office/countblank-%E5%87%BD%E6%95%B0-6a92d772-675c-4bee-b346-24af6bd3ac22',
             },
         ],
         functionParameter: {
@@ -342,7 +342,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/countif-%E5%87%BD%E6%95%B0-e0de10c6-f885-4e71-abb4-1f464816df34',
+                url: 'https://support.microsoft.com/zh-tw/office/countif-%E5%87%BD%E6%95%B0-e0de10c6-f885-4e71-abb4-1f464816df34',
             },
         ],
         functionParameter: {
@@ -356,7 +356,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/countifs-%E5%87%BD%E6%95%B0-dda3dc6e-f74e-4aee-88bc-aa8c2a866842',
+                url: 'https://support.microsoft.com/zh-tw/office/countifs-%E5%87%BD%E6%95%B0-dda3dc6e-f74e-4aee-88bc-aa8c2a866842',
             },
         ],
         functionParameter: {
@@ -372,7 +372,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/covariance-p-%E5%87%BD%E6%95%B0-6f0e1e6d-956d-4e4b-9943-cfef0bf9edfc',
+                url: 'https://support.microsoft.com/zh-tw/office/covariance-p-%E5%87%BD%E6%95%B0-6f0e1e6d-956d-4e4b-9943-cfef0bf9edfc',
             },
         ],
         functionParameter: {
@@ -386,7 +386,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/covariance-s-%E5%87%BD%E6%95%B0-0a539b74-7371-42aa-a18f-1f5320314977',
+                url: 'https://support.microsoft.com/zh-tw/office/covariance-s-%E5%87%BD%E6%95%B0-0a539b74-7371-42aa-a18f-1f5320314977',
             },
         ],
         functionParameter: {
@@ -400,7 +400,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/devsq-%E5%87%BD%E6%95%B0-8b739616-8376-4df5-8bd0-cfe0a6caf444',
+                url: 'https://support.microsoft.com/zh-tw/office/devsq-%E5%87%BD%E6%95%B0-8b739616-8376-4df5-8bd0-cfe0a6caf444',
             },
         ],
         functionParameter: {
@@ -414,7 +414,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/expon-dist-%E5%87%BD%E6%95%B0-4c12ae24-e563-4155-bf3e-8b78b6ae140e',
+                url: 'https://support.microsoft.com/zh-tw/office/expon-dist-%E5%87%BD%E6%95%B0-4c12ae24-e563-4155-bf3e-8b78b6ae140e',
             },
         ],
         functionParameter: {
@@ -428,7 +428,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/f-dist-%E5%87%BD%E6%95%B0-a887efdc-7c8e-46cb-a74a-f884cd29b25d',
+                url: 'https://support.microsoft.com/zh-tw/office/f-dist-%E5%87%BD%E6%95%B0-a887efdc-7c8e-46cb-a74a-f884cd29b25d',
             },
         ],
         functionParameter: {
@@ -442,7 +442,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/f-dist-rt-%E5%87%BD%E6%95%B0-d74cbb00-6017-4ac9-b7d7-6049badc0520',
+                url: 'https://support.microsoft.com/zh-tw/office/f-dist-rt-%E5%87%BD%E6%95%B0-d74cbb00-6017-4ac9-b7d7-6049badc0520',
             },
         ],
         functionParameter: {
@@ -456,7 +456,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/f-inv-%E5%87%BD%E6%95%B0-0dda0cf9-4ea0-42fd-8c3c-417a1ff30dbe',
+                url: 'https://support.microsoft.com/zh-tw/office/f-inv-%E5%87%BD%E6%95%B0-0dda0cf9-4ea0-42fd-8c3c-417a1ff30dbe',
             },
         ],
         functionParameter: {
@@ -470,7 +470,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/f-inv-rt-%E5%87%BD%E6%95%B0-d371aa8f-b0b1-40ef-9cc2-496f0693ac00',
+                url: 'https://support.microsoft.com/zh-tw/office/f-inv-rt-%E5%87%BD%E6%95%B0-d371aa8f-b0b1-40ef-9cc2-496f0693ac00',
             },
         ],
         functionParameter: {
@@ -484,7 +484,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/f-test-%E5%87%BD%E6%95%B0-100a59e7-4108-46f8-8443-78ffacb6c0a7',
+                url: 'https://support.microsoft.com/zh-tw/office/f-test-%E5%87%BD%E6%95%B0-100a59e7-4108-46f8-8443-78ffacb6c0a7',
             },
         ],
         functionParameter: {
@@ -498,7 +498,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/fisher-%E5%87%BD%E6%95%B0-d656523c-5076-4f95-b87b-7741bf236c69',
+                url: 'https://support.microsoft.com/zh-tw/office/fisher-%E5%87%BD%E6%95%B0-d656523c-5076-4f95-b87b-7741bf236c69',
             },
         ],
         functionParameter: {
@@ -512,7 +512,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/fisherinv-%E5%87%BD%E6%95%B0-62504b39-415a-4284-a285-19c8e82f86bb',
+                url: 'https://support.microsoft.com/zh-tw/office/fisherinv-%E5%87%BD%E6%95%B0-62504b39-415a-4284-a285-19c8e82f86bb',
             },
         ],
         functionParameter: {
@@ -526,7 +526,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892 -94e4-7ad38bbeda99',
+                url: 'https://support.microsoft.com/zh-tw/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892 -94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {
@@ -540,7 +540,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS',
+                url: 'https://support.microsoft.com/zh-tw/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS',
             },
         ],
         functionParameter: {
@@ -554,7 +554,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.CONFINT',
+                url: 'https://support.microsoft.com/zh-tw/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.CONFINT',
             },
         ],
         functionParameter: {
@@ -568,7 +568,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.SEASONALITY',
+                url: 'https://support.microsoft.com/zh-tw/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.SEASONALITY',
             },
         ],
         functionParameter: {
@@ -583,7 +583,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.STAT',
+                url: 'https://support.microsoft.com/zh-tw/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.ETS.STAT',
             },
         ],
         functionParameter: {
@@ -597,7 +597,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.LINEAR',
+                url: 'https://support.microsoft.com/zh-tw/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.LINEAR',
             },
         ],
         functionParameter: {
@@ -611,7 +611,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/frequency-%E5%87%BD%E6%95%B0-44e3be2b-eca0-42cd-a3f7-fd9ea898fdb9',
+                url: 'https://support.microsoft.com/zh-tw/office/frequency-%E5%87%BD%E6%95%B0-44e3be2b-eca0-42cd-a3f7-fd9ea898fdb9',
             },
         ],
         functionParameter: {
@@ -625,7 +625,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/gamma-%E5%87%BD%E6%95%B0-ce1702b1-cf55-471d-8307-f83be0fc5297',
+                url: 'https://support.microsoft.com/zh-tw/office/gamma-%E5%87%BD%E6%95%B0-ce1702b1-cf55-471d-8307-f83be0fc5297',
             },
         ],
         functionParameter: {
@@ -639,7 +639,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/gamma-dist-%E5%87%BD%E6%95%B0-9b6f1538-d11c-4d5f-8966-21f6a2201def',
+                url: 'https://support.microsoft.com/zh-tw/office/gamma-dist-%E5%87%BD%E6%95%B0-9b6f1538-d11c-4d5f-8966-21f6a2201def',
             },
         ],
         functionParameter: {
@@ -653,7 +653,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/gamma-inv-%E5%87%BD%E6%95%B0-74991443-c2b0-4be5-aaab-1aa4d71fbb18',
+                url: 'https://support.microsoft.com/zh-tw/office/gamma-inv-%E5%87%BD%E6%95%B0-74991443-c2b0-4be5-aaab-1aa4d71fbb18',
             },
         ],
         functionParameter: {
@@ -667,7 +667,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/gammaln-%E5%87%BD%E6%95%B0-b838c48b-c65f-484f-9e1d-141c55470eb9',
+                url: 'https://support.microsoft.com/zh-tw/office/gammaln-%E5%87%BD%E6%95%B0-b838c48b-c65f-484f-9e1d-141c55470eb9',
             },
         ],
         functionParameter: {
@@ -681,7 +681,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/gammaln-precise-%E5%87%BD%E6%95%B0-5cdfe601-4e1e-4189-9d74-241ef1caa599',
+                url: 'https://support.microsoft.com/zh-tw/office/gammaln-precise-%E5%87%BD%E6%95%B0-5cdfe601-4e1e-4189-9d74-241ef1caa599',
             },
         ],
         functionParameter: {
@@ -695,7 +695,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/gauss-%E5%87%BD%E6%95%B0-069f1b4e-7dee-4d6a-a71f-4b69044a6b33',
+                url: 'https://support.microsoft.com/zh-tw/office/gauss-%E5%87%BD%E6%95%B0-069f1b4e-7dee-4d6a-a71f-4b69044a6b33',
             },
         ],
         functionParameter: {
@@ -709,7 +709,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/geomean-%E5%87%BD%E6%95%B0-db1ac48d-25a5-40a0-ab83-0b38980e40d5',
+                url: 'https://support.microsoft.com/zh-tw/office/geomean-%E5%87%BD%E6%95%B0-db1ac48d-25a5-40a0-ab83-0b38980e40d5',
             },
         ],
         functionParameter: {
@@ -723,7 +723,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/growth-%E5%87%BD%E6%95%B0-541a91dc-3d5e-437d-b156-21324e68b80d',
+                url: 'https://support.microsoft.com/zh-tw/office/growth-%E5%87%BD%E6%95%B0-541a91dc-3d5e-437d-b156-21324e68b80d',
             },
         ],
         functionParameter: {
@@ -737,7 +737,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/harmean-%E5%87%BD%E6%95%B0-5efd9184-fab5-42f9-b1d3-57883a1d3bc6',
+                url: 'https://support.microsoft.com/zh-tw/office/harmean-%E5%87%BD%E6%95%B0-5efd9184-fab5-42f9-b1d3-57883a1d3bc6',
             },
         ],
         functionParameter: {
@@ -751,7 +751,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/hypgeom-dist-%E5%87%BD%E6%95%B0-6dbd547f-1d12-4b1f-8ae5-b0d9e3d22fbf',
+                url: 'https://support.microsoft.com/zh-tw/office/hypgeom-dist-%E5%87%BD%E6%95%B0-6dbd547f-1d12-4b1f-8ae5-b0d9e3d22fbf',
             },
         ],
         functionParameter: {
@@ -765,7 +765,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/intercept-%E5%87%BD%E6%95%B0-2a9b74e2-9d47-4772-b663-3bca70bf63ef',
+                url: 'https://support.microsoft.com/zh-tw/office/intercept-%E5%87%BD%E6%95%B0-2a9b74e2-9d47-4772-b663-3bca70bf63ef',
             },
         ],
         functionParameter: {
@@ -779,7 +779,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/kurt-%E5%87%BD%E6%95%B0-bc3a265c-5da4-4dcb-b7fd-c237789095ab',
+                url: 'https://support.microsoft.com/zh-tw/office/kurt-%E5%87%BD%E6%95%B0-bc3a265c-5da4-4dcb-b7fd-c237789095ab',
             },
         ],
         functionParameter: {
@@ -793,7 +793,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/large-%E5%87%BD%E6%95%B0-3af0af19-1190-42bb-bb8b-01672ec00a64',
+                url: 'https://support.microsoft.com/zh-tw/office/large-%E5%87%BD%E6%95%B0-3af0af19-1190-42bb-bb8b-01672ec00a64',
             },
         ],
         functionParameter: {
@@ -807,7 +807,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/linest-%E5%87%BD%E6%95%B0-84d7d0d9-6e50-4101-977a-fa7abf772b6d',
+                url: 'https://support.microsoft.com/zh-tw/office/linest-%E5%87%BD%E6%95%B0-84d7d0d9-6e50-4101-977a-fa7abf772b6d',
             },
         ],
         functionParameter: {
@@ -821,7 +821,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/logest-%E5%87%BD%E6%95%B0-f27462d8-3657-4030-866b-a272c1d18b4b',
+                url: 'https://support.microsoft.com/zh-tw/office/logest-%E5%87%BD%E6%95%B0-f27462d8-3657-4030-866b-a272c1d18b4b',
             },
         ],
         functionParameter: {
@@ -835,7 +835,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/lognorm-dist-%E5%87%BD%E6%95%B0-eb60d00b-48a9-4217-be2b-6074aee6b070',
+                url: 'https://support.microsoft.com/zh-tw/office/lognorm-dist-%E5%87%BD%E6%95%B0-eb60d00b-48a9-4217-be2b-6074aee6b070',
             },
         ],
         functionParameter: {
@@ -849,7 +849,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/lognorm-inv-%E5%87%BD%E6%95%B0-fe79751a-f1f2-4af8-a0a1-e151b2d4f600',
+                url: 'https://support.microsoft.com/zh-tw/office/lognorm-inv-%E5%87%BD%E6%95%B0-fe79751a-f1f2-4af8-a0a1-e151b2d4f600',
             },
         ],
         functionParameter: {
@@ -863,7 +863,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/max-%E5%87%BD%E6%95%B0-e0012414-9ac8-4b34-9a47-73e662c08098',
+                url: 'https://support.microsoft.com/zh-tw/office/max-%E5%87%BD%E6%95%B0-e0012414-9ac8-4b34-9a47-73e662c08098',
             },
         ],
         functionParameter: {
@@ -883,7 +883,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/maxa-%E5%87%BD%E6%95%B0-814bda1e-3840-4bff-9365-2f59ac2ee62d',
+                url: 'https://support.microsoft.com/zh-tw/office/maxa-%E5%87%BD%E6%95%B0-814bda1e-3840-4bff-9365-2f59ac2ee62d',
             },
         ],
         functionParameter: {
@@ -897,7 +897,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/maxifs-%E5%87%BD%E6%95%B0-dfd611e6-da2c-488a-919b-9b6376b28883',
+                url: 'https://support.microsoft.com/zh-tw/office/maxifs-%E5%87%BD%E6%95%B0-dfd611e6-da2c-488a-919b-9b6376b28883',
             },
         ],
         functionParameter: {
@@ -914,7 +914,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/median-%E5%87%BD%E6%95%B0-d0916313-4753-414c-8537-ce85bdd967d2',
+                url: 'https://support.microsoft.com/zh-tw/office/median-%E5%87%BD%E6%95%B0-d0916313-4753-414c-8537-ce85bdd967d2',
             },
         ],
         functionParameter: {
@@ -928,7 +928,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/min-%E5%87%BD%E6%95%B0-61635d12-920f-4ce2-a70f-96f202dcc152',
+                url: 'https://support.microsoft.com/zh-tw/office/min-%E5%87%BD%E6%95%B0-61635d12-920f-4ce2-a70f-96f202dcc152',
             },
         ],
         functionParameter: {
@@ -948,7 +948,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/mina-%E5%87%BD%E6%95%B0-245a6f46-7ca5-4dc7-ab49-805341bc31d3',
+                url: 'https://support.microsoft.com/zh-tw/office/mina-%E5%87%BD%E6%95%B0-245a6f46-7ca5-4dc7-ab49-805341bc31d3',
             },
         ],
         functionParameter: {
@@ -962,7 +962,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/minifs-%E5%87%BD%E6%95%B0-6ca1ddaa-079b-4e74-80cc-72eef32e6599',
+                url: 'https://support.microsoft.com/zh-tw/office/minifs-%E5%87%BD%E6%95%B0-6ca1ddaa-079b-4e74-80cc-72eef32e6599',
             },
         ],
         functionParameter: {
@@ -979,7 +979,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/mode-mult-%E5%87%BD%E6%95%B0-50fd9464-b2ba-4191-b57a-39446689ae8c',
+                url: 'https://support.microsoft.com/zh-tw/office/mode-mult-%E5%87%BD%E6%95%B0-50fd9464-b2ba-4191-b57a-39446689ae8c',
             },
         ],
         functionParameter: {
@@ -993,7 +993,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/mode-sngl-%E5%87%BD%E6%95%B0-f1267c16-66c6-4386-959f-8fba5f8bb7f8',
+                url: 'https://support.microsoft.com/zh-tw/office/mode-sngl-%E5%87%BD%E6%95%B0-f1267c16-66c6-4386-959f-8fba5f8bb7f8',
             },
         ],
         functionParameter: {
@@ -1007,7 +1007,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/negbinom-dist-%E5%87%BD%E6%95%B0-c8239f89-c2d0-45bd-b6af-172e570f8599',
+                url: 'https://support.microsoft.com/zh-tw/office/negbinom-dist-%E5%87%BD%E6%95%B0-c8239f89-c2d0-45bd-b6af-172e570f8599',
             },
         ],
         functionParameter: {
@@ -1021,7 +1021,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/norm-dist-%E5%87%BD%E6%95%B0-edb1cc14-a21c-4e53-839d-8082074c9f8d',
+                url: 'https://support.microsoft.com/zh-tw/office/norm-dist-%E5%87%BD%E6%95%B0-edb1cc14-a21c-4e53-839d-8082074c9f8d',
             },
         ],
         functionParameter: {
@@ -1035,7 +1035,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/norm-inv-%E5%87%BD%E6%95%B0-54b30935-fee7-493c-bedb-2278a9db7e13',
+                url: 'https://support.microsoft.com/zh-tw/office/norm-inv-%E5%87%BD%E6%95%B0-54b30935-fee7-493c-bedb-2278a9db7e13',
             },
         ],
         functionParameter: {
@@ -1049,7 +1049,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/norm-s-dist-%E5%87%BD%E6%95%B0-1e787282-3832-4520-a9ae-bd2a8d99ba88',
+                url: 'https://support.microsoft.com/zh-tw/office/norm-s-dist-%E5%87%BD%E6%95%B0-1e787282-3832-4520-a9ae-bd2a8d99ba88',
             },
         ],
         functionParameter: {
@@ -1063,7 +1063,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/norm-s-inv-%E5%87%BD%E6%95%B0-d6d556b4-ab7f-49cd-b526-5a20918452b1',
+                url: 'https://support.microsoft.com/zh-tw/office/norm-s-inv-%E5%87%BD%E6%95%B0-d6d556b4-ab7f-49cd-b526-5a20918452b1',
             },
         ],
         functionParameter: {
@@ -1077,7 +1077,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/pearson-%E5%87%BD%E6%95%B0-0c3e30fc-e5af-49c4-808a-3ef66e034c18',
+                url: 'https://support.microsoft.com/zh-tw/office/pearson-%E5%87%BD%E6%95%B0-0c3e30fc-e5af-49c4-808a-3ef66e034c18',
             },
         ],
         functionParameter: {
@@ -1091,7 +1091,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/percentile-exc-%E5%87%BD%E6%95%B0-bbaa7204-e9e1-4010-85bf-c31dc5dce4ba',
+                url: 'https://support.microsoft.com/zh-tw/office/percentile-exc-%E5%87%BD%E6%95%B0-bbaa7204-e9e1-4010-85bf-c31dc5dce4ba',
             },
         ],
         functionParameter: {
@@ -1105,7 +1105,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/percentile-inc-%E5%87%BD%E6%95%B0-680f9539-45eb-410b-9a5e-c1355e5fe2ed',
+                url: 'https://support.microsoft.com/zh-tw/office/percentile-inc-%E5%87%BD%E6%95%B0-680f9539-45eb-410b-9a5e-c1355e5fe2ed',
             },
         ],
         functionParameter: {
@@ -1119,7 +1119,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/percentrank-exc-%E5%87%BD%E6%95%B0-d8afee96-b7e2-4a2f-8c01-8fcdedaa6314',
+                url: 'https://support.microsoft.com/zh-tw/office/percentrank-exc-%E5%87%BD%E6%95%B0-d8afee96-b7e2-4a2f-8c01-8fcdedaa6314',
             },
         ],
         functionParameter: {
@@ -1133,7 +1133,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/percentrank-inc-%E5%87%BD%E6%95%B0-149592c9-00c0-49ba-86c1-c1f45b80463a',
+                url: 'https://support.microsoft.com/zh-tw/office/percentrank-inc-%E5%87%BD%E6%95%B0-149592c9-00c0-49ba-86c1-c1f45b80463a',
             },
         ],
         functionParameter: {
@@ -1147,7 +1147,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/permut-%E5%87%BD%E6%95%B0-3bd1cb9a-2880-41ab-a197-f246a7a602d3',
+                url: 'https://support.microsoft.com/zh-tw/office/permut-%E5%87%BD%E6%95%B0-3bd1cb9a-2880-41ab-a197-f246a7a602d3',
             },
         ],
         functionParameter: {
@@ -1161,7 +1161,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/permutationa-%E5%87%BD%E6%95%B0-6c7d7fdc-d657-44e6-aa19-2857b25cae4e',
+                url: 'https://support.microsoft.com/zh-tw/office/permutationa-%E5%87%BD%E6%95%B0-6c7d7fdc-d657-44e6-aa19-2857b25cae4e',
             },
         ],
         functionParameter: {
@@ -1175,7 +1175,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/phi-%E5%87%BD%E6%95%B0-23e49bc6-a8e8-402d-98d3-9ded87f6295c',
+                url: 'https://support.microsoft.com/zh-tw/office/phi-%E5%87%BD%E6%95%B0-23e49bc6-a8e8-402d-98d3-9ded87f6295c',
             },
         ],
         functionParameter: {
@@ -1189,7 +1189,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/poisson-dist-%E5%87%BD%E6%95%B0-8fe148ff-39a2-46cb-abf3-7772695d9636',
+                url: 'https://support.microsoft.com/zh-tw/office/poisson-dist-%E5%87%BD%E6%95%B0-8fe148ff-39a2-46cb-abf3-7772695d9636',
             },
         ],
         functionParameter: {
@@ -1203,7 +1203,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/prob-%E5%87%BD%E6%95%B0-9ac30561-c81c-4259-8253-34f0a238fc49',
+                url: 'https://support.microsoft.com/zh-tw/office/prob-%E5%87%BD%E6%95%B0-9ac30561-c81c-4259-8253-34f0a238fc49',
             },
         ],
         functionParameter: {
@@ -1217,7 +1217,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/quartile-exc-%E5%87%BD%E6%95%B0-5a355b7a-840b-4a01-b0f1-f538c2864cad',
+                url: 'https://support.microsoft.com/zh-tw/office/quartile-exc-%E5%87%BD%E6%95%B0-5a355b7a-840b-4a01-b0f1-f538c2864cad',
             },
         ],
         functionParameter: {
@@ -1231,7 +1231,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/quartile-inc-%E5%87%BD%E6%95%B0-1bbacc80-5075-42f1-aed6-47d735c4819d',
+                url: 'https://support.microsoft.com/zh-tw/office/quartile-inc-%E5%87%BD%E6%95%B0-1bbacc80-5075-42f1-aed6-47d735c4819d',
             },
         ],
         functionParameter: {
@@ -1245,7 +1245,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/rank-avg-%E5%87%BD%E6%95%B0-bd406a6f-eb38-4d73-aa8e-6d1c3c72e83a',
+                url: 'https://support.microsoft.com/zh-tw/office/rank-avg-%E5%87%BD%E6%95%B0-bd406a6f-eb38-4d73-aa8e-6d1c3c72e83a',
             },
         ],
         functionParameter: {
@@ -1259,7 +1259,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/rank-eq-%E5%87%BD%E6%95%B0-284858ce-8ef6-450e-b662-26245be04a40',
+                url: 'https://support.microsoft.com/zh-tw/office/rank-eq-%E5%87%BD%E6%95%B0-284858ce-8ef6-450e-b662-26245be04a40',
             },
         ],
         functionParameter: {
@@ -1273,7 +1273,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/rsq-%E5%87%BD%E6%95%B0-d7161715-250d-4a01-b80d-a8364f2be08f',
+                url: 'https://support.microsoft.com/zh-tw/office/rsq-%E5%87%BD%E6%95%B0-d7161715-250d-4a01-b80d-a8364f2be08f',
             },
         ],
         functionParameter: {
@@ -1287,7 +1287,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/skew-%E5%87%BD%E6%95%B0-bdf49d86-b1ef-4804-a046-28eaea69c9fa',
+                url: 'https://support.microsoft.com/zh-tw/office/skew-%E5%87%BD%E6%95%B0-bdf49d86-b1ef-4804-a046-28eaea69c9fa',
             },
         ],
         functionParameter: {
@@ -1301,7 +1301,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/skew-p-%E5%87%BD%E6%95%B0-76530a5c-99b9-48a1-8392-26632d542fcb',
+                url: 'https://support.microsoft.com/zh-tw/office/skew-p-%E5%87%BD%E6%95%B0-76530a5c-99b9-48a1-8392-26632d542fcb',
             },
         ],
         functionParameter: {
@@ -1315,7 +1315,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/slope-%E5%87%BD%E6%95%B0-11fb8f97-3117-4813-98aa-61d7e01276b9',
+                url: 'https://support.microsoft.com/zh-tw/office/slope-%E5%87%BD%E6%95%B0-11fb8f97-3117-4813-98aa-61d7e01276b9',
             },
         ],
         functionParameter: {
@@ -1329,7 +1329,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/small-%E5%87%BD%E6%95%B0-17da8222-7c82-42b2-961b-14c45384df07',
+                url: 'https://support.microsoft.com/zh-tw/office/small-%E5%87%BD%E6%95%B0-17da8222-7c82-42b2-961b-14c45384df07',
             },
         ],
         functionParameter: {
@@ -1343,7 +1343,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/standardize-%E5%87%BD%E6%95%B0-81d66554-2d54-40ec-ba83-6437108ee775',
+                url: 'https://support.microsoft.com/zh-tw/office/standardize-%E5%87%BD%E6%95%B0-81d66554-2d54-40ec-ba83-6437108ee775',
             },
         ],
         functionParameter: {
@@ -1357,7 +1357,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/stdev-p-%E5%87%BD%E6%95%B0-6e917c05-31a0-496f-ade7-4f4e7462f285',
+                url: 'https://support.microsoft.com/zh-tw/office/stdev-p-%E5%87%BD%E6%95%B0-6e917c05-31a0-496f-ade7-4f4e7462f285',
             },
         ],
         functionParameter: {
@@ -1371,7 +1371,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/stdev-s-%E5%87%BD%E6%95%B0-7d69cf97-0c1f-4acf-be27-f3e83904cc23',
+                url: 'https://support.microsoft.com/zh-tw/office/stdev-s-%E5%87%BD%E6%95%B0-7d69cf97-0c1f-4acf-be27-f3e83904cc23',
             },
         ],
         functionParameter: {
@@ -1385,7 +1385,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/stdeva-%E5%87%BD%E6%95%B0-5ff38888-7ea5-48de-9a6d-11ed73b29e9d',
+                url: 'https://support.microsoft.com/zh-tw/office/stdeva-%E5%87%BD%E6%95%B0-5ff38888-7ea5-48de-9a6d-11ed73b29e9d',
             },
         ],
         functionParameter: {
@@ -1399,7 +1399,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/stdevpa-%E5%87%BD%E6%95%B0-5578d4d6-455a-4308-9991-d405afe2c28c',
+                url: 'https://support.microsoft.com/zh-tw/office/stdevpa-%E5%87%BD%E6%95%B0-5578d4d6-455a-4308-9991-d405afe2c28c',
             },
         ],
         functionParameter: {
@@ -1413,7 +1413,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/steyx-%E5%87%BD%E6%95%B0-6ce74b2c-449d-4a6e-b9ac-f9cef5ba48ab',
+                url: 'https://support.microsoft.com/zh-tw/office/steyx-%E5%87%BD%E6%95%B0-6ce74b2c-449d-4a6e-b9ac-f9cef5ba48ab',
             },
         ],
         functionParameter: {
@@ -1427,7 +1427,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/t-dist-%E5%87%BD%E6%95%B0-4329459f-ae91-48c2-bba8-1ead1c6c21b2',
+                url: 'https://support.microsoft.com/zh-tw/office/t-dist-%E5%87%BD%E6%95%B0-4329459f-ae91-48c2-bba8-1ead1c6c21b2',
             },
         ],
         functionParameter: {
@@ -1441,7 +1441,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/t-dist-2t-%E5%87%BD%E6%95%B0-198e9340-e360-4230-bd21-f52f22ff5c28',
+                url: 'https://support.microsoft.com/zh-tw/office/t-dist-2t-%E5%87%BD%E6%95%B0-198e9340-e360-4230-bd21-f52f22ff5c28',
             },
         ],
         functionParameter: {
@@ -1455,7 +1455,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/t-dist-rt-%E5%87%BD%E6%95%B0-20a30020-86f9-4b35-af1f-7ef6ae683eda',
+                url: 'https://support.microsoft.com/zh-tw/office/t-dist-rt-%E5%87%BD%E6%95%B0-20a30020-86f9-4b35-af1f-7ef6ae683eda',
             },
         ],
         functionParameter: {
@@ -1469,7 +1469,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/t-inv-%E5%87%BD%E6%95%B0-2908272b-4e61-4942-9df9-a25fec9b0e2e',
+                url: 'https://support.microsoft.com/zh-tw/office/t-inv-%E5%87%BD%E6%95%B0-2908272b-4e61-4942-9df9-a25fec9b0e2e',
             },
         ],
         functionParameter: {
@@ -1483,7 +1483,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/t-inv-2t-%E5%87%BD%E6%95%B0-ce72ea19-ec6c-4be7-bed2-b9baf2264f17',
+                url: 'https://support.microsoft.com/zh-tw/office/t-inv-2t-%E5%87%BD%E6%95%B0-ce72ea19-ec6c-4be7-bed2-b9baf2264f17',
             },
         ],
         functionParameter: {
@@ -1497,7 +1497,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/t-test-%E5%87%BD%E6%95%B0-d4e08ec3-c545-485f-962e-276f7cbed055',
+                url: 'https://support.microsoft.com/zh-tw/office/t-test-%E5%87%BD%E6%95%B0-d4e08ec3-c545-485f-962e-276f7cbed055',
             },
         ],
         functionParameter: {
@@ -1511,7 +1511,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/trend-%E5%87%BD%E6%95%B0-e2f135f0-8827-4096-9873-9a7cf7b51ef1',
+                url: 'https://support.microsoft.com/zh-tw/office/trend-%E5%87%BD%E6%95%B0-e2f135f0-8827-4096-9873-9a7cf7b51ef1',
             },
         ],
         functionParameter: {
@@ -1525,7 +1525,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/trimmean-%E5%87%BD%E6%95%B0-d90c9878-a119-4746-88fa-63d988f511d3',
+                url: 'https://support.microsoft.com/zh-tw/office/trimmean-%E5%87%BD%E6%95%B0-d90c9878-a119-4746-88fa-63d988f511d3',
             },
         ],
         functionParameter: {
@@ -1539,7 +1539,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/var-p-%E5%87%BD%E6%95%B0-73d1285c-108c-4843-ba5d-a51f90656f3a',
+                url: 'https://support.microsoft.com/zh-tw/office/var-p-%E5%87%BD%E6%95%B0-73d1285c-108c-4843-ba5d-a51f90656f3a',
             },
         ],
         functionParameter: {
@@ -1553,7 +1553,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/var-s-%E5%87%BD%E6%95%B0-913633de-136b-449d-813e-65a00b2b990b',
+                url: 'https://support.microsoft.com/zh-tw/office/var-s-%E5%87%BD%E6%95%B0-913633de-136b-449d-813e-65a00b2b990b',
             },
         ],
         functionParameter: {
@@ -1567,7 +1567,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/vara-%E5%87%BD%E6%95%B0-3de77469-fa3a-47b4-85fd-81758a1e1d07',
+                url: 'https://support.microsoft.com/zh-tw/office/vara-%E5%87%BD%E6%95%B0-3de77469-fa3a-47b4-85fd-81758a1e1d07',
             },
         ],
         functionParameter: {
@@ -1581,7 +1581,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/varpa-%E5%87%BD%E6%95%B0-59a62635-4e89-4fad-88ac-ce4dc0513b96',
+                url: 'https://support.microsoft.com/zh-tw/office/varpa-%E5%87%BD%E6%95%B0-59a62635-4e89-4fad-88ac-ce4dc0513b96',
             },
         ],
         functionParameter: {
@@ -1595,7 +1595,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/weibull-dist-%E5%87%BD%E6%95%B0-4e783c39-9325-49be-bbc9-a83ef82b45db',
+                url: 'https://support.microsoft.com/zh-tw/office/weibull-dist-%E5%87%BD%E6%95%B0-4e783c39-9325-49be-bbc9-a83ef82b45db',
             },
         ],
         functionParameter: {
@@ -1609,7 +1609,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/z-test-%E5%87%BD%E6%95%B0-d633d5a3-2031-4614-a016-92180ad82bee',
+                url: 'https://support.microsoft.com/zh-tw/office/z-test-%E5%87%BD%E6%95%B0-d633d5a3-2031-4614-a016-92180ad82bee',
             },
         ],
         functionParameter: {

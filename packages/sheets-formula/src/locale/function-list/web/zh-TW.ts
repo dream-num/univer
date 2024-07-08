@@ -21,7 +21,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/encodeurl-%E5%87%BD%E6%95%B0-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+                url: 'https://support.microsoft.com/zh-tw/office/encodeurl-%E5%87%BD%E6%95%B0-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
             },
         ],
         functionParameter: {
@@ -35,7 +35,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/filterxml-%E5%87%BD%E6%95%B0-4df72efc-11ec-4951-86f5-c1374812f5b7',
+                url: 'https://support.microsoft.com/zh-tw/office/filterxml-%E5%87%BD%E6%95%B0-4df72efc-11ec-4951-86f5-c1374812f5b7',
             },
         ],
         functionParameter: {
@@ -44,12 +44,12 @@ export default {
         },
     },
     WEBSERVICE: {
-        description: '傳回 Web 服務中的資料。 ',
-        abstract: '傳回 Web 服務中的資料。 ',
+        description: '傳回 Web 服務中的資料。',
+        abstract: '傳回 Web 服務中的資料。',
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/webservice-%E5%87%BD%E6%95%B0-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
+                url: 'https://support.microsoft.com/zh-tw/office/webservice-%E5%87%BD%E6%95%B0-0546a35a-ecc6-4739-aed7-c0b7ce1562c4',
             },
         ],
         functionParameter: {

@@ -16,12 +16,12 @@
 
 export default {
     AND: {
-        description: '如果其所有参数均为 TRUE，则返回 TRUE',
-        abstract: '如果其所有参数均为 TRUE，则返回 TRUE',
+        description: 'Returns TRUE if all of its arguments are TRUE',
+        abstract: 'Returns TRUE if all of its arguments are TRUE',
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/and-%E5%87%BD%E6%95%B0-5f19b2e8-e1df-4408-897a-ce285a19e9d9',
+                url: 'https://support.microsoft.com/vi-vn/office/and-%E5%87%BD%E6%95%B0-5f19b2e8-e1df-4408-897a-ce285a19e9d9',
             },
         ],
         functionParameter: {
@@ -35,7 +35,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/bycol-%E5%87%BD%E6%95%B0-58463999-7de5-49ce-8f38-b7f7a2192bfb',
+                url: 'https://support.microsoft.com/vi-vn/office/bycol-%E5%87%BD%E6%95%B0-58463999-7de5-49ce-8f38-b7f7a2192bfb',
             },
         ],
         functionParameter: {
@@ -49,7 +49,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/byrow-%E5%87%BD%E6%95%B0-2e04c677-78c8-4e6b-8c10-a4602f2602bb',
+                url: 'https://support.microsoft.com/vi-vn/office/byrow-%E5%87%BD%E6%95%B0-2e04c677-78c8-4e6b-8c10-a4602f2602bb',
             },
         ],
         functionParameter: {
@@ -63,7 +63,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/false-%E5%87%BD%E6%95%B0-2d58dfa5-9c03-4259-bf8f-f0ae14346904',
+                url: 'https://support.microsoft.com/vi-vn/office/false-%E5%87%BD%E6%95%B0-2d58dfa5-9c03-4259-bf8f-f0ae14346904',
             },
         ],
         functionParameter: {
@@ -77,7 +77,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/if-%E5%87%BD%E6%95%B0-69aed7c9-4e8a-4755-a9bc-aa8bbff73be2',
+                url: 'https://support.microsoft.com/vi-vn/office/if-%E5%87%BD%E6%95%B0-69aed7c9-4e8a-4755-a9bc-aa8bbff73be2',
             },
         ],
         functionParameter: {
@@ -92,7 +92,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/iferror-%E5%87%BD%E6%95%B0-c526fd07-caeb-47b8-8bb6-63f3e417f611',
+                url: 'https://support.microsoft.com/vi-vn/office/iferror-%E5%87%BD%E6%95%B0-c526fd07-caeb-47b8-8bb6-63f3e417f611',
             },
         ],
         functionParameter: {
@@ -106,7 +106,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/ifna-%E5%87%BD%E6%95%B0-6626c961-a569-42fc-a49d-79b4951fd461',
+                url: 'https://support.microsoft.com/vi-vn/office/ifna-%E5%87%BD%E6%95%B0-6626c961-a569-42fc-a49d-79b4951fd461',
             },
         ],
         functionParameter: {
@@ -120,7 +120,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/ifs-%E5%87%BD%E6%95%B0-36329a26-37b2-467c-972b-4a39bd951d45',
+                url: 'https://support.microsoft.com/vi-vn/office/ifs-%E5%87%BD%E6%95%B0-36329a26-37b2-467c-972b-4a39bd951d45',
             },
         ],
         functionParameter: {
@@ -134,7 +134,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/lambda-%E5%87%BD%E6%95%B0-bd212d27-1cd1-4321-a34a-ccbf254b8b67',
+                url: 'https://support.microsoft.com/vi-vn/office/lambda-%E5%87%BD%E6%95%B0-bd212d27-1cd1-4321-a34a-ccbf254b8b67',
             },
         ],
         functionParameter: {
@@ -154,7 +154,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/let-%E5%87%BD%E6%95%B0-34842dd8-b92b-4d3f-b325-b8b8f9908999',
+                url: 'https://support.microsoft.com/vi-vn/office/let-%E5%87%BD%E6%95%B0-34842dd8-b92b-4d3f-b325-b8b8f9908999',
             },
         ],
         functionParameter: {
@@ -168,7 +168,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/makearray-%E5%87%BD%E6%95%B0-b80da5ad-b338-4149-a523-5b221da09097',
+                url: 'https://support.microsoft.com/vi-vn/office/makearray-%E5%87%BD%E6%95%B0-b80da5ad-b338-4149-a523-5b221da09097',
             },
         ],
         functionParameter: {
@@ -186,7 +186,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/map-%E5%87%BD%E6%95%B0-48006093-f97c-47c1-bfcc-749263bb1f01',
+                url: 'https://support.microsoft.com/vi-vn/office/map-%E5%87%BD%E6%95%B0-48006093-f97c-47c1-bfcc-749263bb1f01',
             },
         ],
         functionParameter: {
@@ -200,7 +200,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/not-%E5%87%BD%E6%95%B0-9cfc6011-a054-40c7-a140-cd4ba2d87d77',
+                url: 'https://support.microsoft.com/vi-vn/office/not-%E5%87%BD%E6%95%B0-9cfc6011-a054-40c7-a140-cd4ba2d87d77',
             },
         ],
         functionParameter: {
@@ -214,7 +214,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/or-%E5%87%BD%E6%95%B0-7d17ad14-8700-4281-b308-00b131e22af0',
+                url: 'https://support.microsoft.com/vi-vn/office/or-%E5%87%BD%E6%95%B0-7d17ad14-8700-4281-b308-00b131e22af0',
             },
         ],
         functionParameter: {
@@ -228,7 +228,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/reduce-%E5%87%BD%E6%95%B0-42e39910-b345-45f3-84b8-0642b568b7cb',
+                url: 'https://support.microsoft.com/vi-vn/office/reduce-%E5%87%BD%E6%95%B0-42e39910-b345-45f3-84b8-0642b568b7cb',
             },
         ],
         functionParameter: {
@@ -242,7 +242,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/scan-%E5%87%BD%E6%95%B0-d58dfd11-9969-4439-b2dc-e7062724de29',
+                url: 'https://support.microsoft.com/vi-vn/office/scan-%E5%87%BD%E6%95%B0-d58dfd11-9969-4439-b2dc-e7062724de29',
             },
         ],
         functionParameter: {
@@ -256,7 +256,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/switch-%E5%87%BD%E6%95%B0-47ab33c0-28ce-4530-8a45-d532ec4aa25e',
+                url: 'https://support.microsoft.com/vi-vn/office/switch-%E5%87%BD%E6%95%B0-47ab33c0-28ce-4530-8a45-d532ec4aa25e',
             },
         ],
         functionParameter: {
@@ -270,7 +270,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/true-%E5%87%BD%E6%95%B0-7652c6e3-8987-48d0-97cd-ef223246b3fb',
+                url: 'https://support.microsoft.com/vi-vn/office/true-%E5%87%BD%E6%95%B0-7652c6e3-8987-48d0-97cd-ef223246b3fb',
             },
         ],
         functionParameter: {
@@ -284,7 +284,7 @@ export default {
         links: [
             {
                 title: 'Giảng dạy',
-                url: 'https://support.microsoft.com/zh-cn/office/xor-%E5%87%BD%E6%95%B0-1548d4c2-5e47-4f77-9a92-0533bba14f37',
+                url: 'https://support.microsoft.com/vi-vn/office/xor-%E5%87%BD%E6%95%B0-1548d4c2-5e47-4f77-9a92-0533bba14f37',
             },
         ],
         functionParameter: {

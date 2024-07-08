@@ -23,7 +23,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/cubekpimember-%E5%87%BD%E6%95%B0-744608bf-2c62-42cd-b67a-a56109f4b03b',
+                url: 'https://support.microsoft.com/zh-tw/office/cubekpimember-%E5%87%BD%E6%95%B0-744608bf-2c62-42cd-b67a-a56109f4b03b',
             },
         ],
         functionParameter: {
@@ -37,7 +37,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/cubemember-%E5%87%BD%E6%95%B0-0f6a15b9-2c18-4819-ae89-e1b5c8b398ad',
+                url: 'https://support.microsoft.com/zh-tw/office/cubemember-%E5%87%BD%E6%95%B0-0f6a15b9-2c18-4819-ae89-e1b5c8b398ad',
             },
         ],
         functionParameter: {
@@ -51,7 +51,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/cubememberproperty-%E5%87%BD%E6%95%B0-001e57d6-b35a-49e5-abcd-05ff599e8951',
+                url: 'https://support.microsoft.com/zh-tw/office/cubememberproperty-%E5%87%BD%E6%95%B0-001e57d6-b35a-49e5-abcd-05ff599e8951',
             },
         ],
         functionParameter: {
@@ -67,7 +67,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/cuberankedmember-%E5%87%BD%E6%95%B0-07efecde-e669-4075-b4bf-6b40df2dc4b3',
+                url: 'https://support.microsoft.com/zh-tw/office/cuberankedmember-%E5%87%BD%E6%95%B0-07efecde-e669-4075-b4bf-6b40df2dc4b3',
             },
         ],
         functionParameter: {
@@ -83,7 +83,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/cubeset-%E5%87%BD%E6%95%B0-5b2146bd-62d6-4d04-9d8f-670e9993ee1d9',
+                url: 'https://support.microsoft.com/zh-tw/office/cubeset-%E5%87%BD%E6%95%B0-5b2146bd-62d6-4d04-9d8f-670e9993ee1d9',
             },
         ],
         functionParameter: {
@@ -97,7 +97,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/cubesetcount-%E5%87%BD%E6%95%B0-c4c2a438-c1ff-4061-80fe-982f2d705286',
+                url: 'https://support.microsoft.com/zh-tw/office/cubesetcount-%E5%87%BD%E6%95%B0-c4c2a438-c1ff-4061-80fe-982f2d705286',
             },
         ],
         functionParameter: {
@@ -111,7 +111,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/cubevalue-%E5%87%BD%E6%95%B0-8733da24-26d1-4e34-9b3a-84a8f00dcbe0',
+                url: 'https://support.microsoft.com/zh-tw/office/cubevalue-%E5%87%BD%E6%95%B0-8733da24-26d1-4e34-9b3a-84a8f00dcbe0',
             },
         ],
         functionParameter: {

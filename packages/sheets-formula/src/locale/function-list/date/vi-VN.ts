@@ -21,7 +21,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/date-%E5%87%BD%E6%95%B0-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/vi-vn/office/date-%E5%87%BD%E6%95%B0-e36c0c8c-4104-49da-ab83-82328b832349',
             },
         ],
         functionParameter: {
@@ -45,7 +45,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/datedif-%E5%87%BD%E6%95%B0-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/vi-vn/office/datedif-%E5%87%BD%E6%95%B0-25dba1a4-2812-480b-84dd-8b32a451b35c',
             },
         ],
         functionParameter: {
@@ -65,7 +65,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/datevalue-%E5%87%BD%E6%95%B0-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/vi-vn/office/datevalue-%E5%87%BD%E6%95%B0-df8b07d4-7761-4a93-bc33-b7471bbff252',
             },
         ],
         functionParameter: {
@@ -81,7 +81,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/day-%E5%87%BD%E6%95%B0-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/vi-vn/office/day-%E5%87%BD%E6%95%B0-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
             },
         ],
         functionParameter: {
@@ -97,7 +97,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/days-%E5%87%BD%E6%95%B0-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/vi-vn/office/days-%E5%87%BD%E6%95%B0-57740535-d549-4395-8728-0f07bff0b9df',
             },
         ],
         functionParameter: {
@@ -117,7 +117,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/days360-%E5%87%BD%E6%95%B0-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/vi-vn/office/days360-%E5%87%BD%E6%95%B0-b9a509fd-49ef-407e-94df-0cbda5718c2a',
             },
         ],
         functionParameter: {
@@ -137,7 +137,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/edate-%E5%87%BD%E6%95%B0-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/vi-vn/office/edate-%E5%87%BD%E6%95%B0-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
             },
         ],
         functionParameter: {
@@ -157,7 +157,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/eomonth-%E5%87%BD%E6%95%B0-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/vi-vn/office/eomonth-%E5%87%BD%E6%95%B0-7314ffa1-2bc9-4005-9d66-f49db127d628',
             },
         ],
         functionParameter: {
@@ -177,7 +177,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/hour-%E5%87%BD%E6%95%B0-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/vi-vn/office/hour-%E5%87%BD%E6%95%B0-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
             },
         ],
         functionParameter: {
@@ -197,7 +197,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/minute-%E5%87%BD%E6%95%B0-9a3db35c-256c-45da-86bf-d82cde6d4fcb',
+                url: 'https://support.microsoft.com/vi-vn/office/minute-%E5%87%BD%E6%95%B0-9a3db35c-256c-45da-86bf-d82cde6d4fcb',
             },
         ],
         functionParameter: {
@@ -217,7 +217,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/month-%E5%87%BD%E6%95%B0-0df62f6e-672d-4c78-9a70-a764de937b5e',
+                url: 'https://support.microsoft.com/vi-vn/office/month-%E5%87%BD%E6%95%B0-0df62f6e-672d-4c78-9a70-a764de937b5e',
             },
         ],
         functionParameter: {
@@ -233,7 +233,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/networkdays-%E5%87%BD%E6%95%B0-c48cafe0-1b60-4dd7-afac-81521ff6f53b',
+                url: 'https://support.microsoft.com/vi-vn/office/networkdays-%E5%87%BD%E6%95%B0-c48cafe0-1b60-4dd7-afac-81521ff6f53b',
             },
         ],
         functionParameter: {
@@ -253,7 +253,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/second-%E5%87%BD%E6%95%B0-44921a95-0b32-4f8b-8317-82ef1d22bb84',
+                url: 'https://support.microsoft.com/vi-vn/office/second-%E5%87%BD%E6%95%B0-44921a95-0b32-4f8b-8317-82ef1d22bb84',
             },
         ],
         functionParameter: {
@@ -273,7 +273,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/time-%E5%87%BD%E6%95%B0-3607e6cc-0f46-4c3b-8357-40fe314d7b3c',
+                url: 'https://support.microsoft.com/vi-vn/office/time-%E5%87%BD%E6%95%B0-3607e6cc-0f46-4c3b-8357-40fe314d7b3c',
             },
         ],
         functionParameter: {
@@ -293,7 +293,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/timevalue-%E5%87%BD%E6%95%B0-d7c29d57-399f-4a11-a7d8-379e01c7130d',
+                url: 'https://support.microsoft.com/vi-vn/office/timevalue-%E5%87%BD%E6%95%B0-d7c29d57-399f-4a11-a7d8-379e01c7130d',
             },
         ],
         functionParameter: {
@@ -309,7 +309,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/today-%E5%87%BD%E6%95%B0-49540925-3611-41c5-90e3-f1b6e8e5f029',
+                url: 'https://support.microsoft.com/vi-vn/office/today-%E5%87%BD%E6%95%B0-49540925-3611-41c5-90e3-f1b6e8e5f029',
             },
         ],
         functionParameter: {},
@@ -320,7 +320,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/weekday-%E5%87%BD%E6%95%B0-f3651330-3a06-4892-9d89-12cc7dadaabd',
+                url: 'https://support.microsoft.com/vi-vn/office/weekday-%E5%87%BD%E6%95%B0-f3651330-3a06-4892-9d89-12cc7dadaabd',
             },
         ],
         functionParameter: {
@@ -340,7 +340,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/weeknum-%E5%87%BD%E6%95%B0-2fdd388d-8f4d-4208-95de-8f2ad40187af',
+                url: 'https://support.microsoft.com/vi-vn/office/weeknum-%E5%87%BD%E6%95%B0-2fdd388d-8f4d-4208-95de-8f2ad40187af',
             },
         ],
         functionParameter: {
@@ -360,7 +360,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/workday-%E5%87%BD%E6%95%B0-5570eab1-e9e5-49d0-9650-efda88d7d0b8',
+                url: 'https://support.microsoft.com/vi-vn/office/workday-%E5%87%BD%E6%95%B0-5570eab1-e9e5-49d0-9650-efda88d7d0b8',
             },
         ],
         functionParameter: {
@@ -384,7 +384,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/year-%E5%87%BD%E6%95%B0-371d2722-0a8d-48de-8b7c-9bd6b289b93c',
+                url: 'https://support.microsoft.com/vi-vn/office/year-%E5%87%BD%E6%95%B0-371d2722-0a8d-48de-8b7c-9bd6b289b93c',
             },
         ],
         functionParameter: {
@@ -400,7 +400,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/yearfrac-%E5%87%BD%E6%95%B0-7b2a6219-4830-40b8-b8e3-9b7c0b6ab0d0',
+                url: 'https://support.microsoft.com/vi-vn/office/yearfrac-%E5%87%BD%E6%95%B0-7b2a6219-4830-40b8-b8e3-9b7c0b6ab0d0',
             },
         ],
         functionParameter: {

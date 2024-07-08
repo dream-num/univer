@@ -21,7 +21,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/address-%E5%87%BD%E6%95%B0-d0c26c0d-3991-446b-8de4-ab46431d4f89',
+                url: 'https://support.microsoft.com/vi-vn/office/address-%E5%87%BD%E6%95%B0-d0c26c0d-3991-446b-8de4-ab46431d4f89',
             },
         ],
         functionParameter: {
@@ -44,7 +44,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/areas-%E5%87%BD%E6%95%B0-8392ba32-7a41-43b3-96b0-3695d2ec6152',
+                url: 'https://support.microsoft.com/vi-vn/office/areas-%E5%87%BD%E6%95%B0-8392ba32-7a41-43b3-96b0-3695d2ec6152',
             },
         ],
         functionParameter: {
@@ -58,7 +58,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/choose-%E5%87%BD%E6%95%B0-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
+                url: 'https://support.microsoft.com/vi-vn/office/choose-%E5%87%BD%E6%95%B0-fc5c184f-cb62-4ec7-a46e-38653b98f5bc',
             },
         ],
         functionParameter: {
@@ -79,7 +79,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/choosecols-%E5%87%BD%E6%95%B0-bf117976-2722-4466-9b9a-1c01ed9aebff',
+                url: 'https://support.microsoft.com/vi-vn/office/choosecols-%E5%87%BD%E6%95%B0-bf117976-2722-4466-9b9a-1c01ed9aebff',
             },
         ],
         functionParameter: {
@@ -93,7 +93,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/chooserows-%E5%87%BD%E6%95%B0-51ace882-9bab-4a44-9625-7274ef7507a3',
+                url: 'https://support.microsoft.com/vi-vn/office/chooserows-%E5%87%BD%E6%95%B0-51ace882-9bab-4a44-9625-7274ef7507a3',
             },
         ],
         functionParameter: {
@@ -107,7 +107,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/column-%E5%87%BD%E6%95%B0-44e8c754-711c-4df3-9da4-47a55042554b',
+                url: 'https://support.microsoft.com/vi-vn/office/column-%E5%87%BD%E6%95%B0-44e8c754-711c-4df3-9da4-47a55042554b',
             },
         ],
         functionParameter: {
@@ -120,7 +120,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/columns-%E5%87%BD%E6%95%B0-4e8e7b4e-e603-43e8-b177-956088fa48ca',
+                url: 'https://support.microsoft.com/vi-vn/office/columns-%E5%87%BD%E6%95%B0-4e8e7b4e-e603-43e8-b177-956088fa48ca',
             },
         ],
         functionParameter: {
@@ -133,7 +133,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/drop-%E5%87%BD%E6%95%B0-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
+                url: 'https://support.microsoft.com/vi-vn/office/drop-%E5%87%BD%E6%95%B0-1cb4e151-9e17-4838-abe5-9ba48d8c6a34',
             },
         ],
         functionParameter: {
@@ -147,7 +147,7 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/zh-cn/office/expand-%E5%87%BD%E6%95%B0-7433fba5-4ad1-41da-a904-d5d95808bc38',
+                url: 'https://support.microsoft.com/vi-vn/office/expand-%E5%87%BD%E6%95%B0-7433fba5-4ad1-41da-a904-d5d95808bc38',
             },
         ],
         functionParameter: {

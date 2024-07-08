@@ -17,10 +17,23 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
-    shortcut: {
-        sheet: {
-            'zen-edit-cancel': '取消編輯（禪模式狀態）',
-            'zen-edit-confirm': '放棄編輯（禪模式狀態）',
+    docLink: {
+        edit: {
+            confirm: 'Xác nhận',
+            cancel: 'Hủy',
+            title: 'Liên kết',
+            address: 'Địa chỉ liên kết',
+            placeholder: 'Vui lòng nhập liên kết hợp lệ',
+            addressError: 'Vui lòng nhập liên kết hợp lệ',
+        },
+        info: {
+            copy: 'Sao chép',
+            edit: 'Chỉnh sửa',
+            cancel: 'Hủy liên kết',
+            coped: 'Liên kết đã được sao chép vào clipboard',
+        },
+        menu: {
+            tooltip: 'Thêm liên kết',
         },
     },
 };

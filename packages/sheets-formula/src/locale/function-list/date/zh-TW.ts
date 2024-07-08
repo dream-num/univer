@@ -21,7 +21,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/date-%E5%87%BD%E6%95%B0-e36c0c8c-4104-49da-ab83-82328b832349',
+                url: 'https://support.microsoft.com/zh-tw/office/date-%E5%87%BD%E6%95%B0-e36c0c8c-4104-49da-ab83-82328b832349',
             },
         ],
         functionParameter: {
@@ -36,7 +36,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/datedif-%E5%87%BD%E6%95%B0-25dba1a4-2812-480b-84dd-8b32a451b35c',
+                url: 'https://support.microsoft.com/zh-tw/office/datedif-%E5%87%BD%E6%95%B0-25dba1a4-2812-480b-84dd-8b32a451b35c',
             },
         ],
         functionParameter: {
@@ -50,7 +50,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/datevalue-%E5%87%BD%E6%95%B0-df8b07d4-7761-4a93-bc33-b7471bbff252',
+                url: 'https://support.microsoft.com/zh-tw/office/datevalue-%E5%87%BD%E6%95%B0-df8b07d4-7761-4a93-bc33-b7471bbff252',
             },
         ],
         functionParameter: {
@@ -63,7 +63,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/day-%E5%87%BD%E6%95%B0-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
+                url: 'https://support.microsoft.com/zh-tw/office/day-%E5%87%BD%E6%95%B0-8a7d1cbb-6c7d-4ba1-8aea-25c134d03101',
             },
         ],
         functionParameter: {
@@ -76,7 +76,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/days-%E5%87%BD%E6%95%B0-57740535-d549-4395-8728-0f07bff0b9df',
+                url: 'https://support.microsoft.com/zh-tw/office/days-%E5%87%BD%E6%95%B0-57740535-d549-4395-8728-0f07bff0b9df',
             },
         ],
         functionParameter: {
@@ -90,7 +90,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/days360-%E5%87%BD%E6%95%B0-b9a509fd-49ef-407e-94df-0cbda5718c2a',
+                url: 'https://support.microsoft.com/zh-tw/office/days360-%E5%87%BD%E6%95%B0-b9a509fd-49ef-407e-94df-0cbda5718c2a',
             },
         ],
         functionParameter: {
@@ -104,7 +104,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/edate-%E5%87%BD%E6%95%B0-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
+                url: 'https://support.microsoft.com/zh-tw/office/edate-%E5%87%BD%E6%95%B0-3c920eb2-6e66-44e7-a1f5-753ae47ee4f5',
             },
         ],
         functionParameter: {
@@ -118,7 +118,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/eomonth-%E5%87%BD%E6%95%B0-7314ffa1-2bc9-4005-9d66-f49db127d628',
+                url: 'https://support.microsoft.com/zh-tw/office/eomonth-%E5%87%BD%E6%95%B0-7314ffa1-2bc9-4005-9d66-f49db127d628',
             },
         ],
         functionParameter: {
@@ -132,7 +132,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/hour-%E5%87%BD%E6%95%B0-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
+                url: 'https://support.microsoft.com/zh-tw/office/hour-%E5%87%BD%E6%95%B0-a3afa879-86cb-4339-b1b5-2dd2d7310ac7',
             },
         ],
         functionParameter: {
@@ -146,7 +146,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/isoweeknum-%E5%87%BD%E6%95%B0-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
+                url: 'https://support.microsoft.com/zh-tw/office/isoweeknum-%E5%87%BD%E6%95%B0-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
             },
         ],
         functionParameter: {
@@ -160,7 +160,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/minute-%E5%87%BD%E6%95%B0-af728df0-05c4-4b07-9eed-a84801a60589',
+                url: 'https://support.microsoft.com/zh-tw/office/minute-%E5%87%BD%E6%95%B0-af728df0-05c4-4b07-9eed-a84801a60589',
             },
         ],
         functionParameter: {
@@ -174,7 +174,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/month-%E5%87%BD%E6%95%B0-579a2881-199b-48b2-ab90-ddba0eba86e8',
+                url: 'https://support.microsoft.com/zh-tw/office/month-%E5%87%BD%E6%95%B0-579a2881-199b-48b2-ab90-ddba0eba86e8',
             },
         ],
         functionParameter: {
@@ -187,7 +187,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/networkdays-%E5%87%BD%E6%95%B0-48e717bf-a7a3-495f-969e-5005e3eb18e7',
+                url: 'https://support.microsoft.com/zh-tw/office/networkdays-%E5%87%BD%E6%95%B0-48e717bf-a7a3-495f-969e-5005e3eb18e7',
             },
         ],
         functionParameter: {
@@ -201,7 +201,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/networkdays-intl-%E5%87%BD%E6%95%B0-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
+                url: 'https://support.microsoft.com/zh-tw/office/networkdays-intl-%E5%87%BD%E6%95%B0-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
             },
         ],
         functionParameter: {
@@ -215,7 +215,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/now-%E5%87%BD%E6%95%B0-3337fd29-145a-4347-b2e6-2​​0c904739c46',
+                url: 'https://support.microsoft.com/zh-tw/office/now-%E5%87%BD%E6%95%B0-3337fd29-145a-4347-b2e6-2​​0c904739c46',
             },
         ],
         functionParameter: {
@@ -227,7 +227,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/second-%E5%87%BD%E6%95%B0-740d1cfc-553c-4099-b668-80eaa24e8af1',
+                url: 'https://support.microsoft.com/zh-tw/office/second-%E5%87%BD%E6%95%B0-740d1cfc-553c-4099-b668-80eaa24e8af1',
             },
         ],
         functionParameter: {
@@ -241,7 +241,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/time-%E5%87%BD%E6%95%B0-9a5aff99-8f7d-4611-845e-747d0b8d5457',
+                url: 'https://support.microsoft.com/zh-tw/office/time-%E5%87%BD%E6%95%B0-9a5aff99-8f7d-4611-845e-747d0b8d5457',
             },
         ],
         functionParameter: {
@@ -256,7 +256,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/timevalue-%E5%87%BD%E6%95%B0-0b615c12-33d8-4431-bf3d-f3eb6d186645',
+                url: 'https://support.microsoft.com/zh-tw/office/timevalue-%E5%87%BD%E6%95%B0-0b615c12-33d8-4431-bf3d-f3eb6d186645',
             },
         ],
         functionParameter: {
@@ -269,7 +269,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/today-%E5%87%BD%E6%95%B0-5eb3078d-a82c-4736-8930-2f51a028fdd9',
+                url: 'https://support.microsoft.com/zh-tw/office/today-%E5%87%BD%E6%95%B0-5eb3078d-a82c-4736-8930-2f51a028fdd9',
             },
         ],
         functionParameter: {
@@ -280,7 +280,7 @@ export default {
         abstract: '將序號轉換為星期日期', links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/weekday-%E5%87%BD%E6%95%B0-60e44483-2ed1-439f-8bd0-e404c190949a',
+                url: 'https://support.microsoft.com/zh-tw/office/weekday-%E5%87%BD%E6%95%B0-60e44483-2ed1-439f-8bd0-e404c190949a',
             },
         ],
         functionParameter: {
@@ -294,7 +294,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/weeknum-%E5%87%BD%E6%95%B0-e5c43a03-b4ab-426c-b411-b18c13c75340',
+                url: 'https://support.microsoft.com/zh-tw/office/weeknum-%E5%87%BD%E6%95%B0-e5c43a03-b4ab-426c-b411-b18c13c75340',
             },
         ],
         functionParameter: {
@@ -308,7 +308,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/workday-%E5%87%BD%E6%95%B0-f764a5b7-05fc-4494-9486-60d494efbf33',
+                url: 'https://support.microsoft.com/zh-tw/office/workday-%E5%87%BD%E6%95%B0-f764a5b7-05fc-4494-9486-60d494efbf33',
             },
         ],
         functionParameter: {
@@ -322,7 +322,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/workday-intl-%E5%87%BD%E6%95%B0-a378391c-9ba7-4678-8a39-39611a9bf81d',
+                url: 'https://support.microsoft.com/zh-tw/office/workday-intl-%E5%87%BD%E6%95%B0-a378391c-9ba7-4678-8a39-39611a9bf81d',
             },
         ],
         functionParameter: {
@@ -336,7 +336,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/year-%E5%87%BD%E6%95%B0-c64f017a-1354-490d-981f-578e8ec8d3b9',
+                url: 'https://support.microsoft.com/zh-tw/office/year-%E5%87%BD%E6%95%B0-c64f017a-1354-490d-981f-578e8ec8d3b9',
             },
         ],
         functionParameter: {
@@ -349,7 +349,7 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-cn/office/yearfrac-%E5%87%BD%E6%95%B0-3844141e-c76d-4143-82b6-208454ddc6a8',
+                url: 'https://support.microsoft.com/zh-tw/office/yearfrac-%E5%87%BD%E6%95%B0-3844141e-c76d-4143-82b6-208454ddc6a8',
             },
         ],
         functionParameter: {

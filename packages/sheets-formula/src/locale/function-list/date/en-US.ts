@@ -288,8 +288,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'serial_number', detail: 'A sequential number that represents the date of the day you are trying to find.' },
+            returnType: { name: 'return_type', detail: 'A number that determines the type of return value.' },
         },
     },
     WEEKNUM: {

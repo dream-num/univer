@@ -288,8 +288,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '一个序列号，代表尝试查找的那一天的日期。' },
+            returnType: { name: '返回值类型', detail: '用于确定返回值类型的数字。' },
         },
     },
     WEEKNUM: {

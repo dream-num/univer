@@ -288,8 +288,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する日付のシリアル値を指定します。' },
+            returnType: { name: '週の基準', detail: '戻り値の種類を数値で指定します。' },
         },
     },
     WEEKNUM: {

@@ -398,6 +398,12 @@ importers:
         specifier: ^5.43.0
         version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.3
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.0
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core

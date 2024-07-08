@@ -15,7 +15,7 @@
  */
 
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
-import type { IWorkbenchOptions } from '@univerjs/ui';
+import type { IUniverUIConfig, IWorkbenchOptions } from '@univerjs/ui';
 import { BuiltInUIPart, CanvasPopup, FloatDom, IUIPartsService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -30,17 +30,21 @@ const STEADY_TIMEOUT = 3000;
 
 export class UniverUniUIController extends Disposable {
     constructor(
+        private readonly _config: IUniverUIConfig,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService
     ) {
         super();
+
         this._initBuiltinComponents();
+
+        Promise.resolve().then(() => this._bootstrapWorkbench());
     }
 
-    bootstrapWorkbench(options: IWorkbenchOptions): void {
+    private _bootstrapWorkbench(): void {
         this.disposeWithMe(
-            bootstrap(this._injector, options, () => {
+            bootstrap(this._injector, this._config, () => {
                 this._lifecycleService.lifecycle$.pipe(
                     filter((lifecycle) => lifecycle === LifecycleStages.Ready),
                     delay(300),

@@ -100,7 +100,6 @@ export class UniverUniUIPlugin extends Plugin {
         const dependencies: Dependency[] = mergeOverrideWithDependencies([
             [ComponentManager],
             [ZIndexManager],
-
             [ShortcutPanelService],
             [UnitGridService],
             [IUIPartsService, { useClass: UIPartsService }],
@@ -124,13 +123,16 @@ export class UniverUniUIPlugin extends Plugin {
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
-
-            // This line is different from the original UI plugin.
-            [IUIController, { useClass: UniverUniUIController }],
-
-            [SharedController, { useFactory: () => this._injector.createInstance(SharedController, this._config) }],
+            [IUIController, {
+                useFactory: () => this._injector.createInstance(UniverUniUIController, this._config),
+            }],
+            [SharedController, {
+                useFactory: () => this._injector.createInstance(SharedController, this._config),
+            }],
             [ErrorController],
-            [ShortcutPanelController, { useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config) }],
+            [ShortcutPanelController, {
+                useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
+            }],
         ], this._config.override);
         dependencies.forEach((dependency) => injector.add(dependency));
     }

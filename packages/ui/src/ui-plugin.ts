@@ -107,27 +107,18 @@ export class UniverUIPlugin extends Plugin {
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
-
-            // controllers
-            [
-                IUIController, {
-                    useFactory: (injector: Injector) => injector.createInstance(DesktopUIController, this._config),
-                    deps: [Injector],
-                },
+            [IUIController, {
+                useFactory: (injector: Injector) => injector.createInstance(DesktopUIController, this._config),
+                deps: [Injector],
+            },
             ],
-            [
-                SharedController,
-                {
-                    useFactory: () => this._injector.createInstance(SharedController, this._config),
-                },
-            ],
+            [SharedController, {
+                useFactory: () => this._injector.createInstance(SharedController, this._config),
+            }],
             [ErrorController],
-            [
-                ShortcutPanelController,
-                {
-                    useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
-                },
-            ],
+            [ShortcutPanelController, {
+                useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
+            }],
         ], this._config.override);
         dependencies.forEach((dependency) => injector.add(dependency));
     }

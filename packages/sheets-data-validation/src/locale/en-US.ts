@@ -176,6 +176,9 @@ const locale: typeof zhCN = {
             text: 'Plain text',
             label: 'Display style',
         },
+        showTime: {
+            label: 'Show TimePicker',
+        },
     },
 };
 

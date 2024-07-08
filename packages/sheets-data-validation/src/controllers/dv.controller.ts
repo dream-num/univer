@@ -28,6 +28,12 @@ import { WholeValidator } from '../validators/whole-validator';
 import { ListMultipleValidator } from '../validators/list-multiple-validator';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
+import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
+import { DataValidationPanel, DATE_DROPDOWN_KEY, DateDropdown, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
+import { CellDropdown, DROP_DOWN_KEY } from '../views/drop-down';
+import { FORMULA_INPUTS } from '../views/formula-input';
+import { ListRenderModeInput } from '../views/render-mode';
+import { DateShowTimeOption } from '../views/show-time';
 import { DataValidationIcon } from './dv.menu';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
@@ -49,8 +55,8 @@ export class DataValidationController extends RxDisposable {
     private _init() {
         this._registerValidators();
         this._initInstanceChange();
-        this._componentManger.register(DataValidationIcon, DataValidationSingle);
         this._initCommandInterceptor();
+        this._initComponents();
     }
 
     private _registerValidators() {
@@ -136,6 +142,24 @@ export class DataValidationController extends RxDisposable {
                     redos: [],
                 };
             },
+        });
+    }
+
+    private _initComponents() {
+        ([
+            [DataValidationIcon, DataValidationSingle],
+            [DATA_VALIDATION_PANEL, DataValidationPanel],
+            [DROP_DOWN_KEY, CellDropdown],
+            [LIST_DROPDOWN_KEY, ListDropDown],
+            [DATE_DROPDOWN_KEY, DateDropdown],
+            [ListRenderModeInput.componentKey, ListRenderModeInput],
+            [DateShowTimeOption.componentKey, DateShowTimeOption],
+            ...FORMULA_INPUTS,
+        ] as const).forEach(([key, component]) => {
+            this.disposeWithMe(this._componentManger.register(
+                key,
+                component
+            ));
         });
     }
 }

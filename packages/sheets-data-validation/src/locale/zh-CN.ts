@@ -176,6 +176,9 @@ const locale = {
             text: '纯文本',
             label: '显示样式',
         },
+        showTime: {
+            label: '展示时间选择',
+        },
     },
 };
 

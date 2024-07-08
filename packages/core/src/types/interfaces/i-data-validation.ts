@@ -30,19 +30,32 @@ export interface IDataValidationRuleBase {
 }
 
 export interface IDataValidationRuleOptions {
+    imeMode?: DataValidationImeMode;
+    /**
+     * for dropdown
+     */
+    showDropDown?: boolean;
+    /**
+     * validator error
+     */
+    showErrorMessage?: boolean;
     error?: string;
     errorStyle?: DataValidationErrorStyle;
     errorTitle?: string;
-    imeMode?: DataValidationImeMode;
+    /**
+     * input prompt, not for using now.
+     */
+    showInputMessage?: boolean;
     prompt?: string;
     promptTitle?: string;
-    showDropDown?: boolean;
-    showErrorMessage?: boolean;
-    showInputMessage?: boolean;
     /**
      * cell render mode of data validation
      */
     renderMode?: DataValidationRenderMode;
+    /**
+     * custom biz info
+     */
+    bizInfo?: Record<string, any>;
 }
 
 export interface IDataValidationRule extends IDataValidationRuleBase, IDataValidationRuleOptions {

@@ -27,13 +27,10 @@ import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { DATE_DROPDOWN_KEY } from '../views';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
+import { DateShowTimeOption } from '../views/show-time';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
-
-const isValidDateString = (date: string) => {
-    return dayjs(date).isValid();
-};
 
 const transformDate = (value: Nullable<CellValue>) => {
     if (value === undefined || value === null || typeof value === 'boolean') {
@@ -63,9 +60,12 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
 
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
+    override optionsInput = DateShowTimeOption.componentKey;
     override dropdown = DATE_DROPDOWN_KEY;
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
+
+    transformDate = transformDate;
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<Dayjs | undefined>> {
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
@@ -77,7 +77,15 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         };
     }
 
-    transformDate = transformDate;
+    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string) {
+        const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
+        const { formula1, formula2 } = rule;
+
+        return {
+            formula1: transformDate(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
+            formula2: transformDate(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
+        };
+    }
 
     override async isValidType(info: IValidatorCellInfo): Promise<boolean> {
         const { value } = info;
@@ -215,28 +223,6 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         }
 
         return cellValue.isBefore(formula1) || cellValue.isSame(formula1);
-    }
-
-    validatorFormulaValue(rule: IDataValidationRule): string | undefined {
-        if (!Tools.isDefine(rule.operator)) {
-            return undefined;
-        }
-
-        const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(rule.operator);
-
-        if (isTwoFormula) {
-            if (Tools.isBlank(rule.formula1) || Tools.isBlank(rule.formula2)) {
-                return '';
-            } else {
-                if (!isValidDateString(rule.formula1!) || !isValidDateString(rule.formula2!)) {
-                    return '';
-                }
-            }
-        } else {
-            if (Tools.isBlank(rule.formula1)) {
-                return '';
-            }
-        }
     }
 
     override get operatorNames() {

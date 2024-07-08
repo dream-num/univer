@@ -17,7 +17,7 @@
 import React, { useState } from 'react';
 import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { DatePanel } from '@univerjs/design';
+import { Button, DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import dayjs from 'dayjs';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
@@ -47,49 +47,64 @@ export function DateDropdown(props: IDropdownComponentProps) {
     const cellStr = getCellValueOrigin(cellData);
     const originDate = validator.transformDate(cellStr) ?? dayjs();
     const date = originDate.isValid() ? originDate : dayjs();
+    const showTime = Boolean(rule.bizInfo?.showTime);
+
+    const handleSave = async () => {
+        if (!localDate) {
+            return;
+        }
+        const newValue = localDate;
+        const newValueStr = newValue.format(showTime ? 'YYYY/MM/DD HH:mm:ss' : 'YYYY/MM/DD');
+        if (
+            rule.errorStyle !== DataValidationErrorStyle.STOP ||
+            (await validator.validator({
+                value: newValueStr,
+                unitId,
+                subUnitId,
+                row,
+                column: col,
+            }, rule))
+        ) {
+            commandService.executeCommand(SetRangeValuesCommand.id, {
+                unitId,
+                subUnitId,
+                range: {
+                    startColumn: col,
+                    endColumn: col,
+                    startRow: row,
+                    endRow: row,
+                },
+                value: {
+                    v: newValueStr,
+                    p: null,
+                    f: null,
+                    si: null,
+
+                },
+            });
+            hideFn();
+        } else {
+            rejectInputController.showReject(validator.getRuleFinalError(rule));
+        }
+    };
 
     return (
         <div className={styles.dvDateDropdown}>
             <DatePanel
                 pickerValue={localDate ?? date}
+                showTime={showTime || undefined}
                 onSelect={async (newValue) => {
-                    const newValueStr = newValue.format('YYYY/MM/DD');
-                    if (
-                        rule.errorStyle !== DataValidationErrorStyle.STOP ||
-                        (await validator.validator({
-                            value: newValueStr,
-                            unitId,
-                            subUnitId,
-                            row,
-                            column: col,
-                        }, rule))
-                    ) {
-                        commandService.executeCommand(SetRangeValuesCommand.id, {
-                            unitId,
-                            subUnitId,
-                            range: {
-                                startColumn: col,
-                                endColumn: col,
-                                startRow: row,
-                                endRow: row,
-                            },
-                            value: {
-                                v: newValueStr,
-                                p: null,
-                                f: null,
-                                si: null,
-
-                            },
-                        });
-                    } else {
-                        rejectInputController.showReject(validator.getRuleFinalError(rule));
-                    }
-                    hideFn();
+                    setLocalDate(newValue);
                 }}
                 onPanelChange={(value) => {
                     setLocalDate(value);
                 }}
             />
+            <div className={styles.dvDateDropdownBtns}>
+                <Button size="small" type="primary" onClick={handleSave} disabled={!localDate}>
+                    确定
+                </Button>
+            </div>
         </div>
 
     );

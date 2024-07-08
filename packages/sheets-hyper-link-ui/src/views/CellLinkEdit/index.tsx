@@ -35,6 +35,7 @@ enum LinkType {
     range = 'range',
     sheet = 'gid',
     definedName = 'rangeid',
+    extraction_field = 'extraction_field',
 }
 
 export const CellLinkEdit = () => {
@@ -142,6 +143,10 @@ export const CellLinkEdit = () => {
         {
             label: localeService.t('hyperLink.form.definedName'),
             value: LinkType.definedName,
+        },
+        {
+            label: localeService.t('ExtractionField'),
+            value: LinkType.extraction_field,
         },
     ];
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -273,6 +278,23 @@ export const CellLinkEdit = () => {
                             }
                         }}
                         placeholder={localeService.t('hyperLink.form.linkPlaceholder')}
+                    />
+                </FormLayout>
+            )}
+            {type === LinkType.extraction_field && (
+                <FormLayout
+                    error={showError ? !payload ? localeService.t('hyperLink.form.inputError') : !isLegalLink(payload) ? localeService.t('hyperLink.form.linkError') : '' : ''}
+                >
+                    <Input
+                        value={payload}
+                        onChange={(newLink) => {
+                            setPayload(newLink);
+                            if (newLink && (setByPayload.current || !display || display === payload)) {
+                                setDisplay(newLink);
+                                setByPayload.current = true;
+                            }
+                        }}
+                        placeholder={localeService.t('请输入抽取字段链接')}
                     />
                 </FormLayout>
             )}

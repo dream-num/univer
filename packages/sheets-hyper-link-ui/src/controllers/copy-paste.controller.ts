@@ -16,7 +16,7 @@
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, Tools } from '@univerjs/core';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation, HyperLinkModel, ICellHyperLink, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -54,8 +54,17 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             },
             onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
                 if (isLegalLink(clipText)) {
-                    const text = serializeUrl(clipText);
+                    const customHyperLink = this._hyperLinkModel.findCustomHyperLink(clipText);
+                    const newLink: Partial<ICellHyperLink> = {
+                        payload: customHyperLink ? customHyperLink.serialize(clipText) : serializeUrl(clipText)
+                    }
+                    const display = customHyperLink ? customHyperLink.display(clipText) : undefined;
+                    if (display) {
+                        newLink.display = display;
+                    }
+                    // const text = customHyperLink ? customHyperLink.serialize(clipText) : serializeUrl(clipText);
 
+console.log(newLink.payload, 'newLink. link')
                     const { range, unitId, subUnitId } = pasteTo;
                     const { ranges: [pasteToRange], mapFunc } = virtualizeDiscreteRanges([range]);
                     const redos: IMutationInfo[] = [];
@@ -83,7 +92,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                                     id: newId,
                                     row,
                                     column,
-                                    payload: text,
+                                    ...newLink
                                 },
                             },
                         });
@@ -150,6 +159,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             subUnitId: string;
         }
     ) {
+        console.log('paste hyperlink')
         if (!this._copyInfo) {
             return { redos: [], undos: [] };
         }

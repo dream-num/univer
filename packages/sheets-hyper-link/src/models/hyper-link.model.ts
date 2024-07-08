@@ -56,12 +56,19 @@ type LinkUpdate = {
     silent?: boolean;
 };
 
+export interface ICustomHyperlink {
+    canUse(urlStr: string): boolean
+    serialize(urlStr: string): Partial<ICellHyperLink>
+    display(urlStr: string): string
+}
+
 export class HyperLinkModel extends Disposable {
     private _linkUpdate$ = new Subject<LinkUpdate>();
     linkUpdate$ = this._linkUpdate$.asObservable();
 
     private _linkMap: Map<string, Map<string, ObjectMatrix<ICellHyperLink>>> = new Map();
     private _linkPositionMap: Map<string, Map<string, Map<string, { row: number; column: number; link: ICellHyperLink }>>> = new Map();
+    private _customHyperLinks: ICustomHyperlink[] = []
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
@@ -72,6 +79,14 @@ export class HyperLinkModel extends Disposable {
                 this._linkUpdate$.complete();
             },
         });
+    }
+
+    registerCustomHyperLink(customHyperLink: ICustomHyperlink) {
+        this._customHyperLinks.push(customHyperLink);
+    }
+
+    findCustomHyperLink(urlStr: string) {
+       return this._customHyperLinks.find((customHyperLink) => customHyperLink.canUse(urlStr));
     }
 
     private _ensureMap(unitId: string, subUnitId: string) {

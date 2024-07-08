@@ -354,15 +354,15 @@ export const FUNCTION_LIST_TEXT: IFunctionInfo[] = [
         abstract: 'formula.functionList.LEFTB.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.LEFT.functionParameter.text.name',
-                detail: 'formula.functionList.LEFT.functionParameter.text.detail',
+                name: 'formula.functionList.LEFTB.functionParameter.text.name',
+                detail: 'formula.functionList.LEFTB.functionParameter.text.detail',
                 example: '"Hello Univer"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.LEFT.functionParameter.numBytes.name',
-                detail: 'formula.functionList.LEFT.functionParameter.numBytes.detail',
+                name: 'formula.functionList.LEFTB.functionParameter.numBytes.name',
+                detail: 'formula.functionList.LEFTB.functionParameter.numBytes.detail',
                 example: '1',
                 require: 0,
                 repeat: 0,

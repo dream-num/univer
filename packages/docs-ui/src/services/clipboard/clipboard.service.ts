@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange, IDocumentBody, IParagraph } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, toDisposable } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -275,7 +275,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
             const deleteRange = getDeleteSelection({ startOffset, endOffset, collapsed }, body);
 
-            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).sliceBody(deleteRange.startOffset, deleteRange.endOffset);
+            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).sliceBody(deleteRange.startOffset, deleteRange.endOffset, SliceBodyType.copy);
             if (docBody == null) {
                 continue;
             }

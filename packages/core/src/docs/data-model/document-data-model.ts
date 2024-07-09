@@ -25,7 +25,7 @@ import type {
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
-import { getBodySlice } from './text-x/utils';
+import { getBodySlice, SliceBodyType } from './text-x/utils';
 import { getEmptySnapshot } from './empty-snapshot';
 import type { JSONXActions } from './json-x/json-x';
 import { JSONX } from './json-x/json-x';
@@ -298,14 +298,14 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this.snapshot;
     }
 
-    sliceBody(startOffset: number, endOffset: number): Nullable<IDocumentBody> {
+    sliceBody(startOffset: number, endOffset: number, type = SliceBodyType.copy): Nullable<IDocumentBody> {
         const body = this.getBody();
 
         if (body == null) {
             return;
         }
 
-        return getBodySlice(body, startOffset, endOffset);
+        return getBodySlice(body, startOffset, endOffset, false, type);
     }
 
     private _initializeHeaderFooterModel() {

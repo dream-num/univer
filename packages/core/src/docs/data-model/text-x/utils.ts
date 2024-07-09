@@ -21,12 +21,18 @@ import { DataStreamTreeTokenType } from '../types';
 import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
+export enum SliceBodyType {
+    copy,
+    cut,
+}
+
 // TODO: Support other properties like custom ranges, tables, etc.
 export function getBodySlice(
     body: IDocumentBody,
     startOffset: number,
     endOffset: number,
-    returnEmptyTextRun = false
+    returnEmptyTextRun = false,
+    type = SliceBodyType.cut
 ): IDocumentBody {
     const { dataStream, textRuns = [], paragraphs = [] } = body;
 
@@ -93,8 +99,9 @@ export function getBodySlice(
             startIndex: p.startIndex - startOffset,
         }));
     }
-
-    docBody.customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
+    if (type === SliceBodyType.cut) {
+        docBody.customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
+    }
     const { customRanges } = getCustomRangeSlice(body, startOffset, endOffset);
     docBody.customRanges = customRanges;
     return docBody;

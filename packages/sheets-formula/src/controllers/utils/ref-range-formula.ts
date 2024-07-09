@@ -457,7 +457,7 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
 
         const newFormula = newFormulaMatrix.getValue(oldStartRow, oldStartColumn) || oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
         // Use the formula result value to update the data to ensure accuracy, otherwise the new formula cannot be inferred from #REF
-        const newValue = formulaDataItemToCellDataFormula(newFormula);
+        const newValue = formulaDataItemToCellData(newFormula);
 
         redoFormulaData.setValue(oldStartRow, oldStartColumn, { f: null, si: null });
 
@@ -538,48 +538,12 @@ export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaData
         cellData.f = f;
     }
 
-    return cellData;
-}
-
-/**
- * Transfer the formulaDataItem to the cellData, contains formula
- * ┌────────────────────────────────┬─────────────────┐
- * │        IFormulaDataItem        │     ICellData   │
- * ├──────────────────┬─────┬───┬───┼───────────┬─────┤
- * │ f                │ si  │ x │ y │ f         │ si  │
- * ├──────────────────┼─────┼───┼───┼───────────┼─────┤
- * │ =SUM(1)          │     │   │   │ =SUM(1)   │     │
- * │                  │ id1 │   │   │           │ id1 │
- * │ =SUM(1)          │ id1 │   │   │ =SUM(1)   │     │
- * │ =SUM(1)          │ id1 │ 0 │ 0 │ =SUM(1)   │     │
- * │ =SUM(1)          │ id1 │ 0 │ 1 │ =SUM(1)   │     │
- * └──────────────────┴─────┴───┴───┴───────────┴─────┘
- *
- * The fifth case: The value f of the formula is already the result value. If the formula content of si contains #REF, it cannot be obtained from the formula offset of si, and the result value must be stored directly
- */
-export function formulaDataItemToCellDataFormula(formulaDataItem: Nullable<IFormulaDataItem>): Nullable<ICellData> {
-    if (formulaDataItem == null) {
-        return;
-    }
-    const { f, si } = formulaDataItem;
-    const checkFormulaString = isFormulaString(f);
-    const checkFormulaId = isFormulaId(si);
-
-    if (!checkFormulaString && !checkFormulaId) {
-        return {
-            f: null,
-            si: null,
-        };
+    if (cellData.f === undefined) {
+        cellData.f = null;
     }
 
-    const cellData: ICellData = {};
-
-    if (checkFormulaString) {
-        cellData.f = f;
-    }
-
-    if (checkFormulaId && !checkFormulaString) {
-        cellData.si = si;
+    if (cellData.si === undefined) {
+        cellData.si = null;
     }
 
     return cellData;

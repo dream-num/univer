@@ -24,6 +24,7 @@ import type { IDropdownComponentProps } from '../../services/dropdown-manager.se
 import type { DateValidator } from '../../validators';
 import { getCellValueOrigin } from '../../utils/get-cell-data-origin';
 import { DataValidationRejectInputController } from '../../controllers/dv-reject-input.controller';
+import { timestamp2SerialTime } from '../../utils/date';
 import styles from './index.module.less';
 
 export function DateDropdown(props: IDropdownComponentProps) {
@@ -54,11 +55,11 @@ export function DateDropdown(props: IDropdownComponentProps) {
             return;
         }
         const newValue = localDate;
-        const newValueStr = newValue.format(showTime ? 'YYYY/MM/DD HH:mm:ss' : 'YYYY/MM/DD');
+        const serialTime = timestamp2SerialTime(dayjs(newValue.format(showTime ? 'YYYY/MM/DD HH:mm:ss' : 'YYYY/MM/DD 00:00:00')).unix());
         if (
             rule.errorStyle !== DataValidationErrorStyle.STOP ||
             (await validator.validator({
-                value: newValueStr,
+                value: serialTime,
                 unitId,
                 subUnitId,
                 row,
@@ -75,10 +76,16 @@ export function DateDropdown(props: IDropdownComponentProps) {
                     endRow: row,
                 },
                 value: {
-                    v: newValueStr,
+                    v: serialTime,
+                    t: 2,
                     p: null,
                     f: null,
                     si: null,
+                    s: {
+                        n: {
+                            pattern: showTime ? 'yyyy-MM-dd hh:mm:ss' : 'yyyy-MM-dd',
+                        },
+                    },
 
                 },
             });

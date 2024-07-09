@@ -65,3 +65,7 @@ export const serialTimeToTimestamp = (value: number) => {
     dt.setUTCHours(hh, mm, ss);
     return dt.getTime();
 };
+
+export const timestamp2SerialTime = (timestamp: number) => {
+    return (timestamp / 86400) + 25569;
+};

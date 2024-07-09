@@ -22,7 +22,7 @@ import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@u
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
-import { serialTimeToTimestamp } from '../utils/date';
+import { excelSerialToUnixTimestamp } from '../utils/date';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { DATE_DROPDOWN_KEY } from '../views';
@@ -38,7 +38,7 @@ const transformDate = (value: Nullable<CellValue>) => {
     }
 
     if (typeof value === 'number' || !Number.isNaN(+value)) {
-        return dayjs(serialTimeToTimestamp(+value));
+        return dayjs.unix(excelSerialToUnixTimestamp(+value));
     }
 
     return dayjs(value);

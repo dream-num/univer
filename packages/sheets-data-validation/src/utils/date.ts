@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const DAY_SIZE = 86400;
-
 export function toYMD_1900(ord: number, leap1900 = true) {
     if (leap1900 && ord >= 0) {
         if (ord === 0) {
@@ -41,30 +39,10 @@ export function toYMD_1900(ord: number, leap1900 = true) {
     return [nYear | 0, nMonth | 0, nDay | 0];
 }
 
-export const serialTimeToTimestamp = (value: number) => {
-    let date = (value | 0);
-    const t = DAY_SIZE * (value - date);
-    let time = Math.floor(t); // in seconds
-    // date "epsilon" correction
-    if ((t - time) > 0.9999) {
-        time += 1;
-        if (time === DAY_SIZE) {
-            time = 0;
-            date += 1;
-        }
-    }
-    // serial date/time to gregorian calendar
-    const x = (time < 0) ? DAY_SIZE + time : time;
-    const [y, m, d] = toYMD_1900(value, true);
-    const hh = Math.floor((x / 60) / 60) % 60;
-    const mm = Math.floor(x / 60) % 60;
-    const ss = Math.floor(x) % 60;
-    // return it as a native date object
-    const dt = new Date(0);
-    dt.setUTCFullYear(y, m - 1, d);
-    dt.setUTCHours(hh, mm, ss);
-    return dt.getTime();
-};
+export function excelSerialToUnixTimestamp(excelSerial: number) {
+    const date = new Date((excelSerial - 25569) * 86400);
+    return date.getTime();
+}
 
 export const timestamp2SerialTime = (timestamp: number) => {
     return (timestamp / 86400) + 25569;

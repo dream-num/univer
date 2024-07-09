@@ -1069,8 +1069,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组', detail: '其相应元素需要进行相乘并求和的第一个数组参数。' },
+            array2: { name: '数组', detail: '2 到 255 个数组参数，其相应元素需要进行相乘并求和。' },
         },
     },
     SUMSQ: {

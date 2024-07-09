@@ -20,7 +20,6 @@ import type {
     IRangeWithCoord,
     ISelectionCell,
     ISelectionCellWithMergeInfo,
-
     ISelectionWithCoord,
     Nullable,
     ThemeService,

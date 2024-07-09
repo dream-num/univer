@@ -24,7 +24,6 @@ import {
     BuiltInUIPart,
     ComponentContainer,
     ContextMenu,
-    DISABLE_AUTO_FOCUS_KEY,
     IMessageService,
     type IWorkbenchOptions,
     Sidebar,
@@ -196,7 +195,7 @@ interface IUnitRendererProps {
     gridService: UnitGridService;
     instanceService: IUniverInstanceService;
 
-    onFocus?: (unitId: string) => void;
+    onFocus: (unitId: string) => void;
 }
 
 function UnitRenderer(props: IUnitRendererProps) {
@@ -212,13 +211,10 @@ function UnitRenderer(props: IUnitRendererProps) {
     );
 
     const focus = useCallback(() => {
-        !disableChangingUnitFocusing && !focused && onFocus?.(unitId);
+        if (!disableChangingUnitFocusing && !focused) {
+            onFocus(unitId);
+        }
     }, [focused, onFocus, disableChangingUnitFocusing, unitId]);
-
-    useEffect(() => {
-        // eslint-disable-next-line no-console
-        console.log('Disable changing unit focused', disableChangingUnitFocusing);
-    }, [disableChangingUnitFocusing]);
 
     useEffect(() => {
         if (mountRef.current) {
@@ -232,7 +228,9 @@ function UnitRenderer(props: IUnitRendererProps) {
                 [styles.workbenchContainerCanvasFocused]: focused,
             })}
             ref={mountRef}
-            onPointerDown={focus}
+            // We bind these focusing events on capture phrase so the
+            // other event handlers would have correct currently focused unit.
+            onPointerUpCapture={focus}
             onWheelCapture={focus}
         >
         </div>

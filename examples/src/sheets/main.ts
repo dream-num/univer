@@ -28,7 +28,6 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 
-import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
@@ -47,7 +46,6 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { FUniver } from '@univerjs/facade';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
-import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { enUS, ruRU, zhCN } from '../locales';
@@ -99,16 +97,8 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 } as IUniverRPCMainThreadConfig);
 
 univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
-
-// data validation
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
-
-// sort
-univer.registerPlugin(UniverSheetsSortPlugin);
 univer.registerPlugin(UniverSheetsSortUIPlugin);
-
-// sheet condition formatting
-univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // drawing

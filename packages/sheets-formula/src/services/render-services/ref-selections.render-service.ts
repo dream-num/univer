@@ -19,7 +19,6 @@ import { DisposableCollection, RANGE_TYPE, ThemeService, toDisposable } from '@u
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
-import type { SelectionShape } from '@univerjs/sheets-ui';
 import { BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -75,13 +74,13 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._skipLastEnabled = enabled;
     }
 
-    removeControl(control: SelectionShape): void {
-        const index = this._selectionControls.findIndex((c) => c === control);
-        if (index !== -1) {
-            control.dispose();
-            this._selectionControls.splice(index, 1);
+    clearLastSelection(): void {
+        const last = this._selectionControls[this._selectionControls.length - 1];
+        if (last) {
+            last.dispose();
+            this._selectionControls.pop();
         }
-    };
+    }
 
     /**
      * Call this method and user will be able to select on the canvas to update selections.

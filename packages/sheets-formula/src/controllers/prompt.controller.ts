@@ -67,7 +67,6 @@ import {
     serializeRangeToRefString,
 } from '@univerjs/engine-formula';
 import {
-    Control,
     DeviceInputEventType,
     IRenderManagerService,
     ITextSelectionRenderManager,
@@ -386,6 +385,7 @@ export class PromptController extends Disposable {
 
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
+        this._contextService.setContextValue(UNI_DISABLE_CHANGING_FOCUS_KEY, false);
 
         this._quitSelectingMode();
 
@@ -405,7 +405,7 @@ export class PromptController extends Disposable {
             // Update rendering in each selection render service.
             this._allSelectionRenderServices.forEach((r) => this._updateRefSelectionStyle(r, this._isSelectionMovingRefSelections));
 
-            const selectionControls = this._selectionRenderService.getSelectionControls();
+            const selectionControls = this._allSelectionRenderServices.map((s) => s.getSelectionControls()).flat();
             selectionControls.forEach((c) => {
                 c.disableHelperSelection();
                 d.add(c.selectionMoving$.subscribe((toRange) => this._onSelectionControlChange(toRange, c)));
@@ -431,19 +431,35 @@ export class PromptController extends Disposable {
         }
     }
 
+    private _currentlyWorkingRefRenderer: Nullable<RefSelectionsRenderService> = null;
     private _selectionsChangeDisposables: Nullable<IDisposable>;
     private _enableRefSelectionsRenderService() {
         const d = this._selectionsChangeDisposables = new DisposableCollection();
         this._allSelectionRenderServices.forEach((renderer) => {
             d.add(renderer.enableSelectionChanging());
+
+            // When the current selections change, the ref string is updated without touch `IRefSelectionsService`.
             d.add(renderer.selectionMoving$.subscribe((selections) => {
-                // When the current selections change, the ref string is updated without touch `IRefSelectionsService`.
                 this._updateSelecting(selections.map((s) => convertSelectionDataToRange(s)));
             }));
+
+            // When the selection change begins, if other render service has last selection,
+            // it should be removed.
             d.add(renderer.selectionMoveStart$.subscribe((selections) => {
-                this._updateSelecting(selections.map((s) => convertSelectionDataToRange(s)), true);
+                const performInsertion = this._checkClearingLastSelection(renderer);
+                this._currentlyWorkingRefRenderer = renderer;
+                this._updateSelecting(selections.map((s) => convertSelectionDataToRange(s)), performInsertion);
             }));
         });
+    }
+
+    private _checkClearingLastSelection(renderer: RefSelectionsRenderService): boolean {
+        if (this._currentlyWorkingRefRenderer && this._currentlyWorkingRefRenderer !== renderer) {
+            this._currentlyWorkingRefRenderer.clearLastSelection();
+            return false;
+        }
+
+        return true;
     }
 
     private _disposeSelectionsChangeListeners(): void {
@@ -688,6 +704,7 @@ export class PromptController extends Disposable {
 
         // Maybe `enterSelectingMode` should be merged with `_enableRefSelectionsRenderService`.
         this._enableRefSelectionsRenderService();
+        this._currentlyWorkingRefRenderer = null;
 
         // TODO: remain last
         if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
@@ -920,6 +937,8 @@ export class PromptController extends Disposable {
      */
     private _refreshSelectionForReference(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]) {
         const [unitId, sheetId] = refSelectionRenderService.getLocation();
+        const { unitId: selfUnitId, sheetId: selfSheetId } = this._getCurrentUnitIdAndSheetId();
+        const isSelf = unitId === selfUnitId && sheetId === selfSheetId;
 
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId)!;
         const worksheet = workbook.getSheetBySheetId(sheetId)!;
@@ -932,8 +951,11 @@ export class PromptController extends Disposable {
             const { themeColor, token, refIndex } = refSelection;
 
             const gridRange = deserializeRangeWithSheet(token);
-
             const { unitId: refUnitId, sheetName, range: rawRange } = gridRange;
+
+            if (!isSelf && (!refUnitId || !sheetName)) {
+                continue;
+            }
 
             /**
              * pro/issues/436
@@ -1429,14 +1451,12 @@ export class PromptController extends Disposable {
                 matchedControls.add(control);
             }
         }
-
-        controls.forEach((control) => {
-            if (!matchedControls.has(control)) { refSelectionRenderService.removeControl(control); }
-        });
     }
 
     private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionShape) {
+        // FIXME: change here
         const { skeleton } = this._getCurrentUnitIdAndSheetId();
+        // const { unitId, sheetId } = toRange;
         this._formulaPromptService.enableLockedSelectionChange();
 
         const id = selectionControl.selectionStyle?.id;
@@ -1448,9 +1468,13 @@ export class PromptController extends Disposable {
         const primary = getCellInfoInMergeData(startRow, startColumn, skeleton?.mergeData);
 
         if (primary) {
-            const { isMerged, isMergedMainCell, startRow: mergeStartRow,
-                    endRow: mergeEndRow, startColumn: mergeStartColumn,
-                    endColumn: mergeEndColumn,
+            const {
+                isMerged,
+                isMergedMainCell,
+                startRow: mergeStartRow,
+                endRow: mergeEndRow,
+                startColumn: mergeStartColumn,
+                endColumn: mergeEndColumn,
             } = primary;
 
             if (
@@ -1514,7 +1538,6 @@ export class PromptController extends Disposable {
             }
 
             documentComponent.getSkeleton()?.calculate();
-
             documentComponent.makeDirty();
         }
     }

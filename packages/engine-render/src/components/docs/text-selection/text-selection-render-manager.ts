@@ -168,7 +168,7 @@ export interface IEditorInputConfig {
 }
 
 export class TextSelectionRenderManager extends RxDisposable implements ITextSelectionRenderManager {
-    private readonly _onInputBefore$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+    private readonly _onInputBefore$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onInputBefore$ = this._onInputBefore$.asObservable();
 
     private readonly _onKeydown$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);

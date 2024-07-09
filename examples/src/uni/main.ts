@@ -28,9 +28,13 @@ import { UniverUniUIPlugin } from '@univerjs/uniui';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { FUniver } from '@univerjs/facade';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-import { enUS } from '../locales';
+import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
+import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
+import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
+import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
+import { enUS } from '../locales';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -65,6 +69,11 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);
+
+univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
+univer.registerPlugin(UniverSheetsDataValidationPlugin);
+univer.registerPlugin(UniverSheetsSortUIPlugin);
+univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {

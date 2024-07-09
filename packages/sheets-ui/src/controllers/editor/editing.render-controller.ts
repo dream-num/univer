@@ -69,6 +69,7 @@ import {
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
+import type { WorkbookSelections } from '@univerjs/sheets';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
@@ -109,10 +110,13 @@ export class EditingRenderController extends Disposable implements IRenderModule
     /** If the corresponding unit is active and prepared for editing. */
     private _isUnitEditing = false;
 
+    private _workbookSelections: WorkbookSelections;
+
     private _d: Nullable<IDisposable>;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
@@ -120,7 +124,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -128,6 +131,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
+
+        this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
 
         // EditingRenderController is per unit. It should only handle keyboard events when the unit is
         // the current of its type.
@@ -813,25 +818,19 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const editorIsDirty = this._editorBridgeService.getEditorDirty();
         if (editorIsDirty === false) {
             this._moveCursor(keycode);
-
             return;
         }
 
-        const workbook = this._instanceSrv.getUniverSheetInstance(unitId);
-        const worksheet = workbook?.getActiveSheet();
-
-        if (worksheet == null) {
-            return;
-        }
-
-        const workbookId = workbook!.getUnitId();
+        const workbook = this._context.unit;
+        const worksheet = workbook.getActiveSheet();
+        const workbookId = this._context.unitId;
         const worksheetId = worksheet.getSheetId();
+        // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
-            const selections = this._selectionManagerService.getCurrentSelections();
-            // Reselect the current selections, when exist cell editor by press ESC.
+            const selections = this._workbookSelections.getCurrentSelections();
             if (selections) {
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    unitId: workbookId,
+                    unitId: this._context.unit,
                     subUnitId: worksheetId,
                     selections,
                 });
@@ -846,9 +845,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             this._lexerTreeBuilder
         );
 
-        if (cellData == null) {
+        if (!cellData) {
             this._moveCursor(keycode);
-
             return;
         }
 

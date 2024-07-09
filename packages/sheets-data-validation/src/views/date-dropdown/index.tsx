@@ -49,23 +49,18 @@ export function DateDropdown(props: IDropdownComponentProps) {
     const { worksheet, row, col, unitId, subUnitId } = location;
     const commandService = useDependency(ICommandService);
     const rejectInputController = useDependency(DataValidationRejectInputController);
-    const [localDate, setLocalDate] = useState<dayjs.Dayjs>();
-    if (!worksheet) {
-        return null;
-    }
-
     const cellData = worksheet.getCell(row, col);
     const rule = cellData?.dataValidation?.rule;
     const validator = cellData?.dataValidation?.validator as DateValidator | undefined;
+    const cellStr = getCellValueOrigin(cellData);
+    const originDate = transformDate(cellStr);
+    const [localDate, setLocalDate] = useState<dayjs.Dayjs | undefined>(originDate);
+    const showTime = Boolean(rule?.bizInfo?.showTime);
+    const date = localDate && localDate.isValid() ? localDate : dayjs();
 
     if (!cellData || !rule || !validator) {
         return;
     }
-
-    const cellStr = getCellValueOrigin(cellData);
-    const originDate = transformDate(cellStr) ?? dayjs();
-    const date = originDate.isValid() ? originDate : dayjs();
-    const showTime = Boolean(rule.bizInfo?.showTime);
 
     const handleSave = async () => {
         if (!localDate) {
@@ -117,6 +112,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
     return (
         <div className={styles.dvDateDropdown}>
             <DatePanel
+                defaultValue={localDate}
                 pickerValue={localDate ?? date}
                 showTime={showTime || undefined}
                 onSelect={async (newValue) => {
@@ -125,7 +121,6 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 onPanelChange={(value) => {
                     setLocalDate(value);
                 }}
-
             />
             <div className={styles.dvDateDropdownBtns}>
                 <Button size="small" type="primary" onClick={handleSave} disabled={!localDate}>

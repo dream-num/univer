@@ -149,11 +149,11 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initRenderModules(): void {
         ([
-            DocBackScrollRenderController,
-            DocTextSelectionRenderController,
-            DocHeaderFooterController,
-        ]).forEach((m) => {
-            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m as unknown as Dependency);
+            [DocBackScrollRenderController],
+            [DocTextSelectionRenderController],
+            [DocHeaderFooterController],
+        ] as Dependency[]).forEach((m) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
     }
 }

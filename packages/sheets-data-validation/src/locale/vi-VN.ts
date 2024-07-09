@@ -176,6 +176,9 @@ const locale: typeof zhCN = {
             text: 'Văn bản thuần túy',
             label: 'Hiển thị kiểu',
         },
+        showTime: {
+            label: 'Hiển thị lựa chọn thời gian',
+        },
     },
 };
 

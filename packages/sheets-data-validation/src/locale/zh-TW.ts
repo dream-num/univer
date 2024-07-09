@@ -178,6 +178,9 @@ const locale: typeof zhCN = {
             text: '純文字',
             label: '顯示樣式',
         },
+        showTime: {
+            label: '展示時間選擇',
+        },
     },
 };
 

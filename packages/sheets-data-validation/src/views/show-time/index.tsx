@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
-import { Checkbox, FormLayout, Radio, RadioGroup } from '@univerjs/design';
+import { type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
+import { Checkbox, FormLayout } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 

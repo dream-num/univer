@@ -28,3 +28,8 @@ export interface ISidebarMethodOptions {
     onClose?: () => void;
     onOpen?: () => void;
 }
+
+export interface ISidebarScrollOptions {
+    event: Event;
+    element: HTMLDivElement;
+}

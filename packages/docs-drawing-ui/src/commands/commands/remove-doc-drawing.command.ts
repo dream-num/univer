@@ -26,8 +26,8 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { RichTextEditingMutation } from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { getRichTextEditPath, RichTextEditingMutation } from '@univerjs/docs';
+import { type ITextRangeWithStyle, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { IDeleteDrawingCommandParams } from './interfaces';
 
 /**
@@ -40,6 +40,7 @@ export const RemoveDocDrawingCommand: ICommand = {
     handler: (accessor: IAccessor, params?: IDeleteDrawingCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const textSelectionRenderManager = accessor.get(ITextSelectionRenderManager);
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
         if (params == null || documentDataModel == null) {
@@ -48,9 +49,11 @@ export const RemoveDocDrawingCommand: ICommand = {
 
         const { drawings: removeDrawings } = params;
 
+        const segmentId = textSelectionRenderManager.getSegment() ?? '';
+
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
-        const customBlocks = documentDataModel.getBody()?.customBlocks ?? [];
+        const customBlocks = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customBlocks ?? [];
         const removeCustomBlocks = removeDrawings
             .map((drawing) => customBlocks.find((customBlock) => customBlock.blockId === drawing.drawingId))
             .filter((block) => !!block)
@@ -102,7 +105,8 @@ export const RemoveDocDrawingCommand: ICommand = {
             memoryCursor.moveCursorTo(startIndex + 1);
         }
 
-        rawActions.push(jsonX.editOp(textX.serialize())!);
+        const path = getRichTextEditPath(documentDataModel, segmentId);
+        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
 
         for (const block of removeCustomBlocks) {
             const { blockId } = block!;

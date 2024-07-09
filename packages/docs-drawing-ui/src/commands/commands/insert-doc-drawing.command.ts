@@ -25,7 +25,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { getRetainAndDeleteFromReplace, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import { getRetainAndDeleteFromReplace, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { IInsertDrawingCommandParams } from './interfaces';
 
 /**
@@ -55,6 +55,11 @@ export const InsertDocDrawingCommand: ICommand = {
         const unitId = documentDataModel.getUnitId();
         const { drawings } = params;
         const { collapsed, startOffset, segmentId } = activeTextRange;
+        const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (body == null) {
+            return false;
+        }
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
@@ -71,7 +76,7 @@ export const InsertDocDrawingCommand: ICommand = {
                 });
             }
         } else {
-            const { dos } = getRetainAndDeleteFromReplace(activeTextRange, segmentId, 0, documentDataModel.getBody()!);
+            const { dos } = getRetainAndDeleteFromReplace(activeTextRange, segmentId, 0, body);
             textX.push(...dos);
         }
 
@@ -89,7 +94,8 @@ export const InsertDocDrawingCommand: ICommand = {
             segmentId,
         });
 
-        const placeHolderAction = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(documentDataModel, segmentId);
+        const placeHolderAction = jsonX.editOp(textX.serialize(), path);
 
         rawActions.push(placeHolderAction!);
 

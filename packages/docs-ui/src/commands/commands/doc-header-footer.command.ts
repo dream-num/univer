@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { ICommand, IDocumentBody, IMutationInfo, JSONXActions } from '@univerjs/core';
 import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -22,7 +22,7 @@ import { DocumentEditArea, IRenderManagerService, type ITextRangeWithStyle } fro
 import { HeaderFooterType } from '../../controllers/doc-header-footer.controller';
 import { SidebarDocHeaderFooterPanelOperation } from '../operations/doc-header-footer-panel.operation';
 
-function getEmptyHeaderFooterBody() {
+function getEmptyHeaderFooterBody(): IDocumentBody {
     return {
         dataStream: '\r\n',
         textRuns: [{
@@ -32,12 +32,15 @@ function getEmptyHeaderFooterBody() {
                 fs: 9, // The default header footer text size.
             },
         }],
+        customBlocks: [],
         paragraphs: [
             {
                 startIndex: 0,
-                spaceAbove: 0,
-                lineSpacing: 1.5,
-                spaceBelow: 0,
+                paragraphStyle: {
+                    spaceAbove: 0,
+                    lineSpacing: 1.5,
+                    spaceBelow: 0,
+                },
             },
         ],
         sectionBreaks: [

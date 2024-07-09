@@ -30,9 +30,9 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSkeletonManagerService, getRichTextEditPath, RichTextEditingMutation } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 
 export enum TextWrappingStyle {
     INLINE = 'inline',
@@ -467,7 +467,7 @@ export const IMoveInlineDrawingCommand: ICommand = {
         }
 
         const renderManagerService = accessor.get(IRenderManagerService);
-
+        const textSelectionRenderManager = accessor.get(ITextSelectionRenderManager);
         const renderObject = renderManagerService.getRenderById(params.unitId);
         const scene = renderObject?.scene;
         if (scene == null) {
@@ -491,9 +491,8 @@ export const IMoveInlineDrawingCommand: ICommand = {
 
         const { drawingId } = drawing;
 
-        // TODO: @JOCS update segmentId when in header and footer.
-        const segmentId = '';
-        const oldOffset = documentDataModel.getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
+        const segmentId = textSelectionRenderManager.getSegment() ?? '';
+        const oldOffset = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
 
         if (oldOffset == null) {
             return false;
@@ -575,7 +574,8 @@ export const IMoveInlineDrawingCommand: ICommand = {
             });
         }
 
-        const action = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(documentDataModel, segmentId);
+        const action = jsonX.editOp(textX.serialize(), path);
         rawActions.push(action!);
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -624,6 +624,8 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
             return false;
         }
 
+        const textSelectionRenderManager = accessor.get(ITextSelectionRenderManager);
+
         const renderManagerService = accessor.get(IRenderManagerService);
         const renderObject = renderManagerService.getRenderById(params.unitId);
         const scene = renderObject?.scene;
@@ -648,9 +650,8 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
 
         const { drawingId } = drawing;
 
-        // TODO: @JOCS update segmentId when in header and footer.
-        const segmentId = '';
-        const oldOffset = documentDataModel.getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
+        const segmentId = textSelectionRenderManager.getSegment() ?? '';
+        const oldOffset = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
 
         if (oldOffset == null) {
             return false;
@@ -733,7 +734,9 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
         }
 
         if (offset !== oldOffset) {
-            const action = jsonX.editOp(textX.serialize());
+            const path = getRichTextEditPath(documentDataModel, segmentId);
+            const action = jsonX.editOp(textX.serialize(), path);
+
             rawActions.push(action!);
         }
 

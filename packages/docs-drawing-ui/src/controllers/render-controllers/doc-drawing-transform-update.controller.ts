@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDrawingParam } from '@univerjs/core';
 import {
     BooleanNumber,
     Disposable,
@@ -24,15 +24,27 @@ import {
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import type { Documents, DocumentSkeleton, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
+interface IDrawingParamsWithBehindText {
+    unitId: string;
+    subUnitId: string;
+    drawingId: string;
+    behindText: boolean;
+    transform: {
+        left: number;
+        top: number;
+        width: number;
+        height: number;
+        angle: number;
+    };
+}
+
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {
     private _liquid = new Liquid();
-
-    private _pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -102,7 +114,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
     private _refreshDrawing(skeleton: DocumentSkeleton) {
         const skeletonData = skeleton?.getSkeletonData();
-        const { mainComponent, scene, unitId } = this._context;
+        const { mainComponent, unitId } = this._context;
         const documentComponent = mainComponent as Documents;
 
         if (!skeletonData) {
@@ -110,60 +122,71 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         }
 
         const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
-        const { pages } = skeletonData;
-        const updateDrawings: any[] = []; // IFloatingObjectManagerParam
-        const { scaleX, scaleY } = scene.getAncestorScale();
+        const { pages, skeHeaders, skeFooters } = skeletonData;
+        const updateDrawings: IDrawingParamsWithBehindText[] = []; // IFloatingObjectManagerParam
 
         this._liquid.reset();
-        this._pageMarginCache.clear();
-
-        // const objectList: BaseObject[] = [];
-        // const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
-
-        // const cumPageLeft = 0;
-        // const cumPageTop = 0;
         /**
          * TODO: @DR-Univer We should not refresh all floating elements, but instead make a diff.
          */
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
-            const { skeDrawings, marginLeft, marginTop } = page;
-            // cumPageLeft + = pageWidth + documents.pageMarginLeft;
+            const { headerId, footerId, pageWidth } = page;
 
-            this._liquid.translatePagePadding(page);
-            skeDrawings.forEach((drawing) => {
-                const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
-                const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
+            if (headerId) {
+                const headerPage = skeHeaders.get(headerId)?.get(pageWidth);
 
-                updateDrawings.push({
-                    unitId,
-                    subUnitId: unitId,
-                    drawingId,
-                    behindText,
-                    transform: {
-                        left: aLeft + docsLeft + this._liquid.x,
-                        top: aTop + docsTop + this._liquid.y,
-                        width,
-                        height,
-                        angle,
-                    },
-                });
+                if (headerPage) {
+                    this._calculateDrawingPosition(unitId, headerPage, docsLeft, docsTop, updateDrawings);
+                }
+            }
 
-                this._pageMarginCache.set(drawingId, {
-                    marginLeft: this._liquid.x,
-                    marginTop: this._liquid.y,
-                });
-            });
+            if (footerId) {
+                const footerPage = skeFooters.get(footerId)?.get(pageWidth);
 
-            this._liquid.restorePagePadding(page);
+                if (footerPage) {
+                    this._calculateDrawingPosition(unitId, footerPage, docsLeft, docsTop, updateDrawings);
+                }
+            }
 
+            this._calculateDrawingPosition(unitId, page, docsLeft, docsTop, updateDrawings);
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
         // console.log('updateDrawings', skeleton.getViewModel().getDataModel(), pages, updateDrawings);
-
         if (updateDrawings.length > 0) {
-            this._drawingManagerService.refreshTransform(updateDrawings);
+            this._drawingManagerService.refreshTransform(updateDrawings as unknown as IDrawingParam[]);
         }
+    }
+
+    private _calculateDrawingPosition(
+        unitId: string,
+        page: IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter,
+        docsLeft: number,
+        docsTop: number,
+        updateDrawings: IDrawingParamsWithBehindText[]
+    ) {
+        const { skeDrawings } = page;
+        this._liquid.translatePagePadding(page);
+        skeDrawings.forEach((drawing) => {
+            const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
+            const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
+
+            updateDrawings.push({
+                unitId,
+                subUnitId: unitId,
+                drawingId,
+                behindText,
+                transform: {
+                    left: aLeft + docsLeft + this._liquid.x,
+                    top: aTop + docsTop + this._liquid.y,
+                    width,
+                    height,
+                    angle,
+                },
+            });
+        });
+
+        this._liquid.restorePagePadding(page);
     }
 }

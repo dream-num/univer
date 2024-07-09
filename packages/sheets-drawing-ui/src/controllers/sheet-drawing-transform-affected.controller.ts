@@ -1078,7 +1078,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 }
 
                 requestIdleCallback(() => {
-                    const params = command.params as ISetRowVisibleMutationParams | ISetColHiddenMutationParams | ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams | ISetWorksheetRowIsAutoHeightMutationParams | ISetRowHiddenMutationParams | ISetColVisibleMutationParams | ISetWorksheetColWidthMutationParams;
+                    const params = command.params as ISetRowVisibleMutationParams | ISetColHiddenMutationParams | ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams | ISetWorksheetRowIsAutoHeightMutationParams | ISetRowHiddenMutationParams | ISetColVisibleMutationParams;
                     const { unitId, subUnitId, ranges } = params;
                     this._refreshDrawingTransform(unitId, subUnitId, ranges);
                 });

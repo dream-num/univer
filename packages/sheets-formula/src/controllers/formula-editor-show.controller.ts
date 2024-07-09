@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import {
     ColorKit,
     Disposable,
     ICommandService,
     ObjectMatrix,
+    Rectangle,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
@@ -31,6 +32,8 @@ import {
 } from '@univerjs/engine-formula';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
+import { SetColHiddenMutation, SetColVisibleMutation, SetRowHiddenMutation, SetRowVisibleMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation } from '@univerjs/sheets';
 import {
     IEditorBridgeService,
     ISheetSelectionRenderService,
@@ -38,6 +41,15 @@ import {
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
+
+const REFRESH_ARRAY_SHAPE_MUTATIONS = [
+    SetWorksheetRowHeightMutation.id,
+    SetWorksheetColWidthMutation.id,
+    SetColHiddenMutation.id,
+    SetColVisibleMutation.id,
+    SetRowHiddenMutation.id,
+    SetRowVisibleMutation.id,
+];
 
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
     private _previousShape: Nullable<SelectionShape>;
@@ -105,44 +117,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                              */
                             const matrixRange = arrayFormulaMatrixRange?.[unitId]?.[subUnitId];
                             if (matrixRange != null) {
-                                new ObjectMatrix(matrixRange).forValue((rowIndex, columnIndex, range) => {
-                                    if (range == null) {
-                                        return true;
-                                    }
-                                    const { startRow, startColumn, endRow, endColumn } = range;
-                                    if (rowIndex === row && columnIndex === col) {
-                                        this._createArrayFormulaRangeShape(range, unitId);
-                                        return false;
-                                    }
-                                    if (row >= startRow && row <= endRow && col >= startColumn && col <= endColumn) {
-                                        const mainCellValue = worksheet.getCell(startRow, startColumn);
-
-                                        if (mainCellValue?.v === ErrorType.SPILL) {
-                                            return;
-                                        }
-
-                                        const formulaDataItem = this._formulaDataModel.getFormulaDataItem(
-                                            rowIndex,
-                                            columnIndex,
-                                            subUnitId,
-                                            unitId
-                                        );
-
-                                        if (formulaDataItem == null || formulaDataItem.f == null) {
-                                            return true;
-                                        }
-
-                                        if (cellInfo == null) {
-                                            cellInfo = {
-                                                f: formulaDataItem.f,
-                                                isInArrayFormulaRange: true,
-                                            };
-                                        }
-
-                                        this._createArrayFormulaRangeShape(range, unitId);
-                                        return false;
-                                    }
-                                });
+                                this._displayArrayFormulaRangeShape(matrixRange, row, col, unitId, subUnitId, worksheet, cellInfo);
                             }
 
                             if (cellInfo) {
@@ -164,6 +139,67 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                 this._removeArrayFormulaRangeShape();
             }
         }));
+
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                if (SetWorksheetRowAutoHeightMutation.id === command.id) {
+                    requestIdleCallback(() => {
+                        const params = command.params as ISetWorksheetRowAutoHeightMutationParams;
+                        const { unitId, subUnitId, rowsAutoHeightInfo } = params;
+                        this._refreshArrayFormulaRangeShapeByRow(unitId, subUnitId, rowsAutoHeightInfo);
+                    });
+                }
+
+                if (REFRESH_ARRAY_SHAPE_MUTATIONS.includes(command.id)) {
+                    requestIdleCallback(() => {
+                        const params = command.params as ISetRowVisibleMutationParams | ISetColHiddenMutationParams | ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams | ISetRowHiddenMutationParams | ISetColVisibleMutationParams;
+                        const { unitId, subUnitId, ranges } = params;
+                        this._refreshArrayFormulaRangeShapeByRanges(unitId, subUnitId, ranges);
+                    });
+                }
+            })
+        );
+    }
+
+    private _displayArrayFormulaRangeShape(matrixRange: IObjectMatrixPrimitiveType<IRange>, row: number, col: number, unitId: string, subUnitId: string, worksheet: Worksheet, cellInfo: Nullable<ICellDataForSheetInterceptor>) {
+        new ObjectMatrix(matrixRange).forValue((rowIndex, columnIndex, range) => {
+            if (range == null) {
+                return true;
+            }
+            const { startRow, startColumn, endRow, endColumn } = range;
+            if (rowIndex === row && columnIndex === col) {
+                this._createArrayFormulaRangeShape(range, unitId);
+                return false;
+            }
+            if (row >= startRow && row <= endRow && col >= startColumn && col <= endColumn) {
+                const mainCellValue = worksheet.getCell(startRow, startColumn);
+
+                if (mainCellValue?.v === ErrorType.SPILL) {
+                    return;
+                }
+
+                const formulaDataItem = this._formulaDataModel.getFormulaDataItem(
+                    rowIndex,
+                    columnIndex,
+                    subUnitId,
+                    unitId
+                );
+
+                if (formulaDataItem == null || formulaDataItem.f == null) {
+                    return true;
+                }
+
+                if (cellInfo == null) {
+                    cellInfo = {
+                        f: formulaDataItem.f,
+                        isInArrayFormulaRange: true,
+                    };
+                }
+
+                this._createArrayFormulaRangeShape(range, unitId);
+                return false;
+            }
+        });
     }
 
     private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string) {
@@ -191,7 +227,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
             primary: null,
             style,
         });
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
         if (!scene || !skeleton) return;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
         const control = new SelectionShape(scene, 100, false, this._themeService);
@@ -206,5 +242,80 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         }
         this._previousShape.dispose();
         this._previousShape = null;
+    }
+
+    private _refreshArrayFormulaRangeShape(unitId: string, range: IRange) {
+        if (this._previousShape) {
+            const { startRow, endRow, startColumn, endColumn } = this._previousShape.getRange();
+            const range = { startRow, endRow, startColumn, endColumn };
+            this._removeArrayFormulaRangeShape();
+            this._createArrayFormulaRangeShape(range, unitId);
+        }
+    }
+
+    private _checkCurrentSheet(unitId: string, subUnitId: string) {
+        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+        if (!skeleton) return false;
+
+        const worksheet = skeleton.worksheet;
+        if (!worksheet) return false;
+
+        if (worksheet.unitId === unitId && worksheet.getSheetId() === subUnitId) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private _refreshArrayFormulaRangeShapeByRanges(unitId: string, subUnitId: string, ranges: IRange[]) {
+        if (!this._checkCurrentSheet(unitId, subUnitId)) return;
+
+        if (!this._previousShape) return;
+
+        const { startRow: shapeStartRow, endRow: shapeEndRow, startColumn: shapeStartColumn, endColumn: shapeEndColumn } = this._previousShape.getRange();
+
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            const { startRow, endRow, startColumn, endColumn } = range;
+            if (Rectangle.intersects(
+                {
+                    startRow, endRow, startColumn, endColumn,
+                },
+                {
+                    startRow: shapeStartRow, endRow: shapeEndRow, startColumn: shapeStartColumn, endColumn: shapeEndColumn,
+                }
+            ) || shapeStartRow >= endRow || startColumn >= endColumn) {
+                const shapeRange = {
+                    startRow: shapeStartRow,
+                    endRow: shapeEndRow,
+                    startColumn: shapeStartColumn,
+                    endColumn: shapeEndColumn,
+                };
+                this._refreshArrayFormulaRangeShape(unitId, shapeRange);
+                break;
+            }
+        }
+    }
+
+    private _refreshArrayFormulaRangeShapeByRow(unitId: string, subUnitId: string, rowAutoHeightInfo: IRowAutoHeightInfo[]) {
+        if (!this._checkCurrentSheet(unitId, subUnitId)) return;
+
+        if (!this._previousShape) return;
+
+        const { startRow: shapeStartRow, endRow: shapeEndRow, startColumn: shapeStartColumn, endColumn: shapeEndColumn } = this._previousShape.getRange();
+
+        for (let i = 0; i < rowAutoHeightInfo.length; i++) {
+            const { row } = rowAutoHeightInfo[i];
+            if (shapeStartRow >= row) {
+                const shapeRange = {
+                    startRow: shapeStartRow,
+                    endRow: shapeEndRow,
+                    startColumn: shapeStartColumn,
+                    endColumn: shapeEndColumn,
+                };
+                this._refreshArrayFormulaRangeShape(unitId, shapeRange);
+                break;
+            }
+        }
     }
 }

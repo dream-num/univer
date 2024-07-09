@@ -50,6 +50,8 @@ import type { LexerNode } from '../../engine/analysis/lexer-node';
 import { Choose } from '../lookup/choose';
 import { Sum } from '../math/sum';
 import { ErrorType } from '../../basics/error-type';
+import { Len } from '../text/len';
+import { Divided } from '../meta/divided';
 import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
@@ -316,7 +318,9 @@ describe('Test nested functions', () => {
             new Minus(FUNCTION_NAMES_META.MINUS),
             new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE),
             new Sum(FUNCTION_NAMES_MATH.SUM),
-            new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE)
+            new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE),
+            new Len(FUNCTION_NAMES_TEXT.LEN),
+            new Divided(FUNCTION_NAMES_META.DIVIDED)
 
         );
 
@@ -371,6 +375,14 @@ describe('Test nested functions', () => {
 
             result = calculate('="test"');
             expect(result).toStrictEqual('test');
+        });
+
+        it('Len gets length from formula result', () => {
+            let result = calculate('=LEN(1/3)');
+            expect(result).toStrictEqual(17);
+
+            result = calculate('=LEN(0.1+0.2)');
+            expect(result).toStrictEqual(3);
         });
     });
 });

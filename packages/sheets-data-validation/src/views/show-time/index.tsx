@@ -15,7 +15,7 @@
  */
 
 import { DataValidationRenderMode, type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
-import { FormLayout, Radio, RadioGroup } from '@univerjs/design';
+import { Checkbox, FormLayout, Radio, RadioGroup } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 
@@ -31,8 +31,8 @@ export function DateShowTimeOption(props: IDateShowTimeOptionProps) {
 
     return (
         <FormLayout>
-            <Radio
-                value={value.bizInfo?.showTime}
+            <Checkbox
+                checked={value.bizInfo?.showTime}
                 onChange={(showTime) => {
                     onChange({
                         ...value,
@@ -44,7 +44,7 @@ export function DateShowTimeOption(props: IDateShowTimeOptionProps) {
                 }}
             >
                 {localeService.t('dataValidation.showTime.label')}
-            </Radio>
+            </Checkbox>
         </FormLayout>
     );
 }

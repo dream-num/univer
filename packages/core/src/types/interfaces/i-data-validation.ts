@@ -55,7 +55,9 @@ export interface IDataValidationRuleOptions {
     /**
      * custom biz info
      */
-    bizInfo?: Record<string, any>;
+    bizInfo?: {
+        showTime?: boolean;
+    };
 }
 
 export interface IDataValidationRule extends IDataValidationRuleBase, IDataValidationRuleOptions {

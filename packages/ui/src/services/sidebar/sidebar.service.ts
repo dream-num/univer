@@ -24,6 +24,7 @@ export const ISidebarService = createIdentifier<ISidebarService>('univer.sidebar
 
 export interface ISidebarService {
     readonly sidebarOptions$: Subject<ISidebarMethodOptions>;
+    readonly scrollEvent$: Subject<Event>;
 
     open(params: ISidebarMethodOptions): IDisposable;
     close(): void;

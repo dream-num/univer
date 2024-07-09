@@ -177,7 +177,7 @@ const locale: typeof zhCN = {
             label: 'Стиль отображения',
         },
         showTime: {
-            label: 'Show TimePicker',
+            label: 'Показать выбор времени',
         },
     },
 };

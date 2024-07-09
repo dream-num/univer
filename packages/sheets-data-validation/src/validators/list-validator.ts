@@ -19,6 +19,7 @@ import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule,
 import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
+import numfmt from '@univerjs/engine-numfmt';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';
@@ -37,6 +38,10 @@ export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]
             row.forEach((cell) => {
                 const value = getCellValueOrigin(cell);
                 if (value !== null && value !== undefined) {
+                    if (typeof value !== 'string' && typeof cell?.s === 'object' && cell.s?.n?.pattern) {
+                        resultSet.add(numfmt.format(cell.s.n.pattern, value));
+                        return;
+                    }
                     resultSet.add(value.toString());
                 }
             });

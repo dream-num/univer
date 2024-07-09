@@ -754,7 +754,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const { keycode } = param;
 

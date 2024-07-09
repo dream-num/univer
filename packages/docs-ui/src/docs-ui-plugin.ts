@@ -153,7 +153,7 @@ export class UniverDocsUIPlugin extends Plugin {
             DocTextSelectionRenderController,
             DocHeaderFooterController,
         ]).forEach((m) => {
-            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m as any);
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m as unknown as Dependency);
         });
     }
 }

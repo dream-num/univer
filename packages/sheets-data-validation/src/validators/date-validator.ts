@@ -31,7 +31,7 @@ import { DateShowTimeOption } from '../views/show-time';
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
 
-const transformDate = (value: Nullable<CellValue>) => {
+const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
     if (value === undefined || value === null || typeof value === 'boolean') {
         return undefined;
     }
@@ -71,8 +71,8 @@ export class DateValidator extends BaseDataValidator<number> {
         const { formula1, formula2 } = rule;
 
         return {
-            formula1: transformDate(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
-            formula2: transformDate(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
+            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
+            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
         };
     }
 
@@ -81,8 +81,8 @@ export class DateValidator extends BaseDataValidator<number> {
         const { formula1, formula2 } = rule;
 
         return {
-            formula1: transformDate(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
-            formula2: transformDate(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
+            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
+            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
         };
     }
 
@@ -134,7 +134,7 @@ export class DateValidator extends BaseDataValidator<number> {
 
         return {
             ...cellInfo,
-            value: transformDate(value)!,
+            value: transformDate2SerialNumber(value)!,
         };
     }
 

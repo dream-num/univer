@@ -72,6 +72,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
             return;
         }
         const newValue = localDate;
+        // convert current date to utc date
         const dateStr = `${newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00').split(' ').join('T')}Z`;
         const serialTime = timestamp2SerialTime(dayjs(dateStr).unix());
         if (

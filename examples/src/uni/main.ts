@@ -32,6 +32,7 @@ import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-cond
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 import { DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
 import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
@@ -70,6 +71,7 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);
 
+univer.registerPlugin(UniverSheetsFindReplacePlugin);
 univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsSortUIPlugin);

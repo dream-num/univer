@@ -38,7 +38,7 @@ export function DateShowTimeOption(props: IDateShowTimeOptionProps) {
                         ...value,
                         bizInfo: {
                             ...value.bizInfo,
-                            showTime,
+                            showTime: showTime as boolean,
                         },
                     });
                 }}

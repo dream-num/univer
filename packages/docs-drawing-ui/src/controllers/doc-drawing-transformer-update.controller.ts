@@ -436,7 +436,7 @@ export class DocDrawingTransformerController extends Disposable {
             angle,
         };
 
-        const { x, y } = scene.getScrollXY(activeViewport);
+        const { x, y } = scene.getViewportScrollXY(activeViewport);
 
         const coord = this._getTransformCoordForDocumentOffset(documentComponent, activeViewport, left - x, top - y);
         if (coord == null) {

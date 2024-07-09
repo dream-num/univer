@@ -644,8 +644,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            multiple: { name: '複数', detail: '数値を丸める倍数。' },
         },
     },
     MULTINOMIAL: {
@@ -826,8 +826,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '四捨五入の対象となる数値を指定します。' },
+            numDigits: { name: '桁数', detail: '数値を四捨五入した結果の桁数を指定します。' },
         },
     },
     ROUNDDOWN: {
@@ -840,8 +840,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '四捨五入の対象となる数値を指定します。' },
+            numDigits: { name: '桁数', detail: '数値を四捨五入した結果の桁数を指定します。' },
         },
     },
     ROUNDUP: {
@@ -854,8 +854,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '四捨五入の対象となる数値を指定します。' },
+            numDigits: { name: '桁数', detail: '数値を四捨五入した結果の桁数を指定します。' },
         },
     },
     SEC: {

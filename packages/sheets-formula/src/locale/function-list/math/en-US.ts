@@ -644,8 +644,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value to round.' },
+            multiple: { name: 'multiple', detail: 'The multiple to which you want to round number.' },
         },
     },
     MULTINOMIAL: {
@@ -826,8 +826,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number that you want to round.' },
+            numDigits: { name: 'num_digits', detail: 'The number of digits to which you want to round the number argument.' },
         },
     },
     ROUNDDOWN: {
@@ -840,8 +840,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number that you want to round.' },
+            numDigits: { name: 'num_digits', detail: 'The number of digits to which you want to round the number argument.' },
         },
     },
     ROUNDUP: {
@@ -854,8 +854,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number that you want to round.' },
+            numDigits: { name: 'num_digits', detail: 'The number of digits to which you want to round the number argument.' },
         },
     },
     SEC: {

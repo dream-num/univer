@@ -33,8 +33,12 @@ import { Csc } from './csc';
 import { Csch } from './csch';
 import { FUNCTION_NAMES_MATH } from './function-names';
 import { Mod } from './mod';
+import { Mround } from './mround';
 import { Power } from './power';
 import { Product } from './product';
+import { Round } from './round';
+import { Rounddown } from './rounddown';
+import { Roundup } from './roundup';
 import { Sin } from './sin';
 import { Sinh } from './sinh';
 import { Subtotal } from './subtotal';
@@ -64,8 +68,12 @@ export const functionMath = [
     [Csc, FUNCTION_NAMES_MATH.CSC],
     [Csch, FUNCTION_NAMES_MATH.CSCH],
     [Mod, FUNCTION_NAMES_MATH.MOD],
+    [Mround, FUNCTION_NAMES_MATH.MROUND],
     [Power, FUNCTION_NAMES_MATH.POWER],
     [Product, FUNCTION_NAMES_MATH.PRODUCT],
+    [Round, FUNCTION_NAMES_MATH.ROUND],
+    [Rounddown, FUNCTION_NAMES_MATH.ROUNDDOWN],
+    [Roundup, FUNCTION_NAMES_MATH.ROUNDUP],
     [Sin, FUNCTION_NAMES_MATH.SIN],
     [Sinh, FUNCTION_NAMES_MATH.SINH],
     [Subtotal, FUNCTION_NAMES_MATH.SUBTOTAL],

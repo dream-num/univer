@@ -643,8 +643,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要四舍五入的数字。' },
+            multiple: { name: '倍数', detail: '要舍入到的倍数。' },
         },
     },
     MULTINOMIAL: {
@@ -827,8 +827,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要四舍五入的数字。' },
+            numDigits: { name: '位数', detail: '要进行四舍五入运算的位数。' },
         },
     },
     ROUNDDOWN: {
@@ -841,8 +841,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要四舍五入的数字。' },
+            numDigits: { name: '位数', detail: '要进行四舍五入运算的位数。' },
         },
     },
     ROUNDUP: {
@@ -855,8 +855,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要四舍五入的数字。' },
+            numDigits: { name: '位数', detail: '要进行四舍五入运算的位数。' },
         },
     },
     SEC: {

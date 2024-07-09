@@ -652,8 +652,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要捨入的數值。' },
+            multiple: { name: '倍數', detail: '這是要捨入數字的倍數。' },
         },
     },
     MULTINOMIAL: {
@@ -835,8 +835,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要四捨五入的數字。' },
+            numDigits: { name: '位數', detail: '這是要對數字引數進位的位數。' },
         },
     },
     ROUNDDOWN: {
@@ -849,8 +849,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要四捨五入的數字。' },
+            numDigits: { name: '位數', detail: '這是要對數字引數進位的位數。' },
         },
     },
     ROUNDUP: {
@@ -863,8 +863,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要四捨五入的數字。' },
+            numDigits: { name: '位數', detail: '這是要對數字引數進位的位數。' },
         },
     },
     SEC: {

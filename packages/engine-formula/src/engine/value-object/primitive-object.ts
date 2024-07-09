@@ -1170,7 +1170,8 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = round(currentValue, value);
+            // for excel negative special handle
+            const result = currentValue < 0 ? -round(Math.abs(currentValue), value) : round(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -1201,7 +1202,8 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = floor(currentValue, value);
+            // for excel negative special handle
+            const result = currentValue < 0 ? -floor(Math.abs(currentValue), value) : floor(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -1232,7 +1234,8 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = ceil(currentValue, value);
+            // for excel negative special handle
+            const result = currentValue < 0 ? -ceil(Math.abs(currentValue), value) : ceil(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);

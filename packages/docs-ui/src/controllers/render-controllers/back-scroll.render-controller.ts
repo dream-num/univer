@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, RxDisposable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService } from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { getAnchorBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs';
 
 const ANCHOR_WIDTH = 1.5;
 
-export class DocBackScrollRenderController extends RxDisposable implements IRenderModule {
+export class DocBackScrollRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,

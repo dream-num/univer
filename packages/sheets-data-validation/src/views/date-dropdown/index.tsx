@@ -15,17 +15,34 @@
  */
 
 import React, { useState } from 'react';
+import type { CellValue, Nullable } from '@univerjs/core';
 import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import type { DateValidator } from '../../validators';
 import { getCellValueOrigin } from '../../utils/get-cell-data-origin';
 import { DataValidationRejectInputController } from '../../controllers/dv-reject-input.controller';
 import { timestamp2SerialTime } from '../../utils/date';
 import styles from './index.module.less';
+
+dayjs.extend(utc);
+
+const transformDate = (value: Nullable<CellValue>) => {
+    if (value === undefined || value === null || typeof value === 'boolean') {
+        return undefined;
+    }
+
+    if (typeof value === 'number' || !Number.isNaN(+value)) {
+        const date = dayjs.unix(+value).utc().format().slice(0, -1);
+        return dayjs(date);
+    }
+
+    return dayjs(value);
+};
 
 export function DateDropdown(props: IDropdownComponentProps) {
     const { location, hideFn } = props;
@@ -46,7 +63,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
     }
 
     const cellStr = getCellValueOrigin(cellData);
-    const originDate = validator.transformDate(cellStr) ?? dayjs();
+    const originDate = transformDate(cellStr) ?? dayjs();
     const date = originDate.isValid() ? originDate : dayjs();
     const showTime = Boolean(rule.bizInfo?.showTime);
 
@@ -55,7 +72,8 @@ export function DateDropdown(props: IDropdownComponentProps) {
             return;
         }
         const newValue = localDate;
-        const serialTime = timestamp2SerialTime(dayjs(newValue.format(showTime ? 'YYYY/MM/DD HH:mm:ss' : 'YYYY/MM/DD 00:00:00')).unix());
+        const dateStr = `${newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00').split(' ').join('T')}Z`;
+        const serialTime = timestamp2SerialTime(dayjs(dateStr).unix());
         if (
             rule.errorStyle !== DataValidationErrorStyle.STOP ||
             (await validator.validator({
@@ -106,6 +124,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 onPanelChange={(value) => {
                     setLocalDate(value);
                 }}
+
             />
             <div className={styles.dvDateDropdownBtns}>
                 <Button size="small" type="primary" onClick={handleSave} disabled={!localDate}>

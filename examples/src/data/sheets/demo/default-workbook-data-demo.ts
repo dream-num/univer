@@ -125,10 +125,10 @@ const dataValidation = [
             startColumn: 3,
             endColumn: 5,
         }],
-        operator: DataValidationOperator.NOT_BETWEEN,
+        operator: DataValidationOperator.EQUAL,
         formula1: '2024/04/10',
         formula2: '2024/10/10',
-        errorStyle: DataValidationErrorStyle.STOP,
+        // errorStyle: DataValidationErrorStyle.STOP,
     },
     {
         uid: 'xxx-2',

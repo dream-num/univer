@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "private": false,
     "description": "Data validation for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -66,6 +66,7 @@
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
@@ -86,6 +87,7 @@
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",

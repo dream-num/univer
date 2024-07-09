@@ -15,21 +15,20 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { CustomRangeType, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, ResourceManagerService, UniverInstanceType } from '@univerjs/core';
+import { CustomRangeType, Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { DOC_HYPER_LINK_PLUGIN } from '../types/const';
 import { DocHyperLinkModel } from '../models/hyper-link.model';
 import type { IDocHyperLink } from '../types/interfaces/i-doc-hyper-link';
-import { DocHyperLinkController } from './hyper-link.controller';
 
 interface IDocHyperLinkJSON {
     links: IDocHyperLink[];
 }
 
-@OnLifecycle(LifecycleStages.Starting, DocHyperLinkController)
+@OnLifecycle(LifecycleStages.Starting, DocHyperLinkResourceController)
 export class DocHyperLinkResourceController extends Disposable {
     constructor(
-        @Inject(ResourceManagerService) private readonly _resourceManagerService: ResourceManagerService,
+        @Inject(IResourceManagerService) private readonly _resourceManagerService: IResourceManagerService,
         @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {

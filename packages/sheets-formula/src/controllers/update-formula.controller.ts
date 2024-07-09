@@ -108,7 +108,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { filter, map, merge } from 'rxjs';
 import { IEditorService } from '@univerjs/ui';
-import type { IRefRangeWithPosition } from './utils/offset-formula-data';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
 
@@ -688,22 +687,20 @@ export class UpdateFormulaController extends Disposable {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _getFormulaReferenceMoveInfo(
         formulaData: IFormulaData,
         unitSheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam
     ) {
-        if (!Tools.isDefine(formulaData)) return { newFormulaData: {}, oldFormulaData: {}, refRanges: [] };
+        if (!Tools.isDefine(formulaData)) return { newFormulaData: {}, oldFormulaData: {} };
 
         const formulaDataKeys = Object.keys(formulaData);
 
-        if (formulaDataKeys.length === 0) return { newFormulaData: {}, oldFormulaData: {}, refRanges: [] };
+        if (formulaDataKeys.length === 0) return { newFormulaData: {}, oldFormulaData: {} };
 
         const oldFormulaData: IFormulaData = {};
         const newFormulaData: IFormulaData = {};
-
-        // Return all reference ranges. If the operation affects the reference range, you need to clear arrayFormulaRange and arrayFormulaCellData.
-        const refRanges: IRefRangeWithPosition[] = [];
 
         for (const unitId of formulaDataKeys) {
             const sheetData = formulaData[unitId];
@@ -725,9 +722,9 @@ export class UpdateFormulaController extends Disposable {
             for (const sheetId of sheetDataKeys) {
                 const matrixData = new ObjectMatrix(sheetData[sheetId] || {});
 
-                const oldFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
 
+                // eslint-disable-next-line max-lines-per-function, complexity
                 matrixData.forValue((row, column, formulaDataItem) => {
                     if (!formulaDataItem) return true;
 
@@ -751,9 +748,6 @@ export class UpdateFormulaController extends Disposable {
                         const sequenceGrid = deserializeRangeWithSheet(token);
 
                         const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
-
-                        // store ref range
-                        refRanges.push({ row, column, range });
 
                         const mapUnitId =
                             sequenceUnitId == null || sequenceUnitId.length === 0 ? unitId : sequenceUnitId;
@@ -849,24 +843,18 @@ export class UpdateFormulaController extends Disposable {
 
                     const newSequenceNodes = this._updateRefOffset(sequenceNodes, refChangeIds, x, y);
 
-                    oldFormulaDataItem.setValue(row, column, {
-                        f: formulaString,
-                        x,
-                        y,
-                        si,
-                    });
-
-                    newFormulaDataItem.setValue(row, column, {
-                        f: `=${generateStringWithSequence(newSequenceNodes)}`,
-                        x,
-                        y,
-                        si,
-                    });
+                    // The formula f that originally depended on si has been actually calculated and does not require si and x,y.
+                    if ((x !== undefined && (x > 0)) || (y !== undefined && (y > 0))) {
+                        newFormulaDataItem.setValue(row, column, {
+                            f: `=${generateStringWithSequence(newSequenceNodes)}`,
+                        });
+                    } else {
+                        newFormulaDataItem.setValue(row, column, {
+                            f: `=${generateStringWithSequence(newSequenceNodes)}`,
+                            si,
+                        });
+                    }
                 });
-
-                if (oldFormulaData[unitId]) {
-                    oldFormulaData[unitId]![sheetId] = oldFormulaDataItem.getData();
-                }
 
                 if (newFormulaData[unitId]) {
                     newFormulaData[unitId]![sheetId] = newFormulaDataItem.getData();
@@ -874,7 +862,7 @@ export class UpdateFormulaController extends Disposable {
             }
         }
 
-        return { newFormulaData, oldFormulaData, refRanges };
+        return { newFormulaData };
     }
 
     private _getNewRangeByMoveParam(

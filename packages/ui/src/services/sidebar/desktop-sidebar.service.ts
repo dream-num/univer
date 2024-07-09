@@ -25,6 +25,8 @@ export class DesktopSidebarService implements ISidebarService {
     private _sidebarOptions: ISidebarMethodOptions = {};
     readonly sidebarOptions$ = new Subject<ISidebarMethodOptions>();
 
+    readonly scrollEvent$ = new Subject<Event>();
+
     open(params: ISidebarMethodOptions): IDisposable {
         this._sidebarOptions = {
             ...params,

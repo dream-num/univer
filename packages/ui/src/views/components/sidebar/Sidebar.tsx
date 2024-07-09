@@ -17,7 +17,7 @@
 import { CloseSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useObservable } from '../../../components/hooks/observable';
@@ -27,6 +27,7 @@ import type { ISidebarMethodOptions } from './interface';
 export function Sidebar() {
     const sidebarService = useDependency(ISidebarService);
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     const options = useMemo(() => {
         if (!sidebarOptions) {
@@ -54,6 +55,20 @@ export function Sidebar() {
         return copy;
     }, [sidebarOptions]);
 
+    useEffect(() => {
+        const handleScroll = (e: Event) => {
+            sidebarService.scrollEvent$.next(e);
+        };
+        const scrollElement = scrollRef.current;
+        if (scrollElement) {
+            scrollElement.addEventListener('scroll', handleScroll);
+        }
+
+        return () => {
+            scrollElement?.removeEventListener('scroll', handleScroll);
+        };
+    }, [sidebarService]);
+
     const _className = clsx(styles.sidebar, {
         [styles.sidebarOpen]: options?.visible,
     });
@@ -79,7 +94,7 @@ export function Sidebar() {
     }
     return (
         <section className={_className} style={{ width }}>
-            <section className={styles.sidebarContainer}>
+            <section className={styles.sidebarContainer} ref={scrollRef}>
                 <header className={styles.sidebarHeader}>
                     {options?.header}
 

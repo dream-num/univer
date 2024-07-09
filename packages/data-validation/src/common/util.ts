@@ -40,6 +40,7 @@ export function getRuleOptions(rule: IDataValidationRuleOptions): IDataValidatio
         showErrorMessage: rule.showErrorMessage,
         showInputMessage: rule.showInputMessage,
         renderMode: rule.renderMode,
+        bizInfo: rule.bizInfo,
     };
 }
 

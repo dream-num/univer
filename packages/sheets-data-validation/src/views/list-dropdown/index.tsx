@@ -21,9 +21,10 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { KeyCode } from '@univerjs/ui';
+import { KeyCode, useObservable } from '@univerjs/ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { RectPopup, Scrollbar } from '@univerjs/design';
+import { DataValidationModel } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
@@ -92,10 +93,12 @@ const SelectList = (props: ISelectListProps) => {
 export function ListDropDown(props: IDropdownComponentProps) {
     const { location, hideFn } = props;
     const { worksheet, row, col, unitId, subUnitId } = location;
+    const dataValidationModel = useDependency(DataValidationModel);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [localValue, setLocalValue] = useState('');
     const editorBridgeService = useDependency(IEditorBridgeService);
+    useObservable(dataValidationModel.ruleChange$);
     const anchorRect = RectPopup.useContext();
     const cellWidth = anchorRect.right - anchorRect.left;
     if (!worksheet) {

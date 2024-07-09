@@ -56,8 +56,8 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
 
     override onReady(): void {
         ([
-            DocDrawingUpdateRenderController,
-            DocDrawingTransformUpdateController,
-        ]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
+            [DocDrawingUpdateRenderController],
+            [DocDrawingTransformUpdateController],
+        ] as Dependency[]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
     }
 }

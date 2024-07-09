@@ -38,6 +38,8 @@ import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-u
 import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
+import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
@@ -60,7 +62,9 @@ const univer = new Univer({
 univer.registerPlugin(UniverDocsPlugin, {
     hasScroll: false,
 });
-univer.registerPlugin(UniverFormulaEnginePlugin);
+univer.registerPlugin(UniverFormulaEnginePlugin, {
+    notExecuteFormula: true,
+});
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUniUIPlugin, {
     container: 'app',
@@ -75,6 +79,9 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);
+univer.registerPlugin(UniverRPCMainThreadPlugin, {
+    workerURL: './worker.js',
+} as IUniverRPCMainThreadConfig);
 
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
 univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);

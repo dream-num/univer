@@ -83,7 +83,7 @@ export class DocCanvasPopManagerService extends Disposable {
         currentRender: IRender
     ) {
         const calc = () => {
-            const { scene } = currentRender;
+            const { scene, engine } = currentRender;
             const { left, top, width, height } = targetObject;
 
             const bound: IBoundRectNoAngle = {
@@ -94,11 +94,11 @@ export class DocCanvasPopManagerService extends Disposable {
             };
 
             const offsetBound = transformBound2OffsetBound(bound, scene);
-
+            const topOffset = engine.getCanvasElement().getBoundingClientRect().top;
             const position = {
                 left: offsetBound.left,
                 right: offsetBound.right,
-                top: offsetBound.top,
+                top: offsetBound.top + topOffset,
                 bottom: offsetBound.bottom,
             };
             return position;
@@ -130,7 +130,7 @@ export class DocCanvasPopManagerService extends Disposable {
 
     private _createRangePositionObserver(range: ITextRange, currentRender: IRender) {
         const calc = (): IBoundRectNoAngle[] | undefined => {
-            const { scene, mainComponent } = currentRender;
+            const { scene, mainComponent, engine } = currentRender;
             const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
             const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset);
             const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset);
@@ -142,14 +142,14 @@ export class DocCanvasPopManagerService extends Disposable {
 
             const documentOffsetConfig = document.getOffsetConfig();
             const { docsLeft, docsTop } = documentOffsetConfig;
-
+            const top = engine.getCanvasElement().getBoundingClientRect().top;
             const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
             const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
             const bounds = getLineBounding(borderBoxPointGroup);
             const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
                 left: i.left + docsLeft,
                 right: i.right + docsLeft,
-                top: i.top + docsTop,
+                top: i.top + docsTop + top,
                 bottom: i.bottom + docsTop,
             }));
             return res;

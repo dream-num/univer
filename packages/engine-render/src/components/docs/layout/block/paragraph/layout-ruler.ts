@@ -677,6 +677,7 @@ function _reLayoutCheck(
         const startIndex = page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
         if (drawingCache.page && cachePageStartParagraphIndex && startIndex && cachePageStartParagraphIndex !== startIndex) {
             drawingCache.page.skeDrawings.delete(drawing.drawingId);
+            ctx.drawingsCache.delete(drawing.drawingId);
             // console.log(paragraphIndex);
             // console.log('cache page: ', cachePageStartParagraphIndex, 'page', startIndex);
 

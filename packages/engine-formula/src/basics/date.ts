@@ -84,6 +84,25 @@ export function excelSerialToDate(serial: number): Date {
     return resultDate;
 }
 
+export function excelSerialToDateTime(serial: number): Date {
+    const baseDate = new Date(Date.UTC(1900, 0, 1, 0, 0, 0)); // January 1, 1900, UTC
+    const leapDayDate = new Date(Date.UTC(1900, 1, 28, 0, 0, 0)); // February 28, 1900, UTC
+
+    let dayDifference = serial - 1; // Adjust for Excel serial number starting from 1
+
+    // If the serial number corresponds to a date later than February 28, 1900, adjust the day difference
+    if (dayDifference > (leapDayDate.getTime() - baseDate.getTime()) / (1000 * 3600 * 24)) {
+        dayDifference -= 1;
+    }
+
+    if (dayDifference < 0) {
+        dayDifference = serial;
+    }
+
+    const resultDate = new Date(baseDate.getTime() + dayDifference * (1000 * 3600 * 24));
+    return resultDate;
+}
+
 export function formatDateDefault(date: Date): string {
     // Get the year from the date object
     const year: number = date.getFullYear();

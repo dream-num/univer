@@ -193,16 +193,9 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.HOUR.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.HOUR.functionParameter.number1.name',
-                detail: 'formula.functionList.HOUR.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.HOUR.functionParameter.number2.name',
-                detail: 'formula.functionList.HOUR.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.HOUR.functionParameter.serialNumber.name',
+                detail: 'formula.functionList.HOUR.functionParameter.serialNumber.detail',
+                example: '"2011-7-18 7:45"',
                 require: 1,
                 repeat: 0,
             },
@@ -237,16 +230,9 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.MINUTE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.MINUTE.functionParameter.number1.name',
-                detail: 'formula.functionList.MINUTE.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.MINUTE.functionParameter.number2.name',
-                detail: 'formula.functionList.MINUTE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.MINUTE.functionParameter.serialNumber.name',
+                detail: 'formula.functionList.MINUTE.functionParameter.serialNumber.detail',
+                example: '"12:45"',
                 require: 1,
                 repeat: 0,
             },
@@ -347,16 +333,9 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.SECOND.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.SECOND.functionParameter.number1.name',
-                detail: 'formula.functionList.SECOND.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.SECOND.functionParameter.number2.name',
-                detail: 'formula.functionList.SECOND.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.SECOND.functionParameter.serialNumber.name',
+                detail: 'formula.functionList.SECOND.functionParameter.serialNumber.detail',
+                example: '"4:48:18"',
                 require: 1,
                 repeat: 0,
             },

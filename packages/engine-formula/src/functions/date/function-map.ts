@@ -19,10 +19,13 @@ import { Datevalue } from './datevalue';
 import { Day } from './day';
 import { Edate } from './edate';
 import { FUNCTION_NAMES_DATE } from './function-names';
+import { Hour } from './hour';
+import { Minute } from './minute';
 import { Month } from './month';
 import { Networkdays } from './networkdays';
 import { NetworkdaysIntl } from './networkdays-intl';
 import { Now } from './now';
+import { Second } from './second';
 import { Time } from './time';
 import { Timevalue } from './timevalue';
 import { Today } from './today';
@@ -36,10 +39,13 @@ export const functionDate = [
     [Datevalue, FUNCTION_NAMES_DATE.DATEVALUE],
     [Day, FUNCTION_NAMES_DATE.DAY],
     [Edate, FUNCTION_NAMES_DATE.EDATE],
+    [Hour, FUNCTION_NAMES_DATE.HOUR],
+    [Minute, FUNCTION_NAMES_DATE.MINUTE],
     [Month, FUNCTION_NAMES_DATE.MONTH],
     [Networkdays, FUNCTION_NAMES_DATE.NETWORKDAYS],
     [NetworkdaysIntl, FUNCTION_NAMES_DATE.NETWORKDAYS_INTL],
     [Now, FUNCTION_NAMES_DATE.NOW],
+    [Second, FUNCTION_NAMES_DATE.SECOND],
     [Time, FUNCTION_NAMES_DATE.TIME],
     [Timevalue, FUNCTION_NAMES_DATE.TIMEVALUE],
     [Today, FUNCTION_NAMES_DATE.TODAY],

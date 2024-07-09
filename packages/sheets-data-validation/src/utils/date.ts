@@ -14,31 +14,6 @@
  * limitations under the License.
  */
 
-export function toYMD_1900(ord: number, leap1900 = true) {
-    if (leap1900 && ord >= 0) {
-        if (ord === 0) {
-            return [1900, 1, 0];
-        }
-        if (ord === 60) {
-            return [1900, 2, 29];
-        }
-        if (ord < 60) {
-            return [1900, (ord < 32 ? 1 : 2), ((ord - 1) % 31) + 1];
-        }
-    }
-    let l = ord + 68569 + 2415019;
-    const n = Math.floor((4 * l) / 146097);
-    l = l - Math.floor((146097 * n + 3) / 4);
-    const i = Math.floor((4000 * (l + 1)) / 1461001);
-    l = l - Math.floor((1461 * i) / 4) + 31;
-    const j = Math.floor((80 * l) / 2447);
-    const nDay = l - Math.floor((2447 * j) / 80);
-    l = Math.floor(j / 11);
-    const nMonth = j + 2 - (12 * l);
-    const nYear = 100 * (n - 49) + i + l;
-    return [nYear | 0, nMonth | 0, nDay | 0];
-}
-
 export function excelSerialToUnixTimestamp(excelSerial: number) {
     const date = new Date((excelSerial - 25569) * 86400);
     return date.getTime();

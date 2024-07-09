@@ -1,5 +1,12 @@
 
 
+## [0.2.2](https://github.com/dream-num/univer/compare/v0.2.1...v0.2.2) (2024-07-09)
+
+
+### Bug Fixes
+
+* **docs:** fix blank screen ([#2720](https://github.com/dream-num/univer/issues/2720)) ([92ee024](https://github.com/dream-num/univer/commit/92ee024cd41681eab2f338f04e04a1ed3eca94ca))
+
 ## [0.2.1](https://github.com/dream-num/univer/compare/v0.2.0...v0.2.1) (2024-07-08)
 
 

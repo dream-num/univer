@@ -94,7 +94,7 @@ export function Sidebar() {
     }
     return (
         <section className={_className} style={{ width }}>
-            <section className={styles.sidebarContainer}>
+            <section className={styles.sidebarContainer} ref={scrollRef}>
                 <header className={styles.sidebarHeader}>
                     {options?.header}
 

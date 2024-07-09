@@ -26,7 +26,7 @@ import type { IDropdownComponentProps } from '../../services/dropdown-manager.se
 import type { DateValidator } from '../../validators';
 import { getCellValueOrigin } from '../../utils/get-cell-data-origin';
 import { DataValidationRejectInputController } from '../../controllers/dv-reject-input.controller';
-import { timestamp2SerialTime } from '../../utils/date';
+import { excelSerialToUnixTimestamp, timestamp2SerialTime } from '../../utils/date';
 import styles from './index.module.less';
 
 dayjs.extend(utc);
@@ -37,7 +37,7 @@ const transformDate = (value: Nullable<CellValue>) => {
     }
 
     if (typeof value === 'number' || !Number.isNaN(+value)) {
-        const date = dayjs.unix(+value).utc().format().slice(0, -1);
+        const date = dayjs.unix(excelSerialToUnixTimestamp(+value)).utc().format().slice(0, -1);
         return dayjs(date);
     }
 

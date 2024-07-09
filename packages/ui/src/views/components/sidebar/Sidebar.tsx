@@ -57,7 +57,7 @@ export function Sidebar() {
 
     useEffect(() => {
         const handleScroll = (e: Event) => {
-            sidebarService.setScrollOptions({ event: e, element: scrollRef.current! });
+            sidebarService.scrollEvent$.next(e);
         };
         const scrollElement = scrollRef.current;
         if (scrollElement) {

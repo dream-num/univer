@@ -18,15 +18,14 @@ import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Subject } from 'rxjs';
 
-import type { ISidebarMethodOptions, ISidebarScrollOptions } from '../../views/components/sidebar/interface';
+import type { ISidebarMethodOptions } from '../../views/components/sidebar/interface';
 
 export const ISidebarService = createIdentifier<ISidebarService>('univer.sidebar-service');
 
 export interface ISidebarService {
     readonly sidebarOptions$: Subject<ISidebarMethodOptions>;
-    readonly scrollOptions$: Subject<ISidebarScrollOptions | undefined>;
+    readonly scrollEvent$: Subject<Event>;
 
     open(params: ISidebarMethodOptions): IDisposable;
     close(): void;
-    setScrollOptions(options: ISidebarScrollOptions): void;
 }

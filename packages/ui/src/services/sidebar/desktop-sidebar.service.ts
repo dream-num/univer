@@ -18,15 +18,14 @@ import { toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
-import type { ISidebarMethodOptions, ISidebarScrollOptions } from '../../views/components/sidebar/interface';
+import type { ISidebarMethodOptions } from '../../views/components/sidebar/interface';
 import type { ISidebarService } from './sidebar.service';
 
 export class DesktopSidebarService implements ISidebarService {
     private _sidebarOptions: ISidebarMethodOptions = {};
     readonly sidebarOptions$ = new Subject<ISidebarMethodOptions>();
 
-    private _scrollOptions$: ISidebarScrollOptions | undefined = undefined;
-    readonly scrollOptions$ = new Subject<ISidebarScrollOptions | undefined>();
+    readonly scrollEvent$ = new Subject<Event>();
 
     open(params: ISidebarMethodOptions): IDisposable {
         this._sidebarOptions = {
@@ -49,10 +48,5 @@ export class DesktopSidebarService implements ISidebarService {
 
         this.sidebarOptions$.next(this._sidebarOptions);
         this._sidebarOptions.onClose && this._sidebarOptions.onClose();
-    }
-
-    setScrollOptions(options: ISidebarScrollOptions) {
-        this._scrollOptions$ = options;
-        this.scrollOptions$.next(this._scrollOptions$);
     }
 }

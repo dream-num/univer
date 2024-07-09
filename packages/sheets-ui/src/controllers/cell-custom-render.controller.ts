@@ -60,7 +60,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                 const getActiveRender = (evt: IPointerEvent | IMouseEvent) => {
                     const { offsetX, offsetY } = evt;
                     const scene = currentRender.scene;
-                    const worksheet = workbook.getActiveSheet();
+                    const worksheet = workbook.getActiveSheet(true);
 
                     if (!worksheet) {
                         return;

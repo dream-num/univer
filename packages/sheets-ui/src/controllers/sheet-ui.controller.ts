@@ -16,6 +16,8 @@
 
 import type { DependencyOverride } from '@univerjs/core';
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { DependencyOverride } from '@univerjs/core';
+
 import {
     SetBoldCommand,
     SetFontFamilyCommand,

@@ -128,6 +128,7 @@ export class Spreadsheet extends SheetComponent {
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
+
         for (const extension of extensions) {
             const _timeKey = `extension ${viewportInfo.viewportKey}:${extension.constructor.name}`;
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {

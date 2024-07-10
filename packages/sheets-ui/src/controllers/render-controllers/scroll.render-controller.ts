@@ -238,8 +238,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _scrollSubscribeBinding() {
-        const { unitId } = this._context;
-        const scene = this._renderManagerService.getRenderById(unitId)?.scene;
+        const { scene } = this._context;
         if (!scene) return;
         const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (!viewMain) return;

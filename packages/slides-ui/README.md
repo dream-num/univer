@@ -1,9 +1,10 @@
 # @univerjs/slides-ui
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/slides-ui)](https://npmjs.org/package/@univerjs/slides-ui)
-[![license](https://img.shields.io/npm/l/@univerjs/slides-ui)](https://img.shields.io/npm/l/@univerjs/slides-ui)
-![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
-![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/slides-ui` | `UniveSlidesUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
 
 ## Introduction
 
@@ -20,3 +21,9 @@ npm install @univerjs/slides-ui
 # Using pnpm
 pnpm add @univerjs/slides-ui
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/slides-ui?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/slides-ui
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/slides-ui?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/slides-ui?style=flat-square

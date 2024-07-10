@@ -1,9 +1,10 @@
 # @univerjs/ui
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)
-[![license](https://img.shields.io/npm/l/@univerjs/ui)](https://img.shields.io/npm/l/@univerjs/ui)
-![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
-![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/ui` | `UniveUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
 
 ## Introduction
 
@@ -37,3 +38,9 @@ These UI services include:
 ### Workbench
 
 In addition to UI services, `@univerjs/ui` also implements a workspace based on React, which includes elements such as the title bar, toolbar, main content area, context menu, sidebar, and more. Businesses can customize the rendered content using the APIs provided by the Workbench.
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/ui?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/ui
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/ui?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/ui?style=flat-square

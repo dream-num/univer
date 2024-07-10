@@ -1,9 +1,10 @@
 # @univerjs/sheets-zen-editor
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-zen-editor)](https://npmjs.org/packages/@univerjs/sheets-zen-editor)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-zen-editor)](https://img.shields.io/npm/l/@univerjs/sheets-zen-editor)
-![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
-![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/sheets-zen-editor` | `UniveSheetsZenEditor` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ⭕️ |
 
 ## Introduction
 
@@ -20,3 +21,9 @@ npm install @univerjs/sheets-zen-editor
 # Using pnpm
 pnpm add @univerjs/sheets-zen-editor
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/slides?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/slides
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/slides?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/slides?style=flat-square

@@ -1,7 +1,10 @@
 # @univerjs/core
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/core)](https://npmjs.org/package/@univerjs/core)
-[![license](https://img.shields.io/npm/l/@univerjs/core)](https://img.shields.io/npm/l/@univerjs/core)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/core` | `UniverCore` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
 
 ## Introduction
 
@@ -21,7 +24,7 @@
   * Internationalization
   * Resource management
 
-For more information about `@univerjs/core`'s API, please refer to the API documentation.
+For more information about `@univerjs/core`'s API, please refer to the [API documentation](https://univer.ai/typedoc/@univerjs/core/README).
 
 ## Usage
 
@@ -42,7 +45,7 @@ import { Univer } from '@univerjs/core';
 
 new Univer({
     theme: defaultTheme,
-    locale: LocaleType.ZH_CN,
+    locale: LocaleType.EN_US,
     locales,
     logLevel: LogLevel.VERBOSE,
 });
@@ -52,7 +55,13 @@ new Univer({
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| theme | [Theme](https://univer.ai/api/design/#built-in-themes) | - | The theme of the application, which is used to control the appearance of the application. |
-| locale | [LocaleType](https://univer.ai/api/core/enums/LocaleType.html) | `LocaleType.ZH_CN` | The locale of the application. The default value is `LocaleType.ZH_CN`.
-| locales | [ILocales](https://univer.ai/api/core/interfaces/ILocales.html) | - | The supported locales of the application. By default, the application supports Chinese.
-| logLevel | [LogLevel](https://univer.ai/api/core/enums/LogLevel.html) | `LogLevel.SILENT` | The log level of the application. |
+| theme | [Theme](https://univer.ai/guides/sheet/advanced/custom-theme) | - | The theme of the application, which is used to control the appearance of the application. |
+| locale | [LocaleType](https://univer.ai/typedoc/@univerjs/core/enumerations/LocaleType) | `LocaleType.ZH_CN` | The locale of the application. The default value is `LocaleType.ZH_CN`.
+| locales | [ILocales](https://univer.ai/typedoc/@univerjs/core/interfaces/ILocales) | - | The supported locales of the application. By default, the application supports Chinese.
+| logLevel | [LogLevel](https://univer.ai/typedoc/@univerjs/core/enumerations/LogLevel) | `LogLevel.SILENT` | The log level of the application. |
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/core?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/core
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/core?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/core?style=flat-square

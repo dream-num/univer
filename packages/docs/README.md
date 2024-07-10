@@ -1,7 +1,10 @@
 # @univerjs/docs
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/docs)](https://npmjs.org/package/@univerjs/docs)
-[![license](https://img.shields.io/npm/l/@univerjs/docs)](https://img.shields.io/npm/l/@univerjs/docs)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/docs` | `UniverDocs` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
 
 ## Introduction
 
@@ -24,3 +27,9 @@ npm install @univerjs/docs
 # Using pnpm
 pnpm add @univerjs/docs
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/docs?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/docs
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/docs?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/docs?style=flat-square

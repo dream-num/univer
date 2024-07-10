@@ -1,16 +1,18 @@
 # @univerjs/sheets-thread-comment
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-thread-comment)](https://npmjs.org/packages/@univerjs/sheets-thread-comment )
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-thread-comment)](https://img.shields.io/npm/l/@univerjs/sheets- thread-comment)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/sheets-thread-comment` | `UniverSheetsThreadComment` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
 
 ## Introduction
 
 `@univerjs/sheets-thread-comment` provides the comment/annotation function of Univer Sheets.
 
-
 ## Usage
 
-### Install
+### Installation
 
 ```shell
 # Use npm
@@ -20,8 +22,9 @@ npm install @univerjs/sheets-thread-comment
 pnpm add @univerjs/sheets-thread-comment
 ```
 
-### use
-```js
+### Register the plugin
+
+```typescript
 import { UniverSheetsThreadCommentPlugin, IThreadCommentMentionDataService} from '@univerjs/sheets-thread-comment';
 
 const mockUser = {
@@ -58,3 +61,9 @@ univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
     overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
 });
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-thread-comment?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-thread-comment
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-thread-comment?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-thread-comment?style=flat-square

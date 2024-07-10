@@ -50,7 +50,6 @@ export function updateAttributeByDelete(body: IDocumentBody, textLength: number,
     let removeDataStream = '';
     if (dataStream) {
         body.dataStream = deleteContent(dataStream, startIndex, endIndex);
-
         removeDataStream = dataStream.slice(startIndex, endIndex);
     }
 

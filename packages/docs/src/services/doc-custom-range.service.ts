@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType } from '@univerjs/core';
+import type { ICustomRange } from '@univerjs/core';
 import { toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
-export interface ICustomRangeBase {
-    rangeId: string;
-    rangeType: CustomRangeType;
-}
-
 export interface ICustomRangeHook {
-    onCopyCustomRange?: (range: ICustomRangeBase) => ICustomRangeBase;
+    onCopyCustomRange?: (unitId: string, range: ICustomRange) => ICustomRange;
 }
 
 export class DocCustomRangeService {
@@ -42,12 +37,12 @@ export class DocCustomRangeService {
         });
     }
 
-    copyCustomRange(range: ICustomRangeBase) {
+    copyCustomRange(unitId: string, range: ICustomRange) {
         let copy = { ...range };
 
         this._customRangeHooks.forEach((hook) => {
             if (hook.onCopyCustomRange) {
-                copy = hook.onCopyCustomRange(copy);
+                copy = hook.onCopyCustomRange(unitId, copy);
             }
         });
 

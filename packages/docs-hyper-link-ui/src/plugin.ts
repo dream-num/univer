@@ -26,6 +26,7 @@ import { DocHyperLinkPopupService } from './services/hyper-link-popup.service';
 import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
 import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { DocHyperLinkClipboardController } from './controllers/doc-hyper-link-clipboard.controller';
+import { DocHyperLinkCustomRangeController } from './controllers/doc-hyper-link-custom-range.controller';
 
 @DependentOn(UniverDocsHyperLinkPlugin)
 export class UniverDocsHyperLinkUIPlugin extends Plugin {
@@ -50,6 +51,7 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
             ],
             [DocHyperLinkSelectionController],
             [DocHyperLinkClipboardController],
+            [DocHyperLinkCustomRangeController],
         ];
 
         deps.forEach((dep) => {

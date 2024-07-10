@@ -153,7 +153,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        // console.log('updateDrawings', skeleton.getViewModel().getDataModel(), pages, updateDrawings);
+        // console.log('updateDrawings', skeHeaders, skeFooters, pages, updateDrawings);
         if (updateDrawings.length > 0) {
             this._drawingManagerService.refreshTransform(updateDrawings as unknown as IDrawingParam[]);
         }

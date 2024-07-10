@@ -792,6 +792,16 @@ export class DocumentSkeleton extends Skeleton {
             updateBlockIndex(skeleton.pages);
             // Calculate inline drawing position and update.
             updateInlineDrawingCoords(ctx, skeleton.pages);
+            // for (const hSkeMap of skeleton.skeHeaders.values()) {
+            //     for (const page of hSkeMap.values()) {
+            //         updateInlineDrawingCoords(ctx, [page]);
+            //     }
+            // }
+            // for (const fSkeMap of skeleton.skeFooters.values()) {
+            //     for (const page of fSkeMap.values()) {
+            //         updateInlineDrawingCoords(ctx, [page]);
+            //     }
+            // }
             setPageParent(skeleton.pages, skeleton);
 
             return skeleton;

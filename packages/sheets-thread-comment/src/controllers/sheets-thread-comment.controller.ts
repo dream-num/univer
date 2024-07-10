@@ -45,6 +45,8 @@ export const DefaultSheetsThreadCommentConfig: IUniverSheetsThreadCommentConfig 
 
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
 export class SheetsThreadCommentController extends Disposable {
+    private _setting = false;
+
     constructor(
         private readonly _config: Partial<IUniverSheetsThreadCommentConfig>,
         @IMenuService private readonly _menuService: IMenuService,
@@ -73,6 +75,9 @@ export class SheetsThreadCommentController extends Disposable {
     private _initCommandListener() {
         this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetSelectionsOperation.id) {
+                if (this._setting) {
+                    return;
+                }
                 const params = commandInfo.params as ISetSelectionsOperationParams;
                 const { unitId, subUnitId, selections, type } = params;
                 if ((type === SelectionMoveType.MOVE_END || type === undefined) && selections[0].primary) {
@@ -148,6 +153,7 @@ export class SheetsThreadCommentController extends Disposable {
                 if (currentUnitId !== unitId) {
                     return;
                 }
+                this._setting = true;
                 const currentSheetId = currentUnit.getActiveSheet()?.getSheetId();
                 if (currentSheetId !== subUnitId) {
                     await this._commandService.executeCommand(SetWorksheetActiveOperation.id, {
@@ -155,6 +161,7 @@ export class SheetsThreadCommentController extends Disposable {
                         subUnitId,
                     });
                 }
+                this._setting = false;
 
                 const location = singleReferenceToGrid(comment.ref);
 
@@ -164,6 +171,7 @@ export class SheetsThreadCommentController extends Disposable {
                     worksheetTypes: [WorksheetViewPermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],
                 }, [{ startRow: row, startColumn: col, endRow: row, endColumn: col }]);
+
                 if (!commentPermission) {
                     return;
                 }
@@ -181,6 +189,7 @@ export class SheetsThreadCommentController extends Disposable {
                 if (this._threadCommentPanelService.panelVisible) {
                     return;
                 }
+
                 this._sheetsThreadCommentPopupService.showPopup({
                     unitId,
                     subUnitId,

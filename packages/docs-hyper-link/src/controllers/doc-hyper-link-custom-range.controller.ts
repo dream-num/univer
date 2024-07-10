@@ -34,9 +34,20 @@ export class DocHyperLinkCustomRangeController extends Disposable {
         this.disposeWithMe(
             this._docCustomRangeService.addClipboardHook({
                 onCopyCustomRange: (unitId, range) => {
-                    const { rangeId, rangeType, ...ext } = range;
+                    const { rangeId, rangeType, data, ...ext } = range;
 
                     if (rangeType === CustomRangeType.HYPERLINK) {
+                        if (data) {
+                            const id = Tools.generateRandomId();
+                            this._docHyperLinkModel.addLink(unitId, {
+                                id,
+                                payload: data,
+                            });
+                            return {
+                                ...range,
+                                rangeId: id,
+                            };
+                        }
                         const link = this._docHyperLinkModel.getLink(unitId, rangeId);
                         if (!link) {
                             return range;

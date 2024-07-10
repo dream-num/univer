@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IDocumentBody, IParagraph } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IDocumentBody, IParagraph } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType, Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
-import { CutContentCommand, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
+import { CutContentCommand, DocCustomRangeService, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
@@ -31,23 +31,6 @@ import { UDMToHtmlService } from './udm-to-html/convertor';
 HtmlToUDMService.use(PastePluginWord);
 HtmlToUDMService.use(PastePluginLark);
 HtmlToUDMService.use(PastePluginUniver);
-
-function generateBody(text: string): IDocumentBody {
-    // Convert all \n to \r, because we use \r to indicate paragraph break.
-    const dataStream = text.replace(/\n/g, '\r');
-    const paragraphs: IParagraph[] = [];
-
-    for (let i = 0; i < dataStream.length; i++) {
-        if (dataStream[i] === '\r') {
-            paragraphs.push({ startIndex: i });
-        }
-    }
-
-    return {
-        dataStream,
-        paragraphs,
-    };
-}
 
 export interface IClipboardPropertyItem { }
 
@@ -62,7 +45,6 @@ export interface IDocClipboardService {
     cut(): Promise<boolean>;
     paste(items: ClipboardItem[]): Promise<boolean>;
     legacyPaste(html?: string, text?: string): Promise<boolean>;
-
     addClipboardHook(hook: IDocClipboardHook): IDisposable;
 }
 
@@ -79,7 +61,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocCustomRangeService) private readonly _docCustomRangeService: DocCustomRangeService
     ) {
         super();
     }
@@ -328,10 +311,48 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
+    private _generateBody(text: string): IDocumentBody {
+        // Convert all \n to \r, because we use \r to indicate paragraph break.
+        const dataStream = text.replace(/\n/g, '\r');
+
+        if (!text.includes('\r') && Tools.isLegalUrl(text)) {
+            const id = Tools.generateRandomId();
+            const docDataModel = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)!;
+            const range = this._docCustomRangeService.copyCustomRange(
+                docDataModel.getUnitId(),
+                {
+                    startIndex: 0,
+                    endIndex: dataStream.length - 1,
+                    rangeId: id,
+                    rangeType: CustomRangeType.HYPERLINK,
+                    data: text,
+                }
+            );
+
+            return {
+                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${dataStream}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                customRanges: [range],
+            };
+        }
+
+        const paragraphs: IParagraph[] = [];
+
+        for (let i = 0; i < dataStream.length; i++) {
+            if (dataStream[i] === '\r') {
+                paragraphs.push({ startIndex: i });
+            }
+        }
+
+        return {
+            dataStream,
+            paragraphs,
+        };
+    }
+
     private _generateBodyFromHtmlAndText(html?: string, text?: string): IDocumentBody {
         if (!html) {
             if (text) {
-                return generateBody(text);
+                return this._generateBody(text);
             } else {
                 throw new Error('[DocClipboardService] html and text cannot be both empty!');
             }

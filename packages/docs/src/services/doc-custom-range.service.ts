@@ -18,8 +18,12 @@ import type { ICustomRange } from '@univerjs/core';
 import { toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
+export interface ICustomRangeData extends ICustomRange {
+    data?: string;
+}
+
 export interface ICustomRangeHook {
-    onCopyCustomRange?: (unitId: string, range: ICustomRange) => ICustomRange;
+    onCopyCustomRange?: (unitId: string, range: ICustomRangeData) => ICustomRange;
 }
 
 export class DocCustomRangeService {
@@ -37,7 +41,7 @@ export class DocCustomRangeService {
         });
     }
 
-    copyCustomRange(unitId: string, range: ICustomRange) {
+    copyCustomRange(unitId: string, range: ICustomRangeData) {
         let copy = { ...range };
 
         this._customRangeHooks.forEach((hook) => {

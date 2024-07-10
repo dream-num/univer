@@ -21,6 +21,7 @@ import { DOC_HYPER_LINK_PLUGIN } from './types/const';
 import { DocHyperLinkModel } from './models/hyper-link.model';
 import { DocHyperLinkController } from './controllers/hyper-link.controller';
 import { DocHyperLinkResourceController } from './controllers/resource.controller';
+import { DocHyperLinkCustomRangeController } from './controllers/doc-hyper-link-custom-range.controller';
 
 export class UniverDocsHyperLinkPlugin extends Plugin {
     static override pluginName = DOC_HYPER_LINK_PLUGIN;
@@ -37,6 +38,7 @@ export class UniverDocsHyperLinkPlugin extends Plugin {
             [DocHyperLinkModel],
             [DocHyperLinkController],
             [DocHyperLinkResourceController],
+            [DocHyperLinkCustomRangeController],
         ];
 
         deps.forEach((dep) => {

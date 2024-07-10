@@ -89,6 +89,8 @@ export const SheetPermissionPanelDetailFooter = () => {
                                             collaborators,
                                             unitID: activeRule.unitId,
                                             name: activeRule.name,
+                                            readScope: CreateRequest_WorkSheetObjectScope.SomeCollaborator,
+
                                         },
                                         objectType: UnitObject.SelectRange,
                                     });
@@ -126,6 +128,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                     collaborators,
                                     unitID: activeRule.unitId,
                                     name: activeRule.name,
+                                    readScope: CreateRequest_WorkSheetObjectScope.SomeCollaborator,
                                 },
                                 objectType: UnitObject.SelectRange,
                             });

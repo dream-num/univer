@@ -393,8 +393,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The exponent applied to the base e.' },
         },
     },
     FACT: {
@@ -562,8 +561,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The positive real number for which you want the logarithm.' },
+            base: { name: 'base', detail: 'The base of the logarithm. If base is omitted, it is assumed to be 10.' },
         },
     },
     LOG10: {
@@ -576,8 +575,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The positive real number for which you want the base-10 logarithm.' },
         },
     },
     MDETERM: {

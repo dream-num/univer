@@ -35,9 +35,12 @@ import { Cot } from './cot';
 import { Coth } from './coth';
 import { Csc } from './csc';
 import { Csch } from './csch';
+import { Exp } from './exp';
 import { Floor } from './floor';
 import { FloorMath } from './floor-math';
 import { FloorPrecise } from './floor-precise';
+import { Log } from './log';
+import { Log10 } from './log10';
 import { Mod } from './mod';
 import { Mround } from './mround';
 import { Power } from './power';
@@ -76,9 +79,12 @@ export const functionMath = [
     [Coth, FUNCTION_NAMES_MATH.COTH],
     [Csc, FUNCTION_NAMES_MATH.CSC],
     [Csch, FUNCTION_NAMES_MATH.CSCH],
+    [Exp, FUNCTION_NAMES_MATH.EXP],
     [Floor, FUNCTION_NAMES_MATH.FLOOR],
     [FloorMath, FUNCTION_NAMES_MATH.FLOOR_MATH],
     [FloorPrecise, FUNCTION_NAMES_MATH.FLOOR_PRECISE],
+    [Log, FUNCTION_NAMES_MATH.LOG],
+    [Log10, FUNCTION_NAMES_MATH.LOG10],
     [Mod, FUNCTION_NAMES_MATH.MOD],
     [Mround, FUNCTION_NAMES_MATH.MROUND],
     [Power, FUNCTION_NAMES_MATH.POWER],

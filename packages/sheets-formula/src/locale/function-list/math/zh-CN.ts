@@ -392,8 +392,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '底数 e 的指数。' },
         },
     },
     FACT: {
@@ -561,8 +560,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要计算其对数的正实数。' },
+            base: { name: '底数', detail: '对数的底数。 如果省略 base，则假定其值为 10。' },
         },
     },
     LOG10: {
@@ -575,8 +574,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要计算其以 10 为底的对数的正实数。' },
         },
     },
     MDETERM: {

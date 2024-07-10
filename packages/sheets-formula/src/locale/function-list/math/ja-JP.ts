@@ -393,8 +393,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'e を底とするべき乗の指数を指定します。' },
         },
     },
     FACT: {
@@ -562,8 +561,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '対数を求める正の実数を指定します。' },
+            base: { name: '底', detail: '対数の底を指定します。 底を省略すると、10 を指定したと見なされます。' },
         },
     },
     LOG10: {
@@ -576,8 +575,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '10 を底とする対数 (常用対数) を求める正の実数を指定します。' },
         },
     },
     MDETERM: {

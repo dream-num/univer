@@ -401,8 +401,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是套用至基數 e 的指數。' },
         },
     },
     FACT: {
@@ -570,8 +569,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要求得對數的正實數。' },
+            base: { name: '底數', detail: '這是對數的底數。 如果省略 base，則假設其值為 10。' },
         },
     },
     LOG10: {
@@ -584,8 +583,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要求得底數為 10 之對數的正實數。' },
         },
     },
     MDETERM: {

@@ -344,6 +344,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     let macLineDsc = 0;
                     columnHeight += lineHeight;
                     const divideLength = divides.length;
+                    let lineHasGlyph = false;
 
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
@@ -376,6 +377,8 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             continue;
                         }
 
+                        lineHasGlyph = true;
+
                         if (glyphGroup[0].xOffset !== 0 && i === divideLength - 1) {
                             actualWidth -= glyphGroup[0].xOffset;
                         }
@@ -395,7 +398,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                         preDivideStartIndex = divide.ed;
                     }
 
-                    line.st = lineStartIndex + 1;
+                    line.st = lineHasGlyph ? lineStartIndex + 1 : lineStartIndex;
                     line.ed = preDivideStartIndex >= line.st ? preDivideStartIndex : line.st;
                     line.width = actualWidth;
                     line.asc = maxLineAsc;

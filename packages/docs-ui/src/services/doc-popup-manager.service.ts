@@ -215,13 +215,15 @@ export class DocCanvasPopManagerService extends Disposable {
             anchorRect$: position$,
         });
 
-        return {
-            dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                position$.complete();
-                disposable.dispose();
-            },
-        };
+        const disposableCollection = new DisposableCollection();
+        disposableCollection.add(() => {
+            this._globalPopupManagerService.removePopup(id);
+        });
+
+        disposableCollection.add(position$);
+        disposableCollection.add(disposable);
+
+        return disposableCollection;
     }
 
     attachPopupToRange(range: ITextRange, popup: IDocCanvasPopup): IDisposable {
@@ -250,12 +252,14 @@ export class DocCanvasPopManagerService extends Disposable {
             excludeRects$: bounds$,
             direction: direction === 'top' ? 'top' : 'bottom',
         });
-        return {
-            dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                bounds$.complete();
-                disposable.dispose();
-            },
-        };
+        const disposableCollection = new DisposableCollection();
+
+        disposableCollection.add(() => {
+            this._globalPopupManagerService.removePopup(id);
+        });
+        disposableCollection.add(bounds$);
+        disposableCollection.add(disposable);
+
+        return disposableCollection;
     }
 }

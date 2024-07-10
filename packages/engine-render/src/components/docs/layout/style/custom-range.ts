@@ -20,12 +20,8 @@ import { BooleanNumber, CustomRangeType } from '@univerjs/core';
 export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
     if (customRange.rangeType === CustomRangeType.HYPERLINK) {
         return {
-            ul: {
-                s: BooleanNumber.TRUE,
-            },
-            cl: {
-                rgb: '#274fee',
-            },
+            ...customRange.active ? { ul: { s: BooleanNumber.TRUE } } : null,
+            cl: { rgb: '#274fee' },
         };
     }
 

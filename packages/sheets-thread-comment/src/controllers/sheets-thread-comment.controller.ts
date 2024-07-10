@@ -177,6 +177,10 @@ export class SheetsThreadCommentController extends Disposable {
                         endColumn: location.column + GAP,
                     },
                 });
+
+                if (this._threadCommentPanelService.panelVisible) {
+                    return;
+                }
                 this._sheetsThreadCommentPopupService.showPopup({
                     unitId,
                     subUnitId,

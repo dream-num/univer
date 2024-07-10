@@ -32,17 +32,16 @@ export const SheetsThreadCommentPanel = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const threadCommentModel = useDependency(ThreadCommentModel);
     const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-    if (!workbook) {
-        return null;
-    }
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const commandService = useDependency(ICommandService);
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
     const subUnitId = useObservable(subUnitId$, workbook.getActiveSheet()?.getSheetId());
     const activeShapeId = useRef<string | null>();
+    const hoverShapeId = useRef<string | null>();
     const panelService = useDependency(ThreadCommentPanelService);
     const activeCommentId = useObservable(panelService.activeCommentId$);
+    const panelVisible = useObservable(panelService.panelVisible$, panelService.panelVisible);
     const sortComments = useCallback((comments: IThreadComment[]) => {
         const worksheets = workbook.getSheets();
         const sheetIndex: Record<string, number> = {};
@@ -115,18 +114,18 @@ export const SheetsThreadCommentPanel = () => {
             return;
         }
 
-        if (activeShapeId.current) {
-            markSelectionService.removeShape(activeShapeId.current);
-            activeShapeId.current = null;
+        if (hoverShapeId.current) {
+            markSelectionService.removeShape(hoverShapeId.current);
+            hoverShapeId.current = null;
         }
 
-        activeShapeId.current = showShape(comment);
+        hoverShapeId.current = showShape(comment);
     };
 
     const handleLeave = () => {
-        if (activeShapeId.current) {
-            markSelectionService.removeShape(activeShapeId.current);
-            activeShapeId.current = null;
+        if (hoverShapeId.current) {
+            markSelectionService.removeShape(hoverShapeId.current);
+            hoverShapeId.current = null;
         }
     };
 
@@ -144,13 +143,27 @@ export const SheetsThreadCommentPanel = () => {
         if (!comment) {
             return;
         }
-        const id = showShape(comment);
+
+        if (activeShapeId.current) {
+            markSelectionService.removeShape(activeShapeId.current);
+        }
+        activeShapeId.current = showShape(comment);
         return () => {
-            if (id) {
-                markSelectionService.removeShape(id);
+            if (activeShapeId.current) {
+                markSelectionService.removeShape(activeShapeId.current);
             }
         };
     }, [showShape, activeCommentId, threadCommentModel, markSelectionService]);
+
+    useEffect(() => {
+        if (!panelVisible && activeShapeId.current) {
+            markSelectionService.removeShape(activeShapeId.current);
+        }
+
+        if (!panelVisible && hoverShapeId.current) {
+            markSelectionService.removeShape(hoverShapeId.current);
+        }
+    }, [markSelectionService, panelVisible]);
 
     return (
         <ThreadCommentPanel

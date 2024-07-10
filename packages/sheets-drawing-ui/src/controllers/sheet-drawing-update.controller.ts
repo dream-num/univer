@@ -80,6 +80,8 @@ export class SheetDrawingUpdateController extends Disposable {
         this._groupDrawingListener();
 
         this._focusDrawingListener();
+
+        this._drawingAddListener();
     }
 
     /**

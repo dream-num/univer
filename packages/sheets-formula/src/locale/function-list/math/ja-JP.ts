@@ -435,8 +435,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            significance: { name: '基準値', detail: '倍数の基準となる数値を指定します。' },
         },
     },
     FLOOR_MATH: {
@@ -449,8 +449,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            significance: { name: '基準値', detail: '倍数の基準となる数値を指定します。' },
+            mode: { name: 'モード', detail: '負の数値の場合、数値を 0 に丸めるか、ゼロから遠ざけるかを制御します。' },
         },
     },
     FLOOR_PRECISE: {
@@ -463,8 +464,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            significance: { name: '基準値', detail: '倍数の基準となる数値を指定します。' },
         },
     },
     GCD: {

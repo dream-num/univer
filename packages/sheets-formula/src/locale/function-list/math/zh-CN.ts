@@ -434,8 +434,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
+            significance: { name: '倍数', detail: '要舍入到的倍数。' },
         },
     },
     FLOOR_MATH: {
@@ -448,8 +448,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
+            significance: { name: '倍数', detail: '要舍入到的倍数。' },
+            mode: { name: '众数', detail: '对于负数，控制数值是舍入为零还是从零舍入。' },
         },
     },
     FLOOR_PRECISE: {
@@ -462,8 +463,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
+            significance: { name: '倍数', detail: '要舍入到的倍数。' },
         },
     },
     GCD: {

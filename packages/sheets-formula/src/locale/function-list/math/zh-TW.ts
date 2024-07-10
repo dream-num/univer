@@ -443,8 +443,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要捨位的數值。' },
+            significance: { name: '倍數', detail: '這是要捨位的倍數。' },
         },
     },
     FLOOR_MATH: {
@@ -457,8 +457,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要捨位的數值。' },
+            significance: { name: '倍數', detail: '這是要捨位的倍數。' },
+            mode: { name: '眾數', detail: '對於負數，請控制數位是否趨於或背離於零。' },
         },
     },
     FLOOR_PRECISE: {
@@ -471,8 +472,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要捨位的數值。' },
+            significance: { name: '倍數', detail: '這是要捨位的倍數。' },
         },
     },
     GCD: {

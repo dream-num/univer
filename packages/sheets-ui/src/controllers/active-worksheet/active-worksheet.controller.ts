@@ -132,24 +132,22 @@ export class ActiveWorksheetController extends Disposable {
         // But how to decide which one is the previous sheet? We store the deleted sheet' index
         // in the `IRemoteSheetMutationParams` and use it to decide the previous sheet.
 
-        // If the selected sheet is not the deleted one, we don't have to do things.
+        // If the current sheet is not the deleted one, we don't have to call _switchToNextSheet.
         const { unitId } = mutation.params;
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) {
             return;
         }
 
-        // The deleted sheet is not the currently active sheet, we don't have to do things.
-        const activeSheet = workbook.getActiveSheet(true);
-        if (activeSheet) {
-            return;
+        // _switchToNextSheet is executed only when the current sheet is deleted.
+        const activeSheet = workbook.getActiveSheet();
+        if (activeSheet.getSheetId() === mutation.params.subUnitId) {
+            const previousIndex = this._previousSheetIndex;
+            const nextIndex = previousIndex >= 1 ? previousIndex - 1 : 0;
+            const nextId = findTheNextUnhiddenSheet(workbook, nextIndex);
+
+            this._switchToNextSheet(unitId, nextId);
         }
-
-        const previousIndex = this._previousSheetIndex;
-        const nextIndex = previousIndex >= 1 ? previousIndex - 1 : 0;
-        const nextId = findTheNextUnhiddenSheet(workbook, nextIndex);
-
-        this._switchToNextSheet(unitId, nextId);
     }
 
     private _adjustActiveSheetOnInsertSheet(mutation: IMutationInfo<IInsertSheetMutationParams>) {

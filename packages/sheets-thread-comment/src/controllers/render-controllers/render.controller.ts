@@ -70,7 +70,7 @@ export class SheetsThreadCommentRenderController extends Disposable {
             if (!workbook) return;
 
             const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet(true)?.getSheetId();
+            const subUnitId = workbook.getActiveSheet()?.getSheetId();
             if (!subUnitId) {
                 // TODO@zhangw: handle this case
                 console.warn('No active sheet found');

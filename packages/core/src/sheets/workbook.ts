@@ -207,7 +207,6 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
     /**
      * Get the active sheet.
      */
-
     getActiveSheet(): Worksheet;
     getActiveSheet(allowNull: true): Nullable<Worksheet>;
     getActiveSheet(allowNull?: true): Nullable<Worksheet> {
@@ -246,7 +245,12 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         return worksheet;
     }
 
-    setActiveSheet(worksheet: Nullable<Worksheet>): void {
+    /**
+     * ActiveSheet should not be null!
+     * There is at least one sheet in a workbook. You can not delete all sheets in a workbook.
+     * @param worksheet
+     */
+    setActiveSheet(worksheet: Worksheet): void {
         this._activeSheet$.next(worksheet);
     }
 
@@ -254,10 +258,6 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         const sheetToRemove = this._worksheets.get(sheetId);
         if (!sheetToRemove) {
             return false;
-        }
-
-        if (this._activeSheet?.getSheetId() === sheetId) {
-            this.setActiveSheet(null);
         }
 
         this._worksheets.delete(sheetId);

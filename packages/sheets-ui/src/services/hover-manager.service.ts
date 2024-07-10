@@ -79,7 +79,7 @@ export class HoverManagerService extends Disposable {
             return;
         }
 
-        const worksheet = workbook.getActiveSheet(true);
+        const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             this._currentCell$.next(null);
             return;

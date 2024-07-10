@@ -202,8 +202,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value you want to round.' },
+            significance: { name: 'significance', detail: 'The multiple to which you want to round.' },
         },
     },
     CEILING_MATH: {
@@ -216,8 +216,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value you want to round.' },
+            significance: { name: 'significance', detail: 'The multiple to which you want to round.' },
+            mode: { name: 'mode', detail: 'For negative numbers, controls whether Number is rounded toward or away from zero.' },
         },
     },
     CEILING_PRECISE: {
@@ -230,8 +231,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value you want to round.' },
+            significance: { name: 'significance', detail: 'The multiple to which you want to round.' },
         },
     },
     COMBIN: {

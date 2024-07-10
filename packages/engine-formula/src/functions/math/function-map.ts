@@ -25,6 +25,9 @@ import { Atan } from './atan';
 import { Atan2 } from './atan2';
 import { Atanh } from './atanh';
 import { Base } from './base';
+import { Ceiling } from './ceiling';
+import { CeilingMath } from './ceiling-math';
+import { CeilingPrecise } from './ceiling-precise';
 import { Cos } from './cos';
 import { Cosh } from './cosh';
 import { Cot } from './cot';
@@ -61,6 +64,9 @@ export const functionMath = [
     [Atan2, FUNCTION_NAMES_MATH.ATAN2],
     [Atanh, FUNCTION_NAMES_MATH.ATANH],
     [Base, FUNCTION_NAMES_MATH.BASE],
+    [Ceiling, FUNCTION_NAMES_MATH.CEILING],
+    [CeilingMath, FUNCTION_NAMES_MATH.CEILING_MATH],
+    [CeilingPrecise, FUNCTION_NAMES_MATH.CEILING_PRECISE],
     [Cos, FUNCTION_NAMES_MATH.COS],
     [Cosh, FUNCTION_NAMES_MATH.COSH],
     [Cot, FUNCTION_NAMES_MATH.COT],

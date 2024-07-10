@@ -92,6 +92,7 @@ export { SheetPrintInterceptorService } from './services/print-interceptor.servi
 export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';
 export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
 export { expandToContinuousRange } from './commands/commands/utils/selection-utils';
+export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 
 // #region - all commands
 
@@ -111,7 +112,8 @@ export {
 export { DeleteRangeMoveLeftConfirmCommand } from './commands/commands/delete-range-move-left-confirm.command';
 export { DeleteRangeMoveUpConfirmCommand } from './commands/commands/delete-range-move-up-confirm.command';
 export { HideRowConfirmCommand, HideColConfirmCommand } from './commands/commands/hide-row-col-confirm.command';
-export { SetRangeBoldCommand,
+export {
+    SetRangeBoldCommand,
     SetRangeItalicCommand,
     SetRangeUnderlineCommand,
     SetRangeStrickThroughCommand,

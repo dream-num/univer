@@ -16,8 +16,9 @@
 
 import type { ICommandInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
 import { CommandType, ICommandService, Inject, Rectangle, RxDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
+import type { IPartialRenderPerformanceMetry, IRenderContext, IRenderModule, ISampleFrameInfo, IViewportInfos, IWheelEvent, Scene, ISummaryFrameData } from '@univerjs/engine-render';
 import {
+    DEFAULT_FRAME_LIST_SIZE,
     Layer,
     PointerInput,
     Rect,
@@ -30,6 +31,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { ITelemetryService, TelemetryEventNames } from '@univerjs/telemetry';
 import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 
 import {
@@ -39,22 +41,26 @@ import {
 } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
+import { Subject } from 'rxjs';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
     subUnitId: string;
 }
 
+
 export class SheetRenderController extends RxDisposable implements IRenderModule {
+    private _summarizedFrameData$: Subject<ISummaryFrameData>;
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @ITelemetryService private readonly _telemetryService: ITelemetryService
     ) {
         super();
-
         this._addNewRender();
+        this._initSubscriber();
     }
 
     private _addNewRender() {
@@ -77,6 +83,47 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         if (should) {
             engine.runRenderLoop(() => scene.render());
         }
+    }
+
+    private _initSubscriber() {
+        this._summarizedFrameData$ = new Subject<ISummaryFrameData>();
+        this._renderMetryListener();
+        const { engine } = this._context;
+        engine.sampleFrameList$.subscribe( (sampleFrameList:Partial<ISampleFrameInfo>[]) => {
+            if(sampleFrameList.length > DEFAULT_FRAME_LIST_SIZE) {
+                const frameInfos = sampleFrameList as unknown as ISampleFrameInfo[];
+                let minFrameTime = frameInfos[0].frameTime;
+                let maxFrameTime = frameInfos[0].frameTime;
+                let avgFrameTime = frameInfos[0].frameTime;
+                for( let i = 0; i < frameInfos.length; i++) {
+
+                    if(frameInfos[i].frameTime < minFrameTime) {
+                        minFrameTime = frameInfos[i].frameTime;
+                    }
+                    if(frameInfos[i].frameTime > maxFrameTime) {
+                        maxFrameTime = frameInfos[i].frameTime;
+                    }
+                    avgFrameTime += frameInfos[i].frameTime;
+                }
+                avgFrameTime = avgFrameTime / frameInfos.length;
+                this._summarizedFrameData$.next({
+                    minFrameTime,
+                    maxFrameTime,
+                    avgFrameTime
+                })
+            }
+        })
+    }
+
+    private _renderMetryListener() {
+        const sheetId = this._context.unit.getActiveSheet().getSheetId();
+        const unitId = this._context.unit.getUnitId();
+
+        this._summarizedFrameData$.subscribe( (data: ISummaryFrameData) => {
+            console.log('_renderMetryListener', new Date(), {sheetId, unitId, ...data })
+
+            this._telemetryService.capture(TelemetryEventNames.sheet_render_cost, {sheetId, unitId, ...data });
+        });
     }
 
     private _addComponent(workbook: Workbook) {

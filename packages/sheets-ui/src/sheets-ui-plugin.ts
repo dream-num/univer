@@ -20,6 +20,7 @@ import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { ITelemetryService, PosthogTelemetryService, TelemetryController } from '@univerjs/telemetry';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
@@ -100,7 +101,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
-        ([
+        const deps: Dependency[] = [
             // services
             [ShortcutExperienceService],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
@@ -146,7 +147,10 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorBaseController],
             [SheetPermissionInitController],
             // [MoveRangeController],
-        ] as Dependency[]).forEach((d) => injector.add(d));
+        ];
+
+        const mergedDeps = mergeOverrideWithDependencies(deps, this._config?.override);
+        mergedDeps.forEach((d) => injector.add(d));
 
         this._injector.add(
             [

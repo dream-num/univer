@@ -14,31 +14,74 @@
  * limitations under the License.
  */
 
+import { Disposable } from '@univerjs/core';
 import type { Nullable } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 
+export const DEFAULT_FRAME_SAMPLE_SIZE = 60;
+
+export const DEFAULT_FRAME_LIST_SIZE = 60 * 60; // 1min
+
+const DEFAULT_ONE_SEC_MS = 1000;
+
+const DEFAULT_FRAME_TIME = 16.67; // 60FPS
+export interface ISampleFrameInfo {
+    FPS: number;
+    frameTime: number; // frame time in milliseconds
+}
+
+export interface ISummaryFrameData {
+    avgFrameTime: number;
+    minFrameTime: number;
+    maxFrameTime: number;
+}
 /**
  * Performance monitor tracks rolling average frame-time and frame-time variance over a user defined sliding-window
  */
-export class PerformanceMonitor {
+export class PerformanceMonitor extends Disposable {
     private _enabled: boolean = true;
 
     private _rollingFrameTime!: RollingAverage;
 
     private _lastFrameTimeMs: Nullable<number>;
 
+    private _lastSecondTime: Nullable<number>;
+
+    private _frameCountInLastSecond: number = 0;
+
+    private _recFPSValueLastSecond: number = 60;
+
+    protected _frameCount: number = 0; // number of all frames in whole life time.
+
+    protected _frameSampleSize: number = 0;
+
+    /**
+     * frameTime list in past second
+     */
+    protected _frameTimeListPassedSec: Partial<ISampleFrameInfo>[] = [];
+    sampleFrameList$ = new BehaviorSubject<Partial<ISampleFrameInfo>[]>([]);
+
     /**
      * constructor
      * @param frameSampleSize The number of samples required to saturate the sliding window
      */
-    constructor(frameSampleSize: number = 30) {
+    constructor(frameSampleSize: number = DEFAULT_FRAME_SAMPLE_SIZE) {
+        super();
+        this._frameSampleSize = frameSampleSize;
         this._rollingFrameTime = new RollingAverage(frameSampleSize);
     }
 
+    override dispose(): void {
+        super.dispose();
+        this.sampleFrameList$.complete();
+        this._frameTimeListPassedSec = [];
+    }
+
     /**
-     * Returns the average frame time in milliseconds over the sliding window (or the subset of frames sampled so far)
+     * Returns the average frame time in milliseconds of the sliding window (or the subset of frames sampled so far)
      */
     get averageFrameTime(): number {
-        return this._rollingFrameTime.average;
+        return this._rollingFrameTime.averageFrameTime;
     }
 
     /**
@@ -49,7 +92,7 @@ export class PerformanceMonitor {
     }
 
     /**
-     * Returns the frame time of the most recent frame
+     * Returns the frame time of the last recent frame
      */
     get instantaneousFrameTime(): number {
         return this._rollingFrameTime.history(0);
@@ -59,7 +102,7 @@ export class PerformanceMonitor {
      * Returns the average framerate in frames per second over the sliding window (or the subset of frames sampled so far)
      */
     get averageFPS(): number {
-        return 1000.0 / this._rollingFrameTime.average;
+        return this._recFPSValueLastSecond;
     }
 
     /**
@@ -72,7 +115,7 @@ export class PerformanceMonitor {
             return 0;
         }
 
-        return 1000.0 / history;
+        return DEFAULT_ONE_SEC_MS / history;
     }
 
     /**
@@ -90,20 +133,45 @@ export class PerformanceMonitor {
     }
 
     /**
-     * Samples current frame
-     * @param timeMs A timestamp in milliseconds of the current frame to compare with other frames
+     * Samples current frame, set averageFPS instantaneousFrameTime
+     * this method is called each frame by engine renderLoop  --> endFrame.
+     * @param timestamp A timestamp in milliseconds of the current frame to compare with other frames
      */
-    sampleFrame(timeMs: number = this.Now()) {
+    sampleFrame(timestamp: number = this.Now()) {
         if (!this._enabled) {
             return;
         }
-
-        if (this._lastFrameTimeMs != null) {
-            const dt = timeMs - this._lastFrameTimeMs;
-            this._rollingFrameTime.add(dt);
+        this._frameCount++;
+        this._frameCountInLastSecond++;
+        if (this._lastSecondTime != null) {
+            const oneSecPassed = this._lastSecondTime <= timestamp - DEFAULT_ONE_SEC_MS;
+            if (oneSecPassed) {
+                const passedTime = timestamp - this._lastSecondTime;
+                this._recFPSValueLastSecond = Math.round(this._frameCountInLastSecond / passedTime * DEFAULT_ONE_SEC_MS);
+                this._lastSecondTime = timestamp;
+                this._frameCountInLastSecond = 0;
+            }
+        } else {
+            this._lastSecondTime = timestamp;
         }
 
-        this._lastFrameTimeMs = timeMs;
+        if (this._lastFrameTimeMs != null) {
+            const dt = timestamp - this._lastFrameTimeMs;
+            //  set averageFPS instantaneousFrameTime
+            this._rollingFrameTime.add(dt);
+            this._rollingFrameTime.calcAverageFrameTime();
+
+            this._frameTimeListPassedSec.push({
+                frameTime: dt,
+            });
+            this.sampleFrameList$.next([...this._frameTimeListPassedSec]);
+        }
+
+        if (this._frameTimeListPassedSec.length > DEFAULT_FRAME_LIST_SIZE) {
+            this._frameTimeListPassedSec = [];
+        }
+
+        this._lastFrameTimeMs = timestamp;
     }
 
     Now(): number {
@@ -151,7 +219,7 @@ export class RollingAverage {
     /**
      * Current average
      */
-    average: number = 0;
+    averageFrameTime: number = DEFAULT_FRAME_TIME;
 
     /**
      * Current variance
@@ -160,6 +228,10 @@ export class RollingAverage {
 
     protected _samples: number[] = [];
 
+    /**
+     * for isStaturated
+     * max value of _sampleCount is length of _samples
+     */
     protected _sampleCount: number = 0;
 
     protected _pos: number = 0;
@@ -175,37 +247,43 @@ export class RollingAverage {
         this.reset();
     }
 
-    /**
-     * Adds a sample to the sample set
-     * @param v The sample value
-     */
-    add(v: number) {
-        // http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+    calcAverageFrameTime() {
+        const frameDuration = this.history(0);
         let delta: number;
 
         // we need to check if we've already wrapped round
         if (this.isSaturated()) {
             // remove bottom of stack from mean
             const bottomValue = this._samples[this._pos];
-            delta = bottomValue - this.average;
-            this.average -= delta / (this._sampleCount - 1);
-            this._m2 -= delta * (bottomValue - this.average);
+            delta = bottomValue - this.averageFrameTime;
+            // this.averageFrameTime -= delta / (this._sampleCount - 1);
+            this._m2 -= delta * (bottomValue - this.averageFrameTime);
         } else {
             this._sampleCount++;
         }
 
+        const min = Math.min(...this._samples);
+        const max = Math.min(...this._samples);
+        const filteredData = this._samples.filter((v) => v !== max && v !== min);
+        this.averageFrameTime = filteredData.reduce((sum, value) => sum + value, 0) / filteredData.length;
+
         // add new value to mean
-        delta = v - this.average;
-        this.average += delta / this._sampleCount;
-        this._m2 += delta * (v - this.average);
+        delta = frameDuration - this.averageFrameTime;
+
+        this._m2 += delta * (frameDuration - this.averageFrameTime);
 
         // set the new variance
         this.variance = this._m2 / (this._sampleCount - 1);
+    }
 
-        this._samples[this._pos] = v;
-        this._pos++;
-
-        this._pos %= this._samples.length; // positive wrap around
+    /**
+     * Adds a sample to the sample set
+     * @param frameDuration The sample value
+     */
+    add(frameDuration: number) {
+        // http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+        this._samples[this._pos] = frameDuration;
+        this._pos = ++this._pos % this._samples.length; // positive wrap around
     }
 
     /**
@@ -234,7 +312,7 @@ export class RollingAverage {
      * Resets the rolling average (equivalent to 0 samples taken so far)
      */
     reset() {
-        this.average = 0;
+        this.averageFrameTime = DEFAULT_FRAME_TIME;
         this.variance = 0;
         this._sampleCount = 0;
         this._pos = 0;

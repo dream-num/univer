@@ -43,6 +43,7 @@ import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 
 import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
+
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 

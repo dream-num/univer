@@ -28,7 +28,6 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 
-import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
@@ -36,8 +35,6 @@ import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 
 import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
-import { UniverSheetsThreadCommentBasePlugin } from '@univerjs/sheets-thread-comment-base';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
@@ -47,7 +44,6 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { FUniver } from '@univerjs/facade';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
-import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
@@ -71,55 +67,32 @@ const univer = new Univer({
     logLevel: LogLevel.VERBOSE,
 });
 
-// core plugins
-univer.registerPlugin(UniverDocsPlugin, {
-    hasScroll: false,
-});
-univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverUIPlugin, {
-    container: 'app',
-});
-window.univerAPI = FUniver.newAPI(univer);
-
-univer.registerPlugin(UniverDocsUIPlugin);
-
-univer.registerPlugin(UniverSheetsPlugin, {
-    notExecuteFormula: true,
-});
-univer.registerPlugin(UniverSheetsUIPlugin);
-
-// sheet feature plugins
-
-univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(UniverSheetsZenEditorPlugin);
-univer.registerPlugin(UniverFormulaEnginePlugin, {
-    notExecuteFormula: true,
-});
-univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);
 
-univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
+univer.registerPlugin(UniverDocsPlugin, { hasScroll: false });
+univer.registerPlugin(UniverRenderEnginePlugin);
+univer.registerPlugin(UniverUIPlugin, { container: 'app' });
+univer.registerPlugin(UniverDocsUIPlugin);
+univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
+univer.registerPlugin(UniverSheetsUIPlugin);
 
+// sheet feature plugins
+univer.registerPlugin(UniverSheetsNumfmtPlugin);
+univer.registerPlugin(UniverSheetsZenEditorPlugin);
+univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
+univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
+// hyperlink
+univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 // data validation
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
-
 // sort
-univer.registerPlugin(UniverSheetsSortPlugin);
 univer.registerPlugin(UniverSheetsSortUIPlugin);
-
-// sheet condition formatting
-univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
+// condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
-
 // drawing
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
-
-// create univer sheet instance
-if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
-}
 
 const mockUser = {
     userID: 'Owner_qxVnhPbQ',
@@ -151,11 +124,8 @@ class CustomMentionDataService implements IThreadCommentMentionDataService {
     }
 }
 
-univer.registerPlugin(UniverThreadCommentPlugin);
-univer.registerPlugin(UniverThreadCommentUIPlugin, {
-    overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
-});
-univer.registerPlugin(UniverSheetsThreadCommentBasePlugin);
+// comment
+univer.registerPlugin(UniverThreadCommentUIPlugin, { overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]] });
 univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 
 // debugger plugin
@@ -165,12 +135,9 @@ const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);
 userManagerService.setCurrentUser(mockUser);
 
-declare global {
-    // eslint-disable-next-line ts/naming-convention
-    interface Window {
-        univer?: Univer;
-        univerAPI?: ReturnType<typeof FUniver.newAPI>;
-    }
+// create univer sheet instance
+if (!IS_E2E) {
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 }
 
 setTimeout(() => {
@@ -181,3 +148,12 @@ setTimeout(() => {
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;
+window.univerAPI = FUniver.newAPI(univer);
+
+declare global {
+    // eslint-disable-next-line ts/naming-convention
+    interface Window {
+        univer?: Univer;
+        univerAPI?: ReturnType<typeof FUniver.newAPI>;
+    }
+}

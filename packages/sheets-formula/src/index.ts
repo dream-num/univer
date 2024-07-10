@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-export { UniverSheetsFormulaPlugin, UniverSheetsFormulaMobilePlugin } from './formula-ui-plugin';
+export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin, UniverSheetsFormulaMobilePlugin } from './formula-ui-plugin';
 export { IDescriptionService } from './services/description.service';
 export { DescriptionService } from './services/description.service';
-export {
-    FormulaCustomFunctionService,
-    IFormulaCustomFunctionService,
-} from './services/formula-custom-function.service';
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
 export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
+export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
 export { RegisterOtherFormulaService } from './services/register-other-formula.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';

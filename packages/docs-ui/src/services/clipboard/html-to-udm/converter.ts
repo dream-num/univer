@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type IDocumentBody, type ITextStyle, type Nullable, skipParseTagNames } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType, type IDocumentBody, type ITextStyle, type Nullable, skipParseTagNames, Tools } from '@univerjs/core';
 
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
@@ -57,7 +57,6 @@ export class HtmlToUDMService {
 
     convert(html: string): IDocumentBody {
         const pastePlugin = HtmlToUDMService._pluginList.find((plugin) => plugin.checkPasteType(html));
-
         const dom = parseToDom(html);
 
         const newDocBody: IDocumentBody = {
@@ -87,8 +86,28 @@ export class HtmlToUDMService {
                 }
 
                 // TODO: @JOCS, More characters need to be replaced, like `\b`
-                const text = node.nodeValue?.replace(/[\r\n]/g, '');
+                let text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
+
+                if (parent && parent.nodeType === Node.ELEMENT_NODE) {
+                    if ((parent as Element).tagName.toUpperCase() === 'A') {
+                        const id = Tools.generateRandomId();
+                        text = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+                        doc.customRanges = [
+                            ...(doc.customRanges ?? []),
+                            {
+                                startIndex: doc.dataStream.length,
+                                endIndex: doc.dataStream.length + text.length - 1,
+                                rangeId: id,
+                                rangeType: CustomRangeType.HYPERLINK,
+                            },
+                        ];
+                        doc.payloads = {
+                            ...doc.payloads,
+                            [id]: (parent as HTMLAnchorElement).href,
+                        };
+                    }
+                }
 
                 if (parent && this._styleCache.has(parent)) {
                     style = this._styleCache.get(parent);

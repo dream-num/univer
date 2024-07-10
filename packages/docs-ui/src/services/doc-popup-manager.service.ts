@@ -99,7 +99,7 @@ export class DocCanvasPopManagerService extends Disposable {
                 left: offsetBound.left,
                 right: offsetBound.right,
                 top: offsetBound.top + topOffset,
-                bottom: offsetBound.bottom,
+                bottom: offsetBound.bottom + topOffset,
             };
             return position;
         };
@@ -150,7 +150,7 @@ export class DocCanvasPopManagerService extends Disposable {
                 left: i.left + docsLeft,
                 right: i.right + docsLeft,
                 top: i.top + docsTop + top,
-                bottom: i.bottom + docsTop,
+                bottom: i.bottom + docsTop + top,
             }));
             return res;
         };

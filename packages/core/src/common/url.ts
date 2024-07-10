@@ -66,3 +66,17 @@ export function isLegalUrl(url: string) {
     }
     return re_weburl.test(url);
 }
+
+function hasProtocol(urlString: string) {
+    const pattern = /^[a-zA-Z]+:\/\//;
+    return pattern.test(urlString);
+}
+
+function isEmail(url: string) {
+    const pattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    return pattern.test(url);
+}
+
+export function normalizeUrl(urlStr: string) {
+    return hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `https://${urlStr}`;
+}

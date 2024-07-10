@@ -16,7 +16,7 @@
 
 import { customAlphabet, nanoid } from 'nanoid';
 
-import { isLegalUrl } from '../common/url';
+import { isLegalUrl, normalizeUrl } from '../common/url';
 import type { Class, IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
@@ -445,6 +445,10 @@ export class Tools {
 
     static isLegalUrl(url: string): boolean {
         return isLegalUrl(url);
+    }
+
+    static normalizeUrl(url: string) {
+        return normalizeUrl(url);
     }
 
     static itCount(count: number): Function {

@@ -34,6 +34,7 @@ import type {
 } from '@univerjs/core';
 import { CellValueType, CommandType, isBooleanString, isSafeNumeric, IUniverInstanceService, normalizeTextRuns, ObjectMatrix, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
@@ -183,12 +184,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 const oldVal = cellMatrix.getValue(row, col) || {};
 
                 // NOTE: we may need to take `p` into account
-                // If the new value contains t, then take t directly
-                const type = newVal.t
-                    ? newVal.t
-                    : newVal.v !== undefined
-                        ? checkCellValueType(newVal.v, newVal.t)
-                        : checkCellValueType(oldVal.v, oldVal.t);
+                const type = getCellType(styles, newVal, oldVal);
 
                 if (newVal.f !== undefined) {
                     oldVal.f = newVal.f;
@@ -204,11 +200,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
                 // Set to null, clear content
                 if (newVal.v !== undefined) {
-                    oldVal.v = type === CellValueType.NUMBER
-                        ? Number(newVal.v)
-                        : type === CellValueType.BOOLEAN
-                            ? extractBooleanValue(newVal.v) ? 1 : 0
-                            : newVal.v;
+                    oldVal.v = getCellValue(type, newVal);
                 }
 
                 if (oldVal.v !== undefined) {
@@ -269,6 +261,72 @@ function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData) {
 }
 
 /**
+ * Get cell value type by style, new value and old value.
+ * If the new value contains t, then take t directly. In other cases, we need to dynamically determine based on actual data and styles
+ *
+    The following scenarios need to be adapted
+    1.
+    2.
+    3.
+ *
+ * @param newVal
+ * @param oldVal
+ * @returns
+ */
+function getCellType(styles: Styles, newVal: ICellData, oldVal: ICellData) {
+    if (newVal.t) return newVal.t;
+    if (newVal.v === null) return null;
+
+    const newStyle = styles.getStyleByCell(newVal);
+    const oldStyle = styles.getStyleByCell(oldVal);
+
+    if (oldVal.t === CellValueType.FORCE_STRING) {
+        // For cells with forced strings, set the percentage format and still use forced strings
+        // For cells with forced strings, update to the number and convert to ordinary numbers
+        // For cells with forced strings and text formats, update to the number and still use forced strings
+        if (!isTextFormat(oldStyle) && newVal.v !== undefined) {
+            return checkCellValueType(newVal.v, newVal.t);
+        }
+
+        return CellValueType.FORCE_STRING;
+    }
+
+    // For cells with text format, the cell type is still text when numbers are written, because the ISNUMBER function detects FALSE
+    if (isTextFormat(oldStyle)) {
+        return CellValueType.STRING;
+    }
+
+    // For cells with ordinary numbers, set the text format and convert the cell type to text
+    if (isTextFormat(newStyle)) {
+        return CellValueType.STRING;
+    }
+
+    return newVal.v !== undefined ? checkCellValueType(newVal.v, newVal.t) : checkCellValueType(oldVal.v, oldVal.t);
+}
+
+/**
+ * Get cell value from new value by type
+ * @param type
+ * @param newVal
+ * @returns
+ */
+function getCellValue(type: Nullable<CellValueType>, newVal: ICellData) {
+    return type === CellValueType.NUMBER
+        ? Number(newVal.v)
+        : type === CellValueType.BOOLEAN
+            ? extractBooleanValue(newVal.v) ? 1 : 0
+            : newVal.v;
+}
+
+function hasNumberFormat(style: Nullable<IStyleData>) {
+    return !!style?.n?.pattern;
+}
+
+function isTextFormat(style: Nullable<IStyleData>) {
+    return style?.n?.pattern === DEFAULT_TEXT_FORMAT;
+}
+
+/**
  * Get the correct type after setting values to a cell.
  *
  * @param v the new value
@@ -277,8 +335,6 @@ function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData) {
  */
 export function checkCellValueType(v: Nullable<CellValue>, oldType: Nullable<CellValueType>): Nullable<CellValueType> {
     if (v === null) return null;
-
-    if (oldType === CellValueType.FORCE_STRING) return oldType;
 
     if (typeof v === 'string') {
         if (isSafeNumeric(v)) {

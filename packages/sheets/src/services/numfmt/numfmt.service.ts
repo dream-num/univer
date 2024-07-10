@@ -106,7 +106,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                         const styleId = styles.setValue(style);
                         styleId && matrix.setValue(row, col, { s: styleId });
                     } else {
-                        const oldStyle = (cell.s && styles.get(cell.s)) || {};
+                        const oldStyle = styles.getStyleByCell(cell) || {};
                         const newStyle = { ...oldStyle, n: { pattern: value.pattern } };
                         const styleId = styles.setValue(newStyle);
                         cell.s = styleId;

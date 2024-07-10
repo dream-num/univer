@@ -1,7 +1,10 @@
 # @univerjs/sheets-filter
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-filter)](https://npmjs.org/packages/@univerjs/sheets-filter)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-filter)](https://img.shields.io/npm/l/@univerjs/sheets-filter)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/sheets-filter` | `UniverSheetsFilter` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
 
 ## Introduction
 
@@ -20,3 +23,9 @@ npm install @univerjs/sheets-filter
 # Using pnpm
 pnpm add @univerjs/sheets-filter
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-filter?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-filter
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-filter?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-filter?style=flat-square

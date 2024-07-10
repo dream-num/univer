@@ -1,8 +1,10 @@
 # @univerjs/sheets
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets)](https://img.shields.io/npm/l/@univerjs/sheets)
-![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/sheets` | `UniverSheets` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ⭕️ |
 
 ## Introduction
 
@@ -43,3 +45,9 @@ For detailed usage, please refer to the API documentation.
 Use `SheetInterceptorService` when multiple features need to operate on the same data or state, but do not have a clear dependency relationship. For example: pivot tables, formulas, conditional formatting, data validation, and raw cell data can all affect how other features retrieve a cell's value, but they do not depend on each other. In this case, using `SheetInterceptorService` to implement these features is appropriate.
 
 However, if one feature relies explicitly on another feature, such as a formula needing to perform certain actions when the fill down or copy-paste functions are called, the formula module should directly depend on the fill down and copy-paste modules, instead of using `SheetInterceptorService` for implementation.
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/sheets
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets?style=flat-square

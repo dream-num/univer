@@ -1,22 +1,29 @@
 # @univerjs/sheets-thread-comment-base
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-thread-comment-base)](https://npmjs.org/packages/@univerjs/sheets-thread-comment-base)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-thread-comment-base)](https://img.shields.io/npm/l/@univerjs/sheets-thread-comment-base)
+## Package Overview
 
-## 简介
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/sheets-thread-comment-base` | `UniverSheetsThreadCommentBase` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
 
-> `@univerjs/sheets-thread-comment-base` core package for sheet comment. For using, please refer to [@univerjs/sheets-thread-comment](../sheets-thread-comment/README.md)
+## Introduction
 
+`@univerjs/sheets-thread-comment-base` core package for sheet comment. For using, please refer to [@univerjs/sheets-thread-comment](../sheets-thread-comment/README.md)
 
-## 使用指南
+## Usage
 
-### 安装
+### Installation
 
 ```shell
-# 使用 npm
+# Using npm
 npm install @univerjs/sheets-thread-comment-base
 
-# 使用 pnpm
+# Using pnpm
 pnpm add @univerjs/sheets-thread-comment-base
 ```
 
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-thread-comment-base?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-thread-comment-base
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-thread-comment-base?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-thread-comment-base?style=flat-square

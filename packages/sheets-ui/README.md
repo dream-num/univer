@@ -1,9 +1,10 @@
 # @univerjs/sheets-ui
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-ui)](https://img.shields.io/npm/l/@univerjs/sheets-ui)
-![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
-![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/sheets-ui` | `UniverSheetsUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
 
 ## Introduction
 
@@ -26,3 +27,9 @@ npm install @univerjs/sheets-ui
 # Using pnpm
 pnpm add @univerjs/sheets-ui
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-ui?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-ui
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-ui?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-ui?style=flat-square

@@ -955,6 +955,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         scrollTimer.dispose();
                         this._startStateMap.clear();
                         const { offsetX, offsetY } = event;
+
                         if (!isCropper) {
                             this._recoverySizeBoundary(Array.from(this._selectedObjectMap.values()), ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
                             this._changeEnd$.next({
@@ -988,14 +989,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
             const newTransform: ITransformState = {};
 
             if (left + ancestorLeft < this.zeroLeft) {
-                newTransform.left = -ancestorLeft;
+                newTransform.left = this.zeroLeft - ancestorLeft;
                 newTransform.width = width + left;
             } else if (left + width + ancestorLeft > topSceneWidth + this.zeroLeft) {
                 newTransform.width = this.zeroLeft + topSceneWidth - left - ancestorLeft;
             }
 
             if (top + ancestorTop < this.zeroTop) {
-                newTransform.top = -ancestorTop;
+                newTransform.top = this.zeroTop - ancestorTop;
                 newTransform.height = height + top;
             } else if (top + height + ancestorTop > topSceneHeight + this.zeroTop) {
                 newTransform.height = this.zeroTop + topSceneHeight - top - ancestorTop;

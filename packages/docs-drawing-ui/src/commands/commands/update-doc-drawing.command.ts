@@ -385,7 +385,6 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
 
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-
         const renderManagerService = accessor.get(IRenderManagerService);
 
         const renderObject = renderManagerService.getRenderById(params.unitId);

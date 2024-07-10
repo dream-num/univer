@@ -22,7 +22,7 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import type { BaseObject, Documents, IDocumentSkeletonGlyph, Image, IPoint, Viewport } from '@univerjs/engine-render';
+import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, IPoint, Viewport } from '@univerjs/engine-render';
 import { getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
@@ -52,7 +52,6 @@ export class DocDrawingTransformerController extends Disposable {
     private _listenerOnImageMap = new Set();
     // Use to cache the drawings is under transforming or scaling.
     private _transformerCache: Map<string, IDrawingCache> = new Map();
-
     private _anchorShape: Nullable<Rect>;
 
     constructor(
@@ -177,6 +176,7 @@ export class DocDrawingTransformerController extends Disposable {
                 transformer.changeEnd$.subscribe((state) => {
                     const { objects, offsetX, offsetY } = state;
 
+                    // Recovery the opacity of inline drawings.
                     for (const object of objects.values()) {
                         const drawing = this._drawingManagerService.getDrawingOKey(object.oKey);
                         if (drawing == null) {
@@ -241,7 +241,8 @@ export class DocDrawingTransformerController extends Disposable {
         let subUnitId;
         // The new position is calculated based on the offset.
         for (const object of objects.values()) {
-            const { oKey, width, height, left, top, angle } = object;
+            const { oKey, left, top, angle } = object;
+            let { width, height } = object;
             const drawing = this._drawingManagerService.getDrawingOKey(oKey);
             if (drawing == null) {
                 continue;
@@ -262,6 +263,12 @@ export class DocDrawingTransformerController extends Disposable {
             }
 
             const { drawing: drawingData, top: oldTop, left: oldLeft, width: oldWidth, height: oldHeight, angle: oldAngle } = drawingCache;
+
+            const { width: maxWidth, height: maxHeight } = this._getPageContentSize(drawingData);
+
+            // Drawing's width and height should not exceed the page's width and height.
+            width = Math.min(width, maxWidth);
+            height = Math.min(height, maxHeight);
 
             if (oldWidth !== width || oldHeight !== height) {
                 drawings.push({
@@ -421,8 +428,14 @@ export class DocDrawingTransformerController extends Disposable {
         const documentComponent = mainComponent as Documents;
         const activeViewport = scene.getViewports()[0];
         const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documentComponent.getOffsetConfig();
-        const { left, top, width, height, angle } = object;
+        const { left, top, angle } = object;
+        let { width, height } = object;
         const { positionV, positionH } = drawing.docTransform;
+
+        const { width: maxWidth, height: maxHeight } = this._getPageContentSize(drawing);
+
+        width = Math.min(width, maxWidth);
+        height = Math.min(height, maxHeight);
 
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
         let segmentPage = -1;
@@ -550,7 +563,12 @@ export class DocDrawingTransformerController extends Disposable {
         const drawings: IDrawingDocTransform[] = [];
         const { drawing, width: oldWidth, height: oldHeight, angle: oldAngle } = drawingCache;
         const { unitId, subUnitId } = drawing;
-        const { width, height, angle } = object;
+        let { width, height, angle } = object;
+
+        const { width: maxWidth, height: maxHeight } = this._getPageContentSize(drawing);
+
+        width = Math.min(maxWidth, width);
+        height = Math.min(maxHeight, height);
 
         if (width !== oldWidth || height !== oldHeight) {
             drawings.push({
@@ -758,5 +776,47 @@ export class DocDrawingTransformerController extends Disposable {
 
     private _getDocObject() {
         return getDocObject(this._univerInstanceService, this._renderManagerService);
+    }
+
+    private _getPageContentSize(drawing: IDocDrawingBase) {
+        const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+        const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
+        const MAX_WIDTH = 500;
+        const MAX_HEIGHT = 500;
+
+        const skeletonData = skeleton?.getSkeletonData();
+        if (skeletonData == null || currentRender == null) {
+            return {
+                width: MAX_WIDTH,
+                height: MAX_HEIGHT,
+            };
+        }
+
+        // TODO: handle header footer image.
+        const { pages } = skeletonData;
+
+        let page: Nullable<IDocumentSkeletonPage> = null;
+
+        for (const p of pages) {
+            const { skeDrawings } = p;
+            if (skeDrawings.has(drawing.drawingId)) {
+                page = p;
+                break;
+            }
+        }
+
+        if (page) {
+            const { pageWidth, pageHeight, marginLeft, marginBottom, marginRight, marginTop } = page;
+
+            return {
+                width: Math.max(MAX_WIDTH, pageWidth - marginLeft - marginRight),
+                height: Math.max(MAX_HEIGHT, pageHeight - marginTop - marginBottom),
+            };
+        } else {
+            return {
+                width: MAX_WIDTH,
+                height: MAX_HEIGHT,
+            };
+        }
     }
 }

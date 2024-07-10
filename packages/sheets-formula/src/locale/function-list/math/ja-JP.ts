@@ -351,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '文字列の長さは 255 文字以下にする必要があります。' },
+            radix: { name: '基数', detail: ' 数値を変換する基数 (底) の数値を指定します。 2 以上、36 以下の整数である必要があります。' },
         },
     },
     DEGREES: {
@@ -365,8 +365,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: '角度', detail: '度に変換するラジアン単位の角度を指定します。' },
         },
     },
     EVEN: {
@@ -700,8 +699,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     POWER: {
@@ -756,8 +753,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: '角度', detail: 'ラジアンに変換する角度を指定します。' },
         },
     },
     RAND: {

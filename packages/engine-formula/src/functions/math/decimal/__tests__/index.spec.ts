@@ -17,22 +17,21 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Base } from '../index';
+import { Decimal } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
-describe('Test base function', () => {
-    const testFunction = new Base(FUNCTION_NAMES_MATH.BASE);
+describe('Test decimal function', () => {
+    const testFunction = new Decimal(FUNCTION_NAMES_MATH.DECIMAL);
 
-    describe('Base', () => {
+    describe('Decimal', () => {
         it('All value is normal', () => {
-            const number = NumberValueObject.create(15);
-            const radix = NumberValueObject.create(2);
-            const minLength = NumberValueObject.create(10);
-            const result = testFunction.calculate(number, radix, minLength);
-            expect(result.getValue()).toBe('0000001111');
+            const number = StringValueObject.create('abc');
+            const radix = NumberValueObject.create(16);
+            const result = testFunction.calculate(number, radix);
+            expect(result.getValue()).toBe(2748);
         });
 
         it('number value is 2**53', () => {
@@ -42,11 +41,11 @@ describe('Test base function', () => {
             expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
-        it('radix value is 1.5', () => {
-            const number = NumberValueObject.create(15);
-            const radix = NumberValueObject.create(1.5);
+        it('radix value is 15.5', () => {
+            const number = StringValueObject.create('abc');
+            const radix = NumberValueObject.create(15.5);
             const result = testFunction.calculate(number, radix);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(result.getValue()).toBe(2427);
         });
 
         it('radix value is 37', () => {
@@ -56,58 +55,38 @@ describe('Test base function', () => {
             expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
-        it('minLength value is number negative', () => {
-            const number = NumberValueObject.create(15);
-            const radix = NumberValueObject.create(2);
-            const minLength = NumberValueObject.create(-2);
-            const result = testFunction.calculate(number, radix, minLength);
-            expect(result.getValue()).toBe(ErrorType.NUM);
-        });
-
-        it('value is number string', () => {
-            const number = StringValueObject.create('15');
-            const radix = NumberValueObject.create(2);
-            const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength);
-            expect(result.getValue()).toBe('0001111');
-        });
-
         it('value is normal string', () => {
             const number = StringValueObject.create('test');
             const radix = NumberValueObject.create(2);
-            const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            const result = testFunction.calculate(number, radix);
+            expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
         it('Value is boolean', () => {
             const number = BooleanValueObject.create(true);
             const radix = NumberValueObject.create(2);
-            const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength);
-            expect(result.getValue()).toBe('0000001');
+            const result = testFunction.calculate(number, radix);
+            expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
         it('Value is blank cell', () => {
             const number = NullValueObject.create();
             const radix = NumberValueObject.create(2);
-            const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength);
-            expect(result.getValue()).toBe('0000000');
+            const result = testFunction.calculate(number, radix);
+            expect(result.getValue()).toBe(0);
         });
 
         it('Value is error', () => {
             const number = ErrorValueObject.create(ErrorType.NAME);
             const radix = NumberValueObject.create(2);
-            const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength);
+            const result = testFunction.calculate(number, radix);
             expect(result.getValue()).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
             const number = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false, null, ErrorType.NAME],
+                    ['9fb', ' ', 23, 'abc', false, null, ErrorType.NAME],
                 ]),
                 rowCount: 1,
                 columnCount: 7,
@@ -118,8 +97,8 @@ describe('Test base function', () => {
             });
             const radix = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [0],
-                    ['100'],
+                    [true],
+                    ['16'],
                     ['2.34'],
                     ['test'],
                     [-3],
@@ -131,24 +110,13 @@ describe('Test base function', () => {
                 row: 8,
                 column: 8,
             });
-            const minLength = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [-3, 0, 5],
-                ]),
-                rowCount: 1,
-                columnCount: 3,
-                unitId: '',
-                sheetId: '',
-                row: 11,
-                column: 11,
-            });
-            const result = testFunction.calculate(number, radix, minLength);
+            const result = testFunction.calculate(number, radix);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
-                [ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
-                [ErrorType.NUM, ErrorType.VALUE, '00001', ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
+                [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NAME],
+                [2555, 0, 35, 2748, ErrorType.NUM, 0, ErrorType.NAME],
+                [ErrorType.NUM, 0, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, 0, ErrorType.NAME],
                 [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
-                [ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NAME],
+                [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NAME],
             ]);
         });
     });

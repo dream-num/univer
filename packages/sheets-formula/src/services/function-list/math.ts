@@ -462,16 +462,16 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.DECIMAL.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.DECIMAL.functionParameter.number1.name',
-                detail: 'formula.functionList.DECIMAL.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.DECIMAL.functionParameter.text.name',
+                detail: 'formula.functionList.DECIMAL.functionParameter.text.detail',
+                example: '"FF"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.DECIMAL.functionParameter.number2.name',
-                detail: 'formula.functionList.DECIMAL.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.DECIMAL.functionParameter.radix.name',
+                detail: 'formula.functionList.DECIMAL.functionParameter.radix.detail',
+                example: '16',
                 require: 1,
                 repeat: 0,
             },
@@ -484,16 +484,9 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.DEGREES.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.DEGREES.functionParameter.number1.name',
-                detail: 'formula.functionList.DEGREES.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.DEGREES.functionParameter.number2.name',
-                detail: 'formula.functionList.DEGREES.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.DEGREES.functionParameter.angle.name',
+                detail: 'formula.functionList.DEGREES.functionParameter.angle.detail',
+                example: 'PI()',
                 require: 1,
                 repeat: 0,
             },
@@ -1004,20 +997,6 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         description: 'formula.functionList.PI.description',
         abstract: 'formula.functionList.PI.abstract',
         functionParameter: [
-            {
-                name: 'formula.functionList.PI.functionParameter.number1.name',
-                detail: 'formula.functionList.PI.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.PI.functionParameter.number2.name',
-                detail: 'formula.functionList.PI.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
         ],
     },
     {
@@ -1093,16 +1072,9 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.RADIANS.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.RADIANS.functionParameter.number1.name',
-                detail: 'formula.functionList.RADIANS.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.RADIANS.functionParameter.number2.name',
-                detail: 'formula.functionList.RADIANS.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.RADIANS.functionParameter.angle.name',
+                detail: 'formula.functionList.RADIANS.functionParameter.angle.detail',
+                example: '270',
                 require: 1,
                 repeat: 0,
             },

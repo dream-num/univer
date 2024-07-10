@@ -191,8 +191,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要轉換的數位。 必須是大於或等於 0 且小於 2^53 的整數。' },
+            radix: { name: '基數', detail: '這是要將數字轉換為底數的基數。 必須是大於或等於 2 且小於或等於 36 的整數。' },
         },
     },
     CEILING: {
@@ -359,8 +359,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '字串', detail: '字串長度必須小於或等於 255 個字元。' },
+            radix: { name: '基數', detail: '這是要將數字轉換為底數的基數。 必須是大於或等於 2 且小於或等於 36 的整數。' },
         },
     },
     DEGREES: {
@@ -373,8 +373,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: '角度', detail: '這是要轉換的角度，以弧度表示。' },
         },
     },
     EVEN: {
@@ -708,8 +707,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     POWER: {
@@ -763,8 +760,7 @@ export default {
         },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: '角度', detail: '這是要轉換的角度 (以度數為單位)。' },
         },
     },
     RAND: {

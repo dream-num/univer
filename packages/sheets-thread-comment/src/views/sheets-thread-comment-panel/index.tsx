@@ -147,13 +147,16 @@ export const SheetsThreadCommentPanel = () => {
         if (activeShapeId.current) {
             markSelectionService.removeShape(activeShapeId.current);
         }
+        if (!panelVisible) {
+            return;
+        }
         activeShapeId.current = showShape(comment);
         return () => {
             if (activeShapeId.current) {
                 markSelectionService.removeShape(activeShapeId.current);
             }
         };
-    }, [showShape, activeCommentId, threadCommentModel, markSelectionService]);
+    }, [showShape, activeCommentId, threadCommentModel, markSelectionService, panelVisible]);
 
     useEffect(() => {
         if (!panelVisible && activeShapeId.current) {

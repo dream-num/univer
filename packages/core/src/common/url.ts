@@ -18,7 +18,7 @@ const re_weburl = new RegExp(
     '^' +
       // protocol identifier (optional)
       // short syntax // still required
-      // "(?:(?:(?:https?|ftp):)?\\/\\/)" +
+      '(?:(?:(?:https?|ftp):)?\\/\\/)?' +
       // user:pass BasicAuth (optional)
       '(?:\\S+(?::\\S*)?@)?' +
       '(?:' +

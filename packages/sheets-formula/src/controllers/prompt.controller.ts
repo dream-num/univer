@@ -647,7 +647,7 @@ export class PromptController extends Disposable {
         }
 
         const char = this._getCurrentChar();
-        if (char && matchRefDrawToken(char)) {
+        if (char && char.substring(0, 1) === '=' && matchRefDrawToken(char)) {
             this._enterSelectingMode();
         } else {
             this._quitSelectingMode();

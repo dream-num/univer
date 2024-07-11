@@ -30,7 +30,7 @@ import {
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
 import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
-import { IRefSelectionsService, RefRangeService } from '@univerjs/sheets';
+import { IRefSelectionsService } from '@univerjs/sheets';
 import { IEditorService } from '@univerjs/ui';
 import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';

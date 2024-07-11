@@ -20,6 +20,4 @@ export { type IDocDrawing, IDocDrawingService, DocDrawingService } from './servi
 export { DOCS_DRAWING_PLUGIN, type IDocDrawingModel } from './controllers/doc-drawing.controller';
 
 // #region - all commands
-
-export { SetDocDrawingApplyMutation, DocDrawingApplyType, type ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
 // #endregion

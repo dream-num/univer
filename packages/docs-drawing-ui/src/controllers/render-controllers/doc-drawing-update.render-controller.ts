@@ -23,18 +23,17 @@ import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
-import { docDrawingPositionToTransform, transformToDocDrawingPosition } from '@univerjs/docs-ui';
-import { type Documents, type IRenderContext, IRenderManagerService, type IRenderModule, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { TextSelectionManagerService } from '@univerjs/docs';
+import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
+import { type Documents, type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 
 import type { IInsertImageOperationParams } from '../../commands/operations/insert-image.operation';
 import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
-import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../../commands/commands/interfaces';
+import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
 import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
-import { SetDocDrawingCommand } from '../../commands/commands/set-doc-drawing.command';
 
 export class DocDrawingUpdateRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -48,8 +47,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService
     ) {
         super();
 
@@ -215,61 +213,10 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     private _updateDrawingListener() {
-        // REFACTOR: @JOCS  需要修改，移除 transformer 修改，不需要跟新了，单独处理了。
         this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
-            if (params.length === 0) {
-                return;
-            }
-
-            const drawings: Partial<IDocDrawing>[] = [];
-            (params as IDocDrawing[]).forEach((param) => {
-                const { unitId, subUnitId, drawingId, transform } = param;
-                if (transform == null) {
-                    return;
-                }
-
-                const docDrawing = this._docDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
-
-                if (docDrawing == null) {
-                    return;
-                }
-
-                // const { marginLeft, marginTop } = pageMarginCache.get(drawingId) || { marginLeft: 0, marginTop: 0 };
-
-                const docTransform = transformToDocDrawingPosition({ ...docDrawing.transform, ...transform });
-
-                if (docTransform == null) {
-                    return;
-                }
-
-                const newDrawing: Partial<IDocDrawing> = {
-                    ...param,
-                    transform: { ...transform, ...docDrawingPositionToTransform(docTransform) },
-                    docTransform: { ...docTransform },
-                };
-
-                drawings.push(newDrawing);
-            });
-
-            if (drawings.length > 0) {
-                const unitId = params[0].unitId;
-                this._commandService.syncExecuteCommand(SetDocDrawingCommand.id, {
-                    unitId,
-                    drawings,
-                } as ISetDrawingCommandParams);
-
-                this._refreshDocSkeleton();
-            }
+            // REFACTOR: @JOCS  需要修改，移除 transformer 修改，不需要跟新了，单独处理了。
+            // 确认下还需要监听这个吗？
         });
-    }
-
-    private _refreshDocSkeleton() {
-        const { mainComponent, unitId } = this._context;
-        const skeleton = this._renderManagerSrv.getRenderById(unitId)
-            ?.with(DocSkeletonManagerService).getSkeleton();
-
-        skeleton?.calculate();
-        mainComponent?.makeDirty();
     }
 
     private _groupDrawingListener() {

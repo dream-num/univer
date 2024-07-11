@@ -33,7 +33,6 @@ import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-
 import { MoveDocDrawingsCommand } from '../commands/commands/move-drawings.command';
 import { DeleteDocDrawingsCommand } from '../commands/commands/delete-doc-drawing.command';
 import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { SetDocDrawingCommand } from '../commands/commands/set-doc-drawing.command';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
@@ -85,7 +84,6 @@ export class DocDrawingUIController extends Disposable {
             IMoveInlineDrawingCommand,
             ITransformNonInlineDrawingCommand,
             RemoveDocDrawingCommand,
-            SetDocDrawingCommand,
             SidebarDocDrawingOperation,
             ClearDocDrawingTransformerOperation,
             EditDocDrawingOperation,

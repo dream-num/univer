@@ -17,7 +17,7 @@
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import type { Nullable } from '@univerjs/core';
+import type { BooleanNumber, Nullable } from '@univerjs/core';
 import type { ITransformState } from './interface';
 
 export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
@@ -56,6 +56,10 @@ export interface IDrawingSearch extends IDrawingSpace {
 export interface IDrawingParam extends IDrawingSearch {
     drawingType: DrawingType;
     transform?: Nullable<ITransformState>;
+    transforms?: Nullable<ITransformState[]>;
+    // The same drawing render in different place, like image in header and footer.
+    // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
+    isMultiTransform?: BooleanNumber;
     groupId?: string;
 }
 

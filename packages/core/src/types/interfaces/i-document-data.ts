@@ -45,6 +45,7 @@ export interface IReferenceSource {
     lists?: ILists;
     drawings?: IDrawings;
     drawingsOrder?: string[];
+    headerFooterDrawingsOrder?: string[];
 }
 
 export interface IDocumentSettings {
@@ -981,6 +982,10 @@ export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTr
 export interface IDrawingParam extends IDrawingSearch {
     drawingType: DrawingType;
     transform?: Nullable<ITransformState>;
+    transforms?: Nullable<ITransformState[]>;
+    // The same drawing render in different place, like image in header and footer.
+    // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
+    isMultiTransform?: BooleanNumber;
     groupId?: string;
 }
 

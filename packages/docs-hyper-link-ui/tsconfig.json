@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "../docs-hyper-link/src/controllers/doc-hyper-link-custom-range.controller.ts"]
+    "include": ["src"]
 }

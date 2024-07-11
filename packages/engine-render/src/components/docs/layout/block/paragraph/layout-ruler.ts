@@ -241,7 +241,7 @@ function _divideOperator(
                     const sliceGlyphGroupWidth = __getGlyphGroupWidth(sliceGlyphGroup);
                     if (sliceGlyphGroupWidth > divide.width) {
                         // To avoid infinity loop when width is less than one char's width.
-                        if (sliceGlyphGroup.length > 1 || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
+                        if (sliceGlyphGroup.length > 1) { // || (sliceGlyphGroup.length > 0 && sliceGlyphGroup[sliceGlyphGroup.length - 1].drawingId)) {
                             glyphGroup.unshift(sliceGlyphGroup.pop()!);
                         }
                         break;

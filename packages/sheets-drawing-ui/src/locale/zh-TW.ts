@@ -42,11 +42,22 @@ const locale: typeof zhCN = {
         position: '移動但不調整大小與儲存格',
         none: '不要移動或調整大小與單元格',
     },
+
     'update-status': {
         exceedMaxSize: '圖片大小超過限制, 限制為{0}M',
         invalidImageType: '圖片類型錯誤',
         exceedMaxCount: '圖片只能一次上傳{0}張',
         invalidImage: '無效圖片',
+    },
+    'sheet-drawing-view': '繪圖',
+    shortcut: {
+        sheet: {
+            'drawing-move-down': '下移繪圖',
+            'drawing-move-up': '上移繪圖',
+            'drawing-move-left': '左移繪圖',
+            'drawing-move-right': '下移繪圖',
+            'drawing-delete': '删除繪圖',
+        },
     },
 };
 

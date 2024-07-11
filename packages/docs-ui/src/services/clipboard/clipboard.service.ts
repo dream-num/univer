@@ -41,7 +41,7 @@ export interface IDocClipboardHook {
 }
 
 export interface IDocClipboardService {
-    copy(): Promise<boolean>;
+    copy(sliceType?: SliceBodyType): Promise<boolean>;
     cut(): Promise<boolean>;
     paste(items: ClipboardItem[]): Promise<boolean>;
     legacyPaste(html?: string, text?: string): Promise<boolean>;
@@ -67,8 +67,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         super();
     }
 
-    async copy(): Promise<boolean> {
-        const documentBodyList = this._getDocumentBodyInRanges();
+    async copy(sliceType: SliceBodyType = SliceBodyType.copy): Promise<boolean> {
+        const documentBodyList = this._getDocumentBodyInRanges(sliceType);
 
         if (documentBodyList.length === 0) {
             return false;
@@ -119,7 +119,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         // Set content to clipboard.
-        this.copy();
+        this.copy(SliceBodyType.cut);
 
         try {
             let cursor = activeEndOffset;
@@ -229,7 +229,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
     }
 
-    private _getDocumentBodyInRanges(): IDocumentBody[] {
+    private _getDocumentBodyInRanges(sliceType: SliceBodyType): IDocumentBody[] {
         const ranges = this._textSelectionManagerService.getCurrentSelections();
         const activeRange = this._textSelectionManagerService.getActiveRange();
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
@@ -258,7 +258,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
             const deleteRange = getDeleteSelection({ startOffset, endOffset, collapsed }, body);
 
-            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).sliceBody(deleteRange.startOffset, deleteRange.endOffset, SliceBodyType.copy);
+            const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).sliceBody(deleteRange.startOffset, deleteRange.endOffset, sliceType);
             if (docBody == null) {
                 continue;
             }

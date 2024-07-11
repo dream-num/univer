@@ -635,6 +635,10 @@ importers:
         version: 1.6.0(@types/node@20.14.9)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/docs-drawing:
+    dependencies:
+      rxjs:
+        specifier: '>=7.0.0'
+        version: 7.8.1
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -642,9 +646,6 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
-      '@univerjs/docs-ui':
-        specifier: workspace:*
-        version: link:../docs-ui
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
@@ -1500,6 +1501,10 @@ importers:
         version: 1.6.0(@types/node@20.14.9)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/sheets-drawing:
+    dependencies:
+      rxjs:
+        specifier: '>=7.0.0'
+        version: 7.8.1
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

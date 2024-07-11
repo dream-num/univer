@@ -16,19 +16,20 @@
 
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import type { ICustomDecoration, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { ICustomBlock, ICustomDecoration, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
 import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
 // TODO: Support other properties like custom ranges, tables, etc.
+// eslint-disable-next-line max-lines-per-function
 export function getBodySlice(
     body: IDocumentBody,
     startOffset: number,
     endOffset: number,
     returnEmptyTextRun = false
 ): IDocumentBody {
-    const { dataStream, textRuns = [], paragraphs = [] } = body;
+    const { dataStream, textRuns = [], paragraphs = [], customBlocks = [] } = body;
 
     const docBody: IDocumentBody = {
         dataStream: dataStream.slice(startOffset, endOffset),
@@ -97,6 +98,23 @@ export function getBodySlice(
     docBody.customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
     const { customRanges } = getCustomRangeSlice(body, startOffset, endOffset);
     docBody.customRanges = customRanges;
+
+    const newCustomBlocks: ICustomBlock[] = [];
+
+    for (const block of customBlocks) {
+        const { startIndex } = block;
+        if (startIndex >= startOffset && startIndex <= endOffset) {
+            newCustomBlocks.push(Tools.deepClone(block));
+        }
+    }
+
+    if (newCustomBlocks.length) {
+        docBody.customBlocks = newCustomBlocks.map((b) => ({
+            ...b,
+            startIndex: b.startIndex - startOffset,
+        }));
+    }
+
     return docBody;
 }
 

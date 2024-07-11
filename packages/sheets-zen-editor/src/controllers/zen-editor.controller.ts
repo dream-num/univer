@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IParagraph, ITextRun } from '@univerjs/core';
+import type { ICommandInfo, ICustomBlock, IDocumentData, IDrawings, IParagraph, ITextRun } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -77,11 +77,12 @@ export class ZenEditorController extends RxDisposable {
 
     private _createZenEditorInstance() {
         // create univer doc formula bar editor instance
-        const INITIAL_SNAPSHOT = {
+        const INITIAL_SNAPSHOT: IDocumentData = {
             id: DOCS_ZEN_EDITOR_UNIT_ID_KEY,
             body: {
                 dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
                 textRuns: [],
+                customBlocks: [],
                 paragraphs: [
                     {
                         startIndex: 0,
@@ -103,6 +104,8 @@ export class ZenEditorController extends RxDisposable {
                     centerAngle: 0,
                 },
             },
+            drawings: {},
+            drawingsOrder: [],
         };
 
         return this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_DOC, INITIAL_SNAPSHOT);
@@ -212,7 +215,10 @@ export class ZenEditorController extends RxDisposable {
         unitId: string,
         dataStream: string,
         paragraphs: IParagraph[],
-        textRuns: ITextRun[] = []
+        textRuns: ITextRun[] = [],
+        customBlocks: ICustomBlock[] = [],
+        drawings: IDrawings = {},
+        drawingsOrder: string[] = []
     ) {
         const INCLUDE_LIST = [
             DOCS_ZEN_EDITOR_UNIT_ID_KEY,
@@ -230,9 +236,14 @@ export class ZenEditorController extends RxDisposable {
         }
 
         const docBody = docDataModel.getBody()!;
+        const snapshot = docDataModel.getSnapshot()!;
 
         docBody.dataStream = dataStream;
         docBody.paragraphs = paragraphs;
+        docBody.customBlocks = customBlocks;
+
+        snapshot.drawings = drawings;
+        snapshot.drawingsOrder = drawingsOrder;
 
         // Need to empty textRuns(previous formula highlight) every time when sync content(change selection or edit cell or edit formula bar).
         if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
@@ -342,6 +353,9 @@ export class ZenEditorController extends RxDisposable {
                         const dataStream = docBody?.dataStream;
                         const paragraphs = docBody?.paragraphs;
                         const textRuns = docBody?.textRuns;
+                        const customBlocks = docBody?.customBlocks;
+                        const drawings = editorDocDataModel?.getDrawings();
+                        const drawingsOrder = editorDocDataModel?.getDrawingsOrder();
 
                         /**
                          * Fix the issue where content cannot be saved in the doc under Zen mode.
@@ -352,7 +366,7 @@ export class ZenEditorController extends RxDisposable {
                             return;
                         }
 
-                        this._syncContentAndRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns);
+                        this._syncContentAndRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns, customBlocks, drawings, drawingsOrder);
                     }
                 }
             })

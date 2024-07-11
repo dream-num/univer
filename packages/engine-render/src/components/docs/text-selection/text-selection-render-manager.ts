@@ -251,6 +251,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._currentSegmentId = id;
     }
 
+    getSegment() {
+        return this._currentSegmentId;
+    }
+
     setSegmentPage(pageIndex: number) {
         this._currentSegmentPage = pageIndex;
     }

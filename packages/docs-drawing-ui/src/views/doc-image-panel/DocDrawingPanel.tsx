@@ -20,7 +20,8 @@ import { DrawingCommonPanel } from '@univerjs/drawing-ui';
 import type { IDrawingParam } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import styles from './index.module.less';
-import { DocDrawingAnchor } from './DocDrawingAnchor';
+import { DocDrawingTextWrap } from './DocDrawingTextWrap';
+import { DocDrawingPosition } from './DocDrawingPosition';
 
 export const DocDrawingPanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -36,12 +37,14 @@ export const DocDrawingPanel = () => {
         return () => {
             focusDispose.unsubscribe();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return !!drawings?.length && (
         <div className={styles.imageCommonPanel}>
-            <DrawingCommonPanel drawings={drawings} />
-            <DocDrawingAnchor drawings={drawings} />
+            <DrawingCommonPanel drawings={drawings} hasAlign={false} hasCropper={false} hasGroup={false} hasTransform={false} />
+            <DocDrawingTextWrap drawings={drawings} />
+            <DocDrawingPosition drawings={drawings} />
         </div>
     );
 };

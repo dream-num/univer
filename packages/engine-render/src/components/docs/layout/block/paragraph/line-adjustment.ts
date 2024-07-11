@@ -196,6 +196,7 @@ function restoreLastCJKGlyphWidth(line: IDocumentSkeletonLine) {
         const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
 
         if (
+            lastGlyph &&
             divide.isFull &&
             hasCJKText(lastGlyph.content) &&
             lastGlyph.width - lastGlyph.xOffset > lastGlyph.bBox.width

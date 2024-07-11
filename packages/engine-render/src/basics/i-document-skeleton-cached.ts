@@ -212,6 +212,11 @@ export interface IDocumentSkeletonDrawing {
     angle: number; // 旋转
     initialState: boolean; // 是否初始化
     drawingOrigin: IDocDrawingBase;
+    columnLeft: number;
+    isPageBreak: boolean;
+    lineTop: number;
+    lineHeight: number;
+    blockAnchorTop: number; // The paragraph top.
 }
 
 export interface IDocumentSkeletonFontStyle {

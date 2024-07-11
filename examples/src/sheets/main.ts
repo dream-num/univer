@@ -115,6 +115,7 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // drawing
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
+// univer.registerPlugin(UniverDocsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {

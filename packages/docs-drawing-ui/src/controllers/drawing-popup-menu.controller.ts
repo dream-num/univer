@@ -79,6 +79,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         return false;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _popupMenuListener(unitId: string) {
         const scene = this._renderManagerService.getRenderById(unitId)?.scene;
         if (!scene) {
@@ -99,8 +100,9 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     }
 
                     const selectedObjects = transformer.getSelectedObjectMap();
+                    disposePopups.forEach((dispose) => dispose.dispose());
+                    disposePopups.length = 0;
                     if (selectedObjects.size > 1) {
-                        disposePopups.forEach((dispose) => dispose.dispose());
                         return;
                     }
 
@@ -126,6 +128,14 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                         },
                     })));
 
+                    const focusDrawings = this._drawingManagerService.getFocusDrawings();
+
+                    const alreadyFocused = focusDrawings.find((drawing) => drawing.unitId === unitId && drawing.subUnitId === subUnitId && drawing.drawingId === drawingId);
+
+                    if (alreadyFocused) {
+                        return;
+                    }
+
                     this._drawingManagerService.focusDrawing([{
                         unitId,
                         subUnitId,
@@ -136,16 +146,31 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         );
 
         this.disposeWithMe(
-            transformer.clearControl$.subscribe(() => {
-                disposePopups.forEach((dispose) => dispose.dispose());
-                this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                this._drawingManagerService.focusDrawing(null);
-            })
+            toDisposable(
+                transformer.clearControl$.subscribe(() => {
+                    disposePopups.forEach((dispose) => dispose.dispose());
+                    disposePopups.length = 0;
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+                    this._drawingManagerService.focusDrawing(null);
+                })
+            )
         );
         this.disposeWithMe(
-            transformer.changing$.subscribe(() => {
-                disposePopups.forEach((dispose) => dispose.dispose());
-            })
+            toDisposable(
+                transformer.changing$.subscribe(() => {
+                    disposePopups.forEach((dispose) => dispose.dispose());
+                    disposePopups.length = 0;
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                transformer.changeStart$.subscribe(() => {
+                    disposePopups.forEach((dispose) => dispose.dispose());
+                    disposePopups.length = 0;
+                })
+            )
         );
     }
 
@@ -170,14 +195,14 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 index: 2,
                 commandId: OpenImageCropOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
-                disable: false,
+                disable: true, // TODO: @JOCS, feature is not ready.
             },
             {
                 label: 'image-popup.reset',
                 index: 3,
                 commandId: ImageResetSizeOperation.id,
                 commandParams: [{ unitId, subUnitId, drawingId }],
-                disable: false,
+                disable: true, // TODO: @JOCS, feature is not ready.
             },
         ];
     }

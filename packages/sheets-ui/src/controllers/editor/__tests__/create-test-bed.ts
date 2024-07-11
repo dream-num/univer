@@ -16,7 +16,6 @@
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, IResourceLoaderService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { ResourceLoaderService } from '@univerjs/core/services/resource-loader/resource-loader.service.js';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -64,8 +63,6 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
         override onStarting(injector: Injector): void {
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
-            injector.add([IResourceLoaderService, { useClass: ResourceLoaderService }]);
-
             dependencies?.forEach((d) => injector.add(d));
         }
     }

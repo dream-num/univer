@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { ICellData, ICommandInfo, IDocumentBody, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDocumentBody, IDocumentData, IPosition, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -808,7 +808,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             worksheet.getCellRaw(row, column) || {},
             documentLayoutObject,
             this._lexerTreeBuilder,
-            this._resourceLoaderService
+            (model) => this._resourceLoaderService.saveDoc(model)
         );
 
         if (cellData == null) {
@@ -969,7 +969,7 @@ export function getCellDataByInput(
     cellData: ICellData,
     documentLayoutObject: IDocumentLayoutObject,
     lexerTreeBuilder: LexerTreeBuilder,
-    resourceLoaderService: IResourceLoaderService
+    getSnapshot: (data: DocumentDataModel) => IDocumentData
 ) {
     cellData = Tools.deepClone(cellData);
 
@@ -978,7 +978,7 @@ export function getCellDataByInput(
         return null;
     }
 
-    const snapshot = resourceLoaderService.saveDoc(documentModel);
+    const snapshot = getSnapshot(documentModel);
 
     const { body } = snapshot;
     if (body == null) {

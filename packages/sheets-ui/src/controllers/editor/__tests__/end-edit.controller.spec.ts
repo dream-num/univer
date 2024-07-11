@@ -108,7 +108,7 @@ describe('Test EndEditController', () => {
                 throw new Error('documentLayoutObject is undefined');
             }
 
-            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, resourceLoaderService);
+            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot());
         };
     });
 

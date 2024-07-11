@@ -29,7 +29,8 @@ import {
 } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
 import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
+import { IRefSelectionsService, RefRangeService } from '@univerjs/sheets';
 import { IEditorService } from '@univerjs/ui';
 import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -130,7 +131,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService
     ) {
         super();
 
@@ -167,6 +169,14 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const editCellState = this.getLatestEditCellState();
         this._currentEditCellState = editCellState;
+
+        /**
+         * If there is no editor currently focused, then default to selecting the sheet editor to prevent the editorService from using the previously selected editor object.
+         * todo: wzhudev: In boundless mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
+         */
+        if (!this._editorService.getFocusEditor()) {
+            this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        }
 
         this._currentEditCellState$.next(editCellState);
     }
@@ -295,6 +305,15 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
+        /**
+         * Non-sheetEditor and formula selection mode,
+         * double-clicking cannot activate the sheet editor.
+         */
+        const editor = this._editorService.getFocusEditor();
+        if (this._refSelectionsService.getCurrentSelections().length > 0 && editor && !editor.isSheetEditor()) {
+            return;
+        }
+
         this._visible = param;
 
         // Reset the dirty status when the editor is visible.

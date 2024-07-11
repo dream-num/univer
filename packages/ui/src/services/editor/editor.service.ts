@@ -747,9 +747,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                     verticalAlign: VerticalAlign.TOP,
                     horizontalAlign: HorizontalAlign.LEFT,
                 },
-                marginLeft: 6,
-                marginTop: 2,
-                marginRight: 6,
+                marginLeft: 3,
+                marginTop: 0,
+                marginRight: 3,
             },
         } as IDocumentData;
     }

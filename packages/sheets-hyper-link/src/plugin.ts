@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 import { HyperLinkModel } from './models/hyper-link.model';
 import { SHEET_HYPER_LINK_PLUGIN } from './types/const';
 import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 
+@DependentOn(UniverSheetsPlugin)
 export class UniverSheetsHyperLinkPlugin extends Plugin {
     static override pluginName = SHEET_HYPER_LINK_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;

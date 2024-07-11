@@ -30,7 +30,7 @@ import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import { DocumentEditArea } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
-import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent, updateBlockIndex } from './tools';
+import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 import { createSkeletonSection } from './model/section';
 import { dealWithSection } from './block/section';
 import { createSkeletonPage } from './model/page';
@@ -104,8 +104,8 @@ export class DocumentSkeleton extends Skeleton {
 
         // const start = +new Date();
         this._skeletonData = this._createSkeleton(ctx, bounds);
-        // console.log('skeleton calculate cost', +new Date() - start);
         // console.log(this._skeletonData);
+        // console.log('skeleton calculate cost', +new Date() - start);
     }
 
     getSkeletonData() {
@@ -790,7 +790,18 @@ export class DocumentSkeleton extends Skeleton {
             this._iteratorCount = 0;
             removeDupPages(ctx);
             updateBlockIndex(skeleton.pages);
-
+            // Calculate inline drawing position and update.
+            updateInlineDrawingCoords(ctx, skeleton.pages);
+            // for (const hSkeMap of skeleton.skeHeaders.values()) {
+            //     for (const page of hSkeMap.values()) {
+            //         updateInlineDrawingCoords(ctx, [page]);
+            //     }
+            // }
+            // for (const fSkeMap of skeleton.skeFooters.values()) {
+            //     for (const page of fSkeMap.values()) {
+            //         updateInlineDrawingCoords(ctx, [page]);
+            //     }
+            // }
             setPageParent(skeleton.pages, skeleton);
 
             return skeleton;

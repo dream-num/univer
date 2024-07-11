@@ -19,11 +19,11 @@ import { Direction, FOCUSING_COMMON_DRAWINGS, FOCUSING_UNIVER_EDITOR } from '@un
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode } from '@univerjs/ui';
 import { type IMoveDrawingsCommandParams, MoveDocDrawingsCommand } from '../../commands/commands/move-drawings.command';
-import { DeleteDocDrawingsCommand } from '../../commands/commands/delete-drawings.command';
+import { DeleteDocDrawingsCommand } from '../../commands/commands/delete-doc-drawing.command';
 
 export function whenDocDrawingFocused(contextService: IContextService): boolean {
     return (
-        !contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
         contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
     );
 }

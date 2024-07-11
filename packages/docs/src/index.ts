@@ -40,7 +40,7 @@ export {
     type IInsertCommandParams,
     type IUpdateCommandParams,
 } from './commands/commands/core-editing.command';
-export { DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
+export { DeleteLeftCommand, DeleteRightCommand, DeleteCustomBlockCommand, MergeTwoParagraphCommand, type IDeleteCustomBlockParams } from './commands/commands/delete.command';
 export { IMEInputCommand, type IIMEInputCommandParams } from './commands/commands/ime-input.command';
 export {
     SetInlineFormatBoldCommand,
@@ -83,5 +83,6 @@ export {
     SetTextSelectionsOperation,
     type ISetTextSelectionsOperationParams,
 } from './commands/operations/text-selection.operation';
-
+export { getRetainAndDeleteFromReplace } from './basics/retain-delete-params';
+export { getRichTextEditPath } from './commands/util';
 // #endregion

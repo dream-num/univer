@@ -34,7 +34,7 @@ export const DeleteDocDrawingsCommand: ICommand = {
             return false;
         }
 
-        const unitId = drawings[0].unitId;
+        const { unitId } = drawings[0];
 
         const newDrawings = drawings.map((drawing) => {
             const { unitId, subUnitId, drawingId, drawingType } = drawing as IDocDrawing;

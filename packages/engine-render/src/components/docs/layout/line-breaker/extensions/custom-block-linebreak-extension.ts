@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-export { UniverDocsDrawingPlugin } from './plugin';
-export { type IDocDrawing, IDocDrawingService, DocDrawingService } from './services/doc-drawing.service';
+import type { LineBreaker } from '../line-breaker';
 
-export { DOCS_DRAWING_PLUGIN, type IDocDrawingModel } from './controllers/doc-drawing.controller';
+const SLASH_B_CODE_POINT = 8;
 
-// #region - all commands
-
-export { SetDocDrawingApplyMutation, DocDrawingApplyType, type ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
-// #endregion
+export function customBlockLineBreakExtension(breaker: LineBreaker) {
+    breaker.addRule('break_before_slash_b', (codePoint) => {
+        return codePoint === SLASH_B_CODE_POINT;
+    });
+}

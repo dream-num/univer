@@ -393,6 +393,19 @@ export class DocumentViewModel implements IDisposable {
         }
     }
 
+    getCustomBlockWithoutSetCurrentIndex(index: number) {
+        const customBlocks = this.getBody()!.customBlocks;
+        if (customBlocks == null) {
+            return;
+        }
+        for (let i = 0; i < customBlocks.length; i++) {
+            const customBlock = customBlocks[i];
+            if (customBlock.startIndex === index) {
+                return customBlock;
+            }
+        }
+    }
+
     getTable(index: number) {
         const tables = this.getBody()!.tables;
         if (tables == null) {

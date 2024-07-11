@@ -1037,12 +1037,13 @@ export function getCellDataByInput(
 }
 
 function isRichText(body: IDocumentBody) {
-    const { textRuns = [], paragraphs = [], customRanges } = body;
+    const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
 
     return (
         textRuns.some((textRun) => textRun.ts && !Tools.isEmptyObject(textRun.ts)) ||
         paragraphs.some((paragraph) => paragraph.bullet) ||
         paragraphs.length >= 2 ||
-        Boolean(customRanges?.length)
+        Boolean(customRanges?.length) ||
+        customBlocks.length > 0
     );
 }

@@ -378,8 +378,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
         },
     },
     EXP: {
@@ -546,8 +545,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '自然対数を求める正の実数を指定します。' },
         },
     },
     LOG: {
@@ -685,8 +683,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
         },
     },
     PI: {
@@ -766,8 +763,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     RANDARRAY: {
@@ -780,8 +775,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '行の数', detail: '返される行の数' },
+            columns: { name: '列の数', detail: '返される列の数' },
+            min: { name: '最小値', detail: '返される最小値' },
+            max: { name: '最大値', detail: '返される最大値' },
+            wholeNumber: { name: '整数', detail: '整数または 10 進数の値のどちらを返すのかを指定' },
         },
     },
     RANDBETWEEN: {
@@ -794,8 +792,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            bottom: { name: '最小値', detail: ' 乱数の最小値を整数で指定します。' },
+            top: { name: '最大値', detail: '乱数の最大値を整数で指定します。' },
         },
     },
     ROMAN: {

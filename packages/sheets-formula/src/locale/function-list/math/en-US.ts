@@ -378,8 +378,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value to round.' },
         },
     },
     EXP: {
@@ -546,8 +545,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The positive real number for which you want the natural logarithm.' },
         },
     },
     LOG: {
@@ -685,8 +683,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value to round.' },
         },
     },
     PI: {
@@ -766,8 +763,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     RANDARRAY: {
@@ -780,8 +775,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: 'rows', detail: 'The number of rows to be returned' },
+            columns: { name: 'columns', detail: 'The number of columns to be returned' },
+            min: { name: 'min', detail: 'The minimum number you would like returned' },
+            max: { name: 'max', detail: 'The maximum number you would like returned' },
+            wholeNumber: { name: 'whole_number', detail: 'Return a whole number or a decimal value' },
         },
     },
     RANDBETWEEN: {
@@ -794,8 +792,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            bottom: { name: 'bottom', detail: 'The smallest integer RANDBETWEEN will return.' },
+            top: { name: 'top', detail: 'The largest integer RANDBETWEEN will return.' },
         },
     },
     ROMAN: {

@@ -386,8 +386,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要捨入的數值。' },
         },
     },
     EXP: {
@@ -554,8 +553,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要求得自然對數的正實數。' },
         },
     },
     LOG: {
@@ -693,8 +691,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要捨入的數值。' },
         },
     },
     PI: {
@@ -773,8 +770,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     RANDARRAY: {
@@ -789,8 +784,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '列數', detail: '要傳回的列數' },
+            columns: { name: '欄數', detail: '要傳回的欄數' },
+            min: { name: '最小值', detail: '想要傳回的最小數字' },
+            max: { name: '最大值', detail: '想要傳回的最大數字' },
+            wholeNumber: { name: '整數', detail: '傳回整數或小數數值' },
         },
     },
     RANDBETWEEN: {
@@ -803,8 +801,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            bottom: { name: '最小值', detail: '會傳回的最小整數。' },
+            top: { name: '最大值', detail: '會傳回的最大整數。' },
         },
     },
     ROMAN: {

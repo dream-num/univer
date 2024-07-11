@@ -37,18 +37,24 @@ import { Csc } from './csc';
 import { Csch } from './csch';
 import { Decimal } from './decimal';
 import { Degrees } from './degrees';
+import { Even } from './even';
 import { Exp } from './exp';
 import { Floor } from './floor';
 import { FloorMath } from './floor-math';
 import { FloorPrecise } from './floor-precise';
+import { Ln } from './ln';
 import { Log } from './log';
 import { Log10 } from './log10';
 import { Mod } from './mod';
 import { Mround } from './mround';
+import { Odd } from './odd';
 import { Pi } from './pi';
 import { Power } from './power';
 import { Product } from './product';
 import { Radians } from './radians';
+import { Rand } from './rand';
+import { Randarray } from './randarray';
+import { Randbetween } from './randbetween';
 import { Round } from './round';
 import { Rounddown } from './rounddown';
 import { Roundup } from './roundup';
@@ -85,18 +91,24 @@ export const functionMath = [
     [Csch, FUNCTION_NAMES_MATH.CSCH],
     [Decimal, FUNCTION_NAMES_MATH.DECIMAL],
     [Degrees, FUNCTION_NAMES_MATH.DEGREES],
+    [Even, FUNCTION_NAMES_MATH.EVEN],
     [Exp, FUNCTION_NAMES_MATH.EXP],
     [Floor, FUNCTION_NAMES_MATH.FLOOR],
     [FloorMath, FUNCTION_NAMES_MATH.FLOOR_MATH],
     [FloorPrecise, FUNCTION_NAMES_MATH.FLOOR_PRECISE],
     [Log, FUNCTION_NAMES_MATH.LOG],
+    [Ln, FUNCTION_NAMES_MATH.LN],
     [Log10, FUNCTION_NAMES_MATH.LOG10],
     [Mod, FUNCTION_NAMES_MATH.MOD],
     [Mround, FUNCTION_NAMES_MATH.MROUND],
     [Power, FUNCTION_NAMES_MATH.POWER],
+    [Odd, FUNCTION_NAMES_MATH.ODD],
     [Pi, FUNCTION_NAMES_MATH.PI],
     [Product, FUNCTION_NAMES_MATH.PRODUCT],
     [Radians, FUNCTION_NAMES_MATH.RADIANS],
+    [Rand, FUNCTION_NAMES_MATH.RAND],
+    [Randarray, FUNCTION_NAMES_MATH.RANDARRAY],
+    [Randbetween, FUNCTION_NAMES_MATH.RANDBETWEEN],
     [Round, FUNCTION_NAMES_MATH.ROUND],
     [Rounddown, FUNCTION_NAMES_MATH.ROUNDDOWN],
     [Roundup, FUNCTION_NAMES_MATH.ROUNDUP],

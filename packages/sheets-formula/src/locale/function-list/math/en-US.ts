@@ -862,8 +862,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number is the angle in radians for which you want the secant.' },
         },
     },
     SECH: {
@@ -876,8 +875,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number is the angle in radians for which you want the hyperbolic secant.' },
         },
     },
     SERIESSUM: {
@@ -958,8 +956,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number for which you want the square root.' },
         },
     },
     SQRTPI: {
@@ -972,8 +969,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number by which pi is multiplied.' },
         },
     },
     SUBTOTAL: {

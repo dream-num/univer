@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Cosh extends BaseFunction {
+export class Sec extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -31,6 +33,30 @@ export class Cosh extends BaseFunction {
             return number;
         }
 
-        return number.cosh();
+        if (number.isArray()) {
+            return number.map((numberObject) => {
+                if (numberObject.isString()) {
+                    numberObject = numberObject.convertToNumberObjectValue();
+                }
+
+                if (numberObject.isError()) {
+                    return numberObject;
+                }
+
+                return this._handleSingleObject(numberObject);
+            });
+        }
+
+        return this._handleSingleObject(number);
+    }
+
+    private _handleSingleObject(number: BaseValueObject) {
+        const numberValue = +number.getValue();
+
+        if (Math.abs(numberValue) >= 2 ** 27) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return number.cos().getReciprocal();
     }
 }

@@ -871,13 +871,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '數值是要求得正割值的角度，以弧度表示。' },
         },
     },
     SECH: {
-        description: '返回角度的雙曲正切值',
-        abstract: '返回角度的雙曲正切值',
+        description: '返回角度的雙曲正割值',
+        abstract: '返回角度的雙曲正割值',
         links: [
             {
                 title: '教導',
@@ -885,8 +884,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '數值是要求得雙曲正割值的角度，以弧度表示。' },
         },
     },
     SERIESSUM: {
@@ -969,8 +967,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要求得平方根的數字。' },
         },
     },
     SQRTPI: {
@@ -983,8 +980,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要乘以 pi 的數值。' },
         },
     },
     SUBTOTAL: {

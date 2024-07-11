@@ -125,6 +125,10 @@ export class NullValueObject extends BaseValueObject {
         return NumberValueObject.create(0).cos();
     }
 
+    override cosh(): BaseValueObject {
+        return NumberValueObject.create(0).cosh();
+    }
+
     override acos(): BaseValueObject {
         return NumberValueObject.create(0).acos();
     }
@@ -341,6 +345,10 @@ export class BooleanValueObject extends BaseValueObject {
 
     override cos(): BaseValueObject {
         return this._convertToNumber().cos();
+    }
+
+    override cosh(): BaseValueObject {
+        return this._convertToNumber().cosh();
     }
 
     override acos(): BaseValueObject {
@@ -878,6 +886,22 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         const result = Math.cos(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return NumberValueObject.create(result);
+    }
+
+    override cosh(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.cosh(currentValue);
 
         if (!Number.isFinite(result)) {
             return ErrorValueObject.create(ErrorType.NUM);

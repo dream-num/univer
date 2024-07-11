@@ -1227,16 +1227,9 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.SEC.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.SEC.functionParameter.number1.name',
-                detail: 'formula.functionList.SEC.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.SEC.functionParameter.number2.name',
-                detail: 'formula.functionList.SEC.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.SEC.functionParameter.number.name',
+                detail: 'formula.functionList.SEC.functionParameter.number.detail',
+                example: '30',
                 require: 1,
                 repeat: 0,
             },
@@ -1249,16 +1242,9 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.SECH.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.SECH.functionParameter.number1.name',
-                detail: 'formula.functionList.SECH.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.SECH.functionParameter.number2.name',
-                detail: 'formula.functionList.SECH.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.SECH.functionParameter.number.name',
+                detail: 'formula.functionList.SECH.functionParameter.number.detail',
+                example: '30',
                 require: 1,
                 repeat: 0,
             },
@@ -1367,16 +1353,9 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.SQRT.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.SQRT.functionParameter.number1.name',
-                detail: 'formula.functionList.SQRT.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.SQRT.functionParameter.number2.name',
-                detail: 'formula.functionList.SQRT.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.SQRT.functionParameter.number.name',
+                detail: 'formula.functionList.SQRT.functionParameter.number.detail',
+                example: '16',
                 require: 1,
                 repeat: 0,
             },
@@ -1389,16 +1368,9 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.SQRTPI.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.SQRTPI.functionParameter.number1.name',
-                detail: 'formula.functionList.SQRTPI.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.SQRTPI.functionParameter.number2.name',
-                detail: 'formula.functionList.SQRTPI.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.SQRTPI.functionParameter.number.name',
+                detail: 'formula.functionList.SQRTPI.functionParameter.number.detail',
+                example: '1',
                 require: 1,
                 repeat: 0,
             },

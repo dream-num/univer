@@ -297,6 +297,11 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
+    cosh(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
     acos(): BaseValueObject {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);

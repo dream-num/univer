@@ -862,8 +862,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値は、セカントが必要なラジアンの角度です。' },
         },
     },
     SECH: {
@@ -876,8 +875,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値は、双曲線のセカントが必要なラジアンの角度です。' },
         },
     },
     SERIESSUM: {
@@ -958,8 +956,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '平方根を求める数値を指定します。' },
         },
     },
     SQRTPI: {
@@ -972,8 +969,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'π倍する数値を指定します。' },
         },
     },
     SUBTOTAL: {

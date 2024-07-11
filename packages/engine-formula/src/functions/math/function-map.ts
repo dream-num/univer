@@ -58,8 +58,12 @@ import { Randbetween } from './randbetween';
 import { Round } from './round';
 import { Rounddown } from './rounddown';
 import { Roundup } from './roundup';
+import { Sec } from './sec';
+import { Sech } from './sech';
 import { Sin } from './sin';
 import { Sinh } from './sinh';
+import { Sqrt } from './sqrt';
+import { Sqrtpi } from './sqrtpi';
 import { Subtotal } from './subtotal';
 import { Sum } from './sum';
 import { Sumif } from './sumif';
@@ -112,8 +116,12 @@ export const functionMath = [
     [Round, FUNCTION_NAMES_MATH.ROUND],
     [Rounddown, FUNCTION_NAMES_MATH.ROUNDDOWN],
     [Roundup, FUNCTION_NAMES_MATH.ROUNDUP],
+    [Sec, FUNCTION_NAMES_MATH.SEC],
+    [Sech, FUNCTION_NAMES_MATH.SECH],
     [Sin, FUNCTION_NAMES_MATH.SIN],
     [Sinh, FUNCTION_NAMES_MATH.SINH],
+    [Sqrt, FUNCTION_NAMES_MATH.SQRT],
+    [Sqrtpi, FUNCTION_NAMES_MATH.SQRTPI],
     [Subtotal, FUNCTION_NAMES_MATH.SUBTOTAL],
     [Sum, FUNCTION_NAMES_MATH.SUM],
     [Sumif, FUNCTION_NAMES_MATH.SUMIF],

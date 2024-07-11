@@ -17,7 +17,7 @@
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Cosh extends BaseFunction {
+export class Sqrt extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -31,6 +31,6 @@ export class Cosh extends BaseFunction {
             return number;
         }
 
-        return number.cosh();
+        return number.sqrt();
     }
 }

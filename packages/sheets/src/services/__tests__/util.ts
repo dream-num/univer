@@ -15,7 +15,8 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -32,6 +33,23 @@ export const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                     1: {
                         v: 'A2',
+                    },
+                    5: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    6: {
+                        v: '001',
+                        t: CellValueType.STRING,
+                        s: 's5',
+                    },
+                    7: {
+                        v: 'text',
+                        t: CellValueType.STRING,
+                    },
+                    8: {
+                        v: '001',
+                        t: CellValueType.FORCE_STRING,
                     },
                 },
             },
@@ -53,7 +71,13 @@ export const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     locale: LocaleType.ZH_CN,
     name: '',
     sheetOrder: ['sheet1'],
-    styles: {},
+    styles: {
+        s5: {
+            n: {
+                pattern: DEFAULT_TEXT_FORMAT, // text
+            },
+        },
+    },
 };
 
 export function createTestBase(workbookData?: IWorkbookData, dependencies?: Dependency[]) {

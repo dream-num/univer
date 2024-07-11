@@ -131,8 +131,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         ? [tempComment, ...statuedComments]
         : statuedComments;
 
-    const unSolvedComments = comments.filter((comment) => !comment.resolved);
-    const solvedComments = comments.filter((comment) => comment.resolved);
+    const unSolvedComments = renderComments.filter((comment) => !comment.resolved);
+    const solvedComments = renderComments.filter((comment) => comment.resolved);
 
     const isFiltering = status !== 'all' || unit !== 'all';
 

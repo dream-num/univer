@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
-import { CustomRangeType, DataStreamTreeTokenType, ObjectMatrix, skipParseTagNames, Tools } from '@univerjs/core';
+import { ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 
 import type { IPastePlugin } from '@univerjs/docs-ui';

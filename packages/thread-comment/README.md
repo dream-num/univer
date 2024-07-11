@@ -1,7 +1,10 @@
 # @univerjs/thread-comment
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/thread-comment)](https://npmjs.org/packages/@univerjs/thread-comment)
-[![license](https://img.shields.io/npm/l/@univerjs/thread-comment)](https://img.shields.io/npm/l/@univerjs/thread-comment)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/thread-comment` | `UniveThreadComment` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
 
 ## Introduction
 
@@ -18,3 +21,9 @@ npm install @univerjs/thread-comment
 # Using pnpm
 pnpm add @univerjs/thread-comment
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/thread-comment?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/thread-comment
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/thread-comment?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/thread-comment?style=flat-square

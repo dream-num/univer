@@ -15,7 +15,7 @@
  */
 
 import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, ICreateRequest_WorksheetObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction } from '@univerjs/protocol';
-import { UnitObject, UnitRole, UniverType } from '@univerjs/protocol';
+import { CreateRequest_WorkSheetObjectScope, UnitObject, UnitRole, UniverType } from '@univerjs/protocol';
 import { Inject } from '@wendellhu/redi';
 import { Tools } from '../../shared/tools';
 import { IResourceManagerService } from '../resource-manager/type';
@@ -84,7 +84,8 @@ export class AuthzIoLocalService implements IAuthzIoService {
             }
             case UnitObject.Worksheet: {
                 const params = config.worksheetObject!;
-                this._permissionMap.set(id, { ...params, objectType: config.objectType });
+
+                this._permissionMap.set(id, { ...params, objectType: config.objectType, readScope: CreateRequest_WorkSheetObjectScope.SomeCollaborator });
             }
         }
 

@@ -35,6 +35,7 @@ Extensible. High-performance. Embedded to your application.
     - [📊 Univer Sheet](#-univer-sheet)
     - [📝 Univer Doc](#-univer-doc-under-development)
     - [📽️ Univer Slide](#%EF%B8%8F-univer-slide-under-development)
+- [🌐 Internationalization](#-internationalization)
 - [👾 Showcase](#-showcase)<!-- - [📦 Ecosystem](#-ecosystem) -->
 - [💬 Community](#-community)
 - [🤝 Contribution](#-contribution)
@@ -81,11 +82,27 @@ Univer provides a wide range of features for spreadsheets, documents and present
 ### 📝 Univer Doc (Under Development)
 
 - **Core Features**: Univer supports core document features, including paragraphs, headings, lists, superscript, subscript, and more.
+- **Headers & Footers**: Allows adding headers and footers to a document.
+- **Comments**: Enables adding comments to a document to provide additional information.
 - **Collaborative Editing**[^1]: Supports multiple users editing a document simultaneously.
 
 ### 📽️ Univer Slide (Under Development)
 
 - **Core Features**: Univer will support core presentation features, including slides, shapes, text, images, and more.
+
+## 🌐 Internationalization
+
+Univer supports multiple languages, including:
+
+- `zh-CN`
+- `zh-TW`
+- `en-US`
+- `ru-RU`
+- `vi-VN`
+
+`zh-CN` and `en-US` are officially supported, while the others are contributed by the community.
+
+You can add the language you want by [Using Custom Locales](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales). You can also help us add new language support by referring to the [contribution guide](./CONTRIBUTING.md).
 
 ## 👾 Showcase
 

@@ -19,12 +19,13 @@ import { Popup } from '@univerjs/design';
 import type { IMouseEvent } from '@univerjs/engine-render';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Menu } from '../../../components/menu/desktop/Menu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 
 export function DesktopContextMenu() {
+    const contentRef = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
     const [offset, setOffset] = useState<[number, number]>([0, 0]);
@@ -38,11 +39,17 @@ export function DesktopContextMenu() {
             handleContextMenu,
         });
 
-        document.addEventListener('pointerdown', handleClose);
+        function handleClickOutside(event: MouseEvent) {
+            if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
+                handleClose();
+            }
+        }
+
+        document.addEventListener('pointerdown', handleClickOutside);
         document.addEventListener('wheel', handleClose);
 
         return () => {
-            document.removeEventListener('pointerdown', handleClose);
+            document.removeEventListener('pointerdown', handleClickOutside);
             document.removeEventListener('wheel', handleClose);
             disposables.dispose();
         };
@@ -60,7 +67,7 @@ export function DesktopContextMenu() {
 
     return (
         <Popup visible={visible} offset={offset}>
-            <section onPointerDown={(e) => e.stopPropagation()}>
+            <section ref={contentRef}>
                 {menuType && (
                     <Menu
                         menuType={[menuType]}

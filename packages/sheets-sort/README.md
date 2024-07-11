@@ -1,7 +1,10 @@
 # @univerjs/sheets-sort
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-sort)](https://npmjs.org/packages/@univerjs/sheets-sort)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-sort)](https://img.shields.io/npm/l/@univerjs/sheets-sort)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/sheets-sort` | `UniverSheetsSort` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ⭕️ |
 
 ## Introduction
 
@@ -20,3 +23,9 @@ npm install @univerjs/sheets-sort
 # Using pnpm
 pnpm add @univerjs/sheets-sort
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-sort?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-sort
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-sort?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-sort?style=flat-square

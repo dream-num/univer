@@ -47,7 +47,7 @@ export class SheetPermissionInitController extends Disposable {
         this._initWorksheetPermissionFromSnapshot();
         this._initWorksheetPermissionChange();
         this._initWorksheetPermissionPointsChange();
-        this._initWorkbookPermissionChange();
+        this.initWorkbookPermissionChange();
         this._initUserChange();
         this._initViewModelByRangeInterceptor();
         this._initViewModelBySheetInterceptor();
@@ -138,9 +138,8 @@ export class SheetPermissionInitController extends Disposable {
         );
     }
 
-    private _initWorkbookPermissionChange() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
+    public initWorkbookPermissionChange(_unitId?: string) {
+        const unitId = _unitId || this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
         this._authzIoService.allowed({
             objectID: unitId,
             objectType: UnitObject.Workbook,
@@ -311,7 +310,7 @@ export class SheetPermissionInitController extends Disposable {
                     });
                 });
 
-                this._initWorkbookPermissionChange();
+                this.initWorkbookPermissionChange();
                 this._initWorksheetPermissionFromSnapshot();
                 this._initRangePermissionFromSnapshot();
             })

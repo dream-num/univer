@@ -1,7 +1,10 @@
 # @univerjs/facade
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/facade)](https://npmjs.org/packages/@univerjs/facade)
-[![license](https://img.shields.io/npm/l/@univerjs/facade)](https://img.shields.io/npm/l/@univerjs/facade)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/facade` | `UniverFacade` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
 
 ## Introduction
 
@@ -20,3 +23,9 @@ npm install @univerjs/facade
 # Using pnpm
 pnpm add @univerjs/facade
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/facade?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/facade
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/facade?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/facade?style=flat-square

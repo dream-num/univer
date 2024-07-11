@@ -418,7 +418,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // 1. get properties of the table by parsing raw html content, including col properties / row properties
         // cell properties and cell contents.
         const { rowProperties, colProperties, cellMatrix } = this._htmlToUSM.convert(html);
-
         if (!cellMatrix) {
             return false;
         }
@@ -461,7 +460,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         // 4. execute these mutations by the one method
-        return this._pasteUSM(
+        const res = this._pasteUSM(
             {
                 rowProperties,
                 colProperties,
@@ -470,6 +469,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             pasteTarget,
             pasteType
         );
+        return res;
     }
 
     private async _pasteInternal(copyId: string, pasteType: string): Promise<boolean> {

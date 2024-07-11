@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
-import { ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType, ObjectMatrix, skipParseTagNames, Tools } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 
 import type { IPastePlugin } from '@univerjs/docs-ui';
@@ -503,6 +503,7 @@ export class HtmlToUSMService {
         return documentModel?.getSnapshot();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private process(
         parent: Nullable<ChildNode>,
         nodes: NodeListOf<ChildNode>,
@@ -520,7 +521,7 @@ export class HtmlToUSMService {
                 }
 
                 // TODO: @JOCS, More characters need to be replaced, like `\b`
-                const text = node.nodeValue?.replace(/[\r\n]/g, '');
+                let text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
 
                 if (parent && this._styleCache.has(parent)) {
@@ -530,6 +531,24 @@ export class HtmlToUSMService {
                     dataStream: '',
                     textRuns: [],
                 };
+
+                if ((parent as Element).tagName.toUpperCase() === 'A') {
+                    const id = Tools.generateRandomId();
+                    text = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+                    doc.customRanges = [
+                        ...(doc.customRanges ?? []),
+                        {
+                            startIndex: doc.dataStream.length,
+                            endIndex: doc.dataStream.length + text.length - 1,
+                            rangeId: id,
+                            rangeType: CustomRangeType.HYPERLINK,
+                        },
+                    ];
+                    doc.payloads = {
+                        ...doc.payloads,
+                        [id]: (parent as HTMLAnchorElement).href,
+                    };
+                }
 
                 doc.dataStream += text;
                 newDoc.dataStream += text;

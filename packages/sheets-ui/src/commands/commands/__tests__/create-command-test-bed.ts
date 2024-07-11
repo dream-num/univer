@@ -30,6 +30,7 @@ import {
 } from '@univerjs/core';
 import {
     BorderStyleManagerService,
+    IRefSelectionsService,
     RangeProtectionRuleModel,
     SheetInterceptorService,
 
@@ -114,6 +115,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([RangeProtectionRuleModel]);
+            injector.add([IRefSelectionsService, { useClass: SheetsSelectionsService }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

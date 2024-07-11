@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IDocumentData, Univer, Workbook } from '@univerjs/core';
-import { CellValueType, IContextService, LocaleService } from '@univerjs/core';
+import { CellValueType, IContextService, IResourceLoaderService, LocaleService } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { Injector } from '@wendellhu/redi';
@@ -76,6 +76,7 @@ describe('Test EndEditController', () => {
     let contextService: IContextService;
     let lexerTreeBuilder: LexerTreeBuilder;
     let spreadsheetSkeleton: SpreadsheetSkeleton;
+    let resourceLoaderService: IResourceLoaderService;
     let getCellDataByInputCell: (cell: ICellData, inputCell: ICellData) => ICellData | null;
 
     beforeEach(() => {
@@ -88,6 +89,7 @@ describe('Test EndEditController', () => {
         localeService = get(LocaleService);
         contextService = get(IContextService);
         lexerTreeBuilder = new LexerTreeBuilder();
+        resourceLoaderService = get(IResourceLoaderService);
 
         const worksheet = workbook.getActiveSheet()!;
         const config = worksheet.getConfig();
@@ -106,7 +108,7 @@ describe('Test EndEditController', () => {
                 throw new Error('documentLayoutObject is undefined');
             }
 
-            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder);
+            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, resourceLoaderService);
         };
     });
 

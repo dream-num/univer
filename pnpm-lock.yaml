@@ -222,6 +222,9 @@ importers:
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
         version: link:../packages/docs-drawing-ui
+      '@univerjs/docs-hyper-link':
+        specifier: workspace:*
+        version: link:../packages/docs-hyper-link
       '@univerjs/docs-hyper-link-ui':
         specifier: workspace:*
         version: link:../packages/docs-hyper-link-ui
@@ -1843,6 +1846,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/docs-hyper-link':
+        specifier: workspace:*
+        version: link:../docs-hyper-link
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula

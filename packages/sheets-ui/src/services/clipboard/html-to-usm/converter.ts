@@ -144,7 +144,7 @@ export class HtmlToUSMService {
         const tableStrings = html.match(/<table\b[^>]*>([\s\S]*?)<\/table>/gi);
         const tables: IParsedTablesInfo[] = [];
         this.process(null, this._dom.childNodes!, newDocBody, tables);
-        const { paragraphs, dataStream, textRuns } = newDocBody;
+        const { paragraphs, dataStream, textRuns, payloads } = newDocBody;
 
         // use paragraph to split rows
         if (paragraphs) {
@@ -192,6 +192,7 @@ export class HtmlToUSMService {
                     dataStream: singleDataStream,
                     textRuns,
                     paragraphs: generateParagraphs(singleDataStream),
+                    payloads,
                 };
 
                 const dataStreamLength = dataStream.length;

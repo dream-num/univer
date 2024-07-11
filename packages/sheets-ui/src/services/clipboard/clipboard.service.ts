@@ -577,6 +577,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return pasteRes;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _pasteUSM(
         data: IUniverSheetCopyDataModel,
         target: IPasteTarget,

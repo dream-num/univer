@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, Workbook } from '@univerjs/core';
-import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import type { IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
+import { CellValueType, CustomRangeType, DataStreamTreeTokenType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { DOC_HYPER_LINK_PLUGIN } from '@univerjs/docs-hyper-link';
 import { isLegalLink, serializeUrl } from '../common/util';
+
+const getPlainTextFormRich = (data: IDocumentData) => {
+    if (!data.body) {
+        return '';
+    }
+    const str = data.body.dataStream.slice(0, -2);
+    return str.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
+};
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
 export class SheetHyperLinkSetRangeController extends Disposable {
@@ -30,7 +40,8 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
 
@@ -42,6 +53,11 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         this._initSetRangeValuesCommandInterceptor();
         this._initUpdateHyperLinkCommandInterceptor();
         this._initClearSelectionCommandInterceptor();
+        this._initRichTextEditorInterceptor();
+    }
+
+    private _getCurrentCell(unitId: string, subUnitId: string, row: number, col: number) {
+        return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId)?.getCell(row, col);
     }
 
     private _initAddHyperLinkCommandInterceptor() {
@@ -138,7 +154,6 @@ export class SheetHyperLinkSetRangeController extends Disposable {
             getMutations: (command) => {
                 if (command.id === SetRangeValuesCommand.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
-
                     const { unitId, subUnitId } = params;
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
@@ -148,7 +163,8 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                             const cellValue = (cellValueRaw ?? '').toString();
                             const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
                             if (!link) {
-                                if (isLegalLink(cellValue)) {
+                                if (isLegalLink(cellValue) || cell?.custom?.__link_url) {
+                                    const url = cell?.custom?.__link_url ?? cellValue;
                                     const id = Tools.generateRandomId();
                                     undos.push({
                                         id: RemoveHyperLinkMutation.id,
@@ -168,7 +184,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                                 row,
                                                 column: col,
                                                 display: cellValue,
-                                                payload: serializeUrl(cellValue),
+                                                payload: serializeUrl(url),
                                             },
                                         },
                                     });
@@ -261,7 +277,35 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         }));
     }
 
-    private _getCurrentCell(unitId: string, subUnitId: string, row: number, col: number) {
-        return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId)?.getCell(row, col);
+    private _initRichTextEditorInterceptor() {
+        this.disposeWithMe(
+            this._editorBridgeService.interceptor.intercept(
+                this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT,
+                {
+                    handler: (data, context, next) => {
+                        if (data?.p) {
+                            const range = data.p.body?.customRanges?.find((i) => i.rangeType === CustomRangeType.HYPERLINK);
+                            const resource = data.p.resources?.find((i) => i.name === DOC_HYPER_LINK_PLUGIN);
+                            if (range && resource) {
+                                const rangeId = range.rangeId;
+                                const url = JSON.parse(resource.data)?.links?.find((i: { id: string; payload: string }) => i.id === rangeId)?.payload;
+
+                                return next({
+                                    ...data,
+                                    p: null,
+                                    v: getPlainTextFormRich(data.p),
+                                    t: CellValueType.STRING,
+                                    custom: {
+                                        __link_url: url,
+                                    },
+                                });
+                            }
+                        }
+
+                        return next(data);
+                    },
+                }
+            )
+        );
     }
 }

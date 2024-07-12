@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { BooleanNumber } from '../../../types/enum/text-style';
 import { replaceInDocumentBody } from '../replacement';
+import type { IDocumentBody } from '../../../types/interfaces';
 
 function getTestDocumentBody() {
     const documentBody = {
@@ -64,17 +65,17 @@ function getTestDocumentBody() {
             {
                 startIndex: 4,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 11,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
         ],
@@ -83,7 +84,7 @@ function getTestDocumentBody() {
                 startIndex: 12,
             },
         ],
-    };
+    } as IDocumentBody;
 
     return documentBody;
 }

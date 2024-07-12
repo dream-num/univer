@@ -16,6 +16,7 @@
 
 // @ts-ignore
 import numfmt from 'numfmt';
+import { isRealNum } from '@univerjs/core';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { ErrorType } from './error-type';
@@ -298,17 +299,27 @@ export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject)
     const dateValue = serialNumberObject.getValue();
 
     if (serialNumberObject.isString()) {
+        let dateSerial;
+
         if (parseFormattedDate(`${dateValue}`)) {
-            return parseFormattedDate(`${dateValue}`).v;
+            dateSerial = parseFormattedDate(`${dateValue}`).v;
         } else if (parseFormattedTime(`${dateValue}`)) {
-            return parseFormattedTime(`${dateValue}`).v;
+            dateSerial = parseFormattedTime(`${dateValue}`).v;
+        } else if (isRealNum(dateValue)) {
+            dateSerial = +dateValue;
         } else {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
+
+        if (+dateSerial < 0 || +dateSerial > 2958465) { // 2958465 = 9999/12/31
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return dateSerial;
     } else {
         const dateSerial = +serialNumberObject.getValue();
 
-        if (dateSerial < 0) {
+        if (dateSerial < 0 || dateSerial > 2958465) { // 2958465 = 9999/12/31
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

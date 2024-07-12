@@ -117,7 +117,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {} } = paragraph;
-            const { indentFirstLine = 0, snapToGrid, indentStart = 0 } = paragraphStyle;
+            const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
             const { hanging: listHanging, indentStart: listIndentStart } = lists[listType].nestingLevel[0];
 
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
@@ -139,7 +139,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                 paragraphStyle: {
                                     ...paragraphStyle,
                                     hanging: undefined,
-                                    indentStart: indentStart ? Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + listHanging - listIndentStart) : undefined,
+                                    indentStart: indentStart ? { v: Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + getNumberUnitValue(listHanging, charSpaceApply) - getNumberUnitValue(listIndentStart, charSpaceApply)) } : undefined,
                                 },
                                 startIndex: 0,
                             }
@@ -149,7 +149,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                     ...paragraphStyle,
                                     indentFirstLine: undefined,
                                     hanging: listHanging,
-                                    indentStart: listIndentStart - listHanging + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply),
+                                    indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
                                 },
                                 bullet: {
                                     ...(paragraph.bullet ?? {

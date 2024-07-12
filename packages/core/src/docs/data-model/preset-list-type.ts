@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IListData, INestingLevel } from '../../types/interfaces/i-document-data';
 import { BulletAlignment, GlyphType } from '../../types/interfaces/i-document-data';
 
 export enum PresetListType {
@@ -33,8 +34,8 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphSymbol: '\u25CF',
-                hanging: 21,
-                indentStart: 21,
+                hanging: { v: 21 },
+                indentStart: { v: 21 },
             },
             {
                 bulletAlignment: BulletAlignment.START,
@@ -44,8 +45,8 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphSymbol: '\u25A0',
-                hanging: 21,
-                indentStart: 42,
+                hanging: { v: 21 },
+                indentStart: { v: 42 },
             },
             {
                 bulletAlignment: BulletAlignment.START,
@@ -55,11 +56,11 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphSymbol: '\u25C6',
-                hanging: 21,
-                indentStart: 63,
+                hanging: { v: 21 },
+                indentStart: { v: 63 },
             },
-        ],
-    },
+        ] as INestingLevel[],
+    } as IListData,
     [PresetListType.ORDER_LIST]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel: [
@@ -71,8 +72,8 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphType: GlyphType.DECIMAL,
-                hanging: 21,
-                indentStart: 21,
+                hanging: { v: 21 },
+                indentStart: { v: 21 },
             },
             {
                 bulletAlignment: BulletAlignment.START,
@@ -82,8 +83,8 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphType: GlyphType.DECIMAL,
-                hanging: 21,
-                indentStart: 42,
+                hanging: { v: 21 },
+                indentStart: { v: 42 },
             },
             {
                 bulletAlignment: BulletAlignment.START,
@@ -93,9 +94,9 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphType: GlyphType.DECIMAL,
-                hanging: 21,
-                indentStart: 63,
+                hanging: { v: 21 },
+                indentStart: { v: 63 },
             },
-        ],
-    },
+        ] as INestingLevel[],
+    } as IListData,
 };

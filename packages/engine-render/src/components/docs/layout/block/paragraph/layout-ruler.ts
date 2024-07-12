@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumberUnit } from '@univerjs/core';
+import type { INumberUnit, Nullable } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
@@ -447,8 +447,8 @@ function _lineOperator(
         // horizontalAlign = HorizontalAlign.UNSPECIFIED,
 
         // direction,
-        spaceAbove = 0,
-        spaceBelow = 0,
+        spaceAbove,
+        spaceBelow,
 
         // borderBetween,
         // borderTop,
@@ -456,10 +456,10 @@ function _lineOperator(
         // borderLeft,
         // borderRight,
 
-        indentFirstLine = 0,
-        hanging = 0,
-        indentStart = 0,
-        indentEnd = 0,
+        indentFirstLine,
+        hanging,
+        indentStart,
+        indentEnd,
         // tabStops = [],
 
         // keepLines = BooleanNumber.FALSE,
@@ -818,10 +818,10 @@ function _pageOperator(
  * 17.3.1.12 ind (Paragraph Indentation)
  */
 function __getIndentPadding(
-    indentFirstLine: INumberUnit | number = 0,
-    hanging: INumberUnit | number = 0,
-    indentStart: INumberUnit | number = 0,
-    indentEnd: INumberUnit | number = 0,
+    indentFirstLine: Nullable<INumberUnit>,
+    hanging: Nullable<INumberUnit>,
+    indentStart: Nullable<INumberUnit>,
+    indentEnd: Nullable<INumberUnit>,
     charSpaceApply: number,
     paragraphStart = false
 ) {
@@ -849,8 +849,8 @@ function __getIndentPadding(
 
 function __getParagraphSpace(
     lineSpacing: number = 0,
-    spaceAbove: INumberUnit | number = 0,
-    spaceBelow: INumberUnit | number = 0,
+    spaceAbove: Nullable<INumberUnit>,
+    spaceBelow: Nullable<INumberUnit>,
     paragraphStart: boolean,
     preLine?: IDocumentSkeletonLine
 ) {

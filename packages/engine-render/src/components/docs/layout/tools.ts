@@ -237,17 +237,22 @@ function isLineBlank(line?: IDocumentSkeletonLine) {
     return true;
 }
 
-export function getNumberUnitValue(unitValue: number | INumberUnit, benchMark: number) {
-    if (unitValue instanceof Object) {
-        const { v: value, u: unit } = unitValue;
-        if (unit === NumberUnitType.POINT) {
-            return value;
-        }
-
-        return value * benchMark;
+export function getNumberUnitValue(unitValue: Nullable<INumberUnit>, benchMark: number) {
+    if (!unitValue) {
+        return 0;
     }
 
-    return unitValue;
+    const { v: value, u: unit } = unitValue;
+
+    if (!unit) {
+        return value;
+    }
+
+    if (unit === NumberUnitType.PIXEL) {
+        return value;
+    }
+
+    return value * benchMark;
 }
 
 // Return charSpaceApply, choose between grid or font to calculate the length of a tab, where one tab represents a length of 1 character.

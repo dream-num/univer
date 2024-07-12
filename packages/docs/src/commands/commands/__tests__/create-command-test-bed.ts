@@ -75,8 +75,8 @@ const TEST_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 68,
                 paragraphStyle: {
-                    spaceAbove: 20,
-                    indentFirstLine: 20,
+                    spaceAbove: { v: 20 },
+                    indentFirstLine: { v: 20 },
                 },
             },
         ],

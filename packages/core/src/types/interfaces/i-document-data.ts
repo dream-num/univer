@@ -621,9 +621,9 @@ export interface ITextStyle extends IStyleBase {
 }
 
 export interface IIndentStart {
-    indentFirstLine?: INumberUnit | number; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
-    hanging?: INumberUnit | number; // hanging，offset of first word except first line
-    indentStart?: INumberUnit | number; // indentStart
+    indentFirstLine?: INumberUnit ; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
+    hanging?: INumberUnit ; // hanging，offset of first word except first line
+    indentStart?: INumberUnit ; // indentStart
     tabStops?: ITabStop[]; // tabStops
 }
 
@@ -638,14 +638,14 @@ export interface IParagraphStyle extends IIndentStart {
     direction?: TextDirection; // direction
     spacingRule?: SpacingRule; // SpacingRule
     snapToGrid?: BooleanNumber; // snapToGrid 17.3.2.34 snapToGrid (Use Document Grid Settings For Inter-Character Spacing)
-    spaceAbove?: INumberUnit | number; // spaceAbove before beforeLines (Spacing Above Paragraph)
-    spaceBelow?: INumberUnit | number; // spaceBelow after afterLines (Spacing Below Paragraph)
+    spaceAbove?: INumberUnit ; // spaceAbove before beforeLines (Spacing Above Paragraph)
+    spaceBelow?: INumberUnit ; // spaceBelow after afterLines (Spacing Below Paragraph)
     borderBetween?: IParagraphBorder; // borderBetween
     borderTop?: IParagraphBorder; // borderTop
     borderBottom?: IParagraphBorder; // borderBottom
     borderLeft?: IParagraphBorder; // borderLeft
     borderRight?: IParagraphBorder; // borderRight
-    indentEnd?: INumberUnit | number; // indentEnd
+    indentEnd?: INumberUnit ; // indentEnd
     keepLines?: BooleanNumber; // 17.3.1.14 keepLines (Keep All Lines On One Page)
     keepNext?: BooleanNumber; // 17.3.1.15 keepNext (Keep Paragraph With Next Paragraph)
     wordWrap?: BooleanNumber; // 17.3.1.45 wordWrap (Allow Line Breaking At Character Level)
@@ -832,7 +832,7 @@ export enum FontStyleType {
 
 export interface INumberUnit {
     v: number; // value
-    u: NumberUnitType; // unit
+    u?: NumberUnitType; // unit
 }
 
 export interface IObjectPositionH {
@@ -878,6 +878,7 @@ export enum NumberUnitType {
     POINT,
     LINE,
     CHARACTER,
+    PIXEL,
 }
 
 // 20.4.3.1 ST_AlignH (Relative Horizontal Alignment Positions)

@@ -20,6 +20,9 @@ import {
     createInterceptorKey,
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    FOCUSING_EDITOR_STANDALONE,
+    FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
+    IContextService,
     InterceptorManager,
     IUniverInstanceService,
     makeCellToSelection,
@@ -132,7 +135,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService
+        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -167,16 +171,18 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     setEditCell(param: ICurrentEditCellParam) {
         this._currentEditCell = param;
 
-        const editCellState = this.getLatestEditCellState();
-        this._currentEditCellState = editCellState;
-
         /**
          * If there is no editor currently focused, then default to selecting the sheet editor to prevent the editorService from using the previously selected editor object.
          * todo: wzhudev: In boundless mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
          */
         if (!this._editorService.getFocusEditor()) {
             this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
+            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
         }
+
+        const editCellState = this.getLatestEditCellState();
+        this._currentEditCellState = editCellState;
 
         this._currentEditCellState$.next(editCellState);
     }

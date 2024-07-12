@@ -647,7 +647,8 @@ export class PromptController extends Disposable {
         }
 
         const char = this._getCurrentChar();
-        if (char && char.substring(0, 1) === '=' && matchRefDrawToken(char)) {
+        const dataStream = this._getCurrentDataStream();
+        if (dataStream?.substring(0, 1) === '=' && char && matchRefDrawToken(char)) {
             this._enterSelectingMode();
         } else {
             this._quitSelectingMode();
@@ -676,6 +677,11 @@ export class PromptController extends Disposable {
         const dataStream = config.dataStream;
 
         return dataStream[startOffset - 1 + config.offset];
+    }
+
+    private _getCurrentDataStream() {
+        const config = this._getCurrentBodyDataStreamAndOffset();
+        return config?.dataStream;
     }
 
     private _isSelectingMode = false;

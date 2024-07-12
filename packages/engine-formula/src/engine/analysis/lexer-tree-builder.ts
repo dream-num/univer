@@ -1430,7 +1430,13 @@ export class LexerTreeBuilder extends Disposable {
                     const nextCurrentString = formulaStringArray[cur + 1];
                     if (nextCurrentString && OPERATOR_TOKEN_SET.has(currentString + nextCurrentString)) {
                         this._pushNodeToChildren(trimSegment + currentString + nextCurrentString);
+
+                        this._resetSegment();
+                        this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
                         cur++;
+                        this._addSequenceArray(sequenceArray, nextCurrentString, cur, isZeroAdded);
+                        cur++;
+                        continue;
                     } else {
                         this._pushNodeToChildren(trimSegment + currentString);
                     }

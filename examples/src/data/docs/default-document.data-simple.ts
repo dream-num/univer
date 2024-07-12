@@ -54,17 +54,17 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
             {
                 startIndex: 4,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 36,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
         ],

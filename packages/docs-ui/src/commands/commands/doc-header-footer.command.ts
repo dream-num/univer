@@ -37,9 +37,9 @@ function getEmptyHeaderFooterBody(): IDocumentBody {
             {
                 startIndex: 0,
                 paragraphStyle: {
-                    spaceAbove: 0,
+                    spaceAbove: { v: 0 },
                     lineSpacing: 1.5,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
         ],

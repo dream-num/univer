@@ -34,9 +34,9 @@ export function getEmptySnapshot(
                 {
                     startIndex: 0,
                     paragraphStyle: {
-                        spaceAbove: 5,
+                        spaceAbove: { v: 5 },
                         lineSpacing: 1,
-                        spaceBelow: 0,
+                        spaceBelow: { v: 0 },
                     },
                 },
             ],

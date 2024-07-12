@@ -236,7 +236,7 @@ describe('Test set range values commands', () => {
                                 {
                                     startIndex: 489,
                                     paragraphStyle: {
-                                        spaceAbove: 10,
+                                        spaceAbove: { v: 10 },
                                         lineSpacing: 1.2,
                                     },
                                 },
@@ -634,7 +634,7 @@ describe('Test set range values commands', () => {
                                 {
                                     startIndex: 489,
                                     paragraphStyle: {
-                                        spaceAbove: 10,
+                                        spaceAbove: { v: 10 },
                                         lineSpacing: 1.2,
                                     },
                                 },
@@ -701,7 +701,7 @@ describe('Test set range values commands', () => {
                                 {
                                     startIndex: 489,
                                     paragraphStyle: {
-                                        spaceAbove: 10,
+                                        spaceAbove: { v: 10 },
                                         lineSpacing: 1.2,
                                     },
                                 },

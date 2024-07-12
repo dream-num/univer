@@ -35,9 +35,7 @@ import { ISocketService, WebSocketService } from '@univerjs/network';
 import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import {
     DescriptionService,
-    FormulaCustomFunctionService,
     IDescriptionService,
-    IFormulaCustomFunctionService,
     IRegisterFunctionService,
     RegisterFunctionService,
 } from '@univerjs/sheets-formula';
@@ -137,7 +135,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             ]);
 
             injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);

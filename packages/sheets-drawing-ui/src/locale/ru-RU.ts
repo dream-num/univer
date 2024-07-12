@@ -48,6 +48,16 @@ const locale: typeof zhCN = {
         exceedMaxCount: 'За один раз можно загрузить только {0} изображений',
         invalidImage: 'Недопустимое изображение',
     },
+    'sheet-drawing-view': 'Drawing',
+    shortcut: {
+        sheet: {
+            'drawing-move-down': 'Move Drawing down',
+            'drawing-move-up': 'Move Drawing up',
+            'drawing-move-left': 'Move Drawing left',
+            'drawing-move-right': 'Move Drawing right',
+            'drawing-delete': 'Delete Drawing',
+        },
+    },
 };
 
 export default locale;

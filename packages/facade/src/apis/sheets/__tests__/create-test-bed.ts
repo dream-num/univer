@@ -30,9 +30,7 @@ import { ISocketService, WebSocketService } from '@univerjs/network';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
     DescriptionService,
-    FormulaCustomFunctionService,
     IDescriptionService,
-    IFormulaCustomFunctionService,
     IRegisterFunctionService,
     RegisterFunctionService,
 } from '@univerjs/sheets-formula';
@@ -96,7 +94,6 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
                 },
             ]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
 
             dependencies?.forEach((d) => injector.add(d));

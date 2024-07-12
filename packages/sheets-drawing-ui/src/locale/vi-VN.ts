@@ -48,7 +48,16 @@ const locale: typeof zhCN = {
         exceedMaxCount: 'Chỉ có thể tải lên {0} hình ảnh một lần',
         invalidImage: 'Hình ảnh không hợp lệ',
     },
-}
-;
+    'sheet-drawing-view': 'Drawing',
+    shortcut: {
+        sheet: {
+            'drawing-move-down': 'Move Drawing down',
+            'drawing-move-up': 'Move Drawing up',
+            'drawing-move-left': 'Move Drawing left',
+            'drawing-move-right': 'Move Drawing right',
+            'drawing-delete': 'Delete Drawing',
+        },
+    },
+};
 
 export default locale;

@@ -30,12 +30,14 @@ import {
 import type { IActiveTextRange, ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 
+import type { IAccessor } from '@wendellhu/redi';
 import type { ITextActiveRange } from '../../services/text-selection-manager.service';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getDeleteSelection, getInsertSelection } from '../../basics/selection';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
+import { DocCustomRangeService } from '../../services/doc-custom-range.service';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
 
@@ -162,6 +164,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         }
 
         const actualRange = getDeleteSelection(activeRange, originBody);
+        const unitId = docDataModel.getUnitId();
         const { startOffset, collapsed } = actualRange;
 
         if (!collapsed) {
@@ -171,11 +174,8 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
         const endIndex = originBody.paragraphs
             ?.find((p) => p.startIndex >= startIndex)?.startIndex!;
-        const body = getParagraphBody(originBody, startIndex, endIndex);
-
+        const body = getParagraphBody(accessor, unitId, originBody, startIndex, endIndex);
         const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
-
-        const unitId = docDataModel.getUnitId();
 
         const textRanges = [
             {
@@ -560,13 +560,14 @@ export const DeleteRightCommand: ICommand = {
     },
 };
 
-function getParagraphBody(body: IDocumentBody, start: number, end: number): IDocumentBody {
+function getParagraphBody(accessor: IAccessor, unitId: string, body: IDocumentBody, start: number, end: number): IDocumentBody {
     const { textRuns: originTextRuns = [], customBlocks: originCustomBlocks = [] } = body;
     const dataStream = body.dataStream.substring(start, end);
+    const customRangeService = accessor.get(DocCustomRangeService);
 
     const bodySlice: IDocumentBody = {
         dataStream,
-        customRanges: getCustomRangeSlice(body, start, end).customRanges,
+        customRanges: getCustomRangeSlice(body, start, end).customRanges.map((range) => customRangeService.copyCustomRange(unitId, range)),
         customDecorations: getCustomDecorationSlice(body, start, end),
     };
 

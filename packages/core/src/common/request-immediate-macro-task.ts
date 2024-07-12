@@ -24,12 +24,12 @@ export function requestImmediateMacroTask(callback: (value?: unknown) => void): 
         }
     };
 
-    channel.port1.addEventListener('message', hanlder);
+    // This would cause memory leak. But we cannot use addEventListener because it won't work in web worker.
+    channel.port1.onmessage = hanlder;
     channel.port2.postMessage(null);
 
     return () => {
         cancelled = true;
-        channel.port1.removeEventListener('message', hanlder);
         channel.port1.close();
         channel.port2.close();
     };

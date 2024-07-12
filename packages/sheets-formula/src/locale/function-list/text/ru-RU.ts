@@ -291,8 +291,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            text: { name: 'text', detail: 'Обязательно. Строка текста, содержащая символы, которые вы хотите извлечь.' },
+            startNum: { name: 'start_num', detail: 'Обязательно. Позиция первого символа, который вы хотите извлечь из текста.' },
+            numChars: { name: 'num_chars', detail: 'Обязательно. Указывает количество символов, которые MID должен вернуть из текста.' },
         },
     },
     MIDB: {

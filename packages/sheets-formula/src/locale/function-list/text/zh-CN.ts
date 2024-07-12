@@ -291,8 +291,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: '必需。包含您要提取的字符的文本字符串。' },
+            startNum: { name: 'start_num', detail: '必需。您希望从文本中提取的第一个字符的位置。' },
+            numChars: { name: 'num_chars', detail: '必需。指定MID应从文本中返回的字符数。' },
         },
     },
     MIDB: {

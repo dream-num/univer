@@ -292,8 +292,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: '必須。抽出したい文字を含むテキスト文字列。' },
+            startNum: { name: 'start_num', detail: '必須。テキスト内で抽出したい最初の文字の位置。' },
+            numChars: { name: 'num_chars', detail: '必須。テキストからMIDが返す文字数を指定します。' },
         },
     },
     MIDB: {

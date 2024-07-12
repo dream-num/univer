@@ -16,6 +16,9 @@
 
 // @ts-ignore
 import numfmt from 'numfmt';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../engine/value-object/base-value-object';
+import { ErrorType } from './error-type';
 
 export const DEFAULT_DATE_FORMAT = 'yyyy/mm/dd;@';
 export const DEFAULT_NOW_FORMAT = 'yyyy/mm/dd hh:mm';
@@ -228,34 +231,27 @@ export function getWeekendArray(weekend: number | string): number[] {
     return weekendNumberMap[Number(weekend)] || [];
 }
 
-export function countWorkingDays(startDate: Date, endDate: Date, weekend: number | string = 1, holidays?: (Date | string)[]): number {
-    const start = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())).getTime();
-    const end = new Date(Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())).getTime();
-    const diffTime = end > start ? end - start : start - end;
-    const startTime = end > start ? start : end;
-
-    const millisecondsPerDay = 24 * 60 * 60 * 1000;
-    const daysDiff = Math.floor(diffTime / millisecondsPerDay) + 1;
+export function countWorkingDays(startDateSerialNumber: number, endDateSerialNumber: number, weekend: number | string = 1, holidays?: number[]): number {
     const weekendArray = getWeekendArray(weekend);
+
+    const start = Math.floor(startDateSerialNumber);
+    const end = Math.floor(endDateSerialNumber);
+    const startSerialNumber = end > start ? start : end;
 
     let workingDays = 0;
 
+    const daysDiff = Math.abs(Math.floor(endDateSerialNumber) - Math.floor(startDateSerialNumber)) + 1;
+
     for (let i = 0; i < daysDiff; i++) {
-        const currentDate = new Date(startTime + i * millisecondsPerDay);
+        const currentDateSerialNumber = startSerialNumber + i;
 
-        if (holidays && holidays.length > 0 && holidays.some((item) => {
-            if (typeof item === 'string') {
-                item = new Date(item);
-            }
-
-            return item.getFullYear() === currentDate.getFullYear() &&
-                item.getMonth() === currentDate.getMonth() &&
-                item.getDate() === currentDate.getDate();
-        })) {
+        if (holidays && holidays.length > 0 && holidays.some((item) => Math.floor(item) === currentDateSerialNumber)) {
             continue;
         }
 
-        if (weekendArray.includes(currentDate.getDay())) {
+        const weekDay = getWeekDayByDateSerialNumber(currentDateSerialNumber);
+
+        if (weekendArray.includes(weekDay)) {
             continue;
         }
 
@@ -265,38 +261,73 @@ export function countWorkingDays(startDate: Date, endDate: Date, weekend: number
     return end > start ? workingDays : -workingDays;
 }
 
-export function getDateByWorkingDays(startDate: Date, workingDays: number, weekend: number | string = 1, holidays?: (Date | string)[]): Date {
-    const start = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())).getTime();
-    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, workingDays: number, weekend: number | string = 1, holidays?: number[]): (number | ErrorValueObject) {
     const weekendArray = getWeekendArray(weekend);
 
+    startDateSerialNumber = Math.floor(startDateSerialNumber);
+    let targetDateSerialNumber = startDateSerialNumber;
+
     let days = Math.abs(workingDays);
-    let targetDate: Date = startDate;
 
-    for (let i = 0; i < days; i++) {
-        const dayTimes = (i + 1) * millisecondsPerDay;
-        const currentDate = new Date(workingDays < 0 ? start - dayTimes : start + dayTimes);
+    for (let i = 1; i <= days; i++) {
+        const currentDateSerialNumber = workingDays < 0 ? startDateSerialNumber - i : startDateSerialNumber + i;
 
-        if (holidays && holidays.length > 0 && holidays.some((item) => {
-            if (typeof item === 'string') {
-                item = new Date(item);
-            }
+        if (currentDateSerialNumber < 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
 
-            return item.getFullYear() === currentDate.getFullYear() &&
-                item.getMonth() === currentDate.getMonth() &&
-                item.getDate() === currentDate.getDate();
-        })) {
+        if (holidays && holidays.length > 0 && holidays.some((item) => Math.floor(item) === currentDateSerialNumber)) {
             days++;
             continue;
         }
 
-        if (weekendArray.includes(currentDate.getDay())) {
+        const weekDay = getWeekDayByDateSerialNumber(currentDateSerialNumber);
+
+        if (weekendArray.includes(weekDay)) {
             days++;
             continue;
         }
 
-        targetDate = currentDate;
+        targetDateSerialNumber = currentDateSerialNumber;
     }
 
-    return targetDate;
+    return targetDateSerialNumber;
+}
+
+export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject): (ErrorValueObject | number) {
+    const dateValue = serialNumberObject.getValue();
+
+    if (serialNumberObject.isString()) {
+        if (parseFormattedDate(`${dateValue}`)) {
+            return parseFormattedDate(`${dateValue}`).v;
+        } else if (parseFormattedTime(`${dateValue}`)) {
+            return parseFormattedTime(`${dateValue}`).v;
+        } else {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+    } else {
+        const dateSerial = +serialNumberObject.getValue();
+
+        if (dateSerial < 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return dateSerial;
+    }
+}
+
+export function getWeekDayByDateSerialNumber(dateSerialNumber: number): number {
+    // special date 1990-02-29(serialNumber = 60)
+    const isDate19000229 = Math.floor(dateSerialNumber) === 60;
+
+    let date = excelSerialToDate(dateSerialNumber);
+
+    const dateTime = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).getTime();
+    const leapDayDateTime = new Date(Date.UTC(1900, 1, 28)).getTime(); // February 28, 1900, UTC
+
+    if (!isDate19000229 && dateTime <= leapDayDateTime) {
+        date = new Date(dateTime - 24 * 3600 * 1000);
+    }
+
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).getUTCDay();
 }

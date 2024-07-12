@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { excelDateSerial, excelSerialToDate, getDateByWorkingDays, isValidDateStr } from '../../../basics/date';
+import { getDateSerialNumberByObject, getDateSerialNumberByWorkingDays } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
@@ -68,23 +68,10 @@ export class Workday extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        let startDateObject: Date;
-        const startDateValue = startDate.getValue();
+        const startDateSerialNumber = getDateSerialNumberByObject(startDate);
 
-        if (startDate.isString()) {
-            if (!isValidDateStr(`${startDateValue}`)) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            startDateObject = new Date(`${startDateValue}`);
-        } else {
-            const dateSerial = +startDateValue;
-
-            if (dateSerial < 0) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            startDateObject = excelSerialToDate(dateSerial);
+        if (typeof startDateSerialNumber !== 'number') {
+            return startDateSerialNumber;
         }
 
         if (days.isString()) {
@@ -95,12 +82,12 @@ export class Workday extends BaseFunction {
             }
         }
 
-        const workingDays = Number(days.getValue());
+        const workingDays = +days.getValue();
 
-        let result: Date;
+        let result: number | ErrorValueObject;
 
         if (holidays) {
-            const holidaysValueArray = [];
+            const holidaysValueArray: number[] = [];
 
             if (holidays?.isArray()) {
                 const rowCount = (holidays as ArrayValueObject).getRowCount();
@@ -109,64 +96,43 @@ export class Workday extends BaseFunction {
                 for (let r = 0; r < rowCount; r++) {
                     for (let c = 0; c < columnCount; c++) {
                         const cell = (holidays as ArrayValueObject).get(r, c) as BaseValueObject;
+
                         if (cell.isBoolean()) {
                             return ErrorValueObject.create(ErrorType.VALUE);
                         }
 
-                        let holidaysObject: Date;
-                        const holidaysValue = cell.getValue();
+                        const holidaySerialNumber = getDateSerialNumberByObject(cell);
 
-                        if (cell.isString()) {
-                            if (!isValidDateStr(`${holidaysValue}`)) {
-                                return ErrorValueObject.create(ErrorType.VALUE);
-                            }
-
-                            holidaysObject = new Date(`${holidaysValue}`);
-                        } else {
-                            const dateSerial = +holidaysValue;
-
-                            if (dateSerial < 0) {
-                                return ErrorValueObject.create(ErrorType.NUM);
-                            }
-
-                            holidaysObject = excelSerialToDate(dateSerial);
+                        if (typeof holidaySerialNumber !== 'number') {
+                            return holidaySerialNumber;
                         }
 
-                        holidaysValueArray.push(holidaysObject);
+                        holidaysValueArray.push(holidaySerialNumber);
                     }
                 }
             } else {
-                let holidaysObject: Date;
-                const holidaysValue = holidays.getValue();
-
                 if (holidays.isBoolean()) {
                     return ErrorValueObject.create(ErrorType.VALUE);
                 }
 
-                if (holidays.isString()) {
-                    if (!isValidDateStr(`${holidaysValue}`)) {
-                        return ErrorValueObject.create(ErrorType.VALUE);
-                    }
+                const holidaySerialNumber = getDateSerialNumberByObject(holidays);
 
-                    holidaysObject = new Date(`${holidaysValue}`);
-                } else {
-                    const dateSerial = +holidaysValue;
-
-                    if (dateSerial < 0) {
-                        return ErrorValueObject.create(ErrorType.NUM);
-                    }
-
-                    holidaysObject = excelSerialToDate(dateSerial);
+                if (typeof holidaySerialNumber !== 'number') {
+                    return holidaySerialNumber;
                 }
 
-                holidaysValueArray.push(holidaysObject);
+                holidaysValueArray.push(holidaySerialNumber);
             }
 
-            result = getDateByWorkingDays(startDateObject, workingDays, 1, holidaysValueArray);
+            result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays, 1, holidaysValueArray);
         } else {
-            result = getDateByWorkingDays(startDateObject, workingDays);
+            result = getDateSerialNumberByWorkingDays(startDateSerialNumber, workingDays);
         }
 
-        return NumberValueObject.create(excelDateSerial(result));
+        if (typeof result !== 'number') {
+            return result;
+        }
+
+        return NumberValueObject.create(result);
     }
 }

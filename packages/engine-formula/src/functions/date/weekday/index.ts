@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { excelSerialToDate, isValidDateStr } from '../../../basics/date';
+import { getDateSerialNumberByObject, getWeekDayByDateSerialNumber } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -76,36 +76,10 @@ export class Weekday extends BaseFunction {
             return returnTypeObject;
         }
 
-        let date: Date;
-        let isDate19000229: boolean = false; // special date 1990-02-29(serialNumber = 60)
-        const dateValue = serialNumberObject.getValue();
+        const dateSerialNumber = getDateSerialNumberByObject(serialNumberObject);
 
-        if (serialNumberObject.isString()) {
-            if (!isValidDateStr(`${dateValue}`)) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            date = new Date(`${dateValue}`);
-        } else {
-            const dateSerial = Math.floor(+serialNumberObject.getValue());
-
-            if (dateSerial < 0) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            if (dateSerial === 60) {
-                isDate19000229 = true;
-            }
-
-            date = excelSerialToDate(dateSerial);
-        }
-
-        // for Excel
-        const dateTime = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).getTime();
-        const leapDayDateTime = new Date(Date.UTC(1900, 1, 28)).getTime(); // February 28, 1900, UTC
-
-        if (!isDate19000229 && dateTime <= leapDayDateTime) {
-            date = new Date(dateTime - 24 * 3600 * 1000);
+        if (typeof dateSerialNumber !== 'number') {
+            return dateSerialNumber;
         }
 
         const returnTypeMap: {
@@ -141,7 +115,7 @@ export class Weekday extends BaseFunction {
             }
         }
 
-        const weekDay = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).getUTCDay();
+        const weekDay = getWeekDayByDateSerialNumber(dateSerialNumber);
 
         const result = returnTypeMap[returnType][weekDay];
 

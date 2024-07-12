@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { excelSerialToDateTime, parseFormattedDate, parseFormattedTime } from '../../../basics/date';
-import { ErrorType } from '../../../basics/error-type';
+import { excelSerialToDateTime, getDateSerialNumberByObject } from '../../../basics/date';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -45,35 +43,19 @@ export class Hour extends BaseFunction {
     }
 
     private _handleSingleObject(serialNumberObject: BaseValueObject) {
-        let date: Date;
-        const dateValue = serialNumberObject.getValue();
+        const dateSerialNumber = getDateSerialNumberByObject(serialNumberObject);
 
-        if (serialNumberObject.isString()) {
-            if (parseFormattedDate(`${dateValue}`)) {
-                date = excelSerialToDateTime(parseFormattedDate(`${dateValue}`).v);
-            } else if (parseFormattedTime(`${dateValue}`)) {
-                date = excelSerialToDateTime(parseFormattedTime(`${dateValue}`).v);
-            } else {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-        } else {
-            const dateSerial = +serialNumberObject.getValue();
-
-            if (dateSerial < 0) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            // Excel serial 0 is 1900-01-00
-            // Google Sheets serial 0 is 1899-12-30
-            if (dateSerial === 0) {
-                return NumberValueObject.create(0);
-            }
-
-            date = excelSerialToDateTime(dateSerial);
+        if (typeof dateSerialNumber !== 'number') {
+            return dateSerialNumber;
         }
 
-        const hour = date.getUTCHours();
+        if (dateSerialNumber === 0) {
+            return NumberValueObject.create(0);
+        }
 
-        return NumberValueObject.create(hour);
+        const date = excelSerialToDateTime(dateSerialNumber);
+        const hours = date.getUTCHours();
+
+        return NumberValueObject.create(hours);
     }
 }

@@ -30,14 +30,12 @@ import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-co
 export const SheetsThreadCommentPanel = () => {
     const markSelectionService = useDependency(IMarkSelectionService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const threadCommentModel = useDependency(ThreadCommentModel);
     const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const commandService = useDependency(ICommandService);
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
     const subUnitId = useObservable(subUnitId$, workbook.getActiveSheet()?.getSheetId());
-    const activeShapeId = useRef<string | null>();
     const hoverShapeId = useRef<string | null>();
     const panelService = useDependency(ThreadCommentPanelService);
     const activeCommentId = useObservable(panelService.activeCommentId$);
@@ -136,33 +134,6 @@ export const SheetsThreadCommentPanel = () => {
     };
 
     useEffect(() => {
-        if (!activeCommentId) {
-            return;
-        }
-        const comment = threadCommentModel.getComment(activeCommentId.unitId, activeCommentId.subUnitId, activeCommentId.commentId);
-        if (!comment) {
-            return;
-        }
-
-        if (activeShapeId.current) {
-            markSelectionService.removeShape(activeShapeId.current);
-        }
-        if (!panelVisible) {
-            return;
-        }
-        activeShapeId.current = showShape(comment);
-        return () => {
-            if (activeShapeId.current) {
-                markSelectionService.removeShape(activeShapeId.current);
-            }
-        };
-    }, [showShape, activeCommentId, threadCommentModel, markSelectionService, panelVisible]);
-
-    useEffect(() => {
-        if (!panelVisible && activeShapeId.current) {
-            markSelectionService.removeShape(activeShapeId.current);
-        }
-
         if (!panelVisible && hoverShapeId.current) {
             markSelectionService.removeShape(hoverShapeId.current);
         }

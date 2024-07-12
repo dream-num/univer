@@ -43,7 +43,7 @@ export function __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION() {
 export class HTTPRequest {
     get headers(): HTTPHeaders { return this.requestParams!.headers; }
     get withCredentials(): boolean { return this.requestParams!.withCredentials; }
-    get responseType(): string { return this.requestParams!.responseType; }
+    get responseType(): HTTPResponseType { return this.requestParams!.responseType; }
 
     readonly uid = HTTPRequestUID++;
 

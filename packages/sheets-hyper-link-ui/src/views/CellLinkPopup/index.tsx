@@ -16,12 +16,13 @@
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { CancelHyperLinkCommand, HyperLinkModel } from '@univerjs/sheets-hyper-link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
-import { IMessageService, useObservable } from '@univerjs/ui';
+import { IMessageService } from '@univerjs/ui';
+import type { IHyperLinkPopup } from '../../services/popup.service';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
@@ -43,8 +44,19 @@ export const CellLinkPopup = () => {
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);
-    const currentPopup = useObservable(popupService.currentPopup$, popupService.currentPopup);
+    const [currentPopup, setCurrentPopup] = useState<IHyperLinkPopup | null>(null);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
+
+    useEffect(() => {
+        setCurrentPopup(popupService.currentPopup);
+        const ob = popupService.currentPopup$.subscribe((popup) => {
+            setCurrentPopup(popup);
+        });
+        return () => {
+            ob.unsubscribe();
+        };
+    }, [popupService.currentPopup, popupService.currentPopup$]);
+
     if (!currentPopup) {
         return null;
     }

@@ -44,7 +44,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
     color: true,
     loader: { '.svg': 'file', '.ttf': 'file' },
     sourcemap: args.watch,
-    minify: !args.watch,
+    minify: false,
     target: 'chrome70',
     plugins: [
         copyPlugin({

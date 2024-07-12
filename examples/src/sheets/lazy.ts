@@ -17,22 +17,22 @@
 import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
-import { UniverUniscriptPlugin } from '@univerjs/uniscript';
+// import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
     return [
-        [
-            UniverUniscriptPlugin,
-            {
-                getWorkerUrl(moduleID: string, label: string) {
-                    if (label === 'typescript' || label === 'javascript') {
-                        return './vs/language/typescript/ts.worker.js';
-                    }
+        // [
+        //     UniverUniscriptPlugin,
+        //     {
+        //         getWorkerUrl(moduleID: string, label: string) {
+        //             if (label === 'typescript' || label === 'javascript') {
+        //                 return './vs/language/typescript/ts.worker.js';
+        //             }
 
-                    return './vs/editor/editor.worker.js';
-                },
-            },
-        ],
+        //             return './vs/editor/editor.worker.js';
+        //         },
+        //     },
+        // ],
         [UniverSheetsFilterUIPlugin],
         [UniverSheetsFindReplacePlugin],
     ];

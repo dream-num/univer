@@ -15,15 +15,29 @@
  */
 
 import type { ILocales } from '@univerjs/core';
-import { Disposable, LocaleService, toDisposable } from '@univerjs/core';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { FunctionType, IFunctionService } from '@univerjs/engine-formula';
+import { Disposable, DisposableCollection, LocaleService, toDisposable } from '@univerjs/core';
+import type { IFunctionInfo, PrimitiveValueType } from '@univerjs/engine-formula';
+import { CustomFunction, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject } from '@wendellhu/redi';
+import { createIdentifier, Inject, Optional } from '@wendellhu/redi';
 
 import { IDescriptionService } from './description.service';
-import type { IRegisterFunctionList } from './formula-custom-function.service';
-import { IFormulaCustomFunctionService } from './formula-custom-function.service';
+import { IRemoteRegisterFunctionService } from './remote/remote-register-function.service';
+
+export type IRegisterFunction = (
+    ...arg: Array<PrimitiveValueType | PrimitiveValueType[][]>
+) => PrimitiveValueType | PrimitiveValueType[][];
+
+// [[Function, FunctionName, Description]]
+export type IRegisterFunctionList = [[IRegisterFunction, string, string?]];
+
+export interface IFormulaCustomFunctionService {
+    /**
+     * register descriptions
+     * @param functionList
+     */
+    registerFunctions(functionList: IRegisterFunctionList): IDisposable;
+}
 
 /**
  * Register function operation params
@@ -60,25 +74,28 @@ export interface IUnregisterFunctionParams {
     functionNames: string[];
 }
 
+/**
+ * This
+ */
 export interface IRegisterFunctionService {
     /**
      * register descriptions
-     * @param functionList
+     * @param params
      */
     registerFunctions(params: IRegisterFunctionParams): IDisposable;
 }
 
 export const IRegisterFunctionService = createIdentifier<IRegisterFunctionService>(
-    'formula-ui.register-function-service'
+    'sheets-formula.register-function-service'
 );
 
 export class RegisterFunctionService extends Disposable implements IRegisterFunctionService {
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
-        @Inject(IFormulaCustomFunctionService)
-        private readonly _formulaCustomFunctionService: IFormulaCustomFunctionService,
-        @IFunctionService private readonly _functionService: IFunctionService
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @Optional(IRemoteRegisterFunctionService)
+        private readonly _remoteRegisterFunctionService?: IRemoteRegisterFunctionService
     ) {
         super();
     }
@@ -92,12 +109,11 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
             this._localeService.load(locales);
         }
 
-        let descriptionDisposable: IDisposable;
-        // description
+        const disposables = new DisposableCollection();
         if (description) {
-            descriptionDisposable = this._descriptionService.registerDescriptions(description);
+            disposables.add(this._descriptionService.registerDescriptions(description));
         } else {
-            const descriptionList: IFunctionInfo[] = calculate.map(([func, functionName, functionIntroduction]) => {
+            const descriptionList: IFunctionInfo[] = calculate.map(([_func, functionName, functionIntroduction]) => {
                 return {
                     functionName,
                     functionType: FunctionType.User,
@@ -107,15 +123,38 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
                 };
             });
 
-            descriptionDisposable = this._functionService.registerDescriptions(...descriptionList);
+            disposables.add(this._functionService.registerDescriptions(...descriptionList));
         }
 
         // calculation
-        const functionsDisposable = this._formulaCustomFunctionService.registerFunctions(calculate);
+        disposables.add(this._registerLocalExecutors(calculate));
+        if (this._remoteRegisterFunctionService) {
+            disposables.add(this._registerRemoteExecutors(calculate));
+        }
 
-        return toDisposable(() => {
-            functionsDisposable.dispose();
-            descriptionDisposable.dispose();
+        return disposables;
+    }
+
+    private _registerLocalExecutors(list: IRegisterFunctionList): IDisposable {
+        const names = list.map(([_func, name]) => name);
+        const functions = list.map(([func, name]) => {
+            const instance = new CustomFunction(name);
+            instance.calculateCustom = func;
+            return instance;
         });
+
+        this._functionService.registerExecutors(...functions);
+        return toDisposable(() => this._functionService.unregisterExecutors(...names));
+    }
+
+    private _registerRemoteExecutors(list: IRegisterFunctionList): IDisposable {
+        const functionNameList: string[] = []; // used to unregister functions
+        const functions = list.map(([func, name]) => {
+            functionNameList.push(name);
+            return [func.toString(), name] as [string, string];
+        });
+
+        this._remoteRegisterFunctionService!.registerFunctions(functions);
+        return toDisposable(() => this._remoteRegisterFunctionService!.unregisterFunctions(functionNameList));
     }
 }

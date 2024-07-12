@@ -651,7 +651,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         super.dispose();
 
         this._detachEvent();
-
+        this._removeAllTextRanges();
         this._container.remove();
     }
 

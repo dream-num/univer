@@ -84,7 +84,7 @@ export class DataValidationController extends RxDisposable {
 
     private _initInstanceChange() {
         const disposableCollection = new DisposableCollection();
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             disposableCollection.dispose();
             if (!workbook) {
                 return;
@@ -104,7 +104,7 @@ export class DataValidationController extends RxDisposable {
                     }
                 })
             ));
-        });
+        }));
 
         this.disposeWithMe(disposableCollection);
     }

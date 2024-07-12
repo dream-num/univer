@@ -15,7 +15,7 @@
  */
 
 import { RxDisposable } from '@univerjs/core';
-import type { Subscriber, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject, firstValueFrom, isObservable, Observable, of } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
 
@@ -175,7 +175,6 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
     private _initialized = new BehaviorSubject<boolean>(false);
     private _lastRequestCounter = 0;
     private _pendingRequests = new Map<number, IResponseHandler>();
-    private _pendingSubscriptions = new Map<number, Subscriber<any>>();
 
     constructor(private readonly _protocol: IMessageProtocol) {
         super();
@@ -183,6 +182,10 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
         // TODO: subscribe to the state of the protocol and see if it is connected \
         // and initialized.
         this._protocol.onMessage.pipe(takeUntil(this.dispose$)).subscribe((message) => this._onMessage(message));
+    }
+
+    override dispose(): void {
+        this._pendingRequests.clear();
     }
 
     getChannel<T extends IChannel>(channelName: string): T {
@@ -324,6 +327,13 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
 
         this._protocol.onMessage.pipe(takeUntil(this.dispose$)).subscribe((message) => this._onRequest(message));
         this._sendResponse({ seq: -1, type: ResponseType.INITIALIZE });
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        this._subscriptions.clear();
+        this._channels.clear();
     }
 
     registerChannel(channelName: string, channel: IChannel): void {

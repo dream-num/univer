@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-// @ts-ignore
-import numfmt from 'numfmt';
+import { BaseFunction } from './base-function';
 
-import type { Numfmt } from './type';
-
-export { DEFAULT_TEXT_FORMAT } from './const';
-
-export default numfmt as Numfmt;
+export class CustomFunction extends BaseFunction {
+    override isCustom(): boolean {
+        return true;
+    }
+}

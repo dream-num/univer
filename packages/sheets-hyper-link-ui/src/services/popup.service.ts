@@ -23,7 +23,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { Disposable } from '@univerjs/core';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 
-interface IHyperLinkPopup {
+export interface IHyperLinkPopup {
     unitId: string;
     subUnitId: string;
     id: string;

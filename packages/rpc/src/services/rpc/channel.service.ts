@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 
 import type { IChannel, IMessageProtocol } from './rpc.service';
@@ -29,13 +30,18 @@ export const IRPCChannelService = createIdentifier<IRPCChannelService>('IRPCChan
 /**
  * This service is responsible for managing the RPC channels.
  */
-export class ChannelService {
+export class ChannelService implements IDisposable {
     private readonly _client: ChannelClient;
     private readonly _server: ChannelServer;
 
     constructor(_messageProtocol: IMessageProtocol) {
         this._client = new ChannelClient(_messageProtocol);
         this._server = new ChannelServer(_messageProtocol);
+    }
+
+    dispose(): void {
+        this._client.dispose();
+        this._server.dispose();
     }
 
     requestChannel(name: string): IChannel {

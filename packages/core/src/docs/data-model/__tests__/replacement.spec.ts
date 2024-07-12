@@ -126,17 +126,17 @@ describe('test case in replaceInDocumentBody utils', () => {
                 {
                     startIndex: 6,
                     paragraphStyle: {
-                        spaceAbove: 10,
+                        spaceAbove: { v: 10 },
                         lineSpacing: 2,
-                        spaceBelow: 0,
+                        spaceBelow: { v: 0 },
                     },
                 },
                 {
                     startIndex: 15,
                     paragraphStyle: {
-                        spaceAbove: 10,
+                        spaceAbove: { v: 10 },
                         lineSpacing: 2,
-                        spaceBelow: 0,
+                        spaceBelow: { v: 0 },
                     },
                 },
             ],
@@ -145,7 +145,7 @@ describe('test case in replaceInDocumentBody utils', () => {
                     startIndex: 16,
                 },
             ],
-        };
+        } as IDocumentBody;
 
         expect(replaceInDocumentBody(documentBody, '月色', 'Jocs')).toEqual(expectedBody);
     });
@@ -184,17 +184,17 @@ describe('test case in replaceInDocumentBody utils', () => {
                 {
                     startIndex: 2,
                     paragraphStyle: {
-                        spaceAbove: 10,
+                        spaceAbove: { v: 10 },
                         lineSpacing: 2,
-                        spaceBelow: 0,
+                        spaceBelow: { v: 0 },
                     },
                 },
                 {
                     startIndex: 7,
                     paragraphStyle: {
-                        spaceAbove: 10,
+                        spaceAbove: { v: 10 },
                         lineSpacing: 2,
-                        spaceBelow: 0,
+                        spaceBelow: { v: 0 },
                     },
                 },
             ],
@@ -203,7 +203,7 @@ describe('test case in replaceInDocumentBody utils', () => {
                     startIndex: 8,
                 },
             ],
-        };
+        } as IDocumentBody;
 
         expect(replaceInDocumentBody(documentBody, '月色', '')).toEqual(expectedBody);
     });

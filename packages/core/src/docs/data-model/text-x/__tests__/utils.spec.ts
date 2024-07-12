@@ -264,9 +264,9 @@ describe('test text-x utils', () => {
             paragraphs: [{
                 startIndex: 5,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             }],
         });
@@ -301,9 +301,9 @@ describe('test text-x utils', () => {
             }, {
                 startIndex: 5,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             }],
         });
@@ -336,9 +336,9 @@ describe('test text-x utils', () => {
             paragraphs: [{
                 startIndex: 5,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             }, {
                 startIndex: 8,

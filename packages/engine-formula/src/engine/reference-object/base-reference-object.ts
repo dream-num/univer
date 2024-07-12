@@ -414,6 +414,9 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _getPatternByCell(cell: ICellData) {
         const styles = this._unitStylesData[this.getUnitId()];
+
+        if (!styles) return '';
+
         const style = styles.getStyleByCell(cell);
         return style?.n?.pattern || '';
     }

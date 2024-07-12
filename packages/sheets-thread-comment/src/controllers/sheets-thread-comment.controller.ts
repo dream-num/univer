@@ -91,6 +91,10 @@ export class SheetsThreadCommentController extends Disposable {
                 const params = commandInfo.params as ISetSelectionsOperationParams;
                 const { unitId, subUnitId, selections, type } = params;
                 if ((type === SelectionMoveType.MOVE_END || type === undefined) && selections[0].primary) {
+                    const range = selections[0].range;
+                    if (range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) {
+                        return;
+                    }
                     const row = selections[0].primary.actualRow;
                     const col = selections[0].primary.actualColumn;
                     if (!this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {

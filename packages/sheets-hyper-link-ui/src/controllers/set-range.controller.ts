@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
-import { CellValueType, CustomRangeType, DataStreamTreeTokenType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import type { IMutationInfo, Workbook } from '@univerjs/core';
+import { CellValueType, CustomRangeType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
@@ -23,15 +23,8 @@ import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '
 import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { DOC_HYPER_LINK_PLUGIN } from '@univerjs/docs-hyper-link';
+import { getPlainTextFormDocument } from '@univerjs/docs';
 import { isLegalLink, serializeUrl } from '../common/util';
-
-const getPlainTextFormRich = (data: IDocumentData) => {
-    if (!data.body) {
-        return '';
-    }
-    const str = data.body.dataStream.slice(0, -2);
-    return str.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
-};
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
 export class SheetHyperLinkSetRangeController extends Disposable {
@@ -293,7 +286,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                 return next({
                                     ...data,
                                     p: null,
-                                    v: getPlainTextFormRich(data.p),
+                                    v: getPlainTextFormDocument(data.p),
                                     t: CellValueType.STRING,
                                     custom: {
                                         __link_url: url,

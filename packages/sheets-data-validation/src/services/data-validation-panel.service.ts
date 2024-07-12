@@ -57,7 +57,7 @@ export class DataValidationPanelService extends Disposable {
 
         this._open$.next(false);
         this._open$.complete();
-
+        this._activeRule$.complete();
         this._closeDisposable?.dispose();
     }
 

@@ -61,6 +61,10 @@ export class DataValidationDropdownManagerService extends Disposable {
     ) {
         super();
         this._init();
+
+        this.disposeWithMe(() => {
+            this._activeDropdown$.complete();
+        });
     }
 
     private _init() {

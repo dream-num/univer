@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ITextRange, Nullable } from '@univerjs/core';
+import { Disposable, type ITextRange, type Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
-export class DocThreadCommentService {
+export class DocThreadCommentService extends Disposable {
     private _addingComment$ = new BehaviorSubject<Nullable<IThreadComment & ITextRange>>(undefined);
     readonly addingComment$ = this._addingComment$.asObservable();
 
@@ -33,6 +33,11 @@ export class DocThreadCommentService {
         @ISidebarService private readonly _sidebarService: ISidebarService,
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService
     ) {
+        super();
+
+        this.disposeWithMe(() => {
+            this._addingComment$.complete();
+        });
     }
 
     startAdd(comment: IThreadComment & ITextRange) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import { Disposable, type Nullable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { Inject } from '@wendellhu/redi';
@@ -26,7 +26,7 @@ export interface ICurrentDataValidationManager {
     subUnitId: string;
 }
 
-export class SheetDataValidationService {
+export class SheetDataValidationService extends Disposable {
     private _currentManager: Nullable<ICurrentDataValidationManager>;
 
     private _currentManager$ = new Subject<ICurrentDataValidationManager>();
@@ -41,6 +41,10 @@ export class SheetDataValidationService {
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel
     ) {
         // empty
+        super();
+        this.disposeWithMe(() => {
+            this._currentManager$.complete();
+        });
     }
 
     private _ensureManager(unitId: string, subUnitId: string) {

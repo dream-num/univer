@@ -52,7 +52,7 @@ interface ISelectionShapeInfo {
 
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
 export class SheetsThreadCommentController extends Disposable {
-    private _setting = false;
+    private _isSwitchToCommenting = false;
     private _selectionShapeInfo: Nullable<ISelectionShapeInfo> = null;
 
     constructor(
@@ -85,7 +85,7 @@ export class SheetsThreadCommentController extends Disposable {
     private _initCommandListener() {
         this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetSelectionsOperation.id) {
-                if (this._setting) {
+                if (this._isSwitchToCommenting) {
                     return;
                 }
                 const params = commandInfo.params as ISetSelectionsOperationParams;
@@ -163,7 +163,7 @@ export class SheetsThreadCommentController extends Disposable {
                 if (currentUnitId !== unitId) {
                     return;
                 }
-                this._setting = true;
+                this._isSwitchToCommenting = true;
                 const currentSheetId = currentUnit.getActiveSheet()?.getSheetId();
                 if (currentSheetId !== subUnitId) {
                     await this._commandService.executeCommand(SetWorksheetActiveOperation.id, {
@@ -171,7 +171,7 @@ export class SheetsThreadCommentController extends Disposable {
                         subUnitId,
                     });
                 }
-                this._setting = false;
+                this._isSwitchToCommenting = false;
 
                 const location = singleReferenceToGrid(comment.ref);
 

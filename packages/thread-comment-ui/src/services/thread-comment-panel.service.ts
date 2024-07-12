@@ -38,6 +38,11 @@ export class ThreadCommentPanelService extends Disposable {
     ) {
         super();
         this._init();
+
+        this.disposeWithMe(() => {
+            this._activeCommentId$.complete();
+            this._panelVisible$.complete();
+        });
     }
 
     private _init() {

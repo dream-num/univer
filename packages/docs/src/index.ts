@@ -83,6 +83,9 @@ export {
     SetTextSelectionsOperation,
     type ISetTextSelectionsOperationParams,
 } from './commands/operations/text-selection.operation';
+
+// #endregion
+
 export { getRetainAndDeleteFromReplace } from './basics/retain-delete-params';
 export { getRichTextEditPath } from './commands/util';
-// #endregion
+export { getPlainTextFormDocument } from './basics/plain-text';

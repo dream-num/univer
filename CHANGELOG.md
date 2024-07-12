@@ -1,5 +1,41 @@
 
 
+## [0.2.3](https://github.com/dream-num/univer/compare/v0.2.0...v0.2.3) (2024-07-12)
+
+
+### Bug Fixes
+
+* backspace in header and footer ([#2704](https://github.com/dream-num/univer/issues/2704)) ([749b407](https://github.com/dream-num/univer/commit/749b407fddbb2b8386924fffe2070f4c68919857))
+* **docs-hyper-link:** hyper link resource ([#2732](https://github.com/dream-num/univer/issues/2732)) ([1b17ec5](https://github.com/dream-num/univer/commit/1b17ec5127b97898a8f00b97c0f692fda99fcaf9))
+* **docs:** fix blank screen ([#2720](https://github.com/dream-num/univer/issues/2720)) ([fbed267](https://github.com/dream-num/univer/commit/fbed26731a67ca146be9ecf350fa7d8d2b99c8ed))
+* failed to get scene in scroll render controller ([#2737](https://github.com/dream-num/univer/issues/2737)) ([987c5d2](https://github.com/dream-num/univer/commit/987c5d267146ab70039eda43c5073a1da9c4d9de))
+* fix replace content params options ([c2bbaaf](https://github.com/dream-num/univer/commit/c2bbaaf03618b0193e4ceaf1ba8b416089593e14))
+* **formula:** len counts displayed value ([#2702](https://github.com/dream-num/univer/issues/2702)) ([ce887b0](https://github.com/dream-num/univer/commit/ce887b058d8ca26f87ae7bafda9211f0176a1805))
+* load resource ([#2752](https://github.com/dream-num/univer/issues/2752)) ([9606194](https://github.com/dream-num/univer/commit/960619473b9786db26aa2e8746c1facbae4dd5cf))
+* **sheet:** keep text formatting when setting range value ([#2711](https://github.com/dream-num/univer/issues/2711)) ([a1a3dbc](https://github.com/dream-num/univer/commit/a1a3dbcd829dfb585162945369c6ee51db9c55e1))
+* **sheets-hyper-link-ui:** popup observable error on react16 ([#2755](https://github.com/dream-num/univer/issues/2755)) ([f0edc5b](https://github.com/dream-num/univer/commit/f0edc5b0f2a12f8cbb2eebd7591a26a522207617))
+* tons of memory leak ([#2754](https://github.com/dream-num/univer/issues/2754)) ([3f3dcff](https://github.com/dream-num/univer/commit/3f3dcff2fd0ead417d2fe522c74c893c23221745))
+* **ui:** fix issue where context menu item cannot be selected in React 16 ([#2739](https://github.com/dream-num/univer/issues/2739)) ([d971be9](https://github.com/dream-num/univer/commit/d971be91909bd9d38ded67c367668ccc903e717b))
+* **umd:** fix issue with datepicker localization not working in UMD bundle ([#2719](https://github.com/dream-num/univer/issues/2719)) ([962e057](https://github.com/dream-num/univer/commit/962e05778e67f70c7f9bb795a9f9d6a1dd484ddb))
+
+
+### Features
+
+* **formula:** add more functions ([#2701](https://github.com/dream-num/univer/issues/2701)) ([8598e02](https://github.com/dream-num/univer/commit/8598e028c0ff2129b98a3b0e09428388b9dcb1df))
+* **formula:** enable cancellation of ongoing formula calculations ([#2661](https://github.com/dream-num/univer/issues/2661)) ([5d80993](https://github.com/dream-num/univer/commit/5d80993cd76ad9f62748a1bc6451aa85a3b67eb1))
+* **i18n:** add `zh-TW`, `vi-VN` language ([#2694](https://github.com/dream-num/univer/issues/2694)) ([2f99d19](https://github.com/dream-num/univer/commit/2f99d19aeacab3f0574df7a1f6e61bad0062f57e))
+* **network:** add merge interceptor ([#2749](https://github.com/dream-num/univer/issues/2749)) ([6a0c1b7](https://github.com/dream-num/univer/commit/6a0c1b7e3abca62e284bd82c431b249831f61866))
+* optimization of doc image ([#2432](https://github.com/dream-num/univer/issues/2432)) ([3f98681](https://github.com/dream-num/univer/commit/3f98681655478056b27e1ee0f3f2d840d0392d4d))
+* **permission:** support refresh ([#2740](https://github.com/dream-num/univer/issues/2740)) ([710e26a](https://github.com/dream-num/univer/commit/710e26afaac3f2c53cf51d1a4097587e2e3e9fb5))
+* **sheets-data-validation:** support show-time when set validation at `date` ([#2723](https://github.com/dream-num/univer/issues/2723)) ([737660e](https://github.com/dream-num/univer/commit/737660e5205e60a72762cdc7cce06f8b08c21dab))
+* sidebar-service supports scroll-event subscription ([#2724](https://github.com/dream-num/univer/issues/2724)) ([2da550d](https://github.com/dream-num/univer/commit/2da550df5950ae8f0e78d4906818f93bf414fe4c))
+* **ui:** change floating position ([#2698](https://github.com/dream-num/univer/issues/2698)) ([f2fbd3b](https://github.com/dream-num/univer/commit/f2fbd3bdf1f2110469179de1afc132cfe1941bf8))
+
+
+### Reverts
+
+* "chore: image menu show on insert position" ([#2714](https://github.com/dream-num/univer/issues/2714)) ([2965f28](https://github.com/dream-num/univer/commit/2965f28ba729c80800e84150bae87970a41fa2cf))
+
 ## [0.2.2](https://github.com/dream-num/univer/compare/v0.2.1...v0.2.2) (2024-07-09)
 
 

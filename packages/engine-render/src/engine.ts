@@ -21,8 +21,8 @@ import { Observable, shareReplay, Subject } from 'rxjs';
 import type { CURSOR_TYPE } from './basics/const';
 import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
 import { DeviceType, PointerInput } from './basics/i-events';
-import type { IPartialRenderPerformanceMetry } from './basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
+import type { ISampleFrameInfo } from './basics/performance-monitor';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
 import { Canvas, CanvasRenderMode } from './canvas';
@@ -36,7 +36,7 @@ export class Engine extends ThinEngine<Scene> {
     private readonly _beginFrame$ = new Subject<void>();
     readonly beginFrame$ = this._beginFrame$.asObservable();
 
-    private readonly _endFrame$ = new Subject<IPartialRenderPerformanceMetry>();
+    private readonly _endFrame$ = new Subject<ISampleFrameInfo>();
     readonly endFrame$ = this._endFrame$.asObservable();
 
     private _rect$: Nullable<Observable<void>> = null;
@@ -67,7 +67,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _renderingQueueLaunched = false;
 
-    private _renderFrameTasks = new Array<() => void>();
+    private _renderFrameTasks = new Array<() => Record<string, any> | void>();
 
     private _renderFunction = (_timestamp: number) => { /* empty */ };
 
@@ -150,8 +150,8 @@ export class Engine extends ThinEngine<Scene> {
         this._performanceMonitor = new PerformanceMonitor();
     }
 
-    get sampleFrameList$() {
-        return this._performanceMonitor.sampleFrameList$;
+    get frameList$() {
+        return this._performanceMonitor.frameListPastSec$;
     }
 
     override get width() {
@@ -320,7 +320,7 @@ export class Engine extends ThinEngine<Scene> {
         if (!this._renderingQueueLaunched) {
             this._renderStartTime = performance.now();
             this._renderingQueueLaunched = true;
-            this._renderFunction = this._renderLoop.bind(this);
+            this._renderFunction = this._renderFunctionCore.bind(this);
             this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
         }
     }
@@ -358,9 +358,8 @@ export class Engine extends ThinEngine<Scene> {
     /**
      * Begin a new frame
      */
-    beginFrame(timestamp: number): void {
+    beginFrame(_timestamp: number): void {
         this._beginFrame$.next();
-        this._measureFps(timestamp);
     }
 
     /**
@@ -368,9 +367,11 @@ export class Engine extends ThinEngine<Scene> {
      */
     endFrame(timestamp: number): void {
         this._frameId++;
+        this._measureFps(timestamp);
+        this._performanceMonitor.endFrame(timestamp);
         this._endFrame$.next({
-            fps: this.getFps(),
-            duration: this.getDeltaTime(),
+            FPS: this.getFps(),
+            frameTime: this.getDeltaTime(),
         });
     }
 
@@ -395,11 +396,14 @@ export class Engine extends ThinEngine<Scene> {
     /**
      * Exec all function in _renderFrameTasks
      */
-    _renderFrame() {
+    private _renderFrame(_timestamp: number) {
         for (let index = 0; index < this._renderFrameTasks.length; index++) {
             const renderFunction = this._renderFrameTasks[index];
 
-            renderFunction();
+            const renderResult = renderFunction();
+            if (renderResult) {
+                this._performanceMonitor.addFrameTimeDetail(renderResult);
+            }
         }
     }
 
@@ -436,7 +440,7 @@ export class Engine extends ThinEngine<Scene> {
      * call itself by raf
      * Exec all function in _renderFrameTasks in _renderFrame()
      */
-    private _renderLoop(timestamp: number): void {
+    private _renderFunctionCore(timestamp: number): void {
         let shouldRender = true;
         if (!this.renderEvenInBackground) {
             shouldRender = false;
@@ -446,7 +450,6 @@ export class Engine extends ThinEngine<Scene> {
             // Start new frame
             this.beginFrame(timestamp);
             this._renderFrame(timestamp);
-            // Present
             this.endFrame(timestamp);
         }
 

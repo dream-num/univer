@@ -708,6 +708,14 @@ export class Tools {
         return Math.max(min, Math.min(max, value));
     }
 
+    static Now(): number {
+        if (performance && performance.now) {
+            return performance.now();
+        }
+
+        return Date.now();
+    }
+    
     /**
      *
      *

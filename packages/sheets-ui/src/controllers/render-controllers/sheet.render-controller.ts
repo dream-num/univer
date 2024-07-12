@@ -18,8 +18,6 @@ import type { ICommandInfo, IExecutionOptions, IRange, Workbook, Worksheet } fro
 import { CommandType, FOCUSING_SHEET, ICommandService, IContextService, Inject, Rectangle, RxDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
-    DEFAULT_FRAME_LIST_SIZE,
-    Layer,
     PointerInput,
     Rect,
     RENDER_CLASS_TYPE,
@@ -31,7 +29,8 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { ITelemetryService, TelemetryEventNames } from '@univerjs/telemetry';
+import { ITelemetryService } from '@univerjs/telemetry';
+import { Subject, withLatestFrom } from 'rxjs';
 import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 
 import {
@@ -41,16 +40,15 @@ import {
 } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
-import { Subject } from 'rxjs';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
     subUnitId: string;
 }
 
-
 export class SheetRenderController extends RxDisposable implements IRenderModule {
     private _summarizedFrameData$: Subject<ISummaryFrameData>;
+    private _spreadsheet: Spreadsheet;
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IContextService private readonly _contextService: IContextService,
@@ -66,7 +64,11 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _addNewRender() {
         const { scene, engine, unit: workbook } = this._context;
-        scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
+
+        // scene.addLayer(
+        //     new Layer(scene, [], SHEET_COMPONENT_MAIN_LAYER_INDEX),
+        //     new Layer(scene, [], 2)
+        // );
 
         this._addComponent(workbook);
         this._initRerenderScheduler();
@@ -82,45 +84,82 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         engine.runRenderLoop(() => scene.render());
     }
 
+    // private _frameInfoList: ISampleFrameInfo[] = [];
     private _initSubscriber() {
         this._summarizedFrameData$ = new Subject<ISummaryFrameData>();
-        this._renderMetryListener();
-        const { engine } = this._context;
-        engine.sampleFrameList$.subscribe( (sampleFrameList:Partial<ISampleFrameInfo>[]) => {
-            if(sampleFrameList.length > DEFAULT_FRAME_LIST_SIZE) {
-                const frameInfos = sampleFrameList as unknown as ISampleFrameInfo[];
-                let minFrameTime = frameInfos[0].frameTime;
-                let maxFrameTime = frameInfos[0].frameTime;
-                let avgFrameTime = frameInfos[0].frameTime;
-                for( let i = 0; i < frameInfos.length; i++) {
+        const { engine, mainComponent } = this._context;
+        const spreadsheet = mainComponent as Spreadsheet;
 
-                    if(frameInfos[i].frameTime < minFrameTime) {
-                        minFrameTime = frameInfos[i].frameTime;
-                    }
-                    if(frameInfos[i].frameTime > maxFrameTime) {
-                        maxFrameTime = frameInfos[i].frameTime;
-                    }
-                    avgFrameTime += frameInfos[i].frameTime;
-                }
-                avgFrameTime = avgFrameTime / frameInfos.length;
-                this._summarizedFrameData$.next({
-                    minFrameTime,
-                    maxFrameTime,
-                    avgFrameTime
-                })
+        const frameInfoList: ISampleFrameInfo[] = [];
+        spreadsheet.afterRender$.pipe(
+            withLatestFrom(engine.endFrame$)
+        ).subscribe(([spreadsheetRenderDetail, frameInfo]: [Record<string, number>, ISampleFrameInfo ]) => {
+            frameInfoList.push({
+                ...frameInfo,
+                ...spreadsheetRenderDetail,
+            });
+            if (frameInfoList.length > 360) {
+                this._renderMetryCapture(frameInfoList);
+                frameInfoList.length = 0;
             }
-        })
+        });
+        // engine.frameList$.subscribe((sampleFrameList: Partial<ISampleFrameInfo>[]) => {
+        //     if (sampleFrameList.length > DEFAULT_FRAME_LIST_SIZE) {
+        //         const frameInfos = sampleFrameList as unknown as ISampleFrameInfo[];
+        //         let minFrameTime = frameInfos[0].frameTime;
+        //         let maxFrameTime = frameInfos[0].frameTime;
+        //         let avgFrameTime = frameInfos[0].frameTime;
+        //         for (let i = 0; i < frameInfos.length; i++) {
+        //             if (frameInfos[i].frameTime < minFrameTime) {
+        //                 minFrameTime = frameInfos[i].frameTime;
+        //             }
+        //             if (frameInfos[i].frameTime > maxFrameTime) {
+        //                 maxFrameTime = frameInfos[i].frameTime;
+        //             }
+        //             avgFrameTime += frameInfos[i].frameTime;
+        //         }
+        //         avgFrameTime = avgFrameTime / frameInfos.length;
+        //         this._summarizedFrameData$.next({
+        //             minFrameTime,
+        //             maxFrameTime,
+        //             avgFrameTime,
+        //         });
+        //     }
+        // });
     }
 
-    private _renderMetryListener() {
+    private _renderMetryCapture(frameInfoList: ISampleFrameInfo[]) {
+        const getKeyStats = (data: Record<string, number>[]) => {
+            // 首先获取所有的 key
+            const keys = Object.keys(data[0]);
+
+            // 遍历每个 key,计算其最大值、最小值和平均值
+            const stats = keys.reduce((acc: Record<string, Record<string, number>>, key) => {
+                const values = data.map((obj) => obj[key]);
+                const max = Math.max(...values);
+                const min = Math.min(...values);
+                const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
+
+                acc[key] = {
+                    max,
+                    min,
+                    avg,
+                };
+
+                return acc;
+            }, {});
+
+            return stats;
+        };
+        const summaryFrameList = getKeyStats(frameInfoList);
         const sheetId = this._context.unit.getActiveSheet().getSheetId();
         const unitId = this._context.unit.getUnitId();
 
-        this._summarizedFrameData$.subscribe( (data: ISummaryFrameData) => {
-            console.log('_renderMetryListener', new Date(), {sheetId, unitId, ...data })
+        // this._summarizedFrameData$.subscribe((data: ISummaryFrameData) => {
+        //     // console.log('_renderMetryListener', new Date(), { sheetId, unitId, ...data });
 
-            this._telemetryService.capture(TelemetryEventNames.sheet_render_cost, {sheetId, unitId, ...data });
-        });
+        // this._telemetryService.capture(TelemetryEventNames.sheet_render_cost, { sheetId, unitId, ...data });
+        // });
     }
 
     private _addComponent(workbook: Workbook) {
@@ -132,6 +171,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         }
 
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+        // this._spreadsheet = spreadsheet;
 
         this._addViewport(worksheet);
 

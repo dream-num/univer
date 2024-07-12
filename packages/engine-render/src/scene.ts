@@ -589,7 +589,10 @@ export class Scene extends ThinScene {
         const layers = this._layers.sort(sortRules);
 
         for (let i = 0, len = layers.length; i < len; i++) {
+            // const st = Tools.Now();
             layers[i].render(parentCtx, i === len - 1);
+            // const renderDuration = Tools.Now() - st;
+            // console.log(`scene render duration: ${layers[i].zIndex}--${renderDuration}`);
         }
     }
 

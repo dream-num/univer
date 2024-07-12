@@ -15,8 +15,9 @@
  */
 
 import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
-import { BooleanNumber, sortRules } from '@univerjs/core';
+import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 
+import { BehaviorSubject } from 'rxjs';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 
 // import { clearLineByBorderType } from '../../basics/draw';
@@ -57,6 +58,9 @@ export class Spreadsheet extends SheetComponent {
         pageMarginLeft: 0,
         pageMarginTop: 0,
     });
+
+    private _frameTimeDetail: Record<string, number> = {};
+    afterRender$: BehaviorSubject<any> = new BehaviorSubject<any>({});
 
     isPrinting = false;
 
@@ -130,12 +134,15 @@ export class Spreadsheet extends SheetComponent {
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
 
         for (const extension of extensions) {
-            const _timeKey = `extension ${viewportInfo.viewportKey}:${extension.constructor.name}`;
+            const timeKey = `${viewportInfo.viewportKey}-${extension.constructor.name}`;
+            const st = Tools.Now();
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
                 viewRanges,
                 checkOutOfViewBound: true,
                 viewportKey: viewportInfo.viewportKey,
             });
+            // console.log(timeKey, Tools.Now() - st);
+            this._frameTimeDetail[timeKey] = (this._frameTimeDetail[timeKey] || 0) + Tools.Now() - st;
         }
     }
 
@@ -368,23 +375,25 @@ export class Spreadsheet extends SheetComponent {
         ) {
             return;
         }
+
+        this._beforeRender();
         mainCtx.save();
 
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
 
         const { viewportKey } = viewportInfo;
-            // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
-            // SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
-            // SHEET_COMPONENT_SELECTION_LAYER_INDEX = 1;
-            // SHEET_COMPONENT_HEADER_LAYER_INDEX = 10;
-            // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX = 11;
-            // ......
-            // SHEET_COMPONENT_MAIN_LAYER_INDEX spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
-            // SHEET_COMPONENT_HEADER_LAYER_INDEX rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect..., HeaderMenuResizeShape]
-            // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX selection  this.getObjectsByOrder() ---> [_Rect, Group]
+        // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
+        // SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
+        // SHEET_COMPONENT_SELECTION_LAYER_INDEX = 1;
+        // SHEET_COMPONENT_HEADER_LAYER_INDEX = 10;
+        // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX = 11;
+        // ......
+        // SHEET_COMPONENT_MAIN_LAYER_INDEX spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
+        // SHEET_COMPONENT_HEADER_LAYER_INDEX rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect..., HeaderMenuResizeShape]
+        // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX selection  this.getObjectsByOrder() ---> [_Rect, Group]
 
-            // SpreadsheetRowHeader SpreadsheetColumnHeader is not render by spreadsheet
+        // SpreadsheetRowHeader SpreadsheetColumnHeader is not render by spreadsheet
         if (this.sheetContentViewport().includes(viewportKey as SHEET_VIEWPORT_KEY)) {
             if (viewportInfo && viewportInfo.cacheCanvas) {
                 this.renderByViewport(mainCtx, viewportInfo, spreadsheetSkeleton);
@@ -402,9 +411,19 @@ export class Spreadsheet extends SheetComponent {
                 this._draw(mainCtx, viewportInfo);
             }
         }
-
         mainCtx.restore();
+        this._afterRender();
         return this;
+    }
+
+    private _beforeRender() {
+        this._frameTimeDetail = {};
+    }
+
+    private _afterRender() {
+        if (Object.keys(this._frameTimeDetail).length > 0) {
+            this.afterRender$.next(this._frameTimeDetail);
+        }
     }
 
     /**

@@ -48,6 +48,7 @@ import { FormulaEditorShowController } from './formula-editor-show.controller';
 
 export interface IUniverSheetsFormulaConfig {
     menu: MenuConfig;
+    notExecuteFormula?: boolean;
     description: IFunctionInfo[];
     function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
 }

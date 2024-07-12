@@ -1750,6 +1750,9 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../rpc
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared

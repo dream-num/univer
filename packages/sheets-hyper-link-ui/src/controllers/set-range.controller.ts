@@ -185,7 +185,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                 return;
                             }
 
-                            if (cellValueRaw === '') {
+                            if (cellValueRaw === '' || cell?.custom?.__link_url === '') {
                                 redos.push({
                                     id: RemoveHyperLinkMutation.id,
                                     params: {

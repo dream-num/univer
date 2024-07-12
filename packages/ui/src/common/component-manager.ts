@@ -292,13 +292,10 @@ export class ComponentManager {
 async function renderVue3Component(VueComponent: ReturnType<typeof defineComponent>, element: HTMLElement, args: Record<string, any>) {
     try {
         const { h, render } = await import('vue');
-
         const vnode = h(VueComponent, args);
-
         const container = document.createElement('div');
 
         document.body.appendChild(container);
-
         render(vnode, element);
     } catch (error) {
     }

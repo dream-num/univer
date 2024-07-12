@@ -473,6 +473,9 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
+      '@univerjs/facade':
+        specifier: workspace:*
+        version: link:../facade
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared

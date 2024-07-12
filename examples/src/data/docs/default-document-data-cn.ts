@@ -254,41 +254,41 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             {
                 startIndex: 4,
                 paragraphStyle: {
-                    spaceAbove: 0,
+                    spaceAbove: { v: 0 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 5,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 12,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 13,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 127,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                     // hanging: 20,
                     // indentStart: 50,
                     // indentEnd: 50,
@@ -298,457 +298,457 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             {
                 startIndex: 128,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 244,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 245,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 398,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 399,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 618,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 619,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 824,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 825,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1007,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1008,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1130,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1131,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1203,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1204,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1238,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1239,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1256,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1257,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1282,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1283,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1380,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1381,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1396,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1397,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1398,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1399,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1457,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1458,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1559,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1560,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1566,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1670,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1671,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1728,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1729,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1811,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1812,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1912,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 1913,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2053,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2054,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2190,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2191,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2341,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2342,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2481,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2482,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2582,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2583,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2750,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2751,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2853,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2854,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2948,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 2949,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 3065,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
         ],

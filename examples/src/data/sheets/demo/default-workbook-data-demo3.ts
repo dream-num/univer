@@ -36,7 +36,7 @@ const richTextDemo: IDocumentData = {
             {
                 startIndex: 489,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 1.2,
                 },
             },

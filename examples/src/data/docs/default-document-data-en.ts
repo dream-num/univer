@@ -263,7 +263,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 253,
                 paragraphStyle: {
-                    spaceAbove: 30,
+                    spaceAbove: { v: 30 },
                     lineSpacing: 1.5,
                     suppressHyphenation: BooleanNumber.FALSE,
                 },
@@ -271,8 +271,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 404,
                 paragraphStyle: {
-                    spaceAbove: 20,
-                    indentFirstLine: 20,
+                    spaceAbove: { v: 20 },
+                    indentFirstLine: { v: 20 },
                     lineSpacing: 1.5,
                 },
             },
@@ -291,7 +291,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
                 paragraphStyle: {
                     lineSpacing: 1.5,
-                    spaceAbove: 20,
+                    spaceAbove: { v: 20 },
                 },
             },
             {
@@ -305,7 +305,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     },
                 },
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 1.5,
                 },
             },
@@ -320,58 +320,58 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     },
                 },
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 713,
                 paragraphStyle: {
-                    spaceAbove: 20,
-                    indentFirstLine: 20,
+                    spaceAbove: { v: 20 },
+                    indentFirstLine: { v: 20 },
                     lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 771,
                 paragraphStyle: {
-                    spaceAbove: 20,
+                    spaceAbove: { v: 20 },
                     lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 1244,
                 paragraphStyle: {
-                    spaceAbove: 20,
+                    spaceAbove: { v: 20 },
                     lineSpacing: 1.5,
-                    indentFirstLine: 20,
+                    indentFirstLine: { v: 20 },
                 },
             },
             {
                 startIndex: 1589,
                 paragraphStyle: {
-                    indentFirstLine: 20,
+                    indentFirstLine: { v: 20 },
                     lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 1986,
                 paragraphStyle: {
-                    indentFirstLine: 20,
+                    indentFirstLine: { v: 20 },
                     lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 2062,
                 paragraphStyle: {
-                    indentFirstLine: 20,
+                    indentFirstLine: { v: 20 },
                     lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 2294,
                 paragraphStyle: {
-                    indentFirstLine: 20,
+                    indentFirstLine: { v: 20 },
                     lineSpacing: 1.5,
                 },
                 bullet: {
@@ -386,7 +386,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 2438,
                 paragraphStyle: {
-                    indentFirstLine: 20,
+                    indentFirstLine: { v: 20 },
                     lineSpacing: 1.5,
                 },
                 bullet: {
@@ -401,7 +401,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 2628,
                 paragraphStyle: {
-                    indentFirstLine: 20,
+                    indentFirstLine: { v: 20 },
                     lineSpacing: 1.5,
                 },
                 bullet: {

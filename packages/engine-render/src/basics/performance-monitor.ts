@@ -45,21 +45,25 @@ export class PerformanceMonitor extends Disposable {
 
     private _lastFrameTimeMs: Nullable<number>;
 
-    private _lastSecondTime: Nullable<number>;
+    /**
+     * for counting frame in a second.
+     */
+    private _lastSecondTimeMs: Nullable<number>;
 
     private _frameCountInLastSecond: number = 0;
 
     private _recFPSValueLastSecond: number = 60;
 
-    protected _frameCount: number = 0; // number of all frames in whole life time.
-
-    protected _frameSampleSize: number = 0;
+    private _frameCount: number = 0; // number of all frames in whole life time.
 
     /**
      * frameTime list in past second
      */
-    protected _frameTimeListPassedSec: Partial<ISampleFrameInfo>[] = [];
-    sampleFrameList$ = new BehaviorSubject<Partial<ISampleFrameInfo>[]>([]);
+    private _frameTimeListPastSec: Partial<ISampleFrameInfo>[] = [];
+    frameListPastSec$ = new BehaviorSubject<Partial<ISampleFrameInfo>[]>([]);
+
+    private _frameTimeDetail: Nullable<Record<string, any>> = null;
+    // frameTime$: BehaviorSubject<Nullable<Record<string, any>>> = new BehaviorSubject<Nullable<Record<string, any>>>(null);
 
     /**
      * constructor
@@ -67,14 +71,14 @@ export class PerformanceMonitor extends Disposable {
      */
     constructor(frameSampleSize: number = DEFAULT_FRAME_SAMPLE_SIZE) {
         super();
-        this._frameSampleSize = frameSampleSize;
         this._rollingFrameTime = new RollingAverage(frameSampleSize);
     }
 
     override dispose(): void {
         super.dispose();
-        this.sampleFrameList$.complete();
-        this._frameTimeListPassedSec = [];
+        this.frameListPastSec$.complete();
+        // this.frameTime$.complete();
+        this._frameTimeListPastSec = [];
     }
 
     /**
@@ -125,6 +129,14 @@ export class PerformanceMonitor extends Disposable {
         return this._rollingFrameTime.isSaturated();
     }
 
+    clearFrameDetail() {
+        this._frameTimeDetail = null;
+    }
+
+    addFrameTimeDetail(moreInfo: Record<string, any>) {
+        this._frameTimeDetail = moreInfo;
+    }
+
     /**
      * Returns true if sampling is enabled
      */
@@ -141,37 +153,47 @@ export class PerformanceMonitor extends Disposable {
         if (!this._enabled) {
             return;
         }
+
+        //#region FPS
         this._frameCount++;
         this._frameCountInLastSecond++;
-        if (this._lastSecondTime != null) {
-            const oneSecPassed = this._lastSecondTime <= timestamp - DEFAULT_ONE_SEC_MS;
+        if (this._lastSecondTimeMs != null) {
+            const oneSecPassed = this._lastSecondTimeMs <= timestamp - DEFAULT_ONE_SEC_MS;
             if (oneSecPassed) {
-                const passedTime = timestamp - this._lastSecondTime;
+                const passedTime = timestamp - this._lastSecondTimeMs;
                 this._recFPSValueLastSecond = Math.round(this._frameCountInLastSecond / passedTime * DEFAULT_ONE_SEC_MS);
-                this._lastSecondTime = timestamp;
+                this._lastSecondTimeMs = timestamp;
                 this._frameCountInLastSecond = 0;
             }
         } else {
-            this._lastSecondTime = timestamp;
+            this._lastSecondTimeMs = timestamp;
         }
+        //#endregion
 
+        //#region frameTime
         if (this._lastFrameTimeMs != null) {
             const dt = timestamp - this._lastFrameTimeMs;
-            //  set averageFPS instantaneousFrameTime
             this._rollingFrameTime.add(dt);
             this._rollingFrameTime.calcAverageFrameTime();
 
-            this._frameTimeListPassedSec.push({
-                frameTime: dt,
-            });
-            this.sampleFrameList$.next([...this._frameTimeListPassedSec]);
+            // const frameInfo = {
+            //     frameTime: dt,
+            // };
+            // if (this._frameTimeDetail) {
+            //     frameInfo = { ...frameInfo, ...this._frameTimeDetail };
+            // }
+            // this._frameTimeListPastSec.push(frameInfo);
         }
+        //#endregion
+    }
 
-        if (this._frameTimeListPassedSec.length > DEFAULT_FRAME_LIST_SIZE) {
-            this._frameTimeListPassedSec = [];
-        }
-
+    endFrame(timestamp: number) {
+        // this.frameListPastSec$.next([...this._frameTimeListPastSec]);
+        // if (this._frameTimeListPastSec.length > DEFAULT_FRAME_LIST_SIZE) {
+        //     this._frameTimeListPastSec = [];
+        // }
         this._lastFrameTimeMs = timestamp;
+        this.clearFrameDetail();
     }
 
     Now(): number {

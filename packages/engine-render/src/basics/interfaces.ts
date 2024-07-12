@@ -67,13 +67,12 @@ export enum TRANSFORM_CHANGE_OBSERVABLE_TYPE {
     all,
 }
 
+// export interface IRenderPerformanceMetry {
+//     fps: number;
+//     duration: number;
+// }
 
-export interface IRenderPerformanceMetry {
-    fps: number;
-    duration: number;
-}
-
-export interface IPartialRenderPerformanceMetry  extends Partial<IRenderPerformanceMetry> {}
+// export interface IPartialRenderPerformanceMetry  extends Partial<IRenderPerformanceMetry> {}
 
 export interface ITransformChangeState {
     type: TRANSFORM_CHANGE_OBSERVABLE_TYPE;

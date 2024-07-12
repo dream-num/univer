@@ -21,7 +21,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';
-import { type IThreadComment, ThreadCommentModel } from '@univerjs/thread-comment';
+import type { IThreadComment } from '@univerjs/thread-comment';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';

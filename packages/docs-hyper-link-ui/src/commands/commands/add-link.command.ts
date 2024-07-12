@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, type ICommand, ICommandService, sequenceExecute, sequenceExecuteAsync, Tools } from '@univerjs/core';
+import { CommandType, CustomRangeType, type ICommand, ICommandService, sequenceExecute, Tools } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import { AddDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
 

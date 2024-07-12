@@ -157,9 +157,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         protected readonly _renderManagerService: IRenderManagerService
     ) {
         super();
+
         this._resetStyle();
-        // @ts-expect-error
-        if (!window.srs) window.srs = this;
     }
 
     protected _setStyle(style: ISelectionStyle) {

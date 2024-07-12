@@ -18,18 +18,18 @@ export function requestImmediateMacroTask(callback: (value?: unknown) => void): 
     const channel = new MessageChannel();
     let cancelled = false;
 
-    channel.port1.onmessage = () => {
+    const hanlder = () => {
         if (!cancelled) {
             callback();
         }
     };
 
+    channel.port1.addEventListener('message', hanlder);
     channel.port2.postMessage(null);
 
     return () => {
         cancelled = true;
-        // dispose
-        channel.port1.onmessage = null;
+        channel.port1.removeEventListener('message', hanlder);
         channel.port1.close();
         channel.port2.close();
     };

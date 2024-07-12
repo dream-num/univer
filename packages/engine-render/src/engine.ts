@@ -278,6 +278,9 @@ export class Engine extends ThinEngine<Scene> {
 
         this._beginFrame$.complete();
         this._endFrame$.complete();
+
+        this._resizeObserver?.disconnect();
+        this._container = null;
     }
 
     /**

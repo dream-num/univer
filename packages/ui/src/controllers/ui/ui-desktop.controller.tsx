@@ -130,13 +130,15 @@ function bootstrap(
     render();
 
     return toDisposable(() => {
-        unmount(mountContainer);
+        // https://github.com/facebook/react/issues/26031
+        createRoot(<div></div>, mountContainer);
+        setTimeout(() => createRoot(<div></div>, mountContainer), 200);
+        setTimeout(() => unmount(mountContainer), 500);
     });
 }
 
 function createContainer(id: string): HTMLElement {
     const element = document.createElement('div');
     element.id = id;
-    // FIXME: the element is not append to the DOM tree. So it won't be rendered.
     return element;
 }

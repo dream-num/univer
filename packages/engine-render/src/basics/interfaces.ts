@@ -116,7 +116,7 @@ export interface IParagraphConfig {
     paragraphStyle?: IParagraphStyle;
     skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
-    drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>;
+    pDrawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>;
     // sectionBreakConfig: ISectionBreakConfig;
 }
 

@@ -40,7 +40,7 @@ export interface ISkeletonResourceReference {
     skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     /* Global cache, does not participate in rendering, only helps skeleton generation */
     skeListLevel?: Map<string, IDocumentSkeletonBullet[]>; // 有序列表缓存，id：{ level: max(width)的bullet }
-    drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>; // Anchor point to assist floating element positioning
+    drawingAnchor?: Map<string, Map<number, IDocumentSkeletonDrawingAnchor>>; // Anchor point to assist floating element positioning
 }
 
 export interface IDocumentSkeletonDrawingAnchor {
@@ -57,6 +57,11 @@ export interface IDocumentSkeletonDrawingAnchor {
 //     ed: number; // endIndex 文本结束索引
 //     marginLeft: number;
 // }
+
+export enum DocumentSkeletonPageType {
+    BODY,
+    HEADER_FOOTER,
+};
 
 export interface IDocumentSkeletonPage {
     sections: IDocumentSkeletonSection[];
@@ -84,6 +89,8 @@ export interface IDocumentSkeletonPage {
     st: number; // startIndex 文本开始索引
     ed: number; // endIndex 文本结束索引
     skeDrawings: Map<string, IDocumentSkeletonDrawing>;
+    segmentId: string; // 如果是页眉、页脚，就是页眉页脚的id，如果是正文页面，为空字符串
+    type: DocumentSkeletonPageType; // 页面类型，页眉页脚或正文
     renderConfig?: IDocumentRenderConfig;
     parent?: IDocumentSkeletonCached;
 }

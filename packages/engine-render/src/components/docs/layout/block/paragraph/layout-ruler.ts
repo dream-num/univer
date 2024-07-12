@@ -438,7 +438,7 @@ function _lineOperator(
         paragraphAffectSkeDrawings,
         skeHeaders,
         skeFooters,
-        drawingAnchor,
+        pDrawingAnchor,
         paragraphIndex,
     } = paragraphConfig;
 
@@ -503,7 +503,7 @@ function _lineOperator(
     const preTop = preLine?.top || 0;
     const lineTop = preLineHeight + preTop;
 
-    const { pageWidth, headerId, footerId } = lastPage;
+    const { pageWidth, headerId, footerId, segmentId } = lastPage;
     const headersDrawings = skeHeaders?.get(headerId)?.get(pageWidth)?.skeDrawings;
     const footersDrawings = skeFooters?.get(footerId)?.get(pageWidth)?.skeDrawings;
 
@@ -512,7 +512,7 @@ function _lineOperator(
     if (preLine) {
         const drawingsInLine = _getCustomBlockIdsInLine(preLine);
         if (drawingsInLine.length > 0) {
-            const affectDrawings = ctx.paragraphConfigCache.get(preLine.paragraphIndex)?.paragraphAffectSkeDrawings;
+            const affectDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(preLine.paragraphIndex)?.paragraphAffectSkeDrawings;
             const relativeLineDrawings = ([...(affectDrawings?.values() ?? [])])
                 .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE)
                 .filter((drawing) => drawingsInLine.includes(drawing.drawingId));
@@ -527,7 +527,7 @@ function _lineOperator(
         const targetDrawings = [...paragraphAffectSkeDrawings.values()]
             .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
 
-        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, paragraphStart, drawingAnchor?.get(paragraphIndex)?.top);
+        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, paragraphStart, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -598,7 +598,7 @@ function _lineOperator(
 
     column.lines.push(newLine);
     newLine.parent = column;
-    createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
+    createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, pDrawingAnchor);
     _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
 }
 
@@ -1002,8 +1002,8 @@ export function updateInlineDrawingPosition(
             }
         }
     }
-
-    page.skeDrawings = new Map([...page.skeDrawings, ...drawings]);
+    const res = new Map([...page.skeDrawings, ...drawings]);
+    page.skeDrawings = res;
 }
 
 function __getDrawingPosition(

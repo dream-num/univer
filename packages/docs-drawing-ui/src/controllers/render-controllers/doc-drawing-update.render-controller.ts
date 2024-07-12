@@ -23,9 +23,9 @@ import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
-import { type Documents, type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
+import { DocumentEditArea, type Documents, type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 
 import type { IInsertImageOperationParams } from '../../commands/operations/insert-image.operation';
 import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
@@ -96,22 +96,26 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             imageParams = await Promise.all(files.map((file) => this._imageIoService.saveImage(file)));
         } catch (error) {
             const type = (error as Error).message;
-            if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
-                this._messageService.show({
-                    type: MessageType.Error,
-                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / (1024 * 1024))),
-                });
-            } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
-                this._messageService.show({
-                    type: MessageType.Error,
-                    content: this._localeService.t('update-status.invalidImageType'),
-                });
-            } else if (type === ImageUploadStatusType.ERROR_IMAGE) {
-                this._messageService.show({
-                    type: MessageType.Error,
-                    content: this._localeService.t('update-status.invalidImage'),
-                });
+            let content = '';
+
+            switch (type) {
+                case ImageUploadStatusType.ERROR_EXCEED_SIZE:
+                    content = this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / (1024 * 1024)));
+                    break;
+                case ImageUploadStatusType.ERROR_IMAGE_TYPE:
+                    content = this._localeService.t('update-status.invalidImageType');
+                    break;
+                case ImageUploadStatusType.ERROR_IMAGE:
+                    content = this._localeService.t('update-status.invalidImage');
+                    break;
+                default:
+                    break;
             }
+
+            this._messageService.show({
+                type: MessageType.Error,
+                content,
+            });
         }
 
         if (imageParams.length === 0) {
@@ -155,13 +159,20 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 behindDoc: BooleanNumber.FALSE,
                 title: '',
                 description: '',
-                layoutType: PositionedObjectLayoutType.INLINE,
+                layoutType: PositionedObjectLayoutType.INLINE, // Insert inline drawing by default.
                 wrapText: WrapTextType.BOTH_SIDES,
                 distB: 0,
                 distL: 0,
                 distR: 0,
                 distT: 0,
             };
+
+            const isInHeaderFooter = this._isInsertInHeaderFooter();
+
+            if (isInHeaderFooter) {
+                docDrawingParam.isMultiTransform = BooleanNumber.TRUE;
+                docDrawingParam.transforms = docDrawingParam.transform ? [docDrawingParam.transform] : null;
+            }
 
             docDrawingParams.push(docDrawingParam);
         }
@@ -170,6 +181,17 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             unitId,
             drawings: docDrawingParams,
         } as IInsertDrawingCommandParams);
+    }
+
+    private _isInsertInHeaderFooter() {
+        const { unitId } = this._context;
+        const viewModel = this._renderManagerSrv.getRenderById(unitId)
+            ?.with(DocSkeletonManagerService)
+            .getViewModel();
+
+        const editArea = viewModel?.getEditArea();
+
+        return editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER;
     }
 
     private _getImagePosition(
@@ -181,7 +203,6 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             top: 0,
         };
 
-        // TODO:@Jocs calculate the position of the image in doc
         return {
             size: {
                 width: imageWidth,

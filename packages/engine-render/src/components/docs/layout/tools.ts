@@ -453,9 +453,10 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 }
 
 export function updateInlineDrawingCoords(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
-    lineIterator(pages, (line) => {
-        const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
-        const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(line.paragraphIndex);
+    lineIterator(pages, (line, _, __, page) => {
+        const { segmentId } = page;
+        const affectInlineDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
+        const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(segmentId)?.get(line.paragraphIndex);
         // Update inline drawings after the line is layout.
         if (affectInlineDrawings && affectInlineDrawings.size > 0) {
             updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top);
@@ -899,7 +900,7 @@ export interface ILayoutContext {
         page: IDocumentSkeletonPage;
         drawing: IDocumentSkeletonDrawing;
     }>;
-    paragraphConfigCache: Map<number, IParagraphConfig>;
+    paragraphConfigCache: Map<string, Map<number, IParagraphConfig>>;
     sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
     paragraphsOpenNewPage: Set<number>;
     // Use for hyphenation.

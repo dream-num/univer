@@ -21,7 +21,7 @@ import type {
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
 } from '../../../../basics/i-document-skeleton-cached';
-import { BreakType } from '../../../../basics/i-document-skeleton-cached';
+import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import { dealWithSection } from '../block/section';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
@@ -104,7 +104,8 @@ export function createSkeletonPage(
                 ctx,
                 headerTreeMap.get(headerId)!,
                 sectionBreakConfig,
-                skeletonResourceReference
+                skeletonResourceReference,
+                headerId
             );
             skeHeaders.set(headerId, new Map([[pageWidth, header]]));
         }
@@ -120,6 +121,7 @@ export function createSkeletonPage(
                 footerTreeMap.get(footerId)!,
                 sectionBreakConfig,
                 skeletonResourceReference,
+                footerId,
                 false
             );
             skeFooters.set(footerId, new Map([[pageWidth, footer]]));
@@ -156,7 +158,10 @@ export function createSkeletonPage(
     return page;
 }
 
-function _getNullPage() {
+function _getNullPage(
+    type = DocumentSkeletonPageType.BODY,
+    segmentId = ''
+): IDocumentSkeletonPage {
     return {
         sections: [],
         headerId: '',
@@ -181,6 +186,8 @@ function _getNullPage() {
         st: 0,
         ed: 0,
         skeDrawings: new Map(),
+        type,
+        segmentId,
     };
 }
 
@@ -189,6 +196,7 @@ function _createSkeletonHeaderFooter(
     headerOrFooterViewModel: DocumentViewModel,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
+    segmentId: string,
     isHeader = true
 ): IDocumentSkeletonHeaderFooter {
     const {
@@ -211,6 +219,9 @@ function _createSkeletonHeaderFooter(
     };
 
     const areaPage = createSkeletonPage(ctx, headerFooterConfig, skeletonResourceReference);
+    areaPage.type = DocumentSkeletonPageType.HEADER_FOOTER;
+    areaPage.segmentId = segmentId;
+
     const page = dealWithSection(
         ctx,
         headerOrFooterViewModel,
@@ -222,18 +233,18 @@ function _createSkeletonHeaderFooter(
     updateBlockIndex([page]);
 
     if (isHeader) {
-        return {
-            ...page,
+        Object.assign(page, {
             marginTop: marginHeader,
             marginBottom: 5, // Space between header and content
-        };
+        });
+    } else {
+        Object.assign(page, {
+            marginTop: 5, // Space between content and footer
+            marginBottom: marginFooter,
+        });
     }
 
-    return {
-        ...page,
-        marginBottom: marginFooter,
-        marginTop: 5, // Space between footer and content
-    };
+    return page;
 }
 
 function _getVerticalMargin(

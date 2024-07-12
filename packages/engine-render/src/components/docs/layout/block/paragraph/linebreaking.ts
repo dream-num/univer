@@ -131,6 +131,7 @@ export function lineBreaking(
     } = sectionBreakConfig;
 
     const { endIndex, blocks = [] } = paragraphNode;
+    const { segmentId } = curPage;
 
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
 
@@ -141,6 +142,13 @@ export function lineBreaking(
     const paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
 
+    let segmentDrawingAnchorCache = drawingAnchor?.get(segmentId);
+
+    if (segmentDrawingAnchorCache == null) {
+        segmentDrawingAnchorCache = new Map();
+        drawingAnchor?.set(segmentId, segmentDrawingAnchorCache);
+    }
+
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
         paragraphStyle,
@@ -148,10 +156,17 @@ export function lineBreaking(
         paragraphInlineSkeDrawings,
         skeHeaders,
         skeFooters,
-        drawingAnchor,
+        pDrawingAnchor: segmentDrawingAnchorCache,
     };
 
-    ctx.paragraphConfigCache.set(endIndex, paragraphConfig);
+    let segmentParagraphCache = ctx.paragraphConfigCache.get(segmentId);
+
+    if (segmentParagraphCache == null) {
+        segmentParagraphCache = new Map();
+        ctx.paragraphConfigCache.set(segmentId, segmentParagraphCache);
+    }
+
+    segmentParagraphCache.set(endIndex, paragraphConfig);
 
     const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
     const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet

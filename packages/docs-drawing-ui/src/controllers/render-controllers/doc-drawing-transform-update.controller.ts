@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDrawingParam } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
 import {
     BooleanNumber,
     Disposable,
@@ -34,13 +34,11 @@ interface IDrawingParamsWithBehindText {
     subUnitId: string;
     drawingId: string;
     behindText: boolean;
-    transform: {
-        left: number;
-        top: number;
-        width: number;
-        height: number;
-        angle: number;
-    };
+    transform: ITransformState;
+    transforms: ITransformState[];
+    // The same drawing render in different place, like image in header and footer.
+    // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
+    isMultiTransform: BooleanNumber;
 }
 
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {
@@ -65,16 +63,10 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
     }
 
     private _initialRenderRefresh() {
-        const { mainComponent } = this._context;
         this._docSkeletonManagerService.currentSkeleton$.subscribe((documentSkeleton) => {
             if (documentSkeleton == null) {
                 return;
             }
-
-            const docsComponent = mainComponent as Documents;
-
-            // TODO: @Jocs, Why NEED change skeleton here?
-            docsComponent.changeSkeleton(documentSkeleton);
 
             this._refreshDrawing(documentSkeleton);
         });
@@ -123,7 +115,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
         const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
         const { pages, skeHeaders, skeFooters } = skeletonData;
-        const updateDrawings: IDrawingParamsWithBehindText[] = []; // IFloatingObjectManagerParam
+        const updateDrawingMap: Record<string, IDrawingParamsWithBehindText> = {}; // IFloatingObjectManagerParam
 
         this._liquid.reset();
         /**
@@ -137,7 +129,11 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 const headerPage = skeHeaders.get(headerId)?.get(pageWidth);
 
                 if (headerPage) {
-                    this._calculateDrawingPosition(unitId, headerPage, docsLeft, docsTop, updateDrawings);
+                    this._calculateDrawingPosition(
+                        unitId, headerPage, docsLeft, docsTop, updateDrawingMap,
+                        headerPage.marginTop,
+                        page.marginLeft
+                    );
                 }
             }
 
@@ -145,15 +141,20 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 const footerPage = skeFooters.get(footerId)?.get(pageWidth);
 
                 if (footerPage) {
-                    this._calculateDrawingPosition(unitId, footerPage, docsLeft, docsTop, updateDrawings);
+                    this._calculateDrawingPosition(
+                        unitId, footerPage, docsLeft, docsTop, updateDrawingMap,
+                        page.pageHeight - page.marginBottom + footerPage.marginTop,
+                        page.marginLeft
+                    );
                 }
             }
 
-            this._calculateDrawingPosition(unitId, page, docsLeft, docsTop, updateDrawings);
+            this._calculateDrawingPosition(unitId, page, docsLeft, docsTop, updateDrawingMap, page.marginTop, page.marginLeft);
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        // console.log('updateDrawings', skeHeaders, skeFooters, pages, updateDrawings);
+        const updateDrawings = Object.values(updateDrawingMap);
+
         if (updateDrawings.length > 0) {
             this._drawingManagerService.refreshTransform(updateDrawings as unknown as IDrawingParam[]);
         }
@@ -164,29 +165,44 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         page: IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter,
         docsLeft: number,
         docsTop: number,
-        updateDrawings: IDrawingParamsWithBehindText[]
+        updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
+        marginTop: number,
+        marginLeft: number
     ) {
         const { skeDrawings } = page;
-        this._liquid.translatePagePadding(page);
+        this._liquid.translatePagePadding({
+            marginTop,
+            marginLeft,
+        } as IDocumentSkeletonPage);
         skeDrawings.forEach((drawing) => {
             const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
             const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
-
-            updateDrawings.push({
-                unitId,
-                subUnitId: unitId,
-                drawingId,
-                behindText,
-                transform: {
-                    left: aLeft + docsLeft + this._liquid.x,
-                    top: aTop + docsTop + this._liquid.y,
-                    width,
-                    height,
-                    angle,
-                },
-            });
+            const { isMultiTransform = BooleanNumber.FALSE } = drawingOrigin;
+            const transform = {
+                left: aLeft + docsLeft + this._liquid.x,
+                top: aTop + docsTop + this._liquid.y,
+                width,
+                height,
+                angle,
+            };
+            if (updateDrawingMap[drawingId] == null) {
+                updateDrawingMap[drawingId] = {
+                    unitId,
+                    subUnitId: unitId,
+                    drawingId,
+                    behindText,
+                    transform,
+                    transforms: [transform],
+                    isMultiTransform,
+                };
+            } else if (isMultiTransform === BooleanNumber.TRUE) {
+                updateDrawingMap[drawingId].transforms.push(transform);
+            }
         });
 
-        this._liquid.restorePagePadding(page);
+        this._liquid.restorePagePadding({
+            marginTop,
+            marginLeft,
+        } as IDocumentSkeletonPage);
     }
 }

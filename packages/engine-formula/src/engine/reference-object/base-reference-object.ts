@@ -398,7 +398,8 @@ export class BaseReferenceObject extends ObjectClassType {
         }
 
         if (cell.t === CellValueType.NUMBER) {
-            return createNumberValueObjectByRawValue(value);
+            const pattern = this._getPatternByCell(cell);
+            return createNumberValueObjectByRawValue(value, pattern);
         }
         if (cell.t === CellValueType.STRING || cell.t === CellValueType.FORCE_STRING) {
             // A1 is `"test"`, =A1 also needs to get `"test"`
@@ -409,6 +410,12 @@ export class BaseReferenceObject extends ObjectClassType {
         }
 
         return ValueObjectFactory.create(value);
+    }
+
+    private _getPatternByCell(cell: ICellData) {
+        const styles = this._unitStylesData[this.getUnitId()];
+        const style = styles.getStyleByCell(cell);
+        return style?.n?.pattern || '';
     }
 
     getCellByRow(row: number) {

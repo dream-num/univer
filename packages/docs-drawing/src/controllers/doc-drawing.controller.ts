@@ -59,24 +59,24 @@ export class DocDrawingController extends Disposable {
     private _initSnapshot() {
         const toJson = (unitId: string) => {
             const map = this._docDrawingService.getDrawingDataForUnit(unitId);
-            if (map) {
-                return JSON.stringify(map);
+            if (map?.[unitId]) {
+                return JSON.stringify(map?.[unitId]);
             }
             return '';
         };
-        const parseJson = (json: string): IDocDrawingModel => {
+        const parseJson = (json: string): IDrawingMapItem<IDocDrawing> => {
             if (!json) {
-                return { drawings: {}, drawingsOrder: [] };
+                return { data: {}, order: [] };
             }
             try {
                 return JSON.parse(json);
             } catch (err) {
-                return { drawings: {}, drawingsOrder: [] };
+                return { data: {}, order: [] };
             }
         };
 
         this.disposeWithMe(
-            this._resourceManagerService.registerPluginResource<IDocDrawingModel>({
+            this._resourceManagerService.registerPluginResource<IDrawingMapItem<IDocDrawing>>({
                 pluginName: DOCS_DRAWING_PLUGIN,
                 businesses: [UniverInstanceType.UNIVER_DOC],
                 toJson: (unitId) => toJson(unitId),
@@ -85,7 +85,7 @@ export class DocDrawingController extends Disposable {
                     this._setDrawingDataForUnit(unitId, { data: {}, order: [] });
                 },
                 onLoad: (unitId, value) => {
-                    this._setDrawingDataForUnit(unitId, { data: value.drawings ?? {}, order: value.drawingsOrder ?? [] });
+                    this._setDrawingDataForUnit(unitId, { data: value.data ?? {}, order: value.order ?? [] });
                 },
             })
         );
@@ -96,6 +96,7 @@ export class DocDrawingController extends Disposable {
         if (documentDataModel == null) {
             return;
         }
+
         documentDataModel.resetDrawing(drawingMapItem.data, drawingMapItem.order);
         this._initDataLoader();
     }

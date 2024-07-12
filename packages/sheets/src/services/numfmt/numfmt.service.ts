@@ -23,6 +23,8 @@ import {
     Range,
 } from '@univerjs/core';
 
+import { getCellTypeByPattern } from '../../basics/cell-type';
+import { getCellValue } from '../../basics/cell-value';
 import type { INumfmtService } from './type';
 
 export class NumfmtService extends Disposable implements INumfmtService {
@@ -106,10 +108,17 @@ export class NumfmtService extends Disposable implements INumfmtService {
                         const styleId = styles.setValue(style);
                         styleId && matrix.setValue(row, col, { s: styleId });
                     } else {
-                        const oldStyle = (cell.s && styles.get(cell.s)) || {};
+                        const oldStyle = styles.getStyleByCell(cell) || {};
                         const newStyle = { ...oldStyle, n: { pattern: value.pattern } };
                         const styleId = styles.setValue(newStyle);
                         cell.s = styleId;
+
+                        // Setting the text format for a cell will set the CellValueType to text
+                        const type = getCellTypeByPattern(cell, value.pattern);
+                        if (cell.v !== undefined) {
+                            cell.t = type;
+                            cell.v = getCellValue(type, cell);
+                        }
                     }
                 });
             });

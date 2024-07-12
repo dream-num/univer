@@ -19,6 +19,29 @@ import type { HTTPRequest } from '../request';
 import { HTTPEventType, HTTPResponse } from '../response';
 import type { HTTPHandlerFn } from '../interceptor';
 
+const createDefaultFetchCheck = (time = 300) => {
+    const noop = () => { };
+    let cancel = noop;
+    return (_currentConfig: HTTPRequest) => {
+        return new Promise<boolean>((res) => {
+            cancel();
+            const t = setTimeout(() => {
+                res(true);
+            }, time);
+            cancel = () => {
+                clearTimeout(t);
+                res(false);
+            };
+        });
+    };
+};
+
+const createDistributeResult = <T, C>() => {
+    return (result: C, list: T[]) => {
+        return list.map((config) => ({ config, result }));
+    };
+};
+
 // eslint-disable-next-line max-lines-per-function
 export const MergeInterceptorFactory = <T, C>(config: {
     /**
@@ -29,22 +52,27 @@ export const MergeInterceptorFactory = <T, C>(config: {
      * Pre-process request parameters, the return value will be used as input parameters for subsequent operations
      * The result is used as an index key
      */
-    preParams: (requestConfig: HTTPRequest) => T;
+    getParamsFromRequest: (requestConfig: HTTPRequest) => T;
     /**
      * The request parameters are merged to initiate the request
      */
-    mergeParams: (list: T[], requestConfig: HTTPRequest) => HTTPRequest;
+    mergeParamsToRequest: (list: T[], requestConfig: HTTPRequest) => HTTPRequest;
+
+}, options: {
     /**
      * Determine when to initiate a request
+     * By default, requests up to 300ms are automatically aggregated
      */
-    fetchCheck: (currentConfig: HTTPRequest, list: T[]) => Promise<{ isFetch: boolean; list: T[] }>;
+        fetchCheck?: (currentConfig: HTTPRequest) => Promise<boolean>;
     /**
-     * The result of the request is dispatched based on the request parameters
+     * The result of the request is dispatched based on the request parameters.
+     * By default each request gets the full result of the batch request
      */
-    distributeResult: (result: C, list: T[]) => { config: T; result: C }[];
-}) => {
+        distributeResult?: (result: C, list: T[]) => { config: T; result: C }[];
+    } = {}) => {
     interface IHook { next: (v: HTTPResponse<C>) => void; config: T; error: (error: string) => void };
-    const { isMatch, preParams, mergeParams, fetchCheck, distributeResult } = config;
+    const { isMatch, getParamsFromRequest, mergeParamsToRequest } = config;
+    const { fetchCheck = createDefaultFetchCheck(300), distributeResult = createDistributeResult() } = options;
     const hookList: IHook[] = [];
     const getPlainList = (_list: IHook[]) => _list.map((item) => item.config);
 
@@ -53,15 +81,14 @@ export const MergeInterceptorFactory = <T, C>(config: {
             return next(requestConfig);
         }
         return new Observable<HTTPResponse<C>>((observer) => {
-            const params = preParams(requestConfig);
+            const params = getParamsFromRequest(requestConfig);
             hookList.push({
                 next: (v) => observer.next(v),
                 error: (error) => observer.error(error),
                 config: params,
             });
-
-            fetchCheck(requestConfig, getPlainList(hookList)).then((res) => {
-                const { isFetch, list } = res;
+            const list = getPlainList(hookList);
+            fetchCheck(requestConfig).then((isFetch) => {
                 if (isFetch) {
                     // Pin down the queue that currently needs a request.
                     const currentHookList: IHook[] = [];
@@ -75,13 +102,13 @@ export const MergeInterceptorFactory = <T, C>(config: {
                         }
                     });
 
-                    next(mergeParams(getPlainList(currentHookList), requestConfig)).subscribe({
+                    next(mergeParamsToRequest(list, requestConfig)).subscribe({
                         next: (e) => {
                             if (e.type === HTTPEventType.Response) {
                                 const body = e.body as C;
                                 const configList = distributeResult(body, list);
-                                currentHookList.forEach((listItem) => {
-                                    const res = configList.find((item) => item.config === listItem.config);
+                                currentHookList.forEach((hookItem) => {
+                                    const res = configList.find((item) => item.config === hookItem.config);
                                     if (res) {
                                         const response = new HTTPResponse({
                                             body: res.result,
@@ -89,9 +116,9 @@ export const MergeInterceptorFactory = <T, C>(config: {
                                             status: e.status,
                                             statusText: e.statusText,
                                         });
-                                        listItem.next(response);
+                                        hookItem.next(response);
                                     } else {
-                                        listItem.error('batch error');
+                                        hookItem.error('batch error');
                                     }
                                 });
                             }

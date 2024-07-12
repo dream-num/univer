@@ -46,60 +46,41 @@ describe('test "HTTPMergeInterceptor"', () => {
         vitest.useRealTimers();
     });
 
-    function emitSuccess(uid: number, result: number[]) {
+    function emitSuccess(uid: number, body: any) {
         httpImplementation.getHandler(uid).emitResponse(new HTTPResponse({
             headers: new HTTPHeaders(),
             status: 200,
             statusText: 'Request Succeeded',
-            body: {
-                list: result,
-            },
+            body,
         }));
     }
 
-    it('should two requests were created, but only one was a real request ', async () => {
+    it('two requests were created, but only one was a real request', async () => {
         const path = 'http://example.com';
-        const noop = () => { };
-        let cancel = noop;
         interface Request { ids: string[] };
-        interface Response { list: string[] };
+        interface Response { list: number[] };
+        const response: Response = { list: [1, 2] };
         httpService.registerHTTPInterceptor({
             priority: 999,
             interceptor: MergeInterceptorFactory<Request, Response>({
                 isMatch(config) {
                     return config.url === path;
                 },
-                preParams(config) {
+                getParamsFromRequest(config) {
                     const body = config.requestParams?.body as { ids: string[] };
                     return body;
                 },
-                fetchCheck(_currentConfig, list) {
-                    return new Promise((res) => {
-                        cancel();
-                        const time = setTimeout(() => {
-                            res({ isFetch: true, list });
-                        }, 1000);
-                        cancel = () => {
-                            clearTimeout(time);
-                            res({ isFetch: false, list });
-                        };
-                    });
-                },
-                mergeParams(list, currentConfig) {
+
+                mergeParamsToRequest(list, currentConfig) {
                     const ids = list.reduce((a, b) => {
                         a.push(...b.ids);
                         return a;
                     }, [] as string[]);
                     return new HTTPRequest(currentConfig.method, currentConfig.url, {
                         headers: currentConfig.headers,
-                        responseType: currentConfig.responseType as any,
+                        responseType: currentConfig.responseType,
                         withCredentials: currentConfig.withCredentials,
                         body: { ids },
-                    });
-                },
-                distributeResult(result, list) {
-                    return list.map((e, index) => {
-                        return { result: { list: [result.list[index]] }, config: e };
                     });
                 },
             }),
@@ -108,13 +89,11 @@ describe('test "HTTPMergeInterceptor"', () => {
         const request1 = httpService.post<Response>(path, { body: { ids: [1] } });
         const request2 = httpService.post<Response>(path, { body: { ids: [2] } });
 
-        // According to the logic of the distributeResult function, the first request gets the first value of the queue
         request1.then((e) => {
-            expect((e as HTTPResponse<Response>).body.list).toEqual([1]);
+            expect((e as HTTPResponse<Response>).body.list).toEqual(response.list);
         });
-        // According to the logic of the distributeResult function, the first request gets the second value of the queue
         request2.then((e) => {
-            expect((e as HTTPResponse<Response>).body.list).toEqual([2]);
+            expect((e as HTTPResponse<Response>).body.list).toEqual(response.list);
         });
 
         await vitest.advanceTimersByTimeAsync(1200);
@@ -124,6 +103,6 @@ describe('test "HTTPMergeInterceptor"', () => {
         expect(() => httpImplementation.getHandler(1)).toThrowError();
 
         // The first two create requests and the last merge result in a new request, so the sequence number is 2
-        emitSuccess(2, [1, 2]);
+        emitSuccess(2, response);
     });
 });

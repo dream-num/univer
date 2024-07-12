@@ -133,6 +133,7 @@ export interface IDocumentBody {
 
     /**
      * for copy/paste, data of custom-range and other module
+     * it won't save to disk
      */
     payloads?: Record<string, string>;
 }
@@ -276,16 +277,6 @@ export interface ICustomRange {
     endIndex: number;
     rangeId: string;
     rangeType: CustomRangeType;
-}
-
-export interface ICustomRangeForInterceptor extends ICustomRange {
-    active?: boolean;
-    show?: boolean;
-}
-
-export interface ICustomDecorationForInterceptor extends ICustomDecoration {
-    active?: boolean;
-    show?: boolean;
 }
 
 export enum CustomRangeType {

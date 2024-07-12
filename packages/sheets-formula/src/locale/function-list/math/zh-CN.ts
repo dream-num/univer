@@ -1073,8 +1073,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '要对其求平方和第1个数字，也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
+            number2: { name: '数值2', detail: '要对其求平方和的第2个数字。可以按照这种方式最多指定255个数字。' },
         },
     },
     SUMX2MY2: {
@@ -1087,8 +1087,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '数组1', detail: '第一个数组或数值区域。' },
+            arrayY: { name: '数组2', detail: '第二个数组或数值区域。' },
         },
     },
     SUMX2PY2: {

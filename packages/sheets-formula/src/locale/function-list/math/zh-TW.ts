@@ -1083,8 +1083,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '這是要求出平方總和的第1個數字。您也可以使用單一陣列或陣列參照來取代以逗點分隔的引數。' },
+            number2: { name: '數值2', detail: '這是要求出平方總和的第2個數字。可以按照這種方式指定最多 255 個數字。' },
         },
     },
     SUMX2MY2: {
@@ -1097,8 +1097,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '值陣列1', detail: '這是第一個值陣列或範圍。' },
+            arrayY: { name: '值陣列2', detail: '這是第二個值陣列或範圍。' },
         },
     },
     SUMX2PY2: {

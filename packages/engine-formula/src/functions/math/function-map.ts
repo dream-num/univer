@@ -68,6 +68,8 @@ import { Subtotal } from './subtotal';
 import { Sum } from './sum';
 import { Sumif } from './sumif';
 import { Sumifs } from './sumifs';
+import { Sumsq } from './sumsq';
+import { Sumx2my2 } from './sumx2my2';
 import { Sumproduct } from './sumproduct';
 import { Tan } from './tan';
 import { Tanh } from './tanh';
@@ -126,7 +128,6 @@ export const functionMath = [
     [Sum, FUNCTION_NAMES_MATH.SUM],
     [Sumif, FUNCTION_NAMES_MATH.SUMIF],
     [Sumifs, FUNCTION_NAMES_MATH.SUMIFS],
-    [Sumproduct, FUNCTION_NAMES_MATH.SUMPRODUCT],
     [Tan, FUNCTION_NAMES_MATH.TAN],
     [Tanh, FUNCTION_NAMES_MATH.TANH],
 ];

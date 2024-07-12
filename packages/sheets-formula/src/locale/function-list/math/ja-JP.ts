@@ -1063,8 +1063,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '最初の数値を二乗して合計するには、コンマ区切りの引数の代わりに単一の配列または配列への参照を使用することもできます。' },
+            number2: { name: '数値2', detail: '二乗を合計する 2 番目の数値。この方法では、最大 255 個の番号を指定できます。' },
         },
     },
     SUMX2MY2: {
@@ -1077,8 +1077,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '配列1', detail: '対象となる一方の数値配列またはセル範囲を指定します。' },
+            arrayY: { name: '配列2', detail: '対象となるもう一方の数値配列またはセル範囲を指定します。' },
         },
     },
     SUMX2PY2: {

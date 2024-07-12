@@ -1072,8 +1072,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'To square and find the first number, you can also use a single array or a reference to an array instead of comma-separated parameters.' },
+            number2: { name: 'number2', detail: 'The second number to be squared and summed. Up to 255 numbers can be specified in this way.' },
         },
     },
     SUMX2MY2: {
@@ -1086,8 +1086,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: 'array_x', detail: 'The first array or range of values.' },
+            arrayY: { name: 'array_y', detail: 'The second array or range of values.' },
         },
     },
     SUMX2PY2: {

@@ -38,7 +38,7 @@ import type { Engine } from '../../../engine';
 import type { Scene } from '../../../scene';
 import { ScrollTimer } from '../../../scroll-timer';
 import type { IScrollObserverParam, Viewport } from '../../../viewport';
-import type { DocumentSkeleton } from '../layout/doc-skeleton';
+import type { DocumentSkeleton, IFindNodeRestrictions } from '../layout/doc-skeleton';
 import type { Documents } from '../document';
 import { getSystemHighlightColor } from '../../../basics/tools';
 import { cursorConvertToTextRange, TextRange } from './text-range';
@@ -310,7 +310,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     setCursorManually(evtOffsetX: number, evtOffsetY: number) {
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
+            strict: true,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
 
         const position = this._getNodePosition(startNode);
 
@@ -394,7 +398,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
+            strict: false,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
         if (startNode == null || startNode.node == null) {
             return;
         }
@@ -452,7 +460,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
+            strict: false,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
         if (startNode == null || startNode.node == null) {
             return;
         }
@@ -487,7 +499,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
+            strict: false,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
 
         const position = this._getNodePosition(startNode);
 
@@ -853,7 +869,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const endNode = this._findNodeByCoord(moveOffsetX, moveOffsetY);
+        const endNode = this._findNodeByCoord(moveOffsetX, moveOffsetY, {
+            strict: true,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
 
         const focusNodePosition = this._getNodePosition(endNode);
 
@@ -1054,7 +1074,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         return documentTransform.clone().invert().applyPoint(originCoord);
     }
 
-    private _findNodeByCoord(evtOffsetX: number, evtOffsetY: number) {
+    private _findNodeByCoord(evtOffsetX: number, evtOffsetY: number, restrictions: IFindNodeRestrictions) {
         const coord = this._getTransformCoordForDocumentOffset(evtOffsetX, evtOffsetY);
 
         if (coord == null) {
@@ -1068,7 +1088,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         } = this._document!.getOffsetConfig();
 
         const nodeInfo = this._docSkeleton?.findNodeByCoord(
-            coord, pageLayoutType, pageMarginLeft, pageMarginTop
+            coord, pageLayoutType, pageMarginLeft, pageMarginTop, restrictions
         );
 
         return nodeInfo;

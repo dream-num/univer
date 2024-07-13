@@ -66,6 +66,12 @@ interface INearestCache {
     nearestNodeDistanceY: number;
 }
 
+export interface IFindNodeRestrictions {
+    strict: boolean;
+    segmentId: string;
+    segmentPage: number;
+}
+
 export class DocumentSkeleton extends Skeleton {
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
@@ -246,10 +252,9 @@ export class DocumentSkeleton extends Skeleton {
             return;
         }
 
-        const editArea = this.getViewModel().getEditArea();
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
-        const { divide, line, column, section, page, isBack, segmentPage } = position;
+        const { divide, line, column, section, page, isBack, segmentPage, pageType } = position;
 
         let { glyph } = position;
 
@@ -261,18 +266,18 @@ export class DocumentSkeleton extends Skeleton {
 
         let skePage = pages[page];
 
-        if (editArea !== DocumentEditArea.BODY) {
+        if (pageType !== DocumentSkeletonPageType.BODY) {
             skePage = pages[segmentPage];
             const { headerId, footerId, pageWidth } = skePage;
 
-            if (editArea === DocumentEditArea.HEADER) {
+            if (pageType === DocumentSkeletonPageType.HEADER) {
                 const skeHeader = skeHeaders.get(headerId)?.get(pageWidth);
                 if (skeHeader == null) {
                     return;
                 } else {
                     skePage = skeHeader;
                 }
-            } else if (editArea === DocumentEditArea.FOOTER) {
+            } else if (pageType === DocumentSkeletonPageType.FOOTER) {
                 const skeFooter = skeFooters.get(footerId)?.get(pageWidth);
                 if (skeFooter == null) {
                     return;
@@ -369,7 +374,8 @@ export class DocumentSkeleton extends Skeleton {
         coord: Vector2,
         pageLayoutType: PageLayoutType,
         pageMarginLeft: number,
-        pageMarginTop: number
+        pageMarginTop: number,
+        restrictions?: IFindNodeRestrictions
     ): Nullable<INodeInfo> {
         const { x, y } = coord;
 
@@ -380,71 +386,177 @@ export class DocumentSkeleton extends Skeleton {
             return;
         }
 
-        const editArea = this.getViewModel().getEditArea();
-
-        const { pages, skeHeaders, skeFooters } = skeletonData;
-
         const cache: INearestCache = {
             nearestNodeList: [],
             nearestNodeDistanceList: [],
             nearestNodeDistanceY: Number.POSITIVE_INFINITY,
         };
 
-        for (let pi = 0, len = pages.length; pi < len; pi++) {
-            const page = pages[pi];
-            const { headerId, footerId, pageWidth } = page;
+        const { pages, skeHeaders, skeFooters } = skeletonData;
+        const editArea = this.findEditAreaByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop).editArea;
 
+        if (restrictions == null) {
+            for (let pi = 0, len = pages.length; pi < len; pi++) {
+                const page = pages[pi];
+                const { headerId, footerId, pageWidth } = page;
+
+                let exactMatch = null;
+
+                if (editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER) {
+                    const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
+
+                    if (headerSke) {
+                        exactMatch = this._collectNearestNode(
+                            headerSke,
+                            DocumentSkeletonPageType.HEADER,
+                            page,
+                            headerId,
+                            pi,
+                            cache,
+                            x,
+                            y
+                        );
+                    }
+
+                    const footerSke = skeFooters.get(footerId)?.get(pageWidth) as IDocumentSkeletonPage;
+
+                    if (footerSke) {
+                        exactMatch = exactMatch ?? this._collectNearestNode(
+                            footerSke,
+                            DocumentSkeletonPageType.FOOTER,
+                            page,
+                            footerId,
+                            pi,
+                            cache,
+                            x,
+                            y
+                        );
+                    }
+                } else {
+                    const BODY_SEGMENT_ID = '';
+                    exactMatch = this._collectNearestNode(
+                        page,
+                        DocumentSkeletonPageType.BODY,
+                        page,
+                        BODY_SEGMENT_ID,
+                        pi,
+                        cache,
+                        x,
+                        y
+                    );
+                }
+
+                if (exactMatch) {
+                    return exactMatch;
+                }
+
+                this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+            }
+        } else {
+            const { segmentId, segmentPage, strict } = restrictions;
             let exactMatch = null;
 
-            if (editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER) {
-                const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
+            if (strict === false) {
+                for (let pi = 0, len = pages.length; pi < len; pi++) {
+                    const page = pages[pi];
+                    const { headerId, footerId, pageWidth } = page;
 
-                if (headerSke) {
-                    exactMatch = this._collectNearestNode(
-                        headerSke,
-                        DocumentSkeletonPageType.HEADER,
-                        page,
-                        headerId,
-                        pi,
-                        cache,
-                        x,
-                        y
-                    );
-                }
+                    if (segmentId !== '') {
+                        const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
 
-                const footerSke = skeFooters.get(footerId)?.get(pageWidth) as IDocumentSkeletonPage;
+                        if (headerSke) {
+                            exactMatch = this._collectNearestNode(
+                                headerSke,
+                                DocumentSkeletonPageType.HEADER,
+                                page,
+                                headerId,
+                                pi,
+                                cache,
+                                x,
+                                y
+                            );
+                        }
 
-                if (footerSke) {
-                    exactMatch = this._collectNearestNode(
-                        footerSke,
-                        DocumentSkeletonPageType.FOOTER,
-                        page,
-                        footerId,
-                        pi,
-                        cache,
-                        x,
-                        y
-                    );
+                        const footerSke = skeFooters.get(footerId)?.get(pageWidth) as IDocumentSkeletonPage;
+
+                        if (footerSke) {
+                            exactMatch = exactMatch ?? this._collectNearestNode(
+                                footerSke,
+                                DocumentSkeletonPageType.FOOTER,
+                                page,
+                                footerId,
+                                pi,
+                                cache,
+                                x,
+                                y
+                            );
+                        }
+                    } else {
+                        const BODY_SEGMENT_ID = '';
+                        exactMatch = this._collectNearestNode(
+                            page,
+                            DocumentSkeletonPageType.BODY,
+                            page,
+                            BODY_SEGMENT_ID,
+                            pi,
+                            cache,
+                            x,
+                            y
+                        );
+                    }
+
+                    if (exactMatch) {
+                        return exactMatch;
+                    }
+
+                    this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
                 }
             } else {
-                const BODY_SEGMENT_ID = '';
-                exactMatch = this._collectNearestNode(
-                    page,
-                    DocumentSkeletonPageType.BODY,
-                    page,
-                    BODY_SEGMENT_ID,
-                    pi,
-                    cache,
-                    x,
-                    y
-                );
-            }
+                for (let pi = 0, len = pages.length; pi < len; pi++) {
+                    const page = pages[pi];
 
-            if (exactMatch) {
-                return exactMatch;
-            }
+                    if (segmentId) {
+                        if (segmentPage !== pi) {
+                            this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+                            continue;
+                        }
 
-            this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+                        const { headerId, pageWidth } = page;
+
+                        const segmentSke = segmentId === headerId ? skeHeaders.get(segmentId)?.get(pageWidth) : skeFooters.get(segmentId)?.get(pageWidth);
+                        if (segmentSke) {
+                            exactMatch = this._collectNearestNode(
+                                segmentSke,
+                                segmentId === headerId ? DocumentSkeletonPageType.HEADER : DocumentSkeletonPageType.FOOTER,
+                                page,
+                                segmentId,
+                                segmentPage,
+                                cache,
+                                x,
+                                y
+                            );
+                        }
+                    } else {
+                        const BODY_SEGMENT_ID = '';
+                        exactMatch = this._collectNearestNode(
+                            page,
+                            DocumentSkeletonPageType.BODY,
+                            page,
+                            BODY_SEGMENT_ID,
+                            pi,
+                            cache,
+                            x,
+                            y
+                        );
+                    }
+
+                    if (exactMatch) {
+                        return exactMatch;
+                    }
+
+                    this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+                }
+            }
         }
 
         return this._getNearestNode(cache.nearestNodeList, cache.nearestNodeDistanceList);
@@ -483,6 +595,7 @@ export class DocumentSkeleton extends Skeleton {
         for (const section of sections) {
             const { columns } = section;
 
+            this._findLiquid.translateSave();
             this._findLiquid.translateSection(section);
 
             // const { y: startY } = this._findLiquid;
@@ -568,8 +681,8 @@ export class DocumentSkeleton extends Skeleton {
                                     }
 
                                     if (cache.nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
-                                        cache.nearestNodeList.length = 0;
-                                        cache.nearestNodeDistanceList.length = 0;
+                                        cache.nearestNodeList = [];
+                                        cache.nearestNodeDistanceList = [];
                                     }
                                     cache.nearestNodeList.push({
                                         node: glyph,
@@ -610,6 +723,7 @@ export class DocumentSkeleton extends Skeleton {
                 }
                 this._findLiquid.translateRestore();
             }
+            this._findLiquid.translateRestore();
         }
         this._findLiquid.translateRestore();
     }
@@ -886,24 +1000,20 @@ export class DocumentSkeleton extends Skeleton {
 
         for (const page of pages) {
             const curPageIndex = pages.indexOf(page);
-            if (editArea !== DocumentEditArea.BODY && curPageIndex !== segmentPageIndex) {
+            if (segmentId && curPageIndex !== segmentPageIndex) {
                 continue;
             }
 
             const { pageWidth } = page;
             let segmentPage = page;
 
-            if (editArea === DocumentEditArea.HEADER) {
-                const headerSke = skeHeaders.get(segmentId)?.get(pageWidth);
-                if (headerSke) {
-                    segmentPage = headerSke;
-                } else {
-                    continue;
-                }
-            } else if (editArea === DocumentEditArea.FOOTER) {
-                const footerSke = skeFooters.get(segmentId)?.get(pageWidth);
-                if (footerSke) {
-                    segmentPage = footerSke;
+            if (segmentId) {
+                const maybeHeaderSke = skeHeaders.get(segmentId)?.get(pageWidth);
+                const maybeFooterSke = skeFooters.get(segmentId)?.get(pageWidth);
+                if (maybeHeaderSke) {
+                    segmentPage = maybeHeaderSke;
+                } else if (maybeFooterSke) {
+                    segmentPage = maybeFooterSke;
                 } else {
                     continue;
                 }

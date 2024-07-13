@@ -54,17 +54,17 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             },
             onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
                 if (isLegalLink(clipText)) {
-                    const customHyperLink = this._hyperLinkModel.findCustomHyperLink(clipText);
+                    const customLink = this._hyperLinkModel.findCustomHyperLinkByUrl(clipText);
+                    const customLinkContent = customLink?.toLink(clipText);
+
                     const newLink: Partial<ICellHyperLink> = {
-                        payload: customHyperLink ? customHyperLink.serialize(clipText) : serializeUrl(clipText)
+                        payload: customLinkContent ? customLinkContent.payload : serializeUrl(clipText)
                     }
-                    const display = customHyperLink ? customHyperLink.display(clipText) : undefined;
+                    const display = customLinkContent ? customLinkContent.display : undefined;
                     if (display) {
                         newLink.display = display;
                     }
-                    // const text = customHyperLink ? customHyperLink.serialize(clipText) : serializeUrl(clipText);
 
-console.log(newLink.payload, 'newLink. link')
                     const { range, unitId, subUnitId } = pasteTo;
                     const { ranges: [pasteToRange], mapFunc } = virtualizeDiscreteRanges([range]);
                     const redos: IMutationInfo[] = [];

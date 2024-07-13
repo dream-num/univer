@@ -17,15 +17,6 @@
 import type { ICellData, Nullable } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, Tools } from '@univerjs/core';
 
-export function isExtractionFieldLink(jsonStr: string) {
-    try {
-        const json = JSON.parse(jsonStr);
-        return json?.type === 'extraction_field';
-    } catch {
-        return false;
-    }
-}
-
 export function isLegalLink(link: string) {
     return Tools.isLegalUrl(link);
 }

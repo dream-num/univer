@@ -24,13 +24,12 @@ import type {
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
 } from '../../../basics/i-document-skeleton-cached';
-import { GlyphType } from '../../../basics/i-document-skeleton-cached';
+import { DocumentSkeletonPageType, GlyphType } from '../../../basics/i-document-skeleton-cached';
 import type { INodePosition } from '../../../basics/interfaces';
 import type { IPoint } from '../../../basics/vector2';
 import type { DocumentSkeleton } from '../layout/doc-skeleton';
 import type { IDocumentOffsetConfig } from '../document';
 import { Liquid } from '../liquid';
-import { DocumentEditArea } from '../view-model/document-view-model';
 
 export enum NodePositionStateType {
     NORMAL,
@@ -221,6 +220,12 @@ export class NodePositionConvertToCursor {
             };
         }
 
+        const isValid = this._isValidPosition(startOrigin, endOrigin);
+
+        if (!isValid) {
+            throw new Error('Invalid positions in NodePositionConvertToCursor, they are not in the same segment page when in header or footer.');
+        }
+
         const { start, end } = compareNodePosition(startOrigin, endOrigin);
 
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
@@ -304,6 +309,21 @@ export class NodePositionConvertToCursor {
             contentBoxPointGroup,
             cursorList,
         };
+    }
+
+    private _isValidPosition(startOrigin: INodePosition, endOrigin: INodePosition) {
+        const { segmentPage: startPage, pageType: startPageType } = startOrigin;
+        const { segmentPage: endPage, pageType: endPageType } = endOrigin;
+
+        if (startPageType !== endPageType) {
+            return false;
+        }
+
+        if (startPageType === DocumentSkeletonPageType.HEADER || startPageType === DocumentSkeletonPageType.FOOTER) {
+            return startPage === endPage;
+        }
+
+        return true;
     }
 
     private _resetCurrentNodePositionState() {
@@ -465,8 +485,7 @@ export class NodePositionConvertToCursor {
             return [];
         }
 
-        const viewModel = this._docSkeleton.getViewModel();
-        const editArea = viewModel.getEditArea();
+        const { pageType } = startPosition; // startPosition and endPosition must has the same pageType and in the same segment page.
 
         this._liquid.reset();
 
@@ -489,23 +508,23 @@ export class NodePositionConvertToCursor {
 
         const { pageLayoutType, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
 
-        const skipPageIndex = editArea === DocumentEditArea.BODY ? pageIndex : segmentPage;
+        const skipPageIndex = pageType === DocumentSkeletonPageType.BODY ? pageIndex : segmentPage;
 
         for (let p = 0; p < skipPageIndex; p++) {
             const page = pages[p];
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        const endIndex = editArea === DocumentEditArea.BODY ? endPageIndex : endSegmentPage;
+        const endIndex = pageType === DocumentSkeletonPageType.BODY ? endPageIndex : endSegmentPage;
 
         for (let p = skipPageIndex; p <= endIndex; p++) {
             const page = pages[p];
             const { headerId, footerId, pageWidth } = page;
             let segmentPage: Nullable<IDocumentSkeletonPage> = page;
 
-            if (editArea === DocumentEditArea.HEADER) {
+            if (pageType === DocumentSkeletonPageType.HEADER) {
                 segmentPage = skeHeaders.get(headerId)?.get(pageWidth);
-            } else if (editArea === DocumentEditArea.FOOTER) {
+            } else if (pageType === DocumentSkeletonPageType.FOOTER) {
                 segmentPage = skeFooters.get(footerId)?.get(pageWidth);
             }
 
@@ -521,18 +540,18 @@ export class NodePositionConvertToCursor {
                 startPosition,
                 endPosition,
                 sections.length - 1,
-                editArea === DocumentEditArea.BODY ? p : 0
+                pageType === DocumentSkeletonPageType.BODY ? p : 0
             );
             this._liquid.translateSave();
 
-            switch (editArea) {
-                case DocumentEditArea.HEADER:
+            switch (pageType) {
+                case DocumentSkeletonPageType.HEADER:
                     this._liquid.translatePagePadding({
                         ...segmentPage,
                         marginLeft: page.marginLeft, // Because header or footer margin Left is 0.
                     });
                     break;
-                case DocumentEditArea.FOOTER: {
+                case DocumentSkeletonPageType.FOOTER: {
                     const footerTop = page.pageHeight - segmentPage.height - segmentPage.marginBottom;
                     this._liquid.translate(page.marginLeft, footerTop);
                     break;

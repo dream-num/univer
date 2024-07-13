@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -49,6 +49,176 @@ const WRAPPING_STYLE_TO_LAYOUT_TYPE = {
     [TextWrappingStyle.IN_FRONT_OF_TEXT]: PositionedObjectLayoutType.WRAP_NONE,
     [TextWrappingStyle.BEHIND_TEXT]: PositionedObjectLayoutType.WRAP_NONE,
 };
+
+// eslint-disable-next-line max-lines-per-function
+function getDeleteAndInsertCustomBlockActions(
+    segmentId: string,
+    oldSegmentId: string,
+    segmentPage: number,
+    offset: number,
+    drawingId: string,
+    documentDataModel: DocumentDataModel,
+    textSelectionRenderManager: ITextSelectionRenderManager
+) {
+    const textX = new TextX();
+    const jsonX = JSONX.getInstance();
+    const rawActions: JSONXActions = [];
+
+    if (segmentId === oldSegmentId) {
+        const oldOffset = documentDataModel.getSelfOrHeaderFooterModel(oldSegmentId).getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
+
+        if (oldOffset == null) {
+            return;
+        }
+
+        if (offset < oldOffset) {
+            // Insert first.
+            if (offset > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: offset,
+                    segmentId: oldSegmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.INSERT,
+                body: {
+                    dataStream: '\b',
+                    customBlocks: [{
+                        startIndex: 0,
+                        blockId: drawingId,
+                    }],
+                },
+                len: 1,
+                line: 0,
+                segmentId: oldSegmentId,
+            });
+
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: oldOffset - offset,
+                segmentId: oldSegmentId,
+            });
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            });
+        } else {
+            // Delete first.
+            if (oldOffset > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: oldOffset,
+                    segmentId: oldSegmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            });
+
+            if (offset - oldOffset - 1 > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: offset - oldOffset - 1,
+                    segmentId: oldSegmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.INSERT,
+                body: {
+                    dataStream: '\b',
+                    customBlocks: [{
+                        startIndex: 0,
+                        blockId: drawingId,
+                    }],
+                },
+                len: 1,
+                line: 0,
+                segmentId: oldSegmentId,
+            });
+        }
+
+        if (offset !== oldOffset) {
+            const path = getRichTextEditPath(documentDataModel, oldSegmentId);
+            const action = jsonX.editOp(textX.serialize(), path);
+            rawActions.push(action!);
+        }
+    } else {
+        const body = documentDataModel.getSelfOrHeaderFooterModel(oldSegmentId).getBody();
+        const newBody = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (body == null || newBody == null) {
+            return;
+        }
+
+        const oldOffset = body.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
+
+        if (oldOffset == null) {
+            return;
+        }
+
+        if (oldOffset > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: oldOffset,
+                segmentId: oldSegmentId,
+            });
+        }
+
+        textX.push({
+            t: TextXActionType.DELETE,
+            len: 1,
+            line: 0,
+            segmentId: '',
+        });
+
+        let path = getRichTextEditPath(documentDataModel, oldSegmentId);
+        let action = jsonX.editOp(textX.serialize(), path);
+        rawActions.push(action!);
+
+        textX.empty();
+
+        if (offset > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: offset,
+                segmentId,
+            });
+        }
+
+        textX.push({
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: '\b',
+                customBlocks: [{
+                    startIndex: 0,
+                    blockId: drawingId,
+                }],
+            },
+            len: 1,
+            line: 0,
+            segmentId,
+        });
+
+        path = getRichTextEditPath(documentDataModel, segmentId);
+        action = jsonX.editOp(textX.serialize(), path);
+        rawActions.push(action!);
+
+        textSelectionRenderManager.setSegment(segmentId);
+        textSelectionRenderManager.setSegmentPage(segmentPage);
+    }
+
+    return rawActions;
+}
 
 interface IUpdateDocDrawingWrappingStyleParams {
     unitId: string;
@@ -483,6 +653,8 @@ export interface IMoveInlineDrawingParams {
     subUnitId: string;
     drawing: IDocDrawingBase;
     offset: number;
+    segmentId: string;
+    segmentPage: number;
 }
 
 /**
@@ -493,7 +665,6 @@ export const IMoveInlineDrawingCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params?: IMoveInlineDrawingParams) => {
         if (params == null) {
             return false;
@@ -516,100 +687,28 @@ export const IMoveInlineDrawingCommand: ICommand = {
             return false;
         }
 
-        const { drawing, unitId, offset } = params;
+        const { drawing, unitId, offset, segmentId: newSegmentId, segmentPage } = params;
 
-        const textX = new TextX();
-        const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
 
         const { drawingId } = drawing;
-
         const segmentId = textSelectionRenderManager.getSegment() ?? '';
-        const oldOffset = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
 
-        if (oldOffset == null) {
+        const actions = getDeleteAndInsertCustomBlockActions(
+            newSegmentId,
+            segmentId,
+            segmentPage,
+            offset,
+            drawingId,
+            documentDataModel,
+            textSelectionRenderManager
+        );
+
+        if (actions == null || actions.length === 0) {
             return false;
         }
 
-        if (offset < oldOffset) {
-            // Insert first.
-            if (offset > 0) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: offset,
-                    segmentId,
-                });
-            }
-
-            textX.push({
-                t: TextXActionType.INSERT,
-                body: {
-                    dataStream: '\b',
-                    customBlocks: [{
-                        startIndex: 0,
-                        blockId: drawing.drawingId,
-                    }],
-                },
-                len: 1,
-                line: 0,
-                segmentId,
-            });
-
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: oldOffset - offset,
-                segmentId,
-            });
-
-            textX.push({
-                t: TextXActionType.DELETE,
-                len: 1,
-                line: 0,
-                segmentId: '',
-            });
-        } else {
-            // Delete first.
-            if (oldOffset > 0) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: oldOffset,
-                    segmentId,
-                });
-            }
-
-            textX.push({
-                t: TextXActionType.DELETE,
-                len: 1,
-                line: 0,
-                segmentId: '',
-            });
-
-            if (offset - oldOffset - 1 > 0) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: offset - oldOffset - 1,
-                    segmentId,
-                });
-            }
-
-            textX.push({
-                t: TextXActionType.INSERT,
-                body: {
-                    dataStream: '\b',
-                    customBlocks: [{
-                        startIndex: 0,
-                        blockId: drawing.drawingId,
-                    }],
-                },
-                len: 1,
-                line: 0,
-                segmentId,
-            });
-        }
-
-        const path = getRichTextEditPath(documentDataModel, segmentId);
-        const action = jsonX.editOp(textX.serialize(), path);
-        rawActions.push(action!);
+        rawActions.push(...actions);
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -641,6 +740,8 @@ export interface ITransformNonInlineDrawingParams {
     drawing: IDocDrawingBase;
     offset: number;
     docTransform: IDocDrawingPosition;
+    segmentId: string;
+    segmentPage: number;
 }
 
 /**
@@ -675,103 +776,32 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
             return false;
         }
 
-        const { drawing, unitId, offset, docTransform } = params;
-
-        const textX = new TextX();
-        const jsonX = JSONX.getInstance();
+        const { drawing, unitId, offset, docTransform, segmentId: newSegmentId, segmentPage } = params;
         const rawActions: JSONXActions = [];
 
         const { drawingId } = drawing;
 
         const segmentId = textSelectionRenderManager.getSegment() ?? '';
-        const oldOffset = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
 
-        if (oldOffset == null) {
+        const actions = getDeleteAndInsertCustomBlockActions(
+            newSegmentId,
+            segmentId,
+            segmentPage,
+            offset,
+            drawingId,
+            documentDataModel,
+            textSelectionRenderManager
+        );
+
+        if (actions == null) {
             return false;
         }
 
-        if (offset < oldOffset) {
-            // Insert first.
-            if (offset > 0) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: offset,
-                    segmentId,
-                });
-            }
-
-            textX.push({
-                t: TextXActionType.INSERT,
-                body: {
-                    dataStream: '\b',
-                    customBlocks: [{
-                        startIndex: 0,
-                        blockId: drawing.drawingId,
-                    }],
-                },
-                len: 1,
-                line: 0,
-                segmentId,
-            });
-
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: oldOffset - offset,
-                segmentId,
-            });
-
-            textX.push({
-                t: TextXActionType.DELETE,
-                len: 1,
-                line: 0,
-                segmentId: '',
-            });
-        } else if (offset > oldOffset) {
-            // Delete first.
-            if (oldOffset > 0) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: oldOffset,
-                    segmentId,
-                });
-            }
-
-            textX.push({
-                t: TextXActionType.DELETE,
-                len: 1,
-                line: 0,
-                segmentId: '',
-            });
-
-            if (offset - oldOffset - 1 > 0) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: offset - oldOffset - 1,
-                    segmentId,
-                });
-            }
-
-            textX.push({
-                t: TextXActionType.INSERT,
-                body: {
-                    dataStream: '\b',
-                    customBlocks: [{
-                        startIndex: 0,
-                        blockId: drawing.drawingId,
-                    }],
-                },
-                len: 1,
-                line: 0,
-                segmentId,
-            });
+        if (actions.length > 0) {
+            rawActions.push(...actions);
         }
 
-        if (offset !== oldOffset) {
-            const path = getRichTextEditPath(documentDataModel, segmentId);
-            const action = jsonX.editOp(textX.serialize(), path);
-
-            rawActions.push(action!);
-        }
+        const jsonX = JSONX.getInstance();
 
         const { drawings: oldDrawings = {} } = documentDataModel.getSnapshot();
         const oldDocTransform = oldDrawings[drawingId].docTransform;

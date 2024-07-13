@@ -60,7 +60,8 @@ export interface IDocumentSkeletonDrawingAnchor {
 
 export enum DocumentSkeletonPageType {
     BODY,
-    HEADER_FOOTER,
+    HEADER,
+    FOOTER,
 };
 
 export interface IDocumentSkeletonPage {
@@ -90,7 +91,7 @@ export interface IDocumentSkeletonPage {
     ed: number; // endIndex 文本结束索引
     skeDrawings: Map<string, IDocumentSkeletonDrawing>;
     segmentId: string; // 如果是页眉、页脚，就是页眉页脚的id，如果是正文页面，为空字符串
-    type: DocumentSkeletonPageType; // 页面类型，页眉页脚或正文
+    type: DocumentSkeletonPageType; // 页面类型，页眉、页脚或正文
     renderConfig?: IDocumentRenderConfig;
     parent?: IDocumentSkeletonCached;
 }

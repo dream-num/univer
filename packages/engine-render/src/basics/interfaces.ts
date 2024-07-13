@@ -32,6 +32,7 @@ import type {
 
 import type { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import type {
+    DocumentSkeletonPageType,
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonDrawingAnchor,
@@ -156,7 +157,7 @@ export interface INodeSearch {
     section: number;
     page: number;
     segmentPage: number; // The index of the page where the header and footer reside.
-    isInBody: boolean;
+    pageType: DocumentSkeletonPageType;
 }
 
 export interface INodePosition extends INodeSearch {

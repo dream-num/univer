@@ -219,7 +219,7 @@ function _createSkeletonHeaderFooter(
     };
 
     const areaPage = createSkeletonPage(ctx, headerFooterConfig, skeletonResourceReference);
-    areaPage.type = DocumentSkeletonPageType.HEADER_FOOTER;
+    areaPage.type = isHeader ? DocumentSkeletonPageType.HEADER : DocumentSkeletonPageType.FOOTER;
     areaPage.segmentId = segmentId;
 
     const page = dealWithSection(

@@ -117,7 +117,8 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                              */
                             const matrixRange = arrayFormulaMatrixRange?.[unitId]?.[subUnitId];
                             if (matrixRange != null) {
-                                this._displayArrayFormulaRangeShape(matrixRange, row, col, unitId, subUnitId, worksheet, cellInfo);
+                                // For cells other than the upper left corner, the cellInfo information will be updated
+                                cellInfo = this._displayArrayFormulaRangeShape(matrixRange, row, col, unitId, subUnitId, worksheet, cellInfo);
                             }
 
                             if (cellInfo) {
@@ -200,6 +201,8 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                 return false;
             }
         });
+
+        return cellInfo;
     }
 
     private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string) {

@@ -271,7 +271,7 @@ export class AutoFillController extends Disposable {
         );
     }
 
-    // eslint-disable-next-line max-lines-per-function
+  // eslint-disable-next-line max-lines-per-function, complexity
     private _triggerAutoFill(source: IRange, selection: IRange) {
         // if source range === dest range, do nothing;
         if (

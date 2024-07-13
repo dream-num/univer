@@ -38,10 +38,11 @@ import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
+    HEADER_MENU_SHAPE_SIZE,
     HEADER_MENU_SHAPE_THUMB_SIZE,
-    HEADER_MENU_SHAPE_WIDTH_HEIGHT,
     HEADER_RESIZE_SHAPE_TYPE,
     HeaderMenuResizeShape,
+    MAX_HEADER_MENU_SHAPE_SIZE,
 } from '../../views/header-resize-shape';
 import { getCoordByOffset, getTransformCoord } from '../utils/component-tools';
 
@@ -172,7 +173,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
             const scale = Math.max(scaleX, scaleY);
 
-            const HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE = HEADER_MENU_SHAPE_WIDTH_HEIGHT / scale;
+            const HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE = HEADER_MENU_SHAPE_SIZE / scale;
 
             if (initialType === HEADER_RESIZE_TYPE.ROW) {
                 let top = startY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
@@ -202,7 +203,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     return false;
                 }
 
-                const rowSize = rowHeaderWidth / 3;
+                const rowSize = Math.min(MAX_HEADER_MENU_SHAPE_SIZE, rowHeaderWidth / 3);
 
                 this._rowResizeRect.transformByState({
                     left: rowHeaderWidth / 2 - rowSize / 2,

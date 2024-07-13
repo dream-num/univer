@@ -79,7 +79,7 @@ interface IScrollBarPosition {
     y?: number;
 }
 
-interface IViewportScrollPos {
+interface IViewportScrollValue {
     viewportScrollX?: number;
     viewportScrollY?: number;
 }
@@ -545,30 +545,38 @@ export class Viewport {
      */
     scrollTo(pos: IScrollBarPosition) {
         // console.trace();
-        return this._scrollCore(SCROLL_TYPE.scrollTo, pos);
+        return this._scrollToBarPosCore(pos);
     }
 
     /**
      * current position plus offset, relative
      * normally triggered by scroll-timer(in sheet)
-     * @param pos
+     * @param delta
      * @returns isLimited
      */
-    scrollBy(pos: IScrollBarPosition, isTrigger = true) {
-        pos.x = this.scrollX + (pos.x || 0);
-        pos.y = this.scrollY + (pos.y || 0);
-        return this._scrollCore(SCROLL_TYPE.scrollTo, pos, isTrigger);
+    scrollBy(delta: IScrollBarPosition, isTrigger = true) {
+        const x = this.scrollX + (delta.x || 0);
+        const y = this.scrollY + (delta.y || 0);
+        return this._scrollToBarPosCore({ x, y }, isTrigger);
+    }
+
+    scrollByViewportDeltaValue(delta: IViewportScrollValue, isTrigger = true) {
+        const viewportScrollX = this.viewportScrollX + (delta.viewportScrollX || 0);
+        const viewportScrollY = this.viewportScrollY + (delta.viewportScrollY || 0);
+        return this._scrollToByViewportPosCore({ viewportScrollX, viewportScrollY }, isTrigger);
     }
 
     /**
-     *
+     * TODO @lumixraku
+     * What's the diff between scrollBy?  it seems same except onScrollByBar$
      * @param pos
      * @param isTrigger
      */
     scrollByBar(pos: IScrollBarPosition, isTrigger = true) {
-        pos.x = this.scrollX + (pos.x || 0);
-        pos.y = this.scrollY + (pos.y || 0);
-        this._scrollCore(SCROLL_TYPE.scrollTo, pos, isTrigger);
+        // pos.x = this.scrollX + (pos.x || 0);
+        // pos.y = this.scrollY + (pos.y || 0);
+        // this._scrollToBarPosCore(SCROLL_TYPE.scrollTo, pos, isTrigger);
+        this.scrollBy(pos, isTrigger);
         const { x, y } = pos;
         this.onScrollByBar$.emitEvent({
             viewport: this,
@@ -588,12 +596,9 @@ export class Viewport {
         if (!this._scrollBar || this.isActive === false) {
             return;
         }
-        const x = deltaX + this.viewportScrollX;
-        const y = deltaY + this.viewportScrollY;
-        // console.log('before', y, viewportScrollY, this.viewportScrollY);
-        const param = this.transViewportScroll2ScrollValue(x, y);
-        this._scrollCore(SCROLL_TYPE.scrollTo, param, false);
-        // console.log('after', y, this.viewportScrollY);
+        const viewportScrollX = deltaX + this.viewportScrollX;
+        const viewportScrollY = deltaY + this.viewportScrollY;
+        this._scrollToByViewportPosCore({ viewportScrollX, viewportScrollY }, false);
     }
 
     /**
@@ -691,7 +696,7 @@ export class Viewport {
 
     /**
      * get actual scroll value by scrollXY
-     * @returns
+     * @returns {x, y}
      */
     getViewportScrollByScroll() {
         const x = this.scrollX;
@@ -1340,19 +1345,16 @@ export class Viewport {
      * @param scrollBarPos viewMain 滚动条的位置
      * @param isTrigger
      */
-    private _scrollCore(scrollType: SCROLL_TYPE, scrollBarPos: IScrollBarPosition, isTrigger: boolean = true) {
+    private _scrollToBarPosCore(scrollBarPos: IScrollBarPosition, isTrigger: boolean = true) {
         const { x, y } = scrollBarPos;
         if (this._scrollBar == null) {
             return;
         }
 
         if (x !== undefined) {
+            // TODO @lumixraku WTF? ?! sheet can not scroll when horizonThumb is invisible ??
             if (this._scrollBar.hasHorizonThumb()) {
-                if (scrollType === SCROLL_TYPE.scrollBy) {
-                    this.scrollX += x;
-                } else {
-                    this.scrollX = x;
-                }
+                this.scrollX = x;
             } else {
                 this.scrollX = 0;
             }
@@ -1360,11 +1362,7 @@ export class Viewport {
 
         if (y !== undefined) {
             if (this._scrollBar.hasVerticalThumb()) {
-                if (scrollType === SCROLL_TYPE.scrollBy) {
-                    this.scrollY += y;
-                } else {
-                    this.scrollY = y;
-                }
+                this.scrollY = y;
             } else {
                 this.scrollY = 0;
             }
@@ -1389,10 +1387,66 @@ export class Viewport {
         const clampedViewportScroll = this.getViewportScrollByScroll();
         this.viewportScrollX = clampedViewportScroll.x;
         this.viewportScrollY = clampedViewportScroll.y;
-        // console.log('scrollToCore', this.scrollY, this.viewportScrollY, limited);
-        // calc startRow & offset by viewportScrollXY, then update scrollInfo
-        // other viewports, rowHeader & colHeader depend on this notify
-        // scroll.render-controller@onScrollAfterObserver ---> setScrollInfo but no notify
+        this.onScrollAfter$.emitEvent({
+            isTrigger,
+            viewport: this,
+            x,
+            y,
+            scrollX: this.scrollX,
+            scrollY: this.scrollY,
+            viewportScrollX: clampedViewportScroll.x,
+            viewportScrollY: clampedViewportScroll.y,
+            limitX: this._scrollBar?.limitX,
+            limitY: this._scrollBar?.limitY,
+        } as IScrollObserverParam);
+
+        this._triggerScrollStop(clampedViewportScroll, x, y);
+
+        return limited;
+    }
+
+    private _scrollToByViewportPosCore(scrollVpPos: IViewportScrollValue, isTrigger: boolean = true) {
+        const { viewportScrollX, viewportScrollY } = scrollVpPos;
+        const { x, y } = this.transViewportScroll2ScrollValue(viewportScrollX || 0, viewportScrollY || 0);
+        if (this._scrollBar == null) {
+            return;
+        }
+
+        if (viewportScrollX !== undefined) {
+            if (this._scrollBar.hasHorizonThumb()) {
+                this.scrollX = x;
+            } else {
+                this.scrollX = 0;
+            }
+        }
+
+        if (viewportScrollX !== undefined) {
+            if (this._scrollBar.hasVerticalThumb()) {
+                this.scrollY = y;
+            } else {
+                this.scrollY = 0;
+            }
+        }
+
+        const limited = this.limitedScroll();
+        this.onScrollBefore$.emitEvent({
+            viewport: this,
+            scrollX: this.scrollX,
+            scrollY: this.scrollY,
+            x,
+            y,
+            limitX: this._scrollBar?.limitX,
+            limitY: this._scrollBar?.limitY,
+            isTrigger,
+        });
+
+        if (this._scrollBar) {
+            this._scrollBar.makeDirty(true);
+        }
+
+        const clampedViewportScroll = this.getViewportScrollByScroll();
+        this.viewportScrollX = clampedViewportScroll.x;
+        this.viewportScrollY = clampedViewportScroll.y;
         this.onScrollAfter$.emitEvent({
             isTrigger,
             viewport: this,

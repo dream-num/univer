@@ -1091,8 +1091,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '配列1', detail: '対象となる一方の数値配列またはセル範囲を指定します。' },
+            arrayY: { name: '配列2', detail: '対象となるもう一方の数値配列またはセル範囲を指定します。' },
         },
     },
     SUMXMY2: {
@@ -1105,8 +1105,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '配列1', detail: '対象となる一方の数値配列またはセル範囲を指定します。' },
+            arrayY: { name: '配列2', detail: '対象となるもう一方の数値配列またはセル範囲を指定します。' },
         },
     },
     TAN: {

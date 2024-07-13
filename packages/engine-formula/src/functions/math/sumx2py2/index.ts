@@ -21,7 +21,7 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Sumx2my2 extends BaseFunction {
+export class Sumx2py2 extends BaseFunction {
     override minParams = 2;
 
     override maxParams = 2;
@@ -87,7 +87,7 @@ export class Sumx2my2 extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
 
-            const result = arrayXValue ** 2 - arrayYValue ** 2;
+            const result = arrayXValue ** 2 + arrayYValue ** 2;
 
             return NumberValueObject.create(result);
         } else {
@@ -126,7 +126,7 @@ export class Sumx2my2 extends BaseFunction {
                 arrayXValidValue.push(arrayXValue);
                 arrayYValidValue.push(arrayYValue);
 
-                result += arrayXValue ** 2 - arrayYValue ** 2;
+                result += arrayXValue ** 2 + arrayYValue ** 2;
             });
 
             if (errorObject.isError()) {

@@ -17,29 +17,29 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Sumx2my2 } from '../index';
+import { Sumx2py2 } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 
-describe('Test sumx2my2 function', () => {
-    const testFunction = new Sumx2my2(FUNCTION_NAMES_MATH.SUMX2MY2);
+describe('Test sumx2py2 function', () => {
+    const testFunction = new Sumx2py2(FUNCTION_NAMES_MATH.SUMX2PY2);
 
-    describe('Sumx2my2', () => {
+    describe('Sumx2py2', () => {
         it('Value is normal number', () => {
             const arrayX = NumberValueObject.create(1);
             const arrayY = NumberValueObject.create(2);
             const result = testFunction.calculate(arrayX, arrayY);
-            expect(result.getValue()).toBe(-3);
+            expect(result.getValue()).toBe(5);
         });
 
         it('Value is number string', () => {
             const arrayX = StringValueObject.create('-3');
             const arrayY = NumberValueObject.create(2);
             const result = testFunction.calculate(arrayX, arrayY);
-            expect(result.getValue()).toBe(5);
+            expect(result.getValue()).toBe(13);
         });
 
         it('arrayX is number, arrayY is string', () => {
@@ -120,7 +120,7 @@ describe('Test sumx2my2 function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(arrayX, arrayY);
-            expect(stripErrorMargin(Number(result.getValue()))).toBe(28);
+            expect(stripErrorMargin(Number(result.getValue()))).toBe(56);
         });
     });
 });

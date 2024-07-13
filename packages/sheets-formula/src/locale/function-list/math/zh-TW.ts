@@ -1111,8 +1111,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '值陣列1', detail: '這是第一個值陣列或範圍。' },
+            arrayY: { name: '值陣列2', detail: '這是第二個值陣列或範圍。' },
         },
     },
     SUMXMY2: {
@@ -1125,8 +1125,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '值陣列1', detail: '這是第一個值陣列或範圍。' },
+            arrayY: { name: '值陣列2', detail: '這是第二個值陣列或範圍。' },
         },
     },
     TAN: {

@@ -1100,8 +1100,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: 'array_x', detail: 'The first array or range of values.' },
+            arrayY: { name: 'array_y', detail: 'The second array or range of values.' },
         },
     },
     SUMXMY2: {
@@ -1114,8 +1114,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: 'array_x', detail: 'The first array or range of values.' },
+            arrayY: { name: 'array_y', detail: 'The second array or range of values.' },
         },
     },
     TAN: {

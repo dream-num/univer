@@ -1101,8 +1101,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '数组1', detail: '第一个数组或数值区域。' },
+            arrayY: { name: '数组2', detail: '第二个数组或数值区域。' },
         },
     },
     SUMXMY2: {
@@ -1115,8 +1115,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '数组1', detail: '第一个数组或数值区域。' },
+            arrayY: { name: '数组2', detail: '第二个数组或数值区域。' },
         },
     },
     TAN: {

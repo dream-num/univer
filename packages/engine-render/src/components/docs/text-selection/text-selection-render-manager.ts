@@ -138,6 +138,7 @@ export interface ITextSelectionRenderManager {
     enableSelection(): void;
     disableSelection(): void;
     setSegment(id: string): void;
+    getSegment(): string;
     setSegmentPage(pageIndex: number): void;
     getSegmentPage(): number;
     setStyle(style: ITextSelectionStyle): void;

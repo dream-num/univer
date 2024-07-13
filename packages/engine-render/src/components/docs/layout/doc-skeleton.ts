@@ -379,8 +379,6 @@ export class DocumentSkeleton extends Skeleton {
     ): Nullable<INodeInfo> {
         const { x, y } = coord;
 
-        this._findLiquid.reset();
-
         const skeletonData = this.getSkeletonData();
         if (skeletonData == null) {
             return;
@@ -395,6 +393,7 @@ export class DocumentSkeleton extends Skeleton {
         const { pages, skeHeaders, skeFooters } = skeletonData;
         const editArea = this.findEditAreaByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop).editArea;
 
+        this._findLiquid.reset();
         if (restrictions == null) {
             for (let pi = 0, len = pages.length; pi < len; pi++) {
                 const page = pages[pi];
@@ -576,26 +575,29 @@ export class DocumentSkeleton extends Skeleton {
 
         this._findLiquid.translateSave();
         switch (pageType) {
-            case DocumentSkeletonPageType.HEADER:
+            case DocumentSkeletonPageType.HEADER: {
                 this._findLiquid.translatePagePadding({
                     ...segmentPage,
                     marginLeft: page.marginLeft, // Because header or footer margin Left is 0.
                 });
                 break;
+            }
+
             case DocumentSkeletonPageType.FOOTER: {
                 const footerTop = page.pageHeight - segmentPage.height - segmentPage.marginBottom;
                 this._findLiquid.translate(page.marginLeft, footerTop);
                 break;
             }
-            default:
+
+            default: {
                 this._findLiquid.translatePagePadding(page);
                 break;
+            }
         }
 
         for (const section of sections) {
             const { columns } = section;
 
-            this._findLiquid.translateSave();
             this._findLiquid.translateSection(section);
 
             // const { y: startY } = this._findLiquid;
@@ -723,7 +725,6 @@ export class DocumentSkeleton extends Skeleton {
                 }
                 this._findLiquid.translateRestore();
             }
-            this._findLiquid.translateRestore();
         }
         this._findLiquid.translateRestore();
     }

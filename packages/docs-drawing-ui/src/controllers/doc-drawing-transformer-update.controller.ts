@@ -23,7 +23,7 @@ import {
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, IPoint, Viewport } from '@univerjs/engine-render';
-import { DocumentSkeletonPageType, getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, ITextSelectionRenderManager, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 
@@ -60,7 +60,8 @@ export class DocDrawingTransformerController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
     ) {
         super();
 
@@ -356,6 +357,7 @@ export class DocDrawingTransformerController extends Disposable {
 
     private _getInlineDrawingAnchor(drawing: IDocDrawingBase, offsetX: number, offsetY: number): Nullable<IDrawingAnchor> {
         const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
 
         if (currentRender == null) {
@@ -378,7 +380,14 @@ export class DocDrawingTransformerController extends Disposable {
         if (coord == null) {
             return;
         }
-        const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
+        const nodeInfo = skeleton?.findNodeByCoord(
+            coord, pageLayoutType, pageMarginLeft, pageMarginTop,
+            {
+                strict: false,
+                segmentId: this._textSelectionRenderManager.getSegment(),
+                segmentPage: this._textSelectionRenderManager.getSegmentPage(),
+            }
+        );
         if (nodeInfo) {
             const { node, ratioX, segmentPage, segmentId: nodeSegmentId } = nodeInfo;
             isBack = ratioX < HALF;
@@ -460,7 +469,11 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
+        const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop, {
+            strict: false,
+            segmentId: this._textSelectionRenderManager.getSegment(),
+            segmentPage: this._textSelectionRenderManager.getSegmentPage(),
+        });
         if (nodeInfo) {
             const { node, segmentPage: segmentPageIndex, segmentId: nodeSegmentId } = nodeInfo;
             glyphAnchor = node;

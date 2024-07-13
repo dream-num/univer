@@ -18,14 +18,15 @@ import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } f
 import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
-import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
-import { DocumentEditArea, type Documents, type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
+import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
 import type { IInsertImageOperationParams } from '../../commands/operations/insert-image.operation';
 import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
@@ -56,6 +57,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
+
+        this._editAreaChangeListener();
     }
 
     /**
@@ -291,6 +294,72 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                             zeroLeft: docsLeft,
                         });
                     }
+                }
+            })
+        );
+    }
+
+    // Update drawings edit status and opacity. You can not edit header footer images when you are editing body. and vice verse.
+    private _updateDrawingsEditStatus() {
+        const { unit: docDataModel, scene, unitId } = this._context;
+        const viewModel = this._renderManagerSrv
+            .getRenderById(unitId)
+            ?.with(DocSkeletonManagerService).getViewModel();
+
+        if (viewModel == null || docDataModel == null) {
+            return;
+        }
+
+        const snapshot = docDataModel.getSnapshot();
+        const { drawings = {} } = snapshot;
+        const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
+
+        for (const key of Object.keys(drawings)) {
+            const drawing = drawings[key];
+            const objectKey = getDrawingShapeKeyByDrawingSearch({ unitId, drawingId: drawing.drawingId, subUnitId: unitId });
+            const drawingShapes = scene.fuzzyMathObjects(objectKey, true);
+
+            if (drawingShapes.length) {
+                for (const shape of drawingShapes) {
+                    scene.detachTransformerFrom(shape);
+                    (shape as Image).setOpacity(0.5);
+                    if (
+                        (isEditBody && drawing.isMultiTransform !== BooleanNumber.TRUE)
+                        || (!isEditBody && drawing.isMultiTransform === BooleanNumber.TRUE)
+                    ) {
+                        scene.attachTransformerTo(shape);
+                        (shape as Image).setOpacity(1);
+                    }
+                }
+            }
+        }
+    }
+
+    private _editAreaChangeListener() {
+        const { unitId } = this._context;
+        const viewModel = this._renderManagerSrv
+            .getRenderById(unitId)
+            ?.with(DocSkeletonManagerService).getViewModel();
+
+        if (viewModel == null) {
+            return;
+        }
+
+        this._updateDrawingsEditStatus();
+
+        this.disposeWithMe(
+            viewModel.editAreaChange$.subscribe(() => {
+                this._updateDrawingsEditStatus();
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
+                if (command.id === RichTextEditingMutation.id) {
+                    // To wait the image is rendered.
+                    queueMicrotask(() => {
+                        this._updateDrawingsEditStatus();
+                    });
                 }
             })
         );

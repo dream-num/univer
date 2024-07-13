@@ -40,10 +40,8 @@ export interface ITelemetryService {
     capture: (eventName: TelemetryEventNames, params?: Record<string, any>) => void;
     onPageView: (url: string) => void;
 };
-// export const IThreadCommentMentionDataService = createIdentifier<IThreadCommentMentionDataService>('thread-comment.mention-data.service');
 
 export const ITelemetryService = createIdentifier<ITelemetryService>('telemetry.service');
-// export declare const ITelemetryService: import('@wendellhu/redi').IdentifierDecorator<ITelemetryService>;
 
 export class PosthogTelemetryService extends Disposable implements ITelemetryService, IDisposable {
     constructor() {
@@ -57,7 +55,7 @@ export class PosthogTelemetryService extends Disposable implements ITelemetrySer
         // eslint-disable-next-line node/prefer-global/process
         const isDev = process.env.NODE_ENV === 'development';
         const isBrowser = typeof window !== 'undefined';
-        const onMetry = isBrowser && isSiteWithMetry// && !isDev;
+        const onMetry = isBrowser && isSiteWithMetry && !isDev;
         if (onMetry) {
             posthog.init('phc_57fDHywG9pssGGW4JSHpc3Pq8hQ9puPnoWHoM6x30T7', {
                 api_host: 'https://us.i.posthog.com',
@@ -77,6 +75,9 @@ export class PosthogTelemetryService extends Disposable implements ITelemetrySer
     }
 
     capture(eventName: string, params?: Record<string, any> | undefined) {
+        console.log('capture', params);
+
+        if (params?.FPS.avg > 59.5) return;
         posthog.capture(eventName, params);
     }
 

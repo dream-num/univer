@@ -71,6 +71,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/telemetry": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": ">=2.0.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",

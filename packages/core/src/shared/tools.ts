@@ -708,7 +708,7 @@ export class Tools {
         return Math.max(min, Math.min(max, value));
     }
 
-    static Now(): number {
+    static now(): number {
         if (performance && performance.now) {
             return performance.now();
         }

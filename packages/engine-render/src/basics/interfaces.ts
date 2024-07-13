@@ -68,13 +68,6 @@ export enum TRANSFORM_CHANGE_OBSERVABLE_TYPE {
     all,
 }
 
-// export interface IRenderPerformanceMetry {
-//     fps: number;
-//     duration: number;
-// }
-
-// export interface IPartialRenderPerformanceMetry  extends Partial<IRenderPerformanceMetry> {}
-
 export interface ITransformChangeState {
     type: TRANSFORM_CHANGE_OBSERVABLE_TYPE;
     value: IObjectFullState
@@ -178,4 +171,17 @@ export interface INodeSearch {
 
 export interface INodePosition extends INodeSearch {
     isBack: boolean;
+}
+
+export interface IAfterRender$Info {
+    // renderFrameMetric: IRenderFrameMetric;
+    frameTimeMetric: Record<string, number | number[]>;
+    tags: { scrolling: boolean } & Record<string, any>;
+}
+
+export type ITimeMetric = [string, number];
+
+export interface IRenderFrameMetric {
+    timeMetric: Record<string, number>;
+    tags: { scrolling: boolean } & Record<string, any>;
 }

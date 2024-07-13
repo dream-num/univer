@@ -15,14 +15,15 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { toDisposable } from '@univerjs/core';
+import { toDisposable, Tools } from '@univerjs/core';
 
 import { Observable, shareReplay, Subject } from 'rxjs';
 import type { CURSOR_TYPE } from './basics/const';
 import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
 import { DeviceType, PointerInput } from './basics/i-events';
+import type { ITimeMetric } from './basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
-import type { ISampleFrameInfo } from './basics/performance-monitor';
+import type { IBasicFrameInfo } from './basics/performance-monitor';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
 import { Canvas, CanvasRenderMode } from './canvas';
@@ -33,18 +34,22 @@ import { observeClientRect } from './floating/util';
 export class Engine extends ThinEngine<Scene> {
     renderEvenInBackground = true;
 
-    private readonly _beginFrame$ = new Subject<void>();
+    private readonly _beginFrame$ = new Subject<number>();
     readonly beginFrame$ = this._beginFrame$.asObservable();
 
-    private readonly _endFrame$ = new Subject<ISampleFrameInfo>();
+    private readonly _endFrame$ = new Subject<IBasicFrameInfo>();
     readonly endFrame$ = this._endFrame$.asObservable();
 
-    private _rect$: Nullable<Observable<void>> = null;
+    readonly renderFrameTimeMetric$ = new Subject<ITimeMetric>();
+
+    readonly renderFrameTags$ = new Subject<[string, any]>();
+
     /**
      * time when render start, for elapsedTime
      */
     private _renderStartTime: number = 0;
-    private _elapsedTime: number = 0;
+
+    private _rect$: Nullable<Observable<void>> = null;
 
     public get clientRect$(): Observable<void> {
         return this._rect$ || (this._rect$ = new Observable((subscriber) => {
@@ -67,7 +72,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _renderingQueueLaunched = false;
 
-    private _renderFrameTasks = new Array<() => Record<string, any> | void>();
+    private _renderFrameTasks = new Array<() => void>();
 
     private _renderFunction = (_timestamp: number) => { /* empty */ };
 
@@ -150,8 +155,12 @@ export class Engine extends ThinEngine<Scene> {
         this._performanceMonitor = new PerformanceMonitor();
     }
 
+    get elapsedTime(): number {
+        return Tools.now() - this._renderStartTime;
+    }
+
     get frameList$() {
-        return this._performanceMonitor.frameListPastSec$;
+        return this._performanceMonitor.lastSecondFramesList$;
     }
 
     override get width() {
@@ -172,6 +181,18 @@ export class Engine extends ThinEngine<Scene> {
     get frameId(): number {
         return this._frameId;
     }
+
+    // afterRenderMetric$: Subject<IAfterRender$Info> = new Subject<IAfterRender$Info>();
+
+    // addRenderFrameTimeMetric$: Subject<ITimeMetric> = new Subject<ITimeMetric>();
+    // _initPerformanceMonitor() {
+    //     this._performanceMonitor = new PerformanceMonitor();
+
+    //     const _renderFrameTimeMetric: Nullable<Record<string, number[]>> = null;
+    //     const _renderFrameTags: Record<string, any> = {};
+
+    //     this.addRenderFrameTimeMetric$.subscribe()
+    // }
 
     override setCanvasCursor(val: CURSOR_TYPE) {
         const canvasEl = this.getCanvas().getCanvasEle();
@@ -358,24 +379,26 @@ export class Engine extends ThinEngine<Scene> {
     /**
      * Begin a new frame
      */
-    beginFrame(_timestamp: number): void {
-        this._beginFrame$.next();
+    _beginFrame(_timestamp: number): void {
+        this._frameId++;
+        this._beginFrame$.next(this._frameId);
     }
 
     /**
      * End the current frame
      */
-    endFrame(timestamp: number): void {
-        this._frameId++;
-        this._measureFps(timestamp);
+    _endFrame(timestamp: number): void {
+        // this._measureFps(timestamp);
+        this._performanceMonitor.sampleFrame(timestamp);
         this._performanceMonitor.endFrame(timestamp);
+        this._fps = this._performanceMonitor.averageFPS;
+        this._deltaTime = this._performanceMonitor.instantaneousFrameTime || 0;
         this._endFrame$.next({
             FPS: this.getFps(),
             frameTime: this.getDeltaTime(),
-        });
+            elapsedTime: this.elapsedTime,
+        } as IBasicFrameInfo);
     }
-
-    // FPS
 
     /**
      * Gets the current framerate
@@ -399,11 +422,7 @@ export class Engine extends ThinEngine<Scene> {
     private _renderFrame(_timestamp: number) {
         for (let index = 0; index < this._renderFrameTasks.length; index++) {
             const renderFunction = this._renderFrameTasks[index];
-
-            const renderResult = renderFunction();
-            if (renderResult) {
-                this._performanceMonitor.addFrameTimeDetail(renderResult);
-            }
+            renderFunction();
         }
     }
 
@@ -448,9 +467,9 @@ export class Engine extends ThinEngine<Scene> {
 
         if (shouldRender) {
             // Start new frame
-            this.beginFrame(timestamp);
+            this._beginFrame(timestamp);
             this._renderFrame(timestamp);
-            this.endFrame(timestamp);
+            this._endFrame(timestamp);
         }
 
         if (this._renderFrameTasks.length > 0) {

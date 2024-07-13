@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Documents, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { CURSOR_TYPE, DocumentEditArea, ITextSelectionRenderManager, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -231,7 +231,8 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
 
             // The initial cursor is set at the beginning of the document,
             // and can be set to the previous cursor position in the future.
-            if (!this._editorService.isEditor(unitId)) {
+            // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.
+            if (!isInternalEditorID(unitId)) {
                 this._textSelectionManagerService.replaceTextRanges([
                     {
                         startOffset: 0,

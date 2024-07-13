@@ -462,6 +462,11 @@ export class PromptController extends Disposable {
             let insertNodes = this._formulaPromptService.getSequenceNodes()!;
             const char = this._getCurrentChar()!;
 
+            // To reset the cursor position when resetting the editor's content.
+            if (insertNodes.length === 0 && this._currentInsertRefStringIndex > 0) {
+                this._currentInsertRefStringIndex = -1;
+            }
+
             this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
 
             if (!matchRefDrawToken(char) && this._focusIsOnlyRange(selections.length)) {
@@ -549,7 +554,7 @@ export class PromptController extends Disposable {
                         selectionIndex += 1;
                     }
 
-                    this._syncToEditor(lastSequenceNodes, selectionIndex, undefined, false, false);
+                    this._syncToEditor(lastSequenceNodes, selectionIndex, undefined, true, false);
                 })
             )
         );
@@ -642,7 +647,8 @@ export class PromptController extends Disposable {
         }
 
         const char = this._getCurrentChar();
-        if (char && matchRefDrawToken(char)) {
+        const dataStream = this._getCurrentDataStream();
+        if (dataStream?.substring(0, 1) === '=' && char && matchRefDrawToken(char)) {
             this._enterSelectingMode();
         } else {
             this._quitSelectingMode();
@@ -671,6 +677,11 @@ export class PromptController extends Disposable {
         const dataStream = config.dataStream;
 
         return dataStream[startOffset - 1 + config.offset];
+    }
+
+    private _getCurrentDataStream() {
+        const config = this._getCurrentBodyDataStreamAndOffset();
+        return config?.dataStream;
     }
 
     private _isSelectingMode = false;
@@ -1165,6 +1176,7 @@ export class PromptController extends Disposable {
      * @param sequenceNodes
      * @param textSelectionOffset
      */
+    // eslint-disable-next-line max-lines-per-function
     private _syncToEditor(
         sequenceNodes: Array<string | ISequenceNode>,
         textSelectionOffset: number,
@@ -1196,8 +1208,12 @@ export class PromptController extends Disposable {
 
         const editor = this._editorService.getEditor(editorUnitId);
 
+        // You need to set a mode for single selection area or multiple selection areas, adapting to a rangeSelector that only has a single selection area.
         if (editor?.isSingleChoice()) {
             dataStream = dataStream.split(',')[0];
+            this._selectionRenderService.setSingleSelectionEnabled(true);
+        } else {
+            this._selectionRenderService.setSingleSelectionEnabled(false);
         }
 
         let formulaString = dataStream;
@@ -1226,6 +1242,14 @@ export class PromptController extends Disposable {
                 segmentId: null,
                 options: { fromSelection },
             });
+            // The ReplaceContentCommand has canceled the selection operation, so it needs to be triggered externally once.
+            this._textSelectionManagerService.replaceTextRanges([
+                {
+                    startOffset: textSelectionOffset + 1 - offset,
+                    endOffset: textSelectionOffset + 1 - offset,
+                    style,
+                },
+            ], true, { fromSelection });
         } else {
             this._updateEditorModel(`${formulaString}\r\n`, textRuns);
             this._textSelectionManagerService.replaceTextRanges([
@@ -1641,6 +1665,7 @@ export class PromptController extends Disposable {
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _commandExecutedListener() {
         // Listen to document edits to refresh the size of the editor.
         const updateCommandList = [SelectEditorFormulaOperation.id];

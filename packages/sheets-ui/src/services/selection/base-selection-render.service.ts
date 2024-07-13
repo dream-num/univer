@@ -73,6 +73,8 @@ export interface ISheetSelectionRenderService {
     attachPrimaryWithCoord(primary: Nullable<Partial<ISelectionCell>>): Nullable<ISelectionCellWithMergeInfo>;
 
     getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithMergeInfo>; // drawing
+
+    setSingleSelectionEnabled(enabled: boolean): void;
 }
 
 export const ISheetSelectionRenderService = createIdentifier<ISheetSelectionRenderService>('univer.sheet.selection-render-service');
@@ -172,6 +174,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     /** @deprecated This should not be provided by the selection render service. */
     getViewPort() {
         return this._activeViewport!;
+    }
+
+    setSingleSelectionEnabled(enabled: boolean = false): void {
+        this._singleSelectionEnabled = enabled;
     }
 
     /**

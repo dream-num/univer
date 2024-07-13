@@ -692,7 +692,7 @@ export class DrawingUpdateController extends Disposable {
                         return;
                     }
                     const { transform } = drawingParam;
-                    const { scene } = renderObject;
+                    const { scene, transformer } = renderObject;
 
                     if (isMultiTransform !== BooleanNumber.TRUE) {
                         const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
@@ -712,11 +712,21 @@ export class DrawingUpdateController extends Disposable {
                         drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                     } else {
                         // Step 1: remove all drawing shapes.
-                        const focusDrawings = this._drawingManagerService.getFocusDrawings();
+                        const selectedObjectMap = transformer.getSelectedObjectMap();
+                        const selectedObjectKeys = [...selectedObjectMap.keys()];
 
                         this._drawingManagerService.removeNotification([param]);
                         // Step 2: create new drawing shapes.
                         this._drawingManagerService.addNotification([param]);
+
+                        // Step 3: reSelect previous shapes and focus previous drawings.
+                        for (const key of selectedObjectKeys) {
+                            const drawingShape = scene.getObject(key) as Image;
+
+                            if (drawingShape) {
+                                transformer.setSelectedControl(drawingShape);
+                            }
+                        }
                     }
                 });
             })

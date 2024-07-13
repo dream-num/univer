@@ -23,7 +23,7 @@ import {
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, IPoint, Viewport } from '@univerjs/engine-render';
-import { getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
+import { DocumentEditArea, getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 
@@ -422,7 +422,8 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const { pages } = skeletonData;
+        const editArea = viewModel.getEditArea();
+        const { pages, skeHeaders, skeFooters } = skeletonData;
 
         const { mainComponent, scene } = currentRender;
         const documentComponent = mainComponent as Documents;
@@ -475,6 +476,45 @@ export class DocDrawingTransformerController extends Disposable {
         this._liquid.reset();
 
         for (const p of pages) {
+            const { headerId, footerId, pageHeight, pageWidth, marginLeft, marginBottom } = p;
+            const pIndex = pages.indexOf(p);
+
+            if (segmentPage > -1 && pIndex === segmentPage) {
+                switch (editArea) {
+                    case DocumentEditArea.HEADER: {
+                        const headerSke = skeHeaders.get(headerId)?.get(pageWidth);
+
+                        if (headerSke) {
+                            this._liquid.translatePagePadding({
+                                marginTop: headerSke.marginTop,
+                                marginLeft,
+                            } as IDocumentSkeletonPage);
+                        } else {
+                            throw new Error('header skeleton not found');
+                        }
+
+                        break;
+                    }
+
+                    case DocumentEditArea.FOOTER: {
+                        const footerSke = skeFooters.get(footerId)?.get(pageWidth);
+
+                        if (footerSke) {
+                            this._liquid.translatePagePadding({
+                                marginTop: pageHeight - marginBottom + footerSke.marginTop,
+                                marginLeft,
+                            } as IDocumentSkeletonPage);
+                        } else {
+                            throw new Error('footer skeleton not found');
+                        }
+
+                        break;
+                    }
+                }
+
+                break;
+            }
+
             this._liquid.translatePagePadding(p);
             if (p === page) {
                 break;

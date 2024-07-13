@@ -32,7 +32,7 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, getRichTextEditPath, RichTextEditingMutation } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
-import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 
 export enum TextWrappingStyle {
     INLINE = 'inline',
@@ -81,16 +81,18 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
         const skeletonData = renderObject?.with(DocSkeletonManagerService)
             .getSkeleton()
             .getSkeletonData();
+        const viewModel = renderObject?.with(DocSkeletonManagerService).getViewModel();
         const scene = renderObject?.scene;
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
-        if (documentDataModel == null || skeletonData == null || scene == null) {
+        if (documentDataModel == null || skeletonData == null || scene == null || viewModel == null) {
             return false;
         }
 
+        const editArea = viewModel.getEditArea();
         const transformer = scene.getTransformerByCreate();
 
-        const { pages } = skeletonData;
+        const { pages, skeHeaders, skeFooters } = skeletonData;
 
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
@@ -132,10 +134,42 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             let pageMarginTop = 0;
             let pageMarginLeft = 0;
             for (const page of pages) {
-                if (page.skeDrawings.has(drawingId)) {
-                    skeDrawing = page.skeDrawings.get(drawingId);
-                    pageMarginTop = page.marginTop;
-                    pageMarginLeft = page.marginLeft;
+                const { headerId, footerId, marginTop, marginLeft, marginBottom, pageWidth, pageHeight } = page;
+
+                switch (editArea) {
+                    case DocumentEditArea.HEADER: {
+                        const headerSke = skeHeaders.get(headerId)?.get(pageWidth);
+
+                        if (headerSke != null && headerSke.skeDrawings.has(drawingId)) {
+                            skeDrawing = headerSke.skeDrawings.get(drawingId);
+                            pageMarginTop = headerSke.marginTop;
+                            pageMarginLeft = marginLeft;
+                        }
+
+                        break;
+                    }
+
+                    case DocumentEditArea.FOOTER: {
+                        const footerSke = skeFooters.get(footerId)?.get(pageWidth);
+                        if (footerSke != null && footerSke.skeDrawings.has(drawingId)) {
+                            skeDrawing = footerSke.skeDrawings.get(drawingId);
+                            pageMarginTop = pageHeight - marginBottom + footerSke.marginTop;
+                            pageMarginLeft = marginLeft;
+                        }
+                        break;
+                    }
+
+                    case DocumentEditArea.BODY: {
+                        if (page.skeDrawings.has(drawingId)) {
+                            skeDrawing = page.skeDrawings.get(drawingId);
+                            pageMarginTop = marginTop;
+                            pageMarginLeft = marginLeft;
+                        }
+                        break;
+                    }
+                }
+
+                if (skeDrawing != null) {
                     break;
                 }
             }

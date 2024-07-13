@@ -49,7 +49,6 @@ export class MobileSelectionControl extends SelectionControl {
         protected _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL
     ) {
         super(_scene, _zIndex, _isHeaderHighlight, _themeService);
-        // window.sp = this;
         this.initControlPoints();
     }
 

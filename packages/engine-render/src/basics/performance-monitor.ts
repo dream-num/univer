@@ -25,15 +25,27 @@ export const DEFAULT_FRAME_LIST_SIZE = 60 * 60; // 1min
 const DEFAULT_ONE_SEC_MS = 1000;
 
 const DEFAULT_FRAME_TIME = 16.67; // 60FPS
-export interface ISampleFrameInfo {
+export interface IBasicFrameInfo {
     FPS: number;
     frameTime: number; // frame time in milliseconds
+    elapsedTime: number; // elapsed time in milliseconds
 }
 
-export interface ISummaryFrameData {
-    avgFrameTime: number;
-    minFrameTime: number;
-    maxFrameTime: number;
+export interface IExtendFrameInfo extends IBasicFrameInfo {
+    [key: string]: any;
+    scrolling: boolean;
+}
+
+export interface ISummaryFrameInfo {
+    FPS: ISummaryMetric;
+    frameTime: ISummaryMetric;
+    [key: string]: ISummaryMetric;
+}
+
+export interface ISummaryMetric {
+    avg: number;
+    min: number;
+    max: number;
 }
 /**
  * Performance monitor tracks rolling average frame-time and frame-time variance over a user defined sliding-window
@@ -59,8 +71,8 @@ export class PerformanceMonitor extends Disposable {
     /**
      * frameTime list in past second
      */
-    private _frameTimeListPastSec: Partial<ISampleFrameInfo>[] = [];
-    frameListPastSec$ = new BehaviorSubject<Partial<ISampleFrameInfo>[]>([]);
+    private _frameTimeListPastSec: Partial<IBasicFrameInfo>[] = [];
+    lastSecondFramesList$ = new BehaviorSubject<Partial<IBasicFrameInfo>[]>([]);
 
     private _frameTimeDetail: Nullable<Record<string, any>> = null;
     // frameTime$: BehaviorSubject<Nullable<Record<string, any>>> = new BehaviorSubject<Nullable<Record<string, any>>>(null);
@@ -76,7 +88,7 @@ export class PerformanceMonitor extends Disposable {
 
     override dispose(): void {
         super.dispose();
-        this.frameListPastSec$.complete();
+        this.lastSecondFramesList$.complete();
         // this.frameTime$.complete();
         this._frameTimeListPastSec = [];
     }
@@ -133,10 +145,6 @@ export class PerformanceMonitor extends Disposable {
         this._frameTimeDetail = null;
     }
 
-    addFrameTimeDetail(moreInfo: Record<string, any>) {
-        this._frameTimeDetail = moreInfo;
-    }
-
     /**
      * Returns true if sampling is enabled
      */
@@ -149,7 +157,7 @@ export class PerformanceMonitor extends Disposable {
      * this method is called each frame by engine renderLoop  --> endFrame.
      * @param timestamp A timestamp in milliseconds of the current frame to compare with other frames
      */
-    sampleFrame(timestamp: number = this.Now()) {
+    sampleFrame(timestamp: number = this.now()) {
         if (!this._enabled) {
             return;
         }
@@ -173,30 +181,17 @@ export class PerformanceMonitor extends Disposable {
         //#region frameTime
         if (this._lastFrameTimeMs != null) {
             const dt = timestamp - this._lastFrameTimeMs;
-            this._rollingFrameTime.add(dt);
+            this._rollingFrameTime.addFrameTime(dt);
             this._rollingFrameTime.calcAverageFrameTime();
-
-            // const frameInfo = {
-            //     frameTime: dt,
-            // };
-            // if (this._frameTimeDetail) {
-            //     frameInfo = { ...frameInfo, ...this._frameTimeDetail };
-            // }
-            // this._frameTimeListPastSec.push(frameInfo);
         }
         //#endregion
     }
 
     endFrame(timestamp: number) {
-        // this.frameListPastSec$.next([...this._frameTimeListPastSec]);
-        // if (this._frameTimeListPastSec.length > DEFAULT_FRAME_LIST_SIZE) {
-        //     this._frameTimeListPastSec = [];
-        // }
         this._lastFrameTimeMs = timestamp;
-        this.clearFrameDetail();
     }
 
-    Now(): number {
+    now(): number {
         if (performance && performance.now) {
             return performance.now();
         }
@@ -278,12 +273,12 @@ export class RollingAverage {
             // remove bottom of stack from mean
             const bottomValue = this._samples[this._pos];
             delta = bottomValue - this.averageFrameTime;
-            // this.averageFrameTime -= delta / (this._sampleCount - 1);
             this._m2 -= delta * (bottomValue - this.averageFrameTime);
         } else {
             this._sampleCount++;
         }
 
+        // Remove one maximum and one minimum to ensure the accuracy of the average value.
         const min = Math.min(...this._samples);
         const max = Math.min(...this._samples);
         const filteredData = this._samples.filter((v) => v !== max && v !== min);
@@ -291,7 +286,6 @@ export class RollingAverage {
 
         // add new value to mean
         delta = frameDuration - this.averageFrameTime;
-
         this._m2 += delta * (frameDuration - this.averageFrameTime);
 
         // set the new variance
@@ -300,11 +294,11 @@ export class RollingAverage {
 
     /**
      * Adds a sample to the sample set
-     * @param frameDuration The sample value
+     * @param frameTime The sample value
      */
-    add(frameDuration: number) {
+    addFrameTime(frameTime: number) {
         // http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-        this._samples[this._pos] = frameDuration;
+        this._samples[this._pos] = frameTime;
         this._pos = ++this._pos % this._samples.length; // positive wrap around
     }
 

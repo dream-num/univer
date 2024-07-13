@@ -24,6 +24,11 @@ export enum SHEET_EXTENSION_TYPE {
     GRID,
 }
 
+/**
+ * for distinguish doc & slides extensions, now only used when metric performance.
+ */
+export const SHEET_EXTENSION_PREFIX = 'sheet-ext-';
+
 export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     override type = SHEET_EXTENSION_TYPE.GRID;
 

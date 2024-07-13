@@ -36,7 +36,7 @@ export class UniverTelemetryPlugin extends Plugin {
         super();
     }
 
-    start(injector: Injector) {
+    override onStarting(injector: Injector) {
         const dependencies: Dependency[] = [
             [ITelemetryService, { useClass: this._config.service }],
             [TelemetryController],

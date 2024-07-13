@@ -18,7 +18,6 @@ import type { IDocumentData, Nullable } from '@univerjs/core';
 import { debounce, isInternalEditorID, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
-import { Popup } from '@univerjs/design';
 import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
 import { IEditorService } from '../../services/editor/editor.service';
 import { isElementVisible } from '../../utils/util';
@@ -307,11 +306,13 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
     return (
         <>
             <div {...propsNew} className={className + borderStyle} ref={editorRef}>
+                <div style={{ display: validationVisible ? 'none' : 'block' }} className={styles.textEditorValidationError}>{validationContent}</div>
                 <div style={{ display: hasValue() ? 'none' : 'unset' }} className={styles.textEditorContainerPlaceholder}>{placeholderValue}</div>
             </div>
-            <Popup visible={!validationVisible} offset={validationOffset}>
+            {/* Don't delete it yet, test the stability without popup */}
+            {/* <Popup visible={!validationVisible} offset={validationOffset}>
                 <div className={styles.textEditorValidationError}>{validationContent}</div>
-            </Popup>
+            </Popup> */}
         </>
     );
 }

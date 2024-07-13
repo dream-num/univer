@@ -150,6 +150,7 @@ export class WorksheetPermissionService extends RxDisposable {
                     Object.keys(resources).forEach((subUnitId) => {
                         getAllWorksheetPermissionPoint().forEach((F) => {
                             const instance = new F(unitId, subUnitId);
+                            instance.value = false;
                             this._permissionService.addPermissionPoint(instance);
                         });
                     });

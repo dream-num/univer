@@ -418,6 +418,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
                     columnCount: sheetConfig.columnCount,
                     rowData: sheetConfig.rowData,
                     columnData: sheetConfig.columnData,
+                    defaultRowHeight: sheetConfig.defaultRowHeight,
+                    defaultColumnWidth: sheetConfig.defaultColumnWidth,
                 };
                 sheetNameMap[sheet.getName()] = sheet.getSheetId();
             }

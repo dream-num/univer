@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            infoType: { name: '資訊類型', detail: '這是指定所要傳回何種儲存格資訊類型的文字值。' },
+            reference: { name: '參考', detail: '這是您要取得其相關資訊的儲存格。' },
         },
     },
     ERROR_TYPE: {

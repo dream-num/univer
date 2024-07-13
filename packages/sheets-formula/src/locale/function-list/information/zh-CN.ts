@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            infoType: { name: '信息类型', detail: '一个文本值，指定要返回的单元格信息的类型。' },
+            reference: { name: '引用', detail: '需要其相关信息的单元格。' },
         },
     },
     ERROR_TYPE: {

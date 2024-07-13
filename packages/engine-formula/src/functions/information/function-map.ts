@@ -15,6 +15,7 @@
  */
 
 import { FUNCTION_NAMES_INFORMATION } from './function-names';
+import { Cell } from './cell';
 import { Isblank } from './isblank';
 import { Iserr } from './iserr';
 import { Iserror } from './iserror';
@@ -28,6 +29,7 @@ import { Isref } from './isref';
 import { Istext } from './istext';
 
 export const functionInformation = [
+    [Cell, FUNCTION_NAMES_INFORMATION.CELL],
     [Isblank, FUNCTION_NAMES_INFORMATION.ISBLANK],
     [Iserr, FUNCTION_NAMES_INFORMATION.ISERR],
     [Iseven, FUNCTION_NAMES_INFORMATION.ISEVEN],

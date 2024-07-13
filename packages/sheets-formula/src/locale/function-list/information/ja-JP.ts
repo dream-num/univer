@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            infoType: { name: '検査の種類', detail: '返すセル情報の種類を指定するテキスト値。' },
+            reference: { name: '範囲', detail: '情報が必要なセルを指定します。' },
         },
     },
     ERROR_TYPE: {

@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            infoType: { name: 'info_type', detail: 'A text value that specifies what type of cell information you want to return.' },
+            reference: { name: 'reference', detail: 'The cell that you want information about.' },
         },
     },
     ERROR_TYPE: {

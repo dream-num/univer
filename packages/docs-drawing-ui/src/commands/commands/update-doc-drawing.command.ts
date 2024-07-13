@@ -64,13 +64,23 @@ function getDeleteAndInsertCustomBlockActions(
     const jsonX = JSONX.getInstance();
     const rawActions: JSONXActions = [];
 
+    const oldBody = documentDataModel.getSelfOrHeaderFooterModel(oldSegmentId).getBody();
+    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+    if (oldBody == null || body == null) {
+        return;
+    }
+
+    const oldOffset = oldBody.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
+
+    if (oldOffset == null) {
+        return;
+    }
+
+    // Can not put image after the last \r.
+    offset = Math.min(body.dataStream.length - 2, offset);
+
     if (segmentId === oldSegmentId) {
-        const oldOffset = documentDataModel.getSelfOrHeaderFooterModel(oldSegmentId).getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
-
-        if (oldOffset == null) {
-            return;
-        }
-
         if (offset < oldOffset) {
             // Insert first.
             if (offset > 0) {
@@ -153,19 +163,6 @@ function getDeleteAndInsertCustomBlockActions(
             rawActions.push(action!);
         }
     } else {
-        const body = documentDataModel.getSelfOrHeaderFooterModel(oldSegmentId).getBody();
-        const newBody = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
-
-        if (body == null || newBody == null) {
-            return;
-        }
-
-        const oldOffset = body.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
-
-        if (oldOffset == null) {
-            return;
-        }
-
         if (oldOffset > 0) {
             textX.push({
                 t: TextXActionType.RETAIN,

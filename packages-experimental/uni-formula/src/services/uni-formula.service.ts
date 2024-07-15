@@ -21,7 +21,7 @@ import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Optional } from '@wendellhu/redi';
 
-import type { type IDocFormulaCache, IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
+import { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
 import { DOC_FORMULA_PLUGIN_NAME } from '../const';
 
 const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';

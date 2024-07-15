@@ -118,7 +118,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         }
 
         const config = viewportMain.transViewportScroll2ScrollValue(offsetX, offsetY);
-        viewportMain.scrollBy(config);
+        viewportMain.scrollByBarDeltaValue(config);
     }
 
     // Let the selection show on the current screen.

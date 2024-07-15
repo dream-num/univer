@@ -576,16 +576,16 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                     if (moveOffsetY < viewportMain.top && (selection?.endRow ?? 0) < (freeze?.startRow ?? 0)) {
                         scrollOffsetY = viewportMain.top;
                     } else if (isCrossingY && yCrossTime % 2 === 1) {
-                        viewportMain.scrollTo({
-                            y: 0,
+                        viewportMain.scrollToViewportPos({
+                            viewportScrollY: 0,
                         });
                     }
                 } else if (startKey === SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT) {
                     if (moveOffsetX < viewportMain.left && (selection?.endColumn ?? 0) < (freeze?.startColumn ?? 0)) {
                         scrollOffsetX = viewportMain.left;
                     } else if (isCrossingX && xCrossTime % 2 === 1) {
-                        viewportMain.scrollTo({
-                            x: 0,
+                        viewportMain.scrollToViewportPos({
+                            viewportScrollX: 0,
                         });
                     }
                 } else if (startKey === endKey) {
@@ -627,7 +627,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                     const shouldResetY = startXY.y !== endXY.y && isCrossingY && yCrossTime % 2 === 1;
 
                     if (shouldResetX || shouldResetY) {
-                        viewportMain.scrollTo({
+                        viewportMain.scrollToBarPos({
                             x: shouldResetX ? startXY.x : undefined,
                             y: shouldResetY ? startXY.y : undefined,
                         });

@@ -142,7 +142,7 @@ export class ScrollTimer {
         //     x,
         //     y,
         // });
-        const limited = viewport?.scrollByViewportDeltaValue({
+        const limited = viewport?.scrollByViewportDeltaVal({
             viewportScrollX: x,
             viewportScrollY: y,
         });

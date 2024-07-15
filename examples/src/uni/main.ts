@@ -32,7 +32,6 @@ import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
-import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
@@ -40,6 +39,8 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
+import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
+
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
@@ -85,8 +86,10 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
 univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
-univer.registerPlugin(UniverSheetsDataValidationPlugin);
+// univer.registerPlugin(UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsSortUIPlugin);
+
+univer.registerPlugin(UniverDocUniFormulaPlugin);
 
 const mockUser = {
     userID: 'Owner_qxVnhPbQ',

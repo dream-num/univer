@@ -122,3 +122,27 @@ export class RxDisposable extends Disposable implements IDisposable {
         this.dispose$.complete();
     }
 }
+
+export class RCDisposable extends Disposable {
+    private _ref = 0;
+
+    constructor(private readonly _rootDisposable: IDisposable) {
+        super();
+    }
+
+    inc(): void {
+        if (this._disposed) {
+            throw new Error('[RCDisposable]: should not ref to a disposed.');
+        }
+        this._ref += 1;
+    }
+
+    dec(): void {
+        this._ref -= 1;
+
+        if (this._ref === 0) {
+            this._rootDisposable.dispose();
+            this.dispose();
+        }
+    }
+}

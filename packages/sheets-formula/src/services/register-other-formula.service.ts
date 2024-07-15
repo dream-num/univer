@@ -29,6 +29,8 @@ export class RegisterOtherFormulaService extends Disposable {
     private _formulaChange$ = new Subject<{ unitId: string; subUnitId: string; formulaText: string; formulaId: string }>();
     public formulaChange$ = this._formulaChange$.asObservable();
 
+    // FIXME: this design could be improved.
+
     private _formulaResult$ = new Subject<Record<string, Record<string, IOtherFormulaResult[]>>>();
     public formulaResult$ = this._formulaResult$.asObservable();
 
@@ -60,18 +62,20 @@ export class RegisterOtherFormulaService extends Disposable {
     }
 
     private _createFormulaId(unitId: string, subUnitId: string) {
-        return `sheet.dv_${unitId}_${subUnitId}_${Tools.generateRandomId(8)}`;
+        return `formula.${unitId}_${subUnitId}_${Tools.generateRandomId(8)}`;
     }
 
     private _initFormulaRegister() {
         this._activeDirtyManagerService.register(OtherFormulaMarkDirty.id,
-            { commandId: OtherFormulaMarkDirty.id,
-              getDirtyData(commandInfo) {
-                  const params = commandInfo.params as IOtherFormulaMarkDirtyParams;
-                  return {
-                      dirtyUnitOtherFormulaMap: params,
-                  };
-              } });
+            {
+                commandId: OtherFormulaMarkDirty.id,
+                getDirtyData(commandInfo) {
+                    const params = commandInfo.params as IOtherFormulaMarkDirtyParams;
+                    return {
+                        dirtyUnitOtherFormulaMap: params,
+                    };
+                },
+            });
 
         this.formulaChange$.pipe(bufferTime(16), filter((list) => !!list.length), map((list) => {
             return list.reduce((result, cur) => {

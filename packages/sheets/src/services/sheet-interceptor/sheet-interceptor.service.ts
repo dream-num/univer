@@ -19,6 +19,7 @@ import type {
     ICommandInfo,
     IDisposable,
     IInterceptor,
+    IMutationInfo,
     IRange,
     IUndoRedoCommandInfosByInterceptor,
     Nullable,
@@ -38,6 +39,14 @@ import {
 } from '@univerjs/core';
 
 import { INTERCEPTOR_POINT } from './interceptor-const';
+
+export interface IBeforeCommandInterceptor {
+    priority?: number;
+    performCheck(info: ICommandInfo): Promise<{
+        perform: boolean;
+        mutations?: IUndoRedoCommandInfosByInterceptor;
+    }>;
+}
 
 export interface ICommandInterceptor {
     priority?: number;
@@ -65,6 +74,8 @@ export class SheetInterceptorService extends Disposable {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
     private _commandInterceptors: ICommandInterceptor[] = [];
     private _commandRangesInterceptors: ICommandInterceptorOnlyWithRanges[] = [];
+
+    private _beforeCommandInterceptor: IBeforeCommandInterceptor[] = [];
 
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
@@ -124,6 +135,46 @@ export class SheetInterceptorService extends Disposable {
         this._commandRangesInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
         return this.disposeWithMe(toDisposable(() => remove(this._commandRangesInterceptors, interceptor)));
+    }
+
+    interceptBeforeCommand(interceptor: IBeforeCommandInterceptor): IDisposable {
+        if (this._beforeCommandInterceptor.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+
+        this._beforeCommandInterceptor.push(interceptor);
+        this._beforeCommandInterceptor.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._beforeCommandInterceptor, interceptor)));
+    }
+
+    async beforeCommandExecute(info: ICommandInfo): Promise<{ perform: boolean; mutations: Nullable<IUndoRedoCommandInfosByInterceptor> }> {
+        const allPerformCheckInfo = await Promise.all(this._beforeCommandInterceptor.map((i) => i.performCheck(info)));
+
+        const undos: IMutationInfo[] = [];
+        const redos: IMutationInfo[] = [];
+        const preRedos: IMutationInfo[] = [];
+        const preUndos: IMutationInfo[] = [];
+
+        const perform = allPerformCheckInfo.every((checkInfo) => checkInfo.perform);
+        allPerformCheckInfo.forEach((checkInfo) => {
+            if (checkInfo.mutations) {
+                preRedos.push(...checkInfo.mutations.preRedos ?? []);
+                redos.push(...checkInfo.mutations.redos ?? []);
+                preUndos.push(...checkInfo.mutations.preUndos ?? []);
+                undos.push(...checkInfo.mutations.undos ?? []);
+            }
+        });
+
+        return {
+            perform,
+            mutations: {
+                preRedos,
+                redos,
+                preUndos,
+                undos,
+            },
+        };
     }
 
     /**
@@ -206,6 +257,17 @@ export class SheetInterceptorService extends Disposable {
                                 worksheet,
                             }
                         );
+                    },
+                }));
+
+                sheetDisposables.add(viewModel.registerPivotTableInterceptor({
+                    getPivotInfo(mutations: IMutationInfo[]) {
+                        return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.PIVOT_INFO)(
+                            {
+                                redos: [],
+                                undos: [],
+                            },
+                            mutations);
                     },
                 }));
             });

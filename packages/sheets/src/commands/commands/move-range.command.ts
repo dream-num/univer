@@ -45,15 +45,27 @@ export const MoveRangeCommandId = 'sheet.command.move-range';
 export const MoveRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: MoveRangeCommandId,
-    handler: (accessor: IAccessor, params: IMoveRangeCommandParams) => {
+    handler: async (accessor: IAccessor, params: IMoveRangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const errorService = accessor.get(ErrorService);
         const localeService = accessor.get(LocaleService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
+
+        const performInfo = await sheetInterceptorService.beforeCommandExecute({
+            id: MoveRangeCommand.id,
+            params,
+        });
+
+        const { perform = true, mutations: externalMutations } = performInfo;
+
+        if (!perform) {
+            return false;
+        }
 
         const { worksheet, subUnitId, unitId } = target;
         const moveRangeMutations = getMoveRangeUndoRedoMutations(
@@ -66,7 +78,6 @@ export const MoveRangeCommand: ICommand = {
             return false;
         }
 
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const interceptorCommands = sheetInterceptorService.onCommandExecute({
             id: MoveRangeCommand.id,
             params: { ...params },
@@ -74,8 +85,10 @@ export const MoveRangeCommand: ICommand = {
 
         const redos = [
             ...(interceptorCommands.preRedos ?? []),
+            ...(externalMutations?.preRedos ?? []),
             ...moveRangeMutations.redos,
             ...interceptorCommands.redos,
+            ...(externalMutations?.redos ?? []),
             {
                 id: SetSelectionsOperation.id,
                 params: {
@@ -88,8 +101,10 @@ export const MoveRangeCommand: ICommand = {
         ];
         const undos = [
             ...(interceptorCommands.preUndos ?? []),
+            ...(externalMutations?.preUndos ?? []),
             ...moveRangeMutations.undos,
             ...interceptorCommands.undos,
+            ...(externalMutations?.undos ?? []),
             {
                 id: SetSelectionsOperation.id,
                 params: {

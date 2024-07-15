@@ -60,7 +60,6 @@ export interface ICustomHyperLinkModel {
     type: string
     matchUrl(urlStr: string): boolean
     match(link: ICellHyperLink): boolean
-    parsePayload(payload: string): string
     toLink(urlStr: string): ICellLinkContent
 }
 

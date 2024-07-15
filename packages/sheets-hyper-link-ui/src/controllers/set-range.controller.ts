@@ -149,6 +149,8 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                             const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
                             if (!link) {
                                 if (isLegalLink(cellValue)) {
+                                    const customHyperLink = this._hyperLinkModel.findCustomHyperLinkByUrl(cellValue);
+                                    const link = customHyperLink ? customHyperLink.toLink(cellValue) : { display: cellValue, payload: serializeUrl(cellValue) };
                                     const id = Tools.generateRandomId();
                                     undos.push({
                                         id: RemoveHyperLinkMutation.id,
@@ -167,8 +169,8 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                                 id,
                                                 row,
                                                 column: col,
-                                                display: cellValue,
-                                                payload: serializeUrl(cellValue),
+                                                display: link.display,
+                                                payload: link.payload,
                                             },
                                         },
                                     });

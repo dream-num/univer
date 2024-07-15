@@ -68,7 +68,7 @@ export const CellLinkEdit = () => {
                 const customLink = hyperLinkModel.findCustomHyperLink(link)
                 if (customLink) {
                     setType(customLink.type);
-                    setPayload(customLink.parsePayload(link.payload));
+                    setPayload(link.payload);
                     return;
                 }
                 const linkInfo = resolverService.parseHyperLink(link.payload);

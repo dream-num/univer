@@ -24,4 +24,5 @@ export interface IMessageService {
     show(options: IMessageOptions): IDisposable;
 
     setContainer(container: HTMLElement): void;
+    getContainer(): HTMLElement | undefined;
 }

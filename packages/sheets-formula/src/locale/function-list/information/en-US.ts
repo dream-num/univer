@@ -39,8 +39,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            errorVal: { name: 'error_val', detail: 'The error value whose identifying number you want to find.' },
         },
     },
     INFO: {
@@ -294,8 +293,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'Can be any value, such as a number, text, logical value, and so on.' },
         },
     },
 };

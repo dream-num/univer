@@ -39,8 +39,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            errorVal: { name: '錯誤值', detail: '這是您要尋找之識別數字的錯誤值。' },
         },
     },
     INFO: {
@@ -293,8 +292,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '這可以是任何值，如數字、文字、邏輯值等。' },
         },
     },
 };

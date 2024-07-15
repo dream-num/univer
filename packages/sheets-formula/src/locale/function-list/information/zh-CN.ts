@@ -39,8 +39,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            errorVal: { name: '错误值', detail: '要查找其标识号的错误值。' },
         },
     },
     INFO: {
@@ -294,8 +293,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '可以为任意值，如数字、文本以及逻辑值等等。' },
         },
     },
 };

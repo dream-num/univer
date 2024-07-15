@@ -39,8 +39,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            errorVal: { name: 'エラー値', detail: '評価するエラー値を指定します。' },
         },
     },
     INFO: {
@@ -302,8 +301,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: ' 数値、文字列、論理値など、の任意の値を指定です。' },
         },
     },
 };

@@ -105,16 +105,16 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.DAYS.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.DAYS.functionParameter.number1.name',
-                detail: 'formula.functionList.DAYS.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.DAYS.functionParameter.endDate.name',
+                detail: 'formula.functionList.DAYS.functionParameter.endDate.detail',
+                example: '"2021-12-31"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.DAYS.functionParameter.number2.name',
-                detail: 'formula.functionList.DAYS.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.DAYS.functionParameter.startDate.name',
+                detail: 'formula.functionList.DAYS.functionParameter.startDate.detail',
+                example: '"2021-1-1"',
                 require: 1,
                 repeat: 0,
             },

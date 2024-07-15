@@ -296,6 +296,10 @@ export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, 
 }
 
 export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject): (ErrorValueObject | number) {
+    if (serialNumberObject.isError()) {
+        return serialNumberObject as ErrorValueObject;
+    }
+
     const dateValue = serialNumberObject.getValue();
 
     if (serialNumberObject.isString()) {

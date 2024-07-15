@@ -80,8 +80,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            endDate: { name: 'end_date', detail: ' Start_date and End_date are the two dates between which you want to know the number of days.' },
+            startDate: { name: 'start_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
         },
     },
     DAYS360: {

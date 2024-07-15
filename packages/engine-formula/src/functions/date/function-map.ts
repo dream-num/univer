@@ -17,6 +17,7 @@
 import { DateFunction } from './date';
 import { Datevalue } from './datevalue';
 import { Day } from './day';
+import { Days } from './days';
 import { Edate } from './edate';
 import { FUNCTION_NAMES_DATE } from './function-names';
 import { Hour } from './hour';
@@ -38,6 +39,7 @@ export const functionDate = [
     [DateFunction, FUNCTION_NAMES_DATE.DATE],
     [Datevalue, FUNCTION_NAMES_DATE.DATEVALUE],
     [Day, FUNCTION_NAMES_DATE.DAY],
+    [Days, FUNCTION_NAMES_DATE.DAYS],
     [Edate, FUNCTION_NAMES_DATE.EDATE],
     [Hour, FUNCTION_NAMES_DATE.HOUR],
     [Minute, FUNCTION_NAMES_DATE.MINUTE],

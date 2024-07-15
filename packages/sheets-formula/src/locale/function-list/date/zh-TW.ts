@@ -80,8 +80,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            endDate: { name: '結束日期', detail: '為欲求其相距天數的兩個日期。' },
+            startDate: { name: '開始日期', detail: '為欲求其相距天數的兩個日期。' },
         },
     },
     DAYS360: {

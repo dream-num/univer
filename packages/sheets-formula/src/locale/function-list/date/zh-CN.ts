@@ -80,8 +80,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            endDate: { name: '结束日期', detail: '是用于计算期间天数的起止日期。' },
+            startDate: { name: '开始日期', detail: '是用于计算期间天数的起止日期。' },
         },
     },
     DAYS360: {

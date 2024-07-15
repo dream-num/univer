@@ -80,8 +80,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            endDate: { name: '終了日', detail: '開始日と終了日を指定し、その間の日数を求めます。' },
+            startDate: { name: '開始日', detail: '開始日と終了日を指定し、その間の日数を求めます。' },
         },
     },
     DAYS360: {

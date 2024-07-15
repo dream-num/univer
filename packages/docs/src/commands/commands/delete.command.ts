@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRun, JSONXActions } from '@univerjs/core';
+import type { ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
     getCustomDecorationSlice,
@@ -35,11 +35,12 @@ import type { ITextActiveRange } from '../../services/text-selection-manager.ser
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getDeleteSelection, getInsertSelection } from '../../basics/selection';
+import { getDeleteSelection } from '../../basics/selection';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { DocCustomRangeService } from '../../services/doc-custom-range.service';
+import { DeleteDirection } from '../../types/enums/delete-direction';
 import { CutContentCommand } from './clipboard.inner.command';
-import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
+import { DeleteCommand, UpdateCommand } from './core-editing.command';
 
 export interface IDeleteCustomBlockParams {
     direction: DeleteDirection;
@@ -419,15 +420,13 @@ export const DeleteLeftCommand: ICommand = {
                     });
                 }
             } else {
-                const textRanges = getTextRangesWhenDelete({
-                    ...activeRange,
-                    ...actualRange,
-                }, ranges);
+                const textRanges = getTextRangesWhenDelete(actualRange, [actualRange]);
                 // If the selection is not closed, the effect of Delete and
                 // BACKSPACE is the same as CUT, so the CUT command is executed.
                 result = await commandService.executeCommand(CutContentCommand.id, {
                     segmentId,
                     textRanges,
+                    selections: [actualRange],
                 });
             }
         }
@@ -467,7 +466,7 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
-        const actualRange = getInsertSelection(activeRange, body);
+        const actualRange = getDeleteSelection(activeRange, body, DeleteDirection.RIGHT);
         const { startOffset, endOffset, collapsed } = actualRange;
         // No need to delete when the cursor is at the last position of the last paragraph.
         if (startOffset === body.dataStream.length - 2 && collapsed) {
@@ -546,13 +545,14 @@ export const DeleteRightCommand: ICommand = {
                 });
             }
         } else {
-            const textRanges = getTextRangesWhenDelete(activeRange, ranges);
+            const textRanges = getTextRangesWhenDelete(actualRange, [actualRange]);
 
             // If the selection is not closed, the effect of Delete and
             // BACKSPACE is the same as CUT, so the CUT command is executed.
             result = await commandService.executeCommand(CutContentCommand.id, {
                 segmentId,
                 textRanges,
+                selections: [actualRange],
             });
         }
 
@@ -623,7 +623,7 @@ function getParagraphBody(accessor: IAccessor, unitId: string, body: IDocumentBo
 }
 
 // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
-function getTextRangesWhenDelete(activeRange: ITextActiveRange, ranges: readonly TextRange[]) {
+function getTextRangesWhenDelete(activeRange: ITextActiveRange, ranges: readonly ITextRange[]) {
     let cursor = activeRange.endOffset;
 
     for (const range of ranges) {

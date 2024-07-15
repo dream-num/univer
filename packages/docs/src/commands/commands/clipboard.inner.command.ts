@@ -132,6 +132,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 export interface IInnerCutCommandParams {
     segmentId: string;
     textRanges: ITextRangeWithStyle[];
+    selections?: ITextRange[];
 }
 
 export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
@@ -146,7 +147,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = textSelectionManagerService.getCurrentSelections();
+        const selections = params.selections ?? textSelectionManagerService.getCurrentSelections();
 
         if (!Array.isArray(selections) || selections.length === 0) {
             return false;
@@ -248,7 +249,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
     },
 };
 
-function getCustomBlockIdsInSelections(body: IDocumentBody, selections: TextRange[]): string[] {
+function getCustomBlockIdsInSelections(body: IDocumentBody, selections: ITextRange[]): string[] {
     const customBlockIds: string[] = [];
     const { customBlocks = [] } = body;
 

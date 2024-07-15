@@ -277,6 +277,10 @@ export interface ICustomRange {
     endIndex: number;
     rangeId: string;
     rangeType: CustomRangeType;
+    /**
+     * display as a whole-entity
+     */
+    wholeEntity?: boolean;
 }
 
 export enum CustomRangeType {

@@ -1068,8 +1068,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array', detail: 'The first array argument whose components you want to multiply and then add.' },
+            array2: { name: 'array', detail: 'Array arguments 2 to 255 whose components you want to multiply and then add.' },
         },
     },
     SUMSQ: {

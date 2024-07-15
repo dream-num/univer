@@ -1079,8 +1079,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列', detail: '這是您要求元素乘積和的第一個陣列引數。' },
+            array2: { name: '陣列', detail: '這是您要求元素乘積和的第 2 個到第 255 個陣列引數。' },
         },
     },
     SUMSQ: {

@@ -136,8 +136,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果を指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
         },
     },
     ISOWEEKNUM: {
@@ -164,8 +163,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果を指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
         },
     },
     MONTH: {
@@ -191,8 +189,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '起算日を表す日付を指定します。' },
+            endDate: { name: '終了日', detail: '対象期間の最終日を表す日付を指定します。' },
+            holidays: { name: '休日', detail: '国民の祝日や変動休日など、稼働日数の計算から除外する日付のリストを指定します。' },
         },
     },
     NETWORKDAYS_INTL: {
@@ -205,8 +204,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '起算日を表す日付を指定します。' },
+            endDate: { name: '終了日', detail: '対象期間の最終日を表す日付を指定します。' },
+            weekend: { name: '週末', detail: 'は、週末を示す週末番号または文字列で指定します。' },
+            holidays: { name: '休日', detail: '国民の祝日や変動休日など、稼働日数の計算から除外する日付のリストを指定します。' },
         },
     },
     NOW: {
@@ -231,8 +232,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果を指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
         },
     },
     TIME: {
@@ -285,8 +285,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する日付のシリアル値を指定します。' },
+            returnType: { name: '週の基準', detail: '戻り値の種類を数値で指定します。' },
         },
     },
     WEEKNUM: {
@@ -313,8 +313,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '起算日を表す日付を指定します。' },
+            days: { name: '日数', detail: '開始日から起算して、週末や祭日を除く週日の日数を指定します。 日数に正の数を指定すると、起算日より後の日付となり、負の数を指定すると、起算日より前の日付となります。' },
+            holidays: { name: '休日', detail: '国民の祝日や変動休日など、稼働日数の計算から除外する日付のリストを指定します。' },
         },
     },
     WORKDAY_INTL: {
@@ -327,8 +328,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '起算日を表す日付を指定します。' },
+            days: { name: '日数', detail: '開始日から起算して、週末や祭日を除く週日の日数を指定します。 日数に正の数を指定すると、起算日より後の日付となり、負の数を指定すると、起算日より前の日付となります。' },
+            weekend: { name: '週末', detail: 'は、週末を示す週末番号または文字列で指定します。' },
+            holidays: { name: '休日', detail: '国民の祝日や変動休日など、稼働日数の計算から除外する日付のリストを指定します。' },
         },
     },
     YEAR: {

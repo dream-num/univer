@@ -1059,8 +1059,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列', detail: '計算の対象となる要素を含む最初の配列引数を指定します。' },
+            array2: { name: '配列', detail: '計算の対象となる要素を含む、2 から 255 個までの配列引数を指定します。' },
         },
     },
     SUMSQ: {

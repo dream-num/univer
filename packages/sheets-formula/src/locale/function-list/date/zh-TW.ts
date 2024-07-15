@@ -136,8 +136,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序號', detail: '要找的日期。 應使用 DATE 函數輸入日期，或將日期輸入為其他公式或函數的結果。 例如，使用函數 DATE(2008,5,23) 輸入 2008 年 5 月 23 日。 ' },
         },
     },
     ISOWEEKNUM: {
@@ -164,8 +163,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序號', detail: '要找的日期。 應使用 DATE 函數輸入日期，或將日期輸入為其他公式或函數的結果。 例如，使用函數 DATE(2008,5,23) 輸入 2008 年 5 月 23 日。 ' },
         },
     },
     MONTH: {
@@ -231,8 +229,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序號', detail: '要找的日期。 應使用 DATE 函數輸入日期，或將日期輸入為其他公式或函數的結果。 例如，使用函數 DATE(2008,5,23) 輸入 2008 年 5 月 23 日。 ' },
         },
     },
     TIME: {

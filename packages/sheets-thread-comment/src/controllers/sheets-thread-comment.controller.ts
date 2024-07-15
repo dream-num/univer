@@ -200,10 +200,6 @@ export class SheetsThreadCommentController extends Disposable {
                     },
                 });
 
-                if (this._threadCommentPanelService.panelVisible) {
-                    return;
-                }
-
                 this._sheetsThreadCommentPopupService.showPopup({
                     unitId,
                     subUnitId,

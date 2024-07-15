@@ -361,7 +361,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'tb',
             () => {
                 if (style.tb === WrapStrategy.CLIP) {
-                    str += 'white-space: clip; ';
+                    str += 'white-space: nowrap; overflow-x: hidden; ';
                 } else if (style.tb === WrapStrategy.WRAP) {
                     str += 'white-space: normal;';
                 }

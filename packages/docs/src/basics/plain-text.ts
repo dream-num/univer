@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs/core';
-import { BooleanNumber, CustomRangeType } from '@univerjs/core';
+import { DataStreamTreeTokenType, type IDocumentData } from '@univerjs/core';
 
-export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
-    if (customRange.rangeType === CustomRangeType.HYPERLINK) {
-        return {
-            ...customRange.active ? { ul: { s: BooleanNumber.TRUE } } : null,
-            cl: { rgb: '#274fee' },
-        };
+/**
+ * get plain text from rich-text
+ */
+export const getPlainTextFormDocument = (data: IDocumentData) => {
+    if (!data.body) {
+        return '';
     }
-
-    return null;
-}
+    const str = data.body.dataStream.slice(0, -2);
+    return str.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
+};

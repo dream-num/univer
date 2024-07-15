@@ -88,7 +88,6 @@ export const StartAddCommentOperation: ICommand = {
         const text = getSelectionText(doc.getBody()?.dataStream ?? '', textRange.startOffset, textRange.endOffset);
         const subUnitId = DEFAULT_DOC_SUBUNIT_ID;
         const commentId = '';
-
         const comment = {
             unitId,
             subUnitId,

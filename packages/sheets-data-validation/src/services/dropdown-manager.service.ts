@@ -61,6 +61,10 @@ export class DataValidationDropdownManagerService extends Disposable {
     ) {
         super();
         this._init();
+
+        this.disposeWithMe(() => {
+            this._activeDropdown$.complete();
+        });
     }
 
     private _init() {
@@ -72,7 +76,7 @@ export class DataValidationDropdownManagerService extends Disposable {
         }));
     }
 
-    showDropdown(param: IDropdownParam) {
+    showDropdown(param: IDropdownParam, closeOnOutSide = true) {
         const { location } = param;
         const { row, col } = location;
 
@@ -91,7 +95,9 @@ export class DataValidationDropdownManagerService extends Disposable {
             {
                 componentKey: DROP_DOWN_KEY,
                 onClickOutside: () => {
-                    this.hideDropdown();
+                    if (closeOnOutSide) {
+                        this.hideDropdown();
+                    }
                 },
                 offset: [0, 3],
                 excludeOutside: [currentRender?.engine.getCanvasElement()].filter(Boolean) as HTMLElement[],

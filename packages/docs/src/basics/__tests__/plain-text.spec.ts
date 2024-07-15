@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs/core';
-import { BooleanNumber, CustomRangeType } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
+import { getPlainTextFormDocument } from '../plain-text';
 
-export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
-    if (customRange.rangeType === CustomRangeType.HYPERLINK) {
-        return {
-            ...customRange.active ? { ul: { s: BooleanNumber.TRUE } } : null,
-            cl: { rgb: '#274fee' },
-        };
-    }
-
-    return null;
-}
+describe('Test getPlainTextFormDocument', () => {
+    it('should return plain text without special tags', () => {
+        expect(getPlainTextFormDocument({
+            body: {
+                dataStream: '\x1E123\x1F\r\n',
+            },
+            id: '',
+            documentStyle: {},
+        })).toEqual('123');
+    });
+});

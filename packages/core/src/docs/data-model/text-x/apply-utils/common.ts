@@ -383,6 +383,12 @@ export function insertCustomRanges(
         }
     }
 
+    const currentRange = customRanges.find((range) => range.startIndex > currentIndex && range.endIndex < currentIndex);
+
+    if (currentRange) {
+        return;
+    }
+
     const insertCustomRanges: ICustomRange[] = [];
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
@@ -402,7 +408,6 @@ export function insertCustomRanges(
                     body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
 
                 if (isClosed) {
-                    insertCustomRanges.push(customRange);
                     continue;
                 }
                 // old is start
@@ -791,6 +796,7 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
         }
         body.customRanges = newCustomRanges;
     }
+
     return removeCustomRanges;
 }
 

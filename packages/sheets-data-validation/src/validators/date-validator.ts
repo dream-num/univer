@@ -89,7 +89,7 @@ export class DateValidator extends BaseDataValidator<number> {
     override async isValidType(info: IValidatorCellInfo): Promise<boolean> {
         const { value } = info;
         if (typeof value === 'string') {
-            return dayjs(value).isValid();
+            return dayjs(value, 'YYYY-MM-DD HH:mm:ss', true).isValid();
         }
 
         if (typeof value === 'number') {

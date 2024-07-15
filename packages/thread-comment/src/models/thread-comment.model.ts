@@ -15,7 +15,7 @@
  */
 
 import { BehaviorSubject, map, Subject } from 'rxjs';
-import { CustomRangeType, ICommandService } from '@univerjs/core';
+import { CustomRangeType, Disposable, ICommandService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
@@ -53,7 +53,7 @@ export type CommentUpdate = {
     payload: IThreadComment;
 });
 
-export class ThreadCommentModel {
+export class ThreadCommentModel extends Disposable {
     private _commentsMap: Record<string, Record<string, Record<string, IThreadComment>>> = {};
     private _commentsTreeMap: Map<string, Map<string, Map<string, IThreadComment>>> = new Map();
     private _threadMap: Map<string, Map<string, IThreadComment>> = new Map();
@@ -68,6 +68,12 @@ export class ThreadCommentModel {
         @Inject(IThreadCommentDataSourceService) private readonly _dataSourceService: IThreadCommentDataSourceService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
+        super();
+
+        this.disposeWithMe(() => {
+            this._commentUpdate$.complete();
+            this._commentsMap$.complete();
+        });
     }
 
     private _ensureCommentMap(unitId: string, subUnitId: string) {

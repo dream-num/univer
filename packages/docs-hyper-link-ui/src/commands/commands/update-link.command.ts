@@ -32,6 +32,6 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         }
 
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(UpdateDocHyperLinkMutation.id, params);
+        return commandService.syncExecuteCommand(UpdateDocHyperLinkMutation.id, params);
     },
 };

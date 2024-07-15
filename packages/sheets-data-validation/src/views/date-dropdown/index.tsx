@@ -41,7 +41,11 @@ const transformDate = (value: Nullable<CellValue>) => {
         return dayjs(date);
     }
 
-    return dayjs(value);
+    const date = dayjs(value);
+    if (date.isValid()) {
+        return date;
+    }
+    return undefined;
 };
 
 export function DateDropdown(props: IDropdownComponentProps) {

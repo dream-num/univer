@@ -131,6 +131,9 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         ? [tempComment, ...statuedComments]
         : statuedComments;
 
+    const unSolvedComments = renderComments.filter((comment) => !comment.resolved);
+    const solvedComments = renderComments.filter((comment) => comment.resolved);
+
     const isFiltering = status !== 'all' || unit !== 'all';
 
     const onReset = () => {
@@ -158,6 +161,42 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         const id = `${prefix}-${unitId}-${subUnitId}-${commentId}`;
         document.getElementById(id)?.scrollIntoView({ block: 'center' });
     }, [activeCommentId]);
+
+    const renderComment = (comment: IThreadComment) => (
+        <ThreadCommentTree
+            prefix={prefix}
+            getSubUnitName={getSubUnitName}
+            key={comment.id}
+            id={comment.id}
+            unitId={comment.unitId}
+            subUnitId={comment.subUnitId}
+            refStr={comment.ref}
+            type={type}
+            showEdit={activeCommentId?.commentId === comment.id}
+            showHighlight={activeCommentId?.commentId === comment.id}
+            onClick={() => {
+                shouldScroll.current = false;
+                if (!comment.resolved) {
+                    commandService.executeCommand(
+                        SetActiveCommentOperation.id,
+                        {
+                            unitId: comment.unitId,
+                            subUnitId: comment.subUnitId,
+                            commentId: comment.id,
+                            temp: false,
+                        }
+                    );
+                } else {
+                    commandService.executeCommand(SetActiveCommentOperation.id);
+                }
+            }}
+            onMouseEnter={() => onItemEnter?.(comment)}
+            onMouseLeave={() => onItemLeave?.(comment)}
+            onAddComment={onAddComment}
+            onDeleteComment={onDeleteComment}
+            onResolve={(resolved: boolean) => onResolve?.(comment.id, resolved)}
+        />
+    );
 
     return (
         <div className={styles.threadCommentPanel}>
@@ -203,41 +242,9 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     ]}
                 />
             </div>
-            {renderComments.map((comment) => (
-                <ThreadCommentTree
-                    prefix={prefix}
-                    getSubUnitName={getSubUnitName}
-                    key={comment.id}
-                    id={comment.id}
-                    unitId={comment.unitId}
-                    subUnitId={comment.subUnitId}
-                    refStr={comment.ref}
-                    type={type}
-                    showEdit={activeCommentId?.commentId === comment.id}
-                    showHighlight={activeCommentId?.commentId === comment.id}
-                    onClick={() => {
-                        shouldScroll.current = false;
-                        if (!comment.resolved) {
-                            commandService.executeCommand(
-                                SetActiveCommentOperation.id,
-                                {
-                                    unitId: comment.unitId,
-                                    subUnitId: comment.subUnitId,
-                                    commentId: comment.id,
-                                    temp: false,
-                                }
-                            );
-                        } else {
-                            commandService.executeCommand(SetActiveCommentOperation.id);
-                        }
-                    }}
-                    onMouseEnter={() => onItemEnter?.(comment)}
-                    onMouseLeave={() => onItemLeave?.(comment)}
-                    onAddComment={onAddComment}
-                    onDeleteComment={onDeleteComment}
-                    onResolve={(resolved: boolean) => onResolve?.(comment.id, resolved)}
-                />
-            ))}
+            {unSolvedComments.map(renderComment)}
+            {solvedComments.length ? <div className={styles.threadCommentPanelSolved}>已解决</div> : null}
+            {solvedComments.map(renderComment)}
             {renderComments.length
                 ? null
                 : (

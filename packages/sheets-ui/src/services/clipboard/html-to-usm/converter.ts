@@ -144,7 +144,7 @@ export class HtmlToUSMService {
         const tableStrings = html.match(/<table\b[^>]*>([\s\S]*?)<\/table>/gi);
         const tables: IParsedTablesInfo[] = [];
         this.process(null, this._dom.childNodes!, newDocBody, tables);
-        const { paragraphs, dataStream, textRuns } = newDocBody;
+        const { paragraphs, dataStream, textRuns, payloads } = newDocBody;
 
         // use paragraph to split rows
         if (paragraphs) {
@@ -192,6 +192,7 @@ export class HtmlToUSMService {
                     dataStream: singleDataStream,
                     textRuns,
                     paragraphs: generateParagraphs(singleDataStream),
+                    payloads,
                 };
 
                 const dataStreamLength = dataStream.length;
@@ -503,6 +504,7 @@ export class HtmlToUSMService {
         return documentModel?.getSnapshot();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private process(
         parent: Nullable<ChildNode>,
         nodes: NodeListOf<ChildNode>,
@@ -530,6 +532,24 @@ export class HtmlToUSMService {
                     dataStream: '',
                     textRuns: [],
                 };
+
+                // if ((parent as Element).tagName.toUpperCase() === 'A') {
+                //     const id = Tools.generateRandomId();
+                //     text = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+                //     doc.customRanges = [
+                //         ...(doc.customRanges ?? []),
+                //         {
+                //             startIndex: doc.dataStream.length,
+                //             endIndex: doc.dataStream.length + text.length - 1,
+                //             rangeId: id,
+                //             rangeType: CustomRangeType.HYPERLINK,
+                //         },
+                //     ];
+                //     doc.payloads = {
+                //         ...doc.payloads,
+                //         [id]: (parent as HTMLAnchorElement).href,
+                //     };
+                // }
 
                 doc.dataStream += text;
                 newDoc.dataStream += text;

@@ -63,7 +63,6 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
         override onStarting(injector: Injector): void {
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
-
             dependencies?.forEach((d) => injector.add(d));
         }
     }

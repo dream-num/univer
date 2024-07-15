@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs/core';
-import { BooleanNumber, CustomRangeType } from '@univerjs/core';
+import type { ICustomDecoration, ICustomRange } from './i-document-data';
 
-export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
-    if (customRange.rangeType === CustomRangeType.HYPERLINK) {
-        return {
-            ...customRange.active ? { ul: { s: BooleanNumber.TRUE } } : null,
-            cl: { rgb: '#274fee' },
-        };
-    }
+export interface ICustomRangeForInterceptor extends ICustomRange {
+    active?: boolean;
+    show?: boolean;
+}
 
-    return null;
+export interface ICustomDecorationForInterceptor extends ICustomDecoration {
+    active?: boolean;
+    show?: boolean;
 }

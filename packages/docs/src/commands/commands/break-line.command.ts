@@ -19,6 +19,7 @@ import { CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IU
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { getInsertSelection } from '../../basics/selection';
+import { DocCustomRangeService } from '../../services/doc-custom-range.service';
 import { InsertCommand } from './core-editing.command';
 
 function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
@@ -58,6 +59,7 @@ export const BreakLineCommand: ICommand = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
+        const customRangeService = accessor.get(DocCustomRangeService);
 
         const activeRange = textSelectionManagerService.getActiveRange();
         if (activeRange == null) {
@@ -78,6 +80,9 @@ export const BreakLineCommand: ICommand = {
         // line breaks to 2
         if (prevParagraph && prevParagraph.startIndex > endOffset) {
             const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex));
+
+            bodyAfter.customRanges = bodyAfter.customRanges?.map((range) => customRangeService.copyCustomRange(unitId, range));
+
             const deleteRange = {
                 startOffset,
                 endOffset: prevParagraph.startIndex,

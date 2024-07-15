@@ -91,6 +91,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
         this.disposeWithMe(this._editorBridgeService.visible$.subscribe((visible) => {
             if (!visible.visible) {
+                this._dropdownManagerService.hideDropdown();
                 return;
             }
 
@@ -128,18 +129,21 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                     return;
                 }
 
-                this._dropdownManagerService.showDropdown({
-                    location: {
-                        unitId,
-                        subUnitId: sheetId,
-                        row,
-                        col: column,
-                        workbook,
-                        worksheet,
+                this._dropdownManagerService.showDropdown(
+                    {
+                        location: {
+                            unitId,
+                            subUnitId: sheetId,
+                            row,
+                            col: column,
+                            workbook,
+                            worksheet,
+                        },
+                        componentKey: validator.dropdown,
+                        onHide: () => { /* empty */ },
                     },
-                    componentKey: validator.dropdown,
-                    onHide: () => { /* empty */ },
-                });
+                    false
+                );
             }
         }));
     }

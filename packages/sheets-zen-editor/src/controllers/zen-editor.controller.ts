@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, ICustomBlock, IDocumentData, IDrawings, IParagraph, ITextRun } from '@univerjs/core';
+import type { ICommandInfo, ICustomBlock, ICustomRange, IDocumentData, IDrawings, IParagraph, ITextRun } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -192,7 +192,6 @@ export class ZenEditorController extends RxDisposable {
 
     private _editorSyncHandler(param: IEditorBridgeServiceParam) {
         const body = param.documentLayoutObject.documentModel?.getBody();
-
         const dataStream = body?.dataStream;
         const paragraphs = body?.paragraphs;
         let textRuns: ITextRun[] = [];
@@ -218,7 +217,8 @@ export class ZenEditorController extends RxDisposable {
         textRuns: ITextRun[] = [],
         customBlocks: ICustomBlock[] = [],
         drawings: IDrawings = {},
-        drawingsOrder: string[] = []
+        drawingsOrder: string[] = [],
+        customRanges: ICustomRange[] = []
     ) {
         const INCLUDE_LIST = [
             DOCS_ZEN_EDITOR_UNIT_ID_KEY,
@@ -241,6 +241,7 @@ export class ZenEditorController extends RxDisposable {
         docBody.dataStream = dataStream;
         docBody.paragraphs = paragraphs;
         docBody.customBlocks = customBlocks;
+        docBody.customRanges = customRanges;
 
         snapshot.drawings = drawings;
         snapshot.drawingsOrder = drawingsOrder;
@@ -356,7 +357,7 @@ export class ZenEditorController extends RxDisposable {
                         const customBlocks = docBody?.customBlocks;
                         const drawings = editorDocDataModel?.getDrawings();
                         const drawingsOrder = editorDocDataModel?.getDrawingsOrder();
-
+                        const customRanges = editorDocDataModel?.getCustomRanges();
                         /**
                          * Fix the issue where content cannot be saved in the doc under Zen mode.
                          */
@@ -366,7 +367,7 @@ export class ZenEditorController extends RxDisposable {
                             return;
                         }
 
-                        this._syncContentAndRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns, customBlocks, drawings, drawingsOrder);
+                        this._syncContentAndRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns, customBlocks, drawings, drawingsOrder, customRanges);
                     }
                 }
             })

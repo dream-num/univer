@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { ICellData, ICommandInfo, IDocumentBody, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDocumentBody, IDocumentData, IPosition, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -33,6 +33,7 @@ import {
     HorizontalAlign,
     ICommandService,
     IContextService,
+    IResourceLoaderService,
     isFormulaString,
     IUndoRedoService,
     IUniverInstanceService,
@@ -117,7 +118,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @IResourceLoaderService private readonly _resourceLoaderService: IResourceLoaderService
     ) {
         super();
 
@@ -805,7 +807,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const cellData: Nullable<ICellData> = getCellDataByInput(
             worksheet.getCellRaw(row, column) || {},
             documentLayoutObject,
-            this._lexerTreeBuilder
+            this._lexerTreeBuilder,
+            (model) => this._resourceLoaderService.saveDoc(model)
         );
 
         if (cellData == null) {
@@ -965,7 +968,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
 export function getCellDataByInput(
     cellData: ICellData,
     documentLayoutObject: IDocumentLayoutObject,
-    lexerTreeBuilder: LexerTreeBuilder
+    lexerTreeBuilder: LexerTreeBuilder,
+    getSnapshot: (data: DocumentDataModel) => IDocumentData
 ) {
     cellData = Tools.deepClone(cellData);
 
@@ -974,7 +978,7 @@ export function getCellDataByInput(
         return null;
     }
 
-    const snapshot = documentModel.getSnapshot();
+    const snapshot = getSnapshot(documentModel);
 
     const { body } = snapshot;
     if (body == null) {
@@ -1033,12 +1037,13 @@ export function getCellDataByInput(
 }
 
 function isRichText(body: IDocumentBody) {
-    const { textRuns = [], paragraphs = [], customBlocks = [] } = body;
+    const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
 
     return (
         textRuns.some((textRun) => textRun.ts && !Tools.isEmptyObject(textRun.ts)) ||
         paragraphs.some((paragraph) => paragraph.bullet) ||
         paragraphs.length >= 2 ||
+        Boolean(customRanges?.length) ||
         customBlocks.length > 0
     );
 }

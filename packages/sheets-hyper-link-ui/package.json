@@ -67,6 +67,8 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-hyper-link": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
@@ -84,6 +86,8 @@
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-hyper-link": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",

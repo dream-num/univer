@@ -39,6 +39,9 @@ export class SheetsThreadCommentModel extends Disposable {
     ) {
         super();
         this._init();
+        this.disposeWithMe(() => {
+            this._commentUpdate$.complete();
+        });
     }
 
     private _init() {

@@ -34,6 +34,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    LocaleType,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -837,7 +838,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             worksheet.getCellRaw(row, column) || {},
             documentLayoutObject,
             this._lexerTreeBuilder,
-            (model) => this._resourceLoaderService.saveDoc(model)
+            (model) => this._resourceLoaderService.saveDoc(model),
+            this._localService
         );
 
         if (!cellData) {
@@ -988,7 +990,8 @@ export function getCellDataByInput(
     cellData: ICellData,
     documentLayoutObject: IDocumentLayoutObject,
     lexerTreeBuilder: LexerTreeBuilder,
-    getSnapshot: (data: DocumentDataModel) => IDocumentData
+    getSnapshot: (data: DocumentDataModel) => IDocumentData,
+    localeService: LocaleService
 ) {
     cellData = Tools.deepClone(cellData);
 
@@ -1010,10 +1013,16 @@ export function getCellDataByInput(
     const lastString = data.substring(data.length - 2, data.length);
     let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
+    const currentLocale = localeService.getCurrentLocale();
+    if (isCJKLocale(currentLocale)) {
+        newDataStream = normalizeString(newDataStream, lexerTreeBuilder);
+    }
+
     if (isFormulaString(newDataStream)) {
         if (cellData.f === newDataStream) {
             return null;
         }
+
         const bracketCount = lexerTreeBuilder.checkIfAddBracket(newDataStream);
         for (let i = 0; i < bracketCount; i++) {
             newDataStream += matchToken.CLOSE_BRACKET;

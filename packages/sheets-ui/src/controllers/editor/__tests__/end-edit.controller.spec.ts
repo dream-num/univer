@@ -19,7 +19,7 @@ import { CellValueType, IContextService, IResourceLoaderService, LocaleService }
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { getCellDataByInput } from '../editing.render-controller';
+import { getCellDataByInput, normalizeString } from '../editing.render-controller';
 import { createTestBed } from './create-test-bed';
 
 const richTextDemo: IDocumentData = {
@@ -107,7 +107,7 @@ describe('Test EndEditController', () => {
                 throw new Error('documentLayoutObject is undefined');
             }
 
-            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot());
+            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot(), localeService);
         };
     });
 
@@ -193,6 +193,27 @@ describe('Test EndEditController', () => {
 
             cellData = getCellDataByInputCell(cell, { v: "'=SUM" });
             expect(cellData).toEqual({ v: '=SUM', t: CellValueType.FORCE_STRING, f: null, si: null, p: null });
+        });
+
+        it('Function normalizeString', () => {
+            // normal string
+            expect(normalizeString('１００％', lexerTreeBuilder)).toEqual('100%');
+            expect(normalizeString('１００％＋２', lexerTreeBuilder)).toEqual('１００％＋２');
+            expect(normalizeString('＝１００％＋２＋ｗ', lexerTreeBuilder)).toEqual('=100%+2+ｗ');
+            expect(normalizeString('＄１００', lexerTreeBuilder)).toEqual('$100');
+            expect(normalizeString('＄ｗ', lexerTreeBuilder)).toEqual('＄ｗ');
+
+            // boolean
+            expect(normalizeString('ｔｒｕｅ', lexerTreeBuilder)).toEqual('TRUE');
+
+            // force string
+            expect(normalizeString('＇ｔｒｕｅ', lexerTreeBuilder)).toEqual("'ｔｒｕｅ");
+
+            // formula
+            expect(normalizeString('＝@ｉｆ（ｔｒｕｅ＝１，  ＂　Ａ＄，＂＆＂＋－×＝＜＞％＄＠＆＊＃＂，＂false＂）', lexerTreeBuilder)).toEqual('=@IF(TRUE=1,  "　Ａ＄，"&"＋－×＝＜＞％＄＠＆＊＃","false")');
+            expect(normalizeString('＝ｉｆ（１，“Ａ”，“false　”）', lexerTreeBuilder)).toEqual('=IF(1,“Ａ”,“false ”)');
+            expect(normalizeString('＝ｉｆ（０，１，　　”３“）', lexerTreeBuilder)).toEqual('=IF(0,1,  ”３“)');
+            expect(normalizeString('＝Ａ１＋Ｂ２－Ｃ３＊（Ｄ４＞＝Ｅ５）／（Ｆ６＜Ｇ７）', lexerTreeBuilder)).toEqual('=A1+B2-C3*(D4>=E5)/(F6<G7)');
         });
     });
 });

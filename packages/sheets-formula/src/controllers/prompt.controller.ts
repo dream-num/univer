@@ -1814,8 +1814,9 @@ export class PromptController extends Disposable {
 
                 this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 
-                this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId);
-            })
+                    this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId, true, false);
+                })
+            )
         );
 
         this.disposeWithMe(
@@ -1830,6 +1831,9 @@ export class PromptController extends Disposable {
         );
     }
 
+    /**
+     * Absolute range, triggered by F4
+     */
     private _changeRefString() {
         const activeRange = this._textSelectionManagerService.getActiveRange();
 

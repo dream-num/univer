@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService, IMutationInfo, sequenceExecute } from '@univerjs/core';
+import { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService, type IMutationInfo, sequenceExecute } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 
 import { UniFormulaService } from '../services/uni-formula.service';
@@ -41,7 +41,7 @@ export const AddDocUniFormulaCommand: ICommand<IAddDocUniFormulaCommandParams> =
         if (redoMutation) {
             const addFormulaResourceMutation: IMutationInfo<IAddDocUniFormulaMutationParams> = {
                 id: AddDocUniFormulaMutation.id,
-                params: { unitId, id: rangeId, f },
+                params: { unitId, rangeId, f },
             };
 
             return sequenceExecute([addFormulaResourceMutation, redoMutation], commandService).result;

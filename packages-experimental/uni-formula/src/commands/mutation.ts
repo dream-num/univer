@@ -24,14 +24,14 @@ export interface IAddDocUniFormulaMutationParams {
     f: string;
 
     /** Range id. It is also used as the formula id. */
-    id: string;
+    rangeId: string;
 }
 
 export const AddDocUniFormulaMutation: IMutation<IAddDocUniFormulaMutationParams> = {
     type: CommandType.MUTATION,
     id: 'doc.mutation.add-doc-uni-formula',
     handler(accesstor, params: IAddDocUniFormulaMutationParams) {
-        const { unitId, f, id } = params;
+        const { unitId, f, rangeId: id } = params;
         const uniFormulaService = accesstor.get(UniFormulaService);
 
         uniFormulaService.registerDocFormula(unitId, id, f);
@@ -47,7 +47,7 @@ export const UpdateDocUniFormulaMutation: IMutation<IUpdateDocUniFormulaMutation
     type: CommandType.MUTATION,
     id: 'doc.mutation.update-doc-uni-formula',
     handler(accessor, params: IUpdateDocUniFormulaMutationParams) {
-        const { unitId, f, id } = params;
+        const { unitId, f, rangeId: id } = params;
         const uniFormulaService = accessor.get(UniFormulaService);
 
         if (!uniFormulaService.hasFocFormula(unitId, id)) {

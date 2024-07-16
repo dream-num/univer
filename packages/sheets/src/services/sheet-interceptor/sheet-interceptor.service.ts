@@ -259,17 +259,6 @@ export class SheetInterceptorService extends Disposable {
                         );
                     },
                 }));
-
-                sheetDisposables.add(viewModel.registerPivotTableInterceptor({
-                    getPivotInfo(mutations: IMutationInfo[]) {
-                        return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.PIVOT_INFO)(
-                            {
-                                redos: [],
-                                undos: [],
-                            },
-                            mutations);
-                    },
-                }));
             });
         };
 

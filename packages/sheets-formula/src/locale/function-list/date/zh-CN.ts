@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '表示给定时间段的第一个或开始日期的日期。' },
+            endDate: { name: '结束日期', detail: '用于表示时间段的最后一个（即结束）日期的日期。' },
+            method: { name: '信息类型', detail: '要返回的信息类型。' },
         },
     },
     DATEVALUE: {
@@ -94,8 +95,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '是用于计算期间天数的起止日期。' },
+            endDate: { name: '结束日期', detail: '是用于计算期间天数的起止日期。' },
+            method: { name: '方法', detail: '逻辑值，用于指定在计算中是采用美国方法 还是欧洲方法。' },
         },
     },
     EDATE: {

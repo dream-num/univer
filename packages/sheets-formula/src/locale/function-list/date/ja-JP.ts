@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '指定した期間の最初の日付または開始日を表す日付。' },
+            endDate: { name: '終了日', detail: '期間の最後の日付または終了日を表す日付。' },
+            method: { name: '単位', detail: '返される情報の種類。' },
         },
     },
     DATEVALUE: {
@@ -94,8 +95,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '開始日と終了日を指定し、その間の日数を求めます。' },
+            endDate: { name: '終了日', detail: '開始日と終了日を指定し、その間の日数を求めます。' },
+            method: { name: '方法', detail: '計算に米国方式とヨーロッパ方式のどちらを採用するかを、論理値で指定します。' },
         },
     },
     EDATE: {

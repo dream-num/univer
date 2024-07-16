@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日期', detail: '代表指定期間的第一個或開始日期的日期。' },
+            endDate: { name: '結束日期', detail: '代表期間最後一個或結束日期的日期。' },
+            method: { name: '資訊類型', detail: '您要傳回的資訊類型' },
         },
     },
     DATEVALUE: {
@@ -94,8 +95,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日期', detail: '為欲求其相距天數的兩個日期。' },
+            endDate: { name: '結束日期', detail: '為欲求其相距天數的兩個日期。' },
+            method: { name: '方法', detail: '用來指定是否要使用美制 或歐制之計算方法的邏輯值。' },
         },
     },
     EDATE: {

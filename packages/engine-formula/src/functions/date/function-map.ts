@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import { FUNCTION_NAMES_DATE } from './function-names';
 import { DateFunction } from './date';
+import { Datedif } from './datedif';
 import { Datevalue } from './datevalue';
 import { Day } from './day';
 import { Days } from './days';
+import { Days360 } from './days360';
 import { Edate } from './edate';
-import { FUNCTION_NAMES_DATE } from './function-names';
 import { Hour } from './hour';
 import { Minute } from './minute';
 import { Month } from './month';
@@ -37,9 +39,11 @@ import { Year } from './year';
 
 export const functionDate = [
     [DateFunction, FUNCTION_NAMES_DATE.DATE],
+    [Datedif, FUNCTION_NAMES_DATE.DATEDIF],
     [Datevalue, FUNCTION_NAMES_DATE.DATEVALUE],
     [Day, FUNCTION_NAMES_DATE.DAY],
     [Days, FUNCTION_NAMES_DATE.DAYS],
+    [Days360, FUNCTION_NAMES_DATE.DAYS360],
     [Edate, FUNCTION_NAMES_DATE.EDATE],
     [Hour, FUNCTION_NAMES_DATE.HOUR],
     [Minute, FUNCTION_NAMES_DATE.MINUTE],

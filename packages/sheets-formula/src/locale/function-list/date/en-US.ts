@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the first, or starting date of a given period.' },
+            endDate: { name: 'end_date', detail: 'A date that represents the last, or ending, date of the period.' },
+            method: { name: 'method', detail: 'The type of information that you want returned.' },
         },
     },
     DATEVALUE: {
@@ -80,7 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            endDate: { name: 'end_date', detail: ' Start_date and End_date are the two dates between which you want to know the number of days.' },
+            endDate: { name: 'end_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
             startDate: { name: 'start_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
         },
     },
@@ -94,8 +95,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
+            endDate: { name: 'end_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
+            method: { name: 'method', detail: 'A logical value that specifies whether to use the U.S. or European method in the calculation.' },
         },
     },
     EDATE: {

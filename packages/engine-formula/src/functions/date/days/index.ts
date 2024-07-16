@@ -59,31 +59,19 @@ export class Days extends BaseFunction {
                 return startDateObject;
             }
 
-            let endDateValue = Math.floor(+endDateObject.getValue());
+            const endDateSerialNumber = getDateSerialNumberByObject(endDateObject);
 
-            if (endDateObject.isString()) {
-                const dateSerialNumber = getDateSerialNumberByObject(endDateObject);
-
-                if (typeof dateSerialNumber !== 'number') {
-                    return dateSerialNumber;
-                }
-
-                endDateValue = dateSerialNumber;
+            if (typeof endDateSerialNumber !== 'number') {
+                return endDateSerialNumber;
             }
 
-            let startDateValue = Math.floor(+startDateObject.getValue());
+            const startDateSerialNumber = getDateSerialNumberByObject(startDateObject);
 
-            if (startDateObject.isString()) {
-                const dateSerialNumber = getDateSerialNumberByObject(startDateObject);
-
-                if (typeof dateSerialNumber !== 'number') {
-                    return dateSerialNumber;
-                }
-
-                startDateValue = dateSerialNumber;
+            if (typeof startDateSerialNumber !== 'number') {
+                return startDateSerialNumber;
             }
 
-            const result = endDateValue - startDateValue;
+            const result = Math.floor(endDateSerialNumber) - Math.floor(startDateSerialNumber);
 
             return NumberValueObject.create(result);
         });

@@ -218,9 +218,10 @@ export class MoveCursorController extends Disposable {
         const { startOffset, endOffset, style, collapsed, segmentId, startNodePosition, endNodePosition, segmentPage } = activeRange;
 
         const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const customRanges = docDataModel.getCustomRanges() ?? [];
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
-            let cursor;
+            let cursor: number;
 
             if (!activeRange.collapsed || allRanges.length > 1) {
                 let min = Number.POSITIVE_INFINITY;
@@ -244,6 +245,14 @@ export class MoveCursorController extends Disposable {
                 }
             }
 
+            const relativeRanges = customRanges.filter((range) => range.startIndex < cursor && range.endIndex >= cursor);
+            relativeRanges.forEach((range) => {
+                if (direction === Direction.LEFT) {
+                    cursor = Math.min(range.startIndex, cursor);
+                } else {
+                    cursor = Math.max(range.endIndex + 1, cursor);
+                }
+            });
             this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: cursor,

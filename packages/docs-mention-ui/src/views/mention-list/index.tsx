@@ -15,7 +15,7 @@
  */
 
 import type { IMention } from '@univerjs/docs-mention';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import cs from 'clsx';
 import { KeyCode } from '@univerjs/ui';
 import styles from './index.module.less';
@@ -29,10 +29,15 @@ export interface IMentionListProps {
 
 export const MentionList = (props: IMentionListProps) => {
     const { mentions, active, onSelect, onClick } = props;
+    const ref = useRef<HTMLDivElement>(null);
     const [activeId, setActiveId] = useState(active ?? mentions[0]?.objectId);
     const handleSelect = (item: IMention) => {
         onSelect?.(item);
     };
+
+    useEffect(() => {
+        ref.current?.focus();
+    }, []);
 
     const handleKeyDown = (evt: React.KeyboardEvent<HTMLDivElement>) => {
         const index = mentions.findIndex((i) => i.objectId === activeId);
@@ -50,7 +55,7 @@ export const MentionList = (props: IMentionListProps) => {
     };
 
     return (
-        <div className={styles.docMentionPanel} onKeyDown={handleKeyDown} onClick={onClick}>
+        <div ref={ref} tabIndex={0} className={styles.docMentionPanel} onKeyDown={handleKeyDown} onClick={onClick}>
             {mentions.map((mention) => (
                 <div
                     key={mention.objectId}

@@ -45,7 +45,11 @@ export class DocCustomRangeController extends Disposable {
             if (startOffset <= range.startIndex && endOffset > range.endIndex) {
                 return false;
             }
-            return isSegmentIntersects(startOffset, collapsed ? endOffset : endOffset - 1, range.startIndex, range.endIndex);
+
+            if (collapsed) {
+                return range.startIndex < startOffset && range.endIndex >= endOffset;
+            }
+            return isSegmentIntersects(startOffset, endOffset - 1, range.startIndex, range.endIndex);
         });
 
         if (customRanges?.length) {
@@ -55,6 +59,7 @@ export class DocCustomRangeController extends Disposable {
                 start = Math.min(range.startIndex, start);
                 end = Math.max(range.endIndex + 1, end);
             });
+
             return {
                 ...selection,
                 startOffset: start,

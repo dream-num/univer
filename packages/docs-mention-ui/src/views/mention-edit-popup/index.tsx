@@ -16,8 +16,9 @@
 
 import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { AddDocMentionCommand, type IMention, MentionType } from '@univerjs/docs-mention';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
 import { MentionList } from '../mention-list';
 
@@ -25,12 +26,20 @@ export const MentionEditPopup = () => {
     const popupService = useDependency(DocMentionPopupService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const textSelectionRenderService = useDependency(ITextSelectionRenderManager);
     const editPopup = useObservable(popupService.editPopup$);
     const mentions: IMention[] = [{
         objectId: '1',
         objectType: MentionType.PERSON,
         label: '123',
     }];
+
+    useEffect(() => {
+        textSelectionRenderService.blur();
+        return () => {
+            textSelectionRenderService.focus();
+        };
+    }, [textSelectionRenderService]);
 
     if (!editPopup) {
         return null;

@@ -275,7 +275,7 @@ function getCustomBlockIdsInSelections(body: IDocumentBody, selections: ITextRan
 // If the selection contains line breaks,
 // paragraph information needs to be preserved when performing the CUT operation
 // eslint-disable-next-line max-lines-per-function
-function getRetainAndDeleteAndExcludeLineBreak(
+export function getRetainAndDeleteAndExcludeLineBreak(
     selection: ITextRange,
     body: IDocumentBody,
     segmentId: string = '',

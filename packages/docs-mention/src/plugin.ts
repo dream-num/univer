@@ -18,15 +18,14 @@ import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { UniverDocsPlugin } from '@univerjs/docs';
-import { DOC_HYPER_LINK_PLUGIN } from './types/const';
-import { DocHyperLinkModel } from './models/hyper-link.model';
-import { DocHyperLinkController } from './controllers/hyper-link.controller';
-import { DocHyperLinkResourceController } from './controllers/resource.controller';
-import { DocHyperLinkCustomRangeController } from './controllers/doc-hyper-link-custom-range.controller';
+import { DOC_MENTION_PLUGIN } from './types/const/const';
+import { DocMentionModel } from './models/doc-mention.model';
+import { DocMentionController } from './controllers/doc-mention.controller';
+import { DocMentionCustomRangeController } from './controllers/doc-mention-custom-range.controller';
 
 @DependentOn(UniverDocsPlugin)
-export class UniverDocsHyperLinkPlugin extends Plugin {
-    static override pluginName = DOC_HYPER_LINK_PLUGIN;
+export class UniverDocsMentionPlugin extends Plugin {
+    static override pluginName = DOC_MENTION_PLUGIN;
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
@@ -38,10 +37,9 @@ export class UniverDocsHyperLinkPlugin extends Plugin {
 
     override onStarting(injector: Injector): void {
         const deps: Dependency[] = [
-            [DocHyperLinkModel],
-            [DocHyperLinkController],
-            [DocHyperLinkResourceController],
-            [DocHyperLinkCustomRangeController],
+            [DocMentionModel],
+            [DocMentionController],
+            [DocMentionCustomRangeController],
         ];
 
         deps.forEach((dep) => {

@@ -109,11 +109,12 @@ interface IAddCustomRangeFactoryParam {
     segmentId?: string;
     rangeId: string;
     rangeType: CustomRangeType;
+    wholeEntity?: boolean;
 }
 
 // eslint-disable-next-line max-lines-per-function
 export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAddCustomRangeFactoryParam) {
-    const { segmentId, rangeId, rangeType } = param;
+    const { segmentId, rangeId, rangeType, wholeEntity } = param;
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -215,6 +216,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
                     rangeType,
                     startIndex: -(range.endOffset - range.startOffset - deletes.length + 1),
                     endIndex: 0,
+                    wholeEntity,
                 },
             ],
         },

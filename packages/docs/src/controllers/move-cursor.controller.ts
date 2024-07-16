@@ -16,6 +16,7 @@
 
 import type { ICommandInfo, Nullable } from '@univerjs/core';
 import {
+    DataStreamTreeTokenType,
     Direction,
     Disposable,
     ICommandService,
@@ -210,8 +211,8 @@ export class MoveCursorController extends Disposable {
         const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
             ?.with(DocSkeletonManagerService).getSkeleton();
         const docObject = this._getDocObject();
-
-        if (activeRange == null || skeleton == null || docObject == null || allRanges == null) {
+        const body = docDataModel.getBody();
+        if (activeRange == null || skeleton == null || docObject == null || allRanges == null || body == null) {
             return;
         }
 
@@ -244,6 +245,16 @@ export class MoveCursorController extends Disposable {
                     cursor = Math.min(dataStreamLength - 2, endOffset + curSpan.count);
                 }
             }
+            const skipTokens: string[] = [DataStreamTreeTokenType.CUSTOM_RANGE_START, DataStreamTreeTokenType.CUSTOM_RANGE_END];
+            if (direction === Direction.LEFT) {
+                while (skipTokens.includes(body.dataStream[cursor])) {
+                    cursor--;
+                }
+            } else {
+                while (skipTokens.includes(body.dataStream[cursor - 1])) {
+                    cursor++;
+                }
+            }
 
             const relativeRanges = customRanges.filter((range) => range.wholeEntity && range.startIndex < cursor && range.endIndex >= cursor);
             relativeRanges.forEach((range) => {
@@ -253,6 +264,7 @@ export class MoveCursorController extends Disposable {
                     cursor = Math.max(range.endIndex + 1, cursor);
                 }
             });
+
             this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: cursor,

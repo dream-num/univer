@@ -24,7 +24,7 @@ import {
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
@@ -155,8 +155,51 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
         const updateDrawings = Object.values(updateDrawingMap);
 
-        if (updateDrawings.length > 0) {
-            this._drawingManagerService.refreshTransform(updateDrawings as unknown as IDrawingParam[]);
+        const nonMultiDrawings = updateDrawings.filter((drawing) => !drawing.isMultiTransform);
+        const multiDrawings = updateDrawings.filter((drawing) => drawing.isMultiTransform);
+
+        if (nonMultiDrawings.length > 0) {
+            this._drawingManagerService.refreshTransform(nonMultiDrawings as unknown as IDrawingParam[]);
+        }
+
+        if (multiDrawings.length > 0) {
+            this._handleMultiDrawingsTransform(multiDrawings as unknown as IDrawingParam[]);
+        }
+    }
+
+    private _handleMultiDrawingsTransform(multiDrawings: IDrawingParam[]) {
+        const { scene, unitId } = this._context;
+        const transformer = scene.getTransformerByCreate();
+
+        // Step 1: Update data in drawingManagerService.
+        multiDrawings.forEach((updateParam) => {
+            const param = this._drawingManagerService.getDrawingByParam(updateParam);
+            if (param == null) {
+                return;
+            }
+
+            param.transform = updateParam.transform;
+            param.transforms = updateParam.transforms;
+            param.isMultiTransform = updateParam.isMultiTransform;
+        });
+
+        // Step 2: remove all drawing shapes.
+        const selectedObjectMap = transformer.getSelectedObjectMap();
+        const selectedObjectKeys = [...selectedObjectMap.keys()];
+
+        const allMultiDrawings = Object.values(this._drawingManagerService.getDrawingData(unitId, unitId)).filter((drawing) => drawing.isMultiTransform === BooleanNumber.TRUE);
+
+        this._drawingManagerService.removeNotification(allMultiDrawings);
+        // Step 3: create new drawing shapes.
+        this._drawingManagerService.addNotification(multiDrawings);
+
+        // Step 4: reSelect previous shapes and focus previous drawings.
+        for (const key of selectedObjectKeys) {
+            const drawingShape = scene.getObject(key) as Image;
+
+            if (drawingShape) {
+                transformer.setSelectedControl(drawingShape);
+            }
         }
     }
 

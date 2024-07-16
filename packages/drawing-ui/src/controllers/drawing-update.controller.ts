@@ -19,7 +19,6 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import {
-    BooleanNumber,
     checkIfMove,
     Disposable,
     ICommandService,
@@ -681,7 +680,7 @@ export class DrawingUpdateController extends Disposable {
         this.disposeWithMe(
             this._drawingManagerService.refreshTransform$.subscribe((params) => {
                 (params).forEach((param) => {
-                    const { unitId, subUnitId, drawingId, isMultiTransform } = param;
+                    const { unitId, subUnitId, drawingId } = param;
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
                     if (renderObject == null) {
@@ -692,42 +691,23 @@ export class DrawingUpdateController extends Disposable {
                         return;
                     }
                     const { transform } = drawingParam;
-                    const { scene, transformer } = renderObject;
+                    const { scene } = renderObject;
 
-                    if (isMultiTransform !== BooleanNumber.TRUE) {
-                        const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-                        const drawingShape = scene.getObject(drawingShapeKey);
+                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                    const drawingShape = scene.getObject(drawingShapeKey);
 
-                        if (drawingShape == null || transform == null) {
-                            return true;
-                        }
-
-                        const {
-                            left = 0, top = 0, width = 0, height = 0,
-                            angle = 0,
-                            flipX = false, flipY = false,
-                            skewX = 0, skewY = 0,
-                        } = transform;
-
-                        drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
-                    } else {
-                        // Step 1: remove all drawing shapes.
-                        const selectedObjectMap = transformer.getSelectedObjectMap();
-                        const selectedObjectKeys = [...selectedObjectMap.keys()];
-
-                        this._drawingManagerService.removeNotification([param]);
-                        // Step 2: create new drawing shapes.
-                        this._drawingManagerService.addNotification([param]);
-
-                        // Step 3: reSelect previous shapes and focus previous drawings.
-                        for (const key of selectedObjectKeys) {
-                            const drawingShape = scene.getObject(key) as Image;
-
-                            if (drawingShape) {
-                                transformer.setSelectedControl(drawingShape);
-                            }
-                        }
+                    if (drawingShape == null || transform == null) {
+                        return true;
                     }
+
+                    const {
+                        left = 0, top = 0, width = 0, height = 0,
+                        angle = 0,
+                        flipX = false, flipY = false,
+                        skewX = 0, skewY = 0,
+                    } = transform;
+
+                    drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                 });
             })
         );

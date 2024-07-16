@@ -26,7 +26,7 @@ import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocSkeletonManagerService, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 
 import type { IInsertImageOperationParams } from '../../commands/operations/insert-image.operation';
 import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
@@ -48,7 +48,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
     ) {
         super();
 
@@ -288,6 +289,14 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                     this._textSelectionManager.replaceTextRanges([]);
                     // this._textSelectionRenderManager.blur();
 
+                    const prevSegmentId = this._textSelectionRenderManager.getSegment();
+                    const segmentId = this._findSegmentIdByDrawingId(params[0].drawingId);
+
+                    // Change segmentId when click drawing in different segment.
+                    if (prevSegmentId !== segmentId) {
+                        this._textSelectionRenderManager.setSegment(segmentId);
+                    }
+
                     if (transformer) {
                         transformer.resetProps({
                             zeroTop: docsTop,
@@ -297,6 +306,32 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 }
             })
         );
+    }
+
+    private _findSegmentIdByDrawingId(drawingId: string) {
+        const { unit: DocDataModel } = this._context;
+
+        const { body, headers = {}, footers = {} } = DocDataModel.getSnapshot();
+
+        const bodyCustomBlocks = body?.customBlocks ?? [];
+
+        if (bodyCustomBlocks.some((b) => b.blockId === drawingId)) {
+            return '';
+        }
+
+        for (const headerId of Object.keys(headers)) {
+            if (headers[headerId].body.customBlocks?.some((b) => b.blockId === drawingId)) {
+                return headerId;
+            }
+        }
+
+        for (const footerId of Object.keys(footers)) {
+            if (footers[footerId].body.customBlocks?.some((b) => b.blockId === drawingId)) {
+                return footerId;
+            }
+        }
+
+        return '';
     }
 
     // Update drawings edit status and opacity. You can not edit header footer images when you are editing body. and vice verse.

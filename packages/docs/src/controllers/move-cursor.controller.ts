@@ -245,7 +245,7 @@ export class MoveCursorController extends Disposable {
                 }
             }
 
-            const relativeRanges = customRanges.filter((range) => range.startIndex < cursor && range.endIndex >= cursor);
+            const relativeRanges = customRanges.filter((range) => range.wholeEntity && range.startIndex < cursor && range.endIndex >= cursor);
             relativeRanges.forEach((range) => {
                 if (direction === Direction.LEFT) {
                     cursor = Math.min(range.startIndex, cursor);

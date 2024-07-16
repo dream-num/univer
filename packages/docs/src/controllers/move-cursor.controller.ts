@@ -259,8 +259,8 @@ export class MoveCursorController extends Disposable {
 
             const newPos = this._getTopOrBottomPosition(
                 skeleton,
-                direction === Direction.UP ? startNode : endNode,
-                direction === Direction.UP ? startNodePosition : endNodePosition,
+                direction === Direction.UP ? startNode : (collapsed ? startNode : endNode),
+                direction === Direction.UP ? startNodePosition : (collapsed ? startNodePosition : endNodePosition),
                 direction === Direction.DOWN
             );
 

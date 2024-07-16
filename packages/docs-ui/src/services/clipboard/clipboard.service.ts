@@ -153,11 +153,18 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     private async _paste(_body: IDocumentBody): Promise<boolean> {
         let body = normalizeBody(_body);
 
+        const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+        if (!unitId) {
+            return false;
+        }
+
         this._clipboardHooks.forEach((hook) => {
             if (hook.onBeforePaste) {
                 body = hook.onBeforePaste(body);
             }
         });
+        body.customRanges = body.customRanges?.map((range) => this._docCustomRangeService.copyCustomRange(unitId, range));
+
         const activeRange = this._textSelectionManagerService.getActiveRange();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
         const ranges = this._textSelectionManagerService.getCurrentSelections();

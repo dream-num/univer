@@ -25,6 +25,7 @@ export class DocMentionModel extends Disposable {
 
         if (!unitMap) {
             unitMap = new Map();
+            this._mentionMaps.set(unitId, unitMap);
         }
 
         return unitMap;

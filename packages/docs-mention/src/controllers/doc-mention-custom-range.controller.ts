@@ -35,7 +35,6 @@ export class DocMentionCustomRangeController extends Disposable {
             this._docCustomRangeService.addClipboardHook({
                 onCopyCustomRange: (unitId, range) => {
                     const { rangeId, rangeType, data, ...ext } = range;
-
                     if (rangeType === CustomRangeType.MENTION) {
                         if (data) {
                             const id = Tools.generateRandomId();

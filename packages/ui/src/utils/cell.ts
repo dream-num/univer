@@ -205,10 +205,17 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // font color
         else if (key === 'color') {
-            const rgbStr = new ColorKit(value).toRgbString();
-            styleList.cl = {
-                rgb: rgbStr,
-            };
+            const colorKit = new ColorKit(value);
+            if (colorKit.isValid) {
+                const rgbStr = colorKit.toRgbString();
+                styleList.cl = {
+                    rgb: rgbStr,
+                };
+            } else {
+                styleList.cl = {
+                    rgb: 'rgb(0,0,0)',
+                };
+            }
         }
         // fill color / background
         else if (key === 'background' || key === 'background-color') {

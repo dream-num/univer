@@ -192,6 +192,10 @@ export class Editor {
 
         const { width, height } = this._param.editorDom.getBoundingClientRect();
 
+        if (height === 0 || width === 0) {
+            return;
+        }
+
         if (!this.isSingle()) {
             documentDataModel.updateDocumentDataPageSize(width, undefined);
             return;

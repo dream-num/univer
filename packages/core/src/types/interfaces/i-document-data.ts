@@ -352,10 +352,6 @@ export interface IDocStyleBase extends IMargin {
 }
 
 export interface IDocumentLayout {
-    // docGrid (Document Grid), open xml $17.6.5
-    charSpace?: number; // charSpace
-    linePitch?: number; // linePitch
-    gridType?: GridType; // gridType
 
     defaultTabStop?: number; // 17.15.1.25 defaultTabStop (Distance Between Automatic Tab Stops)   0.5 in  = 36pt，this value should be converted to the default font size when exporting
     characterSpacingControl?: characterSpacingControlType; // characterSpacingControl 17.18.7 ST_CharacterSpacing (Character-Level Whitespace Compression Settings)，default compressPunctuation
@@ -407,10 +403,16 @@ export interface IDocumentRenderConfig {
 }
 
 export interface ISectionBreakBase {
-    columnProperties?: ISectionColumnProperties[]; // columnProperties
+    // docGrid (Document Grid), open xml $17.6.5
+    charSpace?: number; // charSpace
+    linePitch?: number; // linePitch
+    gridType?: GridType; // gridType
+
+    columnProperties?: ISectionColumnProperties[]; // columnProperties 17.6.4 cols (Column Definitions)
     columnSeparatorType?: ColumnSeparatorType; // ColumnSeparatorType
     contentDirection?: TextDirection; // contentDirection
-    sectionType?: SectionType; // sectionType
+    sectionType?: SectionType; // sectionType 17.6.22 type (Section Type)
+    // deprecated: The attribute does not exist in Word and should be deprecated.
     sectionTypeNext?: SectionType; // sectionType
     textDirection?: TextDirectionType; // textDirection
 }
@@ -884,6 +886,8 @@ export enum AlignTypeH {
     LEFT,
     OUTSIDE,
     RIGHT,
+    BOTH,
+    DISTRIBUTE,
 }
 
 // 20.4.3.2 ST_AlignV (Vertical Alignment Definition)

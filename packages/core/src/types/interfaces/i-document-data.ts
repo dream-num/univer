@@ -415,7 +415,8 @@ export interface ISectionBreakBase {
     columnProperties?: ISectionColumnProperties[]; // columnProperties 17.6.4 cols (Column Definitions)
     columnSeparatorType?: ColumnSeparatorType; // ColumnSeparatorType
     contentDirection?: TextDirection; // contentDirection
-    sectionType?: SectionType; // sectionType
+    sectionType?: SectionType; // sectionType 17.6.22 type (Section Type)
+    // deprecated: The attribute does not exist in Word and should be deprecated.
     sectionTypeNext?: SectionType; // sectionType
     textDirection?: TextDirectionType; // textDirection
 }

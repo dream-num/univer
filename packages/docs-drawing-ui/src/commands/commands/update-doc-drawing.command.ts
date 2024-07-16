@@ -33,6 +33,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, getRichTextEditPath, RichTextEditingMutation } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 export enum TextWrappingStyle {
     INLINE = 'inline',
@@ -669,8 +670,10 @@ export const IMoveInlineDrawingCommand: ICommand = {
 
         const renderManagerService = accessor.get(IRenderManagerService);
         const textSelectionRenderManager = accessor.get(ITextSelectionRenderManager);
+        const docRefreshDrawingsService = accessor.get(DocRefreshDrawingsService);
         const renderObject = renderManagerService.getRenderById(params.unitId);
         const scene = renderObject?.scene;
+        const skeleton = renderObject?.with(DocSkeletonManagerService).getSkeleton();
         if (scene == null) {
             return false;
         }
@@ -702,6 +705,8 @@ export const IMoveInlineDrawingCommand: ICommand = {
         );
 
         if (actions == null || actions.length === 0) {
+            docRefreshDrawingsService.refreshDrawings(skeleton);
+            transformer.refreshControls();
             return false;
         }
 

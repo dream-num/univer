@@ -28,6 +28,7 @@ import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocum
 import { Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
+import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 interface IDrawingParamsWithBehindText {
     unitId: string;
@@ -49,7 +50,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService
     ) {
         super();
 
@@ -69,6 +71,14 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             }
 
             this._refreshDrawing(documentSkeleton);
+        });
+
+        this._docRefreshDrawingsService.refreshDrawings$.subscribe((skeleton) => {
+            if (skeleton == null) {
+                return;
+            }
+
+            this._refreshDrawing(skeleton);
         });
     }
 

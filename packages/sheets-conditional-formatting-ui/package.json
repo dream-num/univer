@@ -80,8 +80,8 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.58",
-        "@univerjs/protocol": "0.1.38-alpha.18",
+        "@univerjs/icons": "^0.1.63",
+        "@univerjs/protocol": "0.1.38-alpha.20",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",
         "react-grid-layout": "^1.4.4",
@@ -101,14 +101,14 @@
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.5",
+        "@wendellhu/redi": "0.16.0",
         "clsx": "^2.1.1",
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.3",
         "vite": "^5.3.3",
-        "vitest": "^1.6.0"
+        "vitest": "^2.0.3"
     },
     "univerSpace": {
         ".": {

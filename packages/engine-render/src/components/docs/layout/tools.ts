@@ -283,7 +283,7 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
     const { paragraphStyle = {} } = paragraphConfig;
     const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
-    const { lineSpacing = 1, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
     return { paragraphLineGapDefault, linePitch, gridType, lineSpacing, spacingRule, snapToGrid };
 }
@@ -950,6 +950,10 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         },
     } = documentStyle;
     const {
+        charSpace = 0, // charSpace
+        linePitch = 15.6, // linePitch pt
+        gridType = GridType.LINES, // gridType
+
         pageNumberStart = global_pageNumberStart,
         pageSize = global_pageSize,
         pageOrient = global_pageOrient,
@@ -992,6 +996,10 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     }
 
     const sectionBreakConfig: ISectionBreakConfig = {
+        charSpace,
+        linePitch,
+        gridType,
+
         pageNumberStart,
         pageSize,
         pageOrient,

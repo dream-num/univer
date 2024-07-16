@@ -40,6 +40,10 @@ export class DesktopMessageService implements IMessageService, IDisposable {
         this._message = new Message(container);
     }
 
+    getContainer(): HTMLElement | undefined {
+        return this._portalContainer;
+    }
+
     show(options: IMessageOptions & Omit<IMessageProps, 'key'>): IDisposable {
         if (!this._portalContainer) {
             throw new Error('[DesktopMessageService]: no container to show message!');

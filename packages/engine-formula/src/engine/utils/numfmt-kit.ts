@@ -119,7 +119,10 @@ export function handleNumfmtInCell(oldCell: Nullable<ICellData>, cell: Nullable<
         return cell;
     }
 
-    const newPattern = compareNumfmtPriority(oldPattern, pattern);
+    // The number format calculated by the formula, if the current cell already has a number format, the original format is used, if not, a new one is set.
+    // Why?
+    // Due to the forced calculation mechanism during initialization, if the formula may overwrite the original number format, the number format set for the formula cell may never take effect.
+    const newPattern = oldPattern || pattern;
 
     cellStyle!.n!.pattern = newPattern;
 

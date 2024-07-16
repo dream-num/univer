@@ -15,7 +15,7 @@
  */
 
 import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
-import { GridType, PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
+import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
@@ -621,9 +621,6 @@ export class DocumentSkeleton extends Skeleton {
             ...customLists,
         };
         const {
-            charSpace = 0, // charSpace
-            linePitch = 15.6, // linePitch pt
-            gridType = GridType.LINES, // gridType
             paragraphLineGapDefault = 0,
             defaultTabStop = 10.5,
             textStyle = {},
@@ -635,9 +632,6 @@ export class DocumentSkeleton extends Skeleton {
             lists,
             drawings,
 
-            charSpace,
-            linePitch,
-            gridType,
             localeService: this._localService,
             paragraphLineGapDefault,
             defaultTabStop,

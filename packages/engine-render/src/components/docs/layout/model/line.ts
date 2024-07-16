@@ -22,6 +22,7 @@ import type {
     IDocumentSkeletonDrawing,
     IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
     LineType,
 } from '../../../../basics/i-document-skeleton-cached';
 import { Path2 } from '../../../../basics/path2';
@@ -64,9 +65,9 @@ export function createSkeletonLine(
     columnWidth: number,
     lineIndex: number = 0,
     isParagraphStart: boolean = false,
-    pageSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map(),
-    headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
-    footersDrawings?: Map<string, IDocumentSkeletonDrawing>
+    page: IDocumentSkeletonPage,
+    headerPage: Nullable<IDocumentSkeletonPage>,
+    footerPage: Nullable<IDocumentSkeletonPage>
 ): IDocumentSkeletonLine {
     const {
         lineHeight = 15.6,
@@ -79,6 +80,9 @@ export function createSkeletonLine(
         marginTop = 0,
         spaceBelowApply = 0,
     } = lineBoundingBox;
+    const pageSkeDrawings = page.skeDrawings ?? new Map();
+    const headersDrawings = headerPage?.skeDrawings;
+    const footersDrawings = footerPage?.skeDrawings;
 
     const lineSke = _getLineSke(lineType, paragraphIndex);
 
@@ -100,6 +104,9 @@ export function createSkeletonLine(
         columnWidth,
         paddingLeft,
         paddingRight,
+        page,
+        headerPage,
+        footerPage,
         affectSkeDrawings,
         headersDrawings,
         footersDrawings
@@ -115,24 +122,34 @@ export function createSkeletonLine(
 export function calculateLineTopByDrawings(
     lineHeight: number = 15.6,
     lineTop: number = 0,
-    pageSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
-    headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
-    footersDrawings?: Map<string, IDocumentSkeletonDrawing>
+    page: IDocumentSkeletonPage,
+    headerPage: Nullable<IDocumentSkeletonPage>,
+    footerPage: Nullable<IDocumentSkeletonPage>
 ) {
     let maxTop = lineTop;
-    headersDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop);
-        if (top) {
-            maxTop = Math.max(maxTop, top);
-        }
-    });
+    const pageSkeDrawings = page.skeDrawings;
+    const headersDrawings = headerPage?.skeDrawings;
+    const footersDrawings = footerPage?.skeDrawings;
 
-    footersDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop);
-        if (top) {
-            maxTop = Math.max(maxTop, top);
-        }
-    });
+    if (headerPage && headersDrawings) {
+        headersDrawings.forEach((drawing) => {
+            const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop);
+            if (top) {
+                maxTop = Math.max(maxTop, top);
+            }
+        });
+    }
+
+    if (footerPage && footersDrawings) {
+        footersDrawings.forEach((drawing) => {
+            const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop);
+            if (top) {
+                maxTop = Math.max(maxTop, top);
+            }
+        });
+    }
 
     pageSkeDrawings?.forEach((drawing) => {
         const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop);
@@ -186,6 +203,9 @@ function _calculateDividesByDrawings(
     columnWidth: number,
     paddingLeft: number,
     paddingRight: number,
+    page: IDocumentSkeletonPage,
+    headerPage: Nullable<IDocumentSkeletonPage>,
+    footerPage: Nullable<IDocumentSkeletonPage>,
     paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
     headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     footersDrawings?: Map<string, IDocumentSkeletonDrawing>
@@ -202,20 +222,29 @@ function _calculateDividesByDrawings(
             width: paddingRight,
         }
     );
-    headersDrawings?.forEach((drawing, drawingId) => {
-        const split = _calculateSplit(drawing, lineHeight, lineTop, columnWidth);
-        if (split) {
-            drawingsMix.push(split);
-        }
-    });
 
-    footersDrawings?.forEach((drawing, drawingId) => {
-        const split = _calculateSplit(drawing, lineHeight, lineTop, columnWidth);
-        if (split) {
-            drawingsMix.push(split);
-        }
-    });
-    paragraphAffectSkeDrawings?.forEach((drawing, drawingId) => {
+    if (headerPage && headersDrawings) {
+        headersDrawings.forEach((drawing) => {
+            const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
+
+            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnWidth);
+            if (split) {
+                drawingsMix.push(split);
+            }
+        });
+    }
+
+    if (footerPage && footersDrawings) {
+        footersDrawings.forEach((drawing) => {
+            const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
+            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnWidth);
+            if (split) {
+                drawingsMix.push(split);
+            }
+        });
+    }
+
+    paragraphAffectSkeDrawings?.forEach((drawing) => {
         const split = _calculateSplit(drawing, lineHeight, lineTop, columnWidth);
         if (split) {
             drawingsMix.push(split);
@@ -347,6 +376,30 @@ export function getBoundingBox(angle: number, left: number, width: number, top: 
     const boundingBox = transform.makeBoundingBoxFromPoints([lt, lb, rt, rb]); // 返回旋转后的点集合以及矩形选区
 
     return boundingBox;
+}
+
+// Converts the vertical position of the image in the header and footer to the position
+// of the image relative to the body position.
+function translateHeaderFooterDrawingPosition(
+    drawing: IDocumentSkeletonDrawing,
+    segmentPage: IDocumentSkeletonPage,
+    page: IDocumentSkeletonPage,
+    isHeader = true
+) {
+    const { aTop: prevATop } = drawing;
+
+    let aTop = prevATop;
+
+    if (isHeader) {
+        aTop = prevATop + segmentPage.marginTop - page.marginTop;
+    } else {
+        aTop = prevATop + segmentPage.marginTop + page.pageHeight - page.marginBottom - page.marginTop;
+    }
+
+    return {
+        ...drawing,
+        aTop,
+    };
 }
 
 function __getCrossPoint(points: Vector2[], lineTop: number, lineHeight: number, columnWidth: number) {

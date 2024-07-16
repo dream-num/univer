@@ -504,8 +504,8 @@ function _lineOperator(
     const lineTop = preLineHeight + preTop;
 
     const { pageWidth, headerId, footerId, segmentId } = lastPage;
-    const headersDrawings = skeHeaders?.get(headerId)?.get(pageWidth)?.skeDrawings;
-    const footersDrawings = skeFooters?.get(footerId)?.get(pageWidth)?.skeDrawings;
+    const headerPage = skeHeaders?.get(headerId)?.get(pageWidth);
+    const footerPage = skeFooters?.get(footerId)?.get(pageWidth);
 
     // Handle float object relative to line.
     // FIXME: @jocs, it will not update the last line's drawings.
@@ -533,9 +533,9 @@ function _lineOperator(
     const newLineTop = calculateLineTopByDrawings(
         lineHeight,
         lineTop,
-        lastPage.skeDrawings,
-        headersDrawings,
-        footersDrawings
+        lastPage,
+        headerPage,
+        footerPage
     ); // WRAP_TOP_AND_BOTTOM 的 drawing 会改变行的起始 top
 
     if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) {
@@ -591,9 +591,9 @@ function _lineOperator(
         column.width,
         lineIndex,
         paragraphStart,
-        lastPage.skeDrawings,
-        headersDrawings,
-        footersDrawings
+        lastPage,
+        headerPage,
+        footerPage
     );
 
     column.lines.push(newLine);

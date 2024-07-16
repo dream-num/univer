@@ -378,7 +378,7 @@ export const InsertColBeforeCommand: ICommand = {
                 startColumn: range.startColumn,
                 endColumn: range.startColumn + count - 1,
                 startRow: 0,
-                endRow: worksheet.getLastRowWithContent(),
+                endRow: worksheet.getRowCount() - 1,
                 rangeType: RANGE_TYPE.COLUMN,
             },
             cellValue,
@@ -425,7 +425,7 @@ export const InsertColAfterCommand: ICommand = {
                 startColumn: range.endColumn + 1,
                 endColumn: range.endColumn + count,
                 startRow: 0,
-                endRow: worksheet.getLastRowWithContent(),
+                endRow: worksheet.getRowCount() - 1,
             },
         };
 

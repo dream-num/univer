@@ -70,7 +70,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             return false;
         }
 
-        const sectionBreaks = docDataModel.getBody()?.sectionBreaks || [];
+        const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
 
         const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
 

@@ -63,11 +63,11 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "0.15.5",
+        "@wendellhu/redi": "0.16.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.3",
         "vite": "^5.3.3",
-        "vitest": "^1.6.0"
+        "vitest": "^2.0.3"
     },
     "univerSpace": {
         ".": {

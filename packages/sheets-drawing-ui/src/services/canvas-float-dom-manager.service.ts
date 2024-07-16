@@ -152,6 +152,10 @@ const calcPosition = (
     };
 };
 
+export interface ISheetCanvasFloatDomHook {
+    onGetFloatDomProps: (id: string) => Record<string, any>;
+}
+
 export class SheetCanvasFloatDomManagerService extends Disposable {
     private _domLayerMap: Map<string, Map<string, Map<string, ICanvasFloatDom>>> = new Map();
     private _domLayerInfoMap: Map<string, ICanvasFloatDomInfo> = new Map();
@@ -161,6 +165,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
     private _remove$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
     remove$ = this._remove$.asObservable();
+
+    private _hooks: ISheetCanvasFloatDomHook[] = [];
 
     constructor(
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
@@ -210,6 +216,15 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const canvas = renderObject.engine.getCanvasElement();
 
         return { scene, transformer, renderObject, canvas };
+    }
+
+    private _getFloatDomProps(id: string) {
+        let props;
+        this._hooks.forEach((hook) => {
+            props = hook.onGetFloatDomProps(id);
+        });
+
+        return props;
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -294,7 +309,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         onWheel: (evt: WheelEvent) => {
                             canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                         },
-                        props: map.get(drawingId)?.props,
+                        props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
                     });
 
                     const listener = rect.onTransformChange$.subscribeEvent(() => {
@@ -495,5 +510,16 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const { redo, objects } = jsonOp;
             this._commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE });
         }
+    }
+
+    addHook(hook: ISheetCanvasFloatDomHook): IDisposable {
+        this._hooks.push(hook);
+
+        return {
+            dispose: () => {
+                const index = this._hooks.findIndex((h) => h === hook);
+                this._hooks.splice(index, 1);
+            },
+        };
     }
 }

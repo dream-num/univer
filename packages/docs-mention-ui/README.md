@@ -1,14 +1,8 @@
 # @univerjs/docs-mention-ui
 
-## Package Overview
-
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/docs-mention-ui` | `UniverDocsUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
-
 ## Introduction
 
-`@univerjs/docs-mention-ui` package provides the User Interface for Docs.
+`@univerjs/docs-mention-ui` package provides the Mention function for Docs.
 
 ## Usage
 

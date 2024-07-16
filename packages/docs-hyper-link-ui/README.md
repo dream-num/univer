@@ -1,11 +1,5 @@
 # @univerjs/docs-hyper-link-ui
 
-## Package Overview
-
-| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
-| --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/docs-hyper-link-ui` | `UniverDocsHyperLinkUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
-
 ## Introduction
 
 `@univerjs/docs-hyper-link-ui` provides the link function of Univer Docs.

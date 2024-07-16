@@ -42,11 +42,12 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         if (!activeRange) {
             return false;
         }
+        const dataStream = `${DataStreamTreeTokenType.CUSTOM_RANGE_START} @${mention.label} ${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
         const body: IDocumentBody = {
-            dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${mention.label}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+            dataStream,
             customRanges: [{
                 startIndex: 0,
-                endIndex: mention.label.length + 1,
+                endIndex: dataStream.length - 1,
                 rangeId: mention.id,
                 rangeType: CustomRangeType.MENTION,
                 wholeEntity: true,

@@ -24,10 +24,11 @@ export interface IMentionListProps {
     mentions: IMention[];
     active?: string;
     onSelect?: (item: IMention) => void;
+    onClick?: () => void;
 }
 
 export const MentionList = (props: IMentionListProps) => {
-    const { mentions, active, onSelect } = props;
+    const { mentions, active, onSelect, onClick } = props;
     const [activeId, setActiveId] = useState(active ?? mentions[0]?.objectId);
     const handleSelect = (item: IMention) => {
         onSelect?.(item);
@@ -49,7 +50,7 @@ export const MentionList = (props: IMentionListProps) => {
     };
 
     return (
-        <div className={styles.docMentionPanel} onKeyDown={handleKeyDown}>
+        <div className={styles.docMentionPanel} onKeyDown={handleKeyDown} onClick={onClick}>
             {mentions.map((mention) => (
                 <div
                     key={mention.objectId}

@@ -38,6 +38,7 @@ export const MentionEditPopup = () => {
 
     return (
         <MentionList
+            onClick={() => popupService.closeEditPopup()}
             mentions={mentions}
             onSelect={(mention) => {
                 commandService.executeCommand(AddDocMentionCommand.id, {

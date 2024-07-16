@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
+import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
@@ -23,6 +23,7 @@ import { BehaviorSubject } from 'rxjs';
 import { DocMentionService } from '@univerjs/docs-mention';
 import { MentionEditPopup } from '../views/mention-edit-popup';
 
+@OnLifecycle(LifecycleStages.Rendered, DocMentionPopupService)
 export class DocMentionPopupService extends Disposable {
     private readonly _infoPopup$ = new BehaviorSubject(undefined);
     readonly infoPopup$ = this._infoPopup$.asObservable();
@@ -55,15 +56,17 @@ export class DocMentionPopupService extends Disposable {
 
     showEditPopup(index: number) {
         this.closeEditPopup();
-        this._docCanvasPopupManagerService.attachPopupToRange(
+        const dispose = this._docCanvasPopupManagerService.attachPopupToRange(
             { startOffset: index, endOffset: index, collapsed: true },
             {
                 componentKey: MentionEditPopup.componentKey,
                 onClickOutside: () => {
                     this.closeEditPopup();
                 },
+                direction: 'bottom',
             }
         );
+        this._editPopup$.next({ popup: dispose, anchor: index });
     }
 
     closeEditPopup() {

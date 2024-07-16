@@ -38,8 +38,8 @@ export class DocMentionTriggerController extends Disposable {
                 if (commandInfo.id === InsertCommand.id) {
                     const params = commandInfo.params as IInsertCommandParams;
                     const activeRange = this._textSelectionManagerService.getActiveRange();
-                    if (params.body.dataStream === '@' && activeRange && Tools.isDefine(this._docMentionService.editing)) {
-                        this._docMentionService.startEditing(activeRange.startOffset + 1);
+                    if (params.body.dataStream === '@' && activeRange && !Tools.isDefine(this._docMentionService.editing)) {
+                        this._docMentionService.startEditing(activeRange.startOffset - 1);
                     }
                 }
             })

@@ -42,7 +42,7 @@ export function getRetainAndDeleteAndExcludeLineBreak(
     const textEnd = endOffset - memoryCursor;
 
     const paragraphInRange = paragraphs?.find(
-        (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor <= textEnd
+        (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor < textEnd
     );
 
     const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset));
@@ -134,8 +134,8 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
     }
 
     const textRanges = params.textRanges ?? [{
-        startOffset: selection.startOffset + body.dataStream.length,
-        endOffset: selection.startOffset + body.dataStream.length,
+        startOffset: selection.startOffset + insertBody.dataStream.length,
+        endOffset: selection.startOffset + insertBody.dataStream.length,
         collapsed: true,
     }];
 

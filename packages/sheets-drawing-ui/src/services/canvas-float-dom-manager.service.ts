@@ -15,7 +15,7 @@
  */
 
 import type { IPosition, ITransformState, Nullable, Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
+import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, IUniverInstanceService, Tools, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
@@ -167,7 +167,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(ICommandService) private _commandService: ICommandService,
         @IDrawingManagerService private _drawingManagerService: IDrawingManagerService,
-        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(CanvasFloatDomService) private readonly _canvasFloatDomService: CanvasFloatDomService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService
     ) {
@@ -352,10 +351,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }));
     }
 
-    private _getPosition(position: IPosition): Nullable<ISheetDrawingPosition> {
+    private _getPosition(position: IPosition, unitId: string): Nullable<ISheetDrawingPosition> {
         const { startX, endX, startY, endY } = position;
-
-        const start = this._selectionRenderService.getSelectionCellByPosition(startX, startY);
+        const selectionRenderService = this._renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
+        if (selectionRenderService == null) {
+            return;
+        }
+        const start = selectionRenderService.getSelectionCellByPosition(startX, startY);
         if (start == null) {
             return;
         }
@@ -367,7 +369,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             rowOffset: startY - start.startY,
         };
 
-        const end = this._selectionRenderService.getSelectionCellByPosition(endX, endY);
+        const end = selectionRenderService.getSelectionCellByPosition(endX, endY);
 
         if (end == null) {
             return;
@@ -432,7 +434,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const { initPosition, componentKey } = layer;
         const id = Tools.generateRandomId();
 
-        const sheetTransform = this._getPosition(initPosition);
+        const sheetTransform = this._getPosition(initPosition, unitId);
         if (sheetTransform == null) {
             return;
         }

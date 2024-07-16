@@ -16,11 +16,12 @@
 
 import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
 import { CellValueType, IContextService, IResourceLoaderService, LocaleService } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it,vi } from 'vitest';
 import { getCellDataByInput, normalizeString } from '../editing.render-controller';
 import { createTestBed } from './create-test-bed';
+import { IMockFunctionService, MockFunctionService } from './mock-function.service';
 
 const richTextDemo: IDocumentData = {
     id: 'd',
@@ -67,6 +68,19 @@ const richTextDemo: IDocumentData = {
     },
 };
 
+vi.mock('@univerjs/engine-formula', async () => {
+    const actual = await vi.importActual('@univerjs/engine-formula');
+    const { IMockFunctionService, MockFunctionService } = await import(
+        './mock-function.service'
+    );
+
+    return {
+        ...actual,
+        IMockFunctionService,
+        MockFunctionService,
+    };
+});
+
 describe('Test EndEditController', () => {
     let univer: Univer;
     let workbook: Workbook;
@@ -77,9 +91,12 @@ describe('Test EndEditController', () => {
     let spreadsheetSkeleton: SpreadsheetSkeleton;
     let resourceLoaderService: IResourceLoaderService;
     let getCellDataByInputCell: (cell: ICellData, inputCell: ICellData) => ICellData | null;
+    let normalizeStringByLexer: (str: string) => string;
 
     beforeEach(() => {
-        const testBed = createTestBed();
+        const testBed = createTestBed(undefined, [
+            [IMockFunctionService, { useClass: MockFunctionService }],
+        ]);
 
         univer = testBed.univer;
         workbook = testBed.sheet;
@@ -107,7 +124,11 @@ describe('Test EndEditController', () => {
                 throw new Error('documentLayoutObject is undefined');
             }
 
-            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot(), localeService);
+            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot(), localeService, get(IFunctionService));
+        };
+
+        normalizeStringByLexer = (str: string) => {
+            return normalizeString(str, lexerTreeBuilder, get(IFunctionService));
         };
     });
 
@@ -196,24 +217,49 @@ describe('Test EndEditController', () => {
         });
 
         it('Function normalizeString', () => {
-            // normal string
-            expect(normalizeString('１００％', lexerTreeBuilder)).toEqual('100%');
-            expect(normalizeString('１００％＋２', lexerTreeBuilder)).toEqual('１００％＋２');
-            expect(normalizeString('＝１００％＋２＋ｗ', lexerTreeBuilder)).toEqual('=100%+2+ｗ');
-            expect(normalizeString('＄１００', lexerTreeBuilder)).toEqual('$100');
-            expect(normalizeString('＄ｗ', lexerTreeBuilder)).toEqual('＄ｗ');
-
             // boolean
-            expect(normalizeString('ｔｒｕｅ', lexerTreeBuilder)).toEqual('TRUE');
+            expect(normalizeStringByLexer('ｔｒｕｅ')).toEqual('TRUE');
 
             // force string
-            expect(normalizeString('＇ｔｒｕｅ', lexerTreeBuilder)).toEqual("'ｔｒｕｅ");
+            expect(normalizeStringByLexer('＇ｔｒｕｅ')).toEqual("'ｔｒｕｅ");
+
+            // formatted number
+            expect(normalizeStringByLexer('１００％')).toEqual('100%');
+            expect(normalizeStringByLexer('＄１００')).toEqual('$100');
+            expect(normalizeStringByLexer('０．１１')).toEqual('0.11');
+            expect(normalizeStringByLexer('２０２０－１－１')).toEqual('2020-1-1');
+            expect(normalizeStringByLexer('１０ｅ＋１')).toEqual('10e+1');
 
             // formula
-            expect(normalizeString('＝@ｉｆ（ｔｒｕｅ＝１，  ＂　Ａ＄，＂＆＂＋－×＝＜＞％＄＠＆＊＃＂，＂false＂）', lexerTreeBuilder)).toEqual('=@IF(TRUE=1,  "　Ａ＄，"&"＋－×＝＜＞％＄＠＆＊＃","false")');
-            expect(normalizeString('＝ｉｆ（１，“Ａ”，“false　”）', lexerTreeBuilder)).toEqual('=IF(1,“Ａ”,“false ”)');
-            expect(normalizeString('＝ｉｆ（０，１，　　”３“）', lexerTreeBuilder)).toEqual('=IF(0,1,  ”３“)');
-            expect(normalizeString('＝Ａ１＋Ｂ２－Ｃ３＊（Ｄ４＞＝Ｅ５）／（Ｆ６＜Ｇ７）', lexerTreeBuilder)).toEqual('=A1+B2-C3*(D4>=E5)/(F6<G7)');
+            expect(normalizeStringByLexer('＝ｗ')).toEqual('=ｗ');
+
+            expect(normalizeStringByLexer('＝＂１＂')).toEqual('="１"');
+            expect(normalizeStringByLexer('＝＇１＇')).toEqual("=＇１'"); // invalid in Excel
+            expect(normalizeStringByLexer('＝“２”')).toEqual('=“２”');
+            expect(normalizeStringByLexer('＝“ｗ”')).toEqual('=“ｗ”');
+            expect(normalizeStringByLexer('＝“１')).toEqual('=“１');
+            expect(normalizeStringByLexer('=‘１’')).toEqual('=‘１’');
+            expect(normalizeStringByLexer('=‘１')).toEqual('=‘１');
+
+            expect(normalizeStringByLexer('＝１００％＋２＋ｗ')).toEqual('=100%+2+ｗ');
+            expect(normalizeStringByLexer('＝ｔｒｕｅ＋１')).toEqual('=TRUE+1');
+            expect(normalizeStringByLexer('＝ｔｒｕｅ＋ｗ')).toEqual('=TRUE+ｗ');
+            expect(normalizeStringByLexer('＝ｉｆ')).toEqual('=ｉｆ');
+            expect(normalizeStringByLexer('＝ｉｆ（')).toEqual('=IF('); // invalid in Excel
+            expect(normalizeStringByLexer('＝＠＠ｉｆ＠ｓ')).toEqual('＝@@ｉｆ@ｓ');
+            expect(normalizeStringByLexer('＝＠＠ｉｆ＋＠ｓ')).toEqual('=@@ｉｆ+@ｓ');
+            expect(normalizeStringByLexer('＝＋－ｉｆ')).toEqual('=+-ｉｆ');
+            expect(normalizeStringByLexer('＝＠ｉｆ（ｔｒｕｅ＝１，  ＂　Ａ＄，＂＆＂＋－×＝＜＞％＄＠＆＊＃＂，＂false＂）')).toEqual('=@IF(TRUE=1,  "　Ａ＄，"&"＋－×＝＜＞％＄＠＆＊＃","false")');
+            expect(normalizeStringByLexer('＝ｉｆ（１，“Ａ”，“false　”）')).toEqual('=IF(1,“Ａ”,“false ”)');
+            expect(normalizeStringByLexer('＝ｉｆ（０，１，　　”３“）')).toEqual('=IF(0,1,  ”３“)');
+            expect(normalizeStringByLexer('＝Ａ１＋Ｂ２－Ｃ３＊（Ｄ４＞＝Ｅ５）／（Ｆ６＜Ｇ７）')).toEqual('=A1+B2-C3*(D4>=E5)/(F6<G7)');
+            expect(normalizeStringByLexer('＝ｉｆ（Ａ１＝＂＊２？３＂，１，２）')).toEqual('=IF(A1="＊２？３",1,2)');
+            expect(normalizeStringByLexer('＝｛１，２｝')).toEqual('={1,2}');
+
+            // normal string
+            expect(normalizeStringByLexer('１００％＋２－×＝＜＞％＄＠＆＊＃')).toEqual('１００％＋２－×＝＜＞％＄＠＆＊＃');
+            expect(normalizeStringByLexer('＄ｗ')).toEqual('＄ｗ');
+            expect(normalizeStringByLexer('ｔｒｕｅ＋１')).toEqual('ｔｒｕｅ＋１');
         });
     });
 });

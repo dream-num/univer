@@ -34,7 +34,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
-    LocaleType,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -66,8 +65,10 @@ import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui'
 import type { WorkbookSelections } from '@univerjs/sheets';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
-import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
+import type { ISequenceNode } from '@univerjs/engine-formula';
+import { IFunctionService, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 
+import Numfmt from '@univerjs/engine-numfmt';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
@@ -77,6 +78,7 @@ import styles from '../../views/sheet-container/index.module.less';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
+import { booleanMap, isCJKLocale, replaceString, toHalfWidth } from '../utils/char-tools';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -119,6 +121,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
@@ -839,7 +842,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             documentLayoutObject,
             this._lexerTreeBuilder,
             (model) => this._resourceLoaderService.saveDoc(model),
-            this._localService
+            this._localService,
+            this._functionService
         );
 
         if (!cellData) {
@@ -991,7 +995,8 @@ export function getCellDataByInput(
     documentLayoutObject: IDocumentLayoutObject,
     lexerTreeBuilder: LexerTreeBuilder,
     getSnapshot: (data: DocumentDataModel) => IDocumentData,
-    localeService: LocaleService
+    localeService: LocaleService,
+    functionService: IFunctionService
 ) {
     cellData = Tools.deepClone(cellData);
 
@@ -1015,7 +1020,7 @@ export function getCellDataByInput(
 
     const currentLocale = localeService.getCurrentLocale();
     if (isCJKLocale(currentLocale)) {
-        newDataStream = normalizeString(newDataStream, lexerTreeBuilder);
+        newDataStream = normalizeString(newDataStream, lexerTreeBuilder, functionService);
     }
 
     if (isFormulaString(newDataStream)) {
@@ -1029,6 +1034,7 @@ export function getCellDataByInput(
         }
 
         cellData.f = newDataStream;
+        cellData.si = null; // Disassociate from the original formula
         cellData.v = null;
         cellData.p = null;
     } else if (isForceString(newDataStream)) {

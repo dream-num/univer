@@ -16,6 +16,7 @@
 
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import {
+    BooleanNumber,
     COLORS,
     Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV,
     OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable, Tools,
@@ -746,7 +747,7 @@ export class DocDrawingTransformerController extends Disposable {
     }
 
     private _nonInlineDrawingTransform(drawing: IDocDrawingBase, object: BaseObject, isMoving = false) {
-        const objectPosition = this._limitDrawingInPage(drawing, object);
+        const objectPosition = drawing.isMultiTransform === BooleanNumber.TRUE ? object : this._limitDrawingInPage(drawing, object);
 
         if (isMoving && objectPosition.top !== object.top) {
             return;

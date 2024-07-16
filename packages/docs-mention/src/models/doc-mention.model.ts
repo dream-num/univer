@@ -15,10 +15,10 @@
  */
 
 import { Disposable, Tools } from '@univerjs/core';
-import type { IMention } from '../types/interfaces/i-mention';
+import type { IDocMention } from '../types/interfaces/i-mention';
 
 export class DocMentionModel extends Disposable {
-    private _mentionMaps = new Map<string, Map<string, IMention>>();
+    private _mentionMaps = new Map<string, Map<string, IDocMention>>();
 
     private _ensureMap(unitId: string) {
         let unitMap = this._mentionMaps.get(unitId);
@@ -30,7 +30,7 @@ export class DocMentionModel extends Disposable {
         return unitMap;
     }
 
-    addMention(unitId: string, mention: IMention) {
+    addMention(unitId: string, mention: IDocMention) {
         const map = this._ensureMap(unitId);
         map.set(mention.id, mention);
     }

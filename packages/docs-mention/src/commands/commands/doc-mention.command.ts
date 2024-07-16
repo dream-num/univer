@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, type ICommand, ICommandService, sequenceExecute, Tools } from '@univerjs/core';
-import { addCustomRangeBySelectionFactory, deleteCustomRangeFactory } from '@univerjs/docs';
-import type { IMention } from '../../types/interfaces/i-mention';
+import type { ICommand, IDocumentBody } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, ICommandService, sequenceExecute } from '@univerjs/core';
+import { deleteCustomRangeFactory, replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
+import type { IDocMention } from '../../types/interfaces/i-mention';
 import { AddDocMentionMutation } from '../mutations/doc-mention.mutation';
 import { DocMentionModel } from '../../models/doc-mention.model';
 
 export interface IAddDocMentionCommandParams {
-    mention: IMention;
+    mention: IDocMention;
     unitId: string;
+    startIndex: number;
 }
 
 export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
@@ -33,15 +35,34 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
             return false;
         }
 
-        const { mention, unitId } = params;
+        const { mention, unitId, startIndex } = params;
         const commandService = accessor.get(ICommandService);
-        const id = Tools.generateRandomId();
-        const doMutation = addCustomRangeBySelectionFactory(
-            accessor,
-            {
-                rangeId: id,
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const activeRange = textSelectionManagerService.getActiveRange();
+        if (!activeRange) {
+            return false;
+        }
+        const body: IDocumentBody = {
+            dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${mention.label}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+            customRanges: [{
+                startIndex: 0,
+                endIndex: mention.label.length + 1,
+                rangeId: mention.id,
                 rangeType: CustomRangeType.MENTION,
                 wholeEntity: true,
+            }],
+        };
+
+        const doMutation = replaceSelectionFactory(
+            accessor,
+            {
+                unitId,
+                body,
+                selection: {
+                    startOffset: startIndex,
+                    endOffset: activeRange.endOffset,
+                    collapsed: startIndex === activeRange.endOffset,
+                },
             }
         );
 

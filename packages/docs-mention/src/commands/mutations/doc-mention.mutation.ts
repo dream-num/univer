@@ -16,11 +16,11 @@
 
 import { CommandType, type ICommand } from '@univerjs/core';
 import { DocMentionModel } from '../../models/doc-mention.model';
-import type { IMention } from '../../types/interfaces/i-mention';
+import type { IDocMention } from '../../types/interfaces/i-mention';
 
 export interface IAddDocMentionMutationParams {
     unitId: string;
-    mention: IMention;
+    mention: IDocMention;
 }
 
 export const AddDocMentionMutation: ICommand<IAddDocMentionMutationParams> = {

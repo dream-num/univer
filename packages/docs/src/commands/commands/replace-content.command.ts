@@ -22,7 +22,7 @@ import { TextSelectionManagerService } from '../../services/text-selection-manag
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getRichTextEditPath } from '../util';
-import { getRetainAndDeleteAndExcludeLineBreak } from './clipboard.inner.command';
+import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 
 interface IReplaceContentCommandParams {
     unitId: string;

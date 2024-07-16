@@ -1,0 +1,39 @@
+.doc-mention-panel {
+    width: 280px;
+    padding: 8px;
+    max-height: 276px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.doc-mention {
+    display: flex;
+    padding: 8px;
+    align-items: center;
+    flex-direction: row;
+    cursor: pointer;
+
+    &-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 12px;
+        margin-right: 6px;
+        flex: 0 0 auto;
+        border-radius: 6px;
+
+        &-active {
+            background: rgb(var(--grey-50));
+        }
+    }
+
+    &-icon:hover {
+        background: rgb(var(--grey-50));
+    }
+
+    &-label {
+        overflow: hidden;
+        flex: 1 1 0;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+}

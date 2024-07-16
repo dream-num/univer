@@ -17,16 +17,15 @@
 import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { UniverDocsPlugin } from '@univerjs/docs';
-import { DOC_MENTION_PLUGIN } from './types/const/const';
-import { DocMentionModel } from './models/doc-mention.model';
-import { DocMentionController } from './controllers/doc-mention.controller';
-import { DocMentionCustomRangeController } from './controllers/doc-mention-custom-range.controller';
-import { DocMentionService } from './services/doc-mention.service';
+import { UniverDocsMentionPlugin } from '@univerjs/docs-mention';
+import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
+import { DocMentionPopupService } from './services/doc-mention-popup.service';
+import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
+import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
 
-@DependentOn(UniverDocsPlugin)
-export class UniverDocsMentionPlugin extends Plugin {
-    static override pluginName = DOC_MENTION_PLUGIN;
+@DependentOn(UniverDocsMentionPlugin)
+export class UniverDocsMentionUIPlugin extends Plugin {
+    static override pluginName = DOC_MENTION_UI_PLUGIN;
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
@@ -38,11 +37,9 @@ export class UniverDocsMentionPlugin extends Plugin {
 
     override onStarting(injector: Injector): void {
         const deps: Dependency[] = [
-            [DocMentionModel],
-            [DocMentionService],
-
-            [DocMentionController],
-            [DocMentionCustomRangeController],
+            [DocMentionPopupService],
+            [DocMentionUIController],
+            [DocMentionTriggerController],
         ];
 
         deps.forEach((dep) => {

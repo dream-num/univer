@@ -15,13 +15,15 @@
  */
 
 export { DocMentionModel } from './models/doc-mention.model';
+export { DocMentionService } from './services/doc-mention.service';
 export { DOC_MENTION_PLUGIN } from './types/const/const';
-export type { IMention } from './types/interfaces/i-mention';
+export type { IMention, IDocMention } from './types/interfaces/i-mention';
+export { MentionType } from './types/enums/mention-type';
+export { UniverDocsMentionPlugin } from './plugin';
 
 // #region - all commands
 export { AddDocMentionMutation, DeleteDocMentionMutation } from './commands/mutations/doc-mention.mutation';
 export type { IAddDocMentionMutationParams, IDeleteDocMentionMutationParams } from './commands/mutations/doc-mention.mutation';
 export { AddDocMentionCommand, DeleteDocMentionCommand } from './commands/commands/doc-mention.command';
 export type { IAddDocMentionCommandParams, IDeleteDocMentionCommandParams } from './commands/commands/doc-mention.command';
-
 // #endregion

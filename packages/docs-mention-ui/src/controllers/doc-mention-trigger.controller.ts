@@ -16,16 +16,18 @@
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs';
-import { InsertCommand, TextSelectionManagerService } from '@univerjs/docs';
+import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
 import { DocMentionService } from '@univerjs/docs-mention';
 import { Inject } from '@wendellhu/redi';
+import { DocMentionPopupService } from '../services/doc-mention-popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocMentionTriggerController)
 export class DocMentionTriggerController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocMentionService) private readonly _docMentionService: DocMentionService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocMentionPopupService) private readonly _docMentionPopupService: DocMentionPopupService
     ) {
         super();
 
@@ -40,6 +42,20 @@ export class DocMentionTriggerController extends Disposable {
                     const activeRange = this._textSelectionManagerService.getActiveRange();
                     if (params.body.dataStream === '@' && activeRange && !Tools.isDefine(this._docMentionService.editing)) {
                         this._docMentionService.startEditing(activeRange.startOffset - 1);
+                    }
+                }
+
+                if (commandInfo.id === MoveCursorOperation.id) {
+                    this._docMentionService.endEditing();
+                }
+
+                if (commandInfo.id === DeleteLeftCommand.id) {
+                    if (this._docMentionPopupService.editPopup == null) {
+                        return;
+                    }
+                    const activeRange = this._textSelectionManagerService.getActiveRange();
+                    if (activeRange && activeRange.endOffset <= this._docMentionPopupService.editPopup.anchor) {
+                        this._docMentionService.endEditing();
                     }
                 }
             })

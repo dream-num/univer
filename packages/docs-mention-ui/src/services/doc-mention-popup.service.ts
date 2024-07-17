@@ -46,6 +46,8 @@ export class DocMentionPopupService extends Disposable {
         this.disposeWithMe(this._docMentionService.editing$.subscribe((editing) => {
             if (editing !== undefined && editing !== null) {
                 this.showEditPopup(editing);
+            } else {
+                this.closeEditPopup();
             }
         }));
     }
@@ -70,10 +72,13 @@ export class DocMentionPopupService extends Disposable {
     }
 
     closeEditPopup() {
+        if (!(this._docMentionService.editing == null)) {
+            this._docMentionService.endEditing();
+        }
+
         if (this.editPopup) {
             this.editPopup.popup.dispose();
             this._editPopup$.next(null);
-            this._docMentionService.endEditing();
         }
     }
 }

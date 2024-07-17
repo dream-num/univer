@@ -124,8 +124,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日期', detail: '此為代表開始日期的日期。' },
+            months: { name: '月份數', detail: '開始日期之前或之後的月份數。' },
         },
     },
     HOUR: {
@@ -151,8 +151,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            date: { name: '日期', detail: '用於日期和時間計算的日期時間代碼。' },
         },
     },
     MINUTE: {
@@ -283,8 +282,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列值', detail: '這是代表要尋找之該天日期的序列值。' },
+            returnType: { name: '傳回值類型', detail: '這是決定傳回值類型的數字。' },
         },
     },
     WEEKNUM: {
@@ -297,8 +296,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列值', detail: '這是一週中的日期。' },
+            returnType: { name: '傳回值類型', detail: '這是決定一週從星期幾開始的數字。 預設值為 1。' },
         },
     },
     WORKDAY: {
@@ -352,8 +351,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '這是代表開始日期的日期。' },
+            endDate: { name: '结束日期', detail: '這是代表結束日期的日期。' },
+            basis: { name: '基礎類型', detail: '這是要使用的日計數基礎類型。' },
         },
     },
 };

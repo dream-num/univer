@@ -124,8 +124,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '表示开始日期的日期。' },
+            months: { name: '月份数', detail: '开始日期之前或之后的月份数。' },
         },
     },
     HOUR: {
@@ -151,8 +151,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            date: { name: '日期', detail: '用于日期和时间计算的日期时间代码。' },
         },
     },
     MINUTE: {
@@ -301,8 +300,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '代表一周中的日期。' },
+            returnType: { name: '返回值类型', detail: '一数字，确定星期从哪一天开始。 默认值为 1。' },
         },
     },
     WORKDAY: {
@@ -359,8 +358,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '一个代表开始日期的日期。' },
+            endDate: { name: '结束日期', detail: '一个代表终止日期的日期。' },
+            basis: { name: '基准类型', detail: '要使用的日计数基准类型。' },
         },
     },
 };

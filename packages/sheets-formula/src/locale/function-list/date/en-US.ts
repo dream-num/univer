@@ -124,8 +124,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the starting date.' },
+            months: { name: 'months', detail: 'The number of months before or after start_date.' },
         },
     },
     HOUR: {
@@ -151,8 +151,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            date: { name: 'date', detail: 'Date is the date-time code used by Excel for date and time calculation.' },
         },
     },
     MINUTE: {
@@ -301,8 +300,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'serial_number', detail: 'A date within the week.' },
+            returnType: { name: 'return_type', detail: 'A number that determines on which day the week begins. The default is 1.' },
         },
     },
     WORKDAY: {
@@ -359,8 +358,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
+            endDate: { name: 'end_date', detail: 'A date that represents the end date.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
 };

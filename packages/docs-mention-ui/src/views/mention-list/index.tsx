@@ -62,7 +62,7 @@ export const MentionList = (props: IMentionListProps) => {
                     className={cs(styles.docMention, { [styles.docMentionActive]: activeId === mention.objectId })}
                     onClick={() => handleSelect(mention)}
                 >
-                    <img className={styles.docMentionIcon} />
+                    <img className={styles.docMentionIcon} src={mention.extra?.icon} />
                     <div className={styles.docMentionLabel}>{mention.label}</div>
                 </div>
             ))}

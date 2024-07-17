@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IMutation, Nullable } from '@univerjs/core';
-import { CommandType, Disposable, ICommandService, LifecycleService, LifecycleStages, OnLifecycle, RCDisposable, ResourceManagerService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { CommandType, Disposable, ICommandService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, RCDisposable, ResourceManagerService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import type { IDisposable } from '@wendellhu/redi';
@@ -60,13 +60,16 @@ export class UniFormulaService extends Disposable {
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         // TODO: wzhudev We may need to register the doc formulas to formula service in later lifecycle stages.
         @ICommandService private readonly _commandSrv: ICommandService,
+        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaSrv: RegisterOtherFormulaService,
         @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
     ) {
         super();
 
         this.disposeWithMe(this._commandSrv.registerCommand(UpdateDocUniFormulaCacheMutation));
+
         this._initDocFormulaResources(resoureManagerService);
+        this._initDocDisposingListener();
         this._debugInitFormula();
     }
 
@@ -79,8 +82,11 @@ export class UniFormulaService extends Disposable {
     /**
      * Remove all formulas under a doc.
      */
-    removeDocFormulas(unitId: string): void {
-        // TODO: wzhudev: remove all formulas bound to a doc
+    private _unregisterDoc(unitId: string): void {
+        const existingsFormulas = Array.from(this._docFormulas.entries());
+        existingsFormulas.forEach(([_, value]) => {
+            if (value.unitId === unitId) this.unregisterDocFormula(unitId, value.rangeId);
+        });
     }
 
     /**
@@ -103,8 +109,8 @@ export class UniFormulaService extends Disposable {
         return toDisposable(() => this.unregisterDocFormula(unitId, rangeId));
     }
 
-    unregisterDocFormula(unitId: string, formulaId: string): void {
-        const key = getDocFormulaKey(unitId, formulaId);
+    unregisterDocFormula(unitId: string, rangeId: string): void {
+        const key = getDocFormulaKey(unitId, rangeId);
         const item = this._docFormulas.get(key);
         if (!item) {
             return;
@@ -201,7 +207,7 @@ export class UniFormulaService extends Disposable {
     }
 
     private _initDocFormulaResources(resourceManagerService: ResourceManagerService): void {
-        this.disposeWithMe(resourceManagerService.registerPluginResource({
+        resourceManagerService.registerPluginResource({
             pluginName: DOC_FORMULA_PLUGIN_NAME,
             businesses: [UniverInstanceType.UNIVER_DOC],
             toJson: (unitId: string) => {
@@ -213,12 +219,19 @@ export class UniFormulaService extends Disposable {
                 return formulas;
             },
             onLoad: (unitId, formulas) => {
-                // Should wait for lifecycle?
+                // NOTE: Should wait for lifecycle?
                 formulas.forEach((f) => this.registerDocFormula(unitId, f.rangeId, f.f, f.v, f.t));
             },
             onUnLoad: (unitId) => {
+                this._unregisterDoc(unitId);
             },
-        }));
+        });
+    }
+
+    private _initDocDisposingListener(): void {
+        this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
+            this._unregisterDoc(doc.getUnitId());
+        });
     }
 
     private _getAllFormulasOfUnit(unitId: string) {
@@ -232,6 +245,6 @@ function getPseudoUnitKey(unitId: string): string {
 }
 
 function getDocFormulaKey(unitId: string, formulaId: string): string {
-    return `pseudo-${unitId}-{formulaId}`;
+    return `pseudo-${unitId}-${formulaId}`;
 }
 

@@ -17,9 +17,8 @@
 import { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService, type IMutationInfo, sequenceExecute } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 
-import { UniFormulaService } from '../services/uni-formula.service';
-import type { IAddDocUniFormulaMutationParams } from './mutation';
-import { AddDocUniFormulaMutation } from './mutation';
+import type { IAddDocUniFormulaMutationParams, IRemoveDocUniFormulaMutationParams, IUpdateDocUniFormulaMutationParams } from './mutation';
+import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from './mutation';
 
 export interface IAddDocUniFormulaCommandParams {
     unitId: string;
@@ -28,7 +27,7 @@ export interface IAddDocUniFormulaCommandParams {
 
 export const AddDocUniFormulaCommand: ICommand<IAddDocUniFormulaCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'docs.command.add-uni-formula',
+    id: 'doc.command.add-uni-formula',
     async handler(accessor, params: IAddDocUniFormulaCommandParams) {
         const { f, unitId } = params;
         const commandService = accessor.get(ICommandService);
@@ -57,15 +56,16 @@ export interface IUpdateDocUniFormulaCommandParams {
     f: string;
 }
 
+// TODO: implement update & remove command
+
 export const UpdateDocUniFormulaCommand: ICommand<IUpdateDocUniFormulaCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'docs.command.add-uni-formula',
-    handler: () => true,
+    id: 'doc.command.add-uni-formula',
+    handler: (accessor, params: IUpdateDocUniFormulaCommandParams) => {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(UpdateDocUniFormulaMutation.id, params as IUpdateDocUniFormulaMutationParams);
+    },
 };
-
-// It should just be a mutation.
-// export interface IUpdateDocUniFormulaCacheCommandParams {
-// }
 
 export interface IRemoveDocUniFormulaCommandParams {
     unitId: string;
@@ -74,12 +74,11 @@ export interface IRemoveDocUniFormulaCommandParams {
 
 export const RemoveDocUniFormulaCommand: ICommand<IRemoveDocUniFormulaCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'docs.command.remove-uni-formula',
+    id: 'doc.command.remove-uni-formula',
     handler: (accessor, params: IRemoveDocUniFormulaCommandParams) => {
-        const { unitId, rangeId } = params;
-        const uniFormulaService = accessor.get(UniFormulaService);
-
-        return false;
+        const commandService = accessor.get(ICommandService);
+        // TODO: maybed remove formula under selection?
+        return commandService.syncExecuteCommand(RemoveDocUniFormulaMutation.id, params as IRemoveDocUniFormulaMutationParams);
     },
 };
 

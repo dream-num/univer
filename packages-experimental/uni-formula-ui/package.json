@@ -58,14 +58,15 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/uni-formula": "workspace:*",
         "@wendellhu/redi": ">=0.12.13",
         "rxjs": ">=7.0.0"
     },
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
+        "@univerjs/uni-formula": "workspace:*",
         "@wendellhu/redi": "^0.15.2",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",

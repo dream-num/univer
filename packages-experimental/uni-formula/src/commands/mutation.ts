@@ -62,14 +62,14 @@ export const UpdateDocUniFormulaMutation: IMutation<IUpdateDocUniFormulaMutation
 
 export interface IRemoveDocUniFormulaMutationParams {
     unitId: string;
-    id: string;
+    rangeId: string;
 }
 
 export const RemoveDocUniFormulaMutation: IMutation<IRemoveDocUniFormulaMutationParams> = {
     type: CommandType.MUTATION,
     id: 'doc.mutation.remove-doc-uni-formula',
     handler(accessor, params: IRemoveDocUniFormulaMutationParams) {
-        const { unitId, id } = params;
+        const { unitId, rangeId: id } = params;
         const uniFormulaService = accessor.get(UniFormulaService);
 
         if (!uniFormulaService.hasFocFormula(unitId, id)) {

@@ -4,6 +4,12 @@
         "rootDir": "src",
         "outDir": "lib/types"
     },
-    "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "../../packages/ui/src/const.ts"]
+    "references": [
+        {
+            "path": "./tsconfig.node.json"
+        }
+    ],
+    "include": [
+        "src"
+    ]
 }

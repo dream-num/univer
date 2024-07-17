@@ -15,13 +15,12 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, RxDisposable, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { WorkbookSelections } from '@univerjs/sheets';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, forkJoin, map, merge, of, scan, switchMap, takeUntil } from 'rxjs';
-import { Nullable } from 'vitest';
+import { BehaviorSubject, map, merge, switchMap, takeUntil } from 'rxjs';
 
 /**
  * Ref selections service reuses code of `SelectionManagerService`. And it only contains ref selections

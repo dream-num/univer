@@ -122,7 +122,7 @@ export class Cell extends BaseFunction {
                 result = columnData[_currentColumn]?.w;
 
                 if (!result && result !== 0) {
-                    result = defaultColumnWidth;
+                    result = defaultColumnWidth as number;
                 }
 
                 if (infoTypeIsArray) {

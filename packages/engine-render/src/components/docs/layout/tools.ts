@@ -346,14 +346,14 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 // const preLine: Nullable<IDocumentSkeletonLine> = null;
 
                 for (const line of lines) {
-                    const { divides, lineHeight } = line;
+                    const { divides, lineHeight, top } = line;
                     const lineStartIndex = preLineStartIndex;
                     const lineEndIndex = lineStartIndex;
                     let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
                     let maxLineAsc = 0;
                     let macLineDsc = 0;
-                    columnHeight += lineHeight;
+                    columnHeight = top + lineHeight;
                     const divideLength = divides.length;
                     let lineHasGlyph = false;
 

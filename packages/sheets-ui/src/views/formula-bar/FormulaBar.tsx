@@ -29,6 +29,7 @@ import { IFormulaEditorManagerService } from '../../services/editor/formula-edit
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { DefinedName } from '../defined-name/DefinedName';
 
+import { useActiveWorkbook } from '../../components/hook';
 import styles from './index.module.less';
 
 enum ArrowDirection {
@@ -50,6 +51,7 @@ export function FormulaBar() {
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const permissionService = useDependency(IPermissionService);
+    const currentWorkbook = useActiveWorkbook();
 
     function getPermissionIds(unitId: string, subUnitId: string): string[] {
         return [
@@ -168,6 +170,7 @@ export function FormulaBar() {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
                 keycode: KeyCode.ESC,
+                unitId: currentWorkbook?.getUnitId() ?? '',
             });
         }
     }
@@ -179,6 +182,7 @@ export function FormulaBar() {
             editorBridgeService.changeVisible({
                 visible: false,
                 eventType: DeviceInputEventType.PointerDown,
+                unitId: currentWorkbook?.getUnitId() ?? '',
             });
         }
     }

@@ -30,8 +30,8 @@ import {
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
-    toDisposable,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
@@ -129,9 +129,9 @@ export class FormulaEditorController extends RxDisposable {
 
             if (isFocusButHidden) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-
                 this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
 
+                const currentSheet = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
                 const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
                     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
                 );
@@ -141,6 +141,7 @@ export class FormulaEditorController extends RxDisposable {
                     this._editorBridgeService.changeVisible({
                         visible: true,
                         eventType: DeviceInputEventType.PointerDown,
+                        unitId: currentSheet?.getUnitId() ?? '',
                     });
                 }
 
@@ -195,22 +196,21 @@ export class FormulaEditorController extends RxDisposable {
         }
 
         this.disposeWithMe(
-            toDisposable(
-                documentComponent.onPointerDown$.subscribeEvent(() => {
-                    // When clicking on the formula bar, the cell editor also needs to enter the edit state
-                    const visibleState = this._editorBridgeService.isVisible();
-                    if (visibleState.visible === false) {
-                        this._editorBridgeService.changeVisible({
-                            visible: true,
-                            eventType: DeviceInputEventType.Dblclick,
-                        });
-                    }
+            documentComponent.onPointerDown$.subscribeEvent(() => {
+                // When clicking on the formula bar, the cell editor also needs to enter the edit state
+                const visibleState = this._editorBridgeService.isVisible();
+                if (visibleState.visible === false) {
+                    this._editorBridgeService.changeVisible({
+                        visible: true,
+                        eventType: DeviceInputEventType.Dblclick,
+                        unitId,
+                    });
+                }
 
-                    // Open the normal editor first, and then we mark formula editor as activated.
-                    this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
-                    this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-                })
-            )
+                // Open the normal editor first, and then we mark formula editor as activated.
+                this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
+                this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+            })
         );
     }
 

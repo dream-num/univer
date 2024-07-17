@@ -205,9 +205,9 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // font color
         else if (key === 'color') {
-            const rgbStr = new ColorKit(value).toRgbString();
+            const colorKit = new ColorKit(value);
             styleList.cl = {
-                rgb: rgbStr,
+                rgb: colorKit.isValid ? colorKit.toRgbString() : 'rgb(0,0,0)',
             };
         }
         // fill color / background

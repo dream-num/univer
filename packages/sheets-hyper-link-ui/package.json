@@ -81,7 +81,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.63",
+        "@univerjs/icons": "^0.1.64",
         "@univerjs/sheets-hyper-link": "workspace:*"
     },
     "devDependencies": {
@@ -98,7 +98,7 @@
         "clsx": "^2.1.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.3",
-        "vite": "^5.3.3",
+        "vite": "^5.3.4",
         "vitest": "^2.0.3"
     },
     "univerSpace": {

@@ -63,7 +63,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.63",
+        "@univerjs/icons": "^0.1.64",
         "ot-json1": "^1.0.2"
     },
     "devDependencies": {
@@ -73,7 +73,7 @@
         "less": "^4.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.3",
-        "vite": "^5.3.3",
+        "vite": "^5.3.4",
         "vitest": "^2.0.3"
     },
     "univerSpace": {

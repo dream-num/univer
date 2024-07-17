@@ -22,7 +22,7 @@
         "@vitest/coverage-istanbul": "^2.0.3",
         "happy-dom": "13.3.8",
         "javascript-obfuscator": "^4.1.1",
-        "vite": "^5.3.3",
+        "vite": "^5.3.4",
         "vite-plugin-dts": "^3.9.1",
         "vitest": "^2.0.3"
     }

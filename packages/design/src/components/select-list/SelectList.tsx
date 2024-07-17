@@ -57,11 +57,11 @@ export interface ISelectListProps {
     /**
      * The className of the wrapper
      */
-    wrapperClassName?: string;
+    className?: string;
 }
 
 export function SelectList(props: ISelectListProps) {
-    const { value: _value, options = [], hideCheckMark = false, onChange, multiple, wrapperClassName, optionClassName } = props;
+    const { value: _value, options = [], hideCheckMark = false, onChange, multiple, className, optionClassName } = props;
 
     const value = Array.isArray(_value) ? _value : [_value];
 
@@ -84,7 +84,7 @@ export function SelectList(props: ISelectListProps) {
     }
 
     return (
-        <ul className={clsx(styles.selectList, wrapperClassName)}>
+        <ul className={clsx(styles.selectList, className)}>
             {options.map((option, index) => {
                 const checked = value.indexOf(option.value) > -1;
                 return (

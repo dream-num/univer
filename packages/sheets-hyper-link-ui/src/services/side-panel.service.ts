@@ -36,6 +36,8 @@ export interface ICustomHyperLinkView {
         value: string
     },
     Form: React.FC<CustomHyperLinkFormProps>
+    convert: (link: ICellHyperLink) => { display: string, payload: string, type: string },
+    match: (link: ICellHyperLink) => boolean
 }
 
 export enum LinkType {
@@ -54,6 +56,12 @@ export class SheetsHyperLinkSidePanelService extends Disposable {
 
     getOptions() {
         return Array.from(this._customHyperLinks.values()).map(({ option }) => option);
+    }
+
+    findCustomHyperLink(link: ICellHyperLink): { display: string, payload: string, type: string } | undefined {
+        const customLink = Array.from(this._customHyperLinks.values()).find(item => item.match(link));
+
+        return customLink?.convert(link)
     }
 
     registerCustomHyperLink(customHyperLink: ICustomHyperLinkView) {

@@ -64,13 +64,14 @@ export const CellLinkEdit = () => {
 
             if (link) {
                 setId(link.id);
-                setDisplay(link.display);
-                const customLink = hyperLinkModel.findCustomHyperLink(link)
+                const customLink = sidePanelService.findCustomHyperLink(link)
                 if (customLink) {
                     setType(customLink.type);
-                    setPayload(link.payload);
+                    setPayload(customLink.payload);
+                    setDisplay(customLink.display);
                     return;
                 }
+                setDisplay(link.display);
                 const linkInfo = resolverService.parseHyperLink(link.payload);
                 if (linkInfo.type === 'outer') {
                     setType(LinkType.link);

@@ -56,12 +56,6 @@ type LinkUpdate = {
     silent?: boolean;
 };
 
-export interface ICustomHyperLinkModel {
-    type: string
-    matchUrl(urlStr: string): boolean
-    match(link: ICellHyperLink): boolean
-    toLink(urlStr: string): ICellLinkContent
-}
 
 export class HyperLinkModel extends Disposable {
     private _linkUpdate$ = new Subject<LinkUpdate>();
@@ -69,7 +63,6 @@ export class HyperLinkModel extends Disposable {
 
     private _linkMap: Map<string, Map<string, ObjectMatrix<ICellHyperLink>>> = new Map();
     private _linkPositionMap: Map<string, Map<string, Map<string, { row: number; column: number; link: ICellHyperLink }>>> = new Map();
-    private _customHyperLinkMap = new Map<string, ICustomHyperLinkModel>();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
@@ -77,30 +70,9 @@ export class HyperLinkModel extends Disposable {
         super();
         this.disposeWithMe({
             dispose: () => {
-                this._customHyperLinkMap.clear();
                 this._linkUpdate$.complete();
             },
         });
-    }
-
-    registerCustomHyperLink(customHyperLink: ICustomHyperLinkModel) {
-        this._customHyperLinkMap.set(customHyperLink.type, customHyperLink);
-    }
-
-    removeCustomHyperLink(type: string) {
-        this._customHyperLinkMap.delete(type)
-    }
-
-    findCustomHyperLinkByUrl(urlStr: string) {
-       return Array.from(this._customHyperLinkMap.values()).find((customHyperLink) => customHyperLink.matchUrl(urlStr));
-    }
-
-
-    findCustomHyperLink(link: ICellHyperLink|undefined) {
-        if (!link) {
-            return;
-        }
-        return Array.from(this._customHyperLinkMap.values()).find((customHyperLink) => customHyperLink.match(link));
     }
 
     private _ensureMap(unitId: string, subUnitId: string) {

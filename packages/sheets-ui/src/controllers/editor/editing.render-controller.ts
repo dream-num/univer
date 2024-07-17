@@ -65,10 +65,8 @@ import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui'
 import type { WorkbookSelections } from '@univerjs/sheets';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
-import type { ISequenceNode } from '@univerjs/engine-formula';
-import { IFunctionService, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 
-import Numfmt from '@univerjs/engine-numfmt';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
@@ -78,7 +76,7 @@ import styles from '../../views/sheet-container/index.module.less';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
-import { booleanMap, isCJKLocale, replaceString, toHalfWidth } from '../utils/char-tools';
+import { isCJKLocale, normalizeString } from '../utils/char-tools';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -1081,4 +1079,7 @@ function isRichText(body: IDocumentBody) {
         customBlocks.length > 0
     );
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 026cf027a (fix(sheet): handle formula node type)

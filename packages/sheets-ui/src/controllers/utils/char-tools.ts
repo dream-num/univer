@@ -15,6 +15,9 @@
  */
 
 import { LocaleType } from '@univerjs/core';
+import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import Numfmt from '@univerjs/engine-numfmt';
 
 const fullWidthToHalfWidthMap: { [key: string]: string } = {
     '０': '0', '１': '1', '２': '2', '３': '3', '４': '4',
@@ -37,13 +40,8 @@ const fullWidthToHalfWidthMap: { [key: string]: string } = {
     '｛': '{', '｝': '}',
 };
 
-// Full-width character conversion function
-export function toHalfWidth(char: string): string {
-    return fullWidthToHalfWidthMap[char] || char;
-}
-
 // Boolean conversion
-export const booleanMap: { [key: string]: string } = {
+const booleanMap: { [key: string]: string } = {
     true: 'TRUE',
     false: 'FALSE',
 };
@@ -53,6 +51,103 @@ export function isCJKLocale(locale: LocaleType) {
     return [LocaleType.ZH_CN, LocaleType.ZH_TW].includes(locale);
 }
 
-export function replaceString(replacedString: string, normalStr: string, startIndex: number, endIndex: number): string {
+/**
+ * Convert all full-width characters to half-width characters and try to parse them. If the parsing is successful, apply them. If the parsing is not successful, return them to full-width characters.
+ *
+ * Convert full-width characters to half-width characters
+ * 1. Formula
+ * 2. Boolean
+ * 3. Formatted number
+ *
+ * Not converted
+ * 1. Force string
+ * 2. Chinese single and double quotation marks
+ * 3. Characters between single and double quotes in formulas
+ * 4. Other text that cannot be recognized as formulas, Boolean values, or numbers
+ *
+ * @param str
+ * @param lexerTreeBuilder
+ * @returns
+ */
+export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, functionService: IFunctionService) {
+    // Check if it is a mandatory string with single quotes
+    if (str.startsWith('＇') || str.startsWith("'")) {
+        return `'${str.slice(1)}`;
+    }
+
+    // covert all full width characters to normal characters
+    const normalStr = str.split('').map(toHalfWidth).join('');
+
+     // Check if it is a formula
+    if (normalStr.startsWith('=')) {
+        return normalizeFormulaString(str, normalStr, lexerTreeBuilder, functionService);
+    }
+
+    // Check if it is a boolean value
+    const lowerCaseStr = normalStr.toLowerCase();
+    if (booleanMap[lowerCaseStr]) {
+        return booleanMap[lowerCaseStr];
+    }
+
+    // Formatting Numbers
+    const parsedValue = Numfmt.parseValue(normalStr);
+
+    return parsedValue == null ? str : normalStr;
+}
+
+function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder: LexerTreeBuilder, functionService: IFunctionService) {
+    const nodes = lexerTreeBuilder.sequenceNodesBuilder(normalStr);
+
+    if (!nodes) return str;
+
+    nodes.forEach((node, index) => {
+        if (typeof node === 'object') {
+            const token = node.token;
+            const lowerCaseToken = token.toLowerCase();
+
+            // boolean or function name
+            if (booleanMap[lowerCaseToken] || (node.nodeType === sequenceNodeType.FUNCTION && hasFunctionName(token, functionService, nodes, index)) || node.nodeType === sequenceNodeType.REFERENCE) {
+                const startIndex = node.startIndex + 1;
+                const endIndex = node.endIndex + 2;
+                normalStr = replaceString(token.toLocaleUpperCase(), normalStr, startIndex, endIndex);
+            } else if ((token.startsWith('"') && token.endsWith('"')) || (token.startsWith("'") && token.endsWith("'"))) {
+                const startIndex = node.startIndex + 2;
+                const endIndex = node.endIndex + 1;
+                normalStr = replaceString(str.slice(startIndex, endIndex), normalStr, startIndex, endIndex);
+            } else if (node.nodeType !== sequenceNodeType.ARRAY) {
+                const parsedValue = Numfmt.parseValue(token);
+
+                if (parsedValue == null) {
+                    const startIndex = node.startIndex + 1;
+                    const endIndex = node.endIndex + 2;
+                    normalStr = replaceString(str.slice(startIndex, endIndex), normalStr, startIndex, endIndex);
+                }
+            }
+        }
+    });
+    return normalStr;
+}
+
+function hasFunctionName(name: string, functionService: IFunctionService, nodes: (string | ISequenceNode)[], index: number) {
+    const functionList = functionService.getDescriptions();
+
+    if (nodes[index + 1] !== matchToken.OPEN_BRACKET) {
+        return false;
+    }
+
+    return functionList.get(removeLeadingAtSymbols(name).toLocaleUpperCase()) !== undefined;
+}
+
+function removeLeadingAtSymbols(str: string): string {
+    const regex = /^@+/;
+    return str.replace(regex, '');
+}
+
+// Full-width character conversion function
+function toHalfWidth(char: string): string {
+    return fullWidthToHalfWidthMap[char] || char;
+}
+
+function replaceString(replacedString: string, normalStr: string, startIndex: number, endIndex: number): string {
     return normalStr.substring(0, startIndex) + replacedString + normalStr.substring(endIndex);
 }

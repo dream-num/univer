@@ -74,7 +74,7 @@
         "@rc-component/color-picker": "^1.6.1",
         "@rc-component/trigger": "^2.2.0",
         "@types/react-mentions": "^4.1.13",
-        "@univerjs/icons": "^0.1.63",
+        "@univerjs/icons": "^0.1.64",
         "rc-dialog": "^9.5.2",
         "rc-dropdown": "^4.2.0",
         "rc-input": "^1.5.1",
@@ -104,7 +104,7 @@
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "typescript": "^5.5.3",
-        "vite": "^5.3.3",
+        "vite": "^5.3.4",
         "vitest": "^2.0.3"
     },
     "univerSpace": {

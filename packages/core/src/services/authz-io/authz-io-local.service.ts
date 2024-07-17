@@ -37,10 +37,10 @@ export class AuthzIoLocalService implements IAuthzIoService {
         @Inject(UserManagerService) private _userManagerService: UserManagerService
     ) {
         this._initSnapshot();
-        this._initMockCurrentUser();
+        this._initDefaultUser();
     }
 
-    private _initMockCurrentUser() {
+    private _initDefaultUser() {
         const currentUser = this._userManagerService.getCurrentUser();
         const currentUserIsValid = currentUser && currentUser.userID;
         if (!currentUserIsValid) {

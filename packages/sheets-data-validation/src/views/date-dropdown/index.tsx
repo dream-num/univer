@@ -15,81 +15,122 @@
  */
 
 import React, { useState } from 'react';
+import type { CellValue, Nullable } from '@univerjs/core';
 import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { DatePanel } from '@univerjs/design';
+import { Button, DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import type { DateValidator } from '../../validators';
 import { getCellValueOrigin } from '../../utils/get-cell-data-origin';
 import { DataValidationRejectInputController } from '../../controllers/dv-reject-input.controller';
+import { excelSerialToUnixTimestamp, timestamp2SerialTime } from '../../utils/date';
 import styles from './index.module.less';
+
+dayjs.extend(utc);
+
+const transformDate = (value: Nullable<CellValue>) => {
+    if (value === undefined || value === null || typeof value === 'boolean') {
+        return undefined;
+    }
+
+    if (typeof value === 'number' || !Number.isNaN(+value)) {
+        const date = dayjs.unix(excelSerialToUnixTimestamp(+value)).utc().format().slice(0, -1);
+        return dayjs(date);
+    }
+
+    const date = dayjs(value);
+    if (date.isValid()) {
+        return date;
+    }
+    return undefined;
+};
 
 export function DateDropdown(props: IDropdownComponentProps) {
     const { location, hideFn } = props;
     const { worksheet, row, col, unitId, subUnitId } = location;
     const commandService = useDependency(ICommandService);
     const rejectInputController = useDependency(DataValidationRejectInputController);
-    const [localDate, setLocalDate] = useState<dayjs.Dayjs>();
-    if (!worksheet) {
-        return null;
-    }
-
     const cellData = worksheet.getCell(row, col);
     const rule = cellData?.dataValidation?.rule;
     const validator = cellData?.dataValidation?.validator as DateValidator | undefined;
+    const cellStr = getCellValueOrigin(cellData);
+    const originDate = transformDate(cellStr);
+    const [localDate, setLocalDate] = useState<dayjs.Dayjs | undefined>(originDate);
+    const showTime = Boolean(rule?.bizInfo?.showTime);
+    const date = localDate && localDate.isValid() ? localDate : dayjs();
 
     if (!cellData || !rule || !validator) {
         return;
     }
 
-    const cellStr = getCellValueOrigin(cellData);
-    const originDate = validator.transformDate(cellStr) ?? dayjs();
-    const date = originDate.isValid() ? originDate : dayjs();
+    const handleSave = async () => {
+        if (!localDate) {
+            return;
+        }
+        const newValue = localDate;
+        // convert current date to utc date
+        const dateStr = `${newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00').split(' ').join('T')}Z`;
+        const serialTime = timestamp2SerialTime(dayjs(dateStr).unix());
+        if (
+            rule.errorStyle !== DataValidationErrorStyle.STOP ||
+            (await validator.validator({
+                value: serialTime,
+                unitId,
+                subUnitId,
+                row,
+                column: col,
+            }, rule))
+        ) {
+            commandService.executeCommand(SetRangeValuesCommand.id, {
+                unitId,
+                subUnitId,
+                range: {
+                    startColumn: col,
+                    endColumn: col,
+                    startRow: row,
+                    endRow: row,
+                },
+                value: {
+                    v: serialTime,
+                    t: 2,
+                    p: null,
+                    f: null,
+                    si: null,
+                    s: {
+                        n: {
+                            pattern: showTime ? 'yyyy-MM-dd hh:mm:ss' : 'yyyy-MM-dd',
+                        },
+                    },
+
+                },
+            });
+            hideFn();
+        } else {
+            rejectInputController.showReject(validator.getRuleFinalError(rule));
+        }
+    };
 
     return (
         <div className={styles.dvDateDropdown}>
             <DatePanel
+                defaultValue={localDate}
                 pickerValue={localDate ?? date}
+                showTime={showTime || undefined}
                 onSelect={async (newValue) => {
-                    const newValueStr = newValue.format('YYYY/MM/DD');
-                    if (
-                        rule.errorStyle !== DataValidationErrorStyle.STOP ||
-                        (await validator.validator({
-                            value: newValueStr,
-                            unitId,
-                            subUnitId,
-                            row,
-                            column: col,
-                        }, rule))
-                    ) {
-                        commandService.executeCommand(SetRangeValuesCommand.id, {
-                            unitId,
-                            subUnitId,
-                            range: {
-                                startColumn: col,
-                                endColumn: col,
-                                startRow: row,
-                                endRow: row,
-                            },
-                            value: {
-                                v: newValueStr,
-                                p: null,
-                                f: null,
-                                si: null,
-
-                            },
-                        });
-                    } else {
-                        rejectInputController.showReject(validator.getRuleFinalError(rule));
-                    }
-                    hideFn();
+                    setLocalDate(newValue);
                 }}
                 onPanelChange={(value) => {
                     setLocalDate(value);
                 }}
             />
+            <div className={styles.dvDateDropdownBtns}>
+                <Button size="small" type="primary" onClick={handleSave} disabled={!localDate}>
+                    确定
+                </Button>
+            </div>
         </div>
 
     );

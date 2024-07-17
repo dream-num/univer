@@ -136,8 +136,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '要查找的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。' },
         },
     },
     ISOWEEKNUM: {
@@ -164,8 +163,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '要查找的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。' },
         },
     },
     MONTH: {
@@ -191,8 +189,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '一个代表开始日期的日期' },
+            endDate: { name: '终止日期', detail: '一个代表终止日期的日期' },
+            holidays: { name: '休息日期', detail: '不在工作日历中的一个或多个日期所构成的可选区域' },
         },
     },
     NETWORKDAYS_INTL: {
@@ -205,8 +204,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '一个代表开始日期的日期' },
+            endDate: { name: '终止日期', detail: '一个代表终止日期的日期' },
+            weekend: { name: '周末', detail: '是一个用于指定周末日的周末数字或字符串' },
+            holidays: { name: '休息日期', detail: '不在工作日历中的一个或多个日期所构成的可选区域' },
         },
     },
     NOW: {
@@ -231,8 +232,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '要查找的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。' },
         },
     },
     TIME: {
@@ -285,8 +285,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '一个序列号，代表尝试查找的那一天的日期。' },
+            returnType: { name: '返回值类型', detail: '用于确定返回值类型的数字。' },
         },
     },
     WEEKNUM: {
@@ -313,8 +313,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '一个代表开始日期的日期。' },
+            days: { name: '天数', detail: '开始日期之前或之后不含周末及节假日的天数。为正值将生成未来日期；为负值生成过去日期。' },
+            holidays: { name: '休息日期', detail: '不在工作日历中的一个或多个日期所构成的可选区域。' },
         },
     },
     WORKDAY_INTL: {
@@ -327,8 +328,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '一个代表开始日期的日期。' },
+            days: { name: '天数', detail: '开始日期之前或之后不含周末及节假日的天数。为正值将生成未来日期；为负值生成过去日期。' },
+            weekend: { name: '周末', detail: '是一个用于指定周末日的周末数字或字符串' },
+            holidays: { name: '休息日期', detail: '不在工作日历中的一个或多个日期所构成的可选区域。' },
         },
     },
     YEAR: {

@@ -59,7 +59,7 @@ export const PAGE3_RICHTEXT_3 = {
                             },
                         },
                         paragraphStyle: {
-                            spaceBelow: 15,
+                            spaceBelow: { v: 15 },
                         },
                     },
                     {

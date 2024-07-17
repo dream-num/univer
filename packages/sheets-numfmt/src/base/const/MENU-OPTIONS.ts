@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+
 export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'> = [
     {
         label: 'sheet.numfmt.general',
@@ -21,7 +23,7 @@ export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'
     },
     {
         label: 'sheet.numfmt.text',
-        pattern: '@@@',
+        pattern: DEFAULT_TEXT_FORMAT,
     },
     '|',
     {

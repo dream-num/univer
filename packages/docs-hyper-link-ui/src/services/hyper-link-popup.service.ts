@@ -46,6 +46,11 @@ export class DocHyperLinkPopupService extends Disposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
+
+        this.disposeWithMe(() => {
+            this._editingLink$.complete();
+            this._showingLink$.complete();
+        });
     }
 
     get editing() {

@@ -78,9 +78,9 @@ export function getDefaultBulletSke(listId: string, startIndex: number = 1): IDo
             spr: 0.5,
             spo: 0,
         },
-        indentFirstLine: 0,
-        hanging: 21,
-        indentStart: 0,
+        indentFirstLine: { v: 0 },
+        hanging: { v: 21 },
+        indentStart: { v: 0 },
     };
 }
 

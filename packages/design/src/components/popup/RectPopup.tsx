@@ -144,15 +144,14 @@ function RectPopup(props: IRectPopupProps) {
             ) {
                 return;
             }
-            const x = e.offsetX;
-            const y = e.offsetY;
+            const x = e.clientX;
+            const y = e.clientY;
             const rects = [anchorRect, ...excludeRectsRef.current ?? []];
             for (const rect of rects) {
                 if (x <= rect.right && x >= rect.left && y <= rect.bottom && y >= rect.top) {
                     return;
                 }
             }
-
             clickOtherFn(e);
         };
 

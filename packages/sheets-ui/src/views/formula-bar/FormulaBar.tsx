@@ -24,11 +24,11 @@ import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { merge } from 'rxjs';
+import { EMPTY, merge, switchMap } from 'rxjs';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
-
 import { DefinedName } from '../defined-name/DefinedName';
+
 import styles from './index.module.less';
 
 enum ArrowDirection {
@@ -51,52 +51,53 @@ export function FormulaBar() {
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const permissionService = useDependency(IPermissionService);
 
+    function getPermissionIds(unitId: string, subUnitId: string): string[] {
+        return [
+            new WorkbookEditablePermission(unitId).id,
+            new WorksheetSetCellValuePermission(unitId, subUnitId).id,
+            new WorksheetEditPermission(unitId, subUnitId).id,
+        ];
+    }
+
     useLayoutEffect(() => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        merge(
+        const subscription = merge(
             worksheetProtectionRuleModel.ruleChange$,
             rangeProtectionRuleModel.ruleChange$,
-            selectionManager.selectionMoveEnd$
-        ).subscribe(() => {
-            const unitId = workbook.getUnitId();
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) return;
-            const subUnitId = worksheet.getSheetId();
-            const range = selectionManager.getCurrentLastSelection()?.range;
-            if (!range) return;
-            const workbookEditPermission = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value;
-            const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id)?.value;
-            const worksheetEditPermission = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value;
+            selectionManager.selectionMoveEnd$,
+            workbook.activeSheet$
+        ).pipe(
+            switchMap(() => {
+                const unitId = workbook.getUnitId();
+                const worksheet = workbook.getActiveSheet();
+                if (!worksheet) return EMPTY;
 
-            if (!workbookEditPermission || !worksheetSetCellValuePermission || !worksheetEditPermission) {
-                setDisable(true);
-                return;
-            }
+                const subUnitId = worksheet.getSheetId();
+                const range = selectionManager.getCurrentLastSelection()?.range;
+                if (!range) return EMPTY;
 
-            const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
-            const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
-                return rule.ranges.some((r) => {
-                    return selectionRanges?.some((selectionRange) => {
-                        return Rectangle.intersects(r, selectionRange);
-                    });
+                const permissionIds = getPermissionIds(unitId, subUnitId);
+
+                const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
+                const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                    return rule.ranges.some((r) => selectionRanges?.some((selectionRange) => Rectangle.intersects(r, selectionRange)));
                 });
-            });
 
-            const permissionEditIds: string[] = [];
-            permissionList.forEach((p) => {
-                permissionEditIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
-            });
+                permissionList.forEach((p) => {
+                    permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
+                });
 
-            const rangeEditPermission = permissionService.composePermission(permissionEditIds).every((p) => p.value);
-
-            if (rangeEditPermission) {
-                setDisable(false);
-            } else {
-                setDisable(true);
+                return permissionService.composePermission$(permissionIds);
+            })
+        ).subscribe((permissions) => {
+            if (permissions) {
+                setDisable(!permissions.every((p) => p.value));
             }
-        }
-        );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     const INITIAL_SNAPSHOT = {

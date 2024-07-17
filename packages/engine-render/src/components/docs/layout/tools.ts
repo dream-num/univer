@@ -52,6 +52,7 @@ import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
 import { GlyphType } from '../../../basics/i-document-skeleton-cached';
@@ -63,6 +64,7 @@ import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
+import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -235,17 +237,22 @@ function isLineBlank(line?: IDocumentSkeletonLine) {
     return true;
 }
 
-export function getNumberUnitValue(unitValue: number | INumberUnit, benchMark: number) {
-    if (unitValue instanceof Object) {
-        const { v: value, u: unit } = unitValue;
-        if (unit === NumberUnitType.POINT) {
-            return value;
-        }
-
-        return value * benchMark;
+export function getNumberUnitValue(unitValue: Nullable<INumberUnit>, benchMark: number) {
+    if (!unitValue) {
+        return 0;
     }
 
-    return unitValue;
+    const { v: value, u: unit } = unitValue;
+
+    if (!unit) {
+        return value;
+    }
+
+    if (unit === NumberUnitType.PIXEL) {
+        return value;
+    }
+
+    return value * benchMark;
 }
 
 // Return charSpaceApply, choose between grid or font to calculate the length of a tab, where one tab represents a length of 1 character.
@@ -276,7 +283,7 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
     const { paragraphStyle = {} } = paragraphConfig;
     const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
-    const { lineSpacing = 1, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
     return { paragraphLineGapDefault, linePitch, gridType, lineSpacing, spacingRule, snapToGrid };
 }
@@ -342,6 +349,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     let macLineDsc = 0;
                     columnHeight += lineHeight;
                     const divideLength = divides.length;
+                    let lineHasGlyph = false;
 
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
@@ -374,6 +382,8 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             continue;
                         }
 
+                        lineHasGlyph = true;
+
                         if (glyphGroup[0].xOffset !== 0 && i === divideLength - 1) {
                             actualWidth -= glyphGroup[0].xOffset;
                         }
@@ -393,7 +403,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                         preDivideStartIndex = divide.ed;
                     }
 
-                    line.st = lineStartIndex + 1;
+                    line.st = lineHasGlyph ? lineStartIndex + 1 : lineStartIndex;
                     line.ed = preDivideStartIndex >= line.st ? preDivideStartIndex : line.st;
                     line.width = actualWidth;
                     line.asc = maxLineAsc;
@@ -436,7 +446,28 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
     }
 }
 
-export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (glyph: IDocumentSkeletonGlyph) => void) {
+export function updateInlineDrawingCoords(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
+    lineIterator(pages, (line) => {
+        const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
+        const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(line.paragraphIndex);
+        // Update inline drawings after the line is layout.
+        if (affectInlineDrawings && affectInlineDrawings.size > 0) {
+            updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top);
+        }
+    });
+}
+
+export function glyphIterator(
+    pages: IDocumentSkeletonPage[],
+    cb: (
+        glyph: IDocumentSkeletonGlyph,
+        divide: IDocumentSkeletonDivide,
+        line: IDocumentSkeletonLine,
+        column: IDocumentSkeletonColumn,
+        section: IDocumentSkeletonSection,
+        page: IDocumentSkeletonPage
+    ) => void
+) {
     for (const page of pages) {
         const { sections } = page;
 
@@ -447,15 +478,15 @@ export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
                 const { lines } = column;
 
                 for (const line of lines) {
-                    const { divides, lineHeight } = line;
+                    const { divides } = line;
                     const divideLength = divides.length;
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
                         const { glyphGroup } = divide;
 
                         for (const glyph of glyphGroup) {
-                            if (iteratorFunction && isFunction(iteratorFunction)) {
-                                iteratorFunction(glyph);
+                            if (cb && isFunction(cb)) {
+                                cb(glyph, divide, line, column, section, page);
                             }
                         }
                     }
@@ -465,7 +496,14 @@ export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
     }
 }
 
-export function lineIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (line: IDocumentSkeletonLine) => void) {
+export function lineIterator(
+    pages: IDocumentSkeletonPage[],
+    cb: (
+        line: IDocumentSkeletonLine,
+        column: IDocumentSkeletonColumn,
+        section: IDocumentSkeletonSection,
+        page: IDocumentSkeletonPage
+    ) => void) {
     for (const page of pages) {
         const { sections } = page;
 
@@ -476,8 +514,8 @@ export function lineIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
                 const { lines } = column;
 
                 for (const line of lines) {
-                    if (iteratorFunction && isFunction(iteratorFunction)) {
-                        iteratorFunction(line);
+                    if (cb && isFunction(cb)) {
+                        cb(line, column, section, page);
                     }
                 }
             }
@@ -912,6 +950,10 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         },
     } = documentStyle;
     const {
+        charSpace = 0, // charSpace
+        linePitch = 15.6, // linePitch pt
+        gridType = GridType.LINES, // gridType
+
         pageNumberStart = global_pageNumberStart,
         pageSize = global_pageSize,
         pageOrient = global_pageOrient,
@@ -954,6 +996,10 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     }
 
     const sectionBreakConfig: ISectionBreakConfig = {
+        charSpace,
+        linePitch,
+        gridType,
+
         pageNumberStart,
         pageSize,
         pageOrient,

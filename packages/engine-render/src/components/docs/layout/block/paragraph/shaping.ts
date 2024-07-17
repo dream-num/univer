@@ -33,6 +33,8 @@ import { prepareParagraphBody } from '../../shaping-engine/utils';
 import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
 import { Lang } from '../../hyphenation/lang';
 import { BreakPointType } from '../../line-breaker/break';
+import { getBoundingBox } from '../../model/line';
+import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
@@ -140,6 +142,7 @@ export function shaping(
 
     // Add custom extension for linebreak.
     tabLineBreakExtension(breaker);
+    customBlockLineBreakExtension(breaker);
 
     const lang = languageDetector.detect(content);
 
@@ -206,15 +209,19 @@ export function shaping(
                 if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
                     const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
                     let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
-                    const customBlock = viewModel.getCustomBlock(paragraphNode.startIndex + i);
+                    const customBlock = viewModel.getCustomBlockWithoutSetCurrentIndex(paragraphNode.startIndex + i);
 
                     if (customBlock != null) {
                         const { blockId } = customBlock;
                         const drawingOrigin = drawings[blockId];
                         if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                            const { width, height } = drawingOrigin.docTransform.size;
-                            const { drawingId } = drawingOrigin;
-                            newGlyph = createSkeletonCustomBlockGlyph(config, width, height, drawingId);
+                            const { angle } = drawingOrigin.docTransform;
+                            const { width = 0, height = 0 } = drawingOrigin.docTransform.size;
+                            const top = 0;
+                            const left = 0;
+                            const boundingBox = getBoundingBox(angle, left, width, top, height);
+
+                            newGlyph = createSkeletonCustomBlockGlyph(config, boundingBox.width, boundingBox.height, drawingOrigin.drawingId);
                         } else {
                             newGlyph = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.drawingId);
                         }

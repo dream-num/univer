@@ -21,3 +21,27 @@ export function textTrim(x: string): string {
     }
     return x.replace(/^\s+|\s+$/gm, '');
 }
+
+export function isElementVisible(element: HTMLElement | null) {
+    if (!element) return false;
+
+    const style = window.getComputedStyle(element);
+
+    if (style.display === 'none' ||
+        style.visibility === 'hidden' ||
+        style.opacity === '0') {
+        return false;
+    }
+
+    const rect = element.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+        return false;
+    }
+
+    if (rect.bottom < 0 || rect.top > window.innerHeight ||
+        rect.right < 0 || rect.left > window.innerWidth) {
+        return false;
+    }
+
+    return true;
+}

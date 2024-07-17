@@ -22,6 +22,7 @@ import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/
 import { Inject } from '@wendellhu/redi';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
 import { ShowCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
@@ -33,7 +34,8 @@ export class DocThreadCommentSelectionController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocThreadCommentService) private readonly _docThreadCommentService: DocThreadCommentService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel
     ) {
         super();
 
@@ -60,13 +62,16 @@ export class DocThreadCommentSelectionController extends Disposable {
                         }
 
                         if (customRange) {
-                            this._commandService.executeCommand(ShowCommentPanelOperation.id, {
-                                activeComment: {
-                                    unitId,
-                                    subUnitId: DEFAULT_DOC_SUBUNIT_ID,
-                                    commentId: customRange.id,
-                                },
-                            });
+                            const comment = this._threadCommentModel.getComment(unitId, DEFAULT_DOC_SUBUNIT_ID, customRange.id);
+                            if (comment && !comment.resolved) {
+                                this._commandService.executeCommand(ShowCommentPanelOperation.id, {
+                                    activeComment: {
+                                        unitId,
+                                        subUnitId: DEFAULT_DOC_SUBUNIT_ID,
+                                        commentId: customRange.id,
+                                    },
+                                });
+                            }
                             return;
                         }
                     }

@@ -183,4 +183,33 @@ describe('test rangeMerge', () => {
         ]);
         expect(new RangeMergeUtil().add(...testRange).subtract(...testRange).merge()).toEqual([]);
     });
+
+    it('should be no overlapping regions', () => {
+        const arr = [
+            {
+                startRow: 4,
+                endRow: 12,
+                startColumn: 1,
+                endColumn: 6,
+            },
+            {
+                startRow: 12,
+                endRow: 13,
+                startColumn: 2,
+                endColumn: 5,
+            },
+            {
+                startRow: 3,
+                endRow: 3,
+                startColumn: 2,
+                endColumn: 5,
+            },
+        ];
+        const res = new RangeMergeUtil().add(...arr).merge();
+        expect(res).toEqual([
+            { startRow: 4, endRow: 12, startColumn: 1, endColumn: 6 },
+            { startRow: 3, endRow: 3, startColumn: 2, endColumn: 5 },
+            { startRow: 13, endRow: 13, startColumn: 2, endColumn: 5 },
+        ]);
+    });
 });

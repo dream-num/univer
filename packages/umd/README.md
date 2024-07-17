@@ -1,7 +1,10 @@
 # @univerjs/umd
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/umd)](https://npmjs.org/package/@univerjs/umd)
-[![license](https://img.shields.io/npm/l/@univerjs/umd)](https://img.shields.io/npm/l/@univerjs/umd)
+## Package Overview
+
+| Package Name | Version | License | Downloads |
+| --- | --- | --- | --- |
+| `@univerjs/umd` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] |
 
 ## Introduction
 
@@ -27,3 +30,9 @@ If you are already using React, ReactDOM, and RxJS in your project, you can opt 
 + <script src="https://unpkg.com/@univerjs/umd/lib/univer.slim.umd.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/@univerjs/umd/lib/univer.css">
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/core?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/core
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/core?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/core?style=flat-square

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { Univer, Workbook } from '@univerjs/core';
-import { cellToRange, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { Styles, Univer, Workbook, Worksheet } from '@univerjs/core';
+import { cellToRange, CellValueType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../../commands/mutations/numfmt-mutation';
 import { NumfmtService } from '../numfmt/numfmt.service';
 import { INumfmtService } from '../numfmt/type';
@@ -29,6 +30,13 @@ describe('test numfmt service', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
+    let univerInstanceService: IUniverInstanceService;
+    let numfmtService: INumfmtService;
+    let workbook: Workbook;
+    let styles: Styles;
+    let sheet: Worksheet;
+    let unitId: string;
+    let subUnitId: string;
 
     beforeEach(() => {
         const testBed = createTestBase(undefined, [[INumfmtService, { useClass: NumfmtService }]]);
@@ -37,6 +45,14 @@ describe('test numfmt service', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetNumfmtMutation);
         commandService.registerCommand(RemoveNumfmtMutation);
+
+        univerInstanceService = get(IUniverInstanceService);
+        numfmtService = get(INumfmtService);
+        workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        styles = workbook.getStyles();
+        sheet = workbook.getActiveSheet()!;
+        unitId = workbook.getUnitId();
+        subUnitId = sheet.getSheetId();
     });
 
     afterEach(() => {
@@ -44,12 +60,6 @@ describe('test numfmt service', () => {
     });
 
     it('model delete', () => {
-        const univerInstanceService = get(IUniverInstanceService);
-        const numfmtService = get(INumfmtService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const sheet = workbook.getActiveSheet()!;
-        const unitId = workbook.getUnitId();
-        const subUnitId = sheet.getSheetId();
         const params: ISetNumfmtMutationParams = {
             unitId,
             subUnitId,
@@ -73,14 +83,7 @@ describe('test numfmt service', () => {
         expect(numfmtValueDelete).toEqual(null);
     });
 
-    it('model set', () => {
-        const univerInstanceService = get(IUniverInstanceService);
-        const numfmtService = get(INumfmtService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const styles = workbook.getStyles();
-        const sheet = workbook.getActiveSheet()!;
-        const unitId = workbook.getUnitId();
-        const subUnitId = sheet.getSheetId();
+    it('model set, normal format', () => {
         const params: ISetNumfmtMutationParams = {
             unitId,
             subUnitId,
@@ -96,5 +99,89 @@ describe('test numfmt service', () => {
         expect(numfmt?.pattern).toEqual('asdws');
         const numfmtId = sheet.getCellRaw(1, 1)?.s;
         expect(styles.get(numfmtId)?.n).toEqual({ pattern: 'asdws' });
+    });
+
+    it('model set, update format', () => {
+        const params: ISetNumfmtMutationParams = {
+            unitId,
+            subUnitId,
+            refMap: {
+                1: {
+                    pattern: DEFAULT_TEXT_FORMAT,
+                },
+            },
+            values: { 1: { ranges: [cellToRange(0, 5)] } },
+        };
+        commandService.executeCommand(SetNumfmtMutation.id, params);
+        const numfmt = numfmtService.getValue(unitId, subUnitId, 0, 5);
+        expect(numfmt?.pattern).toEqual(DEFAULT_TEXT_FORMAT);
+
+        const cell = sheet.getCellRaw(0, 5);
+        const numfmtId = cell?.s;
+        expect(styles.get(numfmtId)?.n).toEqual({ pattern: DEFAULT_TEXT_FORMAT });
+        expect(cell).toStrictEqual({ v: '1', t: CellValueType.STRING, s: numfmtId });
+    });
+
+    it('model set, text format contains number, to number format', () => {
+        const params: ISetNumfmtMutationParams = {
+            unitId,
+            subUnitId,
+            refMap: {
+                1: {
+                    pattern: '0%',
+                },
+            },
+            values: { 1: { ranges: [cellToRange(0, 6)] } },
+        };
+        commandService.executeCommand(SetNumfmtMutation.id, params);
+        const numfmt = numfmtService.getValue(unitId, subUnitId, 0, 6);
+        expect(numfmt?.pattern).toEqual('0%');
+
+        const cell = sheet.getCellRaw(0, 6);
+        const numfmtId = cell?.s;
+        expect(styles.get(numfmtId)?.n).toEqual({ pattern: '0%' });
+        expect(cell).toStrictEqual({ v: 1, t: CellValueType.NUMBER, s: numfmtId });
+    });
+
+    it('model set, text format contains text, to number format', () => {
+        const params: ISetNumfmtMutationParams = {
+            unitId,
+            subUnitId,
+            refMap: {
+                1: {
+                    pattern: '0%',
+                },
+            },
+            values: { 1: { ranges: [cellToRange(0, 7)] } },
+        };
+        commandService.executeCommand(SetNumfmtMutation.id, params);
+        const numfmt = numfmtService.getValue(unitId, subUnitId, 0, 7);
+        expect(numfmt?.pattern).toEqual('0%');
+
+        const cell = sheet.getCellRaw(0, 7);
+        const numfmtId = cell?.s;
+        expect(styles.get(numfmtId)?.n).toEqual({ pattern: '0%' });
+        expect(cell).toStrictEqual({ v: 'text', t: CellValueType.STRING, s: numfmtId });
+    });
+
+    it('model set, force string, to number format', () => {
+        const params: ISetNumfmtMutationParams = {
+            unitId,
+            subUnitId,
+            refMap: {
+                1: {
+                    pattern: '0%',
+                },
+            },
+            values: { 1: { ranges: [cellToRange(0, 8)] } },
+        };
+        commandService.executeCommand(SetNumfmtMutation.id, params);
+        const numfmt = numfmtService.getValue(unitId, subUnitId, 0, 8);
+        expect(numfmt?.pattern).toEqual('0%');
+
+        const cell = sheet.getCellRaw(0, 8);
+        const numfmtId = cell?.s;
+        expect(styles.get(numfmtId)?.n).toEqual({ pattern: '0%' });
+        expect(cell).toStrictEqual({ v: '001', t: CellValueType.FORCE_STRING, s: numfmtId });
     });
 });

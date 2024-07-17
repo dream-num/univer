@@ -21,7 +21,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 import type { IFunctionNames } from './basics/function';
 import { CalculateController } from './controller/calculate.controller';
 import { FormulaController } from './controller/formula.controller';
-import { RegisterFunctionController } from './controller/register-function.controller';
 import { SetDefinedNameController } from './controller/set-defined-name.controller';
 import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
 import { SetOtherFormulaController } from './controller/set-other-formula.controller';
@@ -120,7 +119,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 //Controller
                 [CalculateController],
                 [SetOtherFormulaController],
-                [RegisterFunctionController],
                 [SetDependencyController],
 
                 // Calculation engine

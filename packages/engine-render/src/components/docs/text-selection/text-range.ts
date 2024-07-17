@@ -417,7 +417,15 @@ export class TextRange {
 
     private _createOrUpdateAnchor(pointsGroup: IPoint[][], docsLeft: number, docsTop: number, glyph: Nullable<IDocumentSkeletonGlyph>) {
         const bounding = getAnchorBounding(pointsGroup);
-        const { left: boundingLeft, top: boundingTop, height } = bounding;
+        const { left: boundingLeft } = bounding;
+        let { top: boundingTop, height } = bounding;
+        const MIN_CURSOR_HEIGHT = 14;
+
+        if (height < MIN_CURSOR_HEIGHT) {
+            boundingTop -= MIN_CURSOR_HEIGHT - height;
+            height = MIN_CURSOR_HEIGHT;
+        }
+
         const ITALIC_DEGREE = 12;
         let left = boundingLeft + docsLeft;
         const top = boundingTop + docsTop;

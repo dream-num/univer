@@ -1,9 +1,10 @@
 # @univerjs/sheets-sort-ui
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-sort-ui)](https://npmjs.org/packages/@univerjs/sheets-sort-ui)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-sort-ui)](https://img.shields.io/npm/l/@univerjs/sheets-sort-ui)
-![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
-![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/sheets-sort-ui` | `UniverSheetsSortUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
 
 ## Introduction
 
@@ -32,3 +33,9 @@ npm install @univerjs/sheets-sort-ui
 # Using pnpm
 pnpm add @univerjs/sheets-sort-ui
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-sort-ui?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-sort-ui
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-sort-ui?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-sort-ui?style=flat-square

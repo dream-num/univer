@@ -19,7 +19,7 @@ import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 
 import { findLast, remove } from '../../common/array';
 import { sequence, sequenceAsync } from '../../common/sequence';
-import { DisposableCollection, toDisposable } from '../../shared/lifecycle';
+import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';
 import type { IKeyValue } from '../../shared/types';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
@@ -215,7 +215,7 @@ export const NilCommand: ICommand = {
     handler: () => true,
 };
 
-export class CommandService implements ICommandService {
+export class CommandService extends Disposable implements ICommandService {
     protected readonly _commandRegistry: CommandRegistry;
 
     private readonly _beforeCommandExecutionListeners: CommandListener[] = [];
@@ -231,8 +231,17 @@ export class CommandService implements ICommandService {
         @Inject(Injector) private readonly _injector: Injector,
         @ILogService private readonly _logService: ILogService
     ) {
+        super();
+
         this._commandRegistry = new CommandRegistry();
         this._registerCommand(NilCommand);
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        this._commandExecutedListeners.length = 0;
+        this._beforeCommandExecutionListeners.length = 0;
     }
 
     hasCommand(commandId: string): boolean {

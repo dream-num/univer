@@ -15,6 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
+import { stripErrorMargin } from '../../../engine/utils/math-kit';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -45,6 +46,12 @@ export class Len extends BaseFunction {
 
         if (text.isNull()) {
             return NumberValueObject.create(0);
+        }
+
+        if (text.isNumber()) {
+            const numberValue = text.getValue() as number;
+            const numberValueString = stripErrorMargin(numberValue).toString();
+            return NumberValueObject.create(numberValueString.length);
         }
 
         if (text.isString() || text.isBoolean() || text.isNumber()) {

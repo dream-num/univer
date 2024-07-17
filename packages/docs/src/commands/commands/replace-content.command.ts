@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
@@ -22,6 +22,7 @@ import { TextSelectionManagerService } from '../../services/text-selection-manag
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getRichTextEditPath } from '../util';
+import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 
 interface IReplaceContentCommandParams {
     unitId: string;
@@ -150,3 +151,59 @@ function getMutationParams(unitId: string, segmentId: string, docDatModel: Docum
 
     return doMutation;
 }
+
+export interface IReplaceSelectionCommandParams {
+    unitId: string;
+    selection?: ITextRange;
+    body: IDocumentBody; // Do not contain `\r\n` at the end.
+    textRanges?: ITextRangeWithStyle[];
+}
+
+// TODO: implement
+export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> = {
+    id: 'doc.command.replace-selection',
+    type: CommandType.COMMAND,
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { unitId, body: insertBody, textRanges } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        if (!docDataModel) {
+            return false;
+        }
+
+        const body = docDataModel.getBody();
+        const selection = params.selection ?? textSelectionManagerService.getActiveRange();
+        if (!selection || !body) {
+            return false;
+        }
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+                debounce: true,
+            },
+        };
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+        // delete
+        textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, body));
+        // insert
+        textX.push({
+            t: TextXActionType.INSERT,
+            body: insertBody,
+            len: insertBody.dataStream.length,
+            line: 0,
+        });
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
+
+        return true;
+    },
+};

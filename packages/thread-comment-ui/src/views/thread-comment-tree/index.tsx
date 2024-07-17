@@ -275,7 +275,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
 
     const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
     const editorVisible = showEdit && !editingId && !resolved;
-    const title = `${refStr || comments?.root.ref}${subUnitName ? ' · ' : ''}${subUnitName}`;
+    const title = `${refStr || comments?.root.ref || ''}${subUnitName ? ' · ' : ''}${subUnitName}`;
 
     return (
         <div

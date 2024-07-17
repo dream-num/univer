@@ -171,8 +171,8 @@ export interface IUnitOrderDrawingService {
     getBackDrawingsOp(orderParams: IDrawingOrderMapParam): unknown;
     // replaceDrawingOrder(unitId: string, subUnitId: string, drawingIds: string[]): void;
     getDrawingOrder(unitId: string, subUnitId: string): string[];
+    setDrawingOrder(unitId: string, subUnitId: string, order: string[]): void;
     orderUpdateNotification(orderParams: IDrawingOrderMapParam): void;
-
     featurePluginOrderUpdateNotification(drawingOrderUpdateParam: IDrawingOrderUpdateParam): void;
 }
 
@@ -188,12 +188,10 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IUnitNorma
     initializeNotification(unitId: string): void;
 
     getDrawingData(unitId: string, subUnitId: string): IDrawingMapItemData<T>;
-
+    setDrawingData(unitId: string, subUnitId: string, data: IDrawingMapItemData<T>): void;
     getDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;
     getOldDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;
-
     getDrawingOKey(oKey: string): Nullable<T>;
-
     applyJson1(unitId: string, subUnitId: string, jsonOp: unknown): void;
     getDrawingEditable(): boolean;
     getDrawingVisible(): boolean;

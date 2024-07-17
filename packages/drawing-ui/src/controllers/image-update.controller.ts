@@ -135,7 +135,7 @@ export class ImageUpdateController extends Disposable {
             if (renderObject == null) {
                 return;
             }
-            const { scene, transformer } = renderObject;
+            const { scene } = renderObject;
 
             const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
@@ -210,7 +210,7 @@ export class ImageUpdateController extends Disposable {
             }
 
             const image = await this._drawingRenderService.renderImage(imageParam, renderObject.scene);
-            if (!image) {
+            if (image == null) {
                 return;
             }
             this._addHoverForImage(image);

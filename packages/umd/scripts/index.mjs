@@ -74,7 +74,22 @@ async function generateLocale() {
         '@univerjs/uniscript',
     ];
 
-    const languages = ['en-US', 'ru-RU', 'zh-CN'];
+    const languages = [{
+        key: 'en-US',
+        dayjsKey: 'en',
+    }, {
+        key: 'ru-RU',
+        dayjsKey: 'ru',
+    }, {
+        key: 'zh-CN',
+        dayjsKey: 'zh-cn',
+    }, {
+        key: 'vi-VN',
+        dayjsKey: 'vi',
+    }, {
+        key: 'zh-TW',
+        dayjsKey: 'zh-tw',
+    }];
 
     const outputDir = path.resolve(__dirname, '../lib/locale');
     if (!fs.existsSync(outputDir)) {
@@ -84,7 +99,7 @@ async function generateLocale() {
     for (const lang of languages) {
         let output = {};
         for (const lib of libs) {
-            const file = path.resolve(nodeModulesPath, lib, `lib/locale/${lang}.json`);
+            const file = path.resolve(nodeModulesPath, lib, `lib/locale/${lang.key}.json`);
             if (!fs.existsSync(file)) {
                 throw new Error(`File not found: ${file}`);
             }
@@ -92,11 +107,18 @@ async function generateLocale() {
             const data = fs.readFileSync(file, 'utf-8');
             output = lodash.merge(JSON.parse(data), output);
         }
-        const result = generateUMDTemplate(`{
-            "${lang}": ${JSON.stringify(output)}
+
+        let result = generateUMDTemplate(`{
+            "${lang.key}": ${JSON.stringify(output)}
         }`);
 
-        fs.writeFileSync(path.resolve(outputDir, `${lang}.js`), result, 'utf-8');
+        // append dayjs locale
+        const dayjsFile = path.resolve(nodeModulesPath, 'dayjs/locale', `${lang.dayjsKey}.js`);
+        if (fs.existsSync(dayjsFile)) {
+            result += fs.readFileSync(dayjsFile, 'utf-8');
+        }
+
+        fs.writeFileSync(path.resolve(outputDir, `${lang.key}.js`), result, 'utf-8');
     }
 };
 

@@ -79,6 +79,10 @@ export class ConditionalFormattingFormulaService extends Disposable {
         }));
     }
 
+    override dispose(): void {
+        this._formulaChange$.complete();
+    }
+
     private _initCache() {
         const _conditionalFormattingService = this._injector.get(ConditionalFormattingService);
         this.disposeWithMe(_conditionalFormattingService.ruleComputeStatus$.subscribe((option) => {

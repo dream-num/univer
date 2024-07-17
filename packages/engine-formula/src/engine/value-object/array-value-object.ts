@@ -272,6 +272,10 @@ export class ArrayValueObject extends BaseValueObject {
         return v;
     }
 
+    getValueOrDefault(row: number, column: number) {
+        return this.get(row, column) || this._defaultValue;
+    }
+
     set(row: number, column: number, value: Nullable<BaseValueObject>) {
         if (row >= this._rowCount || column >= this._columnCount) {
             throw new Error('Exceeding array bounds.');
@@ -1551,7 +1555,7 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         for (let r = 0; r < rowCount; r++) {
-            const currentValue = this._values?.[r]?.[column];
+            const currentValue = this.getValueOrDefault(r, column);
             if (result[r] == null) {
                 result[r] = [];
             }
@@ -1654,6 +1658,7 @@ export class ArrayValueObject extends BaseValueObject {
         );
     }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _batchOperatorArray(
         valueObject: BaseValueObject,
         batchOperatorType: BatchOperatorType,
@@ -1673,8 +1678,6 @@ export class ArrayValueObject extends BaseValueObject {
 
         const result: BaseValueObject[][] = [];
 
-        const valueObjectList = (valueObject as ArrayValueObject).getArrayValue();
-
         const currentCalculateType = this._checkArrayCalculateType(this as ArrayValueObject);
 
         const opCalculateType = this._checkArrayCalculateType(valueObject as ArrayValueObject);
@@ -1684,24 +1687,24 @@ export class ArrayValueObject extends BaseValueObject {
             for (let c = 0; c < columnCount; c++) {
                 let currentValue: Nullable<BaseValueObject>;
                 if (currentCalculateType === ArrayCalculateType.SINGLE) {
-                    currentValue = this._values?.[0]?.[0];
+                    currentValue = this.getValueOrDefault(0, 0);
                 } else if (currentCalculateType === ArrayCalculateType.ROW) {
-                    currentValue = this._values?.[0]?.[c];
+                    currentValue = this.getValueOrDefault(0, c);
                 } else if (currentCalculateType === ArrayCalculateType.COLUMN) {
-                    currentValue = this._values?.[r]?.[0];
+                    currentValue = this.getValueOrDefault(r, 0);
                 } else {
-                    currentValue = this._values?.[r]?.[c];
+                    currentValue = this.getValueOrDefault(r, c);
                 }
 
                 let opValue: Nullable<BaseValueObject>;
                 if (opCalculateType === ArrayCalculateType.SINGLE) {
-                    opValue = valueObjectList?.[0]?.[0];
+                    opValue = (valueObject as ArrayValueObject).getValueOrDefault(0, 0);
                 } else if (opCalculateType === ArrayCalculateType.ROW) {
-                    opValue = valueObjectList?.[0]?.[c];
+                    opValue = (valueObject as ArrayValueObject).getValueOrDefault(0, c);
                 } else if (opCalculateType === ArrayCalculateType.COLUMN) {
-                    opValue = valueObjectList?.[r]?.[0];
+                    opValue = (valueObject as ArrayValueObject).getValueOrDefault(r, 0);
                 } else {
-                    opValue = valueObjectList?.[r]?.[c];
+                    opValue = (valueObject as ArrayValueObject).getValueOrDefault(r, c);
                 }
 
                 if (currentValue && opValue) {

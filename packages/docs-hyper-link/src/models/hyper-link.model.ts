@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
+import { Disposable, Tools } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type { IDocHyperLink } from '../types/interfaces/i-doc-hyper-link';
 
@@ -62,6 +62,7 @@ export class DocHyperLinkModel extends Disposable {
 
     addLink(unitId: string, link: IDocHyperLink) {
         const map = this._ensureMap(unitId);
+        link.payload = Tools.normalizeUrl(link.payload);
         map.set(link.id, link);
 
         this._linkUpdate$.next({

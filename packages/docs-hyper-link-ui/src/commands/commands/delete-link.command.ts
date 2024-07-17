@@ -27,7 +27,7 @@ export interface IDeleteDocHyperLinkMutationParams {
 export const DeleteDocHyperLinkCommand: ICommand<IDeleteDocHyperLinkMutationParams> = {
     type: CommandType.COMMAND,
     id: 'docs.command.delete-hyper-link',
-    handler(accessor, params) {
+    async handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -44,6 +44,6 @@ export const DeleteDocHyperLinkCommand: ICommand<IDeleteDocHyperLinkMutationPara
             return false;
         }
 
-        return commandService.executeCommand(doMutation.id, doMutation.params);
+        return await commandService.syncExecuteCommand(doMutation.id, doMutation.params);
     },
 };

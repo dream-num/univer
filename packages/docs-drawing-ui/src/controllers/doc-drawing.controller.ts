@@ -31,13 +31,14 @@ import { ClearDocDrawingTransformerOperation } from '../commands/operations/clea
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { MoveDocDrawingsCommand } from '../commands/commands/move-drawings.command';
-import { DeleteDocDrawingsCommand } from '../commands/commands/delete-drawings.command';
+import { DeleteDocDrawingsCommand } from '../commands/commands/delete-doc-drawing.command';
 import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { SetDocDrawingCommand } from '../commands/commands/set-doc-drawing.command';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
+import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
 @OnLifecycle(LifecycleStages.Ready, DocDrawingUIController)
@@ -77,6 +78,12 @@ export class DocDrawingUIController extends Disposable {
         [
             InsertDocImageOperation,
             InsertDocDrawingCommand,
+            UpdateDocDrawingWrappingStyleCommand,
+            UpdateDocDrawingDistanceCommand,
+            UpdateDocDrawingWrapTextCommand,
+            UpdateDrawingDocTransformCommand,
+            IMoveInlineDrawingCommand,
+            ITransformNonInlineDrawingCommand,
             RemoveDocDrawingCommand,
             SetDocDrawingCommand,
             SidebarDocDrawingOperation,

@@ -91,7 +91,7 @@ export class DocStateChangeManagerService extends RxDisposable {
     private _cacheChangeState(changeState: IDocStateChangeParams, type: ChangeStateCacheType = 'history') {
         const { trigger, unitId, noHistory, debounce = false } = changeState;
 
-        if (noHistory) {
+        if (noHistory || trigger == null) {
             return;
         }
 

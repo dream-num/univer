@@ -226,6 +226,11 @@ export class NodePositionConvertToCursor {
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
             const { lineHeight, marginTop, asc } = line;
             const { glyphGroup, st } = divide;
+            if (glyphGroup.length === 0) {
+                // The divide is empty, and no need to set selection.
+                // Handle the drawing which split the line, and the second divide is empty.
+                return;
+            }
             const { x: startX, y: startY } = this._liquid;
 
             let borderBoxPosition: IPosition;

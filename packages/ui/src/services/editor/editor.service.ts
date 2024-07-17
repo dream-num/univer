@@ -192,6 +192,10 @@ export class Editor {
 
         const { width, height } = this._param.editorDom.getBoundingClientRect();
 
+        if (height === 0 || width === 0) {
+            return;
+        }
+
         if (!this.isSingle()) {
             documentDataModel.updateDocumentDataPageSize(width, undefined);
             return;
@@ -747,9 +751,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                     verticalAlign: VerticalAlign.TOP,
                     horizontalAlign: HorizontalAlign.LEFT,
                 },
-                marginLeft: 6,
-                marginTop: 2,
-                marginRight: 6,
+                marginLeft: 3,
+                marginTop: 0,
+                marginRight: 3,
             },
         } as IDocumentData;
     }

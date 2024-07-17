@@ -1,9 +1,10 @@
 # @univerjs/sheets-filter-ui
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-filter-ui)](https://npmjs.org/packages/@univerjs/sheets-filter-ui)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-filter-ui)](https://img.shields.io/npm/l/@univerjs/sheets-filter-ui)
-![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
-![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/sheets-filter-ui` | `UniverSheetsFilterUi` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
 
 ## Introduction
 
@@ -13,7 +14,7 @@
 
 You should use this plugin with the `@univerjs/sheets-filter` package.
 
-```ts
+```typescript
 import '@univerjs/sheets-filter-ui/lib/index.css';
 
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
@@ -32,3 +33,9 @@ npm install @univerjs/sheets-filter-ui
 # Using pnpm
 pnpm add @univerjs/sheets-filter-ui
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-filter-ui?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/sheets-filter-ui
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/sheets-filter-ui?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/sheets-filter-ui?style=flat-square

@@ -75,7 +75,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [DrawingPopupMenuController],
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
-            [SheetsDrawingCopyPasteController],
         ];
 
         const renderModules = [

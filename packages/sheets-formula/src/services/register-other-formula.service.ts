@@ -43,6 +43,13 @@ export class RegisterOtherFormulaService extends Disposable {
         this._initFormulaCalculationResultChange();
     }
 
+    override dispose(): void {
+        super.dispose();
+
+        this._formulaChange$.complete();
+        this._formulaResult$.complete();
+    }
+
     private _ensureCacheMap(unitId: string, subUnitId: string) {
         let unitMap = this._formulaCacheMap.get(unitId);
 

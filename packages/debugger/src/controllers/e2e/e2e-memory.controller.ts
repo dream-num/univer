@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, LifecycleStages, LocaleType, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleType, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DisposeUniverCommand } from '../../commands/commands/unit.command';
 
 const DEFAULT_WORKBOOK_DATA_DEMO = {
@@ -80,12 +80,19 @@ declare global {
  * This controller expose a API on `Window` for the E2E memory test.
  */
 @OnLifecycle(LifecycleStages.Starting, E2EMemoryController)
-export class E2EMemoryController {
+export class E2EMemoryController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
+        super();
+
         this._initPlugin();
+    }
+
+    override dispose(): void {
+        // @ts-ignore
+        window.E2EControllerAPI = undefined;
     }
 
     private _initPlugin(): void {

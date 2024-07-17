@@ -43,11 +43,9 @@ export class DocHyperLinkClipboardController extends Disposable {
                 }
                 const activeRange = this._textSelectionManagerService.getActiveRange();
                 const customRanges = doc.getBody()?.customRanges;
-                if (!customRanges?.length) {
-                    return body;
-                }
+
                 const matchedRange = activeRange ?
-                    customRanges.find(
+                    customRanges?.find(
                         (range) =>
                             range.rangeType === CustomRangeType.HYPERLINK &&
                             range.startIndex <= activeRange.startOffset &&
@@ -68,17 +66,25 @@ export class DocHyperLinkClipboardController extends Disposable {
                     }
                     return bodyWithoutLink;
                 } else {
-                    const customRangeIds = new Set(customRanges.map((i) => i.rangeType === CustomRangeType.HYPERLINK && i.rangeId));
+                    const customRangeIds = new Set(customRanges?.map((i) => i.rangeType === CustomRangeType.HYPERLINK && i.rangeId));
                     body.customRanges?.forEach((range) => {
-                        if (range.rangeType === CustomRangeType.HYPERLINK && customRangeIds.has(range.rangeId)) {
-                            const link = this._hyperLinkModel.getLink(doc.getUnitId(), range.rangeId);
-                            if (link) {
-                                const newId = Tools.generateRandomId();
+                        if (range.rangeType === CustomRangeType.HYPERLINK) {
+                            if (customRangeIds.has(range.rangeId)) {
+                                const link = this._hyperLinkModel.getLink(doc.getUnitId(), range.rangeId);
+                                if (link) {
+                                    const newId = Tools.generateRandomId();
+                                    this._hyperLinkModel.addLink(doc.getUnitId(), {
+                                        payload: link.payload,
+                                        id: newId,
+                                    });
+                                    range.rangeId = newId;
+                                }
+                            } else if (body.payloads?.[range.rangeId]) {
+                                const url = body.payloads[range.rangeId];
                                 this._hyperLinkModel.addLink(doc.getUnitId(), {
-                                    payload: link.payload,
-                                    id: newId,
+                                    payload: url,
+                                    id: range.rangeId,
                                 });
-                                range.rangeId = newId;
                             }
                         }
                     });

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IParagraph } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IParagraph, ISectionBreak } from '@univerjs/core';
 import {
     CommandType,
+    GridType,
     ICommandService,
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
     PRESET_LIST_TYPE,
     PresetListType,
+    sortRulesFactory,
     TextX,
     TextXActionType,
     Tools,
@@ -67,6 +69,8 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         if (paragraphs == null) {
             return false;
         }
+
+        const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
 
         const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
 
@@ -113,12 +117,13 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             ...customLists,
         };
 
-        const { charSpace, defaultTabStop = 36, gridType } = docDataModel.getSnapshot().documentStyle;
+        const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
 
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {} } = paragraph;
-            const { indentFirstLine = 0, snapToGrid, indentStart = 0 } = paragraphStyle;
+            const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
             const { hanging: listHanging, indentStart: listIndentStart } = lists[listType].nestingLevel[0];
+            const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
 
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
@@ -139,7 +144,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                 paragraphStyle: {
                                     ...paragraphStyle,
                                     hanging: undefined,
-                                    indentStart: indentStart ? Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + listHanging - listIndentStart) : undefined,
+                                    indentStart: indentStart ? { v: Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + getNumberUnitValue(listHanging, charSpaceApply) - getNumberUnitValue(listIndentStart, charSpaceApply)) } : undefined,
                                 },
                                 startIndex: 0,
                             }
@@ -149,7 +154,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                     ...paragraphStyle,
                                     indentFirstLine: undefined,
                                     hanging: listHanging,
-                                    indentStart: listIndentStart - listHanging + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply),
+                                    indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
                                 },
                                 bullet: {
                                     ...(paragraph.bullet ?? {
@@ -234,4 +239,14 @@ export function getParagraphsInRange(activeRange: IActiveTextRange, paragraphs: 
     }
 
     return results;
+}
+
+export function findNearestSectionBreak(currentIndex: number, sectionBreaks: ISectionBreak[]) {
+    const sortedSectionBreaks = sectionBreaks.sort(sortRulesFactory('startIndex'));
+    for (let i = 0; i < sortedSectionBreaks.length; i++) {
+        const sectionBreak = sectionBreaks[i];
+        if (sectionBreak.startIndex >= currentIndex) {
+            return sectionBreak;
+        }
+    }
 }

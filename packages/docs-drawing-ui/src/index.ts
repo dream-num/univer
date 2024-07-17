@@ -18,7 +18,7 @@ export { UniverDocsDrawingUIPlugin } from './plugin';
 
 // #region - all commands
 
-export { DeleteDocDrawingsCommand } from './commands/commands/delete-drawings.command';
+export { DeleteDocDrawingsCommand } from './commands/commands/delete-doc-drawing.command';
 export { GroupDocDrawingCommand } from './commands/commands/group-doc-drawing.command';
 export { InsertDocDrawingCommand } from './commands/commands/insert-doc-drawing.command';
 export { MoveDocDrawingsCommand } from './commands/commands/move-drawings.command';

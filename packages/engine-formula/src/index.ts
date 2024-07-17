@@ -67,6 +67,7 @@ export { StringValueObject, NullValueObject } from './engine/value-object/primit
 export { functionArray } from './functions/array/function-map';
 export { FUNCTION_NAMES_ARRAY } from './functions/array/function-names';
 export { BaseFunction } from './functions/base-function';
+export { CustomFunction } from './functions/custom-function';
 export { functionCompatibility } from './functions/compatibility/function-map';
 export { FUNCTION_NAMES_COMPATIBILITY } from './functions/compatibility/function-names';
 export { functionCube } from './functions/cube/function-map';
@@ -144,6 +145,5 @@ export {
 export { SetFormulaDataMutation, type ISetFormulaDataMutationParams } from './commands/mutations/set-formula-data.mutation';
 export { SetOtherFormulaMutation, RemoveOtherFormulaMutation, type ISetOtherFormulaMutationParams, type IRemoveOtherFormulaMutationParams } from './commands/mutations/set-other-formula.mutation';
 export { SetSuperTableMutation, RemoveSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
-export { UnregisterFunctionMutation } from './commands/mutations/unregister-function.mutation';
 
 // #endregion

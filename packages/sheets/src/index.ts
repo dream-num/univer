@@ -144,6 +144,8 @@ export {
     WorkbookSharePermission,
     WorkbookCopyPermission,
     WorkbookManageCollaboratorPermission,
+    WorkbookViewHistoryPermission,
+    WorkbookRecoverHistoryPermission,
 } from './services/permission/permission-point';
 
 // range-protection

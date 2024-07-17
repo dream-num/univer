@@ -1,9 +1,10 @@
 # @univerjs/find-replace
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/find-replace)](https://npmjs.org/packages/@univerjs/find-replace)
-[![license](https://img.shields.io/npm/l/@univerjs/find-replace)](https://img.shields.io/npm/l/@univerjs/find-replace)
-![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
-![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/find-replace` | `UniverFindReplace` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
 
 ## Introduction
 
@@ -26,3 +27,9 @@ npm install @univerjs/find-replace
 # Using pnpm
 pnpm add @univerjs/find-replace
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/find-replace?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/find-replace
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/find-replace?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/find-replace?style=flat-square

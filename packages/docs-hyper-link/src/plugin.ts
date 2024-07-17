@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import { Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import { UniverDocsPlugin } from '@univerjs/docs';
 import { DOC_HYPER_LINK_PLUGIN } from './types/const';
 import { DocHyperLinkModel } from './models/hyper-link.model';
 import { DocHyperLinkController } from './controllers/hyper-link.controller';
 import { DocHyperLinkResourceController } from './controllers/resource.controller';
+import { DocHyperLinkCustomRangeController } from './controllers/doc-hyper-link-custom-range.controller';
 
+@DependentOn(UniverDocsPlugin)
 export class UniverDocsHyperLinkPlugin extends Plugin {
     static override pluginName = DOC_HYPER_LINK_PLUGIN;
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
+        private _config: unknown,
         @Inject(Injector) protected override _injector: Injector
     ) {
         super();
@@ -37,6 +41,7 @@ export class UniverDocsHyperLinkPlugin extends Plugin {
             [DocHyperLinkModel],
             [DocHyperLinkController],
             [DocHyperLinkResourceController],
+            [DocHyperLinkCustomRangeController],
         ];
 
         deps.forEach((dep) => {

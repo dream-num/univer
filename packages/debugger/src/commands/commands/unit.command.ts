@@ -15,11 +15,13 @@
  */
 
 import { CommandType, type ICommand, IUniverInstanceService, type Univer, UniverInstanceType } from '@univerjs/core';
+import type { FUniver } from '@univerjs/facade';
 
 declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
         univer?: Univer;
+        univerAPI?: ReturnType<typeof FUniver.newAPI>;
     }
 }
 
@@ -28,6 +30,8 @@ export const DisposeUniverCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: () => {
         window.univer?.dispose();
+        window.univer = undefined;
+        window.univerAPI = undefined;
 
         return true;
     },

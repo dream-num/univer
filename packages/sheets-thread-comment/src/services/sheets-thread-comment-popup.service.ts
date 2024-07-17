@@ -47,6 +47,10 @@ export class SheetsThreadCommentPopupService extends Disposable {
     ) {
         super();
         this._initZenVisible();
+
+        this.disposeWithMe(() => {
+            this._activePopup$.complete();
+        });
     }
 
     private _initZenVisible() {

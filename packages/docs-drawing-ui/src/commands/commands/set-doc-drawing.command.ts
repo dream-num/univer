@@ -31,6 +31,7 @@ import type { ISetDrawingCommandParams } from './interfaces';
 /**
  * The command to update defined name
  */
+// REFACTOR: @JOCS 需要移除？
 export const SetDocDrawingCommand: ICommand = {
     id: 'doc.command.set-doc-image',
     type: CommandType.COMMAND,

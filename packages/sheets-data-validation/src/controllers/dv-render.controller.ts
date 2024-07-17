@@ -24,15 +24,10 @@ import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { DataValidationPanel, DATE_DROPDOWN_KEY, DateDropdown, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
-import { FORMULA_INPUTS } from '../views/formula-input';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { ListValidator } from '../validators';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
-import { CellDropdown, DROP_DOWN_KEY } from '../views/drop-down';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
-import { ListRenderModeInput } from '../views/render-mode';
-import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
 import { addDataValidationMenuFactory, dataValidationMenuFactory, openDataValidationMenuFactory } from './dv.menu';
 
 export interface IUniverSheetsDataValidation {
@@ -68,7 +63,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
     ) {
         super();
 
-        this._initComponents();
         this._initMenu();
         this._initSkeletonChange();
         this._initDropdown();
@@ -90,37 +84,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
         });
     }
 
-    private _initComponents() {
-        ([
-            [
-                DATA_VALIDATION_PANEL,
-                DataValidationPanel,
-            ],
-            [
-                DROP_DOWN_KEY,
-                CellDropdown,
-            ],
-            [
-                LIST_DROPDOWN_KEY,
-                ListDropDown,
-            ],
-            [
-                DATE_DROPDOWN_KEY,
-                DateDropdown,
-            ],
-            [
-                ListRenderModeInput.componentKey,
-                ListRenderModeInput,
-            ],
-            ...FORMULA_INPUTS,
-        ] as const).forEach(([key, component]) => {
-            this.disposeWithMe(this._componentManager.register(
-                key,
-                component
-            ));
-        });
-    }
-
     private _initDropdown() {
         if (!this._editorBridgeService) {
             return;
@@ -128,6 +91,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
         this.disposeWithMe(this._editorBridgeService.visible$.subscribe((visible) => {
             if (!visible.visible) {
+                this._dropdownManagerService.hideDropdown();
                 return;
             }
 
@@ -165,18 +129,21 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                     return;
                 }
 
-                this._dropdownManagerService.showDropdown({
-                    location: {
-                        unitId,
-                        subUnitId: sheetId,
-                        row,
-                        col: column,
-                        workbook,
-                        worksheet,
+                this._dropdownManagerService.showDropdown(
+                    {
+                        location: {
+                            unitId,
+                            subUnitId: sheetId,
+                            row,
+                            col: column,
+                            workbook,
+                            worksheet,
+                        },
+                        componentKey: validator.dropdown,
+                        onHide: () => { /* empty */ },
                     },
-                    componentKey: validator.dropdown,
-                    onHide: () => { /* empty */ },
-                });
+                    false
+                );
             }
         }));
     }

@@ -15,7 +15,7 @@
  */
 
 import type { IPosition, ITransformState, Nullable, Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, IUniverInstanceService, Tools, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';

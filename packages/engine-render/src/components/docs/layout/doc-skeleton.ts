@@ -30,7 +30,7 @@ import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import { DocumentEditArea } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
-import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
+import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 import { createSkeletonSection } from './model/section';
 import { dealWithSection } from './block/section';
 import { createSkeletonPage } from './model/page';
@@ -42,11 +42,6 @@ export enum DocumentSkeletonState {
     CALCULATING = 'calculating',
     READY = 'ready',
     INVALID = 'invalid',
-}
-
-function resetContext(ctx: ILayoutContext) {
-    ctx.isDirty = false;
-    ctx.skeleton.drawingAnchor?.clear();
 }
 
 function removeDupPages(ctx: ILayoutContext) {
@@ -812,7 +807,7 @@ export class DocumentSkeleton extends Skeleton {
             skeletonResourceReference,
             docsConfig,
             layoutStartPointer: {
-                paragraphIndex: null,
+                '': null, // '' is the main document.
             },
             isDirty: false,
             drawingsCache: new Map(),
@@ -862,10 +857,10 @@ export class DocumentSkeleton extends Skeleton {
 
         let startSectionIndex = 0;
 
-        const layoutAnchor = ctx.layoutStartPointer.paragraphIndex;
+        const layoutAnchor = ctx.layoutStartPointer[''];
 
         // Reset layoutStartPointer.
-        ctx.layoutStartPointer.paragraphIndex = null;
+        ctx.layoutStartPointer[''] = null;
 
         if (layoutAnchor != null) {
             for (let sectionIndex = 0; sectionIndex < viewModel.children.length; sectionIndex++) {

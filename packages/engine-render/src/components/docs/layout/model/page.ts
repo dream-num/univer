@@ -26,7 +26,7 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import { dealWithSection } from '../block/section';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { updateBlockIndex } from '../tools';
+import { resetContext, updateBlockIndex } from '../tools';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -58,8 +58,8 @@ export function createSkeletonPage(
         columnSeparatorType,
         marginTop = 0,
         marginBottom = 0,
-        marginHeader = 0,
-        marginFooter = 0,
+        marginHeader: _marginHeader = 0,
+        marginFooter: _marginFooter = 0,
         marginLeft = 0,
         marginRight = 0,
         renderConfig = {},
@@ -105,8 +105,10 @@ export function createSkeletonPage(
                 headerTreeMap.get(headerId)!,
                 sectionBreakConfig,
                 skeletonResourceReference,
-                headerId
+                headerId,
+                true
             );
+
             skeHeaders.set(headerId, new Map([[pageWidth, header]]));
         }
         page.headerId = headerId;
@@ -124,6 +126,7 @@ export function createSkeletonPage(
                 footerId,
                 false
             );
+
             skeFooters.set(footerId, new Map([[pageWidth, footer]]));
         }
         page.footerId = footerId;
@@ -197,7 +200,9 @@ function _createSkeletonHeaderFooter(
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
     segmentId: string,
-    isHeader = true
+    isHeader = true,
+    areaPage: Nullable<IDocumentSkeletonHeaderFooter>,
+    count = 0
 ): IDocumentSkeletonHeaderFooter {
     const {
         lists, footerTreeMap, headerTreeMap, localeService, pageSize, drawings,
@@ -218,17 +223,39 @@ function _createSkeletonHeaderFooter(
         drawings,
     };
 
-    const areaPage = createSkeletonPage(ctx, headerFooterConfig, skeletonResourceReference);
-    areaPage.type = isHeader ? DocumentSkeletonPageType.HEADER : DocumentSkeletonPageType.FOOTER;
-    areaPage.segmentId = segmentId;
+    if (areaPage == null) {
+        areaPage = createSkeletonPage(ctx, headerFooterConfig, skeletonResourceReference);
+        areaPage.type = isHeader ? DocumentSkeletonPageType.HEADER : DocumentSkeletonPageType.FOOTER;
+        areaPage.segmentId = segmentId;
+    }
+    const layoutAnchor = ctx.layoutStartPointer[segmentId];
+    // Reset layoutStartPointer.
+    ctx.layoutStartPointer[segmentId] = null;
 
     const page = dealWithSection(
         ctx,
         headerOrFooterViewModel,
         headerOrFooterViewModel.children[0],
         areaPage,
-        headerFooterConfig
+        headerFooterConfig,
+        layoutAnchor
     ).pages[0];
+
+    if (ctx.isDirty && count < 10) {
+        count++;
+        resetContext(ctx);
+
+        return _createSkeletonHeaderFooter(
+            ctx,
+            headerOrFooterViewModel,
+            sectionBreakConfig,
+            skeletonResourceReference,
+            segmentId,
+            isHeader,
+            areaPage,
+            count
+        );
+    }
 
     updateBlockIndex([page]);
 

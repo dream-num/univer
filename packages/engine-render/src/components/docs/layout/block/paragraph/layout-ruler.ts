@@ -553,7 +553,7 @@ function _lineOperator(
                 if (ctx.drawingsCache.has(drawing.drawingId)) {
                     ctx.drawingsCache.delete(drawing.drawingId);
                     ctx.isDirty = false;
-                    ctx.layoutStartPointer.paragraphIndex = null;
+                    ctx.layoutStartPointer[segmentId] = null;
                 }
             }
         }
@@ -669,7 +669,7 @@ function _reLayoutCheck(
     // Handle situations where an image anchor paragraph is squeezed to the next page.
     for (const drawing of drawings.values()) {
         const drawingCache = ctx.drawingsCache.get(drawing.drawingId);
-        if (drawingCache == null) {
+        if (drawingCache == null || drawingCache.page.segmentId !== page.segmentId) {
             continue;
         }
         // TODO: 如何判断 drawing 是否在同一页？？？
@@ -695,7 +695,7 @@ function _reLayoutCheck(
                     // No need to loop next line.
                     needBreakLineIterator = true;
                     ctx.isDirty = true;
-                    ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
+                    ctx.layoutStartPointer[drawingCache.page.segmentId] = Math.min(line.paragraphIndex, ctx.layoutStartPointer[drawingCache.page.segmentId] ?? Number.POSITIVE_INFINITY);
                     ctx.paragraphsOpenNewPage.add(paragraphIndex);
                 }
             });
@@ -716,10 +716,15 @@ function _reLayoutCheck(
             let targetDrawing = drawing;
 
             if (ctx.drawingsCache.has(drawing.drawingId)) {
+                const drawingCache = ctx.drawingsCache.get(drawing.drawingId);
                 const needRePosition = checkRelativeDrawingNeedRePosition(ctx, drawing);
 
+                if (drawingCache?.page.segmentId !== page.segmentId) {
+                    continue;
+                }
+
                 if (needRePosition) {
-                    targetDrawing = ctx.drawingsCache.get(drawing.drawingId)?.drawing ?? drawing;
+                    targetDrawing = drawingCache?.drawing ?? drawing;
                 } else {
                     continue;
                 }
@@ -733,7 +738,7 @@ function _reLayoutCheck(
                 needBreakLineIterator = true;
 
                 ctx.isDirty = true;
-                ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
+                ctx.layoutStartPointer[page.segmentId] = Math.min(line.paragraphIndex, ctx.layoutStartPointer[page.segmentId] ?? Number.POSITIVE_INFINITY);
 
                 let drawingCache = ctx.drawingsCache.get(drawing.drawingId);
                 if (drawingCache == null) {

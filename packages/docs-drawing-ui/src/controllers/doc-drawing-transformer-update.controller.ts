@@ -551,7 +551,7 @@ export class DocDrawingTransformerController extends Disposable {
         if (positionV.relativeFrom === ObjectRelativeFromV.LINE) {
             glyphAnchor = line.divides[0].glyphGroup[0];
         } else {
-            glyphAnchor = paragraphStartLine.divides[0].glyphGroup[0];
+            glyphAnchor = paragraphStartLine.divides?.[0]?.glyphGroup?.[0] ?? glyphAnchor;
         }
 
         docTransform.positionH = {

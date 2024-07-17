@@ -886,9 +886,8 @@ export interface ILayoutContext {
     // The position coordinates of the layout,
     // which are used to indicate which section and paragraph are currently layout,
     // and used to support the starting point of the reflow when re-layout.
-    layoutStartPointer: {
-        paragraphIndex: Nullable<number>; // Layout from the beginning if the paragraphIndex is null.
-    };
+    // Layout from the beginning if the paragraphIndex is null.
+    layoutStartPointer: Record<string, Nullable<number>>;
     // It is used to identify whether it is a re-layout,
     // and if it is a re-layout, the skeleton needs to be backtracked to the layoutStartPointer states.
     isDirty: boolean;
@@ -1040,4 +1039,9 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     };
 
     return sectionBreakConfig;
+}
+
+export function resetContext(ctx: ILayoutContext) {
+    ctx.isDirty = false;
+    ctx.skeleton.drawingAnchor?.clear();
 }

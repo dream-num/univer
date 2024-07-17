@@ -58,4 +58,13 @@ export class DocMentionModel extends Disposable {
         const map = this._ensureMap(unitId);
         return map.delete(id);
     }
+
+    getUnit(unitId: string) {
+        const map = this._mentionMaps.get(unitId);
+        return Array.from(map?.values() ?? []);
+    }
+
+    deleteUnit(unitId: string) {
+        this._mentionMaps.delete(unitId);
+    }
 }

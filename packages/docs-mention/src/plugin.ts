@@ -23,6 +23,7 @@ import { DocMentionModel } from './models/doc-mention.model';
 import { DocMentionController } from './controllers/doc-mention.controller';
 import { DocMentionCustomRangeController } from './controllers/doc-mention-custom-range.controller';
 import { DocMentionService } from './services/doc-mention.service';
+import { DocMentionResourceController } from './controllers/doc-mention-resource.controller';
 
 @DependentOn(UniverDocsPlugin)
 export class UniverDocsMentionPlugin extends Plugin {
@@ -43,6 +44,7 @@ export class UniverDocsMentionPlugin extends Plugin {
 
             [DocMentionController],
             [DocMentionCustomRangeController],
+            [DocMentionResourceController],
         ];
 
         deps.forEach((dep) => {

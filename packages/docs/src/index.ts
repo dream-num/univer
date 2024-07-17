@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-export { getSelectionText, getDeleteSelection, getInsertSelection } from './basics/selection';
+export { replaceSelectionFactory } from './basics/replace';
+export { getSelectionText, getDeleteSelection, getInsertSelection, isSegmentIntersects } from './basics/selection';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';

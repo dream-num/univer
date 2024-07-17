@@ -30,6 +30,7 @@ export class UniverDocsHyperLinkPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
+        private _config: unknown,
         @Inject(Injector) protected override _injector: Injector
     ) {
         super();

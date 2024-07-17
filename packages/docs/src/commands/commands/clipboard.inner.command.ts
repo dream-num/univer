@@ -16,10 +16,8 @@
 
 import type {
     ICommand,
-    IDeleteAction,
     IDocumentBody,
     IMutationInfo,
-    IRetainAction,
     ITextRange,
     JSONXActions,
 } from '@univerjs/core';
@@ -33,15 +31,14 @@ import {
     TextX,
     TextXActionType,
 } from '@univerjs/core';
-import type { ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
-import { getDeleteSelection } from '../../basics/selection';
 import { getRichTextEditPath } from '../util';
+import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
@@ -132,6 +129,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 export interface IInnerCutCommandParams {
     segmentId: string;
     textRanges: ITextRangeWithStyle[];
+    selections?: ITextRange[];
 }
 
 export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
@@ -146,7 +144,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = textSelectionManagerService.getCurrentSelections();
+        const selections = params.selections ?? textSelectionManagerService.getCurrentSelections();
 
         if (!Array.isArray(selections) || selections.length === 0) {
             return false;
@@ -248,7 +246,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
     },
 };
 
-function getCustomBlockIdsInSelections(body: IDocumentBody, selections: TextRange[]): string[] {
+function getCustomBlockIdsInSelections(body: IDocumentBody, selections: ITextRange[]): string[] {
     const customBlockIds: string[] = [];
     const { customBlocks = [] } = body;
 
@@ -271,89 +269,3 @@ function getCustomBlockIdsInSelections(body: IDocumentBody, selections: TextRang
     return customBlockIds;
 }
 
-// If the selection contains line breaks,
-// paragraph information needs to be preserved when performing the CUT operation
-// eslint-disable-next-line max-lines-per-function
-function getRetainAndDeleteAndExcludeLineBreak(
-    selection: ITextRange,
-    body: IDocumentBody,
-    segmentId: string = '',
-    memoryCursor: number = 0
-): Array<IRetainAction | IDeleteAction> {
-    const { startOffset, endOffset } = getDeleteSelection(selection, body);
-    const dos: Array<IRetainAction | IDeleteAction> = [];
-
-    const { paragraphs = [], dataStream } = body;
-
-    const textStart = startOffset - memoryCursor;
-    const textEnd = endOffset - memoryCursor;
-
-    const paragraphInRange = paragraphs?.find(
-        (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor <= textEnd
-    );
-
-    const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset));
-    const toDeleteRanges = new Set(relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(startOffset, endOffset - startOffset, customRange, dataStream)));
-    const retainPoints = new Set<number>();
-
-    relativeCustomRanges?.forEach((range) => {
-        if (toDeleteRanges.has(range)) {
-            return;
-        }
-
-        if (range.startIndex - memoryCursor >= textStart &&
-            range.startIndex - memoryCursor <= textEnd &&
-            range.endIndex - memoryCursor > textEnd) {
-            retainPoints.add(range.startIndex);
-        }
-        if (range.endIndex - memoryCursor >= textStart &&
-            range.endIndex - memoryCursor <= textEnd &&
-            range.startIndex < textStart) {
-            retainPoints.add(range.endIndex);
-        }
-    });
-
-    if (textStart > 0) {
-        dos.push({
-            t: TextXActionType.RETAIN,
-            len: textStart,
-            segmentId,
-        });
-    }
-
-    if (paragraphInRange && paragraphInRange.startIndex - memoryCursor > textStart) {
-        const paragraphIndex = paragraphInRange.startIndex - memoryCursor;
-        retainPoints.add(paragraphIndex);
-    }
-
-    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
-
-    let cursor = textStart;
-    sortedRetains.forEach((pos) => {
-        const len = pos - cursor;
-        if (len > 0) {
-            dos.push({
-                t: TextXActionType.DELETE,
-                len,
-                line: 0,
-                segmentId,
-            });
-        }
-        dos.push({
-            t: TextXActionType.RETAIN,
-            len: 1,
-            segmentId,
-        });
-        cursor = pos + 1;
-    });
-
-    if (cursor < textEnd) {
-        dos.push({
-            t: TextXActionType.DELETE,
-            len: textEnd - cursor,
-            line: 0,
-            segmentId,
-        });
-    }
-    return dos;
-}

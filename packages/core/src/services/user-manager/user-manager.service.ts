@@ -64,4 +64,8 @@ export class UserManagerService {
         this._model.clear();
         this._userChange$.next({ type: 'clear' });
     }
+
+    list() {
+        return Array.from(this._model.values());
+    }
 }

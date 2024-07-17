@@ -16,6 +16,7 @@
 
 import type { IDocumentBody, ITextRange, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType } from '@univerjs/core';
+import { DeleteDirection } from '../types/enums/delete-direction';
 import { isCustomRangeSplitSymbol } from './custom-range';
 
 export function normalizeSelection(selection: ITextRange) {
@@ -62,26 +63,52 @@ export function getSelectionWithNoSymbolSide(selection: ITextRange, body: IDocum
     };
 }
 
-export function getDeleteSelection(selection: ITextRange, body: IDocumentBody) {
+export function getDeleteSelection<T extends ITextRange>(selection: T, body: IDocumentBody, direction = DeleteDirection.LEFT): T {
     let { startOffset, endOffset, collapsed } = normalizeSelection(selection);
 
     if (collapsed) {
-        while (isCustomRangeSplitSymbol(body.dataStream[startOffset - 1])) {
-            endOffset -= 1;
-            startOffset -= 1;
+        if (direction === DeleteDirection.LEFT) {
+            while (body.dataStream[startOffset - 1] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+                endOffset -= 1;
+                startOffset -= 1;
+            }
+        } else {
+            while (body.dataStream[startOffset] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+                endOffset += 1;
+                startOffset += 1;
+            }
         }
-
-        return {
-            startOffset,
-            endOffset,
-            collapsed,
-        };
     } else {
-        return {
-            ...getSelectionWithSymbolMax(selection, body),
-            collapsed: false,
-        };
+        const selectionWithSymbolMax = getSelectionWithSymbolMax(selection, body);
+        startOffset = selectionWithSymbolMax.startOffset;
+        endOffset = selectionWithSymbolMax.endOffset;
     }
+
+    collapsed = (startOffset === endOffset);
+
+    const customRanges = body.customRanges?.filter((range) => {
+        if (!range.wholeEntity) {
+            return false;
+        }
+        if (startOffset <= range.startIndex && endOffset > range.endIndex) {
+            return false;
+        }
+        return isSegmentIntersects(startOffset, collapsed ? endOffset : endOffset - 1, range.startIndex, range.endIndex);
+    });
+
+    if (customRanges?.length) {
+        customRanges.forEach((range) => {
+            startOffset = Math.min(range.startIndex, startOffset);
+            endOffset = Math.max(range.endIndex + 1, endOffset);
+        });
+    }
+
+    return {
+        ...selection,
+        startOffset,
+        endOffset,
+        collapsed: startOffset === endOffset,
+    };
 }
 
 export function getInsertSelection(selection: ITextRange, body: IDocumentBody): ITextRange {
@@ -200,3 +227,8 @@ export function getSelectionText(dataStream: string, start: number, end: number)
     const text = dataStream.slice(start, end);
     return tags.reduce((res, curr) => res.replaceAll(curr, ''), text);
 }
+
+export function isSegmentIntersects(start: number, end: number, start2: number, end2: number) {
+    return Math.max(start, start2) <= Math.min(end, end2);
+}
+

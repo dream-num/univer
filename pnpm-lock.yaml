@@ -171,8 +171,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       '@wendellhu/redi':
-        specifier: 0.15.5
-        version: 0.15.5
+        specifier: 0.16.0
+        version: 0.16.0
       css-loader:
         specifier: ^6.10.0
         version: 6.11.0(webpack@5.92.0(@swc/core@1.5.7)(esbuild@0.20.2))
@@ -845,8 +845,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.5
-        version: 0.15.5
+        specifier: 0.16.0
+        version: 0.16.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -890,8 +890,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.5
-        version: 0.15.5
+        specifier: 0.16.0
+        version: 0.16.0
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -5647,9 +5647,6 @@ packages:
 
   '@webassemblyjs/wast-printer@1.12.1':
     resolution: {integrity: sha512-+X4WAlOisVWQMikjbcvY2e0rwPsKQ9F688lksZhBcPycBBuii3O7m8FACbDMWDojpAqvjIncrG8J0XHKyQfVeA==}
-
-  '@wendellhu/redi@0.15.5':
-    resolution: {integrity: sha512-16UPZN5lHuyjBljkzFoJuXbGhK4AP0XvhUGHISWBgkNJ5omJlkdFMatWbaB5oHHRWDpsugQWNnIYl6GWnlIDUQ==}
 
   '@wendellhu/redi@0.16.0':
     resolution: {integrity: sha512-0FlYhI79ol9eEUjj66dT8LTmuYdO4NXTD/y8YSPqeJ37r6dMReGWbE5fJOy6sQ8C+H3bRMuRbf4Ug4C8coZVOA==}
@@ -14775,8 +14772,6 @@ snapshots:
     dependencies:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': 4.2.2
-
-  '@wendellhu/redi@0.15.5': {}
 
   '@wendellhu/redi@0.16.0': {}
 

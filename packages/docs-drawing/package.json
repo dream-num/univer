@@ -60,7 +60,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@wendellhu/redi": "0.15.5",
+        "@wendellhu/redi": "0.16.0",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {

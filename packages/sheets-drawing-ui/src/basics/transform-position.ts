@@ -68,7 +68,7 @@ export function drawingPositionToTransform(
         height = 0;
     }
 
-    const skeleton = sheetSkeletonManagerService.getCurrentSkeleton();
+    const skeleton = sheetSkeletonManagerService.getCurrentSkeleton()!;
     const sheetWidth = skeleton.rowHeaderWidth + skeleton.columnTotalWidth;
     const sheetHeight = skeleton.columnHeaderHeight + skeleton.rowTotalHeight;
 

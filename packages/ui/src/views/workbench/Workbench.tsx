@@ -19,26 +19,27 @@ import type { ILocale } from '@univerjs/design';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+
 import { createPortal } from 'react-dom';
+import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
+import { IMessageService } from '../../services/message/message.service';
+import { BuiltInUIPart } from '../../services/parts/parts.service';
+import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
+import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
+import { Toolbar } from '../components/doc-bars/Toolbar';
+import { Sidebar } from '../components/sidebar/Sidebar';
+import { ZenZone } from '../components/zen-zone/ZenZone';
+import { builtInGlobalComponents } from '../parts';
 
-import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
-import { IMessageService } from '../services/message/message.service';
-import { BuiltInUIPart } from '../services/parts/parts.service';
-import styles from './app.module.less';
-import { ComponentContainer, useComponentsOfPart } from './components/ComponentContainer';
-import { Toolbar } from './components/doc-bars/Toolbar';
-import { Sidebar } from './components/sidebar/Sidebar';
-import { ZenZone } from './components/zen-zone/ZenZone';
-import { builtInGlobalComponents } from './parts';
-import { DesktopContextMenu } from './components/context-menu/ContextMenu';
+import styles from './workbench.module.less';
 
-export interface IUniverAppProps extends IWorkbenchOptions {
+export interface IUniverWorkbenchProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
 
     onRendered?: (container: HTMLElement) => void;
 }
 
-export function DesktopApp(props: IUniverAppProps) {
+export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const {
         header = true,
         toolbar = true,
@@ -108,28 +109,28 @@ export function DesktopApp(props: IUniverAppProps) {
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
               * bubbled to this element and refocus the input element.
               */}
-            <div className={styles.appLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
+            <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* header */}
                 {header && toolbar && (
-                    <header className={styles.appContainerHeader}>
+                    <header className={styles.workbenchContainerHeader}>
                         <Toolbar headerMenuComponents={headerMenuComponents} />
                     </header>
                 )}
 
                 {/* content */}
-                <section className={styles.appContainer}>
-                    <div className={styles.appContainerWrapper}>
-                        <aside className={styles.appContainerLeftSidebar}>
+                <section className={styles.workbenchContainer}>
+                    <div className={styles.workbenchContainerWrapper}>
+                        <aside className={styles.workbenchContainerLeftSidebar}>
                             <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
                         </aside>
 
-                        <section className={styles.appContainerContent}>
+                        <section className={styles.workbenchContainerContent}>
                             <header>
                                 {header && <ComponentContainer key="header" components={headerComponents} />}
                             </header>
 
                             <section
-                                className={styles.appContainerCanvas}
+                                className={styles.workbenchContainerCanvas}
                                 ref={contentRef}
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
@@ -138,18 +139,17 @@ export function DesktopApp(props: IUniverAppProps) {
                             </section>
                         </section>
 
-                        <aside className={styles.appContainerSidebar}>
+                        <aside className={styles.workbenchContainerSidebar}>
                             <Sidebar />
                         </aside>
                     </div>
 
                     {/* footer */}
                     {footer && (
-                        <footer className={styles.appFooter}>
+                        <footer className={styles.workbenchFooter}>
                             <ComponentContainer key="footer" components={footerComponents} sharedProps={{ contextMenu }} />
                         </footer>
                     )}
-
                     <ZenZone />
                 </section>
             </div>

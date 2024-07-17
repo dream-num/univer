@@ -167,11 +167,13 @@ export class Tools {
         return 'Unknown browser';
     }
 
+    /**
+     * Use this method without `Tools`.
+     *
+     * @deprecated
+     */
     static generateRandomId(n: number = 21, alphabet?: string): string {
-        if (alphabet) {
-            return customAlphabet(alphabet, n)();
-        }
-        return nanoid(n);
+        return generateRandomId(n, alphabet);
     }
 
     static getClassName(instance: object): string {
@@ -708,4 +710,12 @@ export class Tools {
     static clamp(value: number, min: number, max: number) {
         return Math.max(min, Math.min(max, value));
     }
+}
+
+export function generateRandomId(n: number = 21, alphabet?: string): string {
+    if (alphabet) {
+        return customAlphabet(alphabet, n)();
+    }
+
+    return nanoid(n);
 }

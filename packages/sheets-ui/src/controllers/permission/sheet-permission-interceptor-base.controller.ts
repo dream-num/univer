@@ -673,20 +673,21 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                     }
                     const { token } = node;
                     const sequenceGrid = deserializeRangeWithSheet(token);
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                    let targetSheet: Nullable<Worksheet> = workbook.getActiveSheet();
+                    const workbook = sequenceGrid.unitId ? this._univerInstanceService.getUnit<Workbook>(sequenceGrid.unitId) : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                    if (!workbook) return true;
+                    let targetSheet: Nullable<Worksheet> = sequenceGrid.sheetName ? workbook.getSheetBySheetName(sequenceGrid.sheetName) : workbook.getActiveSheet();
                     const unitId = workbook.getUnitId();
                     if (sequenceGrid.sheetName) {
                         targetSheet = workbook.getSheetBySheetName(sequenceGrid.sheetName);
                         if (!targetSheet) {
-                            return false;
+                            return true;
                         }
                         const subUnitId = targetSheet?.getSheetId();
                         const viewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id);
                         if (!viewPermission) return false;
                     }
                     if (!targetSheet) {
-                        return false;
+                        return true;
                     }
                     const { startRow, endRow, startColumn, endColumn } = sequenceGrid.range;
                     for (let i = startRow; i <= endRow; i++) {

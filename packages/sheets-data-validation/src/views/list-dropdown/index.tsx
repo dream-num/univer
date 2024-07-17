@@ -159,6 +159,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
                         visible: false,
                         keycode: KeyCode.ESC,
                         eventType: DeviceInputEventType.Keyboard,
+                        unitId,
                     });
                 }
 

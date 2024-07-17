@@ -21,14 +21,14 @@ import { Inject } from '@wendellhu/redi';
 import { HoverManagerService } from '../services/hover-manager.service';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { ScrollManagerService } from '../services/scroll-manager.service';
+import { SheetScrollManagerService } from '../services/scroll-manager.service';
 
 export class HoverRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(ScrollManagerService) private _scrollManagerService: ScrollManagerService
+        @Inject(SheetScrollManagerService) private _scrollManagerService: SheetScrollManagerService
     ) {
         super();
 

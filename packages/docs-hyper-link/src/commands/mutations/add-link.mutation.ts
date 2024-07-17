@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import { CommandType, type IMutation } from '@univerjs/core';
 import type { IDocHyperLink } from '../../types/interfaces/i-doc-hyper-link';
 import { DocHyperLinkModel } from '../../models/hyper-link.model';
 
@@ -23,13 +23,14 @@ export interface IAddDocHyperLinkMutationParams {
     link: IDocHyperLink;
 }
 
-export const AddDocHyperLinkMutation: ICommand<IAddDocHyperLinkMutationParams> = {
+export const AddDocHyperLinkMutation: IMutation<IAddDocHyperLinkMutationParams> = {
     type: CommandType.MUTATION,
     id: 'docs.mutation.add-hyper-link',
-    handler(accessor, params) {
+    handler(accessor, params: IAddDocHyperLinkMutationParams) {
         if (!params) {
             return false;
         }
+
         const docHyperLinkModel = accessor.get(DocHyperLinkModel);
         return docHyperLinkModel.addLink(params.unitId, params.link);
     },

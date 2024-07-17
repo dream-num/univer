@@ -168,7 +168,7 @@ export interface IEditorInputConfig {
 }
 
 export class TextSelectionRenderManager extends RxDisposable implements ITextSelectionRenderManager {
-    private readonly _onInputBefore$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+    private readonly _onInputBefore$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onInputBefore$ = this._onInputBefore$.asObservable();
 
     private readonly _onKeydown$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
@@ -819,6 +819,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     private _getCanvasOffset() {
+        // This is quiet ambiguous, when did the engine's canvas offset changes?
         const engine = this._scene?.getEngine() as Engine;
         return getCanvasOffsetByEngine(engine);
     }

@@ -243,7 +243,7 @@ const richTextTest: IDocumentData = {
  * Default workbook data
  */
 export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
-    id: 'workbook-01',
+    id: 'workbook-left',
     locale: LocaleType.ZH_CN,
     name: 'universheet',
     sheetOrder: ['sheet-01', 'sheet-02', 'sheet-03', 'sheet-04', 'sheet-05', 'sheet-06'],

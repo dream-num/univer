@@ -63,7 +63,7 @@ export {
     SelectionMoveType,
     DISABLE_NORMAL_SELECTIONS,
 } from './services/selections/selection-manager.service';
-export { IRefSelectionsService } from './services/selections/ref-selections.service';
+export { IRefSelectionsService, RefSelectionsService } from './services/selections/ref-selections.service';
 
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { NumfmtService } from './services/numfmt/numfmt.service';

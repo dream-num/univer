@@ -62,12 +62,24 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
     }
 
+    getLocation(): [string, string] {
+        return this._skeleton.getLocation();
+    }
+
     setRemainLastEnabled(enabled: boolean): void {
         this._remainLastEnabled = enabled;
     }
 
     setSkipLastEnabled(enabled: boolean): void {
         this._skipLastEnabled = enabled;
+    }
+
+    clearLastSelection(): void {
+        const last = this._selectionControls[this._selectionControls.length - 1];
+        if (last) {
+            last.dispose();
+            this._selectionControls.pop();
+        }
     }
 
     /**
@@ -92,6 +104,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         const listenerDisposables = new DisposableCollection();
 
         listenerDisposables.add(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            console.warn('debug start dragging', this._skeleton.worksheet?.getUnitId());
             this._onPointerDown(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -167,6 +180,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             // Clear already existed selections.
             this._reset();
 
+            // The selections' style would be colorful here. PromptController would change the color of
+            // selections later.
             for (const selectionWithStyle of selectionsWithStyles) {
                 const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
                 this._addSelectionControlBySelectionData(selectionData);

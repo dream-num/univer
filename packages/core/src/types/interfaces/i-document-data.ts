@@ -283,6 +283,12 @@ export interface ICustomRange {
     wholeEntity?: boolean;
 }
 
+// TODO: @weird94 this range should not be built-in. It makes custom ranges not
+// extensible for community users.
+
+/**
+ * @deprecated
+ */
 export enum CustomRangeType {
     HYPERLINK,
     FIELD, // 17.16 Fields and Hyperlinks
@@ -291,6 +297,7 @@ export enum CustomRangeType {
     COMMENT,
     CUSTOM,
     MENTION,
+    UNI_FORMULA,
 }
 
 /**

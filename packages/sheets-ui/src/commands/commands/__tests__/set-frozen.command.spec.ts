@@ -20,7 +20,7 @@ import { SheetsSelectionsService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ScrollManagerService } from '../../../services/scroll-manager.service';
+import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
     CancelFrozenCommand,
     SetColumnFrozenCommand,
@@ -34,7 +34,7 @@ describe('Test commands used for change selections', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let selectionManagerService: SheetsSelectionsService;
-    let scrollManagerService: ScrollManagerService;
+    let scrollManagerService: SheetScrollManagerService;
 
     const currentInfo = {
         unitId: 'test',
@@ -98,7 +98,7 @@ describe('Test commands used for change selections', () => {
 
         commandService = get(ICommandService);
         selectionManagerService = get(SheetsSelectionsService);
-        scrollManagerService = get(ScrollManagerService);
+        scrollManagerService = get(SheetScrollManagerService);
         scrollManagerService.setSearchParamAndRefresh({
             ...currentInfo,
         });

@@ -23,9 +23,7 @@ import {
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
 import { IEditorService, IShortcutService } from '@univerjs/ui';
-
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import {
@@ -44,7 +42,6 @@ import { DefaultDocUiConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';
-
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocClipboardController } from './controllers/clipboard.controller';

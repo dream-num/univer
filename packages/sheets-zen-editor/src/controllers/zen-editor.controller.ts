@@ -41,7 +41,7 @@ import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-re
 import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui';
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
@@ -52,7 +52,6 @@ export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = '__defaultDocumentZenEditorSpecialUni
 @OnLifecycle(LifecycleStages.Steady, ZenEditorController)
 export class ZenEditorController extends RxDisposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IZenEditorManagerService private readonly _zenEditorManagerService: IZenEditorManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -69,10 +68,7 @@ export class ZenEditorController extends RxDisposable {
 
     private _initialize() {
         this._syncZenEditorSize();
-
         this._commandExecutedListener();
-
-        // this._createZenEditorInstance();
     }
 
     private _createZenEditorInstance() {
@@ -157,11 +153,12 @@ export class ZenEditorController extends RxDisposable {
 
         this._zenZoneService.open();
 
+        const currentSheet = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
+
         // Need to clear undo/redo service when open zen mode.
         this._undoRedoService.clearUndoRedo(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
         this._univerInstanceService.focusUnit(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-
         this._univerInstanceService.setCurrentUnitForType(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
         const visibleState = this._editorBridgeService.isVisible();
@@ -169,6 +166,7 @@ export class ZenEditorController extends RxDisposable {
             this._editorBridgeService.changeVisible({
                 visible: true,
                 eventType: DeviceInputEventType.PointerDown,
+                unitId: currentSheet?.getUnitId() ?? '',
             });
         }
 

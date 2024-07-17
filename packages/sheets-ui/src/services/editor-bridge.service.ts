@@ -48,6 +48,7 @@ import { attachPrimaryWithCoord } from './selection/util';
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;
     eventType: DeviceInputEventType;
+    unitId: string;
     keycode?: KeyCode;
 }
 
@@ -111,6 +112,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     private _visible: IEditorBridgeServiceVisibleParam = {
         visible: false,
         eventType: DeviceInputEventType.Dblclick,
+        unitId: '',
     };
 
     private _currentEditCell: Nullable<ICurrentEditCellParam> = null;
@@ -203,6 +205,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const skeleton = ru.with(SheetSkeletonManagerService).getCurrentSkeleton();
         const selectionRenderService = ru.with(ISheetSelectionRenderService);
+        if (!skeleton) return;
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;

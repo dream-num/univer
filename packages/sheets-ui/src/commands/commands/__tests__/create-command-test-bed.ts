@@ -88,7 +88,11 @@ export interface ITestBed {
     sheet: Workbook;
 }
 
-export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+export function createCommandTestBed(
+    workbookData?: IWorkbookData,
+    dependencies?: Dependency[],
+    renderDependencies?: Dependency[]
+): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 

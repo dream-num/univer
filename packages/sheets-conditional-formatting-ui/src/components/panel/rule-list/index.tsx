@@ -16,6 +16,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Select, Tooltip } from '@univerjs/design';
+import { useObservable } from '@univerjs/ui';
 import { useHighlightRange } from '@univerjs/sheets-ui';
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -115,7 +116,7 @@ export const RuleList = (props: IRuleListProps) => {
     const localeService = useDependency(LocaleService);
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = useObservable(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET))!;
     const unitId = workbook.getUnitId();
     const worksheet = workbook.getActiveSheet();
     if (!worksheet) {

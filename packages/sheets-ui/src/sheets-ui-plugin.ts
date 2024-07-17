@@ -48,7 +48,6 @@ import {
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
-import { ScrollManagerService } from './services/scroll-manager.service';
 import { SheetSelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
@@ -84,6 +83,7 @@ import { SheetPrintInterceptorService } from './services/print-interceptor.servi
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { MoveRangeRenderController } from './controllers/move-range.controller';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
+import { SheetScrollManagerService } from './services/scroll-manager.service';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -114,7 +114,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             [IAutoFillService, { useClass: AutoFillService }],
             [SheetPrintInterceptorService],
 
-            [ScrollManagerService],
             // This would be removed from global injector and moved into RenderUnit provider.
             // [SheetSkeletonManagerService],
             [IStatusBarService, { useClass: StatusBarService }],
@@ -128,7 +127,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             [ActiveWorksheetController],
             [AutoHeightController],
             [FormulaEditorController],
-            [HeaderFreezeRenderController],
             [SheetClipboardController],
             [SheetsRenderService],
             [
@@ -150,8 +148,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorBaseController],
             [SheetPermissionInitController],
             // [MoveRangeController],
-        ] as Dependency[]
-        ).forEach((d) => injector.add(d));
+        ] as Dependency[]).forEach((d) => injector.add(d));
 
         this._injector.add(
             [
@@ -188,13 +185,13 @@ export class UniverSheetsUIPlugin extends Plugin {
     private _registerRenderModules(): void {
         ([
             [HeaderMoveRenderController],
-            [HeaderFreezeRenderController],
             [HeaderUnhideRenderController],
             [HeaderResizeRenderController],
-
             // Caution: ScrollRenderController should placed before ZoomRenderController
             // because ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
+            [SheetScrollManagerService],
             [SheetsScrollRenderController],
+            [HeaderFreezeRenderController],
             [SheetsZoomRenderController],
 
             [FormatPainterRenderController],

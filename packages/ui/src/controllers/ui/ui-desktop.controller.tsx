@@ -24,10 +24,10 @@ import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
 
 import { ILayoutService } from '../../services/layout/layout.service';
-import { DesktopApp } from '../../views/DesktopApp';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
+import { DesktopWorkbench } from '../../views/workbench/Workbench';
 import { type IUniverUIConfig, type IWorkbenchOptions, UI_CONFIG_KEY } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
@@ -113,7 +113,7 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(DesktopApp, injector);
+    const ConnectedApp = connectInjector(DesktopWorkbench, injector);
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
 
     function render() {

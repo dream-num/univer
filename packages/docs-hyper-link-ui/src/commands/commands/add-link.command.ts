@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, type ICommand, ICommandService, sequenceExecute, Tools } from '@univerjs/core';
+import { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import { AddDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
 
@@ -30,9 +30,10 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
         if (!params) {
             return false;
         }
+
         const { payload, unitId } = params;
         const commandService = accessor.get(ICommandService);
-        const id = Tools.generateRandomId();
+        const id = generateRandomId();
         const doMutation = addCustomRangeBySelectionFactory(
             accessor,
             {
@@ -41,18 +42,12 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
             }
         );
         if (doMutation) {
-            const commentMutation = {
+            const hyperLinkMutation = {
                 id: AddDocHyperLinkMutation.id,
-                params: {
-                    unitId,
-                    link: {
-                        payload,
-                        id,
-                    },
-                },
+                params: { unitId, link: { payload, id } },
             };
 
-            return (await sequenceExecute([commentMutation, doMutation], commandService)).result;
+            return (await sequenceExecuteAsync([hyperLinkMutation, doMutation], commandService)).result;
         }
 
         return false;

@@ -28,28 +28,35 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
+import { useActiveWorkbook } from '../../components/hook';
 
 const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
 
 export function ZoomSlider() {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useActiveWorkbook();
 
     const getCurrentZoom = useCallback(() => {
-        const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+        if (!workbook) return 100;
+
+        const worksheet = workbook.getActiveSheet();
         const currentZoom = (worksheet && (worksheet.getZoomRatio() * 100)) || 100;
         return Math.round(currentZoom);
-    }, [univerInstanceService]);
+    }, [workbook]);
 
     const [zoom, setZoom] = useState(() => getCurrentZoom());
 
     useEffect(() => {
+        setZoom(getCurrentZoom());
+
         const disposable = commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetZoomRatioOperation.id || commandInfo.id === SetWorksheetActiveOperation.id) {
                 const currentZoom = getCurrentZoom();
                 setZoom(currentZoom);
             }
         });
+
         return disposable.dispose;
     }, [commandService, getCurrentZoom]);
 

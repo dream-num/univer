@@ -333,9 +333,15 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../packages/ui
+      '@univerjs/uni-formula':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-formula
       '@univerjs/uniscript':
         specifier: workspace:*
         version: link:../packages/uniscript
+      '@univerjs/uniui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uniui
       '@wendellhu/redi':
         specifier: 0.16.0
         version: 0.16.0
@@ -391,6 +397,146 @@ importers:
       typescript:
         specifier: ^5.5.3
         version: 5.5.3
+
+  packages-experimental/uni-formula:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.46
+        version: 0.1.58(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../../packages/engine-formula
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../../packages/rpc
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../../packages/sheets-formula
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@wendellhu/redi':
+        specifier: 0.16.0
+        version: 0.16.0
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.5.3
+      vite:
+        specifier: ^5.3.4
+        version: 5.3.4(@types/node@20.14.11)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^2.0.3
+        version: 2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+
+  packages-experimental/uni-formula-ui:
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/uni-formula':
+        specifier: workspace:*
+        version: link:../uni-formula
+      '@wendellhu/redi':
+        specifier: 0.16.0
+        version: 0.16.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.5.3
+      vite:
+        specifier: ^5.3.4
+        version: 5.3.4(@types/node@20.14.11)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^2.0.3
+        version: 2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+
+  packages-experimental/uniui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.46
+        version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      rc-util:
+        specifier: ^5.43.0
+        version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.3
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.0
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../packages/engine-render
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@wendellhu/redi':
+        specifier: 0.16.0
+        version: 0.16.0
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.5.3
+      vite:
+        specifier: ^5.3.4
+        version: 5.3.4(@types/node@20.14.11)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^2.0.3
+        version: 2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/core:
     dependencies:
@@ -5492,6 +5638,12 @@ packages:
   '@univerjs/icons-svg@0.1.58':
     resolution: {integrity: sha512-c7DmkpQMt4jNSCdfPNf3sUczrdFCnABjupaJEO3CpWe556sIAcHY3kEfcrtOgbkTjGcmS07PD88Ai3s6K3eQug==}
 
+  '@univerjs/icons@0.1.58':
+    resolution: {integrity: sha512-tnWFQ7IojxovMaYTKMOdAcwEBMm6JV+6XygOUTYwqf+YHwRsEePdQ7Tl0u1mtJAmzDssATLcb3t8xGb3wh6YuA==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
   '@univerjs/icons@0.1.64':
     resolution: {integrity: sha512-nKCsfxG2pwHT2x9nTwHvVUGr/dQxAQi76zvhJprm0Gqu8ywQdcCq7vX6D7fHiFwZPGQVO/91gbbwGfsG93mIpg==}
     peerDependencies:
@@ -9707,6 +9859,10 @@ packages:
     peerDependencies:
       react: '>=16.6.0'
       react-dom: '>=16.6.0'
+
+  react@18.2.0:
+    resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
+    engines: {node: '>=0.10.0'}
 
   react@18.3.1:
     resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
@@ -14462,6 +14618,16 @@ snapshots:
 
   '@univerjs/icons-svg@0.1.58': {}
 
+  '@univerjs/icons@0.1.58(react-dom@18.3.1(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.3.1(react@18.2.0)
+
+  '@univerjs/icons@0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
   '@univerjs/icons@0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
@@ -19086,6 +19252,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  react-dom@18.3.1(react@18.2.0):
+    dependencies:
+      loose-envify: 1.4.0
+      react: 18.2.0
+      scheduler: 0.23.2
+
   react-dom@18.3.1(react@18.3.1):
     dependencies:
       loose-envify: 1.4.0
@@ -19206,6 +19378,10 @@ snapshots:
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+
+  react@18.2.0:
+    dependencies:
+      loose-envify: 1.4.0
 
   react@18.3.1:
     dependencies:

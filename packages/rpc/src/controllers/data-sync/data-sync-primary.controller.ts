@@ -22,8 +22,10 @@ import {
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
+    toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs/operators';
 
@@ -40,6 +42,8 @@ import { fromModule, toModule } from '../../services/rpc/rpc.service';
 /**
  * This controller is responsible for syncing data from the primary thread to
  * the worker thread.
+ *
+ * Note that only spreadsheets will be synced to the remote calculation instance by default.
  */
 @OnLifecycle(LifecycleStages.Starting, DataSyncPrimaryController)
 export class DataSyncPrimaryController extends RxDisposable {
@@ -64,6 +68,15 @@ export class DataSyncPrimaryController extends RxDisposable {
 
     registerSyncingMutations(mutation: IMutation<object>): void {
         this._syncingMutations.add(mutation.id);
+    }
+
+    /**
+     * Only spreadsheets would be synced to the web worker in normal situations. If you would like to
+     * sync other types of documents, you should manually call this method with that document's id.
+     */
+    syncUnit(unitId: string): IDisposable {
+        this._syncingUnits.add(unitId);
+        return toDisposable(() => this._syncingUnits.delete(unitId));
     }
 
     private _initRPCChannels(): void {
@@ -102,6 +115,7 @@ export class DataSyncPrimaryController extends RxDisposable {
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo, options) => {
             const { type, params, id } = commandInfo;
             const unitId = (params as { unitId: string })?.unitId || '';
+
             if (type === CommandType.MUTATION &&
                 // only sync mutations to the worker thread
                 (!unitId || this._syncingUnits.has(unitId)) &&

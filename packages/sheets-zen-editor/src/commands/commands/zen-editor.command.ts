@@ -34,6 +34,7 @@ export const CancelZenEditCommand: ICommand = {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
                 keycode: KeyCode.ESC,
+                unitId: '',
             });
         }
 
@@ -66,6 +67,7 @@ export const ConfirmZenEditCommand: ICommand = {
             editorBridgeService.changeVisible({
                 visible: false,
                 eventType: DeviceInputEventType.PointerDown,
+                unitId: '',
             });
         }
 

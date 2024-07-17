@@ -163,24 +163,6 @@ export class CalculateController extends Disposable {
          * Assignment operation after formula calculation.
          */
         this._calculateFormulaService.executionInProgressListener$.subscribe((data) => {
-            const {
-                totalFormulasToCalculate,
-                completedFormulasCount,
-                totalArrayFormulasToCalculate,
-                completedArrayFormulasCount,
-                stage,
-            } = data;
-
-            if (totalArrayFormulasToCalculate > 0) {
-                // console.log(
-                //     `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
-                // );
-            } else {
-                // console.log(
-                //     `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
-                // );
-            }
-
             this._commandService.executeCommand(
                 SetFormulaCalculationNotificationMutation.id,
                 {

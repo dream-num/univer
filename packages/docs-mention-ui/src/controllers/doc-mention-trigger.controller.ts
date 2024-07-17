@@ -20,6 +20,7 @@ import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionMan
 import { DocMentionService } from '@univerjs/docs-mention';
 import { Inject } from '@wendellhu/redi';
 import { DocMentionPopupService } from '../services/doc-mention-popup.service';
+import { CloseMentionEditPopupOperation, ShowMentionEditPopupOperation } from '../commands/operations/mention-popup.operation';
 
 @OnLifecycle(LifecycleStages.Rendered, DocMentionTriggerController)
 export class DocMentionTriggerController extends Disposable {
@@ -41,12 +42,14 @@ export class DocMentionTriggerController extends Disposable {
                     const params = commandInfo.params as IInsertCommandParams;
                     const activeRange = this._textSelectionManagerService.getActiveRange();
                     if (params.body.dataStream === '@' && activeRange && !Tools.isDefine(this._docMentionService.editing)) {
-                        this._docMentionService.startEditing(activeRange.startOffset - 1);
+                        this._commandService.executeCommand(ShowMentionEditPopupOperation.id, {
+                            startIndex: activeRange.startOffset - 1,
+                        });
                     }
                 }
 
                 if (commandInfo.id === MoveCursorOperation.id) {
-                    this._docMentionService.endEditing();
+                    this._commandService.executeCommand(CloseMentionEditPopupOperation.id);
                 }
 
                 if (commandInfo.id === DeleteLeftCommand.id) {
@@ -55,7 +58,7 @@ export class DocMentionTriggerController extends Disposable {
                     }
                     const activeRange = this._textSelectionManagerService.getActiveRange();
                     if (activeRange && activeRange.endOffset <= this._docMentionPopupService.editPopup.anchor) {
-                        this._docMentionService.endEditing();
+                        this._commandService.executeCommand(CloseMentionEditPopupOperation.id);
                     }
                 }
             })

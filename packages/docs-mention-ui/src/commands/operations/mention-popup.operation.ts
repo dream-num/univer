@@ -15,6 +15,7 @@
  */
 
 import { CommandType, type ICommand } from '@univerjs/core';
+import { DocMentionService } from '@univerjs/docs-mention';
 
 export interface IShowMentionInfoPopupOperationParams {
     unitId: string;
@@ -37,11 +38,20 @@ export const CloseMentionInfoPopupOperation: ICommand = {
     },
 };
 
-export const ShowMentionEditPopupOperation: ICommand = {
+export interface IShowMentionEditPopupOperationParams {
+    startIndex: number;
+}
+
+export const ShowMentionEditPopupOperation: ICommand<IShowMentionEditPopupOperationParams> = {
     type: CommandType.OPERATION,
     id: 'docs.operation.show-mention-edit-popup',
     handler(accessor, params) {
-        return false;
+        if (!params) {
+            return false;
+        }
+        const docMentionService = accessor.get(DocMentionService);
+        docMentionService.startEditing(params.startIndex);
+        return true;
     },
 };
 
@@ -49,6 +59,8 @@ export const CloseMentionEditPopupOperation: ICommand = {
     type: CommandType.OPERATION,
     id: 'docs.operation.close-mention-edit-popup',
     handler(accessor) {
-        return false;
+        const docMentionService = accessor.get(DocMentionService);
+        docMentionService.endEditing();
+        return true;
     },
 };

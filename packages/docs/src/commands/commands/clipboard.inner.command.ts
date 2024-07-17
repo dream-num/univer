@@ -16,10 +16,8 @@
 
 import type {
     ICommand,
-    IDeleteAction,
     IDocumentBody,
     IMutationInfo,
-    IRetainAction,
     ITextRange,
     JSONXActions,
 } from '@univerjs/core';
@@ -33,14 +31,12 @@ import {
     TextX,
     TextXActionType,
 } from '@univerjs/core';
-import type { ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
-import { getDeleteSelection } from '../../basics/selection';
 import { getRichTextEditPath } from '../util';
 import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 

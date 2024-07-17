@@ -27,7 +27,7 @@ import {
     TextXActionType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange, ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
+import type { IActiveTextRange, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 
 import type { IAccessor } from '@wendellhu/redi';

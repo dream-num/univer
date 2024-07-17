@@ -35,6 +35,7 @@ import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } fro
 import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
+import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 export class DocDrawingUpdateRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -49,7 +50,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService
     ) {
         super();
 
@@ -390,6 +392,17 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 this._updateDrawingsEditStatus();
             })
         );
+
+        this._docRefreshDrawingsService.refreshDrawings$.subscribe((skeleton) => {
+            if (skeleton == null) {
+                return;
+            }
+
+            // To wait the image is rendered.
+            queueMicrotask(() => {
+                this._updateDrawingsEditStatus();
+            });
+        });
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted(async (command: ICommandInfo) => {

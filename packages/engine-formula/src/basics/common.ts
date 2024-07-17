@@ -52,8 +52,8 @@ export interface ISheetItem {
     columnCount: number;
     rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;
     columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>;
-    defaultColumnWidth: number;
-    defaultRowHeight: number;
+    defaultColumnWidth?: number;
+    defaultRowHeight?: number;
 }
 
 export interface ISheetData {

@@ -205,6 +205,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const skeleton = ru.with(SheetSkeletonManagerService).getCurrentSkeleton();
         const selectionRenderService = ru.with(ISheetSelectionRenderService);
+        if (!skeleton) return;
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;

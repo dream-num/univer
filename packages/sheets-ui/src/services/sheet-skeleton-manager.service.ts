@@ -84,8 +84,8 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         }));
     }
 
-    getCurrentSkeleton(): SpreadsheetSkeleton {
-        return this.getCurrent()!.skeleton;
+    getCurrentSkeleton(): Nullable<SpreadsheetSkeleton> {
+        return this.getCurrent()?.skeleton;
     }
 
     getCurrent(): Nullable<ISheetSkeletonManagerParam> {
@@ -197,6 +197,8 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     /** @deprecated Use function `attachRangeWithCoord` instead.  */
     attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord> {
         const skeleton = this.getCurrentSkeleton();
+        if (!skeleton) return null;
+
         return attachRangeWithCoord(skeleton, range);
     }
 

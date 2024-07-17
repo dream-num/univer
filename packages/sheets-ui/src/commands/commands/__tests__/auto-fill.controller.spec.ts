@@ -267,12 +267,14 @@ describe('Test auto fill rules in controller', () => {
     let commandService: ICommandService;
     let autoFillController: AutoFillController;
     let themeService: ThemeService;
+
     let getValues: (
         startRow: number,
         startColumn: number,
         endRow: number,
         endColumn: number
     ) => Array<Array<Nullable<ICellData>>> | undefined;
+
     let getStyles: (
         startRow: number,
         startColumn: number,
@@ -280,6 +282,7 @@ describe('Test auto fill rules in controller', () => {
         endColumn: number
     ) => Array<Array<Nullable<IStyleData>>> | undefined;
     let selectionManagerService: SheetsSelectionsService;
+
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],

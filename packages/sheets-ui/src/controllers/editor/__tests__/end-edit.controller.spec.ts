@@ -124,11 +124,12 @@ describe('Test EndEditController', () => {
             if (!documentLayoutObject) {
                 throw new Error('documentLayoutObject is undefined');
             }
-
+            // @ts-ignore
             return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot(), localeService, get(IMockFunctionService));
         };
 
         normalizeStringByLexer = (str: string) => {
+            // @ts-ignore
             return normalizeString(str, lexerTreeBuilder, get(IMockFunctionService));
         };
     });

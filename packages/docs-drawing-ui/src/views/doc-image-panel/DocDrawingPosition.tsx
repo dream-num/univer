@@ -100,14 +100,6 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const [followTextMove, setFollowTextMove] = useState(true);
     const [showPanel, setShowPanel] = useState(true);
 
-    function onFocus() {
-        textSelectionRenderService.blur();
-    }
-
-    function onBlur() {
-        textSelectionRenderService.focus();
-    }
-
     function handlePositionChange(
         direction: 'positionH' | 'positionV',
         value: IObjectPositionH | IObjectPositionV
@@ -174,11 +166,27 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             return;
         }
 
-        for (const page of skeletonData.pages) {
-            const { marginLeft, skeDrawings } = page;
+        const { pages, skeHeaders, skeFooters } = skeletonData;
+
+        for (const page of pages) {
+            const { marginLeft, skeDrawings, headerId, footerId, pageWidth } = page;
 
             if (skeDrawings.has(drawingId)) {
                 drawing = skeDrawings.get(drawingId);
+                pageMarginLeft = marginLeft;
+                break;
+            }
+
+            const headerPage = skeHeaders.get(headerId)?.get(pageWidth);
+            if (headerPage?.skeDrawings.has(drawingId)) {
+                drawing = headerPage?.skeDrawings.get(drawingId);
+                pageMarginLeft = marginLeft;
+                break;
+            }
+
+            const footerPage = skeFooters.get(footerId)?.get(pageWidth);
+            if (footerPage?.skeDrawings.has(drawingId)) {
+                drawing = footerPage?.skeDrawings.get(drawingId);
                 pageMarginLeft = marginLeft;
                 break;
             }
@@ -230,8 +238,10 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
         const skeleton = renderManagerService.getRenderById(unitId)
             ?.with(DocSkeletonManagerService).getSkeleton();
+        const segmentId = textSelectionRenderService.getSegment();
+        const segmentPage = textSelectionRenderService.getSegmentPage();
 
-        const drawing = documentDataModel?.getBody()?.customBlocks?.find((c) => c.blockId === drawingId);
+        const drawing = documentDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.customBlocks?.find((c) => c.blockId === drawingId);
 
         if (drawing == null || skeleton == null) {
             return;
@@ -239,7 +249,7 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
         const { startIndex } = drawing;
 
-        const glyph = skeleton.findNodeByCharIndex(startIndex);
+        const glyph = skeleton.findNodeByCharIndex(startIndex, segmentId, segmentPage);
         const line = glyph?.parent?.parent;
         const column = line?.parent;
         const paragraphStartLine = column?.lines.find((l) => l.paragraphIndex === line?.paragraphIndex && l.paragraphStart);

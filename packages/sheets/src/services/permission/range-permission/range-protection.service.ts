@@ -116,6 +116,7 @@ export class RangeProtectionService extends Disposable {
                         list.forEach((rule) => {
                             getAllRangePermissionPoint().forEach((Factor) => {
                                 const instance = new Factor(unitId, subUnitId, rule.permissionId);
+                                instance.value = false;
                                 this._permissionService.addPermissionPoint(instance);
                             });
                         });

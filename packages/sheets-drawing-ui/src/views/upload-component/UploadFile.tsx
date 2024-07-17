@@ -15,8 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ICommandService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, useDependency } from '@univerjs/core';
 import React, { useRef } from 'react';
 import type { ICustomComponentProps } from '@univerjs/ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST } from '@univerjs/drawing';

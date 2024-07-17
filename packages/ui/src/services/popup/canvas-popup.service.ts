@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, Tools } from '@univerjs/core';
+import { createIdentifier, Disposable, Tools } from '@univerjs/core';
 import type { IRectPopupProps } from '@univerjs/design';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
-import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 

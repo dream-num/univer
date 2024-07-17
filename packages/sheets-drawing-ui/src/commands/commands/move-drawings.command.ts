@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import type { IAccessor } from '@wendellhu/redi';
 import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
 
 import { transformToDrawingPosition } from '../../basics/transform-position';

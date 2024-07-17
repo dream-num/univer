@@ -62,7 +62,6 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-hyper-link": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
@@ -71,7 +70,6 @@
         "@univerjs/protocol": "0.1.38-alpha.23",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.3",
         "vite": "^5.3.4",

@@ -17,11 +17,10 @@
 // FIXME: DO NOT USE GLOBAL STYLES
 import './index.less';
 
-import { ICommandService, LocaleService, Range } from '@univerjs/core';
+import { ICommandService, LocaleService, Range, useDependency, useInjector } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { FormatType } from '@univerjs/sheets';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 
 import { MENU_OPTIONS } from '../../base/const/MENU-OPTIONS';

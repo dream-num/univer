@@ -18,6 +18,7 @@ import type { ICommandInfo, Nullable } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
+    Inject,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -28,7 +29,6 @@ import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
 import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
 import { IDialogService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { DrawingRenderService } from '../services/drawing-render.service';

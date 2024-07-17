@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutation, IStyleData } from '@univerjs/core';
-import { Disposable, ICommandService, IConfigService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { type IDisposable, Optional } from '@wendellhu/redi';
+import type { IDisposable, IMutation, IStyleData } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, LifecycleStages, OnLifecycle, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';

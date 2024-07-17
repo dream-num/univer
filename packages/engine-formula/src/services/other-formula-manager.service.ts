@@ -15,8 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Disposable } from '@univerjs/core';
 
 import type { IDirtyUnitOtherFormulaMap, IFormulaDataItem, IOtherFormulaData } from '../basics/common';
 

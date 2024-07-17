@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, Range } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';

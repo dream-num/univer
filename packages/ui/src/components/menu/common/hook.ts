@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useObservable } from '@wendellhu/redi/react-bindings';
+import { useObservable } from '@univerjs/core';
 import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 
 export function useMenuItemState(

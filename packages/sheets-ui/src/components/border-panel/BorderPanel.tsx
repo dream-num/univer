@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { BorderStyleTypes } from '@univerjs/core';
+import { BorderStyleTypes, useDependency } from '@univerjs/core';
 import { ColorPicker, Dropdown, Menu, MenuItem } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
 import { BorderStyleManagerService, type IBorderInfo } from '@univerjs/sheets';
 import { ComponentManager } from '@univerjs/ui';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 
 import { BorderLine } from './border-line/BorderLine';

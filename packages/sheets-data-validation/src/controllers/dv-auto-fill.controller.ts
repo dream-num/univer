@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { DataValidationType, Disposable, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, Injector, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';

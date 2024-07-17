@@ -15,9 +15,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { BooleanNumber } from '@univerjs/core';
+import { BooleanNumber, useDependency } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import cl from 'clsx';
 import type { IHighlightCell } from '@univerjs/sheets-conditional-formatting';
 import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';

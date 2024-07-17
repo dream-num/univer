@@ -17,8 +17,7 @@
 import React, { useEffect, useState } from 'react';
 
 import type { Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';

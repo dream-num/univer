@@ -16,12 +16,11 @@
 
 import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
-import { HorizontalAlign, ICommandService, isFormulaString, ThemeService, VerticalAlign } from '@univerjs/core';
+import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, VerticalAlign } from '@univerjs/core';
 import type { ICellRenderContext, IDataValidationRule, IStyleData, Nullable } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import type { BaseDataValidator, IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
-import { Inject } from '@wendellhu/redi';
 import type { CheckboxValidator } from '../validators/checkbox-validator';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../validators/checkbox-validator';
 import { DataValidationFormulaService } from '../services/dv-formula.service';

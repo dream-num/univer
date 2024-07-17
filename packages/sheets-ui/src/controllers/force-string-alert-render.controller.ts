@@ -15,9 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { CellValueType, Disposable, isRealNum, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { CellValueType, Disposable, Inject, isRealNum, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 
-import { Inject } from '@wendellhu/redi';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { HoverManagerService } from '../services/hover-manager.service';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';

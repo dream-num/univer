@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Styles, Univer, Workbook, Worksheet } from '@univerjs/core';
+import type { Injector, Styles, Univer, Workbook, Worksheet } from '@univerjs/core';
 import { cellToRange, CellValueType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';

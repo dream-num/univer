@@ -58,19 +58,29 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/uni-formula": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
-        "rxjs": ">=7.0.0"
+        "@univerjs/uni-formula": "workspace:*"
     },
     "dependencies": {},
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/uni-formula": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.3.4",
         "vitest": "^2.0.3"
+    },
+    "univerSpace": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*"
     }
 }

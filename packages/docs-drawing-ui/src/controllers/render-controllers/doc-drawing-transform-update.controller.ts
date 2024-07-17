@@ -19,6 +19,7 @@ import {
     BooleanNumber,
     Disposable,
     ICommandService,
+    Inject,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
@@ -27,7 +28,6 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 
 interface IDrawingParamsWithBehindText {
     unitId: string;

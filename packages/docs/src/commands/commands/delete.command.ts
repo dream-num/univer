@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions } from '@univerjs/core';
+import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
     getCustomDecorationSlice,
@@ -30,7 +30,6 @@ import {
 import type { IActiveTextRange, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 
-import type { IAccessor } from '@wendellhu/redi';
 import type { ITextActiveRange } from '../../services/text-selection-manager.service';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';

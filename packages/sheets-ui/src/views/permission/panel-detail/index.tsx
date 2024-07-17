@@ -16,9 +16,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Avatar, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { createInternalEditorID, IAuthzIoService, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
 import type { IRange, Workbook } from '@univerjs/core';
-import { createInternalEditorID, IAuthzIoService, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IDialogService, ISidebarService, RangeSelector, useObservable } from '@univerjs/ui';
 import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';

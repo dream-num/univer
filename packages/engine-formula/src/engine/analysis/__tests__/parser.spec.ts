@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@wendellhu/redi';
+import type { Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { ErrorType } from '../../../basics/error-type';

@@ -15,7 +15,10 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { Disposable, ICommandService,
+import {
+    Disposable,
+    ICommandService,
+    Inject,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -24,7 +27,6 @@ import { Disposable, ICommandService,
 
 import type { ISheetRangeLocation } from '@univerjs/sheets';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { type ICellValueCompareFn, SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { isNullValue } from '../controllers/utils';

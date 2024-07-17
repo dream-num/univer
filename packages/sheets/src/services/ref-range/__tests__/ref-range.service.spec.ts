@@ -15,10 +15,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { ICommand, IRange, IWorkbookData, Nullable } from '@univerjs/core';
-import { ICommandService, ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, ICommand, IRange, IWorkbookData, Nullable } from '@univerjs/core';
+import { ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 
 import { RefRangeService } from '../ref-range.service';
 import { SheetsSelectionsService } from '../../selections/selection-manager.service';

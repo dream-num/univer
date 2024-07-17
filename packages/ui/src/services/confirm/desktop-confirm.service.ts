@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, toDisposable } from '@univerjs/core';
-import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
+import { connectInjector, Disposable, toDisposable } from '@univerjs/core';
+import { type IDisposable, Inject, Injector } from '@univerjs/core';
 import { Subject } from 'rxjs';
 
-import { connectInjector } from '@wendellhu/redi/react-bindings';
 import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 import { ConfirmPart } from '../../views/components/confirm-part/ConfirmPart';

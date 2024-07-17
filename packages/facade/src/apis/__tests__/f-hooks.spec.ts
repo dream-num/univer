@@ -16,7 +16,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LifecycleService, LifecycleStages } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
+import type { Injector } from '@univerjs/core';
 
 import type { FUniver } from '../facade';
 import { createFacadeTestBed } from './create-test-bed';

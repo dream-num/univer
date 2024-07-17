@@ -19,14 +19,13 @@ import {
     Direction,
     Disposable,
     ICommandService,
-    RANGE_TYPE,
-    toDisposable,
-} from '@univerjs/core';
+    Inject,
+    Injector,
+    RANGE_TYPE, toDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import type { SheetsSelectionsService } from '@univerjs/sheets';
 import { getSelectionsService, ScrollToCellOperation } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
+import { createIdentifier } from '@univerjs/core';
 
 import type { IChannel, IMessageProtocol } from './rpc.service';
 import { ChannelClient, ChannelServer } from './rpc.service';

@@ -15,11 +15,10 @@
  */
 
 import { Button } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import React from 'react';
 import { ISidebarService, useObservable } from '@univerjs/ui';
 import type { Workbook } from '@univerjs/core';
-import { IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
 import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../basics/const/permission';

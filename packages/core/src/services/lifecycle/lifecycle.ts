@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Ctor, DependencyIdentifier } from '@wendellhu/redi';
+import type { Ctor, DependencyIdentifier } from '../../common/di';
 
 /**
  * This enum defines multiple lifecycle stages in Univer SDK.

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor, ICommand } from '@univerjs/core';
+import { CommandType, ICommandService } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { RemoveDocDrawingCommand } from './remove-doc-drawing.command';

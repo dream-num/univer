@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -25,8 +25,6 @@ import {
 } from '@univerjs/sheets';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
-import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import {

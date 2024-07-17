@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 

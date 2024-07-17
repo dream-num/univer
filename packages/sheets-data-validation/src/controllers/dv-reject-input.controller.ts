@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { DataValidationErrorStyle, Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { DataValidationErrorStyle, Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 import React from 'react';
 import { Button } from '@univerjs/design';

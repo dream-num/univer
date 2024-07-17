@@ -15,8 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import type { BaseObject } from '@univerjs/engine-render';

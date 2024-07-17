@@ -15,7 +15,7 @@
  */
 
 import React from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { DataValidationDetail } from '../detail';
 import { DataValidationList } from '../list';

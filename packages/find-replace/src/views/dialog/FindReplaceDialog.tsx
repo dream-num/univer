@@ -16,10 +16,8 @@
 
 import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
 import { ILayoutService, IMessageService, useObservable } from '@univerjs/ui';
-import type { Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, LocaleService } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { ICommandService, IContextService, LocaleService, useDependency } from '@univerjs/core';
 import type { ForwardedRef } from 'react';
 import React, { forwardRef, Fragment, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { fromEvent } from 'rxjs';

@@ -15,8 +15,7 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import React, { useState } from 'react';
 import { Select } from '@univerjs/design';
 import clsx from 'clsx';

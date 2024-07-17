@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, ICommandService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DependentOn, ICommandService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';

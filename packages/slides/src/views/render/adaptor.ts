@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IPageElement, PageElementType } from '@univerjs/core';
+import type { Injector, IPageElement, PageElementType } from '@univerjs/core';
 import { Registry } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
-import type { Injector } from '@wendellhu/redi';
 
 export abstract class ObjectAdaptor {
     zIndex = 0;

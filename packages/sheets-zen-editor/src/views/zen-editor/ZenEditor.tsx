@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
 

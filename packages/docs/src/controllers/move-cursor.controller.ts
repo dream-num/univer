@@ -20,6 +20,7 @@ import {
     Direction,
     Disposable,
     ICommandService,
+    Inject,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -32,7 +33,6 @@ import type {
     INodeSearch,
 } from '@univerjs/engine-render';
 import { IRenderManagerService, NodePositionConvertToCursor, RANGE_DIRECTION } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 
 import { getDocObject } from '../basics/component-tools';

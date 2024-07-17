@@ -16,8 +16,7 @@
 
 import React, { useState } from 'react';
 import type { CellValue, Nullable } from '@univerjs/core';
-import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { DataValidationErrorStyle, ICommandService, useDependency } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import dayjs from 'dayjs';

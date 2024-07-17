@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { CellValueType, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { CellValueType, Inject, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';

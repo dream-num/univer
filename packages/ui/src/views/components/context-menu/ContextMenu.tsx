@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, useDependency, useInjector } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import type { IMouseEvent } from '@univerjs/engine-render';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Menu } from '../../../components/menu/desktop/Menu';

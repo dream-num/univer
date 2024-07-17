@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import { COPY_TYPE, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME, SheetSelectionRenderService } from '@univerjs/sheets-ui';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { getSetCellFormulaMutations } from '../formula-clipboard.controller';

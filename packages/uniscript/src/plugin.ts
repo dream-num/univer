@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, Tools } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, LocaleService, Plugin, Tools } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 
 import type { IUniverUniscriptConfig } from './controllers/uniscript.controller';
 import { DefaultUniscriptConfig, UniscriptController } from './controllers/uniscript.controller';

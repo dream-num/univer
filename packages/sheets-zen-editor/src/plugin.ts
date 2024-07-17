@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 
 import { ZenEditorController } from './controllers/zen-editor.controller';
 import type { IUniverSheetsZenEditorUIConfig } from './controllers/zen-editor-ui.controller';

@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { MentionProps } from '@univerjs/design';
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@univerjs/core';
 
 export interface IThreadCommentMentionDataSource {
     getMentions(search: string, unitId: string, subUnitId: string): Promise<IThreadCommentMention[]>;

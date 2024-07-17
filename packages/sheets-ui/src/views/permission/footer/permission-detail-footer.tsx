@@ -15,10 +15,9 @@
  */
 
 import { Button } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { IAuthzIoService, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import React from 'react';
 import { ISidebarService, useObservable } from '@univerjs/ui';
-import { IAuthzIoService, ICommandService, LocaleService } from '@univerjs/core';
 import { CreateRequest_WorkSheetObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { AddRangeProtectionCommand } from '@univerjs/sheets';
 import { SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';

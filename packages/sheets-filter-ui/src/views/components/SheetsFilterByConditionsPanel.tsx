@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import type { ISelectProps } from '@univerjs/design';
 import { Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useMemo } from 'react';
 
 import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';

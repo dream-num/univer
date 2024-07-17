@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
+import type { IAccessor, IDisposable } from '../../common/di';
+import { createIdentifier, Inject, Injector } from '../../common/di';
 
 import { findLast, remove } from '../../common/array';
 import { sequence, sequenceAsync } from '../../common/sequence';

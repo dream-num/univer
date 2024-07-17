@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
 import { HoverManagerService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 import { debounceTime } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookViewPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetViewPermission } from '@univerjs/sheets';

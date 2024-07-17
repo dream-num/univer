@@ -61,7 +61,6 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
@@ -71,7 +70,6 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.3",

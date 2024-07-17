@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
 import type { IDrawingParam } from '@univerjs/drawing';

@@ -16,7 +16,7 @@
 
 // Refer to packages/ui/src/views/App.tsx
 
-import { IContextService, IUniverInstanceService, LocaleService, ThemeService } from '@univerjs/core';
+import { IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import type { ILocale } from '@univerjs/design';
 import {
@@ -33,7 +33,6 @@ import {
     useObservable,
     ZenZone,
 } from '@univerjs/ui';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';

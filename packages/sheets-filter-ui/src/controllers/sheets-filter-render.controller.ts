@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
-import { CommandType, fromCallback, ICommandService, RxDisposable, ThemeService } from '@univerjs/core';
+import type { IDisposable, IRange, Workbook } from '@univerjs/core';
+import { CommandType, fromCallback, ICommandService, Inject, Injector, RxDisposable, ThemeService } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
@@ -23,8 +23,6 @@ import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import { FILTER_MUTATIONS, ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
 import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import type { ISheetsFilterButtonShapeProps } from '../views/widgets/filter-button.shape';

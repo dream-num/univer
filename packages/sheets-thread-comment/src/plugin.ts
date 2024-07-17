@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
-import { DependentOn, ICommandService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
+import { DependentOn, ICommandService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverSheetsThreadCommentBasePlugin } from '@univerjs/sheets-thread-comment-base';
 import type { IUniverSheetsThreadCommentConfig } from './controllers/sheets-thread-comment.controller';

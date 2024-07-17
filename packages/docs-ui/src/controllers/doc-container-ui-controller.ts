@@ -15,8 +15,7 @@
  */
 
 import type { LocaleType } from '@univerjs/core';
-import { LocaleService } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, LocaleService } from '@univerjs/core';
 
 import type { IUniverDocsUIConfig } from '../basics';
 import type { DocContainer } from '../views/doc-container/DocContainer';

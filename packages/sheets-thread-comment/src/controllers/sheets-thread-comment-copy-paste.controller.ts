@@ -15,9 +15,8 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { Disposable, LifecycleStages, OnLifecycle, Range } from '@univerjs/core';
+import { Disposable, Inject, LifecycleStages, OnLifecycle, Range } from '@univerjs/core';
 import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 import { AddCommentMutation, DeleteCommentMutation, type IThreadComment, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';

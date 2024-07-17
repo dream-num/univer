@@ -16,6 +16,7 @@
 
 import type {
     IInterceptor,
+    Injector,
     IRange,
     IRangeWithCoord,
     ISelectionCell,
@@ -24,13 +25,13 @@ import type {
     Nullable,
     ThemeService,
 } from '@univerjs/core';
-import { Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import {
+    createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderManagerService, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle, transformCellDataToSelectionData } from '@univerjs/sheets';
 import type { IShortcutService } from '@univerjs/ui';
-import { createIdentifier, type Injector } from '@wendellhu/redi';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 

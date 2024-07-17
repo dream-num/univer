@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type { ICellData, Injector, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
-import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Subject } from 'rxjs';
 

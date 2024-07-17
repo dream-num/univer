@@ -16,7 +16,7 @@
 
 import { IUniverInstanceService, UniverInstanceType, type Workbook } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import { of } from 'rxjs';
 
 export function useActiveWorkbook(): Workbook | null {

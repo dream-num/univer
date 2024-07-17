@@ -18,7 +18,7 @@ import React, { useEffect } from 'react';
 
 import { Dropdown, Input } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import clsx from 'clsx';
 import styles from './index.module.less';

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutation, IRange } from '@univerjs/core';
+import type { IAccessor, IMutation, IRange } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetRowVisibleMutationParams {
     unitId: string;

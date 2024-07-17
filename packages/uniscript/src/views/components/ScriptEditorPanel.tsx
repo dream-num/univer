@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { DisposableCollection, LocaleService, toDisposable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { DisposableCollection, LocaleService, toDisposable, useDependency } from '@univerjs/core';
 import { Button, MessageType } from '@univerjs/design';
 import { IMessageService, IShortcutService } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import { editor } from 'monaco-editor';
 import React, { useCallback, useEffect, useRef } from 'react';
 

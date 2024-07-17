@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, toDisposable } from '@univerjs/core';
-import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
+import { connectInjector, Disposable, toDisposable } from '@univerjs/core';
+import { type IDisposable, Inject, Injector } from '@univerjs/core';
 
-import { connectInjector } from '@wendellhu/redi/react-bindings';
 import type { INotificationOptions } from '../../components/notification/Notification';
 import { notification, Notification } from '../../components/notification/Notification';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';

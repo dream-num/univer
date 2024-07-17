@@ -18,10 +18,9 @@
 // These models would be held on `SheetsFilterService`.
 
 import { CommandType, ICommandService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
-import type { ICellData, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
 import type { IReorderRangeCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, ReorderRangeCommand } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 import type { IOrderRule, SortType } from '../../services/interface';
 import { SheetsSortService } from '../../services/sheets-sort.service';
 

@@ -17,8 +17,7 @@
 import React, { useState } from 'react';
 import { Avatar, Button, Input } from '@univerjs/design';
 import clsx from 'clsx';
-import { useDependency } from '@wendellhu/redi/react-bindings';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import { IDialogService } from '@univerjs/ui';
 import { type ICollaborator, UnitRole } from '@univerjs/protocol';
 import { CheckMarkSingle } from '@univerjs/icons';

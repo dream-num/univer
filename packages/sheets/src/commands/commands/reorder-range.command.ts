@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange } from '@univerjs/core';
+import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import type { IReorderRangeMutationParams } from '../mutations/reorder-range.mutation';
 import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';

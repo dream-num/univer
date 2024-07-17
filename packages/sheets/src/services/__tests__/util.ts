@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
-import { CellValueType, ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, IWorkbookData } from '@univerjs/core';
+import { CellValueType, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 export const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',

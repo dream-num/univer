@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { IMutation, IMutationInfo, Workbook } from '@univerjs/core';
+import type { IDisposable, IMutation, IMutationInfo, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -25,8 +27,6 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs/operators';
 
 import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';

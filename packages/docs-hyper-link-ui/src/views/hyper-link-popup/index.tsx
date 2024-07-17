@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import React from 'react';
 import { CopySingle, LinkSingle, UnlinkSingle, WriteSingle } from '@univerjs/icons';
-import { ICommandService, LocaleService } from '@univerjs/core';
 import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { IMessageService, useObservable } from '@univerjs/ui';

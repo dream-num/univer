@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Inject } from '@wendellhu/redi';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 
 import type { ICommandInfo, IRange, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { AddRangeProtectionCommand } from '../../../commands/commands/add-range-protection.command';
 import { SetRangeProtectionCommand } from '../../../commands/commands/set-range-protection.command';
 import type { IRangeProtectionRule } from '../../../model/range-protection-rule.model';

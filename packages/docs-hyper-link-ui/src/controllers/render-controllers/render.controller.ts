@@ -15,10 +15,9 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
-import { Inject } from '@wendellhu/redi';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export class DocHyperLinkRenderController extends Disposable implements IRenderModule {

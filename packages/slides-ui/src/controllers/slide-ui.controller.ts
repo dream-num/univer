@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
-import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';

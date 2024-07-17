@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
 import { filter, Observable, Subject } from 'rxjs';
+import { createIdentifier } from '../../common/di';
 
 import { Disposable } from '../../shared/lifecycle';
 

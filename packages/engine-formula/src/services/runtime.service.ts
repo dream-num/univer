@@ -15,8 +15,7 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import { Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
 
 import type {
     IArrayFormulaRangeType,

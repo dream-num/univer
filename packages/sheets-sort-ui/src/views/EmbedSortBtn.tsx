@@ -16,7 +16,7 @@
 
 import React, { useCallback } from 'react';
 import { type IRange, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';

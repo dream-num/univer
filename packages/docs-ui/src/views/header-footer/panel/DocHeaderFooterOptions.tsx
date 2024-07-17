@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
-import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import clsx from 'clsx';
 import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';

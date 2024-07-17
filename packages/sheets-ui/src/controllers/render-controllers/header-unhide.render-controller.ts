@@ -17,6 +17,7 @@
 import type { Workbook, Worksheet } from '@univerjs/core';
 import {
     ICommandService,
+    Inject,
     RxDisposable,
 } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
@@ -37,7 +38,6 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../../common/keys';

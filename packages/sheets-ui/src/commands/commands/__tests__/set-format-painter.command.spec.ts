@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Univer, Workbook } from '@univerjs/core';
+import type { DependencyIdentifier, Injector, Univer, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -34,7 +34,6 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import type { DependencyIdentifier, Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 

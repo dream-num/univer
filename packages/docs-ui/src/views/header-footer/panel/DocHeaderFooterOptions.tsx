@@ -127,7 +127,14 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
     };
 
     const closeHeaderFooter = () => {
-        const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const renderObject = renderManagerService.getRenderById(unitId);
+        if (renderObject == null) {
+            return;
+        }
+
+        const { scene } = renderObject;
+        const transformer = scene.getTransformerByCreate();
+        const docSkeletonManagerService = renderObject.with(DocSkeletonManagerService);
         const skeleton = docSkeletonManagerService?.getSkeleton();
         const viewModel = docSkeletonManagerService?.getViewModel();
         const render = renderManagerService.getRenderById(unitId);
@@ -138,6 +145,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
 
         // TODO: @JOCS, these codes bellow should be automatically executed?
         textSelectionManagerService.replaceTextRanges([]); // Clear text selection.
+        transformer.clearSelectedObjects();
         textSelectionRenderService.setSegment('');
         textSelectionRenderService.setSegmentPage(-1);
         viewModel.setEditArea(DocumentEditArea.BODY);

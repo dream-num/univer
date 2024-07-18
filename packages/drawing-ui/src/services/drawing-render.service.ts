@@ -26,8 +26,12 @@ export class DrawingRenderService {
         @IImageIoService private readonly _imageIoService: IImageIoService
     ) { }
 
-    async renderImage(imageParam: IImageData, scene: Scene) {
-        const { transform, drawingType, source, imageSourceType, srcRect, prstGeom, groupId, unitId, subUnitId, drawingId } = imageParam;
+    // eslint-disable-next-line max-lines-per-function
+    async renderImages(imageParam: IImageData, scene: Scene) {
+        const {
+            transform: singleTransform, drawingType, source, imageSourceType, srcRect,
+            prstGeom, groupId, unitId, subUnitId, drawingId, isMultiTransform, transforms: multiTransforms,
+        } = imageParam;
         if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
             return;
         }
@@ -36,66 +40,74 @@ export class DrawingRenderService {
             return;
         }
 
-        if (transform == null) {
+        if (singleTransform == null) {
             return;
         }
 
-        const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
-        const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-        const imageShape = scene.getObject(imageShapeKey);
+        const transforms = isMultiTransform && multiTransforms ? multiTransforms : [singleTransform];
 
-        if (imageShape != null) {
-            imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
-            return;
-        }
+        const images = [];
+        for (const transform of transforms) {
+            const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
+            const index = transforms.indexOf(transform);
+            const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId }, isMultiTransform ? index : undefined);
+            const imageShape = scene.getObject(imageShapeKey);
 
-        const orders = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
-        const zIndex = orders.indexOf(drawingId);
-        const imageConfig: IImageProps = { ...transform, zIndex: zIndex === -1 ? (orders.length - 1) : zIndex };
-        const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
-
-        let shouldBeCache = false;
-        if (imageNativeCache != null) {
-            imageConfig.image = imageNativeCache;
-        } else {
-            if (imageSourceType === ImageSourceType.UUID) {
-                try {
-                    imageConfig.url = await this._imageIoService.getImage(source);
-                } catch (error) {
-                    console.error(error);
-                    return;
-                }
-            } else {
-                imageConfig.url = source;
+            if (imageShape != null) {
+                imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                continue;
             }
-            shouldBeCache = true;
+
+            const orders = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
+            const zIndex = orders.indexOf(drawingId);
+            const imageConfig: IImageProps = { ...transform, zIndex: zIndex === -1 ? (orders.length - 1) : zIndex };
+            const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
+
+            let shouldBeCache = false;
+            if (imageNativeCache != null) {
+                imageConfig.image = imageNativeCache;
+            } else {
+                if (imageSourceType === ImageSourceType.UUID) {
+                    try {
+                        imageConfig.url = await this._imageIoService.getImage(source);
+                    } catch (error) {
+                        console.error(error);
+                        continue;
+                    }
+                } else {
+                    imageConfig.url = source;
+                }
+                shouldBeCache = true;
+            }
+
+            imageConfig.printable = true;
+            const image = new Image(imageShapeKey, imageConfig);
+            if (shouldBeCache) {
+                this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
+            }
+
+            if (!this._drawingManagerService.getDrawingVisible()) {
+                continue;
+            }
+
+            const imageObject = scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
+            if (this._drawingManagerService.getDrawingEditable()) {
+                imageObject.attachTransformerTo(image);
+            }
+
+            groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, image, scene, this._drawingManagerService);
+
+            if (prstGeom != null) {
+                image.setPrstGeom(prstGeom);
+            }
+            if (srcRect != null) {
+                image.setSrcRect(srcRect);
+            }
+
+            images.push(image);
         }
 
-        imageConfig.printable = true;
-        const image = new Image(imageShapeKey, imageConfig);
-        if (shouldBeCache) {
-            this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
-        }
-
-        if (!this._drawingManagerService.getDrawingVisible()) {
-            return;
-        }
-
-        const imageObject = scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
-        if (this._drawingManagerService.getDrawingEditable()) {
-            imageObject.attachTransformerTo(image);
-        }
-
-        groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, image, scene, this._drawingManagerService);
-
-        if (prstGeom != null) {
-            image.setPrstGeom(prstGeom);
-        }
-        if (srcRect != null) {
-            image.setSrcRect(srcRect);
-        }
-
-        return image;
+        return images;
     }
 
     renderDrawing(param: IDrawingSearch, scene: Scene) {
@@ -106,7 +118,7 @@ export class DrawingRenderService {
 
         switch (drawingParam.drawingType) {
             case DrawingTypeEnum.DRAWING_IMAGE:
-                return this.renderImage(drawingParam as IImageData, scene);
+                return this.renderImages(drawingParam as IImageData, scene);
             default:
         }
     }

@@ -19,7 +19,7 @@ import type { LineBreaker } from '../line-breaker';
 const SLASH_B_CODE_POINT = 8;
 
 export function customBlockLineBreakExtension(breaker: LineBreaker) {
-    breaker.addRule('break_before_slash_b', (codePoint) => {
-        return codePoint === SLASH_B_CODE_POINT;
+    breaker.addRule('break_before_and_after_slash_b', (codePoint, lastCodePoint) => {
+        return codePoint === SLASH_B_CODE_POINT || lastCodePoint === SLASH_B_CODE_POINT;
     });
 }

@@ -494,18 +494,18 @@ export class Scene extends ThinScene {
         }
     }
 
-    fuzzyMathObjects(oKey: string) {
-        const objects: BaseObject[] = [];
+    fuzzyMathObjects(oKey: string, matchStart = false) {
+        const results: BaseObject[] = [];
         for (const layer of this._layers) {
             const objects = layer.getObjectsByOrder();
             for (const object of objects) {
-                if (object.oKey.indexOf(oKey) > -1) {
-                    objects.push(object);
+                if (matchStart ? object.oKey.startsWith(oKey) : object.oKey.indexOf(oKey) > -1) {
+                    results.push(object);
                 }
             }
         }
 
-        return objects;
+        return results;
     }
 
     override addViewport(...viewport: Viewport[]) {

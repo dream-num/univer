@@ -346,14 +346,14 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 // const preLine: Nullable<IDocumentSkeletonLine> = null;
 
                 for (const line of lines) {
-                    const { divides, lineHeight } = line;
+                    const { divides, lineHeight, top } = line;
                     const lineStartIndex = preLineStartIndex;
                     const lineEndIndex = lineStartIndex;
                     let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
                     let maxLineAsc = 0;
                     let macLineDsc = 0;
-                    columnHeight += lineHeight;
+                    columnHeight = top + lineHeight;
                     const divideLength = divides.length;
                     let lineHasGlyph = false;
 
@@ -453,9 +453,10 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 }
 
 export function updateInlineDrawingCoords(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
-    lineIterator(pages, (line) => {
-        const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
-        const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(line.paragraphIndex);
+    lineIterator(pages, (line, _, __, page) => {
+        const { segmentId } = page;
+        const affectInlineDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
+        const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(segmentId)?.get(line.paragraphIndex);
         // Update inline drawings after the line is layout.
         if (affectInlineDrawings && affectInlineDrawings.size > 0) {
             updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top);
@@ -885,9 +886,8 @@ export interface ILayoutContext {
     // The position coordinates of the layout,
     // which are used to indicate which section and paragraph are currently layout,
     // and used to support the starting point of the reflow when re-layout.
-    layoutStartPointer: {
-        paragraphIndex: Nullable<number>; // Layout from the beginning if the paragraphIndex is null.
-    };
+    // Layout from the beginning if the paragraphIndex is null.
+    layoutStartPointer: Record<string, Nullable<number>>;
     // It is used to identify whether it is a re-layout,
     // and if it is a re-layout, the skeleton needs to be backtracked to the layoutStartPointer states.
     isDirty: boolean;
@@ -899,7 +899,7 @@ export interface ILayoutContext {
         page: IDocumentSkeletonPage;
         drawing: IDocumentSkeletonDrawing;
     }>;
-    paragraphConfigCache: Map<number, IParagraphConfig>;
+    paragraphConfigCache: Map<string, Map<number, IParagraphConfig>>;
     sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
     paragraphsOpenNewPage: Set<number>;
     // Use for hyphenation.
@@ -1039,4 +1039,9 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     };
 
     return sectionBreakConfig;
+}
+
+export function resetContext(ctx: ILayoutContext) {
+    ctx.isDirty = false;
+    ctx.skeleton.drawingAnchor?.clear();
 }

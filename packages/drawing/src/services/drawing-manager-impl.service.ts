@@ -123,17 +123,14 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     refreshTransform(updateParams: T[]) {
         updateParams.forEach((updateParam) => {
-            // QUESTION: Why need to get drawing?
-            const drawing = this.getDrawingByParam(updateParam);
-            if (drawing == null) {
-                return;
-            }
             const param = this._getCurrentBySearch(updateParam);
             if (param == null) {
                 return;
             }
 
             param.transform = updateParam.transform;
+            param.transforms = updateParam.transforms;
+            param.isMultiTransform = updateParam.isMultiTransform;
         });
 
         this.refreshTransformNotification(updateParams);

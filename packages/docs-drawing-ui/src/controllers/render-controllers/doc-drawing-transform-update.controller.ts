@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDrawingParam } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
 import {
     BooleanNumber,
     Disposable,
@@ -24,23 +24,22 @@ import {
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
+import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 interface IDrawingParamsWithBehindText {
     unitId: string;
     subUnitId: string;
     drawingId: string;
     behindText: boolean;
-    transform: {
-        left: number;
-        top: number;
-        width: number;
-        height: number;
-        angle: number;
-    };
+    transform: ITransformState;
+    transforms: ITransformState[];
+    // The same drawing render in different place, like image in header and footer.
+    // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
+    isMultiTransform: BooleanNumber;
 }
 
 export class DocDrawingTransformUpdateController extends Disposable implements IRenderModule {
@@ -51,7 +50,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService
     ) {
         super();
 
@@ -65,18 +65,20 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
     }
 
     private _initialRenderRefresh() {
-        const { mainComponent } = this._context;
         this._docSkeletonManagerService.currentSkeleton$.subscribe((documentSkeleton) => {
             if (documentSkeleton == null) {
                 return;
             }
 
-            const docsComponent = mainComponent as Documents;
-
-            // TODO: @Jocs, Why NEED change skeleton here?
-            docsComponent.changeSkeleton(documentSkeleton);
-
             this._refreshDrawing(documentSkeleton);
+        });
+
+        this._docRefreshDrawingsService.refreshDrawings$.subscribe((skeleton) => {
+            if (skeleton == null) {
+                return;
+            }
+
+            this._refreshDrawing(skeleton);
         });
     }
 
@@ -123,7 +125,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
         const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
         const { pages, skeHeaders, skeFooters } = skeletonData;
-        const updateDrawings: IDrawingParamsWithBehindText[] = []; // IFloatingObjectManagerParam
+        const updateDrawingMap: Record<string, IDrawingParamsWithBehindText> = {}; // IFloatingObjectManagerParam
 
         this._liquid.reset();
         /**
@@ -137,7 +139,11 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 const headerPage = skeHeaders.get(headerId)?.get(pageWidth);
 
                 if (headerPage) {
-                    this._calculateDrawingPosition(unitId, headerPage, docsLeft, docsTop, updateDrawings);
+                    this._calculateDrawingPosition(
+                        unitId, headerPage, docsLeft, docsTop, updateDrawingMap,
+                        headerPage.marginTop,
+                        page.marginLeft
+                    );
                 }
             }
 
@@ -145,17 +151,65 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                 const footerPage = skeFooters.get(footerId)?.get(pageWidth);
 
                 if (footerPage) {
-                    this._calculateDrawingPosition(unitId, footerPage, docsLeft, docsTop, updateDrawings);
+                    this._calculateDrawingPosition(
+                        unitId, footerPage, docsLeft, docsTop, updateDrawingMap,
+                        page.pageHeight - page.marginBottom + footerPage.marginTop,
+                        page.marginLeft
+                    );
                 }
             }
 
-            this._calculateDrawingPosition(unitId, page, docsLeft, docsTop, updateDrawings);
+            this._calculateDrawingPosition(unitId, page, docsLeft, docsTop, updateDrawingMap, page.marginTop, page.marginLeft);
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        // console.log('updateDrawings', skeHeaders, skeFooters, pages, updateDrawings);
-        if (updateDrawings.length > 0) {
-            this._drawingManagerService.refreshTransform(updateDrawings as unknown as IDrawingParam[]);
+        const updateDrawings = Object.values(updateDrawingMap);
+
+        const nonMultiDrawings = updateDrawings.filter((drawing) => !drawing.isMultiTransform);
+        const multiDrawings = updateDrawings.filter((drawing) => drawing.isMultiTransform);
+
+        if (nonMultiDrawings.length > 0) {
+            this._drawingManagerService.refreshTransform(nonMultiDrawings as unknown as IDrawingParam[]);
+        }
+
+        if (multiDrawings.length > 0) {
+            this._handleMultiDrawingsTransform(multiDrawings as unknown as IDrawingParam[]);
+        }
+    }
+
+    private _handleMultiDrawingsTransform(multiDrawings: IDrawingParam[]) {
+        const { scene, unitId } = this._context;
+        const transformer = scene.getTransformerByCreate();
+
+        // Step 1: Update data in drawingManagerService.
+        multiDrawings.forEach((updateParam) => {
+            const param = this._drawingManagerService.getDrawingByParam(updateParam);
+            if (param == null) {
+                return;
+            }
+
+            param.transform = updateParam.transform;
+            param.transforms = updateParam.transforms;
+            param.isMultiTransform = updateParam.isMultiTransform;
+        });
+
+        // Step 2: remove all drawing shapes.
+        const selectedObjectMap = transformer.getSelectedObjectMap();
+        const selectedObjectKeys = [...selectedObjectMap.keys()];
+
+        const allMultiDrawings = Object.values(this._drawingManagerService.getDrawingData(unitId, unitId)).filter((drawing) => drawing.isMultiTransform === BooleanNumber.TRUE);
+
+        this._drawingManagerService.removeNotification(allMultiDrawings);
+        // Step 3: create new drawing shapes.
+        this._drawingManagerService.addNotification(multiDrawings);
+
+        // Step 4: reSelect previous shapes and focus previous drawings.
+        for (const key of selectedObjectKeys) {
+            const drawingShape = scene.getObject(key) as Image;
+
+            if (drawingShape) {
+                transformer.setSelectedControl(drawingShape);
+            }
         }
     }
 
@@ -164,29 +218,44 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         page: IDocumentSkeletonPage | IDocumentSkeletonHeaderFooter,
         docsLeft: number,
         docsTop: number,
-        updateDrawings: IDrawingParamsWithBehindText[]
+        updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
+        marginTop: number,
+        marginLeft: number
     ) {
         const { skeDrawings } = page;
-        this._liquid.translatePagePadding(page);
+        this._liquid.translatePagePadding({
+            marginTop,
+            marginLeft,
+        } as IDocumentSkeletonPage);
         skeDrawings.forEach((drawing) => {
             const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
             const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
-
-            updateDrawings.push({
-                unitId,
-                subUnitId: unitId,
-                drawingId,
-                behindText,
-                transform: {
-                    left: aLeft + docsLeft + this._liquid.x,
-                    top: aTop + docsTop + this._liquid.y,
-                    width,
-                    height,
-                    angle,
-                },
-            });
+            const { isMultiTransform = BooleanNumber.FALSE } = drawingOrigin;
+            const transform = {
+                left: aLeft + docsLeft + this._liquid.x,
+                top: aTop + docsTop + this._liquid.y,
+                width,
+                height,
+                angle,
+            };
+            if (updateDrawingMap[drawingId] == null) {
+                updateDrawingMap[drawingId] = {
+                    unitId,
+                    subUnitId: unitId,
+                    drawingId,
+                    behindText,
+                    transform,
+                    transforms: [transform],
+                    isMultiTransform,
+                };
+            } else if (isMultiTransform === BooleanNumber.TRUE) {
+                updateDrawingMap[drawingId].transforms.push(transform);
+            }
         });
 
-        this._liquid.restorePagePadding(page);
+        this._liquid.restorePagePadding({
+            marginTop,
+            marginLeft,
+        } as IDocumentSkeletonPage);
     }
 }

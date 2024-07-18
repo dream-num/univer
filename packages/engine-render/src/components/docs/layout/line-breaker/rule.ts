@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+
 export interface ILineBreakRule {
-    (codePoint: number, className: number): boolean;
+    (codePoint: number, lastCodePoint: Nullable<number>, className: number): boolean;
 }
 
 export class Rule {
@@ -25,9 +27,9 @@ export class Rule {
         this._rules.set(key, rule);
     }
 
-    shouldBreak(codePoint: number, className: number) {
+    shouldBreak(codePoint: number, lastCodePoint: Nullable<number>, className: number) {
         for (const rule of this._rules.values()) {
-            if (rule(codePoint, className)) {
+            if (rule(codePoint, lastCodePoint, className)) {
                 return true;
             }
         }

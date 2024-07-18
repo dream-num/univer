@@ -73,6 +73,7 @@ export class LineBreaker implements IBreakPoints {
     private _lastPos: number = 0;
     private _curClass: Nullable<number> = null;
     private _codePoint: Nullable<number> = null;
+    private _lastCodePoint: Nullable<number> = null;
     private _nextClass: Nullable<number> = null;
     private _LB8a: boolean = false;
     private _LB21a: boolean = false;
@@ -114,7 +115,7 @@ export class LineBreaker implements IBreakPoints {
                 return new Break(this._lastPos, BreakPointType.Mandatory);
             }
 
-            if (this._rule.shouldBreak(this._codePoint!, this._nextClass)) {
+            if (this._rule.shouldBreak(this._codePoint!, this._lastCodePoint, this._nextClass)) {
                 this._curClass = mapFirst(mapClass(this._nextClass));
                 return new Break(this._lastPos);
             }
@@ -158,6 +159,7 @@ export class LineBreaker implements IBreakPoints {
         const nextCodePoint = this._getNextCodePoint();
         const rawClass = classTrie.get(nextCodePoint);
 
+        this._lastCodePoint = this._codePoint;
         this._codePoint = nextCodePoint;
 
         return mapClass(rawClass);

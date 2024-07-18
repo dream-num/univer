@@ -438,7 +438,7 @@ function _lineOperator(
         paragraphAffectSkeDrawings,
         skeHeaders,
         skeFooters,
-        drawingAnchor,
+        pDrawingAnchor,
         paragraphIndex,
     } = paragraphConfig;
 
@@ -503,16 +503,16 @@ function _lineOperator(
     const preTop = preLine?.top || 0;
     const lineTop = preLineHeight + preTop;
 
-    const { pageWidth, headerId, footerId } = lastPage;
-    const headersDrawings = skeHeaders?.get(headerId)?.get(pageWidth)?.skeDrawings;
-    const footersDrawings = skeFooters?.get(footerId)?.get(pageWidth)?.skeDrawings;
+    const { pageWidth, headerId, footerId, segmentId } = lastPage;
+    const headerPage = skeHeaders?.get(headerId)?.get(pageWidth);
+    const footerPage = skeFooters?.get(footerId)?.get(pageWidth);
 
     // Handle float object relative to line.
     // FIXME: @jocs, it will not update the last line's drawings.
     if (preLine) {
         const drawingsInLine = _getCustomBlockIdsInLine(preLine);
         if (drawingsInLine.length > 0) {
-            const affectDrawings = ctx.paragraphConfigCache.get(preLine.paragraphIndex)?.paragraphAffectSkeDrawings;
+            const affectDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(preLine.paragraphIndex)?.paragraphAffectSkeDrawings;
             const relativeLineDrawings = ([...(affectDrawings?.values() ?? [])])
                 .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE)
                 .filter((drawing) => drawingsInLine.includes(drawing.drawingId));
@@ -527,15 +527,15 @@ function _lineOperator(
         const targetDrawings = [...paragraphAffectSkeDrawings.values()]
             .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
 
-        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, paragraphStart, drawingAnchor?.get(paragraphIndex)?.top);
+        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, paragraphStart, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const newLineTop = calculateLineTopByDrawings(
         lineHeight,
         lineTop,
-        lastPage.skeDrawings,
-        headersDrawings,
-        footersDrawings
+        lastPage,
+        headerPage,
+        footerPage
     ); // WRAP_TOP_AND_BOTTOM 的 drawing 会改变行的起始 top
 
     if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) {
@@ -553,7 +553,7 @@ function _lineOperator(
                 if (ctx.drawingsCache.has(drawing.drawingId)) {
                     ctx.drawingsCache.delete(drawing.drawingId);
                     ctx.isDirty = false;
-                    ctx.layoutStartPointer.paragraphIndex = null;
+                    ctx.layoutStartPointer[segmentId] = null;
                 }
             }
         }
@@ -591,14 +591,14 @@ function _lineOperator(
         column.width,
         lineIndex,
         paragraphStart,
-        lastPage.skeDrawings,
-        headersDrawings,
-        footersDrawings
+        lastPage,
+        headerPage,
+        footerPage
     );
 
     column.lines.push(newLine);
     newLine.parent = column;
-    createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
+    createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, pDrawingAnchor);
     _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
 }
 
@@ -669,7 +669,7 @@ function _reLayoutCheck(
     // Handle situations where an image anchor paragraph is squeezed to the next page.
     for (const drawing of drawings.values()) {
         const drawingCache = ctx.drawingsCache.get(drawing.drawingId);
-        if (drawingCache == null) {
+        if (drawingCache == null || drawingCache.page.segmentId !== page.segmentId) {
             continue;
         }
         // TODO: 如何判断 drawing 是否在同一页？？？
@@ -695,7 +695,7 @@ function _reLayoutCheck(
                     // No need to loop next line.
                     needBreakLineIterator = true;
                     ctx.isDirty = true;
-                    ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
+                    ctx.layoutStartPointer[drawingCache.page.segmentId] = Math.min(line.paragraphIndex, ctx.layoutStartPointer[drawingCache.page.segmentId] ?? Number.POSITIVE_INFINITY);
                     ctx.paragraphsOpenNewPage.add(paragraphIndex);
                 }
             });
@@ -716,10 +716,15 @@ function _reLayoutCheck(
             let targetDrawing = drawing;
 
             if (ctx.drawingsCache.has(drawing.drawingId)) {
+                const drawingCache = ctx.drawingsCache.get(drawing.drawingId);
                 const needRePosition = checkRelativeDrawingNeedRePosition(ctx, drawing);
 
+                if (drawingCache?.page.segmentId !== page.segmentId) {
+                    continue;
+                }
+
                 if (needRePosition) {
-                    targetDrawing = ctx.drawingsCache.get(drawing.drawingId)?.drawing ?? drawing;
+                    targetDrawing = drawingCache?.drawing ?? drawing;
                 } else {
                     continue;
                 }
@@ -733,7 +738,7 @@ function _reLayoutCheck(
                 needBreakLineIterator = true;
 
                 ctx.isDirty = true;
-                ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
+                ctx.layoutStartPointer[page.segmentId] = Math.min(line.paragraphIndex, ctx.layoutStartPointer[page.segmentId] ?? Number.POSITIVE_INFINITY);
 
                 let drawingCache = ctx.drawingsCache.get(drawing.drawingId);
                 if (drawingCache == null) {
@@ -1002,8 +1007,8 @@ export function updateInlineDrawingPosition(
             }
         }
     }
-
-    page.skeDrawings = new Map([...page.skeDrawings, ...drawings]);
+    const res = new Map([...page.skeDrawings, ...drawings]);
+    page.skeDrawings = res;
 }
 
 function __getDrawingPosition(

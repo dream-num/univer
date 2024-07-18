@@ -16,6 +16,7 @@
 
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import {
+    BooleanNumber,
     COLORS,
     Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV,
     OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable, Tools,
@@ -23,7 +24,7 @@ import {
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, IPoint, Viewport } from '@univerjs/engine-render';
-import { getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, ITextSelectionRenderManager, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 
@@ -40,6 +41,8 @@ interface IDrawingCache {
 
 interface IDrawingAnchor {
     offset: number;
+    segmentId: string;
+    segmentPage: number;
     docTransform?: IDocDrawingPosition;
     contentBoxPointGroup?: IPoint[][];
 }
@@ -58,7 +61,8 @@ export class DocDrawingTransformerController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
     ) {
         super();
 
@@ -354,6 +358,7 @@ export class DocDrawingTransformerController extends Disposable {
 
     private _getInlineDrawingAnchor(drawing: IDocDrawingBase, offsetX: number, offsetY: number): Nullable<IDrawingAnchor> {
         const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
 
         if (currentRender == null) {
@@ -370,17 +375,26 @@ export class DocDrawingTransformerController extends Disposable {
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
         let isBack = false;
         let segmentPageIndex = -1;
+        let segmentId = '';
         const HALF = 0.5;
         const coord = this._getTransformCoordForDocumentOffset(documentComponent, activeViewport, offsetX, offsetY);
         if (coord == null) {
             return;
         }
-        const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
+        const nodeInfo = skeleton?.findNodeByCoord(
+            coord, pageLayoutType, pageMarginLeft, pageMarginTop,
+            {
+                strict: false,
+                segmentId: this._textSelectionRenderManager.getSegment(),
+                segmentPage: this._textSelectionRenderManager.getSegmentPage(),
+            }
+        );
         if (nodeInfo) {
-            const { node, ratioX, segmentPage } = nodeInfo;
+            const { node, ratioX, segmentPage, segmentId: nodeSegmentId } = nodeInfo;
             isBack = ratioX < HALF;
             glyphAnchor = node;
             segmentPageIndex = segmentPage;
+            segmentId = nodeSegmentId;
         }
 
         if (glyphAnchor == null) {
@@ -408,21 +422,20 @@ export class DocDrawingTransformerController extends Disposable {
         }
 
         // Put drawing before the anchor.
-        return { offset: startOffset, contentBoxPointGroup };
+        return { offset: startOffset, contentBoxPointGroup, segmentId, segmentPage: segmentPageIndex };
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _getDrawingAnchor(drawing: IDocDrawingBase, object: BaseObject): Nullable<IDrawingAnchor> {
         const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
         const skeleton = currentRender?.with(DocSkeletonManagerService).getSkeleton();
-        const viewModel = skeleton?.getViewModel();
 
         const skeletonData = skeleton?.getSkeletonData();
-        if (skeletonData == null || currentRender == null || viewModel == null) {
+        if (skeletonData == null || currentRender == null) {
             return;
         }
 
-        const { pages } = skeletonData;
+        const { pages, skeHeaders, skeFooters } = skeletonData;
 
         const { mainComponent, scene } = currentRender;
         const documentComponent = mainComponent as Documents;
@@ -438,6 +451,7 @@ export class DocDrawingTransformerController extends Disposable {
         height = Math.min(height, maxHeight);
 
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
+        let segmentId = '';
         let segmentPage = -1;
         const isBack = false;
         const docTransform = {
@@ -456,11 +470,16 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
+        const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop, {
+            strict: false,
+            segmentId: this._textSelectionRenderManager.getSegment(),
+            segmentPage: this._textSelectionRenderManager.getSegmentPage(),
+        });
         if (nodeInfo) {
-            const { node, segmentPage: segmentPageIndex } = nodeInfo;
+            const { node, segmentPage: segmentPageIndex, segmentId: nodeSegmentId } = nodeInfo;
             glyphAnchor = node;
             segmentPage = segmentPageIndex;
+            segmentId = nodeSegmentId;
         }
 
         if (glyphAnchor == null) {
@@ -472,9 +491,54 @@ export class DocDrawingTransformerController extends Disposable {
         const paragraphStartLine = column?.lines.find((l) => l.paragraphIndex === line?.paragraphIndex && l.paragraphStart) ?? column?.lines[0];
         const page = column?.parent?.parent;
 
+        if (line == null || column == null || paragraphStartLine == null || page == null) {
+            return;
+        }
+
         this._liquid.reset();
 
+        const pageType = page.type;
+
         for (const p of pages) {
+            const { headerId, footerId, pageHeight, pageWidth, marginLeft, marginBottom } = p;
+            const pIndex = pages.indexOf(p);
+
+            if (segmentPage > -1 && pIndex === segmentPage) {
+                switch (pageType) {
+                    case DocumentSkeletonPageType.HEADER: {
+                        const headerSke = skeHeaders.get(headerId)?.get(pageWidth);
+
+                        if (headerSke) {
+                            this._liquid.translatePagePadding({
+                                marginTop: headerSke.marginTop,
+                                marginLeft,
+                            } as IDocumentSkeletonPage);
+                        } else {
+                            throw new Error('header skeleton not found');
+                        }
+
+                        break;
+                    }
+
+                    case DocumentSkeletonPageType.FOOTER: {
+                        const footerSke = skeFooters.get(footerId)?.get(pageWidth);
+
+                        if (footerSke) {
+                            this._liquid.translatePagePadding({
+                                marginTop: pageHeight - marginBottom + footerSke.marginTop,
+                                marginLeft,
+                            } as IDocumentSkeletonPage);
+                        } else {
+                            throw new Error('footer skeleton not found');
+                        }
+
+                        break;
+                    }
+                }
+
+                break;
+            }
+
             this._liquid.translatePagePadding(p);
             if (p === page) {
                 break;
@@ -484,14 +548,10 @@ export class DocDrawingTransformerController extends Disposable {
             this._liquid.translatePage(p, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        if (line == null || column == null || paragraphStartLine == null || page == null) {
-            return;
-        }
-
         if (positionV.relativeFrom === ObjectRelativeFromV.LINE) {
             glyphAnchor = line.divides[0].glyphGroup[0];
         } else {
-            glyphAnchor = paragraphStartLine.divides[0].glyphGroup[0];
+            glyphAnchor = paragraphStartLine.divides?.[0]?.glyphGroup?.[0] ?? glyphAnchor;
         }
 
         docTransform.positionH = {
@@ -555,7 +615,7 @@ export class DocDrawingTransformerController extends Disposable {
         }
 
         // Put drawing before the anchor.
-        return { offset: startOffset, docTransform };
+        return { offset: startOffset, docTransform, segmentId, segmentPage };
     }
 
     // Update drawing when use transformer to resize it.
@@ -601,7 +661,7 @@ export class DocDrawingTransformerController extends Disposable {
     // Update inline drawing when use transformer to move it.
     private _moveInlineDrawing(drawing: IDocDrawingBase, offsetX: number, offsetY: number) {
         const anchor = this._getInlineDrawingAnchor(drawing, offsetX, offsetY);
-        const { offset } = anchor ?? {};
+        const { offset, segmentId, segmentPage } = anchor ?? {};
 
         if (offset == null) {
             return;
@@ -612,6 +672,8 @@ export class DocDrawingTransformerController extends Disposable {
             subUnitId: drawing.unitId,
             drawing,
             offset,
+            segmentId,
+            segmentPage,
         });
     }
 
@@ -685,14 +747,14 @@ export class DocDrawingTransformerController extends Disposable {
     }
 
     private _nonInlineDrawingTransform(drawing: IDocDrawingBase, object: BaseObject, isMoving = false) {
-        const objectPosition = this._limitDrawingInPage(drawing, object);
+        const objectPosition = drawing.isMultiTransform === BooleanNumber.TRUE ? object : this._limitDrawingInPage(drawing, object);
 
         if (isMoving && objectPosition.top !== object.top) {
             return;
         }
 
         const anchor = this._getDrawingAnchor(drawing, objectPosition as BaseObject);
-        const { offset, docTransform } = anchor ?? {};
+        const { offset, docTransform, segmentId, segmentPage } = anchor ?? {};
         if (offset == null || docTransform == null) {
             // No need to change the anchor ,when the new anchor is not found. reuse the `_updateMultipleDrawingDocTransform` to modify the transform.
             return this._updateMultipleDrawingDocTransform(new Map([[drawing.drawingId, object]]));
@@ -704,6 +766,8 @@ export class DocDrawingTransformerController extends Disposable {
             drawing,
             offset,
             docTransform,
+            segmentId,
+            segmentPage,
         });
     }
 

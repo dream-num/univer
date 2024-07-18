@@ -21,7 +21,6 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import { Inject } from '@wendellhu/redi';
 import { filter, first } from 'rxjs/operators';
 import { type IDocDrawing, IDocDrawingService } from '../services/doc-drawing.service';
-import { SetDocDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 
 export const DOCS_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
 export interface IDocDrawingModel { drawings?: IDocumentData['drawings']; drawingsOrder?: IDocumentData['drawingsOrder'] };
@@ -32,8 +31,6 @@ export class DocDrawingLoadController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
-
-        this.disposeWithMe(this._commandService.registerCommand(SetDocDrawingApplyMutation));
     }
 }
 

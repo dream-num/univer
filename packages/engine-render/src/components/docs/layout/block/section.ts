@@ -96,9 +96,11 @@ export function dealWithSection(
         }
     }
 
-    if (ctx.isDirty && ctx.layoutStartPointer.paragraphIndex != null) {
+    const { segmentId } = curPage;
+
+    if (ctx.isDirty && ctx.layoutStartPointer[segmentId] != null) {
         // Rollback the skeleton to the layout start point.
-        _rollbackPages(ctx.layoutStartPointer.paragraphIndex, allCurrentSkeletonPages);
+        _rollbackPages(ctx.layoutStartPointer[segmentId], allCurrentSkeletonPages);
     }
 
     return {

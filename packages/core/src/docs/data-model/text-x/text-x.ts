@@ -228,6 +228,11 @@ export class TextX {
         return this;
     }
 
+    empty(): this {
+        this._actions = [];
+        return this;
+    }
+
     serialize(): TextXAction[] {
         return this._actions;
     }

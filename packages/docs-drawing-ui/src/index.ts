@@ -23,7 +23,6 @@ export { GroupDocDrawingCommand } from './commands/commands/group-doc-drawing.co
 export { InsertDocDrawingCommand } from './commands/commands/insert-doc-drawing.command';
 export { MoveDocDrawingsCommand } from './commands/commands/move-drawings.command';
 export { RemoveDocDrawingCommand } from './commands/commands/remove-doc-drawing.command';
-export { SetDocDrawingCommand } from './commands/commands/set-doc-drawing.command';
 export { SetDocDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
 export { UngroupDocDrawingCommand } from './commands/commands/ungroup-doc-drawing.command';
 

@@ -21,12 +21,12 @@ import type {
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
 } from '../../../../basics/i-document-skeleton-cached';
-import { BreakType } from '../../../../basics/i-document-skeleton-cached';
+import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import { dealWithSection } from '../block/section';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { updateBlockIndex } from '../tools';
+import { resetContext, updateBlockIndex } from '../tools';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -58,8 +58,8 @@ export function createSkeletonPage(
         columnSeparatorType,
         marginTop = 0,
         marginBottom = 0,
-        marginHeader = 0,
-        marginFooter = 0,
+        marginHeader: _marginHeader = 0,
+        marginFooter: _marginFooter = 0,
         marginLeft = 0,
         marginRight = 0,
         renderConfig = {},
@@ -104,8 +104,11 @@ export function createSkeletonPage(
                 ctx,
                 headerTreeMap.get(headerId)!,
                 sectionBreakConfig,
-                skeletonResourceReference
+                skeletonResourceReference,
+                headerId,
+                true
             );
+
             skeHeaders.set(headerId, new Map([[pageWidth, header]]));
         }
         page.headerId = headerId;
@@ -120,8 +123,10 @@ export function createSkeletonPage(
                 footerTreeMap.get(footerId)!,
                 sectionBreakConfig,
                 skeletonResourceReference,
+                footerId,
                 false
             );
+
             skeFooters.set(footerId, new Map([[pageWidth, footer]]));
         }
         page.footerId = footerId;
@@ -156,7 +161,10 @@ export function createSkeletonPage(
     return page;
 }
 
-function _getNullPage() {
+function _getNullPage(
+    type = DocumentSkeletonPageType.BODY,
+    segmentId = ''
+): IDocumentSkeletonPage {
     return {
         sections: [],
         headerId: '',
@@ -181,6 +189,8 @@ function _getNullPage() {
         st: 0,
         ed: 0,
         skeDrawings: new Map(),
+        type,
+        segmentId,
     };
 }
 
@@ -189,7 +199,10 @@ function _createSkeletonHeaderFooter(
     headerOrFooterViewModel: DocumentViewModel,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
-    isHeader = true
+    segmentId: string,
+    isHeader = true,
+    areaPage: Nullable<IDocumentSkeletonHeaderFooter>,
+    count = 0
 ): IDocumentSkeletonHeaderFooter {
     const {
         lists, footerTreeMap, headerTreeMap, localeService, pageSize, drawings,
@@ -210,30 +223,56 @@ function _createSkeletonHeaderFooter(
         drawings,
     };
 
-    const areaPage = createSkeletonPage(ctx, headerFooterConfig, skeletonResourceReference);
+    if (areaPage == null) {
+        areaPage = createSkeletonPage(ctx, headerFooterConfig, skeletonResourceReference);
+        areaPage.type = isHeader ? DocumentSkeletonPageType.HEADER : DocumentSkeletonPageType.FOOTER;
+        areaPage.segmentId = segmentId;
+    }
+    const layoutAnchor = ctx.layoutStartPointer[segmentId];
+    // Reset layoutStartPointer.
+    ctx.layoutStartPointer[segmentId] = null;
+
     const page = dealWithSection(
         ctx,
         headerOrFooterViewModel,
         headerOrFooterViewModel.children[0],
         areaPage,
-        headerFooterConfig
+        headerFooterConfig,
+        layoutAnchor
     ).pages[0];
+
+    if (ctx.isDirty && count < 10) {
+        count++;
+        resetContext(ctx);
+        headerOrFooterViewModel.resetCache();
+
+        return _createSkeletonHeaderFooter(
+            ctx,
+            headerOrFooterViewModel,
+            sectionBreakConfig,
+            skeletonResourceReference,
+            segmentId,
+            isHeader,
+            areaPage,
+            count
+        );
+    }
 
     updateBlockIndex([page]);
 
     if (isHeader) {
-        return {
-            ...page,
+        Object.assign(page, {
             marginTop: marginHeader,
             marginBottom: 5, // Space between header and content
-        };
+        });
+    } else {
+        Object.assign(page, {
+            marginTop: 5, // Space between content and footer
+            marginBottom: marginFooter,
+        });
     }
 
-    return {
-        ...page,
-        marginBottom: marginFooter,
-        marginTop: 5, // Space between footer and content
-    };
+    return page;
 }
 
 function _getVerticalMargin(

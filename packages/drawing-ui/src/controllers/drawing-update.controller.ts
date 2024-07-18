@@ -548,17 +548,19 @@ export class DrawingUpdateController extends Disposable {
         if (renderObject == null) {
             return;
         }
-        const { scene, transformer } = renderObject;
+        const { scene } = renderObject;
 
         drawingIds.forEach((drawingId) => {
             const oKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-            const object = scene.getObject(oKey) as Shape<IShapeProps>;
-            if (object == null) {
+            const drawingShapes = scene.fuzzyMathObjects(oKey, true) as Shape<IShapeProps>[];
+            if (drawingShapes == null || drawingShapes.length === 0) {
                 return;
             }
             const index = this._drawingManagerService.getDrawingOrder(unitId, subUnitId).indexOf(drawingId);
-            object.setProps({ zIndex: index });
-            object.makeDirty();
+            for (const shape of drawingShapes) {
+                shape.setProps({ zIndex: index });
+                shape.makeDirty();
+            }
         });
     }
 
@@ -617,14 +619,17 @@ export class DrawingUpdateController extends Disposable {
                     if (renderObject == null) {
                         return;
                     }
-                    const { scene, transformer } = renderObject;
+                    const { scene } = renderObject;
 
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
-                    const drawingShape = scene.getObject(drawingShapeKey);
+                    const drawingShapes = scene.fuzzyMathObjects(drawingShapeKey, true);
 
-                    if (drawingShape != null) {
-                        drawingShape.dispose();
+                    if (drawingShapes.length > 0) {
+                        for (const drawingShape of drawingShapes) {
+                            drawingShape.dispose();
+                        }
+
                         scene.getTransformer()?.clearSelectedObjects();
                     }
                 });
@@ -683,22 +688,17 @@ export class DrawingUpdateController extends Disposable {
                     if (renderObject == null) {
                         return;
                     }
-                    const { scene, transformer } = renderObject;
-
-                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-                    const drawingShape = scene.getObject(drawingShapeKey);
-
-                    if (drawingShape == null) {
-                        return true;
-                    }
-
                     const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IDrawingParam;
                     if (drawingParam == null) {
                         return;
                     }
                     const { transform } = drawingParam;
+                    const { scene } = renderObject;
 
-                    if (transform == null) {
+                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                    const drawingShape = scene.getObject(drawingShapeKey);
+
+                    if (drawingShape == null || transform == null) {
                         return true;
                     }
 
@@ -725,7 +725,7 @@ export class DrawingUpdateController extends Disposable {
                     if (renderObject == null) {
                         return;
                     }
-                    const { scene, transformer } = renderObject;
+                    const { scene } = renderObject;
 
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
                     const drawingShape = scene.getObject(drawingShapeKey);
@@ -774,7 +774,7 @@ export class DrawingUpdateController extends Disposable {
                     const objectArray = Array.from(objects.values());
                     const drawings: IDrawingSearch[] = [];
                     startTransforms = objectArray.map((object) => {
-                        const { left, top, height, width, angle, oKey, groupKey, isInGroup } = object;
+                        const { left, top, height, width, angle, oKey, isInGroup } = object;
                         const drawing = this._drawingManagerService.getDrawingOKey(oKey);
                         if (isInGroup || object instanceof Group) {
                             let group = object.ancestorGroup as Group;

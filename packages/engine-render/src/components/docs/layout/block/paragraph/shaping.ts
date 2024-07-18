@@ -316,6 +316,9 @@ export function shaping(
 
             // Inline Custom Block can open a new line.
             if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0) {
+                if (lastList.length === 0) {
+                    shapedGlyphsList.pop();
+                }
                 shapedGlyphsList.push([glyph]);
             } else {
                 lastList.push(glyph);
@@ -325,7 +328,7 @@ export function shaping(
         const lastShapedGlyphs = shapedGlyphsList[shapedGlyphsList.length - 1];
 
         for (const shapedGlyphs of shapedGlyphsList) {
-            const word = shapedGlyphs.map((g) => g.content).join();
+            const word = shapedGlyphs.map((g) => g.content).join('');
 
             shapedTextList.push({
                 text: word,

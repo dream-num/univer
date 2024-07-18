@@ -108,7 +108,8 @@ export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
             segmentId,
         });
 
-        rawActions.push(jsonX.editOp(textX.serialize())!);
+        const path = getRichTextEditPath(documentDataModel, segmentId);
+        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
 
         const drawing = (documentDataModel.getDrawings() ?? {})[drawingId];
         const drawingOrder = documentDataModel.getDrawingsOrder();

@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import type { DocumentSkeleton } from '@univerjs/engine-render';
+import { BehaviorSubject } from 'rxjs';
 
-export function getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId }: IDrawingSearch, index?: number): string {
-    return typeof index === 'number'
-        ? `${unitId}#-#${subUnitId}#-#${drawingId}#-#${index}`
-        : `${unitId}#-#${subUnitId}#-#${drawingId}`;
+export class DocRefreshDrawingsService {
+    private readonly _refreshDrawings$ = new BehaviorSubject<Nullable<DocumentSkeleton>>(null);
+    readonly refreshDrawings$ = this._refreshDrawings$.asObservable();
+
+    refreshDrawings(skeleton: Nullable<DocumentSkeleton>) {
+        this._refreshDrawings$.next(skeleton);
+    }
 }

@@ -92,6 +92,10 @@ export class Decimal extends BaseFunction {
                 return NumberValueObject.create(0);
             }
 
+            if (!this.isValidCharForRadix(textValue, radixValue)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
             const result = Number.parseInt(textValue, radixValue);
 
             if (Number.isNaN(result)) {
@@ -106,5 +110,21 @@ export class Decimal extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    private isValidCharForRadix(text: string, radix: number): boolean {
+        for (const char of text) {
+            const charCode = char.toUpperCase().charCodeAt(0);
+
+            if (radix <= 10 && !(charCode >= 48 && charCode < 48 + radix)) { // '0' to 'radix-1'
+                return false;
+            }
+
+            if (radix > 10 && !((charCode >= 48 && charCode < 58) || (charCode >= 65 && charCode < 65 + radix - 10))) { // '0' to '9'  'A' to 'A+radix-10'
+                return false;
+            }
+        }
+
+        return true;
     }
 }

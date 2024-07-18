@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, ICellRenderContext, Workbook } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICellRenderContext, IRange, Workbook } from '@univerjs/core';
 import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import type { MenuConfig } from '@univerjs/ui';
@@ -24,7 +24,7 @@ import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { debounceTime } from 'rxjs';
+import { bufferTime, debounceTime } from 'rxjs';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { ListValidator } from '../validators';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
@@ -312,9 +312,16 @@ export class SheetsDataValidationRenderController extends RxDisposable {
     }
 
     private _initAutoHeight() {
-        this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe((info) => {
-            if (info.rule?.ranges) {
-                const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(info.rule.ranges);
+        this._dataValidationModel.ruleChange$.pipe(bufferTime(16)).subscribe((infos) => {
+            const ranges: IRange[] = [];
+            infos.forEach((info) => {
+                if (info.rule?.ranges) {
+                    ranges.push(...info.rule.ranges);
+                }
+            });
+
+            if (ranges.length) {
+                const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
                 sequenceExecute(mutations.redos, this._commandService);
             }
         });
@@ -504,9 +511,16 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
     }
 
     private _initAutoHeight() {
-        this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe((info) => {
-            if (info.rule?.ranges) {
-                const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(info.rule.ranges);
+        this._dataValidationModel.ruleChange$.pipe(bufferTime(16)).subscribe((infos) => {
+            const ranges: IRange[] = [];
+            infos.forEach((info) => {
+                if (info.rule?.ranges) {
+                    ranges.push(...info.rule.ranges);
+                }
+            });
+
+            if (ranges.length) {
+                const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
                 sequenceExecute(mutations.redos, this._commandService);
             }
         });

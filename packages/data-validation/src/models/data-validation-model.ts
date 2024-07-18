@@ -20,13 +20,15 @@ import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-paylo
 import { DataValidationManager } from './data-validation-manager';
 
 type ManagerCreator<T extends IDataValidationRule> = (unitId: string, subUnitId: string) => DataValidationManager<T>;
-type RuleChangeType = 'update' | 'add' | 'remove';
+type DataValidationChangeType = 'update' | 'add' | 'remove';
+export type DataValidationChangeSource = 'command' | 'patched';
 
 export interface IRuleChange<T extends IDataValidationRule> {
     rule?: T;
-    type: RuleChangeType;
+    type: DataValidationChangeType;
     unitId: string;
     subUnitId: string;
+    source: DataValidationChangeSource;
 }
 
 export interface IValidStatusChange {
@@ -79,7 +81,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         return manager;
     }
 
-    private _addRuleSideEffect(unitId: string, subUnitId: string, rule: T) {
+    private _addRuleSideEffect(unitId: string, subUnitId: string, rule: T, source: DataValidationChangeSource) {
         const manager = this.ensureManager(unitId, subUnitId);
         const oldRule = manager.getRuleById(rule.uid);
         if (oldRule) {
@@ -90,15 +92,16 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
             type: 'add',
             unitId,
             subUnitId,
+            source,
         });
     }
 
-    addRule(unitId: string, subUnitId: string, rule: T | T[], index?: number) {
+    addRule(unitId: string, subUnitId: string, rule: T | T[], source: DataValidationChangeSource, index?: number) {
         try {
             const manager = this.ensureManager(unitId, subUnitId);
             const rules = Array.isArray(rule) ? rule : [rule];
             rules.forEach((item) => {
-                this._addRuleSideEffect(unitId, subUnitId, item);
+                this._addRuleSideEffect(unitId, subUnitId, item, source);
             });
 
             manager.addRule(rule, index);
@@ -107,7 +110,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         }
     }
 
-    updateRule(unitId: string, subUnitId: string, ruleId: string, payload: IUpdateRulePayload) {
+    updateRule(unitId: string, subUnitId: string, ruleId: string, payload: IUpdateRulePayload, source: DataValidationChangeSource) {
         try {
             const manager = this.ensureManager(unitId, subUnitId);
             const rule = manager.updateRule(ruleId, payload);
@@ -117,13 +120,14 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
                 type: 'update',
                 unitId,
                 subUnitId,
+                source,
             });
         } catch (error) {
             this._logService.error(error);
         }
     }
 
-    removeRule(unitId: string, subUnitId: string, ruleId: string) {
+    removeRule(unitId: string, subUnitId: string, ruleId: string, source: DataValidationChangeSource) {
         try {
             const manager = this.ensureManager(unitId, subUnitId);
             const oldRule = manager.getRuleById(ruleId);
@@ -134,6 +138,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
                     type: 'remove',
                     unitId,
                     subUnitId,
+                    source,
                 });
             }
         } catch (error) {

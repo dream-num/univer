@@ -62,11 +62,13 @@ export class DataValidationSheetController extends Disposable {
                             unitId,
                             subUnitId,
                             ruleId: ids,
+                            source: 'patched',
                         };
                         const undoParams: IAddDataValidationMutationParams = {
                             unitId,
                             subUnitId,
                             rule: rules,
+                            source: 'patched',
                         };
 
                         return {

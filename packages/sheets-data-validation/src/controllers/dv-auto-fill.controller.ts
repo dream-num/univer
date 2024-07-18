@@ -96,7 +96,7 @@ export class DataValidationAutoFillController extends Disposable {
             });
 
             const diffs = ruleMatrixCopy.diff(manager.getDataValidations());
-            const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector);
+            const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector, 'patched');
             return {
                 undos: undoMutations,
                 redos: redoMutations,

@@ -163,6 +163,7 @@ export class DataValidationRefRangeController extends Disposable {
                         type: UpdateRuleType.RANGE,
                         payload: resultRanges,
                     },
+                    source: 'patched',
                 };
                 // in ref-range case, there won't be any overlap about rule ranges
                 const redos = [{ id: UpdateDataValidationMutation.id, params: redoParams }];
@@ -176,6 +177,7 @@ export class DataValidationRefRangeController extends Disposable {
                             type: UpdateRuleType.RANGE,
                             payload: oldRanges,
                         },
+                        source: 'patched',
                     },
                 }];
                 return { redos, undos };

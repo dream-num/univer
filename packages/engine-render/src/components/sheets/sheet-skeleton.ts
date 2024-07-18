@@ -431,13 +431,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         const results: IRowAutoHeightInfo[] = [];
         const { mergeData, rowData } = this._worksheetData;
         const rowObjectArray = rowData;
+        const calculatedRows = new Set<number>();
 
         for (const range of ranges) {
             const { startRow, endRow, startColumn, endColumn } = range;
 
             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
                 // If the row has already been calculated, it does not need to be calculated
-                if (results.some(({ row }) => row === rowIndex)) {
+                if (calculatedRows.has(rowIndex)) {
                     continue;
                 }
 
@@ -450,7 +451,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
                 if (hasUnMergedCell) {
                     const autoHeight = this._calculateRowAutoHeight(rowIndex);
-
+                    calculatedRows.add(rowIndex);
                     results.push({
                         row: rowIndex,
                         autoHeight,

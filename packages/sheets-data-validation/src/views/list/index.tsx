@@ -15,13 +15,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, Injector, IPermissionService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import { createDefaultNewRule, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
-import type { ICellPermission } from '@univerjs/sheets';
-import { UnitAction } from '@univerjs/protocol';
+import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { DataValidationItem } from '../item';
 import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 import { AddSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
@@ -93,22 +92,29 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     const getDvRulesByPermissionCorrect = (rules: ISheetDataValidationRule[]) => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const permissionService = injector.get(IPermissionService);
+        const rangeProtectionRuleModel = injector.get(RangeProtectionRuleModel);
+        const worksheetEditable = permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+        if (!worksheetEditable) {
+            return rules.map((rule) => {
+                return { ...rule, disable: true };
+            });
+        }
+        const permissions = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
         const rulesByPermissionCheck = rules.map((rule) => {
             const { ranges } = rule;
-            const haveNotPermission = ranges?.some((range) => {
-                const { startRow, startColumn, endRow, endColumn } = range;
-                for (let row = startRow; row <= endRow; row++) {
-                    for (let col = startColumn; col <= endColumn; col++) {
-                        const permission = (worksheet?.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                        if (permission?.[UnitAction.Edit] === false || permission?.[UnitAction.View] === false) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
+            const lapPermission = permissions.find((permission) => {
+                return ranges?.some((range) => {
+                    return permission.ranges.some((pRange) => {
+                        return Rectangle.intersects(range, pRange);
+                    });
+                });
             });
-            if (haveNotPermission) {
-                return { ...rule, disable: true };
+            if (lapPermission) {
+                const editable = permissionService.getPermissionPoint(new RangeProtectionPermissionEditPoint(unitId, subUnitId, lapPermission.permissionId).id)?.value;
+                return editable ? { ...rule } : { ...rule, disable: true };
             } else {
                 return { ...rule };
             }

@@ -24,6 +24,7 @@ import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { debounceTime } from 'rxjs';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { ListValidator } from '../validators';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
@@ -170,8 +171,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             }
         };
 
-        this.disposeWithMe(this._dataValidationModel.ruleChange$.subscribe(() => markSkeletonDirty()));
-        this.disposeWithMe(this._dataValidationModel.validStatusChange$.subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._dataValidationModel.ruleChange$.pipe(debounceTime(5)).subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._dataValidationModel.validStatusChange$.pipe(debounceTime(5)).subscribe(() => markSkeletonDirty()));
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -311,7 +312,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
     }
 
     private _initAutoHeight() {
-        this._dataValidationModel.ruleChange$.subscribe((info) => {
+        this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe((info) => {
             if (info.rule?.ranges) {
                 const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(info.rule.ranges);
                 sequenceExecute(mutations.redos, this._commandService);
@@ -362,8 +363,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             }
         };
 
-        this.disposeWithMe(this._dataValidationModel.ruleChange$.subscribe(() => markSkeletonDirty()));
-        this.disposeWithMe(this._dataValidationModel.validStatusChange$.subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._dataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -503,7 +504,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
     }
 
     private _initAutoHeight() {
-        this._dataValidationModel.ruleChange$.subscribe((info) => {
+        this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe((info) => {
             if (info.rule?.ranges) {
                 const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(info.rule.ranges);
                 sequenceExecute(mutations.redos, this._commandService);

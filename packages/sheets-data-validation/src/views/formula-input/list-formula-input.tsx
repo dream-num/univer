@@ -22,6 +22,7 @@ import { createInternalEditorID, DataValidationType, isFormulaString, LocaleServ
 import { DataValidationModel, DataValidatorRegistryService, type IFormulaInputProps } from '@univerjs/data-validation';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import cs from 'clsx';
+import { debounceTime } from 'rxjs';
 import { deserializeListOptions, serializeListOptions } from '../../validators/util';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
 import type { ListValidator } from '../../validators';
@@ -163,7 +164,8 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const [refOptions, setRefOptions] = useState<string[]>([]);
     const [localError, setLocalError] = useState('');
     const formula1Res = showError ? validResult?.formula1 : '';
-    const ruleChange = useObservable(dataValidationModel.ruleChange$);
+    const ruleChange$ = useMemo(() => dataValidationModel.ruleChange$.pipe(debounceTime(16)), []);
+    const ruleChange = useObservable(ruleChange$);
 
     const onChange = useEvent(_onChange);
 

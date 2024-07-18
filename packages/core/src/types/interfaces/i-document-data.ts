@@ -814,12 +814,36 @@ export interface IShading {
     backgroundColor: IColorStyle; // backgroundColor
 }
 
-/**
- * Type of width
- */
-export enum WidthType {
-    EVENLY_DISTRIBUTED = '0',
-    FIXED_WIDTH = '1',
+export interface IDistFromText {
+    distT: INumberUnit; // distance between top text and table.
+    distB: INumberUnit; // distance between bottom text and table.
+    distL: INumberUnit; // distance between left text and table.
+    distR: INumberUnit; // distance between right text and table.
+}
+
+export interface IDocTablePosition {
+    positionH: IObjectPositionH;
+    positionV: IObjectPositionV;
+}
+
+enum TableSizeType {
+    UNSPECIFIED,
+    SPECIFIED,
+}
+export interface IWidthInTableSize {
+    type: TableSizeType;
+    width: INumberUnit;
+}
+
+enum TableHAlign {
+    LEFT,
+    CENTER,
+    RIGHT,
+}
+
+enum TableTextWrapType {
+    NONE,
+    WRAP,
 }
 
 /**
@@ -831,8 +855,28 @@ export interface ITable {
     rows: number; // rows
     columns: number; // columns
     tableRows: ITableRow[]; // tableRows
-    tableStyle: WidthType; // tableStyle
-    width: number; // width
+    tableColumns: ITableColumn[]; // tableColumns
+    align: TableHAlign; // align
+    leftIndent: INumberUnit; // leftIndent
+    textWrap: TableTextWrapType;
+    position: IDocTablePosition; // position
+    dist: IDistFromText; // dist
+    size: IWidthInTableSize;
+}
+
+enum TableCellHeightRule {
+    MIN,
+    FIX,
+}
+
+export interface ITableColumn {
+    size: IWidthInTableSize;
+}
+
+export interface ITableRowSize {
+    type: TableSizeType;
+    height: INumberUnit;
+    heightRule: TableCellHeightRule;
 }
 
 /**
@@ -842,22 +886,18 @@ export interface ITableRow {
     st: number; // startIndex
     ed: number; // endIndex
     tableCells: ITableCell[]; // tableCells
-    tableRowStyle: ITableRowStyle; // tableRowStyle
-}
-
-/**
- * Properties of style table row
- */
-export interface ITableRowStyle {
-    minRowHeight: number; // minRowHeight
+    size: ITableRowSize; // tableRowStyle
+    allowBreakAcrossPages: BooleanNumber; // allowBreakAcrossPages, the default is false.
+    isFirstRow: BooleanNumber; // isFirstRow.
+    repeatHeaderRow: BooleanNumber; // Show header row in different pages. only for the first row.
 }
 
 /**
  * Properties of table cell
  */
 export interface ITableCell {
-    // st: number; // startIndex
-    // ed: number; // endIndex
+    st: number; // startIndex
+    ed: number; // endIndex
     // content: IBlockElement[]; // content
     tableCellStyle: ITableCellStyle; // tableCellStyle
 }
@@ -873,11 +913,13 @@ export interface ITableCellStyle {
     borderRight: ITableCellBorder; // borderRight
     borderTop: ITableCellBorder; // borderTop
     borderBottom: ITableCellBorder; // borderBottom
-    paddingLeft: number; // paddingLeft
-    paddingRight: number; // paddingRight
-    paddingTop: number; // paddingTop
-    paddingBottom: number; // paddingBottom
-    contentAlignment: ContentAlignment; // contentAlignment
+    paddingLeft: INumberUnit; // paddingLeft
+    paddingRight: INumberUnit; // paddingRight
+    paddingTop: INumberUnit; // paddingTop
+    paddingBottom: INumberUnit; // paddingBottom
+    size: IWidthInTableSize; // size
+    contentHAlignment: ContentHAlignment; // contentAlignment
+    contentVAlignment: ContentVAlignment; // contentAlignment
 }
 
 /**
@@ -885,18 +927,24 @@ export interface ITableCellStyle {
  */
 export interface ITableCellBorder {
     color: IColorStyle; // color
-    width: number; // width
+    width: INumberUnit; // width
     dashStyle: DashStyleType; // dashStyle
 }
 /**
  * The content alignments for a Shape or TableCell. The supported alignments correspond to predefined text anchoring types from the ECMA-376 standard.
  */
-export enum ContentAlignment {
+export enum ContentVAlignment {
     CONTENT_ALIGNMENT_UNSPECIFIED, // An unspecified content alignment. The content alignment is inherited from the parent if one exists.
-    CONTENT_ALIGNMENT_UNSUPPORTED, // An unsupported content alignment.
     TOP, // An alignment that aligns the content to the top of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 't'.
     MIDDLE, // An alignment that aligns the content to the middle of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 'ctr'.
     BOTTOM, // An alignment that aligns the content to the bottom of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 'b'.
+}
+
+export enum ContentHAlignment {
+    CONTENT_ALIGNMENT_UNSPECIFIED, // An unspecified content alignment. The content alignment is inherited from the parent if one exists.
+    LEFT, // An alignment that aligns the content to the left of the content holder.
+    CENTER, // An alignment that aligns the content to the center of the content holder.
+    RIGHT, // An alignment that aligns the content to the right of the content holder.
 }
 
 /**
@@ -957,6 +1005,7 @@ export enum NumberUnitType {
     LINE,
     CHARACTER,
     PIXEL,
+    PERCENT,
 }
 
 // 20.4.3.1 ST_AlignH (Relative Horizontal Alignment Positions)

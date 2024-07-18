@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import { toDisposable } from '@univerjs/core';
 
-import { Subject } from 'rxjs';
+import { Observable, shareReplay, Subject } from 'rxjs';
 import type { CURSOR_TYPE } from './basics/const';
 import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
 import { DeviceType, PointerInput } from './basics/i-events';
@@ -27,14 +27,32 @@ import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './ba
 import { Canvas, CanvasRenderMode } from './canvas';
 import type { Scene } from './scene';
 import { ThinEngine } from './thin-engine';
+import { observeClientRect } from './floating/util';
 
 export class Engine extends ThinEngine<Scene> {
     renderEvenInBackground = true;
 
     private readonly _beginFrame$ = new Subject<void>();
     readonly beginFrame$ = this._beginFrame$.asObservable();
+
     private readonly _endFrame$ = new Subject<void>();
     readonly endFrame$ = this._endFrame$.asObservable();
+
+    private _rect$: Nullable<Observable<void>> = null;
+    public get clientRect$(): Observable<void> {
+        return this._rect$ || (this._rect$ = new Observable((subscriber) => {
+            if (!this._container) {
+                throw new Error('[Engine]: cannot subscribe to rect changes when container is not set!');
+            }
+
+            const sub = observeClientRect(this._container).subscribe(() => subscriber.next());
+
+            return () => {
+                sub.unsubscribe();
+                this._rect$ = null;
+            };
+        })).pipe(shareReplay(1));
+    }
 
     private _container: Nullable<HTMLElement>;
 
@@ -171,6 +189,10 @@ export class Engine extends ThinEngine<Scene> {
     }
 
     setContainer(elem: HTMLElement, resize = true) {
+        if (this._container === elem) {
+            return;
+        }
+
         this._container = elem;
         this._container.appendChild(this.getCanvasElement());
 
@@ -260,6 +282,9 @@ export class Engine extends ThinEngine<Scene> {
 
         this._beginFrame$.complete();
         this._endFrame$.complete();
+
+        this._resizeObserver?.disconnect();
+        this._container = null;
     }
 
     /**
@@ -530,7 +555,6 @@ export class Engine extends ThinEngine<Scene> {
                 deviceEvent.currentState = this.pointer[PointerInput.Horizontal];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
-                // console.log('pointerDownEvent_clientX');
             }
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
@@ -538,7 +562,6 @@ export class Engine extends ThinEngine<Scene> {
                 deviceEvent.currentState = this.pointer[PointerInput.Vertical];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
-                // console.log('pointerDownEvent_clientY');
             }
 
             // evt.button + 2  ---> leftClick: 2, middleClick: 3, rightClick:4
@@ -546,7 +569,6 @@ export class Engine extends ThinEngine<Scene> {
             deviceEvent.previousState = previousButton;
             deviceEvent.currentState = this.pointer[evt.button + 2];
             this.onInputChanged$.emitEvent(deviceEvent);
-            // console.log('pointerDownEvent_2', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this._pointer);
         };
 
         this._pointerUpEvent = (_evt: Event) => {
@@ -647,11 +669,13 @@ export class Engine extends ThinEngine<Scene> {
             this.onInputChanged$.emitEvent(deviceEvent);
         };
 
-        this._pointerBlurEvent = (evt: any) => {
+        this._pointerBlurEvent = () => {
             if (this._mouseId >= 0 && this.getCanvasElement().hasPointerCapture(this._mouseId)) {
-                this.getCanvasElement().releasePointerCapture(this._mouseId);
-                this._remainCapture = this._mouseId;
-                this._mouseId = -1;
+                // NOTE: @wzhudev comment so the canvas could keep capturing pointer events.
+                // May lead to unknown problems.
+                // this.getCanvasElement().releasePointerCapture(this._mouseId);
+                // this._remainCapture = this._mouseId;
+                // this._mouseId = -1;
             }
 
             this.pointer = {};

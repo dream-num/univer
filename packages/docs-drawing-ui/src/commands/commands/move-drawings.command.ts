@@ -15,26 +15,28 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, Direction, ICommandService } from '@univerjs/core';
+import { CommandType, Direction, ICommandService, IUniverInstanceService, PositionedObjectLayoutType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import { transformToDocDrawingPosition } from '@univerjs/docs-ui';
-import { ClearDocDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import type { ISetDrawingCommandParams } from './interfaces';
-import { SetDocDrawingCommand } from './set-doc-drawing.command';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IDrawingDocTransform, IUpdateDrawingDocTransformParams } from './update-doc-drawing.command';
+import { UpdateDrawingDocTransformCommand } from './update-doc-drawing.command';
 
 export interface IMoveDrawingsCommandParams {
-    direction: Direction ;
+    direction: Direction;
 }
 
 export const MoveDocDrawingsCommand: ICommand = {
+
     id: 'doc.command.move-drawing',
+
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: IMoveDrawingsCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const docDrawingService = accessor.get(IDocDrawingService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const renderManagerService = accessor.get(IRenderManagerService);
 
         const { direction } = params;
 
@@ -46,42 +48,58 @@ export const MoveDocDrawingsCommand: ICommand = {
 
         const unitId = drawings[0].unitId;
 
+        const renderObject = renderManagerService.getRenderById(unitId);
+        const scene = renderObject?.scene;
+        if (scene == null) {
+            return false;
+        }
+        const transformer = scene.getTransformerByCreate();
+
+        const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+
         const newDrawings = drawings.map((drawing) => {
-            const { transform } = drawing as IDocDrawing;
-            if (transform == null) {
+            const { drawingId } = drawing as IDocDrawing;
+            const drawingData = documentDataModel?.getSnapshot().drawings?.[drawingId];
+
+            // Inline drawing can not be moved by shortcut.
+            if (drawingData == null || drawingData.layoutType === PositionedObjectLayoutType.INLINE) {
                 return null;
             }
-            const newTransform = { ...transform };
 
-            const { left = 0, top = 0 } = transform;
+            const { positionH, positionV } = drawingData.docTransform;
+
+            const newPositionH = { ...positionH };
+            const newPositionV = { ...positionV };
 
             if (direction === Direction.UP) {
-                newTransform.top = top - 1;
+                newPositionV.posOffset = (newPositionV.posOffset ?? 0) - 2;
             } else if (direction === Direction.DOWN) {
-                newTransform.top = top + 1;
+                newPositionV.posOffset = (newPositionV.posOffset ?? 0) + 2;
             } else if (direction === Direction.LEFT) {
-                newTransform.left = left - 1;
+                newPositionH.posOffset = (newPositionH.posOffset ?? 0) - 2;
             } else if (direction === Direction.RIGHT) {
-                newTransform.left = left + 1;
+                newPositionH.posOffset = (newPositionH.posOffset ?? 0) + 2;
             }
 
             return {
-                ...drawing,
-                transform: newTransform,
-                docTransform: transformToDocDrawingPosition(newTransform),
-            } as IDocDrawing;
-        }).filter((drawing) => drawing != null) as IDocDrawing[];
+                drawingId,
+                key: direction === Direction.UP || direction === Direction.DOWN ? 'positionV' : 'positionH',
+                value: direction === Direction.UP || direction === Direction.DOWN ? newPositionV : newPositionH,
+            } as IDrawingDocTransform;
+        }).filter((drawing) => drawing != null) as IDrawingDocTransform[];
 
-        const result = commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetDocDrawingCommand.id, {
+        if (newDrawings.length === 0) {
+            return false;
+        }
+
+        const result = commandService.syncExecuteCommand<IUpdateDrawingDocTransformParams>(UpdateDrawingDocTransformCommand.id, {
             unitId,
+            subUnitId: unitId,
             drawings: newDrawings,
         });
 
-        if (result) {
-            commandService.syncExecuteCommand(ClearDocDrawingTransformerOperation.id, [unitId]);
-            return true;
-        }
+        transformer.refreshControls();
 
-        return false;
+        return Boolean(result);
     },
 };

@@ -28,9 +28,9 @@ import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../services/auto-fill/type';
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { useActiveWorkbook } from '../../components/hook';
+import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import styles from './index.module.less';
 
 export interface IAnchorPoint {
@@ -54,7 +54,6 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const selectionRenderService = useDependency(ISelectionRenderService);
     const autoFillService = useDependency(IAutoFillService);
     const localeService = useDependency(LocaleService);
     const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
@@ -63,12 +62,16 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     const [selected, setSelected] = useState<APPLY_TYPE>(APPLY_TYPE.SERIES);
     const [isHovered, setHovered] = useState(false);
     const workbook = useActiveWorkbook();
-    const sheetSkeletonManagerService = useMemo(() => {
+    const { sheetSkeletonManagerService, selectionRenderService } = useMemo(() => {
         if (workbook) {
-            return renderManagerService.getRenderById(workbook.getUnitId())?.with(SheetSkeletonManagerService);
+            const ru = renderManagerService.getRenderById(workbook.getUnitId());
+            return {
+                sheetSkeletonManagerService: ru?.with(SheetSkeletonManagerService),
+                selectionRenderService: ru?.with(ISheetSelectionRenderService),
+            };
         }
 
-        return null;
+        return { sheetSkeletonManagerService: null, selectionRenderService: null };
     }, [workbook, renderManagerService]);
 
     const handleMouseEnter = () => {
@@ -150,14 +153,14 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     }
 
     const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
-    if (!sheetObject) return null;
+    if (!sheetObject || !selectionRenderService) return null;
 
     const { scene } = sheetObject;
     const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
     const viewport = selectionRenderService.getViewPort();
     const scaleX = scene?.scaleX;
     const scaleY = scene?.scaleY;
-    const scrollXY = scene?.getScrollXY(viewport);
+    const scrollXY = scene?.getViewportScrollXY(viewport);
     if (!scaleX || !scene || !scaleX || !scaleY || !scrollXY) return null;
     const x = skeleton?.getNoMergeCellPositionByIndex(anchor.row, anchor.col).endX || 0;
     const y = skeleton?.getNoMergeCellPositionByIndex(anchor.row, anchor.col).endY || 0;

@@ -45,6 +45,7 @@ export interface IReferenceSource {
     lists?: ILists;
     drawings?: IDrawings;
     drawingsOrder?: string[];
+    headerFooterDrawingsOrder?: string[];
 }
 
 export interface IDocumentSettings {
@@ -130,6 +131,12 @@ export interface IDocumentBody {
 
     customRanges?: ICustomRange[]; // plugin register，implement special logic for streams， hyperlink, field，structured document tags， bookmark，comment
     customDecorations?: ICustomDecoration[];
+
+    /**
+     * for copy/paste, data of custom-range and other module
+     * it won't save to disk
+     */
+    payloads?: Record<string, string>;
 }
 
 export interface IDocStyle {
@@ -271,18 +278,18 @@ export interface ICustomRange {
     endIndex: number;
     rangeId: string;
     rangeType: CustomRangeType;
+    /**
+     * display as a whole-entity
+     */
+    wholeEntity?: boolean;
 }
 
-export interface ICustomRangeForInterceptor extends ICustomRange {
-    active?: boolean;
-    show?: boolean;
-}
+// TODO: @weird94 this range should not be built-in. It makes custom ranges not
+// extensible for community users.
 
-export interface ICustomDecorationForInterceptor extends ICustomDecoration {
-    active?: boolean;
-    show?: boolean;
-}
-
+/**
+ * @deprecated
+ */
 export enum CustomRangeType {
     HYPERLINK,
     FIELD, // 17.16 Fields and Hyperlinks
@@ -291,6 +298,7 @@ export enum CustomRangeType {
     COMMENT,
     CUSTOM,
     MENTION,
+    UNI_FORMULA,
 }
 
 /**
@@ -356,10 +364,6 @@ export interface IDocStyleBase extends IMargin {
 }
 
 export interface IDocumentLayout {
-    // docGrid (Document Grid), open xml $17.6.5
-    charSpace?: number; // charSpace
-    linePitch?: number; // linePitch
-    gridType?: GridType; // gridType
 
     defaultTabStop?: number; // 17.15.1.25 defaultTabStop (Distance Between Automatic Tab Stops)   0.5 in  = 36pt，this value should be converted to the default font size when exporting
     characterSpacingControl?: characterSpacingControlType; // characterSpacingControl 17.18.7 ST_CharacterSpacing (Character-Level Whitespace Compression Settings)，default compressPunctuation
@@ -411,10 +415,16 @@ export interface IDocumentRenderConfig {
 }
 
 export interface ISectionBreakBase {
-    columnProperties?: ISectionColumnProperties[]; // columnProperties
+    // docGrid (Document Grid), open xml $17.6.5
+    charSpace?: number; // charSpace
+    linePitch?: number; // linePitch
+    gridType?: GridType; // gridType
+
+    columnProperties?: ISectionColumnProperties[]; // columnProperties 17.6.4 cols (Column Definitions)
     columnSeparatorType?: ColumnSeparatorType; // ColumnSeparatorType
     contentDirection?: TextDirection; // contentDirection
-    sectionType?: SectionType; // sectionType
+    sectionType?: SectionType; // sectionType 17.6.22 type (Section Type)
+    // deprecated: The attribute does not exist in Word and should be deprecated.
     sectionTypeNext?: SectionType; // sectionType
     textDirection?: TextDirectionType; // textDirection
 }
@@ -621,9 +631,9 @@ export interface ITextStyle extends IStyleBase {
 }
 
 export interface IIndentStart {
-    indentFirstLine?: INumberUnit | number; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
-    hanging?: INumberUnit | number; // hanging，offset of first word except first line
-    indentStart?: INumberUnit | number; // indentStart
+    indentFirstLine?: INumberUnit ; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
+    hanging?: INumberUnit ; // hanging，offset of first word except first line
+    indentStart?: INumberUnit ; // indentStart
     tabStops?: ITabStop[]; // tabStops
 }
 
@@ -638,14 +648,14 @@ export interface IParagraphStyle extends IIndentStart {
     direction?: TextDirection; // direction
     spacingRule?: SpacingRule; // SpacingRule
     snapToGrid?: BooleanNumber; // snapToGrid 17.3.2.34 snapToGrid (Use Document Grid Settings For Inter-Character Spacing)
-    spaceAbove?: INumberUnit | number; // spaceAbove before beforeLines (Spacing Above Paragraph)
-    spaceBelow?: INumberUnit | number; // spaceBelow after afterLines (Spacing Below Paragraph)
+    spaceAbove?: INumberUnit ; // spaceAbove before beforeLines (Spacing Above Paragraph)
+    spaceBelow?: INumberUnit ; // spaceBelow after afterLines (Spacing Below Paragraph)
     borderBetween?: IParagraphBorder; // borderBetween
     borderTop?: IParagraphBorder; // borderTop
     borderBottom?: IParagraphBorder; // borderBottom
     borderLeft?: IParagraphBorder; // borderLeft
     borderRight?: IParagraphBorder; // borderRight
-    indentEnd?: INumberUnit | number; // indentEnd
+    indentEnd?: INumberUnit ; // indentEnd
     keepLines?: BooleanNumber; // 17.3.1.14 keepLines (Keep All Lines On One Page)
     keepNext?: BooleanNumber; // 17.3.1.15 keepNext (Keep Paragraph With Next Paragraph)
     wordWrap?: BooleanNumber; // 17.3.1.45 wordWrap (Allow Line Breaking At Character Level)
@@ -832,7 +842,7 @@ export enum FontStyleType {
 
 export interface INumberUnit {
     v: number; // value
-    u: NumberUnitType; // unit
+    u?: NumberUnitType; // unit
 }
 
 export interface IObjectPositionH {
@@ -878,6 +888,7 @@ export enum NumberUnitType {
     POINT,
     LINE,
     CHARACTER,
+    PIXEL,
 }
 
 // 20.4.3.1 ST_AlignH (Relative Horizontal Alignment Positions)
@@ -887,6 +898,8 @@ export enum AlignTypeH {
     LEFT,
     OUTSIDE,
     RIGHT,
+    BOTH,
+    DISTRIBUTE,
 }
 
 // 20.4.3.2 ST_AlignV (Vertical Alignment Definition)
@@ -969,6 +982,10 @@ export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTr
 export interface IDrawingParam extends IDrawingSearch {
     drawingType: DrawingType;
     transform?: Nullable<ITransformState>;
+    transforms?: Nullable<ITransformState[]>;
+    // The same drawing render in different place, like image in header and footer.
+    // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
+    isMultiTransform?: BooleanNumber;
     groupId?: string;
 }
 

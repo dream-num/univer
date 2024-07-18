@@ -26,8 +26,8 @@ import { Disposable, ICommandService,
     UniverInstanceType,
 } from '@univerjs/core';
 
+import { getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
-import { getPrimaryForRange, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
 
@@ -68,7 +68,7 @@ export class SheetsSortUIService extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IConfirmService private readonly _confirmService: IConfirmService,
         @ILogService private readonly _logService: ILogService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetsSortService) private readonly _sheetsSortService: SheetsSortService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService) {
@@ -151,7 +151,7 @@ export class SheetsSortUIService extends Disposable {
         const setSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [{ range, primary: getPrimaryForRange(range, worksheet), style: null }],
 
         };
@@ -235,7 +235,7 @@ export class SheetsSortUIService extends Disposable {
         const worksheet = workbook.getActiveSheet() as Worksheet;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return null;
         }
@@ -257,7 +257,7 @@ export class SheetsSortUIService extends Disposable {
                 this.setSelection(unitId, subUnitId, range);
             }
         }
-        const primary = this._selectionManagerService.getLast()?.primary;
+        const primary = this._selectionManagerService.getCurrentLastSelection()?.primary;
         if (!primary) {
             return null;
         }

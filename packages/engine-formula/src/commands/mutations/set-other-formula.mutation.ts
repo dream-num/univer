@@ -29,6 +29,9 @@ export interface IRemoveOtherFormulaMutationParams {
     subUnitId: string;
     formulaIdList: string[];
 };
+
+// TODO: remove these two mutations to use RPC instead.
+
 /**
  * In the formula engine, the mutation is solely responsible for communication between the worker and the main thread.
  * It requires setting local to true during execution.

@@ -17,9 +17,11 @@
 import { DependentOn, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
+import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRefSelectionsService, RefSelectionsService } from '@univerjs/sheets';
+
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
@@ -28,15 +30,9 @@ import { FormulaClipboardController } from './controllers/formula-clipboard.cont
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
 import type { IUniverSheetsFormulaConfig } from './controllers/formula-ui.controller';
 import { DefaultSheetFormulaConfig, FormulaUIController } from './controllers/formula-ui.controller';
-import { PromptController } from './controllers/prompt.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
-
 import { DescriptionService, IDescriptionService } from './services/description.service';
-import {
-    FormulaCustomFunctionService,
-    IFormulaCustomFunctionService,
-} from './services/formula-custom-function.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
 import { DefinedNameController } from './controllers/defined-name.controller';
@@ -44,6 +40,30 @@ import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { RegisterOtherFormulaService } from './services/register-other-formula.service';
 import { FormulaAlertRenderController } from './controllers/formula-alert-render.controller';
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
+import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
+import { PromptController } from './controllers/prompt.controller';
+import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService, RemoteRegisterFunctionServiceName } from './services/remote/remote-register-function.service';
+
+@DependentOn(UniverFormulaEnginePlugin)
+export class UniverRemoteSheetsFormulaPlugin extends Plugin {
+    static override pluginName = 'SHEETS_FORMULA_REMOTE_PLUGIN';
+    static override type = UniverInstanceType.UNIVER_SHEET;
+
+    constructor(
+        private readonly _config = {},
+        @Inject(Injector) override readonly _injector: Injector
+    ) {
+        super();
+    }
+
+    override onStarting(injector: Injector): void {
+        injector.add([RemoteRegisterFunctionService]);
+        injector.get(IRPCChannelService).registerChannel(
+            RemoteRegisterFunctionServiceName,
+            fromModule(injector.get(RemoteRegisterFunctionService))
+        );
+    }
+}
 
 /**
  * The configuration of the formula UI plugin.
@@ -64,46 +84,15 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._init();
-    }
-
-    override onRendered(): void {
-        this._registerRenderModules();
-    }
-
-    private _registerRenderModules(): void {
-        ([
-
-            FormulaAlertRenderController,
-        ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
-        });
-    }
-
-    _init(): void {
+        const j = this._injector;
         const dependencies: Dependency[] = [
-            // services
             [IFormulaPromptService, { useClass: FormulaPromptService }],
-            [
-                IDescriptionService,
-                {
-                    useFactory: () => this._injector.createInstance(DescriptionService, this._config?.description),
-                },
-            ],
-            [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
-
+            [IRefSelectionsService, { useClass: RefSelectionsService }],
+            [IDescriptionService, { useFactory: () => j.createInstance(DescriptionService, this._config?.description) }],
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
             [FormulaRefRangeService],
             [RegisterOtherFormulaService],
-
-            // controllers
-            [
-                FormulaUIController,
-                {
-                    useFactory: () => this._injector.createInstance(FormulaUIController, this._config),
-                },
-            ],
-            [PromptController],
+            [FormulaUIController, { useFactory: () => j.createInstance(FormulaUIController, this._config) }],
             [FormulaAutoFillController],
             [FormulaClipboardController],
             [ArrayFormulaDisplayController],
@@ -113,9 +102,28 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [ActiveDirtyController],
             [DefinedNameController],
             [FormulaRenderManagerController],
+            [PromptController],
         ];
 
-        dependencies.forEach((dependency) => this._injector.add(dependency));
+        // If the plugin do not execute formula, it should delegate a remote calculator.
+        // So custom functions should be synced to that remote calculator.
+        if (this._config.notExecuteFormula) {
+            const rpcChannelService = j.get(IRPCChannelService);
+            dependencies.push([IRemoteRegisterFunctionService, {
+                useFactory: () => toModule<IRemoteRegisterFunctionService>(rpcChannelService.requestChannel(RemoteRegisterFunctionServiceName)),
+            }]);
+        }
+
+        dependencies.forEach((dependency) => j.add(dependency));
+    }
+
+    override onRendered(): void {
+        ([
+            [RefSelectionsRenderService],
+            [FormulaAlertRenderController],
+        ] as Dependency[]).forEach((dep) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
+        });
     }
 }
 
@@ -146,7 +154,6 @@ export class UniverSheetsFormulaMobilePlugin extends Plugin {
                     useFactory: () => this._injector.createInstance(DescriptionService, this._config?.description),
                 },
             ],
-            [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
             [FormulaRefRangeService],
             [RegisterOtherFormulaService],

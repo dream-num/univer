@@ -20,6 +20,9 @@ import {
     createInterceptorKey,
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    FOCUSING_EDITOR_STANDALONE,
+    FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
+    IContextService,
     InterceptorManager,
     IUniverInstanceService,
     makeCellToSelection,
@@ -29,7 +32,8 @@ import {
 } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
 import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
+import { IRefSelectionsService } from '@univerjs/sheets';
 import { IEditorService } from '@univerjs/ui';
 import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -37,12 +41,14 @@ import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-import { ISelectionRenderService } from './selection/selection-render.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
+import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
+import { attachPrimaryWithCoord } from './selection/util';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;
     eventType: DeviceInputEventType;
+    unitId: string;
     keycode?: KeyCode;
 }
 
@@ -106,6 +112,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     private _visible: IEditorBridgeServiceVisibleParam = {
         visible: false,
         eventType: DeviceInputEventType.Dblclick,
+        unitId: '',
     };
 
     private _currentEditCell: Nullable<ICurrentEditCellParam> = null;
@@ -127,10 +134,11 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -165,6 +173,16 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     setEditCell(param: ICurrentEditCellParam) {
         this._currentEditCell = param;
 
+        /**
+         * If there is no editor currently focused, then default to selecting the sheet editor to prevent the editorService from using the previously selected editor object.
+         * todo: wzhudev: In boundless mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
+         */
+        if (!this._editorService.getFocusEditor()) {
+            this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
+            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
+        }
+
         const editCellState = this.getLatestEditCellState();
         this._currentEditCellState = editCellState;
 
@@ -182,30 +200,28 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             return;
         }
 
-        const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
-        if (skeleton == null) {
-            return;
-        }
+        const ru = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
+        if (!ru) return;
+
+        const skeleton = ru.with(SheetSkeletonManagerService).getCurrentSkeleton();
+        const selectionRenderService = ru.with(ISheetSelectionRenderService);
+        if (!skeleton) return;
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;
-        const primaryWithCoord = this._selectionRenderService.attachPrimaryWithCoord(primary);
+        const primaryWithCoord = attachPrimaryWithCoord(primary, skeleton);
         if (primaryWithCoord == null) {
             return;
         }
 
         const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
-        if (actualRangeWithCoord == null) {
-            return;
-        }
-
         const canvasOffset = getCanvasOffsetByEngine(engine);
 
         let { startX, startY, endX, endY } = actualRangeWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
+        const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
         startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
         startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
         endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
@@ -298,6 +314,15 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
+        /**
+         * Non-sheetEditor and formula selection mode,
+         * double-clicking cannot activate the sheet editor.
+         */
+        const editor = this._editorService.getFocusEditor();
+        if (this._refSelectionsService.getCurrentSelections().length > 0 && editor && !editor.isSheetEditor()) {
+            return;
+        }
+
         this._visible = param;
 
         // Reset the dirty status when the editor is visible.

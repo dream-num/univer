@@ -173,10 +173,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
         if (!this._copyInfo) {
             return { redos: [], undos: [] };
         }
-        if (copyInfo.copyType === COPY_TYPE.CUT) {
-            this._copyInfo = null;
-            return { redos: [], undos: [] };
-        }
+
         if (!this._copyInfo || !this._copyInfo.matrix.getSizeOf() || !copyInfo.copyRange) {
             return { redos: [], undos: [] };
         }
@@ -265,9 +262,6 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             });
         });
 
-        return {
-            redos,
-            undos,
-        };
+        return { redos, undos };
     }
 }

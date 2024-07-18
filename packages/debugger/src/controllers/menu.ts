@@ -32,6 +32,7 @@ import { ThemeOperation } from '../commands/operations/theme.operation';
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand } from '../commands/commands/unit.command';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ChangeUserCommand, UnitRole } from '../commands/operations/change-user.operation';
+import { ShowCellContentOperation } from '../commands/operations/cell.operation';
 
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -52,6 +53,14 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
             {
                 label: 'Русский',
                 value: LocaleType.RU_RU,
+            },
+            {
+                label: '繁體中文',
+                value: LocaleType.ZH_TW,
+            },
+            {
+                label: 'Tiếng Việt',
+                value: LocaleType.VI_VN,
             },
         ],
     };
@@ -287,6 +296,17 @@ export function CreateFloatDOMMenuItemFactory(): IMenuButtonItem {
         positions: [FLOAT_DOM_ITEM_MENU_ID],
     };
 }
+
+export function ShowCellContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: ShowCellContentOperation.id,
+        type: MenuItemType.BUTTON,
+        title: 'Cell',
+        positions: [FLOAT_DOM_ITEM_MENU_ID],
+        icon: 'DS',
+    };
+}
+
 export function ChangeUserMenuItemFactory(): IMenuSelectorItem {
     return {
         id: ChangeUserCommand.id,

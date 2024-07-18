@@ -34,6 +34,7 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     noHistory?: boolean;
     // Do you need to compose the undo and redo of history, and compose of the change states.
     debounce?: boolean;
+    options?: { [key: string]: boolean };
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
@@ -71,7 +72,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const selections = textSelectionManagerService.getSelections() ?? [];
+        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
 
         const serializedSelections = selections.map(serializeTextRange);
 
@@ -94,21 +95,18 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         // Step 1: Update Doc Data Model.
         const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
+        // console.log('undoActions', undoActions);
         documentDataModel.apply(actions);
-
-        // console.log(params.trigger);
-        // console.log(actions);
-        // // console.log(undoActions);
-        // console.log(documentDataModel.getSnapshot());
+        // console.log('===redoActions', { actions, undoActions, noHistory });
+        // console.log('===body', documentDataModel);
 
         // Step 2: Update Doc View Model.
         documentViewModel.reset(documentDataModel);
-
         // Step 3: Update cursor & selection.
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null) {
             queueMicrotask(() => {
-                textSelectionManagerService.replaceTextRanges(textRanges);
+                textSelectionManagerService.replaceTextRanges(textRanges, true, params.options);
             });
         }
 

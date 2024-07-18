@@ -205,9 +205,9 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // font color
         else if (key === 'color') {
-            const rgbStr = new ColorKit(value).toRgbString();
+            const colorKit = new ColorKit(value);
             styleList.cl = {
-                rgb: rgbStr,
+                rgb: colorKit.isValid ? colorKit.toRgbString() : 'rgb(0,0,0)',
             };
         }
         // fill color / background
@@ -382,18 +382,20 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
             }
         }
 
-        // wrap text
-        if (key === 'overflow-wrap' || key === 'word-wrap') {
-            if (value === 'break-word') {
-                styleList.tb = 3;
-            }
-        } else if (key === 'text-overflow') {
-            if (value === 'clip') {
-                styleList.tb = 2;
-            }
-        } else if (key === 'text-break') {
-            if (value === 'overflow') {
-                styleList.tb = 1;
+        // wrap text (`white-space` property has a higher priority.)
+        if (styleList.tb !== 1) {
+            if (key === 'overflow-wrap' || key === 'word-wrap') {
+                if (value === 'break-word') {
+                    styleList.tb = 3;
+                }
+            } else if (key === 'text-overflow') {
+                if (value === 'clip') {
+                    styleList.tb = 2;
+                }
+            } else if (key === 'text-break') {
+                if (value === 'overflow') {
+                    styleList.tb = 1;
+                }
             }
         }
 

@@ -22,9 +22,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { DocDrawingApplyType, IDocDrawingService, SetDocDrawingApplyMutation } from '@univerjs/docs-drawing';
-import { ClearDocDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import { groupToUngroup } from './utils';
+import { IDocDrawingService } from '@univerjs/docs-drawing';
 
 /**
  * The command to insert new defined name
@@ -52,23 +50,23 @@ export const GroupDocDrawingCommand: ICommand = {
 
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
-        const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.GROUP });
+        // const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.GROUP });
 
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [
-                    { id: SetDocDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: groupToUngroup(objects as IDrawingGroupUpdateParam[]), type: DocDrawingApplyType.UNGROUP } },
-                    { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
-                ],
-                redoMutations: [
-                    { id: SetDocDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.GROUP } },
-                    { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
-                ],
-            });
+        // if (result) {
+        //     undoRedoService.pushUndoRedo({
+        //         unitID: unitId,
+        //         undoMutations: [
+        //             { id: SetDocDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: groupToUngroup(objects as IDrawingGroupUpdateParam[]), type: DocDrawingApplyType.UNGROUP } },
+        //             { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
+        //         ],
+        //         redoMutations: [
+        //             { id: SetDocDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.GROUP } },
+        //             { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
+        //         ],
+        //     });
 
-            return true;
-        }
+        //     return true;
+        // }
 
         return false;
     },

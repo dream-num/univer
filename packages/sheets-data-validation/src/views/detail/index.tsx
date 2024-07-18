@@ -162,9 +162,10 @@ export function DataValidationDetail() {
 
         const operators = validator.operators;
         const rule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
-        const newRule = newType === rule?.type
+        const newRule = (newType === rule?.type || (newType.includes('list') && rule?.type.includes('list')))
             ? {
                 ...rule,
+                type: newType as DataValidationType,
             }
             : {
                 ...localRule,
@@ -261,7 +262,7 @@ export function DataValidationDetail() {
             {FormulaInput
                 ? (
                     <FormulaInput
-                        key={key}
+                        key={key + localRule.type}
                         isTwoFormula={isTwoFormula}
                         value={{
                             formula1: localRule.formula1,

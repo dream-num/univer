@@ -20,7 +20,7 @@
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, IPermissionService, isICellData, IUniverInstanceService, LifecycleStages, LocaleService, ObjectMatrix, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetNameMutationParams } from '@univerjs/sheets';
-import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 import { IMEInputCommand, InsertCommand } from '@univerjs/docs';
@@ -45,11 +45,13 @@ export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 export class SheetPermissionInterceptorBaseController extends Disposable {
     disposableCollection = new DisposableCollection();
 
+    private _showPermissionDialog = true;
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IDialogService private readonly _dialogService: IDialogService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
@@ -61,6 +63,10 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
     ) {
         super();
         this._initialize();
+    }
+
+    setShowPermissionDialog(value: boolean) {
+        this._showPermissionDialog = value;
     }
 
     public haveNotPermissionHandle(errorMsg: string) {
@@ -76,7 +82,9 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             onClose: () => this._dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID),
             className: 'sheet-permission-user-dialog',
         };
-        this._dialogService.open(dialogProps);
+        if (this._showPermissionDialog) {
+            this._dialogService.open(dialogProps);
+        }
         throw new Error('have not permission');
     }
 
@@ -318,7 +326,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             return false;
         }
         const { worksheet, unitId, subUnitId } = target;
-        const selectionRange = this._selectionManagerService.getLast()?.range;
+        const selectionRange = this._selectionManagerService.getCurrentLastSelection()?.range;
         if (!selectionRange) {
             return false;
         };
@@ -363,7 +371,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             return false;
         }
         const { worksheet, unitId, subUnitId } = target;
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return true;
         }
@@ -423,7 +431,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         if (!subUnitId) {
             subUnitId = worksheet.getSheetId();
         }
-        const ranges = selectionRanges ?? this._selectionManagerService.getSelections()?.map((selection) => {
+        const ranges = selectionRanges ?? this._selectionManagerService.getCurrentSelections()?.map((selection) => {
             return selection.range;
         });
 
@@ -665,20 +673,21 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                     }
                     const { token } = node;
                     const sequenceGrid = deserializeRangeWithSheet(token);
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                    let targetSheet: Nullable<Worksheet> = workbook.getActiveSheet();
+                    const workbook = sequenceGrid.unitId ? this._univerInstanceService.getUnit<Workbook>(sequenceGrid.unitId) : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                    if (!workbook) return true;
+                    let targetSheet: Nullable<Worksheet> = sequenceGrid.sheetName ? workbook.getSheetBySheetName(sequenceGrid.sheetName) : workbook.getActiveSheet();
                     const unitId = workbook.getUnitId();
                     if (sequenceGrid.sheetName) {
                         targetSheet = workbook.getSheetBySheetName(sequenceGrid.sheetName);
                         if (!targetSheet) {
-                            return false;
+                            return true;
                         }
                         const subUnitId = targetSheet?.getSheetId();
                         const viewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id);
                         if (!viewPermission) return false;
                     }
                     if (!targetSheet) {
-                        return false;
+                        return true;
                     }
                     const { startRow, endRow, startColumn, endColumn } = sequenceGrid.range;
                     for (let i = startRow; i <= endRow; i++) {

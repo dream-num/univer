@@ -38,8 +38,7 @@ import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fil
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
-import { ScrollManagerService } from './services/scroll-manager.service';
-import { ISelectionRenderService } from './services/selection/selection-render.service';
+import { SheetScrollManagerService } from './services/scroll-manager.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
@@ -70,8 +69,8 @@ import { SheetPrintInterceptorService } from './services/print-interceptor.servi
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
 import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
-import { MobileSelectionRenderService } from './services/selection/mobile-selection-render.service';
-import { MobileSelectionRenderController } from './controllers/render-controllers/mobile/mobile-selection.render-controller';
+import { MobileSheetsSelectionRenderService } from './services/selection/mobile-selection-render.service';
+import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 
 /**
  * @ignore
@@ -103,10 +102,10 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [IAutoFillService, { useClass: AutoFillService }],
                 [SheetPrintInterceptorService],
 
-                [ScrollManagerService],
+                [SheetScrollManagerService],
                 // This would be removed from global injector and moved into RenderUnit provider.
                 // [SheetSkeletonManagerService],
-                [ISelectionRenderService, { useClass: MobileSelectionRenderService }],
+                [ISheetSelectionRenderService, { useClass: MobileSheetsSelectionRenderService }],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
@@ -117,7 +116,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 // controllers
                 [ActiveWorksheetController],
                 [AutoHeightController],
-                [HeaderFreezeRenderController],
                 [SheetClipboardController],
                 [SheetsRenderService],
                 [
@@ -162,10 +160,11 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
 
     private _registerRenderBasics(): void {
         ([
-            SheetSkeletonManagerService,
-            SheetRenderController,
-        ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
+            [SheetSkeletonManagerService],
+            [SheetRenderController],
+            [ISheetSelectionRenderService, { useClass: MobileSheetsSelectionRenderService }],
+        ] as Dependency[]).forEach((renderDep) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, renderDep));
         });
     }
 
@@ -177,31 +176,28 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).
             // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
             // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
-            HeaderMoveRenderController,
-            MobileSelectionRenderController,
-            HeaderFreezeRenderController,
-            // HeaderUnhideRenderController,
-            // HeaderResizeRenderController,
+            [HeaderMoveRenderController],
+            [HeaderFreezeRenderController],
             // Caution: ScrollRenderController should placed before ZoomRenderController
             // because ZoomRenderController would change scrollInfo in currentSkeletonBefore$
             // currentSkeletonBefore$ --> ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
-            MobileSheetsScrollRenderController,
-            SheetsZoomRenderController,
-            FormatPainterRenderController,
-            // HeaderMenuRenderController,
-            CellAlertRenderController,
-            ForceStringAlertRenderController,
-            MarkSelectionRenderController,
-            HoverRenderController,
-            DragRenderController,
-            ForceStringRenderController,
-            CellCustomRenderController,
-            SheetContextMenuMobileRenderController,
-            SheetPermissionInterceptorCanvasRenderController,
-            SheetPermissionInterceptorFormulaRenderController,
-            SheetPermissionRenderController,
-        ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
+            [MobileSheetsScrollRenderController],
+            [SheetsZoomRenderController],
+            [FormatPainterRenderController],
+            [CellAlertRenderController],
+            [ForceStringAlertRenderController],
+            [MarkSelectionRenderController],
+            [HoverRenderController],
+            [DragRenderController],
+            [ForceStringRenderController],
+            [CellCustomRenderController],
+            [SheetContextMenuMobileRenderController],
+
+            [SheetPermissionInterceptorCanvasRenderController],
+            [SheetPermissionInterceptorFormulaRenderController],
+            [SheetPermissionRenderController],
+        ] as Dependency[]).forEach((renderModule) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, renderModule));
         });
     }
 

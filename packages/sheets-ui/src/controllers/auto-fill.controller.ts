@@ -30,7 +30,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveSheetMutationParams,
@@ -46,13 +46,11 @@ import {
     MoveColsMutation,
     MoveRangeMutation,
     MoveRowsMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveColMutation,
     RemoveMergeUndoMutationFactory,
     RemoveRowMutation,
     RemoveSheetMutation,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
@@ -77,10 +75,10 @@ import type {
 } from '../services/auto-fill/type';
 import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../services/auto-fill/type';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SheetsRenderService } from '../services/sheets-render.service';
+import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 import type { IDiscreteRange } from './utils/range-tools';
 import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
 
@@ -93,11 +91,10 @@ export class AutoFillController extends Disposable {
     private _defaultHook: ISheetAutoFillHook;
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService
     ) {
@@ -179,29 +176,24 @@ export class AutoFillController extends Disposable {
     private _onSelectionControlFillChanged() {
         const disposableCollection = new DisposableCollection();
         const addListener = (disposableCollection: DisposableCollection) => {
-            /**
-             * Auto fill only responds to regular selections;
-             * it does not apply to selections for features like formulas or charts.
-             */
-            const current = this._selectionManagerService.getCurrent();
-            if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                return;
-            }
-
             // Each range change requires re-listening
             disposableCollection.dispose();
 
-            const selectionControls = this._selectionRenderService.getSelectionControls();
+            const currentRenderer = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
+            if (!currentRenderer) return;
+
+            const selectionRenderService = currentRenderer.with(ISheetSelectionRenderService);
+            const selectionControls = selectionRenderService.getSelectionControls();
             selectionControls.forEach((controlSelection) => {
                 disposableCollection.add(
                     toDisposable(
                         controlSelection.selectionFilled$.subscribe((filled) => {
                             if (
                                 filled == null ||
-                                    filled.startColumn === -1 ||
-                                    filled.startRow === -1 ||
-                                    filled.endColumn === -1 ||
-                                    filled.endRow === -1
+                                filled.startColumn === -1 ||
+                                filled.startRow === -1 ||
+                                filled.endColumn === -1 ||
+                                filled.endRow === -1
                             ) {
                                 return;
                             }
@@ -223,8 +215,8 @@ export class AutoFillController extends Disposable {
                     )
                 );
 
-                    // double click to fill range, range length will align to left or right column.
-                    // fill results will be as same as drag operation
+                // double click to fill range, range length will align to left or right column.
+                // fill results will be as same as drag operation
                 disposableCollection.add(
                     toDisposable(
                         controlSelection.fillControl.onDblclick$.subscribeEvent(() => {
@@ -247,6 +239,7 @@ export class AutoFillController extends Disposable {
                                 this._editorBridgeService.changeVisible({
                                     visible: false,
                                     eventType: DeviceInputEventType.PointerDown,
+                                    unitId: currentRenderer.unitId,
                                 });
                             }
                         })
@@ -954,7 +947,7 @@ export class AutoFillController extends Disposable {
         return copyData.every((copyDataPiece) =>
             Object.keys(copyDataPiece).every((type) => (
                 copyDataPiece[type as DATA_TYPE]?.length === 0
-                    || [DATA_TYPE.OTHER, DATA_TYPE.FORMULA].includes(type as DATA_TYPE)
+                || [DATA_TYPE.OTHER, DATA_TYPE.FORMULA].includes(type as DATA_TYPE)
             )
             )
         );
@@ -965,9 +958,9 @@ export class AutoFillController extends Disposable {
         const preferCopy = copyData.every((copyDataPiece) =>
             Object.keys(copyDataPiece).every((type) => (
                 copyDataPiece[type as DATA_TYPE]?.length === 0
-                    || (copyDataPiece[type as DATA_TYPE]?.length === 1
-                        && copyDataPiece[type as DATA_TYPE][0].data.length === 1
-                        && DATA_TYPE.NUMBER === type as DATA_TYPE)
+                || (copyDataPiece[type as DATA_TYPE]?.length === 1
+                    && copyDataPiece[type as DATA_TYPE][0].data.length === 1
+                    && DATA_TYPE.NUMBER === type as DATA_TYPE)
             )
             )
         );

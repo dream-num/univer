@@ -45,6 +45,9 @@ export interface IFindMoveParams {
     /** If the the selection is on the match and then should stay on the match. */
     stayIfOnMatch?: boolean;
 
+    /** Go the next selection ignoring the current selection's position. */
+    ignoreSelection?: boolean;
+
     /**
      * If this param is true, we should only change matching position without performing focusing.
      * This usually happens when "moving" is triggered when a document's content changes.
@@ -278,11 +281,8 @@ export class FindReplaceModel extends Disposable {
             return { results: [] };
         }
 
-        const index = this._moveToInitialMatch(findModels, newMatches);
-        this._state.changeState({
-            matchesCount: newMatches.length,
-            matchesPosition: index + 1, //  the matches position start from 1
-        });
+        this._moveToInitialMatch(findModels);
+        this._state.changeState({ matchesCount: newMatches.length });
         return { results: newMatches };
     }
 
@@ -315,8 +315,8 @@ export class FindReplaceModel extends Disposable {
             .subscribe(([...allMatches]) => {
                 const newMatches = this._matches = allMatches.flat();
                 if (newMatches.length) {
-                    const index = this._moveToInitialMatch(this._findModels, newMatches, true);
-                    this._state.changeState({ matchesCount: newMatches.length, matchesPosition: index + 1 });
+                    this._moveToInitialMatch(this._findModels, true);
+                    this._state.changeState({ matchesCount: newMatches.length });
                     this.replaceables$.next(newMatches.filter((m) => m.replaceable) as IReplaceableMatch[]);
                 } else {
                     this._state.changeState({ matchesCount: 0, matchesPosition: 0 });
@@ -359,6 +359,12 @@ export class FindReplaceModel extends Disposable {
         return this._state.matchesPosition > 0 ? this._matches[this._state.matchesPosition - 1] : null;
     }
 
+    private _markMatch(match: IFindMatch): void {
+        const index = this._matches.findIndex((value) => value === match);
+        this.currentMatch$.next(match);
+        this._state.changeState({ matchesPosition: index + 1 });
+    }
+
     moveToNextMatch(): void {
         if (!this._matchingModel) {
             return;
@@ -367,22 +373,30 @@ export class FindReplaceModel extends Disposable {
         const loopInCurrentUnit = this._findModels.length === 1;
         const nextMatch = this._matchingModel.moveToNextMatch({ loop: loopInCurrentUnit });
         if (nextMatch) {
-            const index = this._matches.findIndex((value) => value === nextMatch);
-            this.currentMatch$.next(nextMatch);
-            this._state.changeState({
-                matchesPosition: index + 1,
-            });
+            this._markMatch(nextMatch);
         } else {
-            // search in the next find model
-            const indexOfPositionModel = this._findModels.findIndex((m) => m === this._matchingModel);
-            const nextPositionModel = this._findModels[(indexOfPositionModel + 1) % this._findModels.length]; // TODO: always loop or not
-            const nextMatch = nextPositionModel.moveToNextMatch();
-            const index = this._matches.findIndex((value) => value === nextMatch);
-            this.currentMatch$.next(nextMatch);
-            this._matchingModel = nextPositionModel;
-            this._state.changeState({
-                matchesPosition: index + 1,
-            });
+            const currentModelIndex = this._findModels.findIndex((m) => m === this._matchingModel);
+            this._moveToNextUnitMatch(currentModelIndex);
+        }
+    }
+
+    private _moveToNextUnitMatch(startingIndex: number): void {
+        const l = this._findModels.length;
+        for (let i = (startingIndex + 1) % l; i !== startingIndex;) {
+            const nextPositionModel = this._findModels[i];
+            const nextMatch = nextPositionModel.moveToNextMatch({ ignoreSelection: true });
+            if (nextMatch) {
+                this._matchingModel = nextPositionModel;
+                this._markMatch(nextMatch);
+                return;
+            }
+
+            i = (i + 1) % l;
+        }
+
+        if (this._matchingModel) {
+            const nextMatch = this._matchingModel.moveToNextMatch({ ignoreSelection: true });
+            if (nextMatch) this._markMatch(nextMatch);
         }
     }
 
@@ -396,44 +410,45 @@ export class FindReplaceModel extends Disposable {
         if (nextMatch) {
             const index = this._matches.findIndex((value) => value === nextMatch);
             this.currentMatch$.next(nextMatch);
-            this._state.changeState({
-                matchesPosition: index + 1,
-            });
+            this._state.changeState({ matchesPosition: index + 1 });
         } else {
-            const indexOfPositionModel = this._findModels.findIndex((m) => m === this._matchingModel);
-            const nextPositionModel =
-                this._findModels[(indexOfPositionModel - 1 + this._findModels.length) % this._findModels.length];
-            const nextMatch = nextPositionModel.moveToPreviousMatch();
-            const index = this._matches.findIndex((value) => value === nextMatch);
-            this.currentMatch$.next(nextMatch);
-            this._matchingModel = nextPositionModel;
-            this._state.changeState({
-                matchesPosition: index + 1,
-            });
+            const l = this._findModels.length;
+            const currentModelIndex = this._findModels.findIndex((m) => m === this._matchingModel);
+            for (let i = (currentModelIndex - 1 + l) % l; i !== currentModelIndex;) {
+                const nextPositionModel = this._findModels[i];
+                const nextMatch = nextPositionModel.moveToPreviousMatch({ ignoreSelection: true });
+                if (nextMatch) {
+                    this._matchingModel = nextPositionModel;
+                    this._markMatch(nextMatch);
+                    return;
+                }
+
+                i = (i - 1) % l;
+            }
+
+            const nextMatch = this._matchingModel.moveToPreviousMatch({ ignoreSelection: true });
+            if (nextMatch) this._markMatch(nextMatch);
         }
     }
 
-    private _moveToInitialMatch(findModels: FindModel[], results: IFindMatch[], noFocus = false): number {
+    private _moveToInitialMatch(findModels: FindModel[], noFocus = false): number {
         const focusedUnitId = this._univerInstanceService.getFocusedUnit()?.getUnitId();
         if (!focusedUnitId) {
             return -1;
         }
 
-        const findModelOnFocusUnit = findModels.find((model) => model.unitId === focusedUnitId);
-        if (findModelOnFocusUnit) {
-            this._matchingModel = findModelOnFocusUnit;
-            const nextMatch = findModelOnFocusUnit.moveToNextMatch({ stayIfOnMatch: true, noFocus });
-            const index = results.findIndex((value) => value === nextMatch);
-            this.currentMatch$.next(nextMatch);
-            return index;
+        const i = findModels.findIndex((model) => model.unitId === focusedUnitId);
+        if (i !== -1) {
+            this._matchingModel = findModels[i];
+            const nextMatch = this._matchingModel.moveToNextMatch({ stayIfOnMatch: true, noFocus });
+            if (nextMatch) {
+                this._markMatch(nextMatch);
+                return i;
+            }
         }
 
-        // otherwise we just simply match the first result
-        this._matchingModel = findModels[0];
-        const nextMatch = this._matchingModel.moveToNextMatch({ noFocus });
-        const matchPosition = this._matches.findIndex((m) => m === nextMatch);
-        this.currentMatch$.next(nextMatch);
-        return matchPosition;
+        this._moveToNextUnitMatch(i);
+        return 0;
     }
 }
 
@@ -542,6 +557,7 @@ export class FindReplaceState {
     get findBy(): FindBy { return this._findBy; }
     get findCompleted(): boolean { return this._findCompleted; }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     changeState(changes: Partial<IFindReplaceState>): void {
         let changed = false;
         const changedState: Partial<IFindReplaceState> = {};

@@ -19,4 +19,6 @@ import numfmt from 'numfmt';
 
 import type { Numfmt } from './type';
 
+export { DEFAULT_TEXT_FORMAT } from './const';
+
 export default numfmt as Numfmt;

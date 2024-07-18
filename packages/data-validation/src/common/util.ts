@@ -15,7 +15,7 @@
  */
 
 import { DataValidationOperator, DataValidationType, type IDataValidationRuleBase, type IDataValidationRuleOptions, Tools } from '@univerjs/core';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 export function getRuleSetting(rule: IDataValidationRuleBase): IDataValidationRuleBase {
@@ -40,12 +40,13 @@ export function getRuleOptions(rule: IDataValidationRuleOptions): IDataValidatio
         showErrorMessage: rule.showErrorMessage,
         showInputMessage: rule.showInputMessage,
         renderMode: rule.renderMode,
+        bizInfo: rule.bizInfo,
     };
 }
 
 export function createDefaultNewRule(accessor: IAccessor) {
-    const selectionManagerService = accessor.get(SelectionManagerService);
-    const currentRanges = selectionManagerService.getSelectionRanges();
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
+    const currentRanges = selectionManagerService.getCurrentSelections().map((s) => s.range);
     const uid = Tools.generateRandomId(6);
     const rule = {
         uid,

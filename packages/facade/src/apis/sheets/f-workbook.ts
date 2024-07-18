@@ -29,7 +29,7 @@ import {
 import type {
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
-import { InsertSheetCommand, RemoveSheetCommand, SelectionManagerService, SetWorksheetActiveOperation, WorkbookEditablePermission } from '@univerjs/sheets';
+import { InsertSheetCommand, RemoveSheetCommand, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -42,7 +42,7 @@ export class FWorkbook {
         private readonly _workbook: Workbook,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(IResourceLoaderService) private readonly _resourceLoaderService: IResourceLoaderService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IPermissionService private readonly _permissionService: IPermissionService

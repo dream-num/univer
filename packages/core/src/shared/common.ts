@@ -31,11 +31,7 @@ import { ColorBuilder } from './color/color';
 import { Tools } from './tools';
 import type { Nullable } from './types';
 
-export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithMergeInfo>): Nullable<IRangeWithCoord> {
-    if (!cellInfo) {
-        return;
-    }
-
+export function makeCellToSelection(cellInfo: ISelectionCellWithMergeInfo): IRangeWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
     let startRow = actualRow;
@@ -365,7 +361,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'tb',
             () => {
                 if (style.tb === WrapStrategy.CLIP) {
-                    str += 'white-space: clip; ';
+                    str += 'white-space: nowrap; overflow-x: hidden; ';
                 } else if (style.tb === WrapStrategy.WRAP) {
                     str += 'white-space: normal;';
                 }

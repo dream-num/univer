@@ -18,9 +18,9 @@ import type { IDocumentData, Nullable } from '@univerjs/core';
 import { debounce, isInternalEditorID, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
-import { Popup } from '@univerjs/design';
 import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
 import { IEditorService } from '../../services/editor/editor.service';
+import { isElementVisible } from '../../utils/util';
 import styles from './index.module.less';
 
 type MyComponentProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
@@ -116,13 +116,15 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         onValid,
 
         isValueValid = true,
+
+        placeholder,
     } = props;
 
     const editorService = useDependency(IEditorService);
 
     const localeService = useDependency(LocaleService);
 
-    const [placeholder, placeholderSet] = useState('');
+    const [placeholderValue, placeholderSet] = useState('');
 
     const [validationContent, setValidationContent] = useState<string>('');
 
@@ -139,9 +141,9 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
     }
 
     useEffect(() => {
-        const editor = editorRef.current;
+        const editorDom = editorRef.current;
 
-        if (!editor) {
+        if (!editorDom) {
             return;
         }
 
@@ -149,10 +151,10 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             if (cancelDefaultResizeListener !== true) {
                 editorService.resize(id);
             }
-            resizeCallBack && resizeCallBack(editor);
+            resizeCallBack && resizeCallBack(editorDom);
         });
 
-        resizeObserver.observe(editor);
+        resizeObserver.observe(editorDom);
 
         const registerSubscription = editorService.register({
             editorUnitId: id,
@@ -169,7 +171,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             openForSheetUnitId,
             openForSheetSubUnitId,
         },
-        editor);
+        editorDom);
 
         editorService.setValueNoRefresh(value || '', id);
         placeholderSet(placeholder || '');
@@ -178,14 +180,6 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             setActive(state);
             onActive && onActive(state);
         }, 30);
-
-        const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: Nullable<string>) => {
-            let state = false;
-            if (unitId === id) {
-                state = true;
-            }
-            activeChange(state);
-        });
 
         // !IMPORTANT: Set a delay of 160ms to ensure that the position is corrected after the sidebar animation ends @jikkai
         const ANIMATION_DELAY = 160;
@@ -215,6 +209,23 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             }
         }, 30);
 
+        const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: Nullable<string>) => {
+            let state = false;
+            if (unitId === id) {
+                state = true;
+            }
+            activeChange(state);
+
+            setTimeout(() => {
+                if (!isElementVisible(editorDom)) {
+                    setValidationVisible(true);
+                } else {
+                    const editor = editorService.getEditor(id);
+                    editor && valueChange(editor);
+                }
+            }, ANIMATION_DELAY);
+        });
+
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {
             if (editor.isSheetEditor()) {
                 return;
@@ -228,7 +239,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         });
 
         return () => {
-            resizeObserver.unobserve(editor);
+            resizeObserver.unobserve(editorDom);
             resizeObserver.disconnect();
             registerSubscription.dispose();
             focusStyleSubscription?.unsubscribe();
@@ -295,11 +306,13 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
     return (
         <>
             <div {...propsNew} className={className + borderStyle} ref={editorRef}>
-                <div style={{ display: hasValue() ? 'none' : 'unset' }} className={styles.textEditorContainerPlaceholder}>{placeholder}</div>
+                <div style={{ display: validationVisible ? 'none' : 'block' }} className={styles.textEditorValidationError}>{validationContent}</div>
+                <div style={{ display: hasValue() ? 'none' : 'unset' }} className={styles.textEditorContainerPlaceholder}>{placeholderValue}</div>
             </div>
-            <Popup visible={!validationVisible} offset={validationOffset}>
+            {/* Don't delete it yet, test the stability without popup */}
+            {/* <Popup visible={!validationVisible} offset={validationOffset}>
                 <div className={styles.textEditorValidationError}>{validationContent}</div>
-            </Popup>
+            </Popup> */}
         </>
     );
 }

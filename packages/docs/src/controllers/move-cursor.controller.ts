@@ -16,6 +16,7 @@
 
 import type { ICommandInfo, Nullable } from '@univerjs/core';
 import {
+    DataStreamTreeTokenType,
     Direction,
     Disposable,
     ICommandService,
@@ -92,7 +93,7 @@ export class MoveCursorController extends Disposable {
     // eslint-disable-next-line max-lines-per-function, complexity
     private _handleShiftMoveSelection(direction: Direction) {
         const activeRange = this._textSelectionManagerService.getActiveRange();
-        const allRanges = this._textSelectionManagerService.getSelections()!;
+        const allRanges = this._textSelectionManagerService.getCurrentSelections()!;
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         if (!docDataModel) {
             return;
@@ -201,7 +202,7 @@ export class MoveCursorController extends Disposable {
     // eslint-disable-next-line max-lines-per-function, complexity
     private _handleMoveCursor(direction: Direction) {
         const activeRange = this._textSelectionManagerService.getActiveRange();
-        const allRanges = this._textSelectionManagerService.getSelections();
+        const allRanges = this._textSelectionManagerService.getCurrentSelections();
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         if (!docDataModel) {
             return false;
@@ -210,17 +211,18 @@ export class MoveCursorController extends Disposable {
         const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
             ?.with(DocSkeletonManagerService).getSkeleton();
         const docObject = this._getDocObject();
-
-        if (activeRange == null || skeleton == null || docObject == null || allRanges == null) {
+        const body = docDataModel.getBody();
+        if (activeRange == null || skeleton == null || docObject == null || allRanges == null || body == null) {
             return;
         }
 
         const { startOffset, endOffset, style, collapsed, segmentId, startNodePosition, endNodePosition, segmentPage } = activeRange;
 
         const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const customRanges = docDataModel.getCustomRanges() ?? [];
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
-            let cursor;
+            let cursor: number;
 
             if (!activeRange.collapsed || allRanges.length > 1) {
                 let min = Number.POSITIVE_INFINITY;
@@ -243,6 +245,25 @@ export class MoveCursorController extends Disposable {
                     cursor = Math.min(dataStreamLength - 2, endOffset + curSpan.count);
                 }
             }
+            const skipTokens: string[] = [DataStreamTreeTokenType.CUSTOM_RANGE_START, DataStreamTreeTokenType.CUSTOM_RANGE_END];
+            if (direction === Direction.LEFT) {
+                while (skipTokens.includes(body.dataStream[cursor])) {
+                    cursor--;
+                }
+            } else {
+                while (skipTokens.includes(body.dataStream[cursor - 1])) {
+                    cursor++;
+                }
+            }
+
+            const relativeRanges = customRanges.filter((range) => range.wholeEntity && range.startIndex < cursor && range.endIndex >= cursor);
+            relativeRanges.forEach((range) => {
+                if (direction === Direction.LEFT) {
+                    cursor = Math.min(range.startIndex, cursor);
+                } else {
+                    cursor = Math.max(range.endIndex + 1, cursor);
+                }
+            });
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
@@ -259,8 +280,8 @@ export class MoveCursorController extends Disposable {
 
             const newPos = this._getTopOrBottomPosition(
                 skeleton,
-                direction === Direction.UP ? startNode : endNode,
-                direction === Direction.UP ? startNodePosition : endNodePosition,
+                direction === Direction.UP ? startNode : (collapsed ? startNode : endNode),
+                direction === Direction.UP ? startNodePosition : (collapsed ? startNodePosition : endNodePosition),
                 direction === Direction.DOWN
             );
 

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import type { ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IDrawingJsonUndo1, IDrawingManagerService, type IDrawingParam, type ITransformState } from '@univerjs/drawing';
-import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveRangeCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, MoveRangeCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 
@@ -51,7 +51,6 @@ const UPDATE_COMMANDS = [
     SetSpecificRowsVisibleCommand.id,
     SetSpecificColsVisibleCommand.id,
     SetColHiddenCommand.id,
-    MoveRangeCommand.id,
 ];
 
 const REFRESH_MUTATIONS = [
@@ -64,16 +63,28 @@ const REFRESH_MUTATIONS = [
 ];
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingTransformAffectedController)
-export class SheetDrawingTransformAffectedController extends Disposable implements IRenderModule {
+export class SheetDrawingTransformAffectedController extends Disposable {
+    // TODO@wzhudev: selection render service would be a render unit, we we cannot
+    // easily access it here.
+    private get _selectionRenderService(): ISheetSelectionRenderService {
+        return this._renderManagerService.getRenderById(
+            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        )!.with(ISheetSelectionRenderService);
+    }
+
+    private get _skeletonManagerService(): SheetSkeletonManagerService {
+        return this._renderManagerService.getRenderById(
+            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        )!.with(SheetSkeletonManagerService);
+    }
+
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -91,6 +102,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
     private _sheetInterceptorListener() {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommand({
+
                 getMutations: (commandInfo) => {
                     if (!UPDATE_COMMANDS.includes(commandInfo.id)) {
                         return { redos: [], undos: [] };
@@ -107,8 +119,6 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                         return this._moveRowInterceptor(commandInfo.params as IRemoveRowColCommandParams, 'remove');
                     } else if (cId === RemoveColCommand.id) {
                         return this._moveColInterceptor(commandInfo.params as IRemoveRowColCommandParams, 'remove');
-                    } else if (cId === MoveRangeCommand.id) {
-                        return this._moveRangeInterceptor(commandInfo.params as IMoveRangeCommandParams);
                     } else if (cId === DeleteRangeMoveLeftCommand.id) {
                         const { range } = commandInfo.params as IRemoveRowColCommandParams;
                         return this._getRangeMoveUndo(range, RangeMoveUndoType.deleteLeft);
@@ -248,7 +258,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
         }
 
         if (newSheetTransform != null && newTransform != null) {
-            const newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+            const newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform });
         }
 
@@ -290,7 +300,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                         let newSheetTransform: Nullable<ISheetDrawingPosition> = null;
                         let newTransform: Nullable<ITransformState> = null;
                         if (fromColumn >= startColumn && fromColumn <= endColumn) {
-                            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: fromColumn, endColumn, startRow: from.row, endRow: to.row });
+                            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: fromColumn, endColumn, startRow: from.row, endRow: to.row });
                             if (selectionCell == null) {
                                 return;
                             }
@@ -315,7 +325,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                     let newTransform: Nullable<ITransformState> = null;
 
                     if (fromColumn >= startColumn && fromColumn <= endColumn) {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: fromColumn, endColumn, startRow: from.row, endRow: to.row });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: fromColumn, endColumn, startRow: from.row, endRow: to.row });
                         if (selectionCell == null) {
                             return;
                         }
@@ -325,7 +335,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                             width: (transform?.width || 0) - selectionCell.endX + selectionCell.startX,
                         };
                     } else if (toColumn >= startColumn && toColumn <= endColumn) {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn, endColumn: toColumn, startRow: from.row, endRow: to.row });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn, endColumn: toColumn, startRow: from.row, endRow: to.row });
                         if (selectionCell == null) {
                             return;
                         }
@@ -334,7 +344,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                             left: selectionCell.startX - (transform?.width || 0),
                         };
                     } else {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn, endColumn, startRow: from.row, endRow: to.row });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn, endColumn, startRow: from.row, endRow: to.row });
                         if (selectionCell == null) {
                             return;
                         }
@@ -429,7 +439,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                         let newSheetTransform: Nullable<ISheetDrawingPosition> = null;
                         let newTransform: Nullable<ITransformState> = null;
                         if (fromRow >= startRow && fromRow <= endRow) {
-                            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow: fromRow, endRow });
+                            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow: fromRow, endRow });
                             if (selectionCell == null) {
                                 return;
                             }
@@ -454,7 +464,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                     let newTransform: Nullable<ITransformState> = null;
 
                     if (fromRow >= startRow && fromRow <= endRow) {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow: fromRow, endRow });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow: fromRow, endRow });
                         if (selectionCell == null) {
                             return;
                         }
@@ -464,7 +474,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                             height: (transform?.height || 0) - selectionCell.endY + selectionCell.startY,
                         };
                     } else if (toRow >= startRow && toRow <= endRow) {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow, endRow: toRow });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow, endRow: toRow });
                         if (selectionCell == null) {
                             return;
                         }
@@ -473,7 +483,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                             top: selectionCell.startY - (transform?.height || 0),
                         };
                     } else {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow, endRow });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow, endRow });
                         if (selectionCell == null) {
                             return;
                         }
@@ -553,7 +563,8 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                         }
                     }
 
-                    const newTransform = drawingPositionToTransform({ ...sheetTransform }, this._selectionRenderService, this._sheetSkeletonManagerService);
+                    const newTransform = drawingPositionToTransform({ ...sheetTransform },
+                        this._selectionRenderService, this._skeletonManagerService);
                     if (newTransform != null) {
                         updateDrawings.push({
                             ...drawing,
@@ -625,7 +636,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 const { from, to } = sheetTransform;
                 const { row: fromRow } = from;
                 const { row: toRow } = to;
-                if (anchorType === SheetDrawingAnchorType.Both && fromRow >= rowStartIndex && toRow <= rowEndIndex) {
+                if (fromRow >= rowStartIndex && toRow <= rowEndIndex) {
                     // delete drawing
                     deleteDrawings.push({ unitId, subUnitId, drawingId });
                 } else {
@@ -670,111 +681,6 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
         };
     }
 
-    private _moveRangeInterceptor(params: IMoveRangeCommandParams) {
-        const { fromRange, toRange } = params;
-        const target = getSheetCommandTarget(this._univerInstanceService);
-        if (!target) {
-            return { redos: [], undos: [] };
-        }
-        const { unitId, subUnitId } = target;
-        const data = this._sheetDrawingService.getDrawingData(unitId, subUnitId);
-        const drawings: Partial<ISheetDrawing>[] = [];
-        // get rect info of toRange and fromRange
-        const fromRangeRect = this._selectionRenderService.attachRangeWithCoord(fromRange);
-        const toRangeRect = this._selectionRenderService.attachRangeWithCoord(toRange);
-        if (!fromRangeRect || !toRangeRect) {
-            return { redos: [], undos: [] };
-        }
-        Object.keys(data).forEach((drawingId) => {
-            const drawing = data[drawingId];
-            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
-
-            if (
-                !sheetTransform || !transform || anchorType === SheetDrawingAnchorType.None) {
-                return;
-            }
-
-            const { left = 0, top = 0, width = 0, height = 0 } = transform;
-            const { drawingStartX, drawingEndX, drawingStartY, drawingEndY } = {
-                drawingStartX: left,
-                drawingEndX: left + width,
-                drawingStartY: top,
-                drawingEndY: top + height,
-            };
-
-            const contained = fromRangeRect.startX <= drawingStartX && drawingEndX <= fromRangeRect.endX && fromRangeRect.startY <= drawingEndY && drawingStartY <= fromRangeRect.endY;
-            // If range does not contain drawing, skip
-            if (!contained) {
-                return;
-            }
-
-            const { to, from } = sheetTransform;
-
-            const rowOffset = toRange.startRow - fromRange.startRow;
-            const colOffset = toRange.startColumn - fromRange.startColumn;
-
-            let newSheetTransform: Nullable<ISheetDrawingPosition>;
-            let newTransform: Nullable<ITransformState>;
-            if (anchorType === SheetDrawingAnchorType.Both) {
-                const drawingFromRect = this._selectionRenderService.attachRangeWithCoord({
-                    startRow: to.row,
-                    endRow: from.row,
-                    startColumn: to.column,
-                    endColumn: from.column,
-                });
-                const drawingToRect = this._selectionRenderService.attachRangeWithCoord({
-                    startRow: to.row + rowOffset,
-                    endRow: from.row + rowOffset,
-                    startColumn: to.column + colOffset,
-                    endColumn: from.column + colOffset,
-                });
-                if (!drawingToRect || !drawingFromRect) {
-                    return;
-                }
-                // Both anchor drawing should calculate the offset of the width and height
-                const widthOffset = (drawingToRect.endX - drawingToRect.startX) - (drawingFromRect.endX - drawingFromRect.startX);
-                const heightOffset = (drawingToRect.endY - drawingToRect.startY) - (drawingFromRect.endY - drawingFromRect.startY);
-
-                newSheetTransform = {
-                    to: { ...to, row: to.row + rowOffset, column: to.column + colOffset, columnOffset: to.columnOffset + widthOffset },
-                    from: { ...from, row: from.row + rowOffset, column: from.column + colOffset, columnOffset: to.columnOffset + widthOffset, rowOffset: to.rowOffset + heightOffset },
-                };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
-            } else {
-                // Position anchor drawing only do the position offset
-                const xOffset = toRangeRect.startX - fromRangeRect.startX;
-                const yOffset = toRangeRect.startY - fromRangeRect.startY;
-
-                newTransform = {
-                    ...transform,
-                    left: left + xOffset,
-                    top: top + yOffset,
-                };
-
-                newSheetTransform = transformToDrawingPosition(newTransform, this._selectionRenderService);
-            }
-
-            if (!newSheetTransform || !newTransform) {
-                return;
-            }
-
-            const params = { unitId, subUnitId, drawingId, transform: newTransform, sheetTransform: newSheetTransform };
-            drawings.push(params);
-        });
-
-        const redos: IMutationInfo[] = [];
-        const undos: IMutationInfo[] = [];
-
-        if (drawings.length > 0) {
-            const updateJsonOp = this._sheetDrawingService.getBatchUpdateOp(drawings as ISheetDrawing[]) as IDrawingJsonUndo1;
-            const { undo, redo, objects } = updateJsonOp;
-            redos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE } });
-            undos.push({ id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE } });
-        }
-
-        return { redos, undos };
-    }
-
     private _moveColInterceptor(params: IInsertColCommandParams | IRemoveRowColCommandParams, type: 'insert' | 'remove') {
         const ids = this._getUnitIdAndSubUnitId(params, type);
         if (ids == null) {
@@ -810,8 +716,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 const { from, to } = sheetTransform;
                 const { column: fromColumn } = from;
                 const { column: toColumn } = to;
-                const contained = fromColumn >= colStartIndex && toColumn <= colEndIndex;
-                if (contained && anchorType === SheetDrawingAnchorType.Both) {
+                if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
                     // delete drawing
                     deleteDrawings.push({ unitId, subUnitId, drawingId });
                 } else {
@@ -879,9 +784,9 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
             //     from: { ...from, column: fromColumn + colCount },
             //     to: { ...to, column: toColumn + colCount },
             // };
-            // newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+            // newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
 
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: colEndIndex, startRow: from.row, endRow: to.row });
+            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: colEndIndex, startRow: from.row, endRow: to.row });
             if (selectionCell == null) {
                 return;
             }
@@ -894,7 +799,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                     from: { ...from },
                     to: { ...to, column: toColumn + colCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -929,30 +834,14 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
 
         if (fromColumn > colEndIndex) {
             // shrink start and end col left only
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: colEndIndex, startRow: from.row, endRow: to.row });
-            if (selectionCell == null) {
-                return;
-            }
-            newTransform = { ...transform, left: (transform.left || 0) - (selectionCell.endX - selectionCell.startX) };
-            newSheetTransform = transformToDrawingPosition(newTransform, this._selectionRenderService);
+            newSheetTransform = {
+                from: { ...from, column: fromColumn - colCount },
+                to: { ...to, column: toColumn - colCount },
+            };
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
         } else if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
             // delete drawing
-            const selectionRect = this._selectionRenderService.attachRangeWithCoord({
-                startColumn: colStartIndex,
-                endColumn: colEndIndex,
-                startRow: 0,
-                endRow: 0,
-            });
-
-            newSheetTransform = {
-                from: { ...from, columnOffset: 0 },
-                to: { ...to, columnOffset: to.columnOffset - from.columnOffset },
-            };
-
-            newTransform = {
-                ...transform,
-                left: selectionRect?.startX,
-            };
+            return null;
         } else if (fromColumn < colStartIndex && toColumn > colEndIndex) {
             // shrink end left only
             if (anchorType === SheetDrawingAnchorType.Both) {
@@ -960,7 +849,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                     from: { ...from },
                     to: { ...to, column: toColumn - colCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -971,7 +860,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
             if (fromColumn === colStartIndex) {
                 newTransform = { ...transform, left: (transform.left || 0) - sheetTransform.from.columnOffset };
             } else {
-                const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: fromColumn - 1, startRow: from.row, endRow: to.row });
+                const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: fromColumn - 1, startRow: from.row, endRow: to.row });
                 if (selectionCell == null) {
                     return;
                 }
@@ -980,7 +869,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
             newSheetTransform = transformToDrawingPosition(newTransform, this._selectionRenderService);
         } else if (toColumn >= colStartIndex && toColumn <= colEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // shrink end col left, then set toColOffset to full cell width
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({
+            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({
                 startColumn: colStartIndex - 1,
                 endColumn: colStartIndex - 1,
                 startRow: from.row,
@@ -994,7 +883,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 from: { ...from },
                 to: { ...to, column: colStartIndex - 1, columnOffset: selectionCell.endX - selectionCell.startX },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -1027,7 +916,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
 
         if (fromRow >= rowStartIndex) {
             // move start and end row down
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startRow: rowStartIndex, endRow: rowEndIndex, startColumn: from.column, endColumn: to.column });
+            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startRow: rowStartIndex, endRow: rowEndIndex, startColumn: from.column, endColumn: to.column });
             if (selectionCell == null) {
                 return;
             }
@@ -1043,7 +932,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                         row: toRow + rowCount,
                     },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -1086,25 +975,10 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 from: { ...from, row: fromRow - rowCount },
                 to: { ...to, row: toRow - rowCount },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
         } else if (fromRow >= rowStartIndex && toRow <= rowEndIndex) {
             // delete drawing
-            const selectionRect = this._selectionRenderService.attachRangeWithCoord({
-                startColumn: 0,
-                endColumn: 0,
-                startRow: rowStartIndex,
-                endRow: rowEndIndex,
-            });
-
-            newSheetTransform = {
-                from: { ...from, rowOffset: 0 },
-                to: { ...to, rowOffset: to.rowOffset - from.rowOffset },
-            };
-
-            newTransform = {
-                ...transform,
-                top: selectionRect?.startY,
-            };
+            return null;
         } else if (fromRow < rowStartIndex && toRow > rowEndIndex) {
             // shrink end up only
             if (anchorType === SheetDrawingAnchorType.Both) {
@@ -1112,7 +986,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                     from: { ...from },
                     to: { ...to, row: toRow - rowCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -1120,11 +994,11 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 };
             }
         } else if (fromRow >= rowStartIndex && fromRow <= rowEndIndex) {
-            // shrink start and end row up, then set fromRowOffset to 0
+           // shrink start and end row up, then set fromRowOffset to 0
             if (fromRow === rowStartIndex) {
                 newTransform = { ...transform, top: (transform.top || 0) - sheetTransform.from.rowOffset };
             } else {
-                const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startRow: rowStartIndex, endRow: fromRow - 1, startColumn: from.column, endColumn: to.column });
+                const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startRow: rowStartIndex, endRow: fromRow - 1, startColumn: from.column, endColumn: to.column });
                 if (selectionCell == null) {
                     return;
                 }
@@ -1133,7 +1007,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
             newSheetTransform = transformToDrawingPosition(newTransform, this._selectionRenderService);
         } else if (toRow >= rowStartIndex && toRow <= rowEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // shrink end row up, then set toRowOffset to full cell height
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: from.column, startRow: rowStartIndex - 1, endRow: rowStartIndex - 1 });
+            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: from.column, startRow: rowStartIndex - 1, endRow: rowStartIndex - 1 });
 
             if (selectionCell == null) {
                 return;
@@ -1142,7 +1016,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 from: { ...from },
                 to: { ...to, row: rowStartIndex - 1, rowOffset: selectionCell.endY - selectionCell.startY },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._skeletonManagerService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -1179,7 +1053,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                                 Object.keys(drawingData).forEach((drawingId) => {
                                     if (unitId === showUnitId && subUnitId === showSubunitId) {
                                         const drawing = drawingData[drawingId] as ISheetDrawing;
-                                        drawing.transform = drawingPositionToTransform(drawing.sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+                                        drawing.transform = drawingPositionToTransform(drawing.sheetTransform, this._selectionRenderService, this._skeletonManagerService);
                                         insertDrawings.push(drawingData[drawingId]);
                                     } else {
                                         removeDrawings.push(drawingData[drawingId]);
@@ -1204,7 +1078,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 }
 
                 requestIdleCallback(() => {
-                    const params = command.params as ISetRowVisibleMutationParams | ISetColHiddenMutationParams | ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams | ISetWorksheetRowIsAutoHeightMutationParams | ISetRowHiddenMutationParams | ISetColVisibleMutationParams | ISetWorksheetColWidthMutationParams;
+                    const params = command.params as ISetRowVisibleMutationParams | ISetColHiddenMutationParams | ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams | ISetWorksheetRowIsAutoHeightMutationParams | ISetRowHiddenMutationParams | ISetColVisibleMutationParams;
                     const { unitId, subUnitId, ranges } = params;
                     this._refreshDrawingTransform(unitId, subUnitId, ranges);
                 });
@@ -1240,7 +1114,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 ) || fromRow > endRow || fromColumn > endColumn) {
                     updateDrawings.push({
                         ...drawing,
-                        transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService),
+                        transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService),
                     });
                     break;
                 }

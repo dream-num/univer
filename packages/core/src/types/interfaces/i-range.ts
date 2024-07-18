@@ -34,7 +34,21 @@ export enum AbsoluteRefType {
     ALL,
 }
 
-export interface IRowRange {
+interface IRangeLocation {
+    /**
+     * Id of the Workbook the range belongs to.
+     * When this field is not defined, it should be considered as the range in the currently activated worksheet.
+     */
+    unitId?: string;
+
+    /**
+     * Id of the Worksheet the range belongs to.
+     * When this field is not defined, it should be considered as the range in the currently activated worksheet.
+     */
+    sheetId?: string;
+}
+
+export interface IRowRange extends IRangeLocation {
     /**
      * The start row (inclusive) of the range
      * startRow
@@ -46,6 +60,20 @@ export interface IRowRange {
      * endRow
      */
     endRow: number;
+}
+
+export interface IColumnRange extends IRangeLocation {
+    /**
+     * The start column (inclusive) of the range
+     * startColumn
+     */
+    startColumn: number;
+
+    /**
+     * The end column (exclusive) of the range
+     * endColumn
+     */
+    endColumn: number;
 }
 
 /**
@@ -63,19 +91,7 @@ export interface IRowRange {
  *
  * means "A1:B2"
  */
-export interface IRange extends IRowRange {
-    /**
-     * The start column (inclusive) of the range
-     * startColumn
-     */
-    startColumn: number;
-
-    /**
-     * The end column (exclusive) of the range
-     * endColumn
-     */
-    endColumn: number;
-
+export interface IRange extends IRowRange, IColumnRange {
     rangeType?: RANGE_TYPE;
 
     startAbsoluteRefType?: AbsoluteRefType;

@@ -25,8 +25,9 @@ import type { IDrawingSearch } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SidebarDocDrawingOperation } from './open-drawing-panel.operation';
 
+// Use to open drawing edit panel.
 export const EditDocDrawingOperation: IOperation<IDrawingSearch> = {
-    id: 'sheet.operation.edit-sheet-image',
+    id: 'doc.operation.edit-doc-image',
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params?: IDrawingSearch) => {
         const drawingManagerService = accessor.get(IDrawingManagerService);

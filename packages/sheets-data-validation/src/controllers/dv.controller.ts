@@ -20,7 +20,7 @@ import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/dat
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
-import { ClearSelectionAllCommand, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { ClearSelectionAllCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
@@ -28,6 +28,12 @@ import { WholeValidator } from '../validators/whole-validator';
 import { ListMultipleValidator } from '../validators/list-multiple-validator';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
+import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
+import { DataValidationPanel, DATE_DROPDOWN_KEY, DateDropdown, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
+import { CellDropdown, DROP_DOWN_KEY } from '../views/drop-down';
+import { FORMULA_INPUTS } from '../views/formula-input';
+import { ListRenderModeInput } from '../views/render-mode';
+import { DateShowTimeOption } from '../views/show-time';
 import { DataValidationIcon } from './dv.menu';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
@@ -38,7 +44,7 @@ export class DataValidationController extends RxDisposable {
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManger: ComponentManager,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
@@ -49,8 +55,8 @@ export class DataValidationController extends RxDisposable {
     private _init() {
         this._registerValidators();
         this._initInstanceChange();
-        this._componentManger.register(DataValidationIcon, DataValidationSingle);
         this._initCommandInterceptor();
+        this._initComponents();
     }
 
     private _registerValidators() {
@@ -78,7 +84,7 @@ export class DataValidationController extends RxDisposable {
 
     private _initInstanceChange() {
         const disposableCollection = new DisposableCollection();
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             disposableCollection.dispose();
             if (!workbook) {
                 return;
@@ -98,7 +104,7 @@ export class DataValidationController extends RxDisposable {
                     }
                 })
             ));
-        });
+        }));
 
         this.disposeWithMe(disposableCollection);
     }
@@ -115,7 +121,7 @@ export class DataValidationController extends RxDisposable {
                     }
 
                     const subUnitId = worksheet.getSheetId();
-                    const selections = this._selectionManagerService.getSelectionRanges();
+                    const selections = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
                     const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
 
@@ -136,6 +142,24 @@ export class DataValidationController extends RxDisposable {
                     redos: [],
                 };
             },
+        });
+    }
+
+    private _initComponents() {
+        ([
+            [DataValidationIcon, DataValidationSingle],
+            [DATA_VALIDATION_PANEL, DataValidationPanel],
+            [DROP_DOWN_KEY, CellDropdown],
+            [LIST_DROPDOWN_KEY, ListDropDown],
+            [DATE_DROPDOWN_KEY, DateDropdown],
+            [ListRenderModeInput.componentKey, ListRenderModeInput],
+            [DateShowTimeOption.componentKey, DateShowTimeOption],
+            ...FORMULA_INPUTS,
+        ] as const).forEach(([key, component]) => {
+            this.disposeWithMe(this._componentManger.register(
+                key,
+                component
+            ));
         });
     }
 }

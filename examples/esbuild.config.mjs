@@ -44,7 +44,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
     color: true,
     loader: { '.svg': 'file', '.ttf': 'file' },
     sourcemap: args.watch,
-    minify: !args.watch,
+    minify: false,
     target: 'chrome70',
     plugins: [
         copyPlugin({
@@ -92,6 +92,8 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
 
         // uni
         './src/uni/main.ts',
+        './src/uni/worker.ts',
+        './src/uni/lazy.ts',
 
         // mobile sheet
         './src/mobile-s/main.ts',

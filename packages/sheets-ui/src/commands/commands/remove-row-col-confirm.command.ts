@@ -17,7 +17,7 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import type { IRemoveRowColCommandParams } from '@univerjs/sheets';
-import { getSheetCommandTarget, RemoveColCommand, RemoveRowCommand, SelectionManagerService } from '@univerjs/sheets';
+import { getSheetCommandTarget, RemoveColCommand, RemoveRowCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -27,11 +27,11 @@ export const RemoveRowConfirmCommand: ICommand = {
     id: 'sheet.command.remove-row-confirm',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         let range = params?.range;
         if (!range) {
-            range = selectionManagerService.getLast()?.range;
+            range = selectionManagerService.getCurrentLastSelection()?.range;
         }
         if (!range) {
             return false;
@@ -72,11 +72,11 @@ export const RemoveColConfirmCommand: ICommand = {
     id: 'sheet.command.remove-col-confirm',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         let range = params?.range;
         if (!range) {
-            range = selectionManagerService.getLast()?.range;
+            range = selectionManagerService.getCurrentLastSelection()?.range;
         }
         if (!range) {
             return false;

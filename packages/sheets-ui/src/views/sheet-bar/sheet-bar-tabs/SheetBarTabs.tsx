@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { ICommandService, IConfigService, IPermissionService, IUniverInstanceService, LocaleService, nameCharacterCheck, UniverInstanceType } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
+import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import {
     InsertSheetMutation,
@@ -32,7 +32,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { IConfirmService, Menu, UI_CONFIG_KEY, useObservable } from '@univerjs/ui';
+import { IConfirmService, Menu, useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -40,7 +40,6 @@ import { LockSingle } from '@univerjs/icons';
 import { merge } from 'rxjs';
 import { Quantity } from '@wendellhu/redi';
 import { SheetMenuPosition } from '../../../controllers/menu/menu';
-import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { useActiveWorkbook } from '../../../components/hook';
@@ -59,12 +58,10 @@ export function SheetBarTabs() {
     const slideTabBarRef = useRef<{ slideTabBar: SlideTabBar | null }>({ slideTabBar: null });
     const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
 
-    const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
-    const selectionRenderService = useDependency(ISelectionRenderService);
     const editorBridgeService = useDependency(IEditorBridgeService, Quantity.OPTIONAL);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
@@ -72,11 +69,6 @@ export function SheetBarTabs() {
 
     const workbook = useActiveWorkbook()!;
     const permissionService = useDependency(IPermissionService);
-
-    const configService = useDependency(IConfigService);
-    const uiConfigs = configService.getConfig<{ contextMenu?: boolean }>(UI_CONFIG_KEY);
-
-    const contextMenu = uiConfigs?.contextMenu ?? true;
 
     const updateSheetItems = useCallback(() => {
         const currentSubUnitId = workbook.getActiveSheet()?.getSheetId() || '';
@@ -128,7 +120,7 @@ export function SheetBarTabs() {
             slideTabBar.destroy();
             subscribeList.forEach((subscribe) => subscribe.unsubscribe());
         };
-    }, [resetOrder]);
+    }, [resetOrder, workbook]);
 
     useEffect(() => {
         if (sheetList.length > 0) {
@@ -213,6 +205,8 @@ export function SheetBarTabs() {
         return slideTabBar;
     };
 
+    // TODO@Dushusir: the following callback functions should be wrapped by `useCallback`.
+
     const nameEmptyCheck = (name: string) => {
         if (name.trim() === '') {
             const id = 'sheetNameEmptyAlert';
@@ -262,7 +256,6 @@ export function SheetBarTabs() {
     };
 
     const nameRepeatCheck = (name: string) => {
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const currenSheetName = worksheet?.getName();
         // TODO@Dushusir: no need trigger save
@@ -293,7 +286,8 @@ export function SheetBarTabs() {
     };
 
     const focusTabEditor = () => {
-        selectionRenderService.endSelection();
+        // FIXME@Dushusir: too strongly coupled
+        // selectionRenderService.endSelection();
 
         // There is an asynchronous operation in endSelection, which will trigger blur immediately after focus, so it must be wrapped with setTimeout.
         setTimeout(() => {
@@ -392,8 +386,6 @@ export function SheetBarTabs() {
     };
 
     const onVisibleChange = (visible: boolean) => {
-        if (!contextMenu) return;
-
         if (editorBridgeService?.isForceKeepVisible()) {
             return;
         }
@@ -417,7 +409,6 @@ export function SheetBarTabs() {
             visible={visible}
             align={{ offset }}
             trigger={['contextMenu']}
-            disabled={!contextMenu}
             overlay={(
                 <Menu
                     menuType={SheetMenuPosition.SHEET_BAR}

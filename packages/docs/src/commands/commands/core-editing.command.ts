@@ -32,6 +32,7 @@ import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-ran
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { getInsertSelection } from '../../basics/selection';
 import { getRichTextEditPath } from '../util';
+import { DeleteDirection } from '../../types/enums/delete-direction';
 
 export interface IInsertCommandParams {
     unitId: string;
@@ -134,11 +135,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         return Boolean(result);
     },
 };
-
-export enum DeleteDirection {
-    LEFT,
-    RIGHT,
-}
 
 export interface IDeleteCommandParams {
     unitId: string;

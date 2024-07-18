@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import { Disposable, RANGE_TYPE, Tools } from '@univerjs/core';
 import { type IPointerEvent, type IRenderContext, type IRenderModule, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { type ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
+import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 
 /**
  * On mobile devices, the context menu would popup when
@@ -33,8 +32,8 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         private readonly _context: IRenderContext<Workbook>,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
         super();
 
@@ -43,9 +42,8 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
 
     private _init(): void {
         let listenToSelectionChangeEvent = false;
-
         this.disposeWithMe(this._selectionManagerService.selectionMoveStart$.subscribe(() => listenToSelectionChangeEvent = true));
-        this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selectionsList: Nullable<ISelectionWithStyle[]>) => {
+        this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selectionsList: ISelectionWithStyle[]) => {
             if (!selectionsList || listenToSelectionChangeEvent === false) {
                 return;
             }
@@ -60,7 +58,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
             if (!selectionRangeWithStyle.primary) return;
 
             const canvasRect = this._layoutService.getCanvasElement().getBoundingClientRect();
-            const range = this._selectionRenderService.attachSelectionWithCoord(selectionRangeWithStyle);
+            const range = this._selectionRenderService.attachSelectionWithCoord(selectionRangeWithStyle as unknown as ISelectionWithStyle);
             const rangeType = selectionRangeWithStyle.range.rangeType;
 
             const { scene } = this._context;
@@ -89,7 +87,13 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
                     clientX = (canvasRect.width - rowHeaderWidth) / 2 + 20;
                     clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
                     break;
+                case RANGE_TYPE.ALL:
+                    clientX = range.rangeWithCoord.startX + canvasRect.left;
+                    clientY = range.rangeWithCoord.startY + canvasRect.top;
+                    break;
                 default:
+                    clientX = range.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
+                    clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
                     break;
             }
             // in case clientXY is not in screen area.

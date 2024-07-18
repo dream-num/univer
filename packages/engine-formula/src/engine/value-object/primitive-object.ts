@@ -137,6 +137,10 @@ export class NullValueObject extends BaseValueObject {
         return NumberValueObject.create(0).sin();
     }
 
+    override sinh(): BaseValueObject {
+        return NumberValueObject.create(0).sinh();
+    }
+
     override asin(): BaseValueObject {
         return NumberValueObject.create(0).asin();
     }
@@ -349,6 +353,10 @@ export class BooleanValueObject extends BaseValueObject {
 
     override sin(): BaseValueObject {
         return this._convertToNumber().sin();
+    }
+
+    override sinh(): BaseValueObject {
+        return this._convertToNumber().sinh();
     }
 
     override asin(): BaseValueObject {
@@ -926,6 +934,22 @@ export class NumberValueObject extends BaseValueObject {
         return NumberValueObject.create(result);
     }
 
+    override sinh(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.sinh(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return NumberValueObject.create(result);
+    }
+
     override asin(): BaseValueObject {
         const currentValue = this.getValue();
 
@@ -1429,20 +1453,20 @@ export function createStringValueObjectByRawValue(rawValue: string | number | bo
     return StringValueObject.create(value);
 }
 
-export function createNumberValueObjectByRawValue(rawValue: string | number | boolean) {
+export function createNumberValueObjectByRawValue(rawValue: string | number | boolean, pattern: string = '') {
     if (typeof rawValue === 'boolean') {
         let result = 0;
         if (rawValue) {
             result = 1;
         }
-        return NumberValueObject.create(result);
+        return NumberValueObject.create(result, pattern);
     } else if (typeof rawValue === 'number') {
         if (!Number.isFinite(rawValue)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
-        return NumberValueObject.create(rawValue);
+        return NumberValueObject.create(rawValue, pattern);
     } else if (isRealNum(rawValue)) {
-        return NumberValueObject.create(Number(rawValue));
+        return NumberValueObject.create(Number(rawValue), pattern);
     }
     return ErrorValueObject.create(ErrorType.VALUE);
 }

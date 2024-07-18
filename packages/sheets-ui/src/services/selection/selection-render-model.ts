@@ -19,22 +19,12 @@ import { makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
 
 export class SelectionRenderModel implements IRangeWithCoord {
     private _startColumn: number = -1;
-
     private _startRow: number = -1;
-
     private _endColumn: number = -1;
-
     private _endRow: number = -1;
-
-    /**
-     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
-     */
     private _startX: number = 0;
-
     private _startY: number = 0;
-
     private _endX: number = 0;
-
     private _endY: number = 0;
 
     /**
@@ -42,65 +32,23 @@ export class SelectionRenderModel implements IRangeWithCoord {
      * when there is no merge info
      * top left cell of current selection (or bottomLeft of current selection)
      */
-    private _currentCell: Nullable<ISelectionCellWithMergeInfo>;
-
+    private _primary: Nullable<ISelectionCellWithMergeInfo>;
     private _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
 
-    get startColumn() {
-        return this._startColumn;
-    }
-
-    get startRow() {
-        return this._startRow;
-    }
-
-    get endColumn() {
-        return this._endColumn;
-    }
-
-    get endRow() {
-        return this._endRow;
-    }
+    get startColumn() { return this._startColumn; }
+    get startRow() { return this._startRow; }
+    get endColumn() { return this._endColumn; }
+    get endRow() { return this._endRow; }
+    get startX() { return this._startX; }
+    get startY() { return this._startY; }
+    get endX() { return this._endX; }
+    get endY() { return this._endY; }
+    get currentCell() { return this._primary; }
+    get rangeType() { return this._rangeType; }
 
     /**
-     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
+     * @deprecated, Duplicate with `Rectangle`
      */
-    get startX() {
-        return this._startX;
-    }
-
-    /**
-     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
-     */
-    get startY() {
-        return this._startY;
-    }
-
-    /**
-     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
-     */
-    get endX() {
-        return this._endX;
-    }
-
-    /**
-     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
-     */
-    get endY() {
-        return this._endY;
-    }
-
-    /**
-     * highlight cell of selection
-     */
-    get currentCell() {
-        return this._currentCell;
-    }
-
-    get rangeType() {
-        return this._rangeType;
-    }
-
     isEqual(rangeWithCoord: IRangeWithCoord) {
         const { startColumn, startRow, endColumn, endRow } = this;
         const {
@@ -109,9 +57,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
             endColumn: newEndColumn,
             endRow: newEndRow,
         } = rangeWithCoord;
-        // if (type !== newType) {
-        //     return false;
-        // }
+
         if (
             startColumn === newStartColumn &&
             startRow === newStartRow &&
@@ -120,9 +66,13 @@ export class SelectionRenderModel implements IRangeWithCoord {
         ) {
             return true;
         }
+
         return false;
     }
 
+    /**
+     * @deprecated, Duplicate with `Rectangle`
+     */
     isInclude(rangeWithCoord: IRangeWithCoord) {
         const { startColumn, startRow, endColumn, endRow } = this;
         const {
@@ -131,10 +81,6 @@ export class SelectionRenderModel implements IRangeWithCoord {
             endColumn: newEndColumn,
             endRow: newEndRow,
         } = rangeWithCoord;
-
-        // if (type !== newType) {
-        //     return false;
-        // }
 
         if (
             !(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)
@@ -145,27 +91,26 @@ export class SelectionRenderModel implements IRangeWithCoord {
     }
 
     highlightToSelection() {
-        return makeCellToSelection(this._currentCell);
+        if (!this._primary) return;
+        return makeCellToSelection(this._primary);
     }
 
-    getRange() {
+    getRange(): IRangeWithCoord {
         return {
             startColumn: this._startColumn,
             startRow: this._startRow,
             endColumn: this._endColumn,
             endRow: this._endRow,
-
             startX: this._startX,
             startY: this._startY,
             endX: this._endX,
             endY: this._endY,
-
             rangeType: this.rangeType,
         };
     }
 
     getCell() {
-        return this._currentCell;
+        return this._primary;
     }
 
     getRangeType() {
@@ -178,20 +123,8 @@ export class SelectionRenderModel implements IRangeWithCoord {
 
     getValue(): ISelectionWithCoord {
         return {
-            rangeWithCoord: {
-                startColumn: this._startColumn,
-                startRow: this._startRow,
-                endColumn: this._endColumn,
-                endRow: this._endRow,
-
-                startX: this._startX,
-                startY: this._startY,
-                endX: this._endX,
-                endY: this._endY,
-
-                rangeType: this._rangeType,
-            },
-            primaryWithCoord: this._currentCell,
+            rangeWithCoord: this.getRange(),
+            primaryWithCoord: this._primary,
         };
     }
 
@@ -201,32 +134,23 @@ export class SelectionRenderModel implements IRangeWithCoord {
             startRow,
             endColumn,
             endRow,
-
             startX,
             startY,
             endX,
             endY,
-
             rangeType,
         } = newSelectionRange;
 
         this._startColumn = startColumn;
-
         this._startRow = startRow;
-
         this._endColumn = endColumn;
-
         this._endRow = endRow;
-
         this._startX = startX;
-
         this._startY = startY;
-
         this._endX = endX;
-
         this._endY = endY;
 
-        if (rangeType != null) {
+        if (rangeType) {
             this._rangeType = rangeType;
         }
 
@@ -235,11 +159,11 @@ export class SelectionRenderModel implements IRangeWithCoord {
 
     setCurrentCell(currentCell: Nullable<ISelectionCellWithMergeInfo>) {
         if (currentCell) {
-            this._currentCell = currentCell;
+            this._primary = currentCell;
         }
     }
 
     clearCurrentCell() {
-        this._currentCell = null;
+        this._primary = null;
     }
 }

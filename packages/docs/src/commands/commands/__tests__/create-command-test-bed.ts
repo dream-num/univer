@@ -75,8 +75,8 @@ const TEST_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 68,
                 paragraphStyle: {
-                    spaceAbove: 20,
-                    indentFirstLine: 20,
+                    spaceAbove: { v: 20 },
+                    indentFirstLine: { v: 20 },
                 },
             },
         ],
@@ -160,7 +160,7 @@ export function createCommandTestBed(workbookData?: IDocumentData, dependencies?
 export class MockRenderManagerService implements Pick<IRenderManagerService, 'getRenderById'> {
     constructor(
         @Inject(Injector) private readonly _injector: Injector
-    ) {}
+    ) { }
 
     getRenderById(_unitId: string): Nullable<IRender> {
         return {

@@ -27,7 +27,7 @@ export {
     SharedController,
     UndoShortcutItem,
 } from './controllers/shared-shortcut.controller';
-export { UI_CONFIG_KEY, IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
+export { UI_CONFIG_KEY, IUIController, type IWorkbenchOptions, type IUniverUIConfig } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { IUIPartsService, BuiltInUIPart, UIPartsService } from './services/parts/parts.service';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
@@ -86,14 +86,19 @@ export { ComponentContainer, useComponentsOfPart, type IComponentContainerProps 
 export { IEditorService, EditorService } from './services/editor/editor.service';
 export { TextEditor } from './components/editor/TextEditor';
 export { RangeSelector } from './components/range-selector/RangeSelector';
-export { IRangeSelectorService } from './services/range-selector/range-selector.service';
-export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { type IMenuGroup, useToolbarGroups, useToolbarItemStatus, useToolbarCollapseObserver } from './views/components/doc-bars/hook';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
-export { IProgressService, ProgressService } from './services/progress/progress.service';
-export type { IProgressStep } from './services/progress/progress.service';
+export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
+export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
+export { IProgressService, type IProgressCount, type IProgressStep, ProgressService } from './services/progress/progress.service';
+export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
+export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
+export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';
+export { ErrorController } from './controllers/error/error.controller';
+export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
+export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
+export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
 
 // #region - workbench components
 
@@ -106,6 +111,7 @@ export { CanvasPopup } from './views/components/popup/CanvasPopup';
 export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
+export { Toolbar } from './views/components/doc-bars/Toolbar';
 
 // #endregion
 

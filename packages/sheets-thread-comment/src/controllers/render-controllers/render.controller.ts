@@ -22,6 +22,7 @@ import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import { debounceTime } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsThreadCommentRenderController)
 export class SheetsThreadCommentRenderController extends Disposable {
@@ -88,7 +89,7 @@ export class SheetsThreadCommentRenderController extends Disposable {
             }
         };
 
-        this.disposeWithMe(this._sheetsThreadCommentModel.commentUpdate$.subscribe((update) => {
+        this.disposeWithMe(this._sheetsThreadCommentModel.commentUpdate$.pipe(debounceTime(16)).subscribe((update) => {
             markSkeletonDirty();
         }));
     }

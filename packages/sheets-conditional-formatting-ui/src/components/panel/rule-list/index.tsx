@@ -16,13 +16,14 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Select, Tooltip } from '@univerjs/design';
+import { useObservable } from '@univerjs/ui';
 import { useHighlightRange } from '@univerjs/sheets-ui';
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ICellPermission } from '@univerjs/sheets';
-import { SelectionManagerService, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import GridLayout from 'react-grid-layout';
@@ -110,12 +111,12 @@ export const RuleList = (props: IRuleListProps) => {
     const { onClick } = props;
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const selectionManagerService = useDependency(SelectionManagerService);
+    const selectionManagerService = useDependency(SheetsSelectionsService);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = useObservable(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET))!;
     const unitId = workbook.getUnitId();
     const worksheet = workbook.getActiveSheet();
     if (!worksheet) {
@@ -142,7 +143,7 @@ export const RuleList = (props: IRuleListProps) => {
             return [];
         }
         if (selectValue === '1') {
-            const selection = selectionManagerService.getLast();
+            const selection = selectionManagerService.getCurrentLastSelection();
             if (!selection) {
                 return [];
             }

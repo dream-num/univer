@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IParagraph, ITextRun } from '@univerjs/core';
+import type { ICommandInfo, ICustomBlock, ICustomRange, IDocumentData, IDrawings, IParagraph, ITextRun } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -41,7 +41,7 @@ import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-re
 import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui';
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
@@ -52,7 +52,6 @@ export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = '__defaultDocumentZenEditorSpecialUni
 @OnLifecycle(LifecycleStages.Steady, ZenEditorController)
 export class ZenEditorController extends RxDisposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IZenEditorManagerService private readonly _zenEditorManagerService: IZenEditorManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -69,19 +68,17 @@ export class ZenEditorController extends RxDisposable {
 
     private _initialize() {
         this._syncZenEditorSize();
-
         this._commandExecutedListener();
-
-        // this._createZenEditorInstance();
     }
 
     private _createZenEditorInstance() {
         // create univer doc formula bar editor instance
-        const INITIAL_SNAPSHOT = {
+        const INITIAL_SNAPSHOT: IDocumentData = {
             id: DOCS_ZEN_EDITOR_UNIT_ID_KEY,
             body: {
                 dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
                 textRuns: [],
+                customBlocks: [],
                 paragraphs: [
                     {
                         startIndex: 0,
@@ -103,6 +100,8 @@ export class ZenEditorController extends RxDisposable {
                     centerAngle: 0,
                 },
             },
+            drawings: {},
+            drawingsOrder: [],
         };
 
         return this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_DOC, INITIAL_SNAPSHOT);
@@ -154,11 +153,12 @@ export class ZenEditorController extends RxDisposable {
 
         this._zenZoneService.open();
 
+        const currentSheet = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
+
         // Need to clear undo/redo service when open zen mode.
         this._undoRedoService.clearUndoRedo(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
         this._univerInstanceService.focusUnit(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-
         this._univerInstanceService.setCurrentUnitForType(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
         const visibleState = this._editorBridgeService.isVisible();
@@ -166,6 +166,7 @@ export class ZenEditorController extends RxDisposable {
             this._editorBridgeService.changeVisible({
                 visible: true,
                 eventType: DeviceInputEventType.PointerDown,
+                unitId: currentSheet?.getUnitId() ?? '',
             });
         }
 
@@ -189,7 +190,6 @@ export class ZenEditorController extends RxDisposable {
 
     private _editorSyncHandler(param: IEditorBridgeServiceParam) {
         const body = param.documentLayoutObject.documentModel?.getBody();
-
         const dataStream = body?.dataStream;
         const paragraphs = body?.paragraphs;
         let textRuns: ITextRun[] = [];
@@ -212,7 +212,11 @@ export class ZenEditorController extends RxDisposable {
         unitId: string,
         dataStream: string,
         paragraphs: IParagraph[],
-        textRuns: ITextRun[] = []
+        textRuns: ITextRun[] = [],
+        customBlocks: ICustomBlock[] = [],
+        drawings: IDrawings = {},
+        drawingsOrder: string[] = [],
+        customRanges: ICustomRange[] = []
     ) {
         const INCLUDE_LIST = [
             DOCS_ZEN_EDITOR_UNIT_ID_KEY,
@@ -230,9 +234,15 @@ export class ZenEditorController extends RxDisposable {
         }
 
         const docBody = docDataModel.getBody()!;
+        const snapshot = docDataModel.getSnapshot()!;
 
         docBody.dataStream = dataStream;
         docBody.paragraphs = paragraphs;
+        docBody.customBlocks = customBlocks;
+        docBody.customRanges = customRanges;
+
+        snapshot.drawings = drawings;
+        snapshot.drawingsOrder = drawingsOrder;
 
         // Need to empty textRuns(previous formula highlight) every time when sync content(change selection or edit cell or edit formula bar).
         if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
@@ -342,7 +352,10 @@ export class ZenEditorController extends RxDisposable {
                         const dataStream = docBody?.dataStream;
                         const paragraphs = docBody?.paragraphs;
                         const textRuns = docBody?.textRuns;
-
+                        const customBlocks = docBody?.customBlocks;
+                        const drawings = editorDocDataModel?.getDrawings();
+                        const drawingsOrder = editorDocDataModel?.getDrawingsOrder();
+                        const customRanges = editorDocDataModel?.getCustomRanges();
                         /**
                          * Fix the issue where content cannot be saved in the doc under Zen mode.
                          */
@@ -352,7 +365,7 @@ export class ZenEditorController extends RxDisposable {
                             return;
                         }
 
-                        this._syncContentAndRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns);
+                        this._syncContentAndRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns, customBlocks, drawings, drawingsOrder, customRanges);
                     }
                 }
             })

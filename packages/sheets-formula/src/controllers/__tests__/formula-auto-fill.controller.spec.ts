@@ -25,22 +25,21 @@ import {
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RangeProtectionRenderModel,
     RangeProtectionRuleModel,
     RangeProtectionService,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetRangeValuesMutation,
     SetSelectionsOperation,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import {
     AutoFillCommand,
     AutoFillController,
     AutoFillService,
     IAutoFillService,
-    ISelectionRenderService,
-    SelectionRenderService,
+    ISheetSelectionRenderService,
+    SheetSelectionRenderService,
     SheetsRenderService,
 } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
@@ -74,7 +73,7 @@ describe('Test auto fill with formula', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [ISelectionRenderService, { useClass: SelectionRenderService }],
+            [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
             [AutoFillController],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: ShortcutService }],
@@ -116,13 +115,9 @@ describe('Test auto fill with formula', () => {
 
     describe('correct situations', () => {
         it('one cell with formula', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            const selectionManager = get(SheetsSelectionsService);
+
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,

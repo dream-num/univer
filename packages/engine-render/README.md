@@ -1,7 +1,10 @@
 # @univerjs/engine-render
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/engine-render)](https://npmjs.org/package/@univerjs/engine-render)
-[![license](https://img.shields.io/npm/l/@univerjs/engine-render)](https://img.shields.io/npm/l/@univerjs/engine-render)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/engine-render` | `UniverEngineRender` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
 
 ## Introduction
 
@@ -20,3 +23,9 @@ npm install @univerjs/engine-render
 # Using pnpm
 pnpm add @univerjs/engine-render
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/engine-numfmt?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/engine-numfmt
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/engine-numfmt?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/engine-numfmt?style=flat-square

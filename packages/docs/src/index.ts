@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-export { getSelectionText, getDeleteSelection, getInsertSelection } from './basics/selection';
+export { replaceSelectionFactory } from './basics/replace';
+export { getSelectionText, getDeleteSelection, getInsertSelection, isSegmentIntersects } from './basics/selection';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';
@@ -40,7 +41,7 @@ export {
     type IInsertCommandParams,
     type IUpdateCommandParams,
 } from './commands/commands/core-editing.command';
-export { DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
+export { DeleteLeftCommand, DeleteRightCommand, DeleteCustomBlockCommand, MergeTwoParagraphCommand, type IDeleteCustomBlockParams } from './commands/commands/delete.command';
 export { IMEInputCommand, type IIMEInputCommandParams } from './commands/commands/ime-input.command';
 export {
     SetInlineFormatBoldCommand,
@@ -85,3 +86,7 @@ export {
 } from './commands/operations/text-selection.operation';
 
 // #endregion
+
+export { getRetainAndDeleteFromReplace } from './basics/retain-delete-params';
+export { getRichTextEditPath } from './commands/util';
+export { getPlainTextFormDocument } from './basics/plain-text';

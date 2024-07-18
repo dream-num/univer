@@ -16,11 +16,11 @@
 
 import type { IFreeze, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ScrollManagerService } from '../../../services/scroll-manager.service';
+import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
     CancelFrozenCommand,
     SetColumnFrozenCommand,
@@ -33,8 +33,8 @@ describe('Test commands used for change selections', () => {
     let univer: Univer | null = null;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManagerService: SelectionManagerService;
-    let scrollManagerService: ScrollManagerService;
+    let selectionManagerService: SheetsSelectionsService;
+    let scrollManagerService: SheetScrollManagerService;
 
     const currentInfo = {
         unitId: 'test',
@@ -51,12 +51,7 @@ describe('Test commands used for change selections', () => {
         isMerged: boolean,
         isMergedMainCell: boolean
     ) {
-        selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            ...currentInfo,
-        });
-
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                 primary: {
@@ -102,12 +97,8 @@ describe('Test commands used for change selections', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            ...currentInfo,
-        });
-        scrollManagerService = get(ScrollManagerService);
+        selectionManagerService = get(SheetsSelectionsService);
+        scrollManagerService = get(SheetScrollManagerService);
         scrollManagerService.setSearchParamAndRefresh({
             ...currentInfo,
         });

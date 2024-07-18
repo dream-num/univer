@@ -19,10 +19,10 @@ import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
 
 import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../upload-component/component-name';
-import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
 const IMAGE_MENU_ID = 'doc.menu.image';
+const IMAGE_MENU_UPLOAD_FLOAT_ID = 'doc.menu.image.upload.float';
 
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
@@ -38,7 +38,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
 
 export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
-        id: InsertDocImageOperation.id,
+        id: IMAGE_MENU_UPLOAD_FLOAT_ID,
         title: 'docImage.upload.float',
         type: MenuItemType.SELECTOR,
         label: {

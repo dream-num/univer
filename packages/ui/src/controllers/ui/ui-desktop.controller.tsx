@@ -24,10 +24,10 @@ import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
 
 import { ILayoutService } from '../../services/layout/layout.service';
-import { DesktopApp } from '../../views/DesktopApp';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
+import { DesktopWorkbench } from '../../views/workbench/Workbench';
 import { type IUniverUIConfig, type IWorkbenchOptions, UI_CONFIG_KEY } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
@@ -87,7 +87,7 @@ export class DesktopUIController extends Disposable {
     }
 
     private _initBuiltinComponents() {
-        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(CanvasPopup, this._injector)));
+        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FLOATING, () => connectInjector(CanvasPopup, this._injector)));
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(FloatDom, this._injector)));
     }
 }
@@ -113,7 +113,7 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(DesktopApp, injector);
+    const ConnectedApp = connectInjector(DesktopWorkbench, injector);
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
 
     function render() {
@@ -130,13 +130,15 @@ function bootstrap(
     render();
 
     return toDisposable(() => {
-        unmount(mountContainer);
+        // https://github.com/facebook/react/issues/26031
+        createRoot(<div></div>, mountContainer);
+        setTimeout(() => createRoot(<div></div>, mountContainer), 200);
+        setTimeout(() => unmount(mountContainer), 500);
     });
 }
 
 function createContainer(id: string): HTMLElement {
     const element = document.createElement('div');
     element.id = id;
-    // FIXME: the element is not append to the DOM tree. So it won't be rendered.
     return element;
 }

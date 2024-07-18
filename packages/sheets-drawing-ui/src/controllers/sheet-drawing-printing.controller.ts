@@ -67,7 +67,7 @@ export class SheetDrawingPrintingController extends Disposable {
                             return next(range);
                         }
 
-                        const skeleton = renderer.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId);
+                        const skeleton = renderer.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
                         if (!skeleton) {
                             return next(range);
                         }

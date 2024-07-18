@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs",
-    "version": "0.1.17",
+    "version": "0.2.3",
     "private": false,
     "description": "UniverSheet normal base-docs",
     "author": "DreamNum <developer@univer.ai>",
@@ -62,18 +62,18 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "0.15.5",
+        "@wendellhu/redi": "0.16.0",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "0.15.5",
+        "@wendellhu/redi": "0.16.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.3",
-        "vite": "^5.3.3",
-        "vitest": "^1.6.0"
+        "vite": "^5.3.4",
+        "vitest": "^2.0.3"
     },
     "univerSpace": {
         ".": {

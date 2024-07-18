@@ -15,13 +15,14 @@
  */
 
 import type { IMutationInfo, IRange, IStyleData } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
-import { SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { Disposable, ICommandService, ILogService, IUndoRedoService, ObjectMatrix, ThemeService } from '@univerjs/core';
+import { SetRangeValuesMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
+import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 
 export interface IFormatPainterService {
     status$: Observable<FormatPainterStatus>;
@@ -70,8 +71,8 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
     private _extendHooks: IFormatPainterHook[] = [];
 
     constructor(
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -157,9 +158,9 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         this._markSelectionService.removeAllShapes();
 
         if (status !== FormatPainterStatus.OFF) {
-            const selection = this._selectionManagerService.getLast();
+            const selection = this._selectionManagerService.getCurrentLastSelection();
             if (selection) {
-                const style = this._selectionManagerService.createCopyPasteSelection();
+                const style = createCopyPasteSelectionStyle(this._themeService);
                 if (status === FormatPainterStatus.INFINITE) {
                     this._markId = this._markSelectionService.addShape({ ...selection, style });
                 } else {

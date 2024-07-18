@@ -38,6 +38,8 @@ export interface IImageProps extends IShapeProps {
      * 20.1.9.18 prstGeom (Preset geometry)
      */
     prstGeom?: Nullable<PresetGeometryType>;
+
+    opacity?: number;
 }
 
 export class Image extends Shape<IImageProps> {
@@ -88,6 +90,15 @@ export class Image extends Shape<IImageProps> {
 
     get prstGeom() {
         return this._props.prstGeom;
+    }
+
+    get opacity() {
+        return this._props.opacity ?? 1;
+    }
+
+    setOpacity(opacity: number) {
+        this._props.opacity = opacity;
+        this.makeDirty(true);
     }
 
     override get classType(): RENDER_CLASS_TYPE {
@@ -273,6 +284,9 @@ export class Image extends Shape<IImageProps> {
         const m = this.transform.getMatrix();
         mainCtx.save();
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        if (this.opacity !== 1) {
+            mainCtx.globalAlpha = this.opacity;
+        }
         this._draw(mainCtx);
         mainCtx.restore();
         this.makeDirty(false);

@@ -137,12 +137,6 @@ export interface IFormulaPromptService {
 
     insertSequenceString(index: number, content: string): void;
 
-    enableSelectionMoving(): void;
-
-    disableSelectionMoving(): void;
-
-    isSelectionMoving(): boolean;
-
     enableLockedSelectionChange(): void;
 
     disableLockedSelectionChange(): void;
@@ -183,11 +177,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
     private _helping: boolean = false;
 
-    private _isInsertRefString: boolean = false;
-
     private _sequenceNodes: Array<string | ISequenceNode> = [];
-
-    private _isSelectionMoving = false;
 
     private _isLockedOnSelectionChangeRefString: boolean = false;
 
@@ -381,18 +371,6 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
             this._sequenceNodes[i] = newNode;
         }
-    }
-
-    enableSelectionMoving() {
-        this._isSelectionMoving = true;
-    }
-
-    disableSelectionMoving() {
-        this._isSelectionMoving = false;
-    }
-
-    isSelectionMoving() {
-        return this._isSelectionMoving;
     }
 
     enableLockedSelectionChange() {

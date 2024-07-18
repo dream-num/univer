@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride, Workbook } from '@univerjs/core';
+import type { DependencyOverride, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
@@ -26,7 +26,7 @@ import { RangeProtectionPermissionViewPoint, SelectionMoveType, SetSelectionsOpe
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
-import { ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
+import { IMarkSelectionService, ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
@@ -43,8 +43,18 @@ export const DefaultSheetsThreadCommentConfig: IUniverSheetsThreadCommentConfig 
 
 };
 
+interface ISelectionShapeInfo {
+    shapeId: string;
+    unitId: string;
+    subUnitId: string;
+    commentId: string;
+}
+
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
 export class SheetsThreadCommentController extends Disposable {
+    private _isSwitchToCommenting = false;
+    private _selectionShapeInfo: Nullable<ISelectionShapeInfo> = null;
+
     constructor(
         private readonly _config: Partial<IUniverSheetsThreadCommentConfig>,
         @IMenuService private readonly _menuService: IMenuService,
@@ -56,7 +66,8 @@ export class SheetsThreadCommentController extends Disposable {
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
+        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
+        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService
     ) {
         super();
         this._initMenu();
@@ -64,6 +75,7 @@ export class SheetsThreadCommentController extends Disposable {
         this._initComponent();
         this._initCommandListener();
         this._initPanelListener();
+        this._initMarkSelection();
     }
 
     private _initShortcut() {
@@ -73,9 +85,16 @@ export class SheetsThreadCommentController extends Disposable {
     private _initCommandListener() {
         this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetSelectionsOperation.id) {
+                if (this._isSwitchToCommenting) {
+                    return;
+                }
                 const params = commandInfo.params as ISetSelectionsOperationParams;
                 const { unitId, subUnitId, selections, type } = params;
                 if ((type === SelectionMoveType.MOVE_END || type === undefined) && selections[0].primary) {
+                    const range = selections[0].range;
+                    if (range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) {
+                        return;
+                    }
                     const row = selections[0].primary.actualRow;
                     const col = selections[0].primary.actualColumn;
                     if (!this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
@@ -148,6 +167,7 @@ export class SheetsThreadCommentController extends Disposable {
                 if (currentUnitId !== unitId) {
                     return;
                 }
+                this._isSwitchToCommenting = true;
                 const currentSheetId = currentUnit.getActiveSheet()?.getSheetId();
                 if (currentSheetId !== subUnitId) {
                     await this._commandService.executeCommand(SetWorksheetActiveOperation.id, {
@@ -155,6 +175,7 @@ export class SheetsThreadCommentController extends Disposable {
                         subUnitId,
                     });
                 }
+                this._isSwitchToCommenting = false;
 
                 const location = singleReferenceToGrid(comment.ref);
 
@@ -164,6 +185,7 @@ export class SheetsThreadCommentController extends Disposable {
                     worksheetTypes: [WorksheetViewPermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],
                 }, [{ startRow: row, startColumn: col, endRow: row, endColumn: col }]);
+
                 if (!commentPermission) {
                     return;
                 }
@@ -177,6 +199,7 @@ export class SheetsThreadCommentController extends Disposable {
                         endColumn: location.column + GAP,
                     },
                 });
+
                 this._sheetsThreadCommentPopupService.showPopup({
                     unitId,
                     subUnitId,
@@ -188,6 +211,63 @@ export class SheetsThreadCommentController extends Disposable {
             } else {
                 this._sheetsThreadCommentPopupService.hidePopup();
             }
+        }));
+    }
+
+    private _initMarkSelection() {
+        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.subscribe((activeComment) => {
+            if (!activeComment) {
+                if (this._selectionShapeInfo) {
+                    this._markSelectionService.removeShape(this._selectionShapeInfo.shapeId);
+                    this._selectionShapeInfo = null;
+                }
+                return;
+            }
+            const { unitId, subUnitId, commentId } = activeComment;
+            if (this._selectionShapeInfo) {
+                if (this._selectionShapeInfo.unitId === unitId && this._selectionShapeInfo.subUnitId === subUnitId && this._selectionShapeInfo.commentId === commentId) {
+                    return;
+                }
+
+                this._markSelectionService.removeShape(this._selectionShapeInfo.shapeId);
+                this._selectionShapeInfo = null;
+            }
+            const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
+            if (!comment) {
+                return;
+            }
+
+            const location = singleReferenceToGrid(comment.ref);
+
+            const { row, column } = location;
+            if (Number.isNaN(row) || Number.isNaN(column)) {
+                return;
+            }
+
+            const shapeId = this._markSelectionService.addShape({
+                range: {
+                    startColumn: column,
+                    endColumn: column,
+                    startRow: row,
+                    endRow: row,
+                },
+                style: {
+                    hasAutoFill: false,
+                    fill: 'rgb(255, 189, 55, 0.35)',
+                    strokeWidth: 1,
+                    stroke: '#FFBD37',
+                    widgets: {},
+                },
+                primary: null,
+            });
+            if (!shapeId) {
+                return;
+            }
+
+            this._selectionShapeInfo = {
+                ...activeComment,
+                shapeId,
+            };
         }));
     }
 }

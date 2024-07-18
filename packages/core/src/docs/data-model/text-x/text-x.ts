@@ -176,6 +176,7 @@ export class TextX {
                 index += action.len;
             }
         }
+
         return invertibleActions;
     }
 
@@ -224,6 +225,11 @@ export class TextX {
 
         this.push(deleteAction);
 
+        return this;
+    }
+
+    empty(): this {
+        this._actions = [];
         return this;
     }
 

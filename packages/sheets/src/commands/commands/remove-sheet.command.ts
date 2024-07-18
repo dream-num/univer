@@ -31,7 +31,6 @@ import type {
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../mutations/remove-sheet.mutation';
-import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IRemoveSheetCommandParams {
@@ -58,14 +57,6 @@ export const RemoveSheetCommand: ICommand = {
 
         if (workbook.getSheets().length <= 1) return false;
 
-        const index = workbook.getSheetIndex(worksheet);
-        const activateSheetId = workbook.getConfig().sheetOrder[index + 1];
-
-        const activeSheetMutationParams: ISetWorksheetActiveOperationParams = {
-            unitId,
-            subUnitId: activateSheetId,
-        };
-
         // prepare do mutations
         const RemoveSheetMutationParams: IRemoveSheetMutationParams = {
             subUnitId,
@@ -84,7 +75,7 @@ export const RemoveSheetCommand: ICommand = {
         const undos = [...(intercepted.preUndos ?? []), { id: InsertSheetMutation.id, params: InsertSheetMutationParams }, ...intercepted.undos];
         const result = sequenceExecute(redos, commandService);
 
-        if (result) {
+        if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: undos,

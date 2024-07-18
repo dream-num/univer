@@ -56,6 +56,10 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         this._initDependencies(_injector);
     }
 
+    override onRendered(): void {
+        this._registerRenderModules();
+    }
+
     private _initDependencies(injector: Injector): void {
         const dependencies: Dependency[] = [
 
@@ -71,7 +75,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [DrawingPopupMenuController],
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
-            [SheetsDrawingCopyPasteController],
         ];
 
         const renderModules = [
@@ -80,6 +83,15 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));
-        renderModules.forEach((controller) => this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
+        renderModules.forEach((controller) => this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller as unknown as Dependency));
+    }
+
+    private _registerRenderModules(): void {
+        ([
+            [SheetsDrawingCopyPasteController],
+
+        ] as Dependency[]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
+        });
     }
 }

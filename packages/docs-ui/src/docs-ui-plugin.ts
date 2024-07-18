@@ -23,9 +23,7 @@ import {
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
 import { IEditorService, IShortcutService } from '@univerjs/ui';
-
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import {
@@ -44,13 +42,11 @@ import { DefaultDocUiConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';
-
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
-import { DocFloatingObjectRenderController } from './controllers/render-controllers/doc-floating-object.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocTextSelectionRenderController } from './controllers/render-controllers/text-selection.render-controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
@@ -140,22 +136,21 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initRenderBasics(): void {
         ([
-            DocSkeletonManagerService,
-            DocInterceptorService,
-            DocRenderController,
-            DocZoomRenderController,
-        ]).forEach((m) => {
+            [DocSkeletonManagerService],
+            [DocInterceptorService],
+            [DocRenderController],
+            [DocZoomRenderController],
+        ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
     }
 
     private _initRenderModules(): void {
         ([
-            DocBackScrollRenderController,
-            DocFloatingObjectRenderController,
-            DocTextSelectionRenderController,
-            DocHeaderFooterController,
-        ]).forEach((m) => {
+            [DocBackScrollRenderController],
+            [DocTextSelectionRenderController],
+            [DocHeaderFooterController],
+        ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
     }

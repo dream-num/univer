@@ -24,31 +24,31 @@ import {
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
-    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     ApplyFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
+import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 
-@OnLifecycle(LifecycleStages.Rendered, FormatPainterController)
+@OnLifecycle(LifecycleStages.Steady, FormatPainterController)
 export class FormatPainterController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
@@ -63,28 +63,29 @@ export class FormatPainterController extends Disposable {
     }
 
     private _commandExecutedListener() {
+        const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISheetSelectionRenderService);
+
         this.disposeWithMe(
-            toDisposable(
-                this._selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
-                    if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
-                        const { rangeWithCoord } = selections[selections.length - 1];
-                        this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
-                            unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
-                            subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId() || '',
-                            range: {
-                                startRow: rangeWithCoord.startRow,
-                                startColumn: rangeWithCoord.startColumn,
-                                endRow: rangeWithCoord.endRow,
-                                endColumn: rangeWithCoord.endColumn,
-                            },
-                        });
-                        // if once, turn off the format painter
-                        if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
-                            this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
-                        }
+            selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
+                if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
+                    const { rangeWithCoord } = selections[selections.length - 1];
+                    this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                        unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
+                        subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId() || '',
+                        range: {
+                            startRow: rangeWithCoord.startRow,
+                            startColumn: rangeWithCoord.startColumn,
+                            endRow: rangeWithCoord.endRow,
+                            endColumn: rangeWithCoord.endColumn,
+                        },
+                    });
+
+                    // if once, turn off the format painter
+                    if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
+                        this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
                     }
-                })
-            )
+                }
+            })
         );
     }
 
@@ -109,7 +110,7 @@ export class FormatPainterController extends Disposable {
     }
 
     private _collectSelectionRangeFormat() {
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         const range = selection?.range;
         if (!range) return null;
         const { startRow, endRow, startColumn, endColumn } = range;

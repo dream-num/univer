@@ -18,13 +18,16 @@ import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { IEditorService } from '@univerjs/ui';
+import { IEditorService, ISidebarService } from '@univerjs/ui';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { throttleTime } from 'rxjs';
 import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
 import { IFormulaPromptService } from '../../../services/prompt.service';
 import { generateParam } from '../../../services/utils';
+import { useResizeScrollObserver } from '../resize-scroll-observer';
 import styles from './index.module.less';
 
 export function HelpFunction() {
@@ -42,6 +45,11 @@ export function HelpFunction() {
 
     const univerInstanceService = useDependency(IUniverInstanceService);
     const editorService = useDependency(IEditorService);
+    const sidebarService = useDependency(ISidebarService);
+    const injector = useInjector();
+
+    // window resize/scroll, update HelpFunction position
+    useResizeScrollObserver(updatePosition);
 
     useEffect(() => {
         const subscription = promptService.help$.subscribe((params: IHelpFunctionOperationParams) => {
@@ -70,10 +78,28 @@ export function HelpFunction() {
             setVisible(visible);
         });
 
+        const sidebarSubscription = sidebarService.scrollEvent$.pipe(throttleTime(100)).subscribe(updatePosition);
+
         return () => {
             subscription?.unsubscribe();
+            sidebarSubscription.unsubscribe();
         };
     }, []);
+
+    function updatePosition() {
+        if (!helpVisible) {
+            return;
+        }
+
+        const position = getPosition();
+
+        if (position == null) {
+            return;
+        }
+
+        const { left, top, height } = position;
+        setOffset([left, top + height]);
+    }
 
     function getPosition() {
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance()!;
@@ -95,7 +121,9 @@ export function HelpFunction() {
     function handleClose() {
         setHelpVisible(!helpVisible);
 
-        // TODO focus editor
+        // focus editor
+        const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
+        textSelectionRenderManager.focus();
     }
 
     return (

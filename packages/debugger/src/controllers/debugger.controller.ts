@@ -38,6 +38,7 @@ import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverComman
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ImageDemo } from '../components/Image';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
+import { ShowCellContentOperation } from '../commands/operations/cell.operation';
 import {
     ChangeUserMenuItemFactory,
     ConfirmMenuItemFactory,
@@ -52,6 +53,7 @@ import {
     NotificationMenuItemFactory,
     SaveSnapshotSetEditableMenuItemFactory,
     SetEditableMenuItemFactory,
+    ShowCellContentMenuItemFactory,
     SidebarMenuItemFactory,
     ThemeMenuItemFactory,
     UnitMenuItemFactory,
@@ -93,6 +95,7 @@ export class DebuggerController extends Disposable {
             CreateEmptySheetCommand,
             CreateFloatDomCommand,
             ChangeUserCommand,
+            ShowCellContentOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._injector.add([ExportController]);
@@ -119,6 +122,7 @@ export class DebuggerController extends Disposable {
             FloatDomMenuItemFactory,
             CreateFloatDOMMenuItemFactory,
             ChangeUserMenuItemFactory,
+            ShowCellContentMenuItemFactory,
         ] as IMenuItemFactory[]).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });

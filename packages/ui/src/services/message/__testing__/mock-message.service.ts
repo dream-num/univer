@@ -31,4 +31,8 @@ export class MockMessageService implements IMessageService {
     setContainer(): void {
         // empty
     }
+
+    getContainer(): HTMLElement | undefined {
+        return undefined;
+    }
 }

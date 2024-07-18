@@ -135,7 +135,7 @@ export class ImageUpdateController extends Disposable {
             if (renderObject == null) {
                 return;
             }
-            const { scene, transformer } = renderObject;
+            const { scene } = renderObject;
 
             const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
@@ -196,7 +196,7 @@ export class ImageUpdateController extends Disposable {
 
     private _insertImages(params: IDrawingSearch[]) {
         (params).forEach(async (param) => {
-            const { unitId, subUnitId, drawingId } = param;
+            const { unitId, subUnitId } = param;
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
             const currentSubUnitId = getCurrentUnitInfo(this._currentUniverService)?.subUnitId;
 
@@ -209,12 +209,15 @@ export class ImageUpdateController extends Disposable {
                 return;
             }
 
-            const image = await this._drawingRenderService.renderImage(imageParam, renderObject.scene);
-            if (!image) {
+            const images = await this._drawingRenderService.renderImages(imageParam, renderObject.scene);
+            if (images == null || images.length === 0) {
                 return;
             }
-            this._addHoverForImage(image);
-            this._addDialogForImage(image);
+
+            for (const image of images) {
+                this._addHoverForImage(image);
+                this._addDialogForImage(image);
+            }
         });
     }
 

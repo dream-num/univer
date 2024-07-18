@@ -16,7 +16,7 @@
 
 import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-import { getSheetCommandTarget, InsertRangeMoveRightCommand, SelectionManagerService } from '@univerjs/sheets';
+import { getSheetCommandTarget, InsertRangeMoveRightCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 
 export const InsertRangeMoveRightConfirmCommand: ICommand = {
@@ -26,10 +26,10 @@ export const InsertRangeMoveRightConfirmCommand: ICommand = {
         const confirmService = accessor.get(IConfirmService);
         const commandService = accessor.get(ICommandService);
         const localeService = accessor.get(LocaleService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selection = selectionManagerService.getSelections();
+        const selection = selectionManagerService.getCurrentSelections();
         if (!selection) {
             return false;
         }

@@ -17,7 +17,7 @@
 import type { ICellData, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, NORMAL_SELECTION_PLUGIN_NAME, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SelectionManagerService, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -206,6 +206,55 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                         f: '=Sheet2!A1:B2',
                     },
                 },
+                18: {
+                    0: {
+                        v: 1,
+                    },
+                    1: {
+                        f: '=SUM(A19)',
+                        t: 2,
+                        v: 1,
+                    },
+                },
+                19: {
+                    0: {
+                        v: 2,
+                    },
+                    1: {
+                        f: '=SUM(A20)',
+                        si: 'id1',
+                        t: 2,
+                        v: 2,
+                    },
+                },
+                20: {
+                    0: {
+                        v: 3,
+                    },
+                    1: {
+                        si: 'id1',
+                        t: 2,
+                        v: 3,
+                    },
+                },
+                21: {
+                    2: {
+                        f: '=OFFSET(A1,1,1)',
+                        v: 0,
+                        t: 2,
+                    },
+                    3: {
+                        f: '=OFFSET(B1,1,1)',
+                        si: 'id2',
+                        v: 1,
+                        t: 2,
+                    },
+                    4: {
+                        si: 'id2',
+                        v: 1,
+                        t: 2,
+                    },
+                },
             },
             name: 'Sheet1',
         },
@@ -363,16 +412,42 @@ describe('Test insert function operation', () => {
             expect(valuesRedo).toStrictEqual([[{}, { f: '=SUM(A1:B2)' }]]);
         });
 
+        it('Move range, update reference with si ', async () => {
+            const params: IMoveRangeCommandParams = {
+                fromRange: {
+                    startRow: 18,
+                    startColumn: 1,
+                    endRow: 20,
+                    endColumn: 1,
+                    rangeType: 0,
+                },
+                toRange: {
+                    startRow: 18,
+                    startColumn: 2,
+                    endRow: 20,
+                    endColumn: 2,
+                    rangeType: 0,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveRangeCommand.id, params)).toBeTruthy();
+            const values = getValues(18, 1, 20, 2);
+            expect(values).toStrictEqual([[{}, { f: '=SUM(A19)', t: 2, v: 1 }], [{}, { f: '=SUM(A20)', si: 'id1', t: 2, v: 2 }], [{}, { si: 'id1', t: 2, v: 3 }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(18, 1, 20, 2);
+            expect(valuesUndo).toStrictEqual([[{ f: '=SUM(A19)', t: 2, v: 1 }, {}], [{ f: '=SUM(A20)', si: 'id1', t: 2, v: 2 }, {}], [{ si: 'id1', t: 2, v: 3 }, {}]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(18, 1, 20, 2);
+            expect(valuesRedo).toStrictEqual([[{}, { f: '=SUM(A19)', t: 2, v: 1 }], [{}, { f: '=SUM(A20)', si: 'id1', t: 2, v: 2 }], [{}, { si: 'id1', t: 2, v: 3 }]]);
+        });
+
         it('Move rows, update reference', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
+            const selectionManager = get(SheetsSelectionsService);
 
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -411,15 +486,9 @@ describe('Test insert function operation', () => {
         });
 
         it('Move rows, update reference and position', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
+            const selectionManager = get(SheetsSelectionsService);
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -464,15 +533,10 @@ describe('Test insert function operation', () => {
         });
 
         it('Move columns, update reference', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
+            const selectionManager = get(SheetsSelectionsService);
 
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,
@@ -511,15 +575,10 @@ describe('Test insert function operation', () => {
         });
 
         it('Move columns, update reference and position', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
+            const selectionManager = get(SheetsSelectionsService);
 
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,
@@ -867,6 +926,70 @@ describe('Test insert function operation', () => {
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:A2)' }, { v: 1, t: CellValueType.NUMBER }]]);
             const valuesRedo3 = getValues(7, 2, 7, 5);
             expect(valuesRedo3).toStrictEqual([[{ f: '=SUM(A8)' }, { f: '=SUM(#REF!)' }, { f: '=SUM(B8)' }, {}]]);
+        });
+
+        it('Remove column, update reference and position, contains #REF', async () => {
+            const params: IRemoveRowColCommandParams = {
+                range: {
+                    startColumn: 0,
+                    endColumn: 1,
+                    startRow: 0,
+                    endRow: 2,
+                },
+            };
+
+            expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
+            const values = getValues(21, 0, 21, 4);
+
+            // Ignore the calculation results and only verify the offset information
+            expect(values).toStrictEqual([[{
+                f: '=OFFSET(#REF!,1,1)',
+                v: 0,
+                t: 2,
+            }, {
+                f: '=OFFSET(#REF!,1,1)',
+                si: 'id2',
+                v: 1,
+                t: 2,
+            }, {
+                f: '=OFFSET(A1,1,1)',
+                v: 1,
+                t: 2,
+            }, {}, {}]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(21, 0, 21, 4);
+            expect(valuesUndo).toStrictEqual([[{ }, { }, {
+                f: '=OFFSET(A1,1,1)',
+                v: 0,
+                t: 2,
+            }, {
+                f: '=OFFSET(B1,1,1)',
+                si: 'id2',
+                v: 1,
+                t: 2,
+            }, {
+                si: 'id2',
+                v: 1,
+                t: 2,
+            }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(21, 0, 21, 4);
+            expect(valuesRedo).toStrictEqual([[{
+                f: '=OFFSET(#REF!,1,1)',
+                v: 0,
+                t: 2,
+            }, {
+                f: '=OFFSET(#REF!,1,1)',
+                si: 'id2',
+                v: 1,
+                t: 2,
+            }, {
+                f: '=OFFSET(A1,1,1)',
+                v: 1,
+                t: 2,
+            }, {}, {}]]);
         });
 
         it('Remove column, removed column contains formula', async () => {

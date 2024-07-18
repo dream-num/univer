@@ -80,8 +80,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値の絶対値は 1 より大きい値である必要があります。' },
         },
     },
     AGGREGATE: {
@@ -188,8 +187,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '変換する数値を指定します。 0 以上、2^53 未満の整数である必要があります。' },
+            radix: { name: '基数', detail: ' 数値を変換する基数 (底) の数値を指定します。 2 以上、36 以下の整数である必要があります。' },
+            minLength: { name: '最小の長さです', detail: '返される文字列の最小長を指定します。 0 以上の整数である必要があります。' },
         },
     },
     CEILING: {
@@ -285,8 +285,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: ' 双曲線余弦を求める実数を指定します。' },
         },
     },
     COT: {
@@ -299,8 +298,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '余接を求める角度を、ラジアンを単位として指定します。' },
         },
     },
     COTH: {
@@ -313,8 +311,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '双曲線余接を求める実数を指定します。' },
         },
     },
     CSC: {
@@ -327,8 +324,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '余割を求める角度を、ラジアンを単位として指定します。' },
         },
     },
     CSCH: {
@@ -341,8 +337,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '双曲線余割を求める角度を、ラジアンを単位として指定します。' },
         },
     },
     DECIMAL: {
@@ -943,8 +938,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'サインを求める角度をラジアンで指定します。' },
         },
     },
     SINH: {
@@ -957,8 +951,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '実数を指定します。' },
         },
     },
     SQRT: {
@@ -1066,8 +1059,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列', detail: '計算の対象となる要素を含む最初の配列引数を指定します。' },
+            array2: { name: '配列', detail: '計算の対象となる要素を含む、2 から 255 個までの配列引数を指定します。' },
         },
     },
     SUMSQ: {

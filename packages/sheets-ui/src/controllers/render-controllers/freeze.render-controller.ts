@@ -50,7 +50,6 @@ import {
     MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
-    SelectionManagerService,
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetFrozenCommand,
@@ -63,6 +62,7 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetInterceptorService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -71,7 +71,7 @@ import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
 
-import { ScrollManagerService } from '../../services/scroll-manager.service';
+import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset, getSheetObject } from '../utils/component-tools';
 
@@ -148,8 +148,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         // @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         // @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private _injector: Injector
@@ -1218,7 +1218,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     }
 
                     if (command.id === MoveColsCommand.id) {
-                        const selections = this._selectionManagerService.getSelections();
+                        const selections = this._selectionManagerService.getCurrentSelections();
                         const {
                             fromRange: { startColumn: fromCol },
                             toRange: { startColumn: toCol },
@@ -1282,7 +1282,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     }
 
                     if (command.id === MoveRowsCommand.id) {
-                        const selections = this._selectionManagerService.getSelections();
+                        const selections = this._selectionManagerService.getCurrentSelections();
                         const {
                             fromRange: { startRow: fromRow },
                             toRange: { startRow: toRow },

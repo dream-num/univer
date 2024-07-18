@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } from '@univerjs/core';
+import type { ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
     getCustomDecorationSlice,
@@ -22,21 +22,117 @@ import {
     ICommandService,
     IUniverInstanceService,
     JSONX,
+    PositionedObjectLayoutType,
     TextX,
     TextXActionType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange, ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
+import type { IActiveTextRange, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 
+import type { IAccessor } from '@wendellhu/redi';
 import type { ITextActiveRange } from '../../services/text-selection-manager.service';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getDeleteSelection, getInsertSelection } from '../../basics/selection';
+import { getDeleteSelection } from '../../basics/selection';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
+import { DocCustomRangeService } from '../../services/doc-custom-range.service';
+import { DeleteDirection } from '../../types/enums/delete-direction';
 import { CutContentCommand } from './clipboard.inner.command';
-import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
+import { DeleteCommand, UpdateCommand } from './core-editing.command';
+
+export interface IDeleteCustomBlockParams {
+    direction: DeleteDirection;
+    range: IActiveTextRange;
+    unitId: string;
+    drawingId: string;
+}
+
+// The activeRange need collapsed.
+export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
+    id: 'doc.command.delete-custom-block',
+    type: CommandType.COMMAND,
+    handler: async (accessor, params: IDeleteCustomBlockParams) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const activeRange = textSelectionManagerService.getActiveRange();
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+        if (activeRange == null || documentDataModel == null) {
+            return false;
+        }
+
+        const { direction, range, unitId, drawingId } = params;
+
+        const { startOffset, segmentId, style } = activeRange;
+
+        const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
+
+        const textRanges = [
+            {
+                startOffset: cursor,
+                endOffset: cursor,
+                style,
+            },
+        ] as ITextRangeWithStyle[];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+                prevTextRanges: [range],
+            },
+        };
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
+
+        if (startOffset > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
+                segmentId,
+            });
+        }
+
+        textX.push({
+            t: TextXActionType.DELETE,
+            len: 1,
+            line: 0,
+            segmentId,
+        });
+
+        const path = getRichTextEditPath(documentDataModel, segmentId);
+        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+
+        const drawing = (documentDataModel.getDrawings() ?? {})[drawingId];
+        const drawingOrder = documentDataModel.getDrawingsOrder();
+        const drawingIndex = drawingOrder!.indexOf(drawingId);
+
+        const removeDrawingAction = jsonX.removeOp(['drawings', drawingId], drawing);
+        const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], drawingId);
+
+        rawActions.push(removeDrawingAction!);
+        rawActions.push(removeDrawingOrderAction!);
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
 
 interface IMergeTwoParagraphParams {
     direction: DeleteDirection;
@@ -47,7 +143,6 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
     id: 'doc.command.merge-two-paragraph',
 
     type: CommandType.COMMAND,
-
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IMergeTwoParagraphParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -57,21 +152,20 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const { direction, range } = params;
 
         const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getSelections();
+        const ranges = textSelectionManagerService.getCurrentSelections();
 
         if (activeRange == null || ranges == null) {
             return false;
         }
-
+        const { segmentId, style } = activeRange;
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const originBody = docDataModel?.getBody();
+        const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (!docDataModel || !originBody) {
             return false;
         }
 
         const actualRange = getDeleteSelection(activeRange, originBody);
-
-        const { segmentId, style } = activeRange;
+        const unitId = docDataModel.getUnitId();
         const { startOffset, collapsed } = actualRange;
 
         if (!collapsed) {
@@ -79,15 +173,10 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         }
 
         const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
-        const endIndex = docDataModel
-            .getBody()
-            ?.paragraphs
+        const endIndex = originBody.paragraphs
             ?.find((p) => p.startIndex >= startIndex)?.startIndex!;
-        const body = getParagraphBody(docDataModel.getBody()!, startIndex, endIndex);
-
+        const body = getParagraphBody(accessor, unitId, originBody, startIndex, endIndex);
         const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
-
-        const unitId = docDataModel.getUnitId();
 
         const textRanges = [
             {
@@ -155,7 +244,6 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
     type: CommandType.COMMAND,
-
     // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -172,7 +260,7 @@ export const DeleteLeftCommand: ICommand = {
         const unitId = docDataModel.getUnitId();
         const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
         const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getSelections();
+        const ranges = textSelectionManagerService.getCurrentSelections();
         const skeleton = docSkeletonManagerService?.getSkeleton();
         if (activeRange == null || skeleton == null || ranges == null) {
             return false;
@@ -203,7 +291,7 @@ export const DeleteLeftCommand: ICommand = {
             isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
 
         if (isUpdateParagraph && collapsed) {
-            const paragraph = getParagraphByGlyph(curGlyph, docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody());
+            const paragraph = getParagraphByGlyph(curGlyph, body);
 
             if (paragraph == null) {
                 return false;
@@ -270,13 +358,57 @@ export const DeleteLeftCommand: ICommand = {
                     return true;
                 }
                 if (preGlyph.content === '\r') {
-                    result = await commandService.executeCommand(
-                        MergeTwoParagraphCommand.id,
-                        {
+                    result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
+                        direction: DeleteDirection.LEFT,
+                        range: actualRange,
+                    });
+                } else if (preGlyph.streamType === '\b') {
+                    const drawing = docDataModel.getSnapshot().drawings?.[preGlyph.drawingId ?? ''];
+
+                    if (drawing == null) {
+                        return true;
+                    }
+
+                    const isInlineDrawing = drawing.layoutType === PositionedObjectLayoutType.INLINE;
+
+                    if (isInlineDrawing) {
+                        const unitId = docDataModel.getUnitId();
+                        result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
                             direction: DeleteDirection.LEFT,
-                            range: actualRange,
+                            range: activeRange,
+                            unitId,
+                            drawingId: preGlyph.drawingId,
+                        });
+                    } else {
+                        const prePreGlyph = skeleton.findNodeByCharIndex(startOffset - 2);
+                        if (prePreGlyph == null) {
+                            return true;
                         }
-                    );
+
+                        cursor -= preGlyph.count;
+                        cursor -= prePreGlyph.count;
+
+                        const textRanges = [
+                            {
+                                startOffset: cursor,
+                                endOffset: cursor,
+                                style,
+                            },
+                        ];
+
+                        result = await commandService.executeCommand(DeleteCommand.id, {
+                            unitId: docDataModel.getUnitId(),
+                            range: {
+                                ...activeRange,
+                                startOffset: activeRange.startOffset - 1,
+                                endOffset: activeRange.endOffset - 1,
+                            },
+                            segmentId,
+                            direction: DeleteDirection.LEFT,
+                            len: prePreGlyph.count,
+                            textRanges,
+                        });
+                    }
                 } else {
                     cursor -= preGlyph.count;
                     result = await commandService.executeCommand(DeleteCommand.id, {
@@ -288,15 +420,13 @@ export const DeleteLeftCommand: ICommand = {
                     });
                 }
             } else {
-                const textRanges = getTextRangesWhenDelete({
-                    ...activeRange,
-                    ...actualRange,
-                }, ranges);
+                const textRanges = getTextRangesWhenDelete(actualRange, [actualRange]);
                 // If the selection is not closed, the effect of Delete and
                 // BACKSPACE is the same as CUT, so the CUT command is executed.
                 result = await commandService.executeCommand(CutContentCommand.id, {
                     segmentId,
                     textRanges,
+                    selections: [actualRange],
                 });
             }
         }
@@ -309,6 +439,8 @@ export const DeleteLeftCommand: ICommand = {
 export const DeleteRightCommand: ICommand = {
     id: 'doc.command.delete-right',
     type: CommandType.COMMAND,
+
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -321,8 +453,7 @@ export const DeleteRightCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
 
         const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getSelections();
-
+        const ranges = textSelectionManagerService.getCurrentSelections();
         const skeleton = docSkeletonManagerService?.getSkeleton();
         if (activeRange == null || skeleton == null || ranges == null) {
             return false;
@@ -335,8 +466,8 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
-        const actualRange = getInsertSelection(activeRange, body);
-        const { startOffset, collapsed } = actualRange;
+        const actualRange = getDeleteSelection(activeRange, body, DeleteDirection.RIGHT);
+        const { startOffset, endOffset, collapsed } = actualRange;
         // No need to delete when the cursor is at the last position of the last paragraph.
         if (startOffset === body.dataStream.length - 2 && collapsed) {
             return true;
@@ -345,12 +476,56 @@ export const DeleteRightCommand: ICommand = {
         let result: boolean = false;
         if (collapsed === true) {
             const needDeleteGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
+            const nextGlyph = skeleton.findNodeByCharIndex(startOffset + 1);
 
             if (needDeleteGlyph.content === '\r') {
                 result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                     direction: DeleteDirection.RIGHT,
                     range: activeRange,
                 });
+            } else if (needDeleteGlyph.streamType === '\b') {
+                const drawing = docDataModel.getSnapshot().drawings?.[needDeleteGlyph.drawingId ?? ''];
+
+                if (drawing == null) {
+                    return true;
+                }
+
+                const isInlineDrawing = drawing.layoutType === PositionedObjectLayoutType.INLINE;
+
+                if (isInlineDrawing) {
+                    const unitId = docDataModel.getUnitId();
+                    result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
+                        direction: DeleteDirection.RIGHT,
+                        range: activeRange,
+                        unitId,
+                        drawingId: needDeleteGlyph.drawingId,
+                    });
+                } else {
+                    if (nextGlyph == null) {
+                        return true;
+                    }
+
+                    const textRanges = [
+                        {
+                            startOffset: startOffset + 1,
+                            endOffset: startOffset + 1,
+                            style,
+                        },
+                    ];
+
+                    result = await commandService.executeCommand(DeleteCommand.id, {
+                        unitId: docDataModel.getUnitId(),
+                        range: {
+                            ...activeRange,
+                            startOffset: startOffset + 1,
+                            endOffset: endOffset + 1,
+                        },
+                        segmentId,
+                        direction: DeleteDirection.RIGHT,
+                        textRanges,
+                        len: nextGlyph.count,
+                    });
+                }
             } else {
                 const textRanges = [
                     {
@@ -362,11 +537,7 @@ export const DeleteRightCommand: ICommand = {
 
                 result = await commandService.executeCommand(DeleteCommand.id, {
                     unitId: docDataModel.getUnitId(),
-                    range: {
-                        startOffset,
-                        endOffset: startOffset,
-                        collapsed,
-                    } as ITextActiveRange,
+                    range: actualRange,
                     segmentId,
                     direction: DeleteDirection.RIGHT,
                     textRanges,
@@ -374,13 +545,14 @@ export const DeleteRightCommand: ICommand = {
                 });
             }
         } else {
-            const textRanges = getTextRangesWhenDelete(activeRange, ranges);
+            const textRanges = getTextRangesWhenDelete(actualRange, [actualRange]);
 
             // If the selection is not closed, the effect of Delete and
             // BACKSPACE is the same as CUT, so the CUT command is executed.
             result = await commandService.executeCommand(CutContentCommand.id, {
                 segmentId,
                 textRanges,
+                selections: [actualRange],
             });
         }
 
@@ -388,57 +560,70 @@ export const DeleteRightCommand: ICommand = {
     },
 };
 
-function getParagraphBody(body: IDocumentBody, startIndex: number, endIndex: number): IDocumentBody {
-    const { textRuns: originTextRuns } = body;
-    const dataStream = body.dataStream.substring(startIndex, endIndex);
+function getParagraphBody(accessor: IAccessor, unitId: string, body: IDocumentBody, start: number, end: number): IDocumentBody {
+    const { textRuns: originTextRuns = [], customBlocks: originCustomBlocks = [] } = body;
+    const dataStream = body.dataStream.substring(start, end);
+    const customRangeService = accessor.get(DocCustomRangeService);
 
-    if (originTextRuns == null) {
-        return {
-            dataStream,
-            customRanges: getCustomRangeSlice(body, startIndex, endIndex).customRanges,
-            customDecorations: getCustomDecorationSlice(body, startIndex, endIndex),
-        };
-    }
+    const bodySlice: IDocumentBody = {
+        dataStream,
+        customRanges: getCustomRangeSlice(body, start, end).customRanges.map((range) => customRangeService.copyCustomRange(unitId, range)),
+        customDecorations: getCustomDecorationSlice(body, start, end),
+    };
 
     const textRuns: ITextRun[] = [];
 
     for (const textRun of originTextRuns) {
         const { st, ed } = textRun;
-        if (ed <= startIndex || st >= endIndex) {
+        if (ed <= start || st >= end) {
             continue;
         }
 
-        if (st < startIndex) {
+        if (st < start) {
             textRuns.push({
                 ...textRun,
                 st: 0,
-                ed: ed - startIndex,
+                ed: ed - start,
             });
-        } else if (ed > endIndex) {
+        } else if (ed > end) {
             textRuns.push({
                 ...textRun,
-                st: st - startIndex,
-                ed: endIndex - startIndex,
+                st: st - start,
+                ed: end - start,
             });
         } else {
             textRuns.push({
                 ...textRun,
-                st: st - startIndex,
-                ed: ed - startIndex,
+                st: st - start,
+                ed: ed - start,
             });
         }
     }
 
-    return {
-        dataStream,
-        textRuns,
-        customRanges: getCustomRangeSlice(body, startIndex, endIndex).customRanges,
-        customDecorations: getCustomDecorationSlice(body, startIndex, endIndex),
-    };
+    if (textRuns.length > 0) {
+        bodySlice.textRuns = textRuns;
+    }
+
+    const customBlocks: ICustomBlock[] = [];
+    for (const block of originCustomBlocks) {
+        const { startIndex } = block;
+        if (startIndex >= start && startIndex <= end) {
+            customBlocks.push({
+                ...block,
+                startIndex: startIndex - start,
+            });
+        }
+    }
+
+    if (customBlocks.length > 0) {
+        bodySlice.customBlocks = customBlocks;
+    }
+
+    return bodySlice;
 }
 
 // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
-function getTextRangesWhenDelete(activeRange: ITextActiveRange, ranges: readonly TextRange[]) {
+function getTextRangesWhenDelete(activeRange: ITextActiveRange, ranges: readonly ITextRange[]) {
     let cursor = activeRange.endOffset;
 
     for (const range of ranges) {

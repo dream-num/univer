@@ -301,6 +301,7 @@ export class Layer extends Disposable {
         });
         this.clear();
 
+        this._debounceDirtyFunc?.();
         this._debounceDirtyFunc = null;
 
         this._cacheCanvas?.dispose();

@@ -46,7 +46,7 @@ export {
 } from './docs/data-model/text-x/action-types';
 export { DataValidationRenderMode } from './types/enum/data-validation-render-mode';
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
-export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
+export { getBodySlice, composeBody, SliceBodyType } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
 export type { TPriority } from './docs/data-model/text-x/text-x';
 export { JSONX, JSON1 } from './docs/data-model/json-x/json-x';
@@ -107,7 +107,7 @@ export {
     UndoCommandId,
 } from './services/undoredo/undoredo.service';
 export * from './shared';
-export { fromCallback } from './shared/rxjs';
+export { fromCallback, takeAfter } from './shared/rxjs';
 export { UserManagerService, type IUser } from './services/user-manager/user-manager.service';
 
 // #region sheet

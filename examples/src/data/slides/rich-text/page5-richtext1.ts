@@ -92,15 +92,15 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
             {
                 startIndex: 253,
                 paragraphStyle: {
-                    spaceAbove: 20,
-                    indentFirstLine: 20,
+                    spaceAbove: { v: 20 },
+                    indentFirstLine: { v: 20 },
                 },
             },
             {
                 startIndex: 404,
                 paragraphStyle: {
-                    spaceAbove: 20,
-                    indentFirstLine: 20,
+                    spaceAbove: { v: 20 },
+                    indentFirstLine: { v: 20 },
                 },
             },
             {

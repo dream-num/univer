@@ -35,7 +35,7 @@ import type {
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     InsertColMutation,
@@ -148,8 +148,8 @@ export const InsertRowBeforeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-before',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections()?.map((s) => s.range);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         let range: IRange;
 
         if (selections?.length === 1) {
@@ -206,8 +206,8 @@ export const InsertRowAfterCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-after',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections()?.map((s) => s.range);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         let range: IRange;
 
         if (selections?.length === 1) {
@@ -335,8 +335,8 @@ export const InsertColBeforeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-before',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections();
         let range: IRange;
 
         if (selections?.length === 1) {
@@ -378,7 +378,7 @@ export const InsertColBeforeCommand: ICommand = {
                 startColumn: range.startColumn,
                 endColumn: range.startColumn + count - 1,
                 startRow: 0,
-                endRow: worksheet.getLastRowWithContent(),
+                endRow: worksheet.getRowCount() - 1,
                 rangeType: RANGE_TYPE.COLUMN,
             },
             cellValue,
@@ -392,8 +392,8 @@ export const InsertColAfterCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-after',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections();
         let range: IRange;
 
         if (selections?.length === 1) {
@@ -425,7 +425,7 @@ export const InsertColAfterCommand: ICommand = {
                 startColumn: range.endColumn + 1,
                 endColumn: range.endColumn + count,
                 startRow: 0,
-                endRow: worksheet.getLastRowWithContent(),
+                endRow: worksheet.getRowCount() - 1,
             },
         };
 

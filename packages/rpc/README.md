@@ -1,7 +1,10 @@
 # @univerjs/rpc
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)
-[![license](https://img.shields.io/npm/l/@univerjs/rpc)](https://img.shields.io/npm/l/@univerjs/rpc)
+## Package Overview
+
+| Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
+| --- | --- | --- | --- | --- | :---: | :---: |
+| `@univerjs/rpc` | `UniverRpc` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ❌ | ❌ |
 
 ## Introduction
 
@@ -20,3 +23,9 @@ npm install @univerjs/rpc
 # Using pnpm
 pnpm add @univerjs/rpc
 ```
+
+<!-- Links -->
+[npm-version-shield]: https://img.shields.io/npm/v/@univerjs/rpc?style=flat-square
+[npm-version-link]: https://npmjs.com/package/@univerjs/rpc
+[npm-license-shield]: https://img.shields.io/npm/l/@univerjs/rpc?style=flat-square
+[npm-downloads-shield]: https://img.shields.io/npm/dm/@univerjs/rpc?style=flat-square

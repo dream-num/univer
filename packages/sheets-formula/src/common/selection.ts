@@ -26,18 +26,13 @@ export function getFormulaRefSelectionStyle(themeService: ThemeService, refColor
         id,
         strokeWidth: 1,
         stroke: refColor,
-        // strokeDash: 10,
         fill,
-
         widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgetSize: 6,
         widgetStrokeWidth: 1,
         widgetStroke: style.colorWhite,
-
         hasAutoFill: false,
-
         hasRowHeader: false,
-
         hasColumnHeader: false,
     };
 }

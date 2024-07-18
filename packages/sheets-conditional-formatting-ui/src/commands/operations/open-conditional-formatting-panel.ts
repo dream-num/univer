@@ -17,7 +17,7 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { CFRuleType, CFSubRuleType, createDefaultRule } from '@univerjs/sheets-conditional-formatting';
 import type { IColorScale, IConditionFormattingRule, IDataBar, IFormulaHighlightCell, IIconSet, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';
 import { ConditionalFormattingMenuController } from '../../controllers/cf.menu.controller';
@@ -46,10 +46,10 @@ export const OpenConditionalFormattingOperator: ICommand = {
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params: IOpenConditionalFormattingOperatorParams) => {
         const conditionalFormattingMenuController = accessor.get(ConditionalFormattingMenuController);
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
 
-        const ranges = selectionManagerService.getSelectionRanges() || [];
+        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range) || [];
 
         const type = params.value;
         switch (type) {

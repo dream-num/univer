@@ -17,7 +17,7 @@
 import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { UniverDocHyperLinkPlugin } from '@univerjs/docs-hyper-link';
+import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
 import type { IDocHyperLinkUIConfig } from './controllers/ui.controller';
@@ -27,8 +27,8 @@ import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-se
 import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { DocHyperLinkClipboardController } from './controllers/doc-hyper-link-clipboard.controller';
 
-@DependentOn(UniverDocHyperLinkPlugin)
-export class UniverDocHyperLinkUIPlugin extends Plugin {
+@DependentOn(UniverDocsHyperLinkPlugin)
+export class UniverDocsHyperLinkUIPlugin extends Plugin {
     static override pluginName = DOC_HYPER_LINK_UI_PLUGIN;
     static override type = UniverInstanceType.UNIVER_DOC;
 
@@ -63,7 +63,7 @@ export class UniverDocHyperLinkUIPlugin extends Plugin {
 
     private _initRenderModule() {
         [DocHyperLinkRenderController].forEach((dep) => {
-            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep);
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep as unknown as Dependency);
         });
     }
 }

@@ -38,7 +38,7 @@ import type { Engine } from '../../../engine';
 import type { Scene } from '../../../scene';
 import { ScrollTimer } from '../../../scroll-timer';
 import type { IScrollObserverParam, Viewport } from '../../../viewport';
-import type { DocumentSkeleton } from '../layout/doc-skeleton';
+import type { DocumentSkeleton, IFindNodeRestrictions } from '../layout/doc-skeleton';
 import type { Documents } from '../document';
 import { getSystemHighlightColor } from '../../../basics/tools';
 import { cursorConvertToTextRange, TextRange } from './text-range';
@@ -104,6 +104,7 @@ export interface ITextSelectionInnerParam {
     isEditing: boolean;
     style: ITextSelectionStyle;
     segmentPage: number;
+    options?: { [key: string]: boolean };
 }
 
 export interface IActiveTextRange {
@@ -122,6 +123,7 @@ export interface ITextSelectionRenderManager {
     readonly onInputBefore$: Observable<Nullable<IEditorInputConfig>>;
     readonly onKeydown$: Observable<Nullable<IEditorInputConfig>>;
     readonly onInput$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onPointerDown$: Observable<void>;
     readonly onCompositionstart$: Observable<Nullable<IEditorInputConfig>>;
     readonly onCompositionupdate$: Observable<Nullable<IEditorInputConfig>>;
     readonly onCompositionend$: Observable<Nullable<IEditorInputConfig>>;
@@ -136,12 +138,15 @@ export interface ITextSelectionRenderManager {
     enableSelection(): void;
     disableSelection(): void;
     setSegment(id: string): void;
+    getSegment(): string;
     setSegmentPage(pageIndex: number): void;
     getSegmentPage(): number;
     setStyle(style: ITextSelectionStyle): void;
     resetStyle(): void;
     removeAllTextRanges(): void;
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean): void;
+
+    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean, options?: { [key: string]: boolean }): void;
+
     sync(): void;
     activate(x: number, y: number): void;
     deactivate(): void;
@@ -164,7 +169,7 @@ export interface IEditorInputConfig {
 }
 
 export class TextSelectionRenderManager extends RxDisposable implements ITextSelectionRenderManager {
-    private readonly _onInputBefore$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+    private readonly _onInputBefore$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onInputBefore$ = this._onInputBefore$.asObservable();
 
     private readonly _onKeydown$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
@@ -196,6 +201,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private readonly _onBlur$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onBlur$ = this._onBlur$.asObservable();
+
+    private readonly _onPointerDown$ = new Subject<void>();
+    readonly onPointerDown$ = this._onPointerDown$.asObservable();
+
     private _container!: HTMLDivElement;
     private _inputParent!: HTMLDivElement;
     private _input!: HTMLDivElement;
@@ -243,6 +252,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._currentSegmentId = id;
     }
 
+    getSegment() {
+        return this._currentSegmentId;
+    }
+
     setSegmentPage(pageIndex: number) {
         this._currentSegmentPage = pageIndex;
     }
@@ -267,7 +280,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._isSelectionEnabled = false;
     }
 
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true) {
+    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         const {
             _scene: scene, _docSkeleton: docSkeleton, _document: document,
             _currentSegmentId: segmentId, _currentSegmentPage: segmentPage,
@@ -291,13 +304,18 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             segmentPage,
             style,
             isEditing,
+            options,
         });
 
         this._updateInputPosition();
     }
 
     setCursorManually(evtOffsetX: number, evtOffsetY: number) {
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
+            strict: true,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
 
         const position = this._getNodePosition(startNode);
 
@@ -381,7 +399,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
+            strict: false,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
         if (startNode == null || startNode.node == null) {
             return;
         }
@@ -439,7 +461,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
+            strict: false,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
         if (startNode == null || startNode.node == null) {
             return;
         }
@@ -474,7 +500,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
+            strict: false,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
 
         const position = this._getNodePosition(startNode);
 
@@ -638,7 +668,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         super.dispose();
 
         this._detachEvent();
-
+        this._removeAllTextRanges();
         this._container.remove();
     }
 
@@ -806,6 +836,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     private _getCanvasOffset() {
+        // This is quiet ambiguous, when did the engine's canvas offset changes?
         const engine = this._scene?.getEngine() as Engine;
         return getCanvasOffsetByEngine(engine);
     }
@@ -839,7 +870,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const endNode = this._findNodeByCoord(moveOffsetX, moveOffsetY);
+        const endNode = this._findNodeByCoord(moveOffsetX, moveOffsetY, {
+            strict: true,
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+        });
 
         const focusNodePosition = this._getNodePosition(endNode);
 
@@ -993,6 +1028,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         );
 
         this.disposeWithMe(
+            fromEvent(this._input, 'pointerdown').subscribe((e) => {
+                this._eventHandle(e, () => {
+                    this._onBlur$.next();
+                });
+            })
+        );
+
+        this.disposeWithMe(
             fromEvent(this._input, 'blur').subscribe((e) => {
                 this._eventHandle(e, (config) => {
                     this._onBlur$.next(config);
@@ -1032,7 +1075,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         return documentTransform.clone().invert().applyPoint(originCoord);
     }
 
-    private _findNodeByCoord(evtOffsetX: number, evtOffsetY: number) {
+    private _findNodeByCoord(evtOffsetX: number, evtOffsetY: number, restrictions: IFindNodeRestrictions) {
         const coord = this._getTransformCoordForDocumentOffset(evtOffsetX, evtOffsetY);
 
         if (coord == null) {
@@ -1046,7 +1089,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         } = this._document!.getOffsetConfig();
 
         const nodeInfo = this._docSkeleton?.findNodeByCoord(
-            coord, pageLayoutType, pageMarginLeft, pageMarginTop
+            coord, pageLayoutType, pageMarginLeft, pageMarginTop, restrictions
         );
 
         return nodeInfo;

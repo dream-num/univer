@@ -52,6 +52,7 @@ import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
 import { GlyphType } from '../../../basics/i-document-skeleton-cached';
@@ -63,6 +64,7 @@ import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
+import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -235,17 +237,22 @@ function isLineBlank(line?: IDocumentSkeletonLine) {
     return true;
 }
 
-export function getNumberUnitValue(unitValue: number | INumberUnit, benchMark: number) {
-    if (unitValue instanceof Object) {
-        const { v: value, u: unit } = unitValue;
-        if (unit === NumberUnitType.POINT) {
-            return value;
-        }
-
-        return value * benchMark;
+export function getNumberUnitValue(unitValue: Nullable<INumberUnit>, benchMark: number) {
+    if (!unitValue) {
+        return 0;
     }
 
-    return unitValue;
+    const { v: value, u: unit } = unitValue;
+
+    if (!unit) {
+        return value;
+    }
+
+    if (unit === NumberUnitType.PIXEL) {
+        return value;
+    }
+
+    return value * benchMark;
 }
 
 // Return charSpaceApply, choose between grid or font to calculate the length of a tab, where one tab represents a length of 1 character.
@@ -276,9 +283,15 @@ export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNu
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
     const { paragraphStyle = {} } = paragraphConfig;
     const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
-    const { lineSpacing = 1, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
-    return { paragraphLineGapDefault, linePitch, gridType, lineSpacing, spacingRule, snapToGrid };
+    // The default line spacing in Word is 1. Here, if the lines layout is used, the default line spacing is set to 1.
+    let lineSpacingApply = lineSpacing;
+    if ((gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS) && lineSpacing === 0 && spacingRule === SpacingRule.AUTO) {
+        lineSpacingApply = 1;
+    }
+
+    return { paragraphLineGapDefault, linePitch, gridType, lineSpacing: lineSpacingApply, spacingRule, snapToGrid };
 }
 
 export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
@@ -333,15 +346,16 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 // const preLine: Nullable<IDocumentSkeletonLine> = null;
 
                 for (const line of lines) {
-                    const { divides, lineHeight } = line;
+                    const { divides, lineHeight, top } = line;
                     const lineStartIndex = preLineStartIndex;
                     const lineEndIndex = lineStartIndex;
                     let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
                     let maxLineAsc = 0;
                     let macLineDsc = 0;
-                    columnHeight += lineHeight;
+                    columnHeight = top + lineHeight;
                     const divideLength = divides.length;
+                    let lineHasGlyph = false;
 
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
@@ -374,6 +388,8 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             continue;
                         }
 
+                        lineHasGlyph = true;
+
                         if (glyphGroup[0].xOffset !== 0 && i === divideLength - 1) {
                             actualWidth -= glyphGroup[0].xOffset;
                         }
@@ -393,7 +409,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                         preDivideStartIndex = divide.ed;
                     }
 
-                    line.st = lineStartIndex + 1;
+                    line.st = lineHasGlyph ? lineStartIndex + 1 : lineStartIndex;
                     line.ed = preDivideStartIndex >= line.st ? preDivideStartIndex : line.st;
                     line.width = actualWidth;
                     line.asc = maxLineAsc;
@@ -436,7 +452,29 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
     }
 }
 
-export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (glyph: IDocumentSkeletonGlyph) => void) {
+export function updateInlineDrawingCoords(ctx: ILayoutContext, pages: IDocumentSkeletonPage[]) {
+    lineIterator(pages, (line, _, __, page) => {
+        const { segmentId } = page;
+        const affectInlineDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
+        const drawingAnchor = ctx.skeletonResourceReference?.drawingAnchor?.get(segmentId)?.get(line.paragraphIndex);
+        // Update inline drawings after the line is layout.
+        if (affectInlineDrawings && affectInlineDrawings.size > 0) {
+            updateInlineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.top);
+        }
+    });
+}
+
+export function glyphIterator(
+    pages: IDocumentSkeletonPage[],
+    cb: (
+        glyph: IDocumentSkeletonGlyph,
+        divide: IDocumentSkeletonDivide,
+        line: IDocumentSkeletonLine,
+        column: IDocumentSkeletonColumn,
+        section: IDocumentSkeletonSection,
+        page: IDocumentSkeletonPage
+    ) => void
+) {
     for (const page of pages) {
         const { sections } = page;
 
@@ -447,15 +485,15 @@ export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
                 const { lines } = column;
 
                 for (const line of lines) {
-                    const { divides, lineHeight } = line;
+                    const { divides } = line;
                     const divideLength = divides.length;
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
                         const { glyphGroup } = divide;
 
                         for (const glyph of glyphGroup) {
-                            if (iteratorFunction && isFunction(iteratorFunction)) {
-                                iteratorFunction(glyph);
+                            if (cb && isFunction(cb)) {
+                                cb(glyph, divide, line, column, section, page);
                             }
                         }
                     }
@@ -465,7 +503,14 @@ export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
     }
 }
 
-export function lineIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (line: IDocumentSkeletonLine) => void) {
+export function lineIterator(
+    pages: IDocumentSkeletonPage[],
+    cb: (
+        line: IDocumentSkeletonLine,
+        column: IDocumentSkeletonColumn,
+        section: IDocumentSkeletonSection,
+        page: IDocumentSkeletonPage
+    ) => void) {
     for (const page of pages) {
         const { sections } = page;
 
@@ -476,8 +521,8 @@ export function lineIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
                 const { lines } = column;
 
                 for (const line of lines) {
-                    if (iteratorFunction && isFunction(iteratorFunction)) {
-                        iteratorFunction(line);
+                    if (cb && isFunction(cb)) {
+                        cb(line, column, section, page);
                     }
                 }
             }
@@ -841,9 +886,8 @@ export interface ILayoutContext {
     // The position coordinates of the layout,
     // which are used to indicate which section and paragraph are currently layout,
     // and used to support the starting point of the reflow when re-layout.
-    layoutStartPointer: {
-        paragraphIndex: Nullable<number>; // Layout from the beginning if the paragraphIndex is null.
-    };
+    // Layout from the beginning if the paragraphIndex is null.
+    layoutStartPointer: Record<string, Nullable<number>>;
     // It is used to identify whether it is a re-layout,
     // and if it is a re-layout, the skeleton needs to be backtracked to the layoutStartPointer states.
     isDirty: boolean;
@@ -855,7 +899,7 @@ export interface ILayoutContext {
         page: IDocumentSkeletonPage;
         drawing: IDocumentSkeletonDrawing;
     }>;
-    paragraphConfigCache: Map<number, IParagraphConfig>;
+    paragraphConfigCache: Map<string, Map<number, IParagraphConfig>>;
     sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
     paragraphsOpenNewPage: Set<number>;
     // Use for hyphenation.
@@ -912,6 +956,10 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         },
     } = documentStyle;
     const {
+        charSpace = 0, // charSpace
+        linePitch = 15.6, // linePitch pt
+        gridType = GridType.LINES, // gridType
+
         pageNumberStart = global_pageNumberStart,
         pageSize = global_pageSize,
         pageOrient = global_pageOrient,
@@ -954,6 +1002,10 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     }
 
     const sectionBreakConfig: ISectionBreakConfig = {
+        charSpace,
+        linePitch,
+        gridType,
+
         pageNumberStart,
         pageSize,
         pageOrient,
@@ -987,4 +1039,9 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
     };
 
     return sectionBreakConfig;
+}
+
+export function resetContext(ctx: ILayoutContext) {
+    ctx.isDirty = false;
+    ctx.skeleton.drawingAnchor?.clear();
 }

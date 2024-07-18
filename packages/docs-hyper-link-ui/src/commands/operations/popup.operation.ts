@@ -16,18 +16,25 @@
 
 import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import type { IAccessor } from '@wendellhu/redi';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const activeRange = textSelectionService.getActiveRange();
+    const renderManagerService = accessor.get(IRenderManagerService);
+    const render = renderManagerService.getCurrent();
+    const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
+    const editArea = skeleton?.getViewModel().getEditArea();
+    if (editArea === DocumentEditArea.FOOTER || editArea === DocumentEditArea.HEADER) {
+        return true;
+    }
     const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!doc || !activeRange || activeRange.collapsed) {
         return (true);
-        return;
     }
 
     const paragraphs = doc.getBody()?.paragraphs;

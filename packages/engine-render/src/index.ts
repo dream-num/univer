@@ -25,7 +25,7 @@ export * from './group';
 export * from './layer';
 export { IRenderingEngine, UniverRenderEnginePlugin } from './render-engine';
 export { type RenderComponentType, IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
-export { RenderUnit, type IRender, type IRenderModuleCtor, type IRenderModule, type IRenderContext } from './render-manager/render-unit';
+export { RenderUnit, type IRender, type IRenderModule, type IRenderContext } from './render-manager/render-unit';
 export * from './scene';
 export * from './scene-viewer';
 export * from './scroll-timer';
@@ -51,3 +51,5 @@ export { getCharSpaceApply, getNumberUnitValue } from './components/docs/layout/
 export { type IChangeObserverConfig } from './scene.transformer';
 export { DEFAULT_PADDING_DATA } from './components/sheets/sheet-skeleton';
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
+export { lineIterator, glyphIterator } from './components/docs/layout/tools';
+export { getOneTextSelectionRange } from './components/docs/text-selection/convert-cursor';

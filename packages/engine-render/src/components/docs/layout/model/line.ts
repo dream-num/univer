@@ -22,6 +22,7 @@ import type {
     IDocumentSkeletonDrawing,
     IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
     LineType,
 } from '../../../../basics/i-document-skeleton-cached';
 import { Path2 } from '../../../../basics/path2';
@@ -64,9 +65,9 @@ export function createSkeletonLine(
     columnWidth: number,
     lineIndex: number = 0,
     isParagraphStart: boolean = false,
-    pageSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map(),
-    headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
-    footersDrawings?: Map<string, IDocumentSkeletonDrawing>
+    page: IDocumentSkeletonPage,
+    headerPage: Nullable<IDocumentSkeletonPage>,
+    footerPage: Nullable<IDocumentSkeletonPage>
 ): IDocumentSkeletonLine {
     const {
         lineHeight = 15.6,
@@ -79,6 +80,9 @@ export function createSkeletonLine(
         marginTop = 0,
         spaceBelowApply = 0,
     } = lineBoundingBox;
+    const pageSkeDrawings = page.skeDrawings ?? new Map();
+    const headersDrawings = headerPage?.skeDrawings;
+    const footersDrawings = footerPage?.skeDrawings;
 
     const lineSke = _getLineSke(lineType, paragraphIndex);
 
@@ -100,6 +104,9 @@ export function createSkeletonLine(
         columnWidth,
         paddingLeft,
         paddingRight,
+        page,
+        headerPage,
+        footerPage,
         affectSkeDrawings,
         headersDrawings,
         footersDrawings
@@ -115,24 +122,34 @@ export function createSkeletonLine(
 export function calculateLineTopByDrawings(
     lineHeight: number = 15.6,
     lineTop: number = 0,
-    pageSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
-    headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
-    footersDrawings?: Map<string, IDocumentSkeletonDrawing>
+    page: IDocumentSkeletonPage,
+    headerPage: Nullable<IDocumentSkeletonPage>,
+    footerPage: Nullable<IDocumentSkeletonPage>
 ) {
     let maxTop = lineTop;
-    headersDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop);
-        if (top) {
-            maxTop = Math.max(maxTop, top);
-        }
-    });
+    const pageSkeDrawings = page.skeDrawings;
+    const headersDrawings = headerPage?.skeDrawings;
+    const footersDrawings = footerPage?.skeDrawings;
 
-    footersDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop);
-        if (top) {
-            maxTop = Math.max(maxTop, top);
-        }
-    });
+    if (headerPage && headersDrawings) {
+        headersDrawings.forEach((drawing) => {
+            const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop);
+            if (top) {
+                maxTop = Math.max(maxTop, top);
+            }
+        });
+    }
+
+    if (footerPage && footersDrawings) {
+        footersDrawings.forEach((drawing) => {
+            const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop);
+            if (top) {
+                maxTop = Math.max(maxTop, top);
+            }
+        });
+    }
 
     pageSkeDrawings?.forEach((drawing) => {
         const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop);
@@ -160,16 +177,16 @@ function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHe
 
     if (angle === 0) {
         const newAtop = aTop - distT;
-        const newHeight = height + distB;
+        const newHeight = distT + height + distB;
 
         if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop) {
             return;
         }
 
-        return newAtop + height;
+        return newAtop + newHeight;
     }
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
-    let { top: sTop = 0, height: sHeight = 0 } = __getBoundingBox(angle, aLeft, width, aTop, height);
+    let { top: sTop = 0, height: sHeight = 0 } = getBoundingBox(angle, aLeft, width, aTop, height);
 
     sTop -= distT;
     sHeight += distB;
@@ -186,6 +203,9 @@ function _calculateDividesByDrawings(
     columnWidth: number,
     paddingLeft: number,
     paddingRight: number,
+    page: IDocumentSkeletonPage,
+    headerPage: Nullable<IDocumentSkeletonPage>,
+    footerPage: Nullable<IDocumentSkeletonPage>,
     paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
     headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     footersDrawings?: Map<string, IDocumentSkeletonDrawing>
@@ -202,20 +222,29 @@ function _calculateDividesByDrawings(
             width: paddingRight,
         }
     );
-    headersDrawings?.forEach((drawing, drawingId) => {
-        const split = _calculateSplit(drawing, lineHeight, lineTop, columnWidth);
-        if (split) {
-            drawingsMix.push(split);
-        }
-    });
 
-    footersDrawings?.forEach((drawing, drawingId) => {
-        const split = _calculateSplit(drawing, lineHeight, lineTop, columnWidth);
-        if (split) {
-            drawingsMix.push(split);
-        }
-    });
-    paragraphAffectSkeDrawings?.forEach((drawing, drawingId) => {
+    if (headerPage && headersDrawings) {
+        headersDrawings.forEach((drawing) => {
+            const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
+
+            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnWidth);
+            if (split) {
+                drawingsMix.push(split);
+            }
+        });
+    }
+
+    if (footerPage && footersDrawings) {
+        footersDrawings.forEach((drawing) => {
+            const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
+            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnWidth);
+            if (split) {
+                drawingsMix.push(split);
+            }
+        });
+    }
+
+    paragraphAffectSkeDrawings?.forEach((drawing) => {
         const split = _calculateSplit(drawing, lineHeight, lineTop, columnWidth);
         if (split) {
             drawingsMix.push(split);
@@ -237,11 +266,30 @@ export function collisionDetection(
     drawing: IDocumentSkeletonDrawing,
     lineHeight: number,
     lineTop: number,
+    columnLeft: number,
     columnWidth: number
 ) {
-    const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
-    // TODO: handle angle is not 0.
-    return !!__getSplitWidthNoAngle(aTop, height, aLeft, width, lineTop, lineHeight, columnWidth, drawingOrigin);
+    const { aTop, height: oHeight, aLeft, width: oWidth, angle = 0, drawingOrigin } = drawing;
+    const { layoutType } = drawingOrigin;
+
+    if (
+        layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+        layoutType === PositionedObjectLayoutType.INLINE // drawing will never be inline here, just double check here.
+    ) {
+        return false;
+    }
+
+    const { top = 0, left = 0, width = 0, height = 0 } = getBoundingBox(angle, aLeft, oWidth, aTop, oHeight);
+
+    if (top + height < lineTop || top > lineHeight + lineTop) {
+        return false;
+    }
+
+    if (left + width < columnLeft || left > columnLeft + columnWidth) {
+        return false;
+    }
+
+    return true;
 }
 
 function _calculateSplit(
@@ -290,7 +338,7 @@ function _calculateSplit(
     }
 
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
-    const boundingBox = __getBoundingBox(angle, aLeft, width, aTop, height);
+    const boundingBox = getBoundingBox(angle, aLeft, width, aTop, height);
 
     if (layoutType === PositionedObjectLayoutType.WRAP_SQUARE) {
         // WRAP_SQUARE的情况下，旋转后的图形会重新有一个rect，用这个新rect来决定split
@@ -311,10 +359,16 @@ function _calculateSplit(
     return __getCrossPoint(boundingBox.points, lineTop, lineHeight, columnWidth);
 }
 
-function __getBoundingBox(angle: number, left: number, width: number, top: number, height: number) {
+export function getBoundingBox(angle: number, left: number, width: number, top: number, height: number) {
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
-    const transform = new Transform().rotate(angle); // 建一个旋转后的变换类
-    // 把drawing四个端点分别进行旋转
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    // 建一个旋转后的变换类
+    const transform = new Transform()
+        .translate(centerX, centerY)
+        .rotate(angle)
+        .translate(-centerX, -centerY);
+    // 把 drawing 四个端点分别进行旋转
     const lt = new Vector2(left, top);
     const lb = new Vector2(left, top + height);
     const rt = new Vector2(left + width, top);
@@ -322,6 +376,30 @@ function __getBoundingBox(angle: number, left: number, width: number, top: numbe
     const boundingBox = transform.makeBoundingBoxFromPoints([lt, lb, rt, rb]); // 返回旋转后的点集合以及矩形选区
 
     return boundingBox;
+}
+
+// Converts the vertical position of the image in the header and footer to the position
+// of the image relative to the body position.
+function translateHeaderFooterDrawingPosition(
+    drawing: IDocumentSkeletonDrawing,
+    segmentPage: IDocumentSkeletonPage,
+    page: IDocumentSkeletonPage,
+    isHeader = true
+) {
+    const { aTop: prevATop } = drawing;
+
+    let aTop = prevATop;
+
+    if (isHeader) {
+        aTop = prevATop + segmentPage.marginTop - page.marginTop;
+    } else {
+        aTop = prevATop + segmentPage.marginTop + page.pageHeight - page.marginBottom - page.marginTop;
+    }
+
+    return {
+        ...drawing,
+        aTop,
+    };
 }
 
 function __getCrossPoint(points: Vector2[], lineTop: number, lineHeight: number, columnWidth: number) {
@@ -379,9 +457,9 @@ function __getSplitWidthNoAngle(
     } = drawingOrigin;
 
     const newAtop = top - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distT : 0);
-    const newHeight = height + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distB : 0);
+    const newHeight = height + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distB + distT : 0);
 
-    if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop) {
+    if (newAtop + newHeight <= lineTop || newAtop >= lineHeight + lineTop) {
         return;
     }
 

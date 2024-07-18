@@ -15,17 +15,17 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
-import { DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { getSheetCommandTarget, RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
+import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { Inject, Optional } from '@wendellhu/redi';
+import { DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
 import { UnitAction } from '@univerjs/protocol';
 import { HeaderMoveRenderController } from '../render-controllers/header-move.render-controller';
 import { HeaderResizeRenderController } from '../render-controllers/header-resize.render-controller';
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
 import { getTransformCoord } from '../utils/component-tools';
+import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
@@ -39,10 +39,10 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
         private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(HeaderMoveRenderController) private _headerMoveRenderController: HeaderMoveRenderController,
-        @ISelectionRenderService private _selectionRenderService: ISelectionRenderService,
+        @ISheetSelectionRenderService private _selectionRenderService: ISheetSelectionRenderService,
         @Inject(HeaderFreezeRenderController) private _headerFreezeRenderController: HeaderFreezeRenderController,
         @Optional(HeaderResizeRenderController) private _headerResizeRenderController?: HeaderResizeRenderController
     ) {
@@ -157,7 +157,60 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                         return Rectangle.intersects(range, selectionRange);
                     });
 
-                    const haveNotPermission = protectionLapRange.some((range) => {
+                    let haveNotPermission = protectionLapRange.some((range) => {
+                        const { startRow, startColumn, endRow, endColumn } = range;
+                        for (let row = startRow; row <= endRow; row++) {
+                            for (let col = startColumn; col <= endColumn; col++) {
+                                const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                                if (permission?.[UnitAction.Edit] === false) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    });
+
+                    if (haveNotPermission) {
+                        return false;
+                    }
+
+                    const resizeType = rangeParams.row !== undefined ? RANGE_TYPE.ROW : RANGE_TYPE.COLUMN;
+                    const selectionRowColRanges: IRange[] = [];
+                    const selectionRanges = this._selectionManagerService.getCurrentSelections();
+                    let isResizeTargetInSelectionRanges = false;
+                    if (resizeType === RANGE_TYPE.ROW) {
+                        selectionRanges?.forEach((selection) => {
+                            if (selection?.range?.rangeType === RANGE_TYPE.ROW || selection?.range?.rangeType === RANGE_TYPE.ALL) {
+                                selectionRowColRanges.push(selection.range);
+                                if (selection.range.startRow <= rangeParams.row! && selection.range.endRow >= rangeParams.row!) {
+                                    isResizeTargetInSelectionRanges = true;
+                                }
+                            }
+                        });
+                    } else {
+                        selectionRanges?.forEach((selection) => {
+                            if (selection?.range?.rangeType === RANGE_TYPE.COLUMN || selection?.range?.rangeType === RANGE_TYPE.ALL) {
+                                selectionRowColRanges.push(selection.range);
+                                if (selection.range.startColumn <= rangeParams.col! && selection.range.endColumn >= rangeParams.col!) {
+                                    isResizeTargetInSelectionRanges = true;
+                                }
+                            }
+                        });
+                    }
+
+                    if (!isResizeTargetInSelectionRanges) {
+                        return true;
+                    }
+
+                    const protectionLapWithSelectionRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
+                        return [...p, ...c.ranges];
+                    }, [] as IRange[]).filter((range) => {
+                        return selectionRowColRanges.some((selectionRange) => {
+                            return Rectangle.intersects(range, selectionRange);
+                        });
+                    });
+
+                    haveNotPermission = protectionLapWithSelectionRanges.some((range) => {
                         const { startRow, startColumn, endRow, endColumn } = range;
                         for (let row = startRow; row <= endRow; row++) {
                             for (let col = startColumn; col <= endColumn; col++) {
@@ -191,7 +244,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                         return false;
                     }
 
-                    const ranges = this._selectionManagerService.getSelections()?.map((selection) => {
+                    const ranges = this._selectionManagerService.getCurrentSelections()?.map((selection) => {
                         return selection.range;
                     });
 
@@ -238,7 +291,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                         return false;
                     }
 
-                    const ranges = this._selectionManagerService.getSelections()?.map((selection) => {
+                    const ranges = this._selectionManagerService.getCurrentSelections()?.map((selection) => {
                         return selection.range;
                     });
 

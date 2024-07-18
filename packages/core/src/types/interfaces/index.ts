@@ -17,6 +17,7 @@
 export * from './i-cell-data';
 export * from './i-column-data';
 export * from './i-document-data';
+export * from './i-document-data-interceptor';
 export * from './i-freeze';
 export * from './i-image-properties';
 export * from './i-placeholder';

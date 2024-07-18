@@ -91,8 +91,8 @@ function _changeDrawingToSkeletonFormat(
     return skeDrawings;
 }
 
-function _getDrawingSkeletonFormat(drawingOrigin: IDocDrawingBase) {
-    const drawingId = drawingOrigin.drawingId;
+function _getDrawingSkeletonFormat(drawingOrigin: IDocDrawingBase): IDocumentSkeletonDrawing {
+    const { drawingId } = drawingOrigin;
 
     return {
         drawingId,
@@ -103,6 +103,11 @@ function _getDrawingSkeletonFormat(drawingOrigin: IDocDrawingBase) {
         angle: 0,
         initialState: false,
         drawingOrigin,
+        columnLeft: 0,
+        lineHeight: 0,
+        lineTop: 0,
+        blockAnchorTop: 0,
+        isPageBreak: false,
     };
 }
 
@@ -126,6 +131,7 @@ export function lineBreaking(
     } = sectionBreakConfig;
 
     const { endIndex, blocks = [] } = paragraphNode;
+    const { segmentId } = curPage;
 
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
 
@@ -136,6 +142,13 @@ export function lineBreaking(
     const paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
 
+    let segmentDrawingAnchorCache = drawingAnchor?.get(segmentId);
+
+    if (segmentDrawingAnchorCache == null) {
+        segmentDrawingAnchorCache = new Map();
+        drawingAnchor?.set(segmentId, segmentDrawingAnchorCache);
+    }
+
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
         paragraphStyle,
@@ -143,10 +156,17 @@ export function lineBreaking(
         paragraphInlineSkeDrawings,
         skeHeaders,
         skeFooters,
-        drawingAnchor,
+        pDrawingAnchor: segmentDrawingAnchorCache,
     };
 
-    ctx.paragraphConfigCache.set(endIndex, paragraphConfig);
+    let segmentParagraphCache = ctx.paragraphConfigCache.get(segmentId);
+
+    if (segmentParagraphCache == null) {
+        segmentParagraphCache = new Map();
+        ctx.paragraphConfigCache.set(segmentId, segmentParagraphCache);
+    }
+
+    segmentParagraphCache.set(endIndex, paragraphConfig);
 
     const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
     const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet
@@ -165,10 +185,11 @@ export function lineBreaking(
 
         const { blockId } = customBlock;
         const drawingOrigin = drawings[blockId];
-        if (drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE) {
-            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
-        } else {
+
+        if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
             paragraphInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+        } else {
+            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
     }
 

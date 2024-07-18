@@ -16,7 +16,8 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 
-export function getDrawingShapeKeyByDrawingSearch(param: IDrawingSearch): string {
-    const { unitId, subUnitId, drawingId } = param;
-    return `${unitId}#-#${subUnitId}#-#${drawingId}`;
+export function getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId }: IDrawingSearch, index?: number): string {
+    return typeof index === 'number'
+        ? `${unitId}#-#${subUnitId}#-#${drawingId}#-#${index}`
+        : `${unitId}#-#${subUnitId}#-#${drawingId}`;
 }

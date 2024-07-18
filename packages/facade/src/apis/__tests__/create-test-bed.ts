@@ -32,12 +32,10 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { RangeProtectionRuleModel, SelectionManagerService, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import {
     DescriptionService,
-    FormulaCustomFunctionService,
     IDescriptionService,
-    IFormulaCustomFunctionService,
     IRegisterFunctionService,
     RegisterFunctionService,
 } from '@univerjs/sheets-formula';
@@ -47,7 +45,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ISelectionRenderService, SelectionRenderService, SheetRenderController, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
+import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
 
@@ -126,7 +124,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SelectionManagerService]);
+            injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
             injector.add([
@@ -137,11 +135,10 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             ]);
 
             injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-            injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
+            injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
             injector.add([SheetsRenderService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IPlatformService, { useClass: PlatformService }]);
@@ -156,8 +153,8 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([WorksheetProtectionRuleModel]);
 
             const renderManagerService = injector.get(IRenderManagerService);
-            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService);
-            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, SheetRenderController);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetRenderController] as Dependency);
 
             ([
                 [ConditionalFormattingService],

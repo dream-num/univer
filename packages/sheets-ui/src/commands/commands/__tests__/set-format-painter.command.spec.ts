@@ -29,14 +29,12 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     AddWorksheetMergeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import type { Injector } from '@wendellhu/redi';
+import type { DependencyIdentifier, Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -49,7 +47,7 @@ import {
     SetOnceFormatPainterCommand,
 } from '../set-format-painter.command';
 import { IMarkSelectionService } from '../../../services/mark-selection/mark-selection.service';
-import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
+import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -195,17 +193,6 @@ class MarkSelectionService extends Disposable implements IMarkSelectionService {
     }
 }
 
-class SelectionRenderService {
-    private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
-    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-}
-
-class RenderManagerService {
-    getRenderById(id: string) {
-        return null;
-    }
-}
-
 describe('Test format painter rules in controller', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -214,15 +201,38 @@ describe('Test format painter rules in controller', () => {
     let formatPainterController: FormatPainterController;
 
     beforeEach(() => {
+        class SheetSelectionRenderService {
+            private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
+            readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
+        }
+
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [IFormatPainterService, { useClass: FormatPainterService }],
-            [ISelectionRenderService, { useClass: SelectionRenderService }],
-            [IRenderManagerService, { useClass: RenderManagerService }],
+            [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
             [FormatPainterController],
         ]);
+
         univer = testBed.univer;
         get = testBed.get;
+
+        class MockRenderManagerService {
+            getRenderById() {
+                return null;
+            }
+
+            getCurrentTypeOfRenderer() {
+                return {
+                    with: <T>(identifier: DependencyIdentifier<T>) => {
+                        return get(identifier);
+                    },
+                };
+            }
+        }
+
+        const injector = univer.__getInjector();
+        // @ts-ignore
+        injector.add([IRenderManagerService, { useClass: MockRenderManagerService }]);
 
         commandService = get(ICommandService);
         themeService = get(ThemeService);
@@ -238,13 +248,6 @@ describe('Test format painter rules in controller', () => {
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(AddWorksheetMergeMutation);
-
-        const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'workbook-01',
-            sheetId: 'sheet-0011',
-        });
     });
 
     describe('format painter', () => {
@@ -255,7 +258,7 @@ describe('Test format painter rules in controller', () => {
                 await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',
                     subUnitId: 'sheet-0011',
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     selections: [
                         {
                             range: {
@@ -310,7 +313,7 @@ describe('Test format painter rules in controller', () => {
                 await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',
                     subUnitId: 'sheet-0011',
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     selections: [
                         {
                             range: {

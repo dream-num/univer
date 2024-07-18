@@ -313,6 +313,7 @@ export class Transform {
                 points[i] = this.applyPoint(points[i]);
             }
         }
+
         const xPoints = [points[0].x, points[1].x, points[2].x, points[3].x];
         const minX = Math.min(...xPoints);
         const maxX = Math.max(...xPoints);

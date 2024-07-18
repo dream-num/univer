@@ -393,6 +393,25 @@ describe('lexer nodeMaker test', () => {
                 ')',
             ]);
         });
+
+        it('Great than or equal', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=A1:B10>=100')).toStrictEqual([
+                {
+                    endIndex: 5,
+                    nodeType: 4,
+                    startIndex: 0,
+                    token: 'A1:B10',
+                },
+                '>',
+                '=',
+                {
+                    endIndex: 10,
+                    nodeType: 1,
+                    startIndex: 8,
+                    token: '100',
+                },
+            ]);
+        });
     });
 
     describe('convertRefersToAbsolute', () => {

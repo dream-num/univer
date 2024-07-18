@@ -30,7 +30,8 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
@@ -50,6 +51,34 @@ const getTestWorkbookDataDemo = (): IWorkbookData => ({
                     },
                     1: {
                         v: 'A2',
+                    },
+                    2: {
+                        s: 's5',
+                    },
+                    3: {
+                        s: 's5',
+                    },
+                    5: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    6: {
+                        v: '001',
+                        t: CellValueType.STRING,
+                        s: 's5',
+                    },
+                    7: {
+                        v: 'text',
+                        t: CellValueType.STRING,
+                    },
+                    8: {
+                        v: '001',
+                        t: CellValueType.FORCE_STRING,
+                    },
+                    9: {
+                        v: '001',
+                        t: CellValueType.FORCE_STRING,
+                        s: 's5',
                     },
                 },
                 1: {},
@@ -94,6 +123,11 @@ const getTestWorkbookDataDemo = (): IWorkbookData => ({
         s2: { bl: 0 },
         s3: { bl: 1 },
         s4: { fs: 12 },
+        s5: {
+            n: {
+                pattern: DEFAULT_TEXT_FORMAT, // text
+            },
+        },
     },
 });
 
@@ -101,7 +135,7 @@ describe('Test set range values commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManager: SelectionManagerService;
+    let selectionManager: SheetsSelectionsService;
     let getValue: (sheetId?: string) => Nullable<ICellData>;
     let getValues: (
         startRow: number,
@@ -110,6 +144,10 @@ describe('Test set range values commands', () => {
         endColumn: number
     ) => Nullable<Array<Array<Nullable<ICellData>>>>;
     let getStyle: () => any;
+    let getStyles: (startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number) => Nullable<Nullable<IStyleData>[][]>;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(getTestWorkbookDataDemo());
@@ -120,13 +158,8 @@ describe('Test set range values commands', () => {
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
 
-        selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-        selectionManager.add([
+        selectionManager = get(SheetsSelectionsService);
+        selectionManager.addSelections([
             {
                 range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
                 primary: null,
@@ -160,6 +193,20 @@ describe('Test set range values commands', () => {
                 return styles.getStyleByCell(value);
             }
         };
+
+        getStyles = (startRow: number,
+            startColumn: number,
+            endRow: number,
+            endColumn: number): Nullable<Nullable<IStyleData>[][]> => {
+            const values = getValues(startRow, startColumn, endRow, endColumn);
+            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
+
+            return values?.map((row, rowIndex) => {
+                return row?.map((cell, columnIndex) => {
+                    return cell && styles?.getStyleByCell(cell);
+                });
+            });
+        };
     });
 
     afterEach(() => {
@@ -189,7 +236,7 @@ describe('Test set range values commands', () => {
                                 {
                                     startIndex: 489,
                                     paragraphStyle: {
-                                        spaceAbove: 10,
+                                        spaceAbove: { v: 10 },
                                         lineSpacing: 1.2,
                                     },
                                 },
@@ -587,7 +634,7 @@ describe('Test set range values commands', () => {
                                 {
                                     startIndex: 489,
                                     paragraphStyle: {
-                                        spaceAbove: 10,
+                                        spaceAbove: { v: 10 },
                                         lineSpacing: 1.2,
                                     },
                                 },
@@ -654,7 +701,7 @@ describe('Test set range values commands', () => {
                                 {
                                     startIndex: 489,
                                     paragraphStyle: {
-                                        spaceAbove: 10,
+                                        spaceAbove: { v: 10 },
                                         lineSpacing: 1.2,
                                     },
                                 },
@@ -702,11 +749,287 @@ describe('Test set range values commands', () => {
                 })).toBeTruthy();
                 expect(getValue()?.p).toBeTruthy();
             });
+
+            it('set value when origin cell has text number format', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 2: { v: '01' }, 3: { v: '0.20' }, 4: { v: '001', t: CellValueType.FORCE_STRING }, 5: { s: { n: { pattern: DEFAULT_TEXT_FORMAT } } } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+                expect(getValues(0, 2, 0, 5)).toStrictEqual([[{ s: 's5', v: '01', t: CellValueType.STRING }, { s: 's5', v: '0.20', t: CellValueType.STRING }, { v: '001', t: CellValueType.FORCE_STRING }, { s: 's5', v: '1', t: CellValueType.STRING }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 2, 0, 5)).toStrictEqual([[{ s: 's5' }, { s: 's5' }, {}, { v: 1, t: CellValueType.NUMBER }]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValues(0, 2, 0, 5)).toStrictEqual([[{ s: 's5', v: '01', t: CellValueType.STRING }, { s: 's5', v: '0.20', t: CellValueType.STRING }, { v: '001', t: CellValueType.FORCE_STRING }, { s: 's5', v: '1', t: CellValueType.STRING }]]);
+            });
+
+            it('set value when origin cell has number in text format, set new number format', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 6: { s: { n: { pattern: '0%' } } } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(0, 6, 0, 6);
+                const styles = getStyles(0, 6, 0, 6);
+
+                expect(styles).toStrictEqual([[{ n: { pattern: '0%' } }]]);
+
+                delete newValue?.[0][0]?.s;
+                expect(newValue).toStrictEqual([[{
+                    v: 1,
+                    t: CellValueType.NUMBER,
+                }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 6, 0, 6)).toStrictEqual([[{ v: '001', t: CellValueType.STRING, s: 's5' }]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(0, 6, 0, 6);
+                const redoStyles = getStyles(0, 6, 0, 6);
+
+                expect(redoStyles).toStrictEqual([[{ n: { pattern: '0%' } }]]);
+
+                delete redoNewValue?.[0][0]?.s;
+                expect(redoNewValue).toStrictEqual([[{
+                    v: 1,
+                    t: CellValueType.NUMBER,
+                }]]);
+            });
+
+            it('set value when origin cell has text in text format, set new number format', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 7: { s: { n: { pattern: '0%' } } } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(0, 7, 0, 7);
+                const styles = getStyles(0, 7, 0, 7);
+
+                expect(styles).toStrictEqual([[{ n: { pattern: '0%' } }]]);
+
+                delete newValue?.[0][0]?.s;
+                expect(newValue).toStrictEqual([[{
+                    v: 'text',
+                    t: CellValueType.STRING,
+                }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 7, 0, 7)).toStrictEqual([[{
+                    v: 'text',
+                    t: CellValueType.STRING,
+                }]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(0, 7, 0, 7);
+                const redoStyles = getStyles(0, 7, 0, 7);
+
+                expect(redoStyles).toStrictEqual([[{ n: { pattern: '0%' } }]]);
+
+                delete redoNewValue?.[0][0]?.s;
+                expect(redoNewValue).toStrictEqual([[{
+                    v: 'text',
+                    t: CellValueType.STRING,
+                }]]);
+            });
+
+            it('set value when origin cell has force string, set new number format', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 8: { s: { n: { pattern: '0%' } } } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(0, 8, 0, 8);
+                const styles = getStyles(0, 8, 0, 8);
+
+                expect(styles).toStrictEqual([[{ n: { pattern: '0%' } }]]);
+
+                delete newValue?.[0][0]?.s;
+                expect(newValue).toStrictEqual([[{
+                    v: '001',
+                    t: CellValueType.FORCE_STRING,
+                }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 8, 0, 8)).toStrictEqual([[{ v: '001', t: CellValueType.FORCE_STRING }]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(0, 8, 0, 8);
+                const redoStyles = getStyles(0, 8, 0, 8);
+
+                expect(redoStyles).toStrictEqual([[{ n: { pattern: '0%' } }]]);
+
+                delete redoNewValue?.[0][0]?.s;
+                expect(redoNewValue).toStrictEqual([[{
+                    v: '001',
+                    t: CellValueType.FORCE_STRING,
+                }]]);
+            });
+
+            it('set value when origin cell has force string, set new number value', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 8: { v: '2' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(0, 8, 0, 8);
+                expect(newValue).toStrictEqual([[{
+                    v: 2,
+                    t: CellValueType.NUMBER,
+                }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 8, 0, 8)).toStrictEqual([[{ v: '001', t: CellValueType.FORCE_STRING }]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(0, 8, 0, 8);
+                expect(redoNewValue).toStrictEqual([[{
+                    v: 2,
+                    t: CellValueType.NUMBER,
+                }]]);
+            });
+
+            it('set value when origin cell has force string, set new boolean value', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 8: { v: 'true' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(0, 8, 0, 8);
+                expect(newValue).toStrictEqual([[{
+                    v: 1,
+                    t: CellValueType.BOOLEAN,
+                }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 8, 0, 8)).toStrictEqual([[{ v: '001', t: CellValueType.FORCE_STRING }]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(0, 8, 0, 8);
+                expect(redoNewValue).toStrictEqual([[{
+                    v: 1,
+                    t: CellValueType.BOOLEAN,
+                }]]);
+            });
+
+            it('set value when origin cell has force string and text number format, set new number value', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 9: { v: '2' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                const newValue = getValues(0, 9, 0, 9);
+                expect(newValue).toStrictEqual([[{ v: '2', t: CellValueType.FORCE_STRING, s: 's5' }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 9, 0, 9)).toStrictEqual([[{ v: '001', t: CellValueType.FORCE_STRING, s: 's5' }]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                const redoNewValue = getValues(0, 9, 0, 9);
+                expect(redoNewValue).toStrictEqual([[{ v: '2', t: CellValueType.FORCE_STRING, s: 's5' }]]);
+            });
+
+            it('set value when origin cell has force string and text number format, set new boolean value', async () => {
+                function getFirstParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 9: { v: 'false' } } },
+                    };
+
+                    return params;
+                }
+
+                function getSecondParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 0: { 9: { v: 'true' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getFirstParams())).toBeTruthy();
+
+                let newValue = getValues(0, 9, 0, 9);
+                expect(newValue).toStrictEqual([[{ v: 'false', t: CellValueType.FORCE_STRING, s: 's5' }]]);
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getSecondParams())).toBeTruthy();
+
+                newValue = getValues(0, 9, 0, 9);
+                expect(newValue).toStrictEqual([[{ v: 'true', t: CellValueType.FORCE_STRING, s: 's5' }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 9, 0, 9)).toStrictEqual([[{ v: 'false', t: CellValueType.FORCE_STRING, s: 's5' }]]);
+
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(0, 9, 0, 9)).toStrictEqual([[{ v: '001', t: CellValueType.FORCE_STRING, s: 's5' }]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValues(0, 9, 0, 9)).toStrictEqual([[{ v: 'false', t: CellValueType.FORCE_STRING, s: 's5' }]]);
+
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValues(0, 9, 0, 9)).toStrictEqual([[{ v: 'true', t: CellValueType.FORCE_STRING, s: 's5' }]]);
+            });
         });
 
         describe('fault situations', () => {
             it('will not apply when there is no selected ranges', async () => {
-                selectionManager.clear();
+                selectionManager.clearCurrentSelections();
                 const params: ISetRangeValuesCommandParams = {
                     value: {
                         v: 'a1',

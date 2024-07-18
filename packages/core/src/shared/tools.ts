@@ -16,7 +16,7 @@
 
 import { customAlphabet, nanoid } from 'nanoid';
 
-import { isLegalUrl } from '../common/url';
+import { isLegalUrl, normalizeUrl } from '../common/url';
 import type { Class, IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
@@ -167,11 +167,13 @@ export class Tools {
         return 'Unknown browser';
     }
 
+    /**
+     * Use this method without `Tools`.
+     *
+     * @deprecated
+     */
     static generateRandomId(n: number = 21, alphabet?: string): string {
-        if (alphabet) {
-            return customAlphabet(alphabet, n)();
-        }
-        return nanoid(n);
+        return generateRandomId(n, alphabet);
     }
 
     static getClassName(instance: object): string {
@@ -447,6 +449,10 @@ export class Tools {
         return isLegalUrl(url);
     }
 
+    static normalizeUrl(url: string) {
+        return normalizeUrl(url);
+    }
+
     static itCount(count: number): Function {
         return (callback: Function) => {
             for (let i = 0; i < count; i++) {
@@ -704,4 +710,12 @@ export class Tools {
     static clamp(value: number, min: number, max: number) {
         return Math.max(min, Math.min(max, value));
     }
+}
+
+export function generateRandomId(n: number = 21, alphabet?: string): string {
+    if (alphabet) {
+        return customAlphabet(alphabet, n)();
+    }
+
+    return nanoid(n);
 }

@@ -15,6 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import type { IDocumentBody } from '@univerjs/core';
 import { BooleanNumber } from '@univerjs/core';
 import { convertBodyToHtml, covertTextRunToHtml, getBodySliceHtml, UDMToHtmlService } from '../convertor';
 
@@ -39,21 +40,21 @@ function getTestBody() {
             {
                 startIndex: 4,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
             {
                 startIndex: 11,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: { v: 10 },
                     lineSpacing: 2,
-                    spaceBelow: 0,
+                    spaceBelow: { v: 0 },
                 },
             },
         ],
-    };
+    } as IDocumentBody;
 }
 
 describe('test case in html and udm convert', () => {
@@ -93,7 +94,7 @@ describe('test case in html and udm convert', () => {
         const documentBody = getTestBody();
         const expectedHtml = '<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>';
 
-        expect(covertTextRunToHtml(documentBody.dataStream, documentBody.textRuns[0])).toBe(expectedHtml);
+        expect(covertTextRunToHtml(documentBody.dataStream, documentBody.textRuns![0])).toBe(expectedHtml);
     });
 
     it('Should get getBodySliceHtml', () => {

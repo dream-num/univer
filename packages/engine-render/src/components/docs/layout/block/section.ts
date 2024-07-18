@@ -96,9 +96,11 @@ export function dealWithSection(
         }
     }
 
-    if (ctx.isDirty && ctx.layoutStartPointer.paragraphIndex != null) {
+    const { segmentId } = curPage;
+
+    if (ctx.isDirty && ctx.layoutStartPointer[segmentId] != null) {
         // Rollback the skeleton to the layout start point.
-        _rollbackPages(ctx.layoutStartPointer.paragraphIndex, allCurrentSkeletonPages);
+        _rollbackPages(ctx.layoutStartPointer[segmentId], allCurrentSkeletonPages);
     }
 
     return {
@@ -130,7 +132,8 @@ function _rollbackPages(paragraphIndex: number, allCurrentSkeletonPages: IDocume
                 }
 
                 if (findFirstDirtyLine) {
-                    const columnSplitIndex = column.lines.length ? columnIndex + 1 : columnIndex;
+                    let columnSplitIndex = column.lines.length ? columnIndex + 1 : columnIndex;
+                    columnSplitIndex = Math.max(columnSplitIndex, 1);
                     const preColumnIndex = columnSplitIndex - 1;
                     if (preColumnIndex >= 0) {
                         section.columns[preColumnIndex].isFull = false;
@@ -141,15 +144,17 @@ function _rollbackPages(paragraphIndex: number, allCurrentSkeletonPages: IDocume
             }
 
             if (findFirstDirtyLine) {
-                const sectionSplitIndex = section.columns.length ? sectionIndex + 1 : sectionIndex;
+                const sectionSplitIndex = sectionIndex + 1;
                 page.sections.splice(sectionSplitIndex);
                 break;
             }
         }
 
         if (findFirstDirtyLine) {
-            const pageSplitIndex = page.sections.length ? pageIndex + 1 : pageIndex;
-            allCurrentSkeletonPages.splice(pageSplitIndex);
+            // Even if all the rows are removed, leave an empty page with an empty section and column.
+            // This is because this keeps the image cache(skeDrawings) on the page.
+            const pageSplitIndex = pageIndex + 1;
+            allCurrentSkeletonPages.splice(Math.max(pageSplitIndex, 1));
             break;
         }
     }

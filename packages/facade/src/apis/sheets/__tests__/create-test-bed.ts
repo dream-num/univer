@@ -27,12 +27,10 @@ import {
 } from '@univerjs/core';
 import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
     DescriptionService,
-    FormulaCustomFunctionService,
     IDescriptionService,
-    IFormulaCustomFunctionService,
     IRegisterFunctionService,
     RegisterFunctionService,
 } from '@univerjs/sheets-formula';
@@ -86,7 +84,7 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SelectionManagerService]);
+            injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
             injector.add([
@@ -96,7 +94,6 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
                 },
             ]);
             injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
 
             dependencies?.forEach((d) => injector.add(d));

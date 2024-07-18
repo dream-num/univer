@@ -22,6 +22,7 @@ import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
+import { debounceTime } from 'rxjs';
 
 export class SheetsHyperLinkRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -55,7 +56,7 @@ export class SheetsHyperLinkRenderController extends Disposable implements IRend
             }
         };
 
-        this.disposeWithMe(this._hyperLinkModel.linkUpdate$.subscribe(() => {
+        this.disposeWithMe(this._hyperLinkModel.linkUpdate$.pipe(debounceTime(16)).subscribe(() => {
             markSkeletonDirty();
         }));
     }

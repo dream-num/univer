@@ -28,39 +28,30 @@ export class FloorMath extends BaseFunction {
     override maxParams = 3;
 
     override calculate(number: BaseValueObject, significance?: BaseValueObject, mode?: BaseValueObject) {
-        if (number.isError()) {
-            return number;
-        }
-
-        if (significance?.isError()) {
-            return significance;
-        }
-
-        if (mode?.isError()) {
-            return mode;
-        }
+        significance = significance ?? NumberValueObject.create(1);
+        mode = mode ?? NumberValueObject.create(0);
 
         // get max row length
         const maxRowLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getRowCount() : 1,
-            significance?.isArray() ? (significance as ArrayValueObject).getRowCount() : 1,
-            mode?.isArray() ? (mode as ArrayValueObject).getRowCount() : 1
+            significance.isArray() ? (significance as ArrayValueObject).getRowCount() : 1,
+            mode.isArray() ? (mode as ArrayValueObject).getRowCount() : 1
         );
 
         // get max column length
         const maxColumnLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getColumnCount() : 1,
-            significance?.isArray() ? (significance as ArrayValueObject).getColumnCount() : 1,
-            mode?.isArray() ? (mode as ArrayValueObject).getColumnCount() : 1
+            significance.isArray() ? (significance as ArrayValueObject).getColumnCount() : 1,
+            mode.isArray() ? (mode as ArrayValueObject).getColumnCount() : 1
         );
 
         const numberArray = expandArrayValueObject(maxRowLength, maxColumnLength, number, ErrorValueObject.create(ErrorType.NA));
-        const significanceArray = significance ? expandArrayValueObject(maxRowLength, maxColumnLength, significance, ErrorValueObject.create(ErrorType.NA)) : [];
-        const modeArray = mode ? expandArrayValueObject(maxRowLength, maxColumnLength, mode, ErrorValueObject.create(ErrorType.NA)) : [];
+        const significanceArray = expandArrayValueObject(maxRowLength, maxColumnLength, significance, ErrorValueObject.create(ErrorType.NA));
+        const modeArray = expandArrayValueObject(maxRowLength, maxColumnLength, mode, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = numberArray.map((numberObject, rowIndex, columnIndex) => {
-            let significanceObject = significance ? (significanceArray as ArrayValueObject).get(rowIndex, columnIndex) as BaseValueObject : NumberValueObject.create(1);
-            let modeObject = mode ? (modeArray as ArrayValueObject).get(rowIndex, columnIndex) as BaseValueObject : NumberValueObject.create(0);
+            let significanceObject = significanceArray.get(rowIndex, columnIndex) as BaseValueObject;
+            let modeObject = modeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
             if (numberObject.isString()) {
                 numberObject = numberObject.convertToNumberObjectValue();

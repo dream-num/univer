@@ -171,8 +171,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             }
         };
 
-        this.disposeWithMe(this._dataValidationModel.ruleChange$.pipe(debounceTime(5)).subscribe(() => markSkeletonDirty()));
-        this.disposeWithMe(this._dataValidationModel.validStatusChange$.pipe(debounceTime(5)).subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._dataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
     }
 
     // eslint-disable-next-line max-lines-per-function

@@ -285,7 +285,13 @@ export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, par
     const { linePitch = 15.6, gridType = GridType.LINES, paragraphLineGapDefault = 0 } = sectionBreakConfig;
     const { lineSpacing = 0, spacingRule = SpacingRule.AUTO, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
-    return { paragraphLineGapDefault, linePitch, gridType, lineSpacing, spacingRule, snapToGrid };
+    // The default line spacing in Word is 1. Here, if the lines layout is used, the default line spacing is set to 1.
+    let lineSpacingApply = lineSpacing;
+    if ((gridType === GridType.LINES || gridType === GridType.LINES_AND_CHARS) && lineSpacing === 0 && spacingRule === SpacingRule.AUTO) {
+        lineSpacingApply = 1;
+    }
+
+    return { paragraphLineGapDefault, linePitch, gridType, lineSpacing: lineSpacingApply, spacingRule, snapToGrid };
 }
 
 export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {

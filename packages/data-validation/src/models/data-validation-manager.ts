@@ -16,29 +16,24 @@
 
 import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
 import { DataValidationStatus, Disposable } from '@univerjs/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 import { UpdateRuleType } from '../types/enum/update-rule-type';
 import { getRuleOptions, getRuleSetting } from '../common/util';
 
 export class DataValidationManager<T extends IDataValidationRule> extends Disposable {
-    private _dataValidations: T[];
+    private _dataValidations: T[] = [];
     private _dataValidationMap = new Map<string, T>();
-    private _dataValidations$ = new Subject<T[]>();
+    private _dataValidations$ = new BehaviorSubject<T[]>(this._dataValidations);
 
     readonly unitId: string;
     readonly subUnitId: string;
     readonly dataValidations$ = this._dataValidations$.asObservable();
 
-    constructor(unitId: string, subUnitId: string, dataValidations: T[] | undefined) {
+    constructor(unitId: string, subUnitId: string) {
         super();
         this.unitId = unitId;
         this.subUnitId = subUnitId;
-        if (!dataValidations) {
-            return;
-        }
-
-        this._insertRules(dataValidations);
         this._notice();
 
         this.disposeWithMe({
@@ -50,13 +45,6 @@ export class DataValidationManager<T extends IDataValidationRule> extends Dispos
 
     private _notice() {
         this._dataValidations$.next(this._dataValidations);
-    }
-
-    private _insertRules(dataValidations: T[]) {
-        this._dataValidations = dataValidations;
-        dataValidations.forEach((validation) => {
-            this._dataValidationMap.set(validation.uid, validation);
-        });
     }
 
     getRuleById(id: string) {

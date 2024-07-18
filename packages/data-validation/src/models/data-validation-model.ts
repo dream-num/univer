@@ -75,6 +75,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
 
         const manager = this._managerCreator(unitId, subUnitId);
         unitMap.set(subUnitId, manager);
+        this.disposeWithMe(manager);
         return manager;
     }
 

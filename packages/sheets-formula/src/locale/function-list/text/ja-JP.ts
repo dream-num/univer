@@ -390,8 +390,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '繰り返す文字列を指定します。' },
+            numberTimes: { name: '繰り返し回数', detail: '文字列を繰り返す回数を、正の数値で指定します。' },
         },
     },
     RIGHT: {
@@ -502,8 +502,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '検索対象のテキスト。ワイルドカード文字は使用できません。' },
+            delimiter: { name: 'デリミタ', detail: '抽出した後のポイントをマークするテキスト。' },
+            instanceNum: { name: 'インスタンス番号', detail: 'テキストを抽出する区切り記号のインスタンス。' },
+            matchMode: { name: 'マッチモード', detail: 'テキスト検索で大文字と小文字を区別するかどうかを指定します。既定では大文字と小文字が区別されます。' },
+            matchEnd: { name: 'マッチ終了', detail: 'テキストの末尾を区切り記号として扱います。既定では、テキストは完全一致です。' },
+            ifNotFound: { name: '比類のない価値', detail: '一致するものが見つからない場合に返される値。既定では、#N/A が返されます。' },
         },
     },
     TEXTBEFORE: {
@@ -516,8 +520,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '検索対象のテキスト。ワイルドカード文字は使用できません。' },
+            delimiter: { name: 'デリミタ', detail: '抽出した後のポイントをマークするテキスト。' },
+            instanceNum: { name: 'インスタンス番号', detail: 'テキストを抽出する区切り記号のインスタンス。' },
+            matchMode: { name: 'マッチモード', detail: 'テキスト検索で大文字と小文字を区別するかどうかを指定します。既定では大文字と小文字が区別されます。' },
+            matchEnd: { name: 'マッチ終了', detail: 'テキストの末尾を区切り記号として扱います。既定では、テキストは完全一致です。' },
+            ifNotFound: { name: '比類のない価値', detail: '一致するものが見つからない場合に返される値。既定では、#N/A が返されます。' },
         },
     },
     TEXTJOIN: {

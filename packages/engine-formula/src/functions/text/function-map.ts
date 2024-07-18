@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-import { Concatenate } from './concatenate';
 import { FUNCTION_NAMES_TEXT } from './function-names';
+import { Concat } from './concat';
+import { Concatenate } from './concatenate';
 import { Len } from './len';
 import { Lenb } from './lenb';
-import { Text } from './text';
 import { Lower } from './lower';
-import { Concat } from './concat';
+import { Rept } from './rept';
+import { Text } from './text';
+import { Textafter } from './textafter';
+import { Textbefore } from './textbefore';
 
 export const functionText = [
     [Concat, FUNCTION_NAMES_TEXT.CONCAT],
     [Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE],
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],
-    [Text, FUNCTION_NAMES_TEXT.TEXT],
     [Lower, FUNCTION_NAMES_TEXT.LOWER],
+    [Rept, FUNCTION_NAMES_TEXT.REPT],
+    [Text, FUNCTION_NAMES_TEXT.TEXT],
+    [Textafter, FUNCTION_NAMES_TEXT.TEXTAFTER],
+    [Textbefore, FUNCTION_NAMES_TEXT.TEXTBEFORE],
 ];

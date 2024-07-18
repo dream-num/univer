@@ -389,8 +389,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text you want to repeat.' },
+            numberTimes: { name: 'numberTimes', detail: 'A positive number specifying the number of times to repeat text.' },
         },
     },
     RIGHT: {
@@ -501,8 +501,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text you are searching within. Wildcard characters not allowed.' },
+            delimiter: { name: 'delimiter', detail: 'The text that marks the point after which you want to extract.' },
+            instanceNum: { name: 'instance_num', detail: 'The instance of the delimiter after which you want to extract the text.' },
+            matchMode: { name: 'match_mode', detail: 'Determines whether the text search is case-sensitive. The default is case-sensitive.' },
+            matchEnd: { name: 'match_end', detail: 'Treats the end of text as a delimiter. By default, the text is an exact match.' },
+            ifNotFound: { name: 'if_not_found', detail: 'Value returned if no match is found. By default, #N/A is returned.' },
         },
     },
     TEXTBEFORE: {
@@ -515,8 +519,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text you are searching within. Wildcard characters not allowed.' },
+            delimiter: { name: 'delimiter', detail: 'The text that marks the point after which you want to extract.' },
+            instanceNum: { name: 'instance_num', detail: 'The instance of the delimiter after which you want to extract the text.' },
+            matchMode: { name: 'match_mode', detail: 'Determines whether the text search is case-sensitive. The default is case-sensitive.' },
+            matchEnd: { name: 'match_end', detail: 'Treats the end of text as a delimiter. By default, the text is an exact match.' },
+            ifNotFound: { name: 'if_not_found', detail: 'Value returned if no match is found. By default, #N/A is returned.' },
         },
     },
     TEXTJOIN: {

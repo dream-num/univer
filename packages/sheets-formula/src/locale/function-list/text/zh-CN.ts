@@ -389,8 +389,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '需要重复显示的文本。' },
+            numberTimes: { name: '重复次数', detail: '用于指定文本重复次数的正数。' },
         },
     },
     RIGHT: {
@@ -501,8 +501,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '你要在其中搜索的文本。不允许使用通配符。' },
+            delimiter: { name: '分隔符', detail: '标记要在其中提取的点的文本。' },
+            instanceNum: { name: '实例编号', detail: '要在其中提取文本的分隔符的实例。' },
+            matchMode: { name: '匹配模式', detail: '确定文本搜索是否区分大小写。 默认为区分大小写。' },
+            matchEnd: { name: '末尾匹配', detail: '将文本结尾视为分隔符。默认情况下，文本完全匹配。' },
+            ifNotFound: { name: '未匹配到的值', detail: '未找到匹配项时返回的值。默认情况下，返回 #N/A。' },
         },
     },
     TEXTBEFORE: {
@@ -515,8 +519,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '你要在其中搜索的文本。不允许使用通配符。' },
+            delimiter: { name: '分隔符', detail: '标记要在其中提取的点的文本。' },
+            instanceNum: { name: '实例编号', detail: '要在其中提取文本的分隔符的实例。' },
+            matchMode: { name: '匹配模式', detail: '确定文本搜索是否区分大小写。 默认为区分大小写。' },
+            matchEnd: { name: '末尾匹配', detail: '将文本结尾视为分隔符。默认情况下，文本完全匹配。' },
+            ifNotFound: { name: '未匹配到的值', detail: '未找到匹配项时返回的值。默认情况下，返回 #N/A。' },
         },
     },
     TEXTJOIN: {

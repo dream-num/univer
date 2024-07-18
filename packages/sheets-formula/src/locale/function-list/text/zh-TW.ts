@@ -388,8 +388,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是要重複的文字。' },
+            numberTimes: { name: '重複次數', detail: '這是指定文字重複次數的正數。' },
         },
     },
     RIGHT: {
@@ -500,8 +500,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '您在此搜尋的文字。不允許萬用字元。' },
+            delimiter: { name: '分隔符號', detail: '標記要擷取之點之後的文字。' },
+            instanceNum: { name: '實例編號', detail: '要解壓縮文字的分隔符號實例。' },
+            matchMode: { name: '匹配模式', detail: '判斷文字搜尋是否區分大小寫。預設值會區分大小寫。' },
+            matchEnd: { name: '結尾匹配', detail: '將文字結尾視為分隔符號。根據預設，文字是完全相符項目。' },
+            ifNotFound: { name: '未匹配到的值', detail: '找不到相符項目時傳回的值。根據預設，會傳回 #N/A。' },
         },
     },
     TEXTBEFORE: {
@@ -514,8 +518,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '您在此搜尋的文字。不允許萬用字元。' },
+            delimiter: { name: '分隔符號', detail: '標記要擷取之點之後的文字。' },
+            instanceNum: { name: '實例編號', detail: '要解壓縮文字的分隔符號實例。' },
+            matchMode: { name: '匹配模式', detail: '判斷文字搜尋是否區分大小寫。預設值會區分大小寫。' },
+            matchEnd: { name: '結尾匹配', detail: '將文字結尾視為分隔符號。根據預設，文字是完全相符項目。' },
+            ifNotFound: { name: '未匹配到的值', detail: '找不到相符項目時傳回的值。根據預設，會傳回 #N/A。' },
         },
     },
     TEXTJOIN: {

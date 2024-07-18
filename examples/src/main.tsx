@@ -56,6 +56,9 @@ function Examples() {
         title: '🌌 Universe',
         href: './uni/',
     }, {
+        title: '🏠 Universe Home',
+        href: './uni-home/',
+    }, {
         title: '📱 Mobile',
         href: './mobile-s/',
     }];

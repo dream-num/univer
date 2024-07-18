@@ -14,5 +14,8 @@
  * limitations under the License.
  */
 
-export { UniverUniUIPlugin } from './plugin';
-export { UniHomeApp } from './views/uni-home/App';
+import { UniHomeApp } from '@univerjs/uniui';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+
+createRoot(document.getElementById('app')!).render(<UniHomeApp />);

@@ -14,5 +14,20 @@
  * limitations under the License.
  */
 
-export { UniverUniUIPlugin } from './plugin';
-export { UniHomeApp } from './views/uni-home/App';
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import { Sidebar } from '../sidebar/Sidebar';
+import { Topbar } from '../topbar/Topbar';
+import styles from './index.module.less';
+
+export const MainLayout: React.FC = () => {
+    return (
+        <div className={styles.mainLayout}>
+            <Sidebar />
+            <div className={styles.content}>
+                <Topbar />
+                <Outlet />
+            </div>
+        </div>
+    );
+};

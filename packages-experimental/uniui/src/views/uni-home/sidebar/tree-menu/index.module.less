@@ -1,0 +1,45 @@
+.tree-menu {
+    list-style-type: none;
+    padding-left: 20px;
+
+    li {
+        margin: 5px 0;
+
+        ul {
+            padding-left: 20px;
+        }
+    }
+}
+
+.folder {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    svg {
+        margin-right: 5px;
+    }
+}
+
+.file {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+
+    svg {
+        margin-right: 5px;
+    }
+}
+
+.arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    margin-right: 5px;
+}
+
+.arrowPlaceholder {
+    display: inline-block;
+    width: 16px; /* Adjust based on the width of the arrow icon */
+    margin-right: 5px;
+}

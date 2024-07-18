@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
-export { UniverUniUIPlugin } from './plugin';
-export { UniHomeApp } from './views/uni-home/App';
+import React from 'react';
+
+export const Template: React.FC = () => {
+    return (
+        <div className="template">
+            <h1>Template Page</h1>
+        </div>
+    );
+};

@@ -14,5 +14,15 @@
  * limitations under the License.
  */
 
-export { UniverUniUIPlugin } from './plugin';
-export { UniHomeApp } from './views/uni-home/App';
+import React from 'react';
+import { RecentFiles } from '../recent-files/RecentFiles';
+import { AllFiles } from '../all-files/AllFiles';
+
+export const Home: React.FC = () => {
+    return (
+        <div>
+            <RecentFiles />
+            <AllFiles />
+        </div>
+    );
+};

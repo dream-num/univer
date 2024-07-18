@@ -167,5 +167,6 @@
         "toml",
         "less",
         "css"
-    ]
+    ],
+    "commentTranslate.multiLineMerge": true
 }

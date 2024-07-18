@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
-export { UniverUniUIPlugin } from './plugin';
-export { UniHomeApp } from './views/uni-home/App';
+import React from 'react';
+
+export const Trash: React.FC = () => {
+    return (
+        <div className="trash">
+            <h1>Trash Page</h1>
+        </div>
+    );
+};

@@ -1,0 +1,64 @@
+.uni-sidebar {
+    width: 250px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.uni-sidebar-header {
+    text-align: center;
+}
+
+.uni-logo {
+    width: 100%;
+}
+
+.uni-sidebar-nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.uni-sidebar-nav ul li {
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.uni-sidebar-nav ul li a {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    border-radius: 8px; /* 圆角 */
+    transition:
+        background-color 0.3s,
+        color 0.3s; /* 添加过渡效果 */
+}
+
+.uni-sidebar-nav ul li a:hover {
+    background-color: rgba(30, 34, 43, 0.06); /* 悬停状态背景色 */
+}
+
+.uni-sidebar-nav ul li a.uni-active {
+    color: #274fee; /* 激活状态文本颜色 */
+    background-color: rgba(39, 79, 238, 0.08); /* 激活状态背景色 */
+    border-radius: 8px; /* 激活状态圆角 */
+}
+
+.uni-icon {
+    margin-right: 10px;
+}
+
+.uni-sidebar-footer {
+    margin-top: auto;
+}
+
+.uni-sidebar-footer a {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+    text-decoration: none;
+}

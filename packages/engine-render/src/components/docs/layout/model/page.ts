@@ -244,6 +244,7 @@ function _createSkeletonHeaderFooter(
     if (ctx.isDirty && count < 10) {
         count++;
         resetContext(ctx);
+        headerOrFooterViewModel.resetCache();
 
         return _createSkeletonHeaderFooter(
             ctx,

@@ -52,8 +52,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     type: CommandType.COMMAND,
 
     handler: async (accessor, params: IInnerPasteCommandParams) => {
-        const { segmentId, textRanges } = params;
-        const body = params.body;
+        const { segmentId, textRanges, body } = params;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

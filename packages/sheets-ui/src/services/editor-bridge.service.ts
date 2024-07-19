@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
+    createIdentifier,
     createInterceptorKey,
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     IContextService,
+    Inject,
     InterceptorManager,
     IUniverInstanceService,
     makeCellToSelection,
@@ -36,8 +38,6 @@ import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IRefSelectionsService } from '@univerjs/sheets';
 import { IEditorService } from '@univerjs/ui';
 import type { KeyCode } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 

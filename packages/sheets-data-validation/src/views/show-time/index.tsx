@@ -16,7 +16,7 @@
 
 import { type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import React from 'react';
 
 export interface IDateShowTimeOptionProps {

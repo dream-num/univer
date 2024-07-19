@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IDrawingSubunitMap } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { Inject } from '@wendellhu/redi';
 import { filter, first } from 'rxjs/operators';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';

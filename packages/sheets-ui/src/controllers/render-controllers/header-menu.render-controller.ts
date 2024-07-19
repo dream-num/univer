@@ -18,6 +18,7 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
+    Inject,
     RANGE_TYPE,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
@@ -25,7 +26,6 @@ import { CURSOR_TYPE, Rect } from '@univerjs/engine-render';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 
 import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';

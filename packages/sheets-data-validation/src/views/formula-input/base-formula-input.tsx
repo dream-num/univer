@@ -17,8 +17,7 @@
 import type { IFormulaInputProps } from '@univerjs/data-validation';
 import { FormLayout, Input } from '@univerjs/design';
 import React from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import styles from './index.module.less';
 
 export const BaseFormulaInput = (props: IFormulaInputProps) => {

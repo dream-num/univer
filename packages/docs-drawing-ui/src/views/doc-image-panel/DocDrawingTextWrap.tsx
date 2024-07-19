@@ -15,8 +15,7 @@
  */
 
 import type { ICommandInfo, Nullable } from '@univerjs/core';
-import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, useDependency, WrapTextType } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { IRenderManagerService } from '@univerjs/engine-render';

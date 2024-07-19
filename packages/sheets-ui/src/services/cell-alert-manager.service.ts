@@ -15,8 +15,8 @@
  */
 
 import { Subject } from 'rxjs';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
+import { Inject } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CELL_ALERT_KEY } from '../views/cell-alert';

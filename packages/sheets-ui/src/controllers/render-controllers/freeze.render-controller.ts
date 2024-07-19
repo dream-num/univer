@@ -21,6 +21,8 @@ import {
     Direction,
     Disposable,
     ICommandService,
+    Inject,
+    Injector,
     InterceptorManager,
     RANGE_TYPE,
     ThemeService,
@@ -64,7 +66,6 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { Subscription } from 'rxjs';
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';

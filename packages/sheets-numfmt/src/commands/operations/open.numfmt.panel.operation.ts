@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { INumfmtController } from '../../controllers/type';
 

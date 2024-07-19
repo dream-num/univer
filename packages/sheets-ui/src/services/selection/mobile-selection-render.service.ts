@@ -18,6 +18,7 @@
 /* eslint-disable max-lines-per-function */
 import type {
     EventState,
+    IDisposable,
     IRange,
     IRangeWithCoord,
     ISelectionCellWithMergeInfo,
@@ -27,7 +28,11 @@ import type {
 import {
     ICommandService,
     IContextService,
-    ILogService, RANGE_TYPE, ThemeService,
+    ILogService,
+    Inject,
+    Injector,
+    RANGE_TYPE,
+    ThemeService,
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, Viewport } from '@univerjs/engine-render';
@@ -35,8 +40,6 @@ import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY
 import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';

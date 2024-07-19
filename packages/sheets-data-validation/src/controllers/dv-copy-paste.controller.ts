@@ -15,10 +15,9 @@
  */
 
 import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle } from '@univerjs/core';
+import { Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle } from '@univerjs/core';
 import type { IDiscreteRange } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';

@@ -16,13 +16,14 @@
 
 import {
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     Plugin,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@univerjs/core';
 import { IEditorService, IShortcutService } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';

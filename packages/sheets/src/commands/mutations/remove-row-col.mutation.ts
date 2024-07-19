@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IColumnData, IMutation, IObjectArrayPrimitiveType, IRowData, Worksheet } from '@univerjs/core';
+import type { IAccessor, IColumnData, IMutation, IObjectArrayPrimitiveType, IRowData, Worksheet } from '@univerjs/core';
 import { CommandType, concatMatrixArray, IUniverInstanceService, sliceMatrixArray, spliceArray } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type {
     IInsertColMutationParams,

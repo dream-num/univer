@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { type Nullable, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { Inject, toDisposable } from '@univerjs/core';
 
 import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
 import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';

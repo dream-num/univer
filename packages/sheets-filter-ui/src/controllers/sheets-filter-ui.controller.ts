@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { ICommandService, IContextService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { ComponentManager, IMenuService, IMessageService, IShortcutService } from '@univerjs/ui';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { distinctUntilChanged } from 'rxjs';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';

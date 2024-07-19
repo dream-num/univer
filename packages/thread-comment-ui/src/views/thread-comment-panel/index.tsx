@@ -15,11 +15,10 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';

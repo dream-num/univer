@@ -16,7 +16,7 @@
 
 import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, ICreateRequest_WorksheetObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction } from '@univerjs/protocol';
 import { CreateRequest_WorkSheetObjectScope, UnitObject, UnitRole, UniverType } from '@univerjs/protocol';
-import { Inject } from '@wendellhu/redi';
+import { Inject } from '../../common/di';
 import { Tools } from '../../shared/tools';
 import { IResourceManagerService } from '../resource-manager/type';
 import { UserManagerService } from '../user-manager/user-manager.service';

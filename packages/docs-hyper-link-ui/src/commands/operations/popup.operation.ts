@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
-import type { IAccessor } from '@wendellhu/redi';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 

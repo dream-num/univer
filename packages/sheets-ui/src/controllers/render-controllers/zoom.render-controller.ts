@@ -15,9 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';

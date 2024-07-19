@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -43,7 +43,6 @@ import {
     SheetsRenderService,
 } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { FormulaAutoFillController } from '../formula-auto-fill.controller';

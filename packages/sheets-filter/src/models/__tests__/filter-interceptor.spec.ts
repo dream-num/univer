@@ -15,10 +15,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IWorkbookData, LocaleType } from '@univerjs/core';
-import { Direction, ICommandService, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, IWorkbookData, LocaleType } from '@univerjs/core';
+import { Direction, ICommandService, Inject, Injector, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
 
 import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';

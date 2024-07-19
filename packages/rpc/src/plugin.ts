@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Plugin } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 
 import { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 import { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';

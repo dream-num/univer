@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { ColorKit, LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ColorKit, LocaleService, useDependency } from '@univerjs/core';
 import React from 'react';
 import type { Observable } from 'rxjs';
 import { isObservable } from 'rxjs';

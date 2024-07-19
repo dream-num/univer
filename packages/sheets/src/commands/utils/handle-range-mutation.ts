@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { IAccessor, ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import { Dimension, getArrayLength, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type {
     IDeleteRangeMutationParams,

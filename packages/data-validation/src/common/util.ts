@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, DataValidationType, type IDataValidationRuleBase, type IDataValidationRuleOptions, Tools } from '@univerjs/core';
+import type { IAccessor, IDataValidationRuleBase, IDataValidationRuleOptions } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, Tools } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 
 export function getRuleSetting(rule: IDataValidationRuleBase): IDataValidationRuleBase {
     return {

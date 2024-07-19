@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import {
     SetColHiddenCommand,
@@ -27,7 +27,6 @@ import {
     SetSelectedRowsVisibleCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import type {

@@ -15,8 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Tools } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Tools } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
 import {

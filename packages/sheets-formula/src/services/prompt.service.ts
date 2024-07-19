@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Direction } from '@univerjs/core';
+import type { Direction, IDisposable } from '@univerjs/core';
 import { type IFunctionInfo, type ISequenceNode, sequenceNodeType } from '@univerjs/engine-formula';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 

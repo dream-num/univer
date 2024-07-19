@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@wendellhu/redi';
-import type { Nullable } from '@univerjs/core';
+import type { Injector, Nullable } from '@univerjs/core';
 import type { IFunctionService } from '../../services/function.service';
 import { PrefixNode } from '../ast-node/prefix-node';
 import { prefixToken } from '../../basics/token';

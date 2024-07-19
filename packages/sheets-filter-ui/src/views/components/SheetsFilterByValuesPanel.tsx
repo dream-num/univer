@@ -15,8 +15,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import List from 'rc-virtual-list';
 import { Button, Checkbox, Input, Tooltip } from '@univerjs/design';

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Inject, Injector } from '@wendellhu/redi';
-import { Range } from '@univerjs/core';
+import { Inject, Injector, Range } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { createCfId } from '../utils/create-cf-id';
 import { ConditionalFormattingService } from '../services/conditional-formatting.service';

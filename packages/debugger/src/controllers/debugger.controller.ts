@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';

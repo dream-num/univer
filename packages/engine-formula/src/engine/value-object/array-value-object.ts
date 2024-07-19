@@ -1047,6 +1047,15 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
+    override cosh(): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return currentValue.cosh();
+        });
+    }
+
     override acos(): BaseValueObject {
         return this.map((currentValue) => {
             if (currentValue.isError()) {

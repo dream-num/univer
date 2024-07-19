@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { IAccessor } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
 import { suffixToken } from '../../basics/token';

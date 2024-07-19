@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -26,7 +26,6 @@ import {
     SetWorksheetRowHeightMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../clipboard.service';

@@ -15,7 +15,7 @@
  */
 
 import { CloseSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';

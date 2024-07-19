@@ -15,9 +15,8 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
-import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { TextEditor } from '@univerjs/ui';
 import { CFRuleType, CFValueType, createDefaultValueByValueType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';

@@ -15,7 +15,7 @@
  */
 
 import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@univerjs/core';
 import { map } from 'rxjs/operators';
 
 import type { IMenuButtonItem } from '../../services/menu/menu';

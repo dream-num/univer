@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@univerjs/core';
 
 /**
  * A service to provide context info of the host service.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import React, { useEffect, useRef, useState } from 'react';

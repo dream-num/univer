@@ -16,6 +16,8 @@
 
 import {
     ICommandService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -23,8 +25,7 @@ import {
     RxDisposable,
 } from '@univerjs/core';
 import { SearchSingle16 } from '@univerjs/icons';
-import type {
-    MenuConfig } from '@univerjs/ui';
+import type { MenuConfig } from '@univerjs/ui';
 import {
     ComponentManager,
     IDialogService,
@@ -32,7 +33,6 @@ import {
     IMenuService,
     IShortcutService,
 } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 import {

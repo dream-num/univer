@@ -15,8 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 

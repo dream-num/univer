@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, IPermissionService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, Injector, IPermissionService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
 import { RangeProtectionRuleModel } from '@univerjs/sheets';
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';

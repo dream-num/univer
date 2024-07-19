@@ -15,8 +15,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
 import { CFNumberOperator, CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
 import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighlightCell, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';

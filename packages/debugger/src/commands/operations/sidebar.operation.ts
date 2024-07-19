@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IEditorService, ISidebarService } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
 import { TEST_EDITOR_CONTAINER_COMPONENT } from '../../views/test-editor/component-name';
 
 export interface IUIComponentCommandParams {

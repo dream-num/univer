@@ -15,12 +15,14 @@
  */
 
 import type { ICellData, Nullable, ObjectMatrix } from '@univerjs/core';
-import { BooleanNumber, CellValueType, Disposable, ICommandService, RefAlias, toDisposable, Tools } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { BooleanNumber, CellValueType, Disposable, ICommandService, Inject, Injector, RefAlias, toDisposable, Tools } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
-import { IActiveDirtyManagerService, RemoveOtherFormulaMutation,
+import {
+    IActiveDirtyManagerService,
+    RemoveOtherFormulaMutation,
     SetFormulaCalculationResultMutation,
-    SetOtherFormulaMutation } from '@univerjs/engine-formula';
+    SetOtherFormulaMutation,
+} from '@univerjs/engine-formula';
 
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';

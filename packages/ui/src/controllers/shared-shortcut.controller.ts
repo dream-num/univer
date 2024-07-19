@@ -15,8 +15,7 @@
  */
 
 import type { IContextService } from '@univerjs/core';
-import { Disposable, FOCUSING_UNIVER_EDITOR, ICommandService, LifecycleStages, OnLifecycle, RedoCommand, UndoCommand } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Disposable, FOCUSING_UNIVER_EDITOR, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, RedoCommand, UndoCommand } from '@univerjs/core';
 
 import { CopyCommand, CutCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { IMenuService } from '../services/menu/menu.service';

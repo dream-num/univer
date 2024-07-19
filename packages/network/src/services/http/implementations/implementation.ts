@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 
 import type { HTTPRequest } from '../request';

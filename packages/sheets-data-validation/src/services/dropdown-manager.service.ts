@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, IUniverInstanceService, type Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject, IUniverInstanceService } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IZenZoneService } from '@univerjs/ui';

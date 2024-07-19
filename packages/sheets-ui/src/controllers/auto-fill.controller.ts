@@ -21,6 +21,8 @@ import {
     DisposableCollection,
     getCellInfoInMergeData,
     ICommandService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
@@ -59,7 +61,6 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';

@@ -15,10 +15,9 @@
  */
 
 import type { IColorStyle, IPageElement, ISlidePage } from '@univerjs/core';
-import { getColorStyle, PageElementType, SlideDataModel } from '@univerjs/core';
+import { getColorStyle, Inject, Injector, PageElementType, SlideDataModel } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
 import { Rect, Scene, Slide, Viewport } from '@univerjs/engine-render';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 import { ObjectProvider } from '../object-provider';

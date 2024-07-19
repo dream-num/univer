@@ -15,12 +15,11 @@
  */
 
 import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, sequenceExecuteAsync, Tools } from '@univerjs/core';
-import type { CellValue, ICellData, ICommand, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { AddDataValidationMutation, createDefaultNewRule, DataValidationModel, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 import type { SheetDataValidationManager } from '../../models/sheet-data-validation-manager';
 import { OpenValidationPanelOperation } from '../operations/data-validation.operation';
 import type { RangeMutation } from '../../models/rule-matrix';

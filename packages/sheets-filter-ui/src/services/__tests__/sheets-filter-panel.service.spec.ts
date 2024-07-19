@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { IOperation, IWorkbookData } from '@univerjs/core';
-import { CommandType, ICommandService, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, IOperation, IWorkbookData } from '@univerjs/core';
+import { CommandType, ICommandService, Inject, Injector, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { CustomFilterOperator, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';

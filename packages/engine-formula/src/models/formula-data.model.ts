@@ -15,8 +15,7 @@
  */
 
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 
 import type {
     IArrayFormulaRangeType,

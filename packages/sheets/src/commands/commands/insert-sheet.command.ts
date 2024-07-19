@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IWorksheetData } from '@univerjs/core';
+import type { IAccessor, ICommand, IWorksheetData } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -24,7 +24,6 @@ import {
     mergeWorksheetSnapshotWithDefault,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type {
     IInsertSheetMutationParams,

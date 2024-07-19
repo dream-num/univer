@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { Disposable, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
 import type { IFunctionInfo, IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';

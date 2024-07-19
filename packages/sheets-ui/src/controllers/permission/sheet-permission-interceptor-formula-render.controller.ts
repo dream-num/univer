@@ -15,9 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DisposableCollection, Inject, Injector, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { getSheetCommandTarget, RangeProtectionRenderModel, WorksheetViewPermission } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { NullValueObject } from '@univerjs/engine-formula';

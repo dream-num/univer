@@ -17,7 +17,7 @@
 import { DataValidationErrorStyle, type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
 import { Checkbox, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import React, { useState } from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
 import styles from './index.module.less';

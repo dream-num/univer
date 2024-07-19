@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 import { HyperLinkModel } from './models/hyper-link.model';

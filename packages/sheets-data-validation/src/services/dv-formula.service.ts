@@ -15,8 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, isFormulaString } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, isFormulaString } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';

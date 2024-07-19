@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -64,14 +64,12 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.3",
         "vite": "^5.3.4",

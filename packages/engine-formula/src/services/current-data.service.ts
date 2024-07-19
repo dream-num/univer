@@ -15,8 +15,7 @@
  */
 
 import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 
 import type {
     IDirtyUnitFeatureMap,

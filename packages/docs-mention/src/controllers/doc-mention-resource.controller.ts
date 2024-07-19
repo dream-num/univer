@@ -15,8 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { CustomRangeType, Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { CustomRangeType, Disposable, Inject, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DOC_MENTION_PLUGIN } from '../types/const/const';
 import type { IDocMention } from '../types/interfaces/i-mention';
 import { DocMentionModel } from '../models/doc-mention.model';

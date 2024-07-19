@@ -17,9 +17,8 @@
 import './adaptors';
 
 import type { IPageElement } from '@univerjs/core';
-import { sortRules } from '@univerjs/core';
+import { Inject, Injector, sortRules } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import type { ObjectAdaptor } from './adaptor';
 import { CanvasObjectProviderRegistry } from './adaptor';

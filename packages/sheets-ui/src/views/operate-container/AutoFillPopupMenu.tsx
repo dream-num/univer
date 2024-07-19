@@ -15,11 +15,10 @@
  */
 
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, toDisposable, useDependency } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 

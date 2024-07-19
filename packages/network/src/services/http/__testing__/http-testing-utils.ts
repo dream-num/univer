@@ -19,9 +19,8 @@
 
 import type { Observer } from 'rxjs';
 import { Observable, Subject } from 'rxjs';
-import { Disposable } from '@univerjs/core';
+import { Disposable, Injector } from '@univerjs/core';
 
-import { Injector } from '@wendellhu/redi';
 import { IHTTPImplementation } from '../implementations/implementation';
 import type { HTTPRequest } from '../request';
 import type { HTTPEvent, HTTPResponse, HTTPResponseError } from '../response';

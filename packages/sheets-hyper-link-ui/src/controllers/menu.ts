@@ -17,7 +17,7 @@
 import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@univerjs/core';
 import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/sidebar.operations';

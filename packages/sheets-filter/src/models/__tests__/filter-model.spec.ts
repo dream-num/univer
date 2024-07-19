@@ -15,9 +15,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 
 import { FilterColumn, generateFilterFn } from '../filter-model';
 import { CustomFilterOperator } from '../types';

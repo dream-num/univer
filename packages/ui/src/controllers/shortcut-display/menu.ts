@@ -15,7 +15,7 @@
  */
 
 import { UniverInstanceType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@univerjs/core';
 
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { getMenuHiddenObservable } from '../../common/menu-hidden-observable';

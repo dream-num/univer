@@ -15,7 +15,7 @@
  */
 
 import { DependentOn, ICommandService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
-import { type Dependency, Inject, Injector } from '@wendellhu/redi';
+import { type Dependency, Inject, Injector } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';

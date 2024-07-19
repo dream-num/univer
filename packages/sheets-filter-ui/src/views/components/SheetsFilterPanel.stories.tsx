@@ -16,11 +16,9 @@
 
 import React, { useState } from 'react';
 import type { Meta } from '@storybook/react';
-import { RediContext } from '@wendellhu/redi/react-bindings';
-import type { Injector } from '@wendellhu/redi';
+import { CommandType, ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, RediContext, Univer, UniverInstanceType } from '@univerjs/core';
+import type { Injector, IWorkbookData } from '@univerjs/core';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import type { IWorkbookData } from '@univerjs/core';
-import { CommandType, ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import { IMenuService, IShortcutService, MenuService, ShortcutService } from '@univerjs/ui';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';

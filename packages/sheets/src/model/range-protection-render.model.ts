@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Inject } from '@wendellhu/redi';
+import { Inject, IPermissionService, LifecycleStages, LRUMap, OnLifecycle, Range } from '@univerjs/core';
 import { filter, map } from 'rxjs/operators';
-import { IPermissionService, LifecycleStages, LRUMap, OnLifecycle, Range } from '@univerjs/core';
 import type { UnitAction } from '@univerjs/protocol';
 import { UnitObject } from '@univerjs/protocol';
 

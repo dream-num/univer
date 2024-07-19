@@ -15,9 +15,8 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, Inject, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 import { UnitAction } from '@univerjs/protocol';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';

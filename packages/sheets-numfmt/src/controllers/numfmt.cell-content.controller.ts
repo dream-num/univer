@@ -23,6 +23,7 @@ import {
     CellValueType,
     Disposable,
     ICommandService,
+    Inject,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -34,7 +35,6 @@ import {
 } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 
 import { of, skip, switchMap } from 'rxjs';
 import { getPatternPreview } from '../utils/pattern';

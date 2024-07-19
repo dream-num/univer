@@ -15,8 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { ICommandService, Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../../services/sheet-filter.service';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../sheets-filter.mutation';

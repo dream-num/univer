@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export type { Dependency } from '@wendellhu/redi';
-export { Inject, Injector } from '@wendellhu/redi';
+export type { Dependency } from '@univerjs/core';
+export { Inject, Injector } from '@univerjs/core';
 export { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
 export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 export { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';

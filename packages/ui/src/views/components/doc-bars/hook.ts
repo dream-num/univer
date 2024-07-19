@@ -17,7 +17,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { combineLatest, map, Observable } from 'rxjs';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import { type IDisplayMenuItem, type IMenuItem, MenuGroup, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
 

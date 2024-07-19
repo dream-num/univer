@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetHideGridlinesMutationParams } from '../mutations/set-hide-gridlines.mutatiom';
 import {

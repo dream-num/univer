@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import { useEffect, useState } from 'react';
 
 import { currencySymbols } from '../base/const/CURRENCY-SYMBOLS';

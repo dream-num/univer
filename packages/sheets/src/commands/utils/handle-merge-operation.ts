@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@wendellhu/redi';
-import type { IRange } from '@univerjs/core';
+import type { IAccessor, IRange } from '@univerjs/core';
 import { Dimension } from '@univerjs/core';
 import type { IAddMergeCommandParams } from '../commands/add-worksheet-merge.command';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';

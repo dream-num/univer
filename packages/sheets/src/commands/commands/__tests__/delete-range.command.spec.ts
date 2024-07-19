@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, IStyleData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IRange, IStyleData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -24,7 +24,6 @@ import {
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';

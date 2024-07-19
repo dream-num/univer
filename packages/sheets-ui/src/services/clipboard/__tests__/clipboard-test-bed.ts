@@ -16,8 +16,8 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { IWorkbookData } from '@univerjs/core';
-import { DisposableCollection, ILogService, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, IDisposable, IWorkbookData } from '@univerjs/core';
+import { DisposableCollection, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
@@ -28,8 +28,6 @@ import {
     INotificationService,
     IPlatformService,
 } from '@univerjs/ui';
-import type { Dependency, IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';

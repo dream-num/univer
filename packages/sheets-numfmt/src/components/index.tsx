@@ -17,10 +17,9 @@
 // FIXME: DO NOT USE GLOBAL STYLES
 import './index.less';
 
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import type { ISelectProps } from '@univerjs/design';
 import { Button, Select } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 

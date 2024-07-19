@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import {
@@ -29,7 +29,6 @@ import {
     SetWorksheetShowCommand,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useObservable } from '@univerjs/ui';
 

@@ -15,11 +15,10 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { Inject } from '@wendellhu/redi';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentModel } from '@univerjs/thread-comment';

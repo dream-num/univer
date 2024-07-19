@@ -15,8 +15,7 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import { CommandType, Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { CommandType, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
 import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
 import {

@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import type { ILocales } from '@univerjs/core';
-import { Disposable, DisposableCollection, LocaleService, toDisposable } from '@univerjs/core';
+import type { IDisposable, ILocales } from '@univerjs/core';
+import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, Optional, toDisposable } from '@univerjs/core';
 import type { IFunctionInfo, PrimitiveValueType } from '@univerjs/engine-formula';
 import { CustomFunction, FunctionType, IFunctionService } from '@univerjs/engine-formula';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject, Optional } from '@wendellhu/redi';
 
 import { IDescriptionService } from './description.service';
 import { IRemoteRegisterFunctionService } from './remote/remote-register-function.service';

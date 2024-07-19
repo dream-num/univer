@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IPosition, ITransformState, Nullable, Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { IDisposable, IPosition, ITransformState, Nullable, Worksheet } from '@univerjs/core';
+import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, Inject, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
@@ -27,8 +27,6 @@ import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from 
 import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';

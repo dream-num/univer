@@ -16,7 +16,7 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@univerjs/core';
 
 import { FRange } from './f-range';
 

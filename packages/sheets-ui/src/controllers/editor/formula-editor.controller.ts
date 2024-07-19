@@ -25,6 +25,7 @@ import {
     HorizontalAlign,
     ICommandService,
     IContextService,
+    Inject,
     IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
@@ -45,7 +46,6 @@ import type { DocumentViewModel, RenderComponentType } from '@univerjs/engine-re
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 import { SetEditorResizeOperation } from '@univerjs/ui';

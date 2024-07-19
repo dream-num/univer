@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import React, { useMemo, useRef } from 'react';
 import { filter, map, startWith } from 'rxjs';
-import type { Injector } from '@wendellhu/redi';
+import type { Injector } from '@univerjs/core';
 import { useObservable } from '../../components/hooks/observable';
 import { IUIPartsService } from '../../services/parts/parts.service';
 

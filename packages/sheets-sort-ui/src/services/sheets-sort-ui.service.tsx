@@ -15,8 +15,11 @@
  */
 
 import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { Disposable, ICommandService,
+import {
+    Disposable,
+    ICommandService,
     ILogService,
+    Inject,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -28,7 +31,6 @@ import { Disposable, ICommandService,
 
 import { getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
 
 import type { ISortOption } from '@univerjs/sheets-sort';

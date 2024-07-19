@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, remove, toDisposable } from '@univerjs/core';
-import type { Dependency, DependencyIdentifier, IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 

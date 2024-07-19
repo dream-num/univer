@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '../../common/di';
 import type { Workbook } from '../../sheets/workbook';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { LifecycleStages, runOnLifecycle } from '../lifecycle/lifecycle';

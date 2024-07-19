@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, toDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
 
 export interface IContextMenuHandler {
     /** A callback to open context menu with given position and menu type. */

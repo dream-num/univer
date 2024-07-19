@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, useDependency, useInjector } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
-import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { IEditorService, ISidebarService } from '@univerjs/ui';

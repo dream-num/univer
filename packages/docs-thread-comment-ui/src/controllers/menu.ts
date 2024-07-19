@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';

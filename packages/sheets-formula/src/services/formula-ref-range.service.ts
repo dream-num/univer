@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IDisposable, IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import { Disposable, DisposableCollection, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 
 export type FormulaChangeMap = Record<string, Record<string, Record<string, string>>>;
 

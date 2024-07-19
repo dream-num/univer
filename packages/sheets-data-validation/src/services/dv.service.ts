@@ -17,7 +17,7 @@
 import { Disposable, type Nullable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { Inject } from '@wendellhu/redi';
+import { Inject } from '@univerjs/core';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 
 export interface ICurrentDataValidationManager {

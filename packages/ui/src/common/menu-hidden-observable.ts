@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceType } from '@univerjs/core';
+import type { IAccessor, UniverInstanceType } from '@univerjs/core';
 import { DocumentFlavor, IUniverInstanceService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
 export function getMenuHiddenObservable(

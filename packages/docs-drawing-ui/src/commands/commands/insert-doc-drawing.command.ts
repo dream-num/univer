@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -23,7 +23,6 @@ import {
     TextX,
     TextXActionType,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getRetainAndDeleteFromReplace, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { IInsertDrawingCommandParams } from './interfaces';

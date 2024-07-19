@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DependentOn, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';

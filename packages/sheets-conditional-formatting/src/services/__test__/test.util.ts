@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, IWorkbookData } from '@univerjs/core';
+import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
 import { ConditionalFormattingService } from '../conditional-formatting.service';
 import { ConditionalFormattingFormulaService } from '../conditional-formatting-formula.service';

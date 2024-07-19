@@ -18,6 +18,7 @@ import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnit
 import {
     Dimension,
     Disposable,
+    Inject,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
@@ -51,7 +52,6 @@ import {
     SetRangeValuesMutation,
     SetStyleCommand,
 } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, ActiveDirtyController)
 export class ActiveDirtyController extends Disposable {

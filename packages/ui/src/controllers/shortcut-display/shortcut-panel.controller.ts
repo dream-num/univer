@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
 import {
     ShortcutPanelComponentName,

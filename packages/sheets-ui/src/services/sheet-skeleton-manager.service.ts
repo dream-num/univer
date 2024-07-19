@@ -15,10 +15,9 @@
  */
 
 import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
+import { Disposable, Inject, Injector } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 export interface ISheetSkeletonManagerParam {

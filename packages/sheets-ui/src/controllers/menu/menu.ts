@@ -81,7 +81,7 @@ import {
     MenuPosition,
     PasteCommand,
 } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@univerjs/core';
 import { combineLatestWith, map, Observable } from 'rxjs';
 
 import {

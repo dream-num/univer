@@ -17,7 +17,7 @@
 import { CommandType, ICommandService, IContextService, type IOperation } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { ILayoutService } from '@univerjs/ui';
-import { Quantity } from '@wendellhu/redi';
+import { Quantity } from '@univerjs/core';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import type { FilterBy } from '../../services/sheets-filter-panel.service';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';

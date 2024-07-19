@@ -15,8 +15,7 @@
  */
 
 import type { IExecutionOptions, IMutationInfo, IWorkbookData } from '@univerjs/core';
-import { ICommandService, ILogService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, ICommandService, ILogService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
     /** If this mutation is executed after it was sent from the peer univer instance (e.g. in a web worker). */

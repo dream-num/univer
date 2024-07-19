@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
 import { SetFrozenMutation, SetFrozenMutationFactory } from '../mutations/set-frozen.mutation';

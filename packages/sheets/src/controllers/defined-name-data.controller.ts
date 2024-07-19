@@ -19,7 +19,8 @@ import {
     IResourceManagerService,
     LifecycleStages,
     OnLifecycle,
-    UniverInstanceType } from '@univerjs/core';
+    UniverInstanceType,
+} from '@univerjs/core';
 import type { IDefinedNameMapItem } from '@univerjs/engine-formula';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 

@@ -480,9 +480,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
             );
         });
 
-        const canvasElement = this._context.engine.getCanvasElement();
-        const canvasBoundingRect = canvasElement.getBoundingClientRect();
-        startX += canvasBoundingRect.left;
+        // const canvasElement = this._context.engine.getCanvasElement();
+        // const canvasBoundingRect = canvasElement.getBoundingClientRect();
+        // startX += canvasBoundingRect.left;
         // startY += canvasBoundingRect.top;
 
         // Update cell editor container position and size.

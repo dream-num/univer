@@ -56,7 +56,7 @@ export function cursorConvertToTextRange(
     const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
     const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage) : null;
 
-    const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style);
+    const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId);
 
     textRange.refresh();
 
@@ -120,7 +120,8 @@ export class TextRange {
         private _docSkeleton: DocumentSkeleton,
         public anchorNodePosition?: Nullable<INodePosition>,
         public focusNodePosition?: Nullable<INodePosition>,
-        public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
+        public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+        private _segmentId: string = ''
     ) {
         this._anchorBlink();
     }
@@ -150,7 +151,11 @@ export class TextRange {
     // The start position of the range
     get startOffset() {
         const { startOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
-        const body = this._docSkeleton.getViewModel().getBody();
+        const body = this._docSkeleton
+            .getViewModel()
+            .getDataModel()
+            .getSelfOrHeaderFooterModel(this._segmentId)
+            .getBody();
 
         if (startOffset == null || body == null) {
             return startOffset;
@@ -164,7 +169,11 @@ export class TextRange {
     // The end position of the range
     get endOffset() {
         const { endOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
-        const body = this._docSkeleton.getViewModel().getBody();
+        const body = this._docSkeleton
+            .getViewModel()
+            .getDataModel()
+            .getSelfOrHeaderFooterModel(this._segmentId)
+            .getBody();
 
         if (endOffset == null || body == null) {
             return endOffset;

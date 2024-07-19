@@ -553,7 +553,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         if (evt.shiftKey && this._getActiveRangeInstance()) {
             this._updateActiveRangeFocusPosition(position);
         } else if (evt.ctrlKey || this._isEmpty()) {
-            const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle);
+            const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle, this._currentSegmentId);
 
             this._addTextRange(newTextSelection);
         } else {
@@ -819,7 +819,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         let lastRange = this._rangeList.pop();
 
         if (!lastRange) {
-            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle);
+            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle, this._currentSegmentId);
         }
 
         this._removeAllTextRanges();

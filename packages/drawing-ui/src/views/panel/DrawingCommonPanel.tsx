@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LogLevel,
     Plugin,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     id: 'workbook-01',

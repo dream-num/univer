@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { CustomDecorationType, DocumentDataModel, IMutationInfo, ITextRange } from '@univerjs/core';
+import type { CustomDecorationType, DocumentDataModel, IAccessor, IMutationInfo, ITextRange } from '@univerjs/core';
 import { getBodySlice, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';

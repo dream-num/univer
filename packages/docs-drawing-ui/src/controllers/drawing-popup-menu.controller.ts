@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
+import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, IContextService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';

@@ -15,10 +15,9 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, isRangesEqual, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { DataValidationModel, RemoveDataValidationMutation, removeDataValidationUndoFactory, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';

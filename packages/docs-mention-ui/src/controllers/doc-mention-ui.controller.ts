@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
 import { CloseMentionEditPopupOperation, CloseMentionInfoPopupOperation, ShowMentionEditPopupOperation, ShowMentionInfoPopupOperation } from '../commands/operations/mention-popup.operation';
 import { MentionEditPopup } from '../views/mention-edit-popup';

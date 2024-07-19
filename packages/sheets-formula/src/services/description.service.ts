@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService, toDisposable } from '@univerjs/core';
+import { createIdentifier, Inject, LocaleService, toDisposable } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import {
     functionArray,
@@ -37,8 +37,7 @@ import {
     IFunctionService,
     isReferenceStrings,
 } from '@univerjs/engine-formula';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
 
 import { FUNCTION_LIST } from './function-list/function-list';
 import { getFunctionName } from './utils';

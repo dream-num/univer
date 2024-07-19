@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 import { createInterceptorKey, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { INTERCEPTOR_POINT } from '../interceptor-const';

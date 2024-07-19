@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService, IUniverInstanceService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor, ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetWorkbookNameMutationParams } from '../mutations/set-workbook-name.mutation';
 import { SetWorkbookNameMutation } from '../mutations/set-workbook-name.mutation';

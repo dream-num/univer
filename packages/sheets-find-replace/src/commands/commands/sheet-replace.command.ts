@@ -15,10 +15,9 @@
  */
 
 import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
-import type { ICellData, ICommand, IObjectArrayPrimitiveType } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IObjectArrayPrimitiveType } from '@univerjs/core';
 import type { IReplaceAllResult } from '@univerjs/find-replace';
 import { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISheetReplaceCommandParams {
     unitId: string;

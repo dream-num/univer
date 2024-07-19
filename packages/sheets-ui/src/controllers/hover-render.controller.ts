@@ -15,9 +15,8 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection } from '@univerjs/core';
+import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import { HoverManagerService } from '../services/hover-manager.service';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';

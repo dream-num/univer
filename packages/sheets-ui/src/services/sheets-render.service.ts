@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { IDisposable, Workbook } from '@univerjs/core';
 import {
     IContextService,
     IUniverInstanceService,
@@ -25,7 +25,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
-import type { IDisposable } from '@wendellhu/redi';
 import { distinctUntilChanged, takeUntil } from 'rxjs';
 
 /**

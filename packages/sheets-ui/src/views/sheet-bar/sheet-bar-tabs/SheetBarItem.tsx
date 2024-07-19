@@ -15,8 +15,7 @@
  */
 
 import type { BooleanNumber } from '@univerjs/core';
-import { ColorKit, ThemeService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ColorKit, ThemeService, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 
 import styles from './index.module.less';

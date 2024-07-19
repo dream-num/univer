@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, IWorkbookData } from '@univerjs/core';
-import { AuthzIoLocalService, IAuthzIoService, ICommandService, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, IRange, IWorkbookData } from '@univerjs/core';
+import { AuthzIoLocalService, IAuthzIoService, ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { RangeProtectionRuleModel, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { FilterModel, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { SetSheetsFilterRangeMutation, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { IMessageService } from '@univerjs/ui';
 import { MockMessageService } from '@univerjs/ui/services/message/__testing__/mock-message.service.js';

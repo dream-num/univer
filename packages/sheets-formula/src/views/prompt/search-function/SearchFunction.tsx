@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Direction, IUniverInstanceService } from '@univerjs/core';
+import { Direction, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { IEditorService } from '@univerjs/ui';

@@ -15,9 +15,8 @@
  */
 
 import type { IMutationInfo, IRange, IStyleData } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, IUndoRedoService, ObjectMatrix, ThemeService } from '@univerjs/core';
+import { createIdentifier, Disposable, ICommandService, ILogService, Inject, IUndoRedoService, ObjectMatrix, ThemeService } from '@univerjs/core';
 import { SetRangeValuesMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 

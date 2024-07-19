@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { Injector, IRange, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, Tools, UniverInstanceType } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';

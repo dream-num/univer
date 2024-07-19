@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type {
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
@@ -31,7 +31,6 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';

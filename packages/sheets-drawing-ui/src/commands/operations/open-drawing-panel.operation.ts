@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { COMPONENT_SHEET_DRAWING_PANEL } from '../../views/sheet-image-panel/component-name';

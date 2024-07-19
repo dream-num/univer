@@ -15,9 +15,8 @@
  */
 
 import type { DocumentDataModel, ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
-import { composeInterceptors, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, LifecycleStages, OnLifecycle, remove, toDisposable } from '@univerjs/core';
+import { composeInterceptors, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, LifecycleStages, OnLifecycle, remove, toDisposable } from '@univerjs/core';
 import type { DocumentViewModel, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import { DocSkeletonManagerService } from '../doc-skeleton-manager.service';
 import { DOC_INTERCEPTOR_POINT } from './interceptor-const';
 

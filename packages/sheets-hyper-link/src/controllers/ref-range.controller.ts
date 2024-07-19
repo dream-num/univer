@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, isValidRange, LifecycleStages, OnLifecycle, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
+import type { IDisposable, IRange, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, isValidRange, LifecycleStages, OnLifecycle, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { ERROR_RANGE } from '../types/const';
 

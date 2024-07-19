@@ -16,6 +16,7 @@
 
 import type {
     BorderStyleTypes,
+    IAccessor,
     IBorderData,
     IBorderStyleData,
     ICellData,
@@ -33,7 +34,6 @@ import {
     Rectangle,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';

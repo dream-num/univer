@@ -20,6 +20,8 @@ import {
     Disposable,
     DisposableCollection,
     ICommandService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -27,7 +29,6 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import type {
     IAddWorksheetMergeMutationParams,

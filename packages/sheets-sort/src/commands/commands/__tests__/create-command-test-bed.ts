@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, ILogService, IUniverInstanceService, type IWorkbookData, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, UniverInstanceType, type Workbook } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import { BooleanNumber, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, UniverInstanceType } from '@univerjs/core';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import enUS from '../../../locale/en-US';

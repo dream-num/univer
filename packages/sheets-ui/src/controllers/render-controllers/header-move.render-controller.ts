@@ -22,9 +22,9 @@ import type {
 } from '@univerjs/core';
 import {
     createInterceptorKey, Disposable, ICommandService,
+    Inject,
     InterceptorManager,
-    RANGE_TYPE,
-} from '@univerjs/core';
+    RANGE_TYPE } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import {
     CURSOR_TYPE,
@@ -40,7 +40,6 @@ import {
     MoveRowsCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 
 import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';

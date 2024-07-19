@@ -15,9 +15,8 @@
  */
 
 import { type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
-import { DataValidationRenderMode } from '@univerjs/core';
+import { DataValidationRenderMode, useDependency } from '@univerjs/core';
 import { FormLayout, Radio, RadioGroup } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 
 export interface IListRenderModeInputProps {

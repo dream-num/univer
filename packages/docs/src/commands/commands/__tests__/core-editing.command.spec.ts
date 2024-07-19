@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { Injector, Univer } from '@univerjs/core';
 import { ICommandService } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SetInlineFormatBoldCommand } from '../inline-format.command';

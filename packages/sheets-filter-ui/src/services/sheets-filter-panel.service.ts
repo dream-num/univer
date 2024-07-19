@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
-import { Disposable, extractPureTextFromCell, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { IDisposable, IRange, Nullable } from '@univerjs/core';
+import { createIdentifier, Disposable, extractPureTextFromCell, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { FilterColumn, FilterModel, IFilterColumn } from '@univerjs/sheets-filter';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
 import { RefRangeService } from '@univerjs/sheets';

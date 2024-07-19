@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { CommandType, ICommandService, Inject } from '@univerjs/core';
 import { Observable } from 'rxjs';
 
 export class RecordController {

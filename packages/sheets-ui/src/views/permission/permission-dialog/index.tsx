@@ -18,9 +18,8 @@ import React, { useEffect, useState } from 'react';
 
 import { Button, Switch } from '@univerjs/design';
 import clsx from 'clsx';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
-import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { IDialogService } from '@univerjs/ui';
 import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';

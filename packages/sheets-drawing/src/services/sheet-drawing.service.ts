@@ -15,7 +15,7 @@
  */
 
 import { type IDrawingParam, type IImageData, type IRotationSkewFlipTransform, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@univerjs/core';
 
 interface ICellPosition {
     column: number; // column number

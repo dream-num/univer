@@ -15,7 +15,7 @@
  */
 
 import { type DependencyOverride, LifecycleStages, runOnLifecycle } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@univerjs/core';
 import type { MenuConfig } from '../../services/menu/menu';
 
 export interface IWorkbenchOptions {

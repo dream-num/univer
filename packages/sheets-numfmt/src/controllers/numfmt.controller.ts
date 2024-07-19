@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
+import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
     DisposableCollection,
     ICommandService,
+    Inject,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -40,8 +41,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 

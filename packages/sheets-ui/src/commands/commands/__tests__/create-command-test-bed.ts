@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     DisposableCollection,
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
@@ -36,8 +38,6 @@ import {
 
     SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { IRenderContext } from '@univerjs/engine-render';

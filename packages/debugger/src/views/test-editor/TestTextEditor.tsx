@@ -18,8 +18,7 @@ import React, { useState } from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
 import type { Workbook } from '@univerjs/core';
-import { createInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { createInternalEditorID, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Input } from '@univerjs/design';
 
 const editorStyle: React.CSSProperties = {

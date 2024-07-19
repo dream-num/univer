@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { DependentOn, IContextService, ILocalStorageService, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { DependentOn, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import {
     BrowserClipboardService,

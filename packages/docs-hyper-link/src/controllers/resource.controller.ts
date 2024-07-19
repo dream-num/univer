@@ -15,8 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { CustomRangeType, Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { CustomRangeType, Disposable, Inject, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DOC_HYPER_LINK_PLUGIN } from '../types/const';
 import { DocHyperLinkModel } from '../models/hyper-link.model';
 import type { IDocHyperLink } from '../types/interfaces/i-doc-hyper-link';

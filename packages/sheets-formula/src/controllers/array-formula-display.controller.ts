@@ -15,11 +15,10 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
 import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, ArrayFormulaDisplayController)
 export class ArrayFormulaDisplayController extends Disposable {

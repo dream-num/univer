@@ -20,10 +20,9 @@ import get from 'lodash.get';
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
 
 import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 
 import type { Workbook } from '@univerjs/core';
-import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { ILayoutService, TextEditor, useScrollYOverContainer } from '@univerjs/ui';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';

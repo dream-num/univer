@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, IWorkbookData } from '@univerjs/core';
+import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     INumfmtService,
@@ -25,8 +25,6 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     id: 'test',

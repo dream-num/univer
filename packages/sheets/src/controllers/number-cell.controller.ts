@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { CellValueType, Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
-import { Inject } from '@wendellhu/redi';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
 

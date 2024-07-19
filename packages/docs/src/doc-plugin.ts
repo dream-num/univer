@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { Dependency, ICommand } from '@univerjs/core';
 import {
     ICommandService,
+    Inject,
+    Injector,
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
 import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/engine-render';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import { BreakLineCommand } from './commands/commands/break-line.command';
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
 import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';

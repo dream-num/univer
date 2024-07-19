@@ -15,9 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { ThreadCommentPanel, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 import { type Observable, Subject } from 'rxjs';
-import { Disposable, toDisposable } from '@univerjs/core';
 
 import type { ComponentType } from '../../common/component-manager';
 

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { THREAD_COMMENT_PANEL } from '../../types/const';
 

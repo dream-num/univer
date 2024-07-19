@@ -15,10 +15,9 @@
  */
 
 import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Documents, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { CURSOR_TYPE, DocumentEditArea, ITextSelectionRenderManager, PageLayoutType, Vector2 } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 
 import { IEditorService } from '@univerjs/ui';
 import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs';

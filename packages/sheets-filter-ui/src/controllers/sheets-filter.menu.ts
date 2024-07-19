@@ -16,7 +16,7 @@
 
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { UniverInstanceType } from '@univerjs/core';
 

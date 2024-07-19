@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ReorderRangeCommand, ReorderRangeMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import type { ISortRangeCommandParams } from '../sheets-sort.command';

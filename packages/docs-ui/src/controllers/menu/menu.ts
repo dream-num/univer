@@ -56,7 +56,7 @@ import {
     MenuItemType,
     MenuPosition,
 } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@univerjs/core';
 import { combineLatest, Observable } from 'rxjs';
 
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';

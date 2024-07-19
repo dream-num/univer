@@ -15,8 +15,7 @@
  */
 
 import { BehaviorSubject, map, Subject } from 'rxjs';
-import { CustomRangeType, Disposable, ICommandService } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
 import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
 import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';

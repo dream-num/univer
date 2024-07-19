@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { DocMentionService } from '@univerjs/docs-mention';
 import { MentionEditPopup } from '../views/mention-edit-popup';

@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
 import { CommandType, createDefaultUser, IPermissionService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { WorkbookManageCollaboratorPermission } from '@univerjs/sheets';
-
-import type { IAccessor } from '@wendellhu/redi';
 
 export enum UnitRole {
     Reader = 0,

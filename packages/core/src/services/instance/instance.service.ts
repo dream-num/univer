@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
+import type { IDisposable } from '../../common/di';
+import { createIdentifier, Inject, Injector } from '../../common/di';
 
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
 import type { Nullable } from '../../shared';

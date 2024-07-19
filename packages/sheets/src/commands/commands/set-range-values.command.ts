@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -26,7 +26,6 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';

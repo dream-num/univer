@@ -163,8 +163,6 @@ function buildExternalLib({ react, rxjs }) {
     const libs = [
         'clsx/dist/clsx.min.js',
         'dayjs/dayjs.min.js',
-        '@wendellhu/redi/dist/redi.js',
-        '@wendellhu/redi/dist/react-bindings.js',
     ];
     if (react) {
         libs.unshift(

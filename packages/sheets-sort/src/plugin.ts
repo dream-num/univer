@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 
 import { SheetsSortController } from './controllers/sheets-sort.controller';
 import { SheetsSortService } from './services/sheets-sort.service';

@@ -15,7 +15,7 @@
  */
 
 import { Disposable, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
 import type { editor } from 'monaco-editor';
 import type { IUniverUniscriptConfig } from '../controllers/uniscript.controller';
 

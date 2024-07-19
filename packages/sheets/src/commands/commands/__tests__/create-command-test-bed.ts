@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
@@ -27,8 +29,6 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import { WorkbookPermissionService } from '../../../services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
 import enUS from '../../../locale/en-US';

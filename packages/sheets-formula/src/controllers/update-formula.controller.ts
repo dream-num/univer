@@ -28,6 +28,8 @@ import {
     Direction,
     Disposable,
     ICommandService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
@@ -104,7 +106,6 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { filter, map, merge } from 'rxjs';
 import { IEditorService } from '@univerjs/ui';

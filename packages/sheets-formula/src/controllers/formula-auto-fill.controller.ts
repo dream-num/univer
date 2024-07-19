@@ -18,6 +18,7 @@ import type { ICellData, Nullable } from '@univerjs/core';
 import {
     Direction,
     Disposable,
+    Inject,
     isFormulaId,
     isFormulaString,
     LifecycleStages,
@@ -27,7 +28,6 @@ import {
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { AutoFillService, IAutoFillRule, ICopyDataInTypeIndexInfo, ICopyDataPiece } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, DATA_TYPE, IAutoFillService } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaAutoFillController)
 export class FormulaAutoFillController extends Disposable {

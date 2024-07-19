@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import styles from './index.module.less';

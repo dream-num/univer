@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
 import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../components/more-numfmt-type/MoreNumfmtType';

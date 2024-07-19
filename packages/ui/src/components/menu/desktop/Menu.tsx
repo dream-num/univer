@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
+import { isRealNum, useDependency } from '@univerjs/core';
 
 import {
     Menu as DesignMenu,
@@ -23,7 +23,6 @@ import {
     SubMenu as DesignSubMenu,
 } from '@univerjs/design';
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import { isObservable } from 'rxjs';

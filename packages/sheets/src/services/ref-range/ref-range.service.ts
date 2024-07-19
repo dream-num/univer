@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IDisposable, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CommandType,
     createInterceptorKey,
     Disposable,
     ICommandService,
+    Inject,
     InterceptorManager,
     IUniverInstanceService,
     LifecycleStages,
@@ -29,8 +30,6 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 
 import { SheetsSelectionsService } from '../selections/selection-manager.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';

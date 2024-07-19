@@ -18,6 +18,7 @@ import type { Univer, Workbook } from '@univerjs/core';
 import {
     DisposableCollection,
     ICommandService,
+    Injector,
     IUniverInstanceService,
     RANGE_TYPE,
     toDisposable,
@@ -37,7 +38,6 @@ import {
     SetSpecificRowsVisibleCommand,
 } from '@univerjs/sheets';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ShowColMenuItemFactory, ShowRowMenuItemFactory } from '../menu';

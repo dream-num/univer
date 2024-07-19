@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetTabColorMutationParams } from '../mutations/set-tab-color.mutation';
 import { SetTabColorMutation, SetTabColorUndoMutationFactory } from '../mutations/set-tab-color.mutation';

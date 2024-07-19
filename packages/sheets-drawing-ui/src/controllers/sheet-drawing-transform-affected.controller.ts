@@ -15,8 +15,7 @@
  */
 
 import type { ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IDrawingJsonUndo1, IDrawingManagerService, type IDrawingParam, type ITransformState } from '@univerjs/drawing';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';

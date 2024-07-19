@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import React from 'react';
 import { useObservable } from '@univerjs/ui';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -28,7 +28,6 @@ import {
     TextXActionType,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, getRichTextEditPath, RichTextEditingMutation } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';

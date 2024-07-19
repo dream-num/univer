@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetHyperLinkUrlController)

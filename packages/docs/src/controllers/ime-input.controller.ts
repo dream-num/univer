@@ -18,6 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
+    Inject,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -25,7 +26,6 @@ import {
 } from '@univerjs/core';
 import type { IEditorInputConfig } from '@univerjs/engine-render';
 import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 
 import { IMEInputCommand } from '../commands/commands/ime-input.command';

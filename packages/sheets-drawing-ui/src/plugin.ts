@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DependentOn, Inject, Injector, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverDrawingPlugin } from '@univerjs/drawing';

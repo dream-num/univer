@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, LocaleService, Plugin } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { DrawingUpdateController } from './controllers/drawing-update.controller';
 import { DrawingUIController } from './controllers/drawing-ui.controller';
 import { ImageCropperController } from './controllers/image-cropper.controller';

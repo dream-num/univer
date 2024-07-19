@@ -15,9 +15,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
 import styles from './index.module.less';

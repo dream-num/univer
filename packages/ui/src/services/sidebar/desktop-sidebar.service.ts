@@ -15,7 +15,7 @@
  */
 
 import { toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 
 import type { ISidebarMethodOptions } from '../../views/components/sidebar/interface';

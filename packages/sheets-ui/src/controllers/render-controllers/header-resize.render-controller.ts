@@ -21,6 +21,7 @@ import {
     createInterceptorKey,
     Disposable,
     ICommandService,
+    Inject,
     InterceptorManager,
     toDisposable,
 } from '@univerjs/core';
@@ -32,7 +33,6 @@ import type {
     ISetWorksheetRowIsAutoHeightCommandParams,
 } from '@univerjs/sheets';
 import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 
 import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';

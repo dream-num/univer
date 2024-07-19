@@ -15,8 +15,7 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { IDirtyUnitSheetNameMap, IFormulaData, IOtherFormulaData, IUnitData } from '../../basics/common';

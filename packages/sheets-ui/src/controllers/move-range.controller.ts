@@ -19,11 +19,11 @@ import {
     Disposable,
     DisposableCollection,
     ICommandService,
+    Inject,
     toDisposable,
 } from '@univerjs/core';
 import type { IMoveRangeCommandParams } from '@univerjs/sheets';
 import { MoveRangeCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
+import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
 import { AddDocMentionCommand, type IMention, MentionType } from '@univerjs/docs-mention';
 import React, { useEffect } from 'react';
-import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
 import { MentionList } from '../mention-list';

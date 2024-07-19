@@ -15,9 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CellAlert } from '../views/cell-alert/CellAlertPopup';
 import { CELL_ALERT_KEY } from '../views/cell-alert';

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Rectangle, sequenceExecute, Tools } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type {
     IAddWorksheetMergeMutationParams,

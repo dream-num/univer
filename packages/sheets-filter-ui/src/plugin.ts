@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DependentOn, Inject, Injector, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 
 import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui.controller';

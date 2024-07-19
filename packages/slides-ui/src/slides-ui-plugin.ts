@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { SlideDataModel } from '@univerjs/core';
-import { IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, SlideDataModel } from '@univerjs/core';
+import { Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { SlideUIController } from './controllers/slide-ui.controller';
 

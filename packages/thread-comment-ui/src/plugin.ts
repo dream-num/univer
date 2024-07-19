@@ -15,10 +15,8 @@
  */
 
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
-import type { DependencyOverride } from '@univerjs/core';
-import { DependentOn, ICommandService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, DependencyOverride } from '@univerjs/core';
+import { DependentOn, ICommandService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { PLUGIN_NAME } from './types/const';
 import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
 import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';

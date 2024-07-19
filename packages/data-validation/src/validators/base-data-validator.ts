@@ -15,8 +15,7 @@
  */
 
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
-import { DataValidationOperator, LocaleService, Tools } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DataValidationOperator, Inject, Injector, LocaleService, Tools } from '@univerjs/core';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
 import type { IBaseDataValidationWidget } from './base-widget';
 

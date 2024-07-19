@@ -15,9 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, filter } from 'rxjs';
 
 export type ActiveCommentInfo = Nullable<{ unitId: string; subUnitId: string; commentId: string; trigger?: string }>;

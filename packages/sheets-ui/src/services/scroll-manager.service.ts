@@ -17,7 +17,7 @@
 import type { Nullable, Workbook } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
+import { Inject } from '@univerjs/core';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IViewportScrollState {

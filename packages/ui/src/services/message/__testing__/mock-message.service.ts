@@ -15,7 +15,7 @@
  */
 
 import type { IMessageOptions, IMessageProps } from '@univerjs/design';
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
 
 import { toDisposable } from '@univerjs/core';
 import type { IMessageService } from '../message.service';

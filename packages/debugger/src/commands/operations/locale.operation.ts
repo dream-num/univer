@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, LocaleType } from '@univerjs/core';
+import type { IAccessor, ICommand, LocaleType } from '@univerjs/core';
 import { CommandType, LocaleService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface ILocaleCommandParams {
     value: LocaleType;

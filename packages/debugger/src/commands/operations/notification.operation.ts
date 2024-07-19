@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { INotificationService } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface IUIComponentCommandParams {
     value: string;

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutation, IObjectArrayPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { IAccessor, IMutation, IObjectArrayPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetColWidthMutationParams {
     unitId: string;

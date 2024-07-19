@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import { ICommandService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { connectInjector, ICommandService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
 
-import { Inject, Injector } from '@wendellhu/redi';
 import type { MenuConfig, UIPartsService } from '@univerjs/ui';
 import { ComponentManager, IDialogService, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { serializeRange } from '@univerjs/engine-formula';
 import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSingle, ExpandDescendingSingle } from '@univerjs/icons';
-import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
 import { SortRangeCommand } from '@univerjs/sheets-sort';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/commands/sheets-sort.command';

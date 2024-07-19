@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import { connectInjector, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
@@ -25,7 +23,6 @@ import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
-import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';

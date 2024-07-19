@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
 import type { Subscription, SubscriptionLike } from 'rxjs';
 import { Subject } from 'rxjs';
 import { isSubscription } from 'rxjs/internal/Subscription';
+import type { IDisposable } from '../common/di';
 
 type DisposableLike = IDisposable | SubscriptionLike | (() => void);
 

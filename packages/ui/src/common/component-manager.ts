@@ -113,7 +113,7 @@ import {
     VerticalIntegrationSingle,
     VerticalTextSingle,
 } from '@univerjs/icons';
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
 import type { defineComponent } from 'vue';
 
 import type React from 'react';

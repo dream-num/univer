@@ -15,9 +15,8 @@
  */
 
 import { Dropdown, ColorPicker as OriginColorPicker } from '@univerjs/design';
-import { ColorKit } from '@univerjs/core';
+import { ColorKit, useDependency } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useMemo } from 'react';
 import { MoreDownSingle } from '@univerjs/icons';
 

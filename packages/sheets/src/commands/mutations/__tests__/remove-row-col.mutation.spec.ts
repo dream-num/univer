@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { Injector, Workbook } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type {

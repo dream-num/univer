@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { Injector, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     SetRangeValuesCommand,
@@ -22,7 +22,6 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { InsertFunctionCommand } from '../../commands/insert-function.command';

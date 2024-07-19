@@ -15,9 +15,8 @@
  */
 
 import { JSONX } from '@univerjs/core';
-import type { JSONXActions, Nullable } from '@univerjs/core';
+import type { IDisposable, JSONXActions, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IDisposable } from '@wendellhu/redi';
 
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 

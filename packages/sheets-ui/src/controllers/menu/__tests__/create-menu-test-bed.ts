@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionRefRangeService, RangeProtectionRenderModel, RangeProtectionRuleModel, RangeProtectionService, RefRangeService, SheetInterceptorService,
     SheetsSelectionsService,
     WorkbookPermissionService,
@@ -24,7 +24,6 @@ import { RangeProtectionRefRangeService, RangeProtectionRenderModel, RangeProtec
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { IMenuService, IPlatformService, IShortcutService, MenuService, PlatformService, ShortcutService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {

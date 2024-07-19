@@ -15,7 +15,7 @@
  */
 
 import { toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
 
 export function fromGlobalEvent<K extends keyof WindowEventMap>(
     type: K,

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { Direction, ICellData, IMutationInfo, Nullable } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
+import type { Direction, IAccessor, ICellData, IMutationInfo, Nullable } from '@univerjs/core';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 
 export enum AutoFillHookType {

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange } from '@univerjs/core';
+import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { generateNullCellValue, getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 

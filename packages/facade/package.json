@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/facade",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -62,7 +62,6 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
@@ -70,7 +69,6 @@
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
@@ -87,7 +85,6 @@
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "jest-canvas-mock": "^2.5.2",
         "jsdom": "^24.1.0",
         "rxjs": "^7.8.1",

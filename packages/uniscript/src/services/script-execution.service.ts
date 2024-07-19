@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ILogService } from '@univerjs/core';
+import { createIdentifier, Disposable, ILogService, Inject, Injector } from '@univerjs/core';
 import { FUniver } from '@univerjs/facade';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 
 export const IUniscriptExecutionService = createIdentifier<IUniscriptExecutionService>('univer.uniscript.execution-service');
 

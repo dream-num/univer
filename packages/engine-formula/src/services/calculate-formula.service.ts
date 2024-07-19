@@ -18,12 +18,12 @@ import type { IUnitRange } from '@univerjs/core';
 import {
     Disposable,
     IConfigService,
+    Inject,
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
     requestImmediateMacroTask,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
 import type {

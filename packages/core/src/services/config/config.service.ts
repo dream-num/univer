@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '../../common/di';
 
 import type { Nullable } from '../../shared/types';
 

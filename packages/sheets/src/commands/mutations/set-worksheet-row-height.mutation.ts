@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook } from '@univerjs/core';
+import type { BooleanNumber, IAccessor, IMutation, IObjectArrayPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 const MAXIMUM_ROW_HEIGHT = 2000;
 

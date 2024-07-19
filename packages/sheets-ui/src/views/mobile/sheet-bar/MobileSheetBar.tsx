@@ -16,9 +16,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, useDependency } from '@univerjs/core';
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { ICommandService } from '@univerjs/core';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
 import {
     InsertSheetMutation,

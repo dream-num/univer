@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMultiCommand } from '@univerjs/core';
+import type { IAccessor, ICommand, IMultiCommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { whenSheetFocused } from '../../controllers/shortcuts/utils';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';

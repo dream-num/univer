@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ContextService, Nullable } from '@univerjs/core';
-import { Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
-import { createIdentifier, type IDisposable } from '@wendellhu/redi';
+import type { ContextService, IDisposable, Nullable } from '@univerjs/core';
+import { createIdentifier, Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
 import { fromEvent } from 'rxjs';
 import { IEditorService } from '../editor/editor.service';
 

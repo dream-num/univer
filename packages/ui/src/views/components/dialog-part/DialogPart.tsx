@@ -16,7 +16,7 @@
 
 import type { IDialogProps } from '@univerjs/design';
 import { Dialog } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';

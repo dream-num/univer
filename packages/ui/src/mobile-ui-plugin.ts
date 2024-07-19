@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { DependentOn, ILocalStorageService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DependentOn, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import { Dropdown, Tooltip } from '@univerjs/design';
 import { MoreFunctionSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import type { ComponentType } from 'react';
 import React, { useMemo } from 'react';

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutation, IMutationInfo } from '@univerjs/core';
+import type { IAccessor, IMutation, IMutationInfo } from '@univerjs/core';
 import { CommandType, Tools } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import { transformSupportSymmetryAnchor } from '../../utils/anchor';
 import type { IAddConditionalRuleMutationParams } from './add-conditional-rule.mutation';

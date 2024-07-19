@@ -17,8 +17,7 @@
 import React, { useEffect, useState } from 'react';
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';

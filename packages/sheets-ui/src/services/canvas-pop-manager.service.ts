@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
 import { ICanvasPopupService } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import { COMMAND_LISTENER_SKELETON_CHANGE, RefRangeService, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';

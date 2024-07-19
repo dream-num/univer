@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@wendellhu/redi';
-import { Injector } from '@wendellhu/redi';
+import type { Dependency } from './common/di';
+import { Injector } from './common/di';
 
 import { DocumentDataModel } from './docs/data-model/document-data-model';
 import { CommandService, ICommandService } from './services/command/command.service';

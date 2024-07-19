@@ -17,9 +17,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { Avatar, Tooltip } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
 import type { IRange, Workbook } from '@univerjs/core';
-import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
 import { DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ISidebarService, useObservable } from '@univerjs/ui';

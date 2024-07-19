@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-import type { Ctor, Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
-import { connectInjector } from '@wendellhu/redi/react-bindings';
+import type { Ctor, Dependency } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';

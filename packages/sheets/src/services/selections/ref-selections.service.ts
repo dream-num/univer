@@ -15,8 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge, switchMap, takeUntil } from 'rxjs';
 import type { WorkbookSelections } from './selection-manager.service';

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, Nullable, Workbook } from '@univerjs/core';
+import type { IDisposable, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
 import {
+    createIdentifier,
     Direction,
     Disposable,
     ICommandService,
+    Inject,
     IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
@@ -29,8 +31,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 

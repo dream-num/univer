@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { Disposable, DisposableCollection, IContextService, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { createIdentifier, Disposable, DisposableCollection, IContextService, Inject, Injector, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, debounceTime, Subject, throttleTime } from 'rxjs';
 import { FIND_REPLACE_REPLACE_REVEALED } from './context-keys';

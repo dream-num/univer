@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Plugin, Tools } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Plugin, Tools } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 
 import type { IUniverDebuggerConfig } from './controllers/debugger.controller';
 import { DebuggerController, DefaultDebuggerConfig } from './controllers/debugger.controller';

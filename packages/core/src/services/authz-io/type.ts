@@ -15,8 +15,8 @@
  */
 
 import type { ILogContext } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
 import type { IAllowedRequest, IAllowedResponse, IBatchAllowedResponse, ICreateCollaboratorRequest, ICreateRequest, ICreateResponse, IDeleteCollaboratorRequest, IListCollaboratorRequest, IListCollaboratorResponse, IListPermPointRequest, IListPermPointResponse, IListRolesRequest, IListRolesResponse, IPutCollaboratorsRequest, IUpdateCollaboratorRequest, IUpdatePermPointRequest } from '@univerjs/protocol';
+import { createIdentifier } from '../../common/di';
 
 export interface IAuthzIoService {
     create(config: ICreateRequest, context?: ILogContext): Promise<ICreateResponse['objectID']>;

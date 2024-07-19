@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { ICommandService, IPermissionService } from '@univerjs/core';
+import { ICommandService, IPermissionService, useDependency } from '@univerjs/core';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { useObservable } from '@univerjs/ui';

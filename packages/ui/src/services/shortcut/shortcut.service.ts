@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IContextService, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Optional } from '@wendellhu/redi';
+import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 

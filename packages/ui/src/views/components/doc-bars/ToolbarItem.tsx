@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService } from '@univerjs/core';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Dropdown, Tooltip } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { Ref } from 'react';
 import React, { forwardRef, useMemo, useState } from 'react';
 import { isObservable, Observable } from 'rxjs';

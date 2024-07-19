@@ -15,8 +15,7 @@
  */
 
 import React from 'react';
-import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
-import { makeArray } from '@univerjs/core';
+import { makeArray, useDependency, useObservable } from '@univerjs/core';
 import { clsx } from 'clsx';
 import type { IBaseMenuProps } from '../desktop/Menu';
 import { IMenuService } from '../../../services/menu/menu.service';

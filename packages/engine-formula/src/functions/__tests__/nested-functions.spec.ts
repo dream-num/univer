@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@wendellhu/redi';
+import type { Injector, IWorkbookData } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { IWorkbookData } from '@univerjs/core';
 import { LocaleType } from '@univerjs/core';
 import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';

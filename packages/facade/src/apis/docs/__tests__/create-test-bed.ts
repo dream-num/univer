@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { Dependency, DocumentDataModel, IDocumentData } from '@univerjs/core';
 import {
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LocaleService,
     LogLevel,
@@ -26,8 +28,6 @@ import {
 } from '@univerjs/core';
 import enUS from '@univerjs/sheets-formula/locale/en-US';
 import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import { DocSkeletonManagerService, DocStateChangeManagerService, IMEInputManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService, ITextSelectionRenderManager, RenderManagerService, TextSelectionRenderManager } from '@univerjs/engine-render';
 import { DocsRenderService } from '@univerjs/docs-ui';

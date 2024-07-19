@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetEditableCommandParams {
     value: 'sheet' | 'univer';

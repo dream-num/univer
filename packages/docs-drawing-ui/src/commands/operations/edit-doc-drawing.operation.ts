@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
+import type { IAccessor, IOperation } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
 
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import type { IDrawingSearch } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { SidebarDocDrawingOperation } from './open-drawing-panel.operation';

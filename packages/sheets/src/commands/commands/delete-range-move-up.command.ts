@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
@@ -23,7 +23,6 @@ import {
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type { IDeleteRangeMutationParams } from '../../basics/interfaces/mutation-interface';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';

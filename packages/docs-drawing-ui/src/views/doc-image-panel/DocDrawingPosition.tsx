@@ -15,8 +15,7 @@
  */
 
 import type { ICommandInfo, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, IUniverInstanceService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';

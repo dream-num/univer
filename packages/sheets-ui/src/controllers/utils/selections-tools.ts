@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { IAccessor, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { RangeProtectionRuleModel, SheetsSelectionsService } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 import { combineLatest, map } from 'rxjs';
 
 export function getSheetSelectionsDisabled$(accessor: IAccessor) {

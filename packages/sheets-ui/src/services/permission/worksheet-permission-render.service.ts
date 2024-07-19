@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { Spreadsheet } from '@univerjs/engine-render';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { worksheetProtectionKey, WorksheetProtectionRenderExtension } from '../../views/permission/extensions/worksheet-permission.render';
 
 @OnLifecycle(LifecycleStages.Ready, WorksheetProtectionRenderService)

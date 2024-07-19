@@ -18,13 +18,13 @@ import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
+    Inject,
     IUniverInstanceService,
 } from '@univerjs/core';
 import type { IDocObjectParam } from '@univerjs/docs';
 import { DocSkeletonManagerService, neoGetDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 
 interface ISetDocMutationParams {
     unitId: string;

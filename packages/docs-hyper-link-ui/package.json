@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-hyper-link-ui",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "private": false,
     "description": "Univer thread comment plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -66,13 +66,12 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "clsx": ">=2.0.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.64"
+        "@univerjs/icons": "^0.1.65"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -82,7 +81,6 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "clsx": "^2.1.1",
         "react": "18.3.1",
         "rxjs": "^7.8.1",

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IBorderData, IRange, Univer } from '@univerjs/core';
+import type { IBorderData, Injector, IRange, Univer } from '@univerjs/core';
 import { BorderStyleTypes, BorderType, ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';

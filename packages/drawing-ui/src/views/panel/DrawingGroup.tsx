@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService, Tools } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { LocaleService, Tools, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import { GroupSingle, UngroupSingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';

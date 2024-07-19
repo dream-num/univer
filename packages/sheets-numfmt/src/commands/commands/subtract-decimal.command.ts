@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
 import { getSheetCommandTarget, INumfmtService, SheetsSelectionsService } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';

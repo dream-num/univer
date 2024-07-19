@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, Injector, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     ICommandService,
@@ -33,7 +33,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { EditorService, IEditorService, IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';

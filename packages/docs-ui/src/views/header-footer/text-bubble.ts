@@ -18,7 +18,8 @@ import type {
     IRectProps,
     IShapeProps,
     Rect,
-    UniverRenderingContext } from '@univerjs/engine-render';
+    UniverRenderingContext,
+} from '@univerjs/engine-render';
 import { Shape } from '@univerjs/engine-render';
 
 export const COLLAB_CURSOR_LABEL_HEIGHT = 18;

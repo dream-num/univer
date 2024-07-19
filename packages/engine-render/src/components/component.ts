@@ -15,7 +15,7 @@
  */
 
 import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
 import { BaseObject } from '../base-object';
 import type { IViewportInfo } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';

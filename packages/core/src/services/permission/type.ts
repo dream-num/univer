@@ -15,8 +15,8 @@
  */
 
 import type { BehaviorSubject, Observable } from 'rxjs';
-import { createIdentifier } from '@wendellhu/redi';
 import type { UnitAction, UnitObject } from '@univerjs/protocol';
+import { createIdentifier } from '../../common/di';
 import type { Nullable } from '../../common/type-utils';
 import { LifecycleStages, runOnLifecycle } from '../lifecycle/lifecycle';
 import type { IRange } from '../../types/interfaces';

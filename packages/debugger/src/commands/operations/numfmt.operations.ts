@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface INumfmtOperationCommandParams {
     value: 'close' | 'open';

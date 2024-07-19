@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, LocaleService } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, LocaleService } from '@univerjs/core';
 
 import type { IFontLocale } from '../basics/interfaces';
 

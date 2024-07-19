@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtI18nController)
 export class NumfmtI18nController extends Disposable {

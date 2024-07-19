@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, IPermissionService, IResourceManagerService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, IResourceManagerService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
-import { Inject } from '@wendellhu/redi';
 import { UnitAction, UnitObject, UniverType } from '@univerjs/protocol';
 import type { IObjectModel } from '../../../model/range-protection-rule.model';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';

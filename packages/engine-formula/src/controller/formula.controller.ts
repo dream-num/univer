@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { type Ctor, Optional } from '@wendellhu/redi';
+import { type Ctor, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 
 import type { IFunctionNames } from '../basics/function';

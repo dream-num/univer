@@ -18,7 +18,7 @@ import { Disposable, type ITextRange, type Nullable } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
+import { Inject } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export class DocThreadCommentService extends Disposable {

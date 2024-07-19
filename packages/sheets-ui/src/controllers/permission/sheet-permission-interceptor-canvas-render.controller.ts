@@ -16,8 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
-import { Inject, Optional } from '@wendellhu/redi';
-import { DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
 import { UnitAction } from '@univerjs/protocol';

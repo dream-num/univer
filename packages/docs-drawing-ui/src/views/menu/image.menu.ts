@@ -15,8 +15,8 @@
  */
 
 import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
 
 import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../upload-component/component-name';
 

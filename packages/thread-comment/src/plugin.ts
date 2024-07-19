@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
-import { ICommandService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
-import { type Dependency, Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, DependencyOverride } from '@univerjs/core';
+import { ICommandService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { ThreadCommentModel } from './models/thread-comment.model';
 import { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 import { TC_PLUGIN_NAME } from './types/const';

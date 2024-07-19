@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
+import { Inject, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import { filter } from 'rxjs';
 
 export class FHooks {

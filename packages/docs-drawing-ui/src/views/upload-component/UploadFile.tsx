@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, useDependency } from '@univerjs/core';
 import React, { useRef } from 'react';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST } from '@univerjs/drawing';
 import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';

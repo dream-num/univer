@@ -15,9 +15,8 @@
  */
 
 import type { JSONXActions, Nullable } from '@univerjs/core';
-import { ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
+import { ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 

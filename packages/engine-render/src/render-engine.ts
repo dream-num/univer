@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
+import { createIdentifier, Inject, Injector, Plugin } from '@univerjs/core';
 
 import { Engine } from './engine';
 import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';

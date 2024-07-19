@@ -16,8 +16,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { Input, InputNumber, Select } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import {
     CFNumberOperator,
     CFRuleType,

@@ -201,8 +201,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
+            significance: { name: '倍数', detail: '要舍入到的倍数。' },
         },
     },
     CEILING_MATH: {
@@ -215,8 +215,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
+            significance: { name: '倍数', detail: '要舍入到的倍数。' },
+            mode: { name: '众数', detail: '对于负数，控制数值是舍入为零还是从零舍入。' },
         },
     },
     CEILING_PRECISE: {
@@ -229,8 +230,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
+            significance: { name: '倍数', detail: '要舍入到的倍数。' },
         },
     },
     COMBIN: {
@@ -349,8 +350,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '字符串', detail: '字符串长度必须小于或等于 255 个字符。' },
+            radix: { name: '基数', detail: '要将数字转换为的基数。 必须是大于或等于 2 且小于或等于 36 的整数。' },
         },
     },
     DEGREES: {
@@ -363,8 +364,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: '角度', detail: '要转换的角度，以弧度表示。' },
         },
     },
     EVEN: {
@@ -377,8 +377,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
         },
     },
     EXP: {
@@ -391,8 +390,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '底数 e 的指数。' },
         },
     },
     FACT: {
@@ -433,8 +431,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
+            significance: { name: '倍数', detail: '要舍入到的倍数。' },
         },
     },
     FLOOR_MATH: {
@@ -447,8 +445,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
+            significance: { name: '倍数', detail: '要舍入到的倍数。' },
+            mode: { name: '众数', detail: '对于负数，控制数值是舍入为零还是从零舍入。' },
         },
     },
     FLOOR_PRECISE: {
@@ -461,8 +460,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
+            significance: { name: '倍数', detail: '要舍入到的倍数。' },
         },
     },
     GCD: {
@@ -545,8 +544,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要计算其自然对数的正实数。' },
         },
     },
     LOG: {
@@ -559,8 +557,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要计算其对数的正实数。' },
+            base: { name: '底数', detail: '对数的底数。 如果省略 base，则假定其值为 10。' },
         },
     },
     LOG10: {
@@ -573,8 +571,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '想要计算其以 10 为底的对数的正实数。' },
         },
     },
     MDETERM: {
@@ -643,8 +640,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要四舍五入的数字。' },
+            multiple: { name: '倍数', detail: '要舍入到的倍数。' },
         },
     },
     MULTINOMIAL: {
@@ -685,8 +682,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要舍入的值。' },
         },
     },
     PI: {
@@ -699,8 +695,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     POWER: {
@@ -755,8 +749,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: '角度', detail: '要转换的以度数表示的角度。' },
         },
     },
     RAND: {
@@ -769,8 +762,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     RANDARRAY: {
@@ -785,8 +776,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '行数', detail: '要返回的行数' },
+            columns: { name: '列数', detail: '要返回的列数' },
+            min: { name: '最小值', detail: '想返回的最小数值' },
+            max: { name: '最大值', detail: '想返回的最大数值' },
+            wholeNumber: { name: '整数', detail: '返回整数或十进制值' },
         },
     },
     RANDBETWEEN: {
@@ -799,8 +793,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            bottom: { name: '最小值', detail: '将返回的最小整数。' },
+            top: { name: '最大值', detail: '将返回的最大整数。' },
         },
     },
     ROMAN: {
@@ -827,8 +821,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要四舍五入的数字。' },
+            numDigits: { name: '位数', detail: '要进行四舍五入运算的位数。' },
         },
     },
     ROUNDDOWN: {
@@ -841,8 +835,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要四舍五入的数字。' },
+            numDigits: { name: '位数', detail: '要进行四舍五入运算的位数。' },
         },
     },
     ROUNDUP: {
@@ -855,8 +849,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要四舍五入的数字。' },
+            numDigits: { name: '位数', detail: '要进行四舍五入运算的位数。' },
         },
     },
     SEC: {
@@ -869,13 +863,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '数值是需要其正割值的角度（以弧度为单位）。' },
         },
     },
     SECH: {
-        description: '返回角度的双曲正切值',
-        abstract: '返回角度的双曲正切值',
+        description: '返回角度的双曲正割值',
+        abstract: '返回角度的双曲正割值',
         links: [
             {
                 title: '教学',
@@ -883,8 +876,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '数值是需要其双曲正割值的角度（以弧度为单位）。' },
         },
     },
     SERIESSUM: {
@@ -965,8 +957,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要计算其平方根的数字。' },
         },
     },
     SQRTPI: {
@@ -979,8 +970,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '与 pi 相乘的数。' },
         },
     },
     SUBTOTAL: {
@@ -1083,8 +1073,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '要对其求平方和第1个数字，也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
+            number2: { name: '数值2', detail: '要对其求平方和的第2个数字。可以按照这种方式最多指定255个数字。' },
         },
     },
     SUMX2MY2: {
@@ -1097,8 +1087,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '数组1', detail: '第一个数组或数值区域。' },
+            arrayY: { name: '数组2', detail: '第二个数组或数值区域。' },
         },
     },
     SUMX2PY2: {
@@ -1111,8 +1101,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '数组1', detail: '第一个数组或数值区域。' },
+            arrayY: { name: '数组2', detail: '第二个数组或数值区域。' },
         },
     },
     SUMXMY2: {
@@ -1125,8 +1115,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '数组1', detail: '第一个数组或数值区域。' },
+            arrayY: { name: '数组2', detail: '第二个数组或数值区域。' },
         },
     },
     TAN: {

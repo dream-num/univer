@@ -15,8 +15,7 @@
  */
 
 import type { IUnitRange, Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Disposable } from '@univerjs/core';
 
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
 import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';

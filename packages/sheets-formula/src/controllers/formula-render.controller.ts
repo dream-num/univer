@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Inject, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { extractFormulaError } from './utils/utils';
 

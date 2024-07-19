@@ -17,7 +17,7 @@
 import { ICommandService, type IRange, type Workbook, type Worksheet } from '@univerjs/core';
 import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
 import { SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@univerjs/core';
 
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';

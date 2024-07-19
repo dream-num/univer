@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Ctor, Injector } from '@wendellhu/redi';
+import type { Ctor, Injector } from '../../common/di';
 import { Disposable } from '../../shared';
 import { UniverInstanceType } from '../../common/unit';
 

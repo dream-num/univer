@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { Inject, Injector } from '@wendellhu/redi';
 import { UniFormulaService } from './services/uni-formula.service';
 import { DOC_FORMULA_PLUGIN_NAME } from './const';
 

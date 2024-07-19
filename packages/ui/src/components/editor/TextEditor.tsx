@@ -15,8 +15,7 @@
  */
 
 import type { IDocumentData, Nullable } from '@univerjs/core';
-import { debounce, isInternalEditorID, LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { debounce, isInternalEditorID, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
 import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
 import { IEditorService } from '../../services/editor/editor.service';

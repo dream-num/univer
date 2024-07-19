@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, LocaleService } from '@univerjs/core';
 import { RemoveSheetCommand } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
 
 interface IRemoveSheetConfirmCommandParams {
     subUnitId: string;

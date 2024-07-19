@@ -15,6 +15,7 @@
  */
 
 import type {
+    IAccessor,
     ICellData,
     ICopyToOptionsData,
     IMutation,
@@ -25,7 +26,6 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import { handleStyle, transformStyle } from '../../basics/cell-style';
 import { getCellValue, setNull } from '../../basics/cell-value';
 import { getCellType } from '../../basics/cell-type';

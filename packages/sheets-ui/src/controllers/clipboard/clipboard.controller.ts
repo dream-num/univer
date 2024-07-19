@@ -36,15 +36,15 @@ import {
     ICommandService,
     IConfigService,
     IContextService,
+    Inject,
+    Injector,
     isFormulaString,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
     ObjectMatrix,
     OnLifecycle,
-    RxDisposable,
-    UniverInstanceType,
-} from '@univerjs/core';
+    Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import type {
     IInsertColMutationParams,
@@ -63,7 +63,6 @@ import {
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
 import { IMessageService, textTrim } from '@univerjs/ui';
-import { Inject, Injector, Optional } from '@wendellhu/redi';
 
 import { IRenderManagerService, ITextSelectionRenderManager, ptToPx } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';

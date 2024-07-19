@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, IDocumentBody, IParagraph } from '@univerjs/core';
-import { CustomRangeType, DataStreamTreeTokenType, Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IDisposable, IDocumentBody, IParagraph } from '@univerjs/core';
+import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { CutContentCommand, DocCustomRangeService, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
 import { copyContentCache, extractId, genId } from './copy-content-cache';

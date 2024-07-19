@@ -15,8 +15,7 @@
  */
 
 import type { Workbook, Worksheet } from '@univerjs/core';
-import { IPermissionService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { takeUntil } from 'rxjs/operators';
 import { UniverType } from '@univerjs/protocol';
 

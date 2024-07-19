@@ -17,6 +17,7 @@
 import type {
     ICellData,
     ICommandInfo,
+    IDisposable,
     IInterceptor,
     IUndoRedoCommandInfosByInterceptor,
     Nullable,
@@ -34,7 +35,6 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
 
 import { INTERCEPTOR_POINT } from './interceptor-const';
 

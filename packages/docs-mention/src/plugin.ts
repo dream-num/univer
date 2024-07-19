@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { DOC_MENTION_PLUGIN } from './types/const/const';
 import { DocMentionModel } from './models/doc-mention.model';

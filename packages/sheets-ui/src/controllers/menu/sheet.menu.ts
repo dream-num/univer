@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { IAccessor, Workbook } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import {
     CopySheetCommand,
@@ -32,7 +32,6 @@ import {
 } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
 import type { Subscriber } from 'rxjs';
 import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
 

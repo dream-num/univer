@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { Disposable, DisposableCollection } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import { type IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 

@@ -15,7 +15,7 @@
  */
 
 import { toDisposable } from '@univerjs/core';
-import { type IDisposable, Inject } from '@wendellhu/redi';
+import { type IDisposable, Inject } from '@univerjs/core';
 import type { ForwardRefExoticComponent } from 'react';
 import { Subject } from 'rxjs';
 

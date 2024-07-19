@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Disposable } from '@univerjs/core';
 import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
 import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
 
 export type ThreadCommentJSON = {

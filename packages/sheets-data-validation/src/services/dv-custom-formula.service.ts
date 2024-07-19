@@ -15,9 +15,8 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, isFormulaString, ObjectMatrix, Range } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, isFormulaString, ObjectMatrix, Range } from '@univerjs/core';
 import { isFormulaTransformable, LexerTreeBuilder, transformFormula } from '@univerjs/engine-formula';
-import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { DataValidationCacheService } from './dv-cache.service';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import {
     CellValueType,
     CommandType,
@@ -32,7 +32,6 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { IEditorService } from '@univerjs/ui';
 import type { IInsertFunction } from '../commands/insert-function.command';

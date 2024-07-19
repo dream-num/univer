@@ -15,9 +15,8 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { LocaleService, LocaleType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { RediContext } from '@wendellhu/redi/react-bindings';
+import { LocaleService, LocaleType, RediContext } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import React, { useContext, useState } from 'react';
 import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';

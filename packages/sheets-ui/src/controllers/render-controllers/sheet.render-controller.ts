@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
-import { CommandType, ICommandService, Rectangle, RxDisposable } from '@univerjs/core';
+import { CommandType, ICommandService, Inject, Rectangle, RxDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     Layer,
@@ -29,7 +29,6 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 

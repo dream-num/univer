@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, IResourceManagerService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, IResourceManagerService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { UniverType } from '@univerjs/protocol';
 import { ThreadCommentModel } from '../models/thread-comment.model';
 import { TC_PLUGIN_NAME } from '../types/const';

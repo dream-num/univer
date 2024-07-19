@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ILogService, LocaleService } from '@univerjs/core';
-import { createIdentifier, Inject, Optional } from '@wendellhu/redi';
+import { createIdentifier, Disposable, ILogService, Inject, LocaleService, Optional } from '@univerjs/core';
 
 import { INotificationService } from '../notification/notification.service';
 import { supportClipboardAPI } from './clipboard-utils';

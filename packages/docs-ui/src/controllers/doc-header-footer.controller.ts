@@ -15,10 +15,9 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
+import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, Inject, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
 import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 
 import { ComponentManager, IEditorService } from '@univerjs/ui';
 import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';

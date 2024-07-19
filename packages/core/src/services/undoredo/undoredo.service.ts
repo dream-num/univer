@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import type { IAccessor, IDisposable } from '../../common/di';
+import { createIdentifier } from '../../common/di';
 
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import { Disposable, toDisposable } from '../../shared/lifecycle';

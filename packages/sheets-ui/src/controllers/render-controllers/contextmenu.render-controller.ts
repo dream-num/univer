@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import type {
-    Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import {
     Disposable,
+    Inject,
     RANGE_TYPE,
 } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 
 import { SheetMenuPosition } from '../menu/menu';
 import { SHEET_VIEW_KEY } from '../../common/keys';

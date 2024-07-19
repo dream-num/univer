@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
@@ -36,7 +36,6 @@ import {
     RemoveWorksheetMergeMutation, SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { getMergeableSelectionsByType, MergeType } from './utils/selection-utils';

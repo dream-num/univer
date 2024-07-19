@@ -16,7 +16,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 
-import type { Injector } from '@wendellhu/redi';
+import type { Injector } from '@univerjs/core';
 import { HTTPService } from '../../http.service';
 import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
 import { IHTTPImplementation } from '../../implementations/implementation';

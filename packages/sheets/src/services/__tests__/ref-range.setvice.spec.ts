@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, Univer, Workbook, Worksheet } from '@univerjs/core';
+import type { Injector, IRange, Univer, Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';

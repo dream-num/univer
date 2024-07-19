@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { ICommandService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
 import { ConditionalFormattingService } from './services/conditional-formatting.service';
 import { ConditionalFormattingRuleModel } from './models/conditional-formatting-rule-model';

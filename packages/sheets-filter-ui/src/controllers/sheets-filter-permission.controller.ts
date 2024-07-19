@@ -15,9 +15,8 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle, Tools } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 

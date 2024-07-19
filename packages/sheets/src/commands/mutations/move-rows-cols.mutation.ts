@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutation, IRange } from '@univerjs/core';
+import type { IAccessor, IMutation, IRange } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, moveMatrixArray, Rectangle } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface IMoveRowsMutationParams {
     unitId: string;

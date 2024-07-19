@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck } from '@univerjs/core';
+import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck, Quantity, useDependency } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import {
     InsertSheetMutation,
@@ -33,12 +33,10 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { IConfirmService, Menu, useObservable } from '@univerjs/ui';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { LockSingle } from '@univerjs/icons';
 import { merge } from 'rxjs';
-import { Quantity } from '@wendellhu/redi';
 import { SheetMenuPosition } from '../../../controllers/menu/menu';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';

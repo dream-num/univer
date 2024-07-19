@@ -16,9 +16,8 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { IWorkbookData, Worksheet } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Worksheet } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
 import type { IFindQuery } from '@univerjs/find-replace';
 import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
 import {

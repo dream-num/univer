@@ -19,6 +19,8 @@ import {
     Disposable,
     getCellInfoInMergeData,
     ICommandService,
+    Inject,
+    Injector,
     isICellData,
     IUniverInstanceService,
     LifecycleStages,
@@ -28,7 +30,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { Inject, Injector } from '@wendellhu/redi';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { IRenderManagerService } from '@univerjs/engine-render';

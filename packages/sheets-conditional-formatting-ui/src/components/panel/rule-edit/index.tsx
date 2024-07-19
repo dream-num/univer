@@ -16,8 +16,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IRange, IUnitRange, Workbook } from '@univerjs/core';
-import { createInternalEditorID, ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { createInternalEditorID, ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
 import { Button, Select } from '@univerjs/design';
 

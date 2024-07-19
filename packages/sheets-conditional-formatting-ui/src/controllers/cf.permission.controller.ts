@@ -15,11 +15,10 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 import type { IAddCfCommandParams } from '../commands/commands/add-cf.command';
 import { AddCfCommand } from '../commands/commands/add-cf.command';
 

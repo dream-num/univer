@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { CommandListener, ICommandInfo, IRange, IWorkbookData, Workbook } from '@univerjs/core';
+import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ICommandService,
+    Inject,
+    Injector,
     IPermissionService,
     IResourceLoaderService,
     IUniverInstanceService,
@@ -30,8 +32,6 @@ import type {
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
 import { InsertSheetCommand, RemoveSheetCommand, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { FWorksheet } from './f-worksheet';
 

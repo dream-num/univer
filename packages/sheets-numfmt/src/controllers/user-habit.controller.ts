@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { ILocalStorageService } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { ILocalStorageService, Inject } from '@univerjs/core';
 
 type HabitValue = string | number;
 interface IUserHabitController {

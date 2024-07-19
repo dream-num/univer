@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
 import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';

@@ -16,6 +16,8 @@
 
 import { installShims } from './common/shims';
 
+installShims();
+
 export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
 export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';
@@ -187,4 +189,5 @@ export { normalizeBody, getCustomRangeSlice, getCustomDecorationSlice } from './
 export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
 export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
 export { nameCharacterCheck } from './shared/name';
-installShims();
+
+export * from './common/di';

@@ -19,6 +19,7 @@ import {
     Direction,
     Disposable,
     ICommandService,
+    Inject,
     IUniverInstanceService,
     RANGE_TYPE,
     toDisposable,
@@ -27,7 +28,6 @@ import {
 import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';

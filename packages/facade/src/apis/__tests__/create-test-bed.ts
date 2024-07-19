@@ -16,11 +16,13 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { IWorkbookData, UnitModel, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, UnitModel, Workbook } from '@univerjs/core';
 import {
     AuthzIoLocalService,
     IAuthzIoService,
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LocaleService,
     LocaleType,
@@ -41,8 +43,6 @@ import {
 } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets-formula/locale/en-US';
 import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';

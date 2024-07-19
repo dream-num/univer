@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import React, { useMemo } from 'react';
 import { RectPopup } from '@univerjs/design';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';

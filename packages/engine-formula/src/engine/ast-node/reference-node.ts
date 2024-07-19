@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { IAccessor, Nullable } from '@univerjs/core';
+import { Inject, Injector } from '@univerjs/core';
 
-import type { Nullable } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import {
     $SUPER_TABLE_COLUMN_REGEX,

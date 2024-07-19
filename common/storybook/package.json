@@ -30,7 +30,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "css-loader": "^6.10.0",
         "less-loader": "^12.2.0",
         "storybook": "8.1.11",

@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutation, Nullable } from '@univerjs/core';
-import { CommandType, Disposable, ICommandService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, RCDisposable, ResourceManagerService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import type { ICellData, IDisposable, IMutation, Nullable } from '@univerjs/core';
+import { CommandType, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, Optional, RCDisposable, ResourceManagerService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Optional } from '@wendellhu/redi';
 
 import { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
 import { DOC_FORMULA_PLUGIN_NAME } from '../const';

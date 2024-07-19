@@ -15,9 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { BooleanNumber, Disposable, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
+import { BooleanNumber, Disposable, Inject, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';

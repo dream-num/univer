@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleService, ThemeService } from '@univerjs/core';
+import { LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
 import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';

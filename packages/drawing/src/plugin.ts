@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
-import { mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, DependencyOverride } from '@univerjs/core';
+import { Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 
 import { ImageIoService } from './services/image-io-impl.service';
 import { DrawingManagerService } from './services/drawing-manager-impl.service';

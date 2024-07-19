@@ -18,9 +18,12 @@ import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    Optional,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -42,7 +45,6 @@ import {
     transformCellsToRange,
 } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { Inject, Injector, Optional } from '@wendellhu/redi';
 
 import { getPatternType } from '../utils/pattern';
 

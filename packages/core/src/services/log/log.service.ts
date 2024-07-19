@@ -16,7 +16,7 @@
 
 /* eslint-disable no-console */
 
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '../../common/di';
 
 import { Disposable } from '../../shared/lifecycle';
 

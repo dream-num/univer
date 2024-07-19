@@ -17,8 +17,7 @@
 import { TextEditor, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
-import { createInternalEditorID, DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
+import { createInternalEditorID, DataValidationType, isFormulaString, LocaleService, Tools, useDependency } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, type IFormulaInputProps } from '@univerjs/data-validation';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import cs from 'clsx';

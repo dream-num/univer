@@ -24,16 +24,6 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
     let hasCss = false;
 
     const externalMap = {
-        '@wendellhu/redi': {
-            global: '@wendellhu/redi',
-            name: '@wendellhu/redi',
-            version: '0.16.0',
-        },
-        '@wendellhu/redi/react-bindings': {
-            global: '@wendellhu/redi/react-bindings',
-            name: '@wendellhu/redi',
-            version: '@wendellhu/redi',
-        },
         clsx: {
             global: 'clsx',
             name: 'clsx',

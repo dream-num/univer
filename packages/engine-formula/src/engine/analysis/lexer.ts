@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject } from '@univerjs/core';
 
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import type { ISequenceArray } from '../utils/sequence';

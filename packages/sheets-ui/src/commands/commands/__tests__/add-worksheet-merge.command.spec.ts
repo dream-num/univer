@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Univer, Workbook } from '@univerjs/core';
+import type { IDisposable, Injector, IRange, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -50,7 +50,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
-import type { IDisposable, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

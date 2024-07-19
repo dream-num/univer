@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, IConfigService, isInternalEditorID, LifecycleService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { connectInjector, Disposable, IConfigService, Inject, Injector, isInternalEditorID, LifecycleService, LifecycleStages, OnLifecycle, Optional, toDisposable } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector, Optional } from '@wendellhu/redi';
-import { connectInjector } from '@wendellhu/redi/react-bindings';
+import type { IDisposable } from '@univerjs/core';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
 

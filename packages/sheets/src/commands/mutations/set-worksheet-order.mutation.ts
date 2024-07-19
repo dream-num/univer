@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
+import type { IAccessor, IMutation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetOrderMutationParams {
     fromOrder: number;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions, Nullable } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, JSONXActions, Nullable } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -26,7 +26,6 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
 import { ArrangeTypeEnum } from '@univerjs/drawing';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
     arrangeType: ArrangeTypeEnum;

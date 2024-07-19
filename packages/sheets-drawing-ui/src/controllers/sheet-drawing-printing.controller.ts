@@ -15,12 +15,11 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { Disposable, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { Disposable, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPrintInterceptorService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingPrintingController)
 export class SheetDrawingPrintingController extends Disposable {

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, DataValidationType, ICommandService, LocaleService } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationType, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useMemo, useState } from 'react';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';

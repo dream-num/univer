@@ -15,7 +15,7 @@
  */
 
 import { Disposable, EventSubject } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
 
 import type { CURSOR_TYPE } from './basics/const';
 import { RENDER_CLASS_TYPE } from './basics/const';

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDeleteAction, IDocumentBody, IMutationInfo, IRetainAction, ITextRange } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, IDeleteAction, IDocumentBody, IMutationInfo, IRetainAction, ITextRange } from '@univerjs/core';
 import { IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';

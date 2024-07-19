@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable, UnitModel, UnitType } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
-import { type Dependency, type DependencyIdentifier, type IDisposable, Inject, Injector, isClassDependencyItem } from '@wendellhu/redi';
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
+import { Disposable, Inject, Injector, isClassDependencyItem } from '@univerjs/core';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';

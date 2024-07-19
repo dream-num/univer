@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { CFRuleType, CFSubRuleType, createDefaultRule } from '@univerjs/sheets-conditional-formatting';
 import type { IColorScale, IConditionFormattingRule, IDataBar, IFormulaHighlightCell, IIconSet, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';

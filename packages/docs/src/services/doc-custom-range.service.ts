@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICustomRange } from '@univerjs/core';
+import type { ICustomRange, IDisposable } from '@univerjs/core';
 import { toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
 
 export interface ICustomRangeData extends ICustomRange {
     data?: string;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
 import { CloseSingle } from '@univerjs/icons';
 import type { IProgressStep } from '../../services/progress/progress.service';

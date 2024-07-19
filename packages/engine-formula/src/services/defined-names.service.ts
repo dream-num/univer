@@ -15,8 +15,7 @@
  */
 
 import type { IUnitRange, Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Disposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { serializeRange } from '../engine/utils/reference';

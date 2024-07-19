@@ -16,7 +16,9 @@
 
 import type {
     CommandListener,
+    Dependency,
     DocumentDataModel,
+    IDisposable,
     IDocumentData,
     IExecutionOptions,
     IWorkbookData,
@@ -27,19 +29,17 @@ import {
     BorderStyleTypes,
     debounce,
     ICommandService,
+    Inject,
+    Injector,
     IUniverInstanceService,
+    Quantity,
     toDisposable,
     UndoCommand,
-    Univer,
-    UniverInstanceType,
-    WrapStrategy,
-} from '@univerjs/core';
+    Univer, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import type { ISocket } from '@univerjs/network';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
-import type { Dependency, IDisposable } from '@wendellhu/redi';
-import { Inject, Injector, Quantity } from '@wendellhu/redi';
 
 import type {
     IColumnsHeaderCfgParam,

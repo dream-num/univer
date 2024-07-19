@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SetFrozenMutation } from '../../mutations/set-frozen.mutation';

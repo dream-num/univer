@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
-import { DependentOn, ICommandService, IConfigService, LocaleService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, DependencyOverride } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, LocaleService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';

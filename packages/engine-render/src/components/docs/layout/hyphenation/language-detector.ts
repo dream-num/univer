@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable, Nullable } from '@univerjs/core';
 import { franc } from 'franc-min';
-import type { Nullable } from '@univerjs/core';
 import { Lang } from './lang';
 
 const LANG_MAP_TO_HYPHEN_LANG: Record<string, Lang> = {

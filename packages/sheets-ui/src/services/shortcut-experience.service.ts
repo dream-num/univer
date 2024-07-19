@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { ISelection, ITextRangeParam, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { IDisposable, ISelection, ITextRangeParam, Nullable } from '@univerjs/core';
+import { Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import type { KeyCode } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 
 export interface IShortcutExperienceSearch {
     unitId: string;

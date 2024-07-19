@@ -15,9 +15,8 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 import { AddDataValidationCommand } from '@univerjs/data-validation';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../commands/commands/data-validation.command';

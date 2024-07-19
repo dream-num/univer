@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
+import type { IDisposable } from '../../common/di';
 
 import { remove } from '../../common/array';
 import { toDisposable } from '../lifecycle';

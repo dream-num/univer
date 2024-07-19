@@ -19,6 +19,7 @@ import {
     ColorKit,
     Disposable,
     ICommandService,
+    Inject,
     ObjectMatrix,
     Rectangle,
     ThemeService,
@@ -40,7 +41,6 @@ import {
     SelectionShape,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 
 const REFRESH_ARRAY_SHAPE_MUTATIONS = [
     SetWorksheetRowHeightMutation.id,

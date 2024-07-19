@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, Univer, Workbook } from '@univerjs/core';
+import type { Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     ICommandService,
@@ -24,7 +24,6 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';

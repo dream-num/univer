@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { DependentOn, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DependentOn, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';

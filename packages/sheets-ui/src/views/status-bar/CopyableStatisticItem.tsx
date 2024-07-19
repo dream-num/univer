@@ -18,7 +18,7 @@ import { LocaleService } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import type { IFunctionNames } from '@univerjs/engine-formula';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL, FUNCTION_NAMES_TEXT } from '@univerjs/engine-formula';
-import numfmt from '@univerjs/engine-numfmt';
+import { numfmt } from '@univerjs/engine-numfmt';
 import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';

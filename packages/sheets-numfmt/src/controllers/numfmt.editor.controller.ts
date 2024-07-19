@@ -24,7 +24,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import numfmt from '@univerjs/engine-numfmt';
+import { numfmt } from '@univerjs/engine-numfmt';
 import type {
     INumfmtItemWithCache,
     IRemoveNumfmtMutationParams,

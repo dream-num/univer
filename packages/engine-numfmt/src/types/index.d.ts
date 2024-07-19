@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-declare module 'numfmt' {}
+declare module 'numfmt' {
+    import type { Numfmt } from '../type';
+
+    export default Numfmt;
+}

@@ -16,7 +16,7 @@
 
 import { LocaleService } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
-import numfmt from '@univerjs/engine-numfmt';
+import { numfmt } from '@univerjs/engine-numfmt';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';

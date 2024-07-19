@@ -38,7 +38,7 @@ import {
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
-import numfmt from '@univerjs/engine-numfmt';
+import { numfmt } from '@univerjs/engine-numfmt';
 import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';

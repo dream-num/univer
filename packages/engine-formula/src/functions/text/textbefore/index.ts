@@ -41,19 +41,19 @@ export class Textbefore extends BaseFunction {
         // get max row length
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,
-            instanceNum?.isArray() ? (instanceNum as ArrayValueObject).getRowCount() : 1,
-            matchMode?.isArray() ? (matchMode as ArrayValueObject).getRowCount() : 1,
-            matchEnd?.isArray() ? (matchEnd as ArrayValueObject).getRowCount() : 1,
-            ifNotFound?.isArray() ? (ifNotFound as ArrayValueObject).getRowCount() : 1
+            instanceNum.isArray() ? (instanceNum as ArrayValueObject).getRowCount() : 1,
+            matchMode.isArray() ? (matchMode as ArrayValueObject).getRowCount() : 1,
+            matchEnd.isArray() ? (matchEnd as ArrayValueObject).getRowCount() : 1,
+            ifNotFound.isArray() ? (ifNotFound as ArrayValueObject).getRowCount() : 1
         );
 
         // get max column length
         const maxColumnLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getColumnCount() : 1,
-            instanceNum?.isArray() ? (instanceNum as ArrayValueObject).getColumnCount() : 1,
-            matchMode?.isArray() ? (matchMode as ArrayValueObject).getColumnCount() : 1,
-            matchEnd?.isArray() ? (matchEnd as ArrayValueObject).getColumnCount() : 1,
-            ifNotFound?.isArray() ? (ifNotFound as ArrayValueObject).getColumnCount() : 1
+            instanceNum.isArray() ? (instanceNum as ArrayValueObject).getColumnCount() : 1,
+            matchMode.isArray() ? (matchMode as ArrayValueObject).getColumnCount() : 1,
+            matchEnd.isArray() ? (matchEnd as ArrayValueObject).getColumnCount() : 1,
+            ifNotFound.isArray() ? (ifNotFound as ArrayValueObject).getColumnCount() : 1
         );
 
         const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, ErrorValueObject.create(ErrorType.NA));

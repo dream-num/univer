@@ -551,8 +551,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '要拆分的文本。' },
+            colDelimiter: { name: '列分隔符', detail: '要拆分列依据的字符或字符串。' },
+            rowDelimiter: { name: '行分隔符', detail: '要拆分行依据的字符或字符串。' },
+            ignoreEmpty: { name: '忽略空单元格', detail: '是否忽略空单元格。默认为 FALSE。' },
+            matchMode: { name: '匹配模式', detail: '搜索文本中的分隔符匹配。默认情况下，会进行区分大小写的匹配。' },
+            padWith: { name: '填充值', detail: '用于填充的值。默认情况下，使用 #N/A。' },
         },
     },
     TRIM: {

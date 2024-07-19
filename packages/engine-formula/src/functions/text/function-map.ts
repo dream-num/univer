@@ -24,6 +24,7 @@ import { Rept } from './rept';
 import { Text } from './text';
 import { Textafter } from './textafter';
 import { Textbefore } from './textbefore';
+import { Textsplit } from './textsplit';
 
 export const functionText = [
     [Concat, FUNCTION_NAMES_TEXT.CONCAT],
@@ -35,4 +36,5 @@ export const functionText = [
     [Text, FUNCTION_NAMES_TEXT.TEXT],
     [Textafter, FUNCTION_NAMES_TEXT.TEXTAFTER],
     [Textbefore, FUNCTION_NAMES_TEXT.TEXTBEFORE],
+    [Textsplit, FUNCTION_NAMES_TEXT.TEXTSPLIT],
 ];

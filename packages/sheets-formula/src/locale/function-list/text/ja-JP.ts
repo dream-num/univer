@@ -552,8 +552,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '分割するテキスト。' },
+            colDelimiter: { name: '列デリミタ', detail: '列を分割する文字または文字列。' },
+            rowDelimiter: { name: '行デリミタ', detail: '行を分割する文字または文字列。' },
+            ignoreEmpty: { name: '空のセルを無視する', detail: '空のセルを無視するかどうか。デフォルトはFALSEです。' },
+            matchMode: { name: 'マッチモード', detail: 'テキスト内の区切り文字の一致を検索します。デフォルトでは、大文字と小文字が区別された照合が行われます。' },
+            padWith: { name: '塗りつぶし値', detail: 'パディングに使用する値。デフォルトでは、#N/A が使用されます。' },
         },
     },
     TRIM: {

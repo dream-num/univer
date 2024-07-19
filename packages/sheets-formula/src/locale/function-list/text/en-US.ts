@@ -551,8 +551,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text to split.' },
+            colDelimiter: { name: 'col_delimiter', detail: 'The character or string by which to split the column.' },
+            rowDelimiter: { name: 'row_delimiter', detail: 'The character or string on which to split the line.' },
+            ignoreEmpty: { name: 'ignore_empty', detail: 'Whether to ignore empty cells. The default is FALSE.' },
+            matchMode: { name: 'match_mode', detail: 'Searches for a delimiter match in the text. By default, a case-sensitive match is done.' },
+            padWith: { name: 'pad_with', detail: 'The value to use for padding. By default, #N/A is used.' },
         },
     },
     TRIM: {

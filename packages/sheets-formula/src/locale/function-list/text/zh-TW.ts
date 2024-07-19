@@ -550,8 +550,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '要拆分的文字。' },
+            colDelimiter: { name: '列分隔符', detail: '若要拆分列依據的字元或字串。' },
+            rowDelimiter: { name: '行分隔符', detail: '若要拆分行依據的字元或字串。' },
+            ignoreEmpty: { name: '忽略空單元格', detail: '是否忽略空單元格。預設為 FALSE。' },
+            matchMode: { name: '匹配模式', detail: '搜尋文字中的分隔符號匹配。預設情況下，會進行區分大小寫的匹配。' },
+            padWith: { name: '填充值', detail: '用於填充的值。預設情況下，使用 #N/A。' },
         },
     },
     TRIM: {

@@ -1,8 +1,52 @@
 .recent-files {
-    margin-bottom: 20px;
+    h2 {
+        margin: 28px 0 8px 32px;
+    }
 }
 
-.file-cards {
+.file-list-title {
     display: flex;
-    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 32px;
+    font-weight: 500;
+    color: var(--secondary-color);
+
+    .file-name {
+        flex: 2;
+    }
+
+    .file-owner,
+    .file-last-modified {
+        flex: 1;
+    }
+}
+
+.file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.file-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--primary-bg);
+
+    .file-name {
+        display: flex;
+        align-items: center;
+        flex: 2;
+    }
+
+    .file-icon {
+        margin-right: 10px;
+    }
+
+    .file-owner,
+    .file-last-modified {
+        flex: 1;
+    }
 }

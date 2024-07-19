@@ -1,0 +1,26 @@
+.btn {
+    border: none;
+    cursor: pointer;
+    font-family: Poppins;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.primary {
+        background-color: var(--primary-color);
+        color: var(--primary-bg);
+    }
+
+    &.default {
+        background-color: var(--primary-bg);
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+    }
+
+    &.text {
+        background: none;
+    }
+}

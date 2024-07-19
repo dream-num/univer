@@ -1,64 +1,84 @@
 .uni-sidebar {
-    width: 250px;
-    background-color: #f4f4f4;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    width: 260px;
+    background-color: var(--primary-bg);
+    padding: 12px;
     display: flex;
+    box-sizing: border-box;
     flex-direction: column;
+    border-right: 1px solid var(--border-color);
 }
 
 .uni-sidebar-header {
-    text-align: center;
+    display: flex;
 }
 
-.uni-logo {
-    width: 100%;
+.uni-sidebar-nav {
+    overflow-y: auto;
 }
 
 .uni-sidebar-nav ul {
     list-style-type: none;
-    padding: 0;
-}
-
-.uni-sidebar-nav ul li {
-    margin-bottom: 10px;
-    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .uni-sidebar-nav ul li a {
     display: flex;
     align-items: center;
-    padding: 10px;
     text-decoration: none;
-    color: #333;
-    font-weight: bold;
+    color: var(--text-color);
     border-radius: 8px; /* 圆角 */
     transition:
         background-color 0.3s,
         color 0.3s; /* 添加过渡效果 */
 }
 
+.uni-sidebar-nav ul.uni-sidebar-nav-tab li a {
+    padding: 6px 0 6px 24px;
+}
+
 .uni-sidebar-nav ul li a:hover {
-    background-color: rgba(30, 34, 43, 0.06); /* 悬停状态背景色 */
+    background-color: var(--secondary-bg); /* 悬停状态背景色 */
 }
 
 .uni-sidebar-nav ul li a.uni-active {
     color: #274fee; /* 激活状态文本颜色 */
     background-color: rgba(39, 79, 238, 0.08); /* 激活状态背景色 */
-    border-radius: 8px; /* 激活状态圆角 */
+    font-weight: 500;
 }
 
 .uni-icon {
-    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
 }
 
 .uni-sidebar-footer {
     margin-top: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    flex-direction: column;
 }
 
 .uni-sidebar-footer a {
     display: block;
-    margin-bottom: 10px;
-    color: #333;
+    color: var(--text-color);
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 6px 0 6px 24px;
+}
+
+.uni-sidebar-footer a svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+}
+
+.uni-dividing-line {
+    width: 100%;
+    margin: 6px 0;
+    border-bottom: 1px solid var(--border-color);
 }

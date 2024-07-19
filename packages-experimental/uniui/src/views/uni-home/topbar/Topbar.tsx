@@ -14,23 +14,51 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { DetailsSingle, IncreaseSingle, Progress50Single, SearchSingle16, UploadSingle } from '@univerjs/icons';
+import Button from '../../../components/button/Button';
 import styles from './index.module.less';
 
 export const Topbar: React.FC = () => {
+    const [darkMode, setDarkMode] = useState(false);
+
+    const toggleDarkMode = () => {
+        setDarkMode(!darkMode);
+        if (darkMode) {
+            document.body.classList.remove('dark-mode');
+        } else {
+            document.body.classList.add('dark-mode');
+        }
+    };
+
     return (
         <div className={styles.topbar}>
-            <input
-                type="text"
-                placeholder="Search For File Name, Creation Time, Creator"
-                className={styles.searchBar}
-            />
+            <div className={styles.searchContainer}>
+                <SearchSingle16 className={styles.searchIcon} />
+                <input
+                    type="text"
+                    className={styles.searchInput}
+                    placeholder="Search For File Name, Creation Time, Creator"
+                />
+                <span className={styles.shortcutHint}>
+                    <kbd>⌘</kbd>
+                    {' '}
+                    +
+                    <kbd>K</kbd>
+                </span>
+            </div>
             <div className={styles.topbarActions}>
-                <button>+ New</button>
-                <button>Upload</button>
-                <button>🌐</button>
-                <button>🔔</button>
-                <img src="/uni-home/assets/images/avatar.png" alt="User Avatar" className={styles.avatar} />
+                <Button type="primary">
+                    <IncreaseSingle className={styles.topbarActionsButtonIcon} />
+                    <span className={styles.topbarActionsNew}>New</span>
+                </Button>
+                <Button type="default">
+                    <UploadSingle className={styles.topbarActionsButtonIcon} />
+                    Upload
+                </Button>
+                <div className={styles.topbarActionsIcon}><Progress50Single /></div>
+                <div className={styles.topbarActionsIcon}><DetailsSingle /></div>
+                <img src="./assets/images/avatar.png" alt="User Avatar" className={styles.avatar} />
             </div>
         </div>
     );

@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import { RecentFiles } from '../recent-files/RecentFiles';
+export function convertToDashCase(input: string): string {
+    const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
 
-export const Home: React.FC = () => {
-    return (
-        <div>
-            {/* This component is not used for the time being */}
-            {/* <RecentFiles /> */}
-            <RecentFiles />
-        </div>
-    );
-};
+    return `--${dashCase}`;
+}

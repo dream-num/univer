@@ -15,14 +15,23 @@
  */
 
 import React from 'react';
-import { RecentFiles } from '../recent-files/RecentFiles';
+import styles from './index.module.less';
 
-export const Home: React.FC = () => {
+interface ButtonProps {
+    type: 'primary' | 'default' | 'text';
+    children: React.ReactNode;
+    onClick?: () => void;
+    className?: string;
+}
+
+const Button = ({ type, children, onClick, className }: ButtonProps) => {
+    const buttonClass = `${styles.btn} ${styles[type]} ${className}`;
+
     return (
-        <div>
-            {/* This component is not used for the time being */}
-            {/* <RecentFiles /> */}
-            <RecentFiles />
-        </div>
+        <button className={buttonClass} onClick={onClick} type="button">
+            {children}
+        </button>
     );
 };
+
+export default Button;

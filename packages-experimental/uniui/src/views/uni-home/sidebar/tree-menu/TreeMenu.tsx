@@ -16,7 +16,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DownSingle, FileLockSingle, FolderSingle } from '@univerjs/icons';
+import { DownSingle, FolderSingle, SaveSingle } from '@univerjs/icons';
 import styles from './index.module.less';
 
 interface TreeNode {
@@ -54,7 +54,7 @@ export const TreeMenu: React.FC<TreeMenuProps> = ({ data }) => {
                                     >
                                         <DownSingle />
                                     </span>
-                                    <FolderSingle />
+                                    <FolderSingle className={styles.icon} />
                                     {' '}
                                     {node.name}
                                 </div>
@@ -64,7 +64,7 @@ export const TreeMenu: React.FC<TreeMenuProps> = ({ data }) => {
                         : (
                             <Link to={node.path || '#'} className={styles.file}>
                                 <span className={styles.arrowPlaceholder}></span>
-                                <FileLockSingle />
+                                <SaveSingle className={styles.icon} />
                                 {' '}
                                 {node.name}
                             </Link>

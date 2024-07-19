@@ -7,14 +7,31 @@
 
         <link rel="icon" type="image/x-icon" href="../favicon.svg" />
         <link rel="stylesheet" href="./main.css" />
+
         <style>
-            html,
-            body {
-                height: 100%;
-                margin: 0;
+            @font-face {
+                font-family: 'Poppins';
+                src: url('./assets/fonts/Poppins-Regular.ttf')
+                    format('truetype');
+                font-weight: 400;
+                font-style: normal;
+            }
+
+            @font-face {
+                font-family: 'Poppins';
+                src: url('./assets/fonts/Poppins-Medium.ttf') format('truetype');
+                font-weight: 500;
+                font-style: normal;
+            }
+
+            @font-face {
+                font-family: 'Poppins';
+                src: url('./assets/fonts/Poppins-SemiBold.ttf')
+                    format('truetype');
+                font-weight: 600;
+                font-style: normal;
             }
         </style>
-
         <script>
             new EventSource('/esbuild').addEventListener('change', () => {
                 console.info('reload--');
@@ -23,8 +40,8 @@
         </script>
     </head>
 
-    <body style="overflow: hidden">
-        <div id="app" style="height: 100%"></div>
+    <body>
+        <div id="app"></div>
 
         <script src="./main.js"></script>
     </body>

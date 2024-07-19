@@ -403,7 +403,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const scene = sheetObject.scene;
 
         const scale = Math.max(scene.scaleX, scene.scaleY);
-        const currentScroll = this._scrollManagerService.getCurrentScrollInfo();
+        const currentScroll = this._scrollManagerService.getCurrentScrollState();
 
         const skeletonViewHeight = (sheetObject.engine.height - skeleton.columnHeaderHeight) / scale;
         const start = currentScroll?.sheetViewStartRow ?? 0;
@@ -597,7 +597,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 // alert(`moveColumnTo: ${this._changeToColumn}`);
             }
 
-            const sheetViewScroll = this._scrollManagerService.getCurrentScrollInfo() || {
+            const sheetViewScroll = this._scrollManagerService.getCurrentScrollState() || {
                 sheetViewStartRow: 0,
                 sheetViewStartColumn: 0,
             };

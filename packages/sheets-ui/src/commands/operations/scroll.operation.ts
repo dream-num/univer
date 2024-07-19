@@ -21,7 +21,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IScrollManagerWithSearchParam } from '../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
-export const SetScrollOperation: IOperation<IScrollManagerWithSearchParam> = {
+export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
     id: 'sheet.operation.set-scroll',
     type: CommandType.OPERATION,
 

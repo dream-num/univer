@@ -172,7 +172,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 // wheel event --> set-scroll.command('sheet.operation.set-scroll') --> scroll.operation.ts -->
                 // scrollManagerService.setScrollInfoAndEmitEvent --->  scrollManagerService.setScrollInfo(raw value, may be negative) &&
                 // _notifyCurrentScrollInfo
-                this._scrollManagerService.rawScrollInfo$.subscribe((rawScrollInfo: Nullable<IScrollManagerParam>) => {
+                this._scrollManagerService.rawScrollInfo$.subscribe((rawScrollInfo: Nullable<IScrollState>) => {
                     if (rawScrollInfo == null) {
                         viewportMain.scrollToViewportPos({
                             viewportScrollX: 0,
@@ -227,7 +227,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     offsetY: rowOffset,
                 };
                 // lastestScrollInfo derived from viewportScrollX, viewportScrollY from onScrollAfter$
-                this._scrollManagerService.setScrollInfoToCurrSheet(scrollInfo);
+                this._scrollManagerService.setScrollStateToCurrSheet(scrollInfo);
                 this._scrollManagerService.validViewportScrollInfo$.next({
                     ...scrollInfo,
                     scrollX,
@@ -279,13 +279,13 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 if (param == null) {
                     return;
                 }
-                const scrollParam = { unitId: param.unitId, sheetId: param.sheetId } as IScrollManagerSearchParam;
+                const scrollParam = { unitId: param.unitId, sheetId: param.sheetId } as IScrollStateSearchParam;
                 this._scrollManagerService.setSearchParam(scrollParam);
                 const sheetObject = this._getSheetObject();
                 if (!sheetObject) return;
                 const scene = sheetObject.scene;
                 const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-                const currScrollInfo = this._scrollManagerService.getScrollInfoByParam(scrollParam);
+                const currScrollInfo = this._scrollManagerService.getScrollStateByParam(scrollParam);
                 const { viewportScrollX, viewportScrollY } = this._scrollManagerService.calcViewportScrollFromRowColOffset(currScrollInfo as unknown as Nullable<IViewportScrollState>);
                 if (viewportMain) {
                     if (currScrollInfo) {
@@ -373,7 +373,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             }
 
             // get scrollInfo from packages/sheets-ui/src/commands/commands/set-scroll.command.ts
-            const _currentScroll = scrollManagerService.getCurrentScrollInfo();
+            const _currentScroll = scrollManagerService.getCurrentScrollState();
 
             lastPointerPos.x = e.offsetX;
             lastPointerPos.y = e.offsetY;
@@ -578,7 +578,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) return false;
 
-        const { offsetX, offsetY } = this._scrollManagerService.getCurrentScrollInfo() || {};
+        const { offsetX, offsetY } = this._scrollManagerService.getCurrentScrollState() || {};
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
             sheetViewStartRow: startSheetViewRow,
             sheetViewStartColumn: startSheetViewColumn,

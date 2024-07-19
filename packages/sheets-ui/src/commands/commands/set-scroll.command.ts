@@ -55,8 +55,7 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
 
         const { unitId, subUnitId, worksheet } = target;
         const { xSplit, ySplit } = worksheet.getConfig().freeze;
-        const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
-        const currentScroll = scrollManagerService.getCurrentScrollInfo();
+        const currentScroll = scrollManagerService.getCurrentScrollState();
         const { offsetX = 0, offsetY = 0 } = params || {};
         const {
             sheetViewStartRow = 0,
@@ -95,6 +94,8 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
+        const { workbook, worksheet } = target;
+        const currentScroll: Readonly<Nullable<IScrollState>> = scrollManagerService.getCurrentScrollState();
         const { workbook, worksheet, unitId } = target;
         const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
         const currentScroll: Readonly<Nullable<IScrollManagerParam>> = scrollManagerService.getCurrentScrollInfo();

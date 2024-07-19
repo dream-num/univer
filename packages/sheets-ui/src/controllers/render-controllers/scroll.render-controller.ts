@@ -170,7 +170,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 // wheel event --> set-scroll.command('sheet.operation.set-scroll') --> scroll.operation.ts -->
                 // scrollManagerService.setScrollInfoAndEmitEvent --->  scrollManagerService.setScrollInfo(raw value, may be negative) &&
                 // _notifyCurrentScrollInfo
-                this._scrollManagerService.rawScrollInfo$.subscribe((rawScrollInfo: Nullable<IScrollManagerParam>) => {
+                this._scrollManagerService.rawScrollInfo$.subscribe((rawScrollInfo: Nullable<IScrollState>) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                     if (!skeleton) return;
 
@@ -228,7 +228,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     offsetX: columnOffset,
                     offsetY: rowOffset,
                 };
-                this._scrollManagerService.setScrollInfoToCurrSheet(scrollInfo);
+                this._scrollManagerService.setScrollStateToCurrSheet(scrollInfo);
                 //#endregion
 
                 this._scrollManagerService.validViewportScrollInfo$.next({
@@ -282,13 +282,13 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 if (param == null) {
                     return;
                 }
-                const scrollParam = { unitId: param.unitId, sheetId: param.sheetId } as IScrollManagerSearchParam;
+                const scrollParam = { unitId: param.unitId, sheetId: param.sheetId } as IScrollStateSearchParam;
                 this._scrollManagerService.setSearchParam(scrollParam);
                 const sheetObject = this._getSheetObject();
                 if (!sheetObject) return;
                 const scene = sheetObject.scene;
                 const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-                const currScrollInfo = this._scrollManagerService.getScrollInfoByParam(scrollParam);
+                const currScrollInfo = this._scrollManagerService.getScrollStateByParam(scrollParam);
                 const { viewportScrollX, viewportScrollY } = this._scrollManagerService.calcViewportScrollFromRowColOffset(currScrollInfo as unknown as Nullable<IViewportScrollState>);
                 if (viewportMain) {
                     if (currScrollInfo) {
@@ -484,7 +484,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) return false;
 
-        const { offsetX, offsetY } = this._scrollManagerService.getCurrentScrollInfo() || {};
+        const { offsetX, offsetY } = this._scrollManagerService.getCurrentScrollState() || {};
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
             sheetViewStartRow: startSheetViewRow,
             sheetViewStartColumn: startSheetViewColumn,

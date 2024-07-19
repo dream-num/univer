@@ -113,10 +113,18 @@ export class Viewport {
     private _deltaViewportScrollY: number = 0;
 
     /**
-     * physcal scene size (scene width in curr viewport * scale)
+     * scene size in current viewport port with scale
+     * scene size relative to row col settings.
+     * if AB col has set to be freeze, then scene size in viewMain will be smaller compared to no freeze state.
      */
     private _sceneWCurrVpAfterScale: number = 0;
     private _sceneHCurrVpAfterScale: number = 0;
+
+    /**
+     * scene size with scale
+     */
+    private _sceneWidthAfterScale: number;
+    private _sceneHeightAfterScale: number;
 
     onMouseWheel$ = new EventSubject<IWheelEvent>();
 
@@ -1186,11 +1194,15 @@ export class Viewport {
     _limitViewportScroll(viewportScrollX: number, viewportScrollY: number) {
         const { width, height } = this._getViewPortSize();
         // Not enough! freeze row & col should also take into consideration.
-        const maxViewportScrollY = this._sceneHCurrVpAfterScale - height;
-        const maxViewportScrollX = this._sceneWCurrVpAfterScale - width;
+        const freezeHeight = this._paddingEndY - this._paddingStartY;
+        const freezeWidth = this._paddingEndX - this._paddingStartX;
+        const scaleY = this.scene.scaleY;
+        const scaleX = this.scene.scaleX;
+        const maxViewportScrollX = this._sceneWidthAfterScale - freezeWidth * scaleX - width;
+        const maxViewportScrollY = this._sceneHeightAfterScale - freezeHeight * scaleY - height;
         return {
-            viewportScrollX: Tools.clamp(viewportScrollX, 0, maxViewportScrollX),
-            viewportScrollY: Tools.clamp(viewportScrollY, 0, maxViewportScrollY),
+            viewportScrollX: Tools.clamp(viewportScrollX, this._paddingStartX, maxViewportScrollX / scaleX),
+            viewportScrollY: Tools.clamp(viewportScrollY, this._paddingStartY, maxViewportScrollY / scaleY),
             isLimitedX: viewportScrollX > maxViewportScrollX,
             isLimitedY: viewportScrollY > maxViewportScrollY,
         };
@@ -1253,6 +1265,8 @@ export class Viewport {
         const sceneHeightCurrVpAfterScale = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
         this._sceneWCurrVpAfterScale = sceneWidthCurrVpAfterScale;
         this._sceneHCurrVpAfterScale = sceneHeightCurrVpAfterScale;
+        this._sceneWidthAfterScale = this._scene.width * this._scene.scaleX;
+        this._sceneHeightAfterScale = this._scene.height * this._scene.scaleY;
 
         if (this._scrollBar) {
             this._scrollBar.resize(width, height, sceneWidthCurrVpAfterScale, sceneHeightCurrVpAfterScale);
@@ -1407,12 +1421,19 @@ export class Viewport {
         let viewportScrollX = scrollVpPos.viewportScrollX ?? this.viewportScrollX;
         let viewportScrollY = scrollVpPos.viewportScrollY ?? this.viewportScrollY;
         const rawScrollXY = this.transViewportScroll2ScrollValue(viewportScrollX, viewportScrollY);
-        const afterLimit = this.limitedScroll(rawScrollXY.x, rawScrollXY.y);
-        const scrollX = afterLimit.scrollX;
-        const scrollY = afterLimit.scrollY;
-        const afterLimitViewportXY = this.transScroll2ViewportScrollValue(scrollX, scrollY);
-        viewportScrollX = afterLimitViewportXY.x;
-        viewportScrollY = afterLimitViewportXY.y;
+        // const afterLimit = this.limitedScroll(rawScrollXY.x, rawScrollXY.y);
+        // const scrollX = afterLimit.scrollX;
+        // const scrollY = afterLimit.scrollY;
+        // const afterLimitViewportXY = this.transScroll2ViewportScrollValue(scrollX, scrollY);
+        // viewportScrollX = afterLimitViewportXY.x;
+        // viewportScrollY = afterLimitViewportXY.y;
+        const afterLimitViewportXY = this._limitViewportScroll(viewportScrollX, viewportScrollY);
+        viewportScrollX = afterLimitViewportXY.viewportScrollX;
+        viewportScrollY = afterLimitViewportXY.viewportScrollY;
+        const afterLimitScrollXY = this.transViewportScroll2ScrollValue(viewportScrollX, viewportScrollY);
+        const scrollX = afterLimitScrollXY.x;
+        const scrollY = afterLimitScrollXY.y;
+
         this.scrollX = scrollX;
         this.scrollY = scrollY;
         this.viewportScrollX = viewportScrollX;
@@ -1437,7 +1458,7 @@ export class Viewport {
         this.onScrollAfter$.emitEvent(scrollSubParam);
         this._emitScrollEnd$(scrollSubParam);
 
-        return afterLimit;
+        return afterLimitViewportXY;
     }
 
     expandBounds(value: { top: number; left: number; bottom: number; right: number }) {

@@ -40,7 +40,7 @@ export interface IValidStatusChange {
 
 export class DataValidationModel<T extends IDataValidationRule = IDataValidationRule> extends Disposable {
     private readonly _model = new Map<string, Map<string, DataValidationManager<T>>>();
-    private _managerCreator: ManagerCreator<T> = (unitId: string, subUnitId: string) => new DataValidationManager<T>(unitId, subUnitId, []);
+    private _managerCreator: ManagerCreator<T> = (unitId: string, subUnitId: string) => new DataValidationManager<T>(unitId, subUnitId);
     private readonly _ruleChange$ = new Subject<IRuleChange<T>>();
     private readonly _validStatusChange$ = new Subject<IValidStatusChange>();
 

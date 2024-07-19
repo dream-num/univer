@@ -408,8 +408,10 @@ export function insertCustomRanges(
                     body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
 
                 if (isClosed) {
+                    insertCustomRanges.push(customRange);
                     continue;
                 }
+
                 // old is start
                 if (body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
                     oldCustomRange.endIndex = customRange.endIndex;

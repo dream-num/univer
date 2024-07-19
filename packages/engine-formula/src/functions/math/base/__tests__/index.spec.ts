@@ -20,7 +20,6 @@ import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Base } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../../basics/error-type';
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
@@ -32,28 +31,28 @@ describe('Test base function', () => {
             const number = NumberValueObject.create(15);
             const radix = NumberValueObject.create(2);
             const minLength = NumberValueObject.create(10);
-            const result = testFunction.calculate(number, radix, minLength) as BaseValueObject;
+            const result = testFunction.calculate(number, radix, minLength);
             expect(result.getValue()).toBe('0000001111');
         });
 
         it('number value is 2**53', () => {
             const number = NumberValueObject.create(2 ** 53);
             const radix = NumberValueObject.create(2);
-            const result = testFunction.calculate(number, radix) as BaseValueObject;
+            const result = testFunction.calculate(number, radix);
             expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
         it('radix value is 1.5', () => {
             const number = NumberValueObject.create(15);
             const radix = NumberValueObject.create(1.5);
-            const result = testFunction.calculate(number, radix) as BaseValueObject;
+            const result = testFunction.calculate(number, radix);
             expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
         it('radix value is 37', () => {
             const number = NumberValueObject.create(15);
             const radix = NumberValueObject.create(37);
-            const result = testFunction.calculate(number, radix) as BaseValueObject;
+            const result = testFunction.calculate(number, radix);
             expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
@@ -61,7 +60,7 @@ describe('Test base function', () => {
             const number = NumberValueObject.create(15);
             const radix = NumberValueObject.create(2);
             const minLength = NumberValueObject.create(-2);
-            const result = testFunction.calculate(number, radix, minLength) as BaseValueObject;
+            const result = testFunction.calculate(number, radix, minLength);
             expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
@@ -69,7 +68,7 @@ describe('Test base function', () => {
             const number = StringValueObject.create('15');
             const radix = NumberValueObject.create(2);
             const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength) as BaseValueObject;
+            const result = testFunction.calculate(number, radix, minLength);
             expect(result.getValue()).toBe('0001111');
         });
 
@@ -77,7 +76,7 @@ describe('Test base function', () => {
             const number = StringValueObject.create('test');
             const radix = NumberValueObject.create(2);
             const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength) as BaseValueObject;
+            const result = testFunction.calculate(number, radix, minLength);
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
@@ -85,7 +84,7 @@ describe('Test base function', () => {
             const number = BooleanValueObject.create(true);
             const radix = NumberValueObject.create(2);
             const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength) as BaseValueObject;
+            const result = testFunction.calculate(number, radix, minLength);
             expect(result.getValue()).toBe('0000001');
         });
 
@@ -93,7 +92,7 @@ describe('Test base function', () => {
             const number = NullValueObject.create();
             const radix = NumberValueObject.create(2);
             const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength) as BaseValueObject;
+            const result = testFunction.calculate(number, radix, minLength);
             expect(result.getValue()).toBe('0000000');
         });
 
@@ -101,7 +100,7 @@ describe('Test base function', () => {
             const number = ErrorValueObject.create(ErrorType.NAME);
             const radix = NumberValueObject.create(2);
             const minLength = StringValueObject.create('7');
-            const result = testFunction.calculate(number, radix, minLength) as BaseValueObject;
+            const result = testFunction.calculate(number, radix, minLength);
             expect(result.getValue()).toBe(ErrorType.NAME);
         });
 

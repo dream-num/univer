@@ -43,7 +43,7 @@ export function divide(a: number, b: number): number {
  * @returns The rounded number.
  */
 export function round(base: number, precision: number): number {
-    const factor = 10 ** Math.floor(precision);
+    const factor = 10 ** Math.trunc(precision);
     const epsilon = baseEpsilon(base, factor);
     return Math.round(multiply(base, factor) + epsilon) / factor;
 }
@@ -55,7 +55,7 @@ export function round(base: number, precision: number): number {
  * @returns The floored number.
  */
 export function floor(base: number, precision: number): number {
-    const factor = 10 ** Math.floor(precision);
+    const factor = 10 ** Math.trunc(precision);
     const epsilon = baseEpsilon(base, factor);
     return Math.floor(multiply(base, factor) + epsilon) / factor;
 }
@@ -67,7 +67,7 @@ export function floor(base: number, precision: number): number {
  * @returns The ceiled number.
  */
 export function ceil(base: number, precision: number): number {
-    const factor = 10 ** Math.floor(precision);
+    const factor = 10 ** Math.trunc(precision);
     const epsilon = baseEpsilon(base, factor);
     return Math.ceil(multiply(base, factor) - epsilon) / factor;
 }

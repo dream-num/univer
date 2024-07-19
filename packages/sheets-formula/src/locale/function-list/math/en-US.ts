@@ -202,8 +202,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value you want to round.' },
+            significance: { name: 'significance', detail: 'The multiple to which you want to round.' },
         },
     },
     CEILING_MATH: {
@@ -216,8 +216,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value you want to round.' },
+            significance: { name: 'significance', detail: 'The multiple to which you want to round.' },
+            mode: { name: 'mode', detail: 'For negative numbers, controls whether Number is rounded toward or away from zero.' },
         },
     },
     CEILING_PRECISE: {
@@ -230,8 +231,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value you want to round.' },
+            significance: { name: 'significance', detail: 'The multiple to which you want to round.' },
         },
     },
     COMBIN: {
@@ -350,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The string length of Text must be less than or equal to 255 characters.' },
+            radix: { name: 'radix', detail: 'The base radix that you want to convert the number into. Must be an integer greater than or equal to 2 and less than or equal to 36.' },
         },
     },
     DEGREES: {
@@ -364,8 +365,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: 'angle', detail: 'The angle in radians that you want to convert.' },
         },
     },
     EVEN: {
@@ -378,8 +378,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value to round.' },
         },
     },
     EXP: {
@@ -392,8 +391,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The exponent applied to the base e.' },
         },
     },
     FACT: {
@@ -434,8 +432,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value you want to round.' },
+            significance: { name: 'significance', detail: 'The multiple to which you want to round.' },
         },
     },
     FLOOR_MATH: {
@@ -448,8 +446,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value you want to round.' },
+            significance: { name: 'significance', detail: 'The multiple to which you want to round.' },
+            mode: { name: 'mode', detail: 'For negative numbers, controls whether Number is rounded toward or away from zero.' },
         },
     },
     FLOOR_PRECISE: {
@@ -462,8 +461,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value you want to round.' },
+            significance: { name: 'significance', detail: 'The multiple to which you want to round.' },
         },
     },
     GCD: {
@@ -546,8 +545,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The positive real number for which you want the natural logarithm.' },
         },
     },
     LOG: {
@@ -560,8 +558,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The positive real number for which you want the logarithm.' },
+            base: { name: 'base', detail: 'The base of the logarithm. If base is omitted, it is assumed to be 10.' },
         },
     },
     LOG10: {
@@ -574,8 +572,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The positive real number for which you want the base-10 logarithm.' },
         },
     },
     MDETERM: {
@@ -644,8 +641,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value to round.' },
+            multiple: { name: 'multiple', detail: 'The multiple to which you want to round number.' },
         },
     },
     MULTINOMIAL: {
@@ -686,8 +683,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value to round.' },
         },
     },
     PI: {
@@ -700,8 +696,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     POWER: {
@@ -756,8 +750,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: 'angle', detail: 'An angle in degrees that you want to convert.' },
         },
     },
     RAND: {
@@ -770,8 +763,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     RANDARRAY: {
@@ -784,8 +775,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: 'rows', detail: 'The number of rows to be returned' },
+            columns: { name: 'columns', detail: 'The number of columns to be returned' },
+            min: { name: 'min', detail: 'The minimum number you would like returned' },
+            max: { name: 'max', detail: 'The maximum number you would like returned' },
+            wholeNumber: { name: 'whole_number', detail: 'Return a whole number or a decimal value' },
         },
     },
     RANDBETWEEN: {
@@ -798,8 +792,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            bottom: { name: 'bottom', detail: 'The smallest integer RANDBETWEEN will return.' },
+            top: { name: 'top', detail: 'The largest integer RANDBETWEEN will return.' },
         },
     },
     ROMAN: {
@@ -826,8 +820,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number that you want to round.' },
+            numDigits: { name: 'num_digits', detail: 'The number of digits to which you want to round the number argument.' },
         },
     },
     ROUNDDOWN: {
@@ -840,8 +834,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number that you want to round.' },
+            numDigits: { name: 'num_digits', detail: 'The number of digits to which you want to round the number argument.' },
         },
     },
     ROUNDUP: {
@@ -854,8 +848,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number that you want to round.' },
+            numDigits: { name: 'num_digits', detail: 'The number of digits to which you want to round the number argument.' },
         },
     },
     SEC: {
@@ -868,8 +862,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number is the angle in radians for which you want the secant.' },
         },
     },
     SECH: {
@@ -882,8 +875,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number is the angle in radians for which you want the hyperbolic secant.' },
         },
     },
     SERIESSUM: {
@@ -964,8 +956,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number for which you want the square root.' },
         },
     },
     SQRTPI: {
@@ -978,8 +969,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number by which pi is multiplied.' },
         },
     },
     SUBTOTAL: {
@@ -1082,8 +1072,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'To square and find the first number, you can also use a single array or a reference to an array instead of comma-separated parameters.' },
+            number2: { name: 'number2', detail: 'The second number to be squared and summed. Up to 255 numbers can be specified in this way.' },
         },
     },
     SUMX2MY2: {
@@ -1096,8 +1086,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: 'array_x', detail: 'The first array or range of values.' },
+            arrayY: { name: 'array_y', detail: 'The second array or range of values.' },
         },
     },
     SUMX2PY2: {
@@ -1110,8 +1100,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: 'array_x', detail: 'The first array or range of values.' },
+            arrayY: { name: 'array_y', detail: 'The second array or range of values.' },
         },
     },
     SUMXMY2: {
@@ -1124,8 +1114,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: 'array_x', detail: 'The first array or range of values.' },
+            arrayY: { name: 'array_y', detail: 'The second array or range of values.' },
         },
     },
     TAN: {

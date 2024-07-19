@@ -202,8 +202,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            significance: { name: '基準値', detail: '倍数の基準となる数値を指定します。' },
         },
     },
     CEILING_MATH: {
@@ -216,8 +216,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            significance: { name: '基準値', detail: '倍数の基準となる数値を指定します。' },
+            mode: { name: 'モード', detail: '負の数値の場合、数値を 0 に丸めるか、ゼロから遠ざけるかを制御します。' },
         },
     },
     CEILING_PRECISE: {
@@ -230,8 +231,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            significance: { name: '基準値', detail: '倍数の基準となる数値を指定します。' },
         },
     },
     COMBIN: {
@@ -350,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '文字列の長さは 255 文字以下にする必要があります。' },
+            radix: { name: '基数', detail: ' 数値を変換する基数 (底) の数値を指定します。 2 以上、36 以下の整数である必要があります。' },
         },
     },
     DEGREES: {
@@ -364,8 +365,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: '角度', detail: '度に変換するラジアン単位の角度を指定します。' },
         },
     },
     EVEN: {
@@ -378,8 +378,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
         },
     },
     EXP: {
@@ -392,8 +391,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'e を底とするべき乗の指数を指定します。' },
         },
     },
     FACT: {
@@ -434,8 +432,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            significance: { name: '基準値', detail: '倍数の基準となる数値を指定します。' },
         },
     },
     FLOOR_MATH: {
@@ -448,8 +446,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            significance: { name: '基準値', detail: '倍数の基準となる数値を指定します。' },
+            mode: { name: 'モード', detail: '負の数値の場合、数値を 0 に丸めるか、ゼロから遠ざけるかを制御します。' },
         },
     },
     FLOOR_PRECISE: {
@@ -462,8 +461,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            significance: { name: '基準値', detail: '倍数の基準となる数値を指定します。' },
         },
     },
     GCD: {
@@ -546,8 +545,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '自然対数を求める正の実数を指定します。' },
         },
     },
     LOG: {
@@ -560,8 +558,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '対数を求める正の実数を指定します。' },
+            base: { name: '底', detail: '対数の底を指定します。 底を省略すると、10 を指定したと見なされます。' },
         },
     },
     LOG10: {
@@ -574,8 +572,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '10 を底とする対数 (常用対数) を求める正の実数を指定します。' },
         },
     },
     MDETERM: {
@@ -644,8 +641,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
+            multiple: { name: '複数', detail: '数値を丸める倍数。' },
         },
     },
     MULTINOMIAL: {
@@ -686,8 +683,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '丸めの対象となる数値を指定します。' },
         },
     },
     PI: {
@@ -700,8 +696,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     POWER: {
@@ -756,8 +750,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            angle: { name: '角度', detail: 'ラジアンに変換する角度を指定します。' },
         },
     },
     RAND: {
@@ -770,8 +763,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     RANDARRAY: {
@@ -784,8 +775,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '行の数', detail: '返される行の数' },
+            columns: { name: '列の数', detail: '返される列の数' },
+            min: { name: '最小値', detail: '返される最小値' },
+            max: { name: '最大値', detail: '返される最大値' },
+            wholeNumber: { name: '整数', detail: '整数または 10 進数の値のどちらを返すのかを指定' },
         },
     },
     RANDBETWEEN: {
@@ -798,8 +792,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            bottom: { name: '最小値', detail: ' 乱数の最小値を整数で指定します。' },
+            top: { name: '最大値', detail: '乱数の最大値を整数で指定します。' },
         },
     },
     ROMAN: {
@@ -826,8 +820,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '四捨五入の対象となる数値を指定します。' },
+            numDigits: { name: '桁数', detail: '数値を四捨五入した結果の桁数を指定します。' },
         },
     },
     ROUNDDOWN: {
@@ -840,8 +834,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '四捨五入の対象となる数値を指定します。' },
+            numDigits: { name: '桁数', detail: '数値を四捨五入した結果の桁数を指定します。' },
         },
     },
     ROUNDUP: {
@@ -854,8 +848,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '四捨五入の対象となる数値を指定します。' },
+            numDigits: { name: '桁数', detail: '数値を四捨五入した結果の桁数を指定します。' },
         },
     },
     SEC: {
@@ -868,8 +862,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値は、セカントが必要なラジアンの角度です。' },
         },
     },
     SECH: {
@@ -882,8 +875,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値は、双曲線のセカントが必要なラジアンの角度です。' },
         },
     },
     SERIESSUM: {
@@ -964,8 +956,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '平方根を求める数値を指定します。' },
         },
     },
     SQRTPI: {
@@ -978,8 +969,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'π倍する数値を指定します。' },
         },
     },
     SUBTOTAL: {
@@ -1073,8 +1063,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '最初の数値を二乗して合計するには、コンマ区切りの引数の代わりに単一の配列または配列への参照を使用することもできます。' },
+            number2: { name: '数値2', detail: '二乗を合計する 2 番目の数値。この方法では、最大 255 個の番号を指定できます。' },
         },
     },
     SUMX2MY2: {
@@ -1087,8 +1077,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '配列1', detail: '対象となる一方の数値配列またはセル範囲を指定します。' },
+            arrayY: { name: '配列2', detail: '対象となるもう一方の数値配列またはセル範囲を指定します。' },
         },
     },
     SUMX2PY2: {
@@ -1101,8 +1091,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '配列1', detail: '対象となる一方の数値配列またはセル範囲を指定します。' },
+            arrayY: { name: '配列2', detail: '対象となるもう一方の数値配列またはセル範囲を指定します。' },
         },
     },
     SUMXMY2: {
@@ -1115,8 +1105,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            arrayX: { name: '配列1', detail: '対象となる一方の数値配列またはセル範囲を指定します。' },
+            arrayY: { name: '配列2', detail: '対象となるもう一方の数値配列またはセル範囲を指定します。' },
         },
     },
     TAN: {

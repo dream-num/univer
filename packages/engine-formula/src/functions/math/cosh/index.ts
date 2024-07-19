@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Cosh extends BaseFunction {
@@ -25,46 +22,15 @@ export class Cosh extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(variant: BaseValueObject) {
-        if (variant.isString()) {
-            variant = variant.convertToNumberObjectValue();
+    override calculate(number: BaseValueObject) {
+        if (number.isString()) {
+            number = number.convertToNumberObjectValue();
         }
 
-        if (variant.isError()) {
-            return variant;
+        if (number.isError()) {
+            return number;
         }
 
-        if ((variant as BaseValueObject).isArray()) {
-            return (variant as BaseValueObject).map((currentValue) => {
-                if (currentValue.isError()) {
-                    return currentValue;
-                }
-                return cosh(currentValue as BaseValueObject);
-            });
-        }
-
-        return cosh(variant as BaseValueObject);
+        return number.cosh();
     }
-}
-
-function cosh(num: BaseValueObject) {
-    let currentValue = num.getValue();
-
-    if (num.isBoolean()) {
-        currentValue = currentValue ? 1 : 0;
-    }
-
-    if (!Number.isFinite(currentValue)) {
-        return ErrorValueObject.create(ErrorType.VALUE);
-    }
-
-    currentValue = Number(currentValue);
-
-    const result = Math.cosh(currentValue);
-
-    if (Number.isNaN(result)) {
-        return ErrorValueObject.create(ErrorType.VALUE);
-    }
-
-    return NumberValueObject.create(result);
 }

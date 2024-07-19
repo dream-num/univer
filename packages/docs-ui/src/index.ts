@@ -24,6 +24,7 @@ export * from './services';
 export { DocsRenderService } from './services/docs-render.service';
 export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
+export { DocHoverManagerService } from './services/doc-hover-manager.service';
 
 // #region - all commands
 

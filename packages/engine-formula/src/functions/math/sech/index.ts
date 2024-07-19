@@ -17,6 +17,7 @@
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Sech extends BaseFunction {
@@ -52,6 +53,10 @@ export class Sech extends BaseFunction {
 
     private _handleSingleObject(number: BaseValueObject) {
         const numberValue = +number.getValue();
+
+        if (!Number.isFinite(Math.cosh(numberValue))) {
+            return NumberValueObject.create(0);
+        }
 
         if (Math.abs(numberValue) >= 2 ** 27) {
             return ErrorValueObject.create(ErrorType.NUM);

@@ -402,7 +402,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.65
-        version: 0.1.65(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -434,12 +434,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      react:
-        specifier: 18.2.0
-        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -9854,10 +9848,6 @@ packages:
       react: '>=16.6.0'
       react-dom: '>=16.6.0'
 
-  react@18.2.0:
-    resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
-    engines: {node: '>=0.10.0'}
-
   react@18.3.1:
     resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
     engines: {node: '>=0.10.0'}
@@ -14612,11 +14602,6 @@ snapshots:
 
   '@univerjs/icons-svg@0.1.58': {}
 
-  '@univerjs/icons@0.1.65(react-dom@18.3.1(react@18.2.0))(react@18.2.0)':
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.3.1(react@18.2.0)
-
   '@univerjs/icons@0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
@@ -19241,12 +19226,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  react-dom@18.3.1(react@18.2.0):
-    dependencies:
-      loose-envify: 1.4.0
-      react: 18.2.0
-      scheduler: 0.23.2
-
   react-dom@18.3.1(react@18.3.1):
     dependencies:
       loose-envify: 1.4.0
@@ -19367,10 +19346,6 @@ snapshots:
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-
-  react@18.2.0:
-    dependencies:
-      loose-envify: 1.4.0
 
   react@18.3.1:
     dependencies:

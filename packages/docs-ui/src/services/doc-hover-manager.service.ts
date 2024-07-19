@@ -38,7 +38,7 @@ import { BehaviorSubject } from 'rxjs';
  */
 export class DocHoverManagerService extends Disposable {
     private readonly _activeCustomRanges$ = new BehaviorSubject<ICustomRange[]>([]);
-    readonly activeRange$ = this._activeCustomRanges$.asObservable();
+    readonly activeCustomRanges$ = this._activeCustomRanges$.asObservable();
 
     private readonly _activeIndex$ = new BehaviorSubject<Nullable<number>>(null);
     readonly activeIndex$ = this._activeIndex$.asObservable();
@@ -67,7 +67,7 @@ export class DocHoverManagerService extends Disposable {
         return documentTransform.clone().invert().applyPoint(originCoord);
     }
 
-    private _calcActiveRange(offsetX: number, offsetY: number) {
+    private _calcActiveCustomRanges(offsetX: number, offsetY: number) {
         const document = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!document) {
             this._activeCustomRanges$.next([]);
@@ -126,7 +126,7 @@ export class DocHoverManagerService extends Disposable {
             return;
         }
         const { offsetX, offsetY } = evt;
-        this._calcActiveRange(offsetX, offsetY);
+        this._calcActiveCustomRanges(offsetX, offsetY);
     }
 
     startScroll() {

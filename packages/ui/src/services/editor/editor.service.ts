@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -621,7 +621,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
         const documentDataModel = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
-            UniverInstanceType.UNIVER_DOC, initialSnapshot || this._getBlank(editorUnitId)
+            UniverInstanceType.UNIVER_DOC,
+            initialSnapshot || this._getBlank(editorUnitId),
+            { makeCurrent: false }
         );
 
         let render = this._renderManagerService.getRenderById(editorUnitId);
@@ -652,28 +654,14 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     private _unRegister(editorUnitId: string) {
         const editor = this._editors.get(editorUnitId);
-
         if (editor == null) {
             return;
         }
 
         this._renderManagerService.removeRender(editorUnitId);
-
         editor.documentDataModel.dispose();
-
         this._editors.delete(editorUnitId);
-
         this._univerInstanceService.disposeUnit(editorUnitId);
-
-        /**
-         * Compatible with the editor in the sheet scenario,
-         * it is necessary to refocus back to the current sheet when unloading.
-         */
-        const sheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (sheets.length > 0) {
-            const current = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            this._univerInstanceService.focusUnit(current.getUnitId());
-        }
     }
 
     refreshValueChange(editorUnitId: string) {

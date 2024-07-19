@@ -16,9 +16,9 @@
 
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import type { IUniverUIConfig, IWorkbenchOptions } from '@univerjs/ui';
-import { BuiltInUIPart, CanvasPopup, FloatDom, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, CanvasPopup, FloatDom, ILayoutService, IUIPartsService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Optional } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 import { delay, filter, take } from 'rxjs';
@@ -33,7 +33,8 @@ export class UniverUniUIController extends Disposable {
         private readonly _config: IUniverUIConfig,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
+        @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
 
@@ -44,7 +45,12 @@ export class UniverUniUIController extends Disposable {
 
     private _bootstrapWorkbench(): void {
         this.disposeWithMe(
-            bootstrap(this._injector, this._config, () => {
+            bootstrap(this._injector, this._config, (contentEl, containerEl) => {
+                if (this._layoutService) {
+                    this.disposeWithMe(this._layoutService.registerContentElement(contentEl));
+                    this.disposeWithMe(this._layoutService.registerContainerElement(containerEl));
+                }
+
                 this._lifecycleService.lifecycle$.pipe(
                     filter((lifecycle) => lifecycle === LifecycleStages.Ready),
                     delay(300),
@@ -66,7 +72,7 @@ export class UniverUniUIController extends Disposable {
 function bootstrap(
     injector: Injector,
     options: IWorkbenchOptions,
-    callback: () => void
+    callback: (contentEl: HTMLElement, containerElement: HTMLElement) => void
 ): IDisposable {
     let mountContainer: HTMLElement;
 
@@ -90,7 +96,7 @@ function bootstrap(
             <ConnectedApp
                 {...options}
                 mountContainer={mountContainer}
-                onRendered={callback}
+                onRendered={(contentEl) => callback(contentEl, mountContainer)}
             />,
             mountContainer
         );

@@ -93,7 +93,7 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
             <TextEditor
                 id={DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY}
                 className={clsx(styles.docUiFormulaPopupEditor, focused && styles.docUiFormulaPopupEditorActivated)}
-                placeholder="Click here to insert formula..."
+                placeholder={localeService.t('uni-formula.popup.placeholder')}
                 snapshot={snapshotRef.current}
                 cancelDefaultResizeListener
                 isSheetEditor={false}

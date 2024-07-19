@@ -60,7 +60,7 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
-import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+import { IEditorService, ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import type { WorkbookSelections } from '@univerjs/sheets';
@@ -110,6 +110,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @ILayoutService private readonly _layoutService: ILayoutService,
         @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IContextService private readonly _contextService: IContextService,
@@ -481,9 +482,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
         });
 
         const canvasElement = this._context.engine.getCanvasElement();
+        const contentBoundingRect = this._layoutService.getContentElement().getBoundingClientRect();
         const canvasBoundingRect = canvasElement.getBoundingClientRect();
-        startX += canvasBoundingRect.left;
-        // startY += canvasBoundingRect.top;
+        startX += (canvasBoundingRect.left - contentBoundingRect.left);
+        startY += (canvasBoundingRect.top - contentBoundingRect.top);
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({

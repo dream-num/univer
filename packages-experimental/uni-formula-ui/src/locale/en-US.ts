@@ -23,14 +23,15 @@ const locale: typeof zhCN = {
                 new: 'Create new formula',
                 existing: 'Edit formula',
             },
+            placeholder: 'Click here to insert formula or continue typing to close...',
             button: {
                 confirm: 'Confirm',
                 cancel: 'Cancel',
             },
         },
         command: {
-            'stream-placeholder': 'Doc Formula'
-        }
+            'stream-placeholder': 'Doc Formula',
+        },
     },
 };
 

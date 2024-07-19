@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, isInternalEditorID, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs';
 import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager, IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/command';
-import { CloseFormulaPopupOperation, IShowFormulaPopupOperationParams, ShowFormulaPopupOperation } from '../commands/operation';
+import type { IShowFormulaPopupOperationParams } from '../commands/operation';
+import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operation';
 import { DocFormulaPopup, DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY } from '../views/components/DocFormulaPopup';
+import { DocFormulaPopupService } from '../services/formula-popup.service';
 
 const FORMULA_INPUT_TRIGGER_CHAR = '=';
 
@@ -32,6 +34,7 @@ export class DocUniFormulaController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService,
+        @Inject(DocFormulaPopupService) private readonly _docFormulaPopupService: DocFormulaPopupService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -61,7 +64,13 @@ export class DocUniFormulaController extends Disposable {
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             const currentEditor = this._editorService.getFocusEditor();
             const focusedUnit = this._instanceSrv.getFocusedUnit();
-            if (currentEditor?.editorUnitId === DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY || focusedUnit?.type !== UniverInstanceType.UNIVER_DOC) return;
+
+            if (
+                currentEditor?.editorUnitId === DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY ||
+                focusedUnit?.type !== UniverInstanceType.UNIVER_DOC
+            ) {
+                return;
+            }
 
             if (commandInfo.id === InsertCommand.id) {
                 const params = commandInfo.params as IInsertCommandParams;
@@ -71,6 +80,8 @@ export class DocUniFormulaController extends Disposable {
                         startIndex: activeRange.startOffset - 1,
                         unitId: focusedUnit.getUnitId(),
                     } as IShowFormulaPopupOperationParams);
+                } else if (this._docFormulaPopupService.popupInfo) {
+                    this._commandService.executeCommand(CloseFormulaPopupOperation.id);
                 }
             }
 

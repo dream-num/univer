@@ -126,13 +126,13 @@ export class Univer {
 
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(
-            (type: UnitType, data, ctor) => {
+            (type: UnitType, data, ctor, options) => {
                 if (!this._startedTypes.has(type)) {
                     this._pluginService.startPluginForType(type);
                     this._startedTypes.add(type);
 
                     const model = injector.createInstance(ctor, data);
-                    univerInstanceService.__addUnit(model);
+                    univerInstanceService.__addUnit(model, options);
 
                     this._tryProgressToReady();
 
@@ -140,7 +140,7 @@ export class Univer {
                 }
 
                 const model = injector.createInstance(ctor, data);
-                univerInstanceService.__addUnit(model);
+                univerInstanceService.__addUnit(model, options);
                 return model;
             }
         );

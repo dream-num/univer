@@ -40,6 +40,7 @@ export interface IDocumentData extends IReferenceSource, IExtraModelData {
 }
 
 export interface IReferenceSource {
+    tables?: ITables; // Table
     footers?: IFooters;
     headers?: IHeaders;
     lists?: ILists;
@@ -64,6 +65,10 @@ export interface IHeaders {
  */
 export interface IFooters {
     [footerId: string]: IFooterData;
+}
+
+export interface ITables {
+    [tableId: string]: ITable;
 }
 
 /**
@@ -124,7 +129,7 @@ export interface IDocumentBody {
 
     customBlocks?: ICustomBlock[]; // customBlock user-defined block through plug-in
 
-    tables?: ITable[]; // Table
+    tables?: ICustomTable[]; // Table
 
     // tableOfContents?: { [index: number]: ITableOfContent }; // tableOfContents
     // links?: { [index: number]: IHyperlink }; // links
@@ -846,14 +851,20 @@ enum TableTextWrapType {
     WRAP,
 }
 
+export interface ICustomTable {
+    startIndex: number;
+    // A unique ID associated with a table.
+    tableId: string;
+}
+
 /**
  * Properties of table
  */
 export interface ITable {
-    startIndex: number;
-    endIndex: number;
-    rows: number; // rows
-    columns: number; // columns
+    // startIndex: number;
+    // endIndex: number;
+    // rows: number; // rows
+    // columns: number; // columns
     tableRows: ITableRow[]; // tableRows
     tableColumns: ITableColumn[]; // tableColumns
     align: TableHAlign; // align
@@ -883,8 +894,8 @@ export interface ITableRowSize {
  * Properties of row of table
  */
 export interface ITableRow {
-    st: number; // startIndex
-    ed: number; // endIndex
+    // st: number; // startIndex
+    // ed: number; // endIndex
     tableCells: ITableCell[]; // tableCells
     size: ITableRowSize; // tableRowStyle
     allowBreakAcrossPages: BooleanNumber; // allowBreakAcrossPages, the default is false.
@@ -896,8 +907,8 @@ export interface ITableRow {
  * Properties of table cell
  */
 export interface ITableCell {
-    st: number; // startIndex
-    ed: number; // endIndex
+    // st: number; // startIndex
+    // ed: number; // endIndex
     tableCellStyle: ITableCellStyle; // tableCellStyle
 }
 

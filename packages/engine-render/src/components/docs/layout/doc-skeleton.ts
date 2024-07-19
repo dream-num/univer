@@ -991,7 +991,6 @@ export class DocumentSkeleton extends Skeleton {
             return;
         }
 
-        const editArea = this.getViewModel().getEditArea();
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
         for (const page of pages) {

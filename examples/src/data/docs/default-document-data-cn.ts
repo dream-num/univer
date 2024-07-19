@@ -20,6 +20,7 @@ import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',
+    tables: {},
     drawings: {
         // shapeTest1: {
         //     unitId: 'd',

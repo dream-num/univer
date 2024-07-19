@@ -339,6 +339,7 @@ export const CellLinkEdit = () => {
                 </FormLayout>
             )}
             {customHyperLinkSidePanel?.Form && <customHyperLinkSidePanel.Form
+                linkId={id}
                 payload={payload}
                 display={display}
                 showError={showError}

@@ -20,13 +20,13 @@ import React from 'react';
 
 
 export interface CustomHyperLinkFormProps {
+    linkId: string,
     payload: string,
     display: string,
     setByPayload: React.MutableRefObject<boolean>,
     showError: boolean,
     setDisplay: (display: string) => void,
     setPayload: (payload: string) => void,
-    [prop: string]: any;
 }
 
 export interface ICustomHyperLinkView {

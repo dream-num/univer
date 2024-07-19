@@ -17,35 +17,34 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Round } from '../index';
+import { Trunc } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
-describe('Test round function', () => {
-    const testFunction = new Round(FUNCTION_NAMES_MATH.ROUND);
+describe('Test trunc function', () => {
+    const testFunction = new Trunc(FUNCTION_NAMES_MATH.TRUNC);
 
-    describe('Round', () => {
+    describe('Trunc', () => {
         it('Value is normal number', () => {
             const number = NumberValueObject.create(2.15);
-            const numDigits = NumberValueObject.create(1);
-            const result = testFunction.calculate(number, numDigits);
-            expect(result.getValue()).toBe(2.2);
+            const result = testFunction.calculate(number);
+            expect(result.getValue()).toBe(2);
         });
 
         it('Value is normal number 2', () => {
             const number = NumberValueObject.create(2.149);
-            const numDigits = NumberValueObject.create(1);
+            const numDigits = NumberValueObject.create(2);
             const result = testFunction.calculate(number, numDigits);
-            expect(result.getValue()).toBe(2.1);
+            expect(result.getValue()).toBe(2.14);
         });
 
         it('Value is number valid', () => {
             const number = NumberValueObject.create(-1.475);
             const numDigits = NumberValueObject.create(2);
             const result = testFunction.calculate(number, numDigits);
-            expect(result.getValue()).toBe(-1.48);
+            expect(result.getValue()).toBe(-1.47);
         });
 
         it('Value is number string', () => {
@@ -66,7 +65,7 @@ describe('Test round function', () => {
             const number = NumberValueObject.create(2.15);
             const numDigits = BooleanValueObject.create(true);
             const result = testFunction.calculate(number, numDigits);
-            expect(result.getValue()).toBe(2.2);
+            expect(result.getValue()).toBe(2.1);
         });
 
         it('Value is blank cell', () => {
@@ -108,7 +107,7 @@ describe('Test round function', () => {
             });
             const result = testFunction.calculate(number, numDigits);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [2.2, 2.1, -1.58, 22, 630, 0, 0, ErrorType.NA, ErrorType.NA],
+                [2.1, 2.1, -1.57, 21, 620, 0, 0, ErrorType.NA, ErrorType.NA],
             ]);
         });
     });

@@ -53,6 +53,7 @@ export class DocHoverManagerService extends Disposable {
 
         this.disposeWithMe(() => {
             this._activeCustomRanges$.complete();
+            this._activeIndex$.complete();
         });
     }
 

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, Nullable } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { Documents, IMouseEvent, IPointerEvent, Viewport } from '@univerjs/engine-render';
-import { IRenderManagerService, IScrollObserverParam, PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import { IRenderManagerService, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
-import type { Nullable } from 'vitest';
 
 /**
  * Copyright 2023-present DreamNum Inc.

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, fromEventSubject } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '@univerjs/docs';
 import { debounceTime, throttleTime } from 'rxjs';

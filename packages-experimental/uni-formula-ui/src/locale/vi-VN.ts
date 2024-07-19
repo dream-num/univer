@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer } from '@univerjs/core';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
+import type zhCN from './zh-CN';
 
-const univer = new Univer({
-    locale: LocaleType.ZH_CN,
-});
+const locale: typeof zhCN = {
+    'uni-formula': {
+        popup: {
+            title: {
+                new: 'Create new formula',
+                existing: 'Edit formula',
+            },
+        },
+    },
+};
 
-univer.registerPlugin(UniverSheetsPlugin, { onlyRegisterFormulaRelatedMutations: true });
-univer.registerPlugin(UniverFormulaEnginePlugin);
-univer.registerPlugin(UniverRPCWorkerThreadPlugin);
-
-declare let self: WorkerGlobalScope & typeof globalThis & { univer: Univer };
-self.univer = univer;
+export default locale;

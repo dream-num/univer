@@ -15,9 +15,12 @@
  */
 
 import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 import { DOC_FORMULA_UI_PLUGIN_NAME } from './const';
+import { DocFormulaPopupService } from './services/formula-popup.service';
+import { DocUniFormulaController } from './controllers/formula-input.controller';
 
 @DependentOn(UniverDocUniFormulaPlugin)
 export class UniverDocUniFormulaUIPlugin extends Plugin {
@@ -32,5 +35,9 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
+        ([
+            [DocUniFormulaController],
+            [DocFormulaPopupService],
+        ] as Dependency[]).forEach((d) => injector.add(d));
     }
 }

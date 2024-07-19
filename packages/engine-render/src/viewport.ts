@@ -544,7 +544,6 @@ export class Viewport {
      * window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
      */
     scrollTo(pos: IScrollBarPosition) {
-        // console.trace();
         return this._scrollCore(SCROLL_TYPE.scrollTo, pos);
     }
 
@@ -1435,9 +1434,9 @@ export class Viewport {
         if (!preCacheVisibleBound) return 0b01;
         const viewBoundOutCacheArea =
             viewBound.right > preCacheVisibleBound.right ||
-            viewBound.top < preCacheVisibleBound.top ||
-            viewBound.left < preCacheVisibleBound.left ||
-            viewBound.bottom > preCacheVisibleBound.bottom
+                viewBound.top < preCacheVisibleBound.top ||
+                viewBound.left < preCacheVisibleBound.left ||
+                viewBound.bottom > preCacheVisibleBound.bottom
                 ? 0b01
                 : 0b00;
 

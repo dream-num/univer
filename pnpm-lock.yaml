@@ -336,6 +336,9 @@ importers:
       '@univerjs/uni-formula':
         specifier: workspace:*
         version: link:../packages-experimental/uni-formula
+      '@univerjs/uni-formula-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-formula-ui
       '@univerjs/uniscript':
         specifier: workspace:*
         version: link:../packages/uniscript
@@ -458,15 +461,30 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@univerjs/uni-formula':
         specifier: workspace:*
         version: link:../uni-formula
       '@wendellhu/redi':
         specifier: 0.16.0
         version: 0.16.0
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1

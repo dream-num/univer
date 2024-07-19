@@ -162,10 +162,17 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         if (!this._unitsByType.has(type)) {
             this._unitsByType.set(type, []);
         }
-        this._unitsByType.get(type)!.push(unit);
 
+        const units = this._unitsByType.get(type)!;
+        const newUnitId = unit.getUnitId();
+        if (units.findIndex((u) => u.getUnitId() === newUnitId) !== -1) {
+            throw new Error(`[UniverInstanceService]: cannot create a unit with the same unit id: ${newUnitId}.`);
+        }
+
+        units.push(unit);
         this._unitAdded$.next(unit);
 
+        // TODO: wzhudev: we may not need to set current unit. Should add a param.
         this.setCurrentUnitForType(unit.getUnitId());
     }
 

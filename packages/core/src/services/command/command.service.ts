@@ -207,7 +207,7 @@ export class CommandRegistry {
     }
 }
 
-interface ICommandExecutionStackItem extends ICommandInfo {}
+interface ICommandExecutionStackItem extends ICommandInfo { }
 
 export const NilCommand: ICommand = {
     id: 'nil',
@@ -319,40 +319,45 @@ export class CommandService extends Disposable implements ICommandService {
         params?: P | undefined,
         options?: IExecutionOptions
     ): R {
-        const item = this._commandRegistry.getCommand(id);
-        if (item) {
-            const [command] = item;
-            const commandInfo: ICommandInfo = {
-                id: command.id,
-                type: command.type,
-                params,
-            };
+        try {
+            const item = this._commandRegistry.getCommand(id);
+            if (item) {
+                const [command] = item;
+                const commandInfo: ICommandInfo = {
+                    id: command.id,
+                    type: command.type,
+                    params,
+                };
 
-            // If the executed command is of type `Mutation`, we should add a trigger params,
-            // whose value is the command's ID that triggers the mutation.
-            if (command.type === CommandType.MUTATION) {
-                const triggerCommand = findLast(
-                    this._commandExecutionStack,
-                    (item) => item.type === CommandType.COMMAND
-                );
-                if (triggerCommand) {
-                    commandInfo.params = commandInfo.params ?? {};
-                    (commandInfo.params as IMutationCommonParams).trigger = triggerCommand.id;
+                // If the executed command is of type `Mutation`, we should add a trigger params,
+                // whose value is the command's ID that triggers the mutation.
+                if (command.type === CommandType.MUTATION) {
+                    const triggerCommand = findLast(
+                        this._commandExecutionStack,
+                        (item) => item.type === CommandType.COMMAND
+                    );
+                    if (triggerCommand) {
+                        commandInfo.params = commandInfo.params ?? {};
+                        (commandInfo.params as IMutationCommonParams).trigger = triggerCommand.id;
+                    }
                 }
+
+                const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
+
+                this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
+                const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, options);
+                this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
+
+                stackItemDisposable.dispose();
+
+                return result;
             }
 
-            const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
-
-            this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
-            const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, options);
-            this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
-
-            stackItemDisposable.dispose();
-
-            return result;
+            throw new Error(`[CommandService]: command "${id}" is not registered.`);
+        } catch (error) {
+            this._logService.error(error);
+            throw error;
         }
-
-        throw new Error(`[CommandService]: command "${id}" is not registered.`);
     }
 
     private _pushCommandExecutionStack(stackItem: ICommandExecutionStackItem): IDisposable {

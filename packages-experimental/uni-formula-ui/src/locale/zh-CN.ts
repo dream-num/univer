@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService } from '@univerjs/core';
+const locale = {
+    'uni-formula': {
+        popup: {
+            title: {
+                new: '添加公式',
+                existing: '编辑公式',
+            },
+            button: {
+                confirm: '确认',
+                cancel: '取消',
+            },
+        },
+        command: {
+            'stream-placeholder': '文档公式'
+        }
+    },
+};
 
-/**
- * This controller is responsible for registering formulas into `UniFormulaService`,
- * when a doc is loaded or a new formula is created. It is also responsible for un-registering
- * formula at current time.
- */
-export class UniFormulaController {
-    constructor(
-        @IUniverInstanceService private readonly _univerInstanceSrv: IUniverInstanceService
-    ) {
-
-    }
-}
-
+export default locale;

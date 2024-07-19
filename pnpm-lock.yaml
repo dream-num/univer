@@ -256,8 +256,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/find-replace
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../packages/rpc
@@ -401,8 +401,8 @@ importers:
   packages-experimental/uni-formula:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.46
-        version: 0.1.58(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -434,17 +434,11 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      react:
-        specifier: 18.2.0
-        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
       typescript:
-        specifier: ^5.4.5
+        specifier: ^5.5.3
         version: 5.5.3
       vite:
         specifier: ^5.3.4
@@ -471,7 +465,7 @@ importers:
         specifier: ^7.8.1
         version: 7.8.1
       typescript:
-        specifier: ^5.4.5
+        specifier: ^5.5.3
         version: 5.5.3
       vite:
         specifier: ^5.3.4
@@ -483,8 +477,8 @@ importers:
   packages-experimental/uniui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.46
-        version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util:
         specifier: ^5.43.0
         version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -529,7 +523,7 @@ importers:
         specifier: ^7.8.1
         version: 7.8.1
       typescript:
-        specifier: ^5.4.5
+        specifier: ^5.5.3
         version: 5.5.3
       vite:
         specifier: ^5.3.4
@@ -662,8 +656,8 @@ importers:
   packages/design:
     dependencies:
       '@rc-component/color-picker':
-        specifier: ^1.6.1
-        version: 1.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^1.7.1
+        version: 1.7.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@rc-component/trigger':
         specifier: ^2.2.0
         version: 2.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -671,8 +665,8 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-dialog:
         specifier: ^9.5.2
         version: 9.5.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -680,11 +674,11 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-input:
-        specifier: ^1.5.1
-        version: 1.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^1.6.2
+        version: 1.6.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-input-number:
-        specifier: ^9.1.0
-        version: 9.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^9.2.0
+        version: 9.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-menu:
         specifier: ^9.14.1
         version: 9.14.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -698,8 +692,8 @@ importers:
         specifier: ^14.15.0
         version: 14.15.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-textarea:
-        specifier: ^1.7.0
-        version: 1.7.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^1.8.1
+        version: 1.8.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-tooltip:
         specifier: ^6.2.0
         version: 6.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -826,8 +820,8 @@ importers:
   packages/docs-drawing-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -923,8 +917,8 @@ importers:
         specifier: workspace:*
         version: link:../docs-ui
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1068,8 +1062,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1165,8 +1159,8 @@ importers:
   packages/drawing:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       ot-json1:
         specifier: ^1.0.2
         version: 1.0.2
@@ -1199,8 +1193,8 @@ importers:
   packages/drawing-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1410,8 +1404,8 @@ importers:
   packages/find-replace:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -1590,8 +1584,8 @@ importers:
   packages/sheets-conditional-formatting-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.38-alpha.23
         version: 0.1.38-alpha.23(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -1678,8 +1672,8 @@ importers:
   packages/sheets-data-validation:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.38-alpha.23
         version: 0.1.38-alpha.23(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -1779,8 +1773,8 @@ importers:
   packages/sheets-drawing-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1867,8 +1861,8 @@ importers:
   packages/sheets-filter-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-virtual-list:
         specifier: ^3.14.5
         version: 3.14.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1974,8 +1968,8 @@ importers:
   packages/sheets-formula:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -2081,8 +2075,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
         version: link:../sheets-hyper-link
@@ -2139,8 +2133,8 @@ importers:
   packages/sheets-numfmt:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -2230,8 +2224,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-virtual-list:
         specifier: ^3.14.5
         version: 3.14.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2291,8 +2285,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2395,8 +2389,8 @@ importers:
         specifier: workspace:*
         version: link:../docs-ui
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.38-alpha.23
         version: 0.1.38-alpha.23(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -2459,8 +2453,8 @@ importers:
   packages/sheets-zen-editor:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2617,8 +2611,8 @@ importers:
   packages/thread-comment-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.38-alpha.23
         version: 0.1.38-alpha.23(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -2675,8 +2669,8 @@ importers:
   packages/ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.64
-        version: 0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.65
+        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: 'link:'
@@ -4782,8 +4776,8 @@ packages:
       '@types/react':
         optional: true
 
-  '@rc-component/color-picker@1.6.1':
-    resolution: {integrity: sha512-b6IkBqNYr2eaQa1RuQUMd4a+zXZIdwvP0jXV0CBuGPV5g1i5cU/iQcCESm5M0JneoKDkwIJHkzQ/1xf+EAjoYg==}
+  '@rc-component/color-picker@1.7.1':
+    resolution: {integrity: sha512-dO7/6wIGTeWm1RjnwaOCCoxHUCbsfAODtIzcWzoF50EpdkLjI15U/ylD5XItNR3DUx5OjI41nzrNfjJ7R3Rtwg==}
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
@@ -5638,14 +5632,8 @@ packages:
   '@univerjs/icons-svg@0.1.58':
     resolution: {integrity: sha512-c7DmkpQMt4jNSCdfPNf3sUczrdFCnABjupaJEO3CpWe556sIAcHY3kEfcrtOgbkTjGcmS07PD88Ai3s6K3eQug==}
 
-  '@univerjs/icons@0.1.58':
-    resolution: {integrity: sha512-tnWFQ7IojxovMaYTKMOdAcwEBMm6JV+6XygOUTYwqf+YHwRsEePdQ7Tl0u1mtJAmzDssATLcb3t8xGb3wh6YuA==}
-    peerDependencies:
-      react: '*'
-      react-dom: '*'
-
-  '@univerjs/icons@0.1.64':
-    resolution: {integrity: sha512-nKCsfxG2pwHT2x9nTwHvVUGr/dQxAQi76zvhJprm0Gqu8ywQdcCq7vX6D7fHiFwZPGQVO/91gbbwGfsG93mIpg==}
+  '@univerjs/icons@0.1.65':
+    resolution: {integrity: sha512-hk0QCr1FQQeFLTqG5TaaqxUfh6uLz29WCcvgpor/yZPD7T1h7/KRL/w6g26N6cP7ANgR0jqQ1QXUBBMxjBSETw==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -9592,14 +9580,14 @@ packages:
       react: '>=16.11.0'
       react-dom: '>=16.11.0'
 
-  rc-input-number@9.1.0:
-    resolution: {integrity: sha512-NqJ6i25Xn/AgYfVxynlevIhX3FuKlMwIFpucGG1h98SlK32wQwDK0zhN9VY32McOmuaqzftduNYWWooWz8pXQA==}
+  rc-input-number@9.2.0:
+    resolution: {integrity: sha512-5XZFhBCV5f9UQ62AZ2hFbEY8iZT/dm23Q1kAg0H8EvOgD3UDbYYJAayoVIkM3lQaCqYAW5gV0yV3vjw1XtzWHg==}
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
 
-  rc-input@1.5.1:
-    resolution: {integrity: sha512-+nOzQJDeIfIpNP/SgY45LXSKbuMlp4Yap2y8c+ZpU7XbLmNzUd6+d5/S75sA/52jsVE6S/AkhkkDEAOjIu7i6g==}
+  rc-input@1.6.2:
+    resolution: {integrity: sha512-nJqsiIv8K88w8pvbUR5savKqBokdSR0zVGPntLApeOKFp8dp6s92l1CzD60yVActpCZAJwlCfRX5rno+QVYV7g==}
     peerDependencies:
       react: '>=16.0.0'
       react-dom: '>=16.0.0'
@@ -9668,8 +9656,8 @@ packages:
       react: '*'
       react-dom: '*'
 
-  rc-textarea@1.7.0:
-    resolution: {integrity: sha512-UxizYJkWkmxP3zofXgc487QiGyDmhhheDLLjIWbFtDmiru1ls30KpO8odDaPyqNUIy9ugj5djxTEuezIn6t3Jg==}
+  rc-textarea@1.8.1:
+    resolution: {integrity: sha512-bm36N2ZqwZAP60ZQg2OY9mPdqWC+m6UTjHc+CqEZOxb3Ia29BGHazY/s5bI8M4113CkqTzhtFUDNA078ZiOx3Q==}
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
@@ -9859,10 +9847,6 @@ packages:
     peerDependencies:
       react: '>=16.6.0'
       react-dom: '>=16.6.0'
-
-  react@18.2.0:
-    resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
-    engines: {node: '>=0.10.0'}
 
   react@18.3.1:
     resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
@@ -13180,7 +13164,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.3
 
-  '@rc-component/color-picker@1.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@rc-component/color-picker@1.7.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@ant-design/fast-color': 1.2.6
       '@babel/runtime': 7.24.7
@@ -14618,17 +14602,7 @@ snapshots:
 
   '@univerjs/icons-svg@0.1.58': {}
 
-  '@univerjs/icons@0.1.58(react-dom@18.3.1(react@18.2.0))(react@18.2.0)':
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.3.1(react@18.2.0)
-
-  '@univerjs/icons@0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
-  '@univerjs/icons@0.1.64(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@univerjs/icons@0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -19032,17 +19006,17 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  rc-input-number@9.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  rc-input-number@9.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.7
       '@rc-component/mini-decimal': 1.1.0
       classnames: 2.5.1
-      rc-input: 1.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      rc-input: 1.6.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  rc-input@1.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  rc-input@1.6.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.7
       classnames: 2.5.1
@@ -19130,11 +19104,11 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  rc-textarea@1.7.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  rc-textarea@1.8.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.7
       classnames: 2.5.1
-      rc-input: 1.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      rc-input: 1.6.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-resize-observer: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
@@ -19251,12 +19225,6 @@ snapshots:
       strip-indent: 4.0.0
     transitivePeerDependencies:
       - supports-color
-
-  react-dom@18.3.1(react@18.2.0):
-    dependencies:
-      loose-envify: 1.4.0
-      react: 18.2.0
-      scheduler: 0.23.2
 
   react-dom@18.3.1(react@18.3.1):
     dependencies:
@@ -19378,10 +19346,6 @@ snapshots:
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-
-  react@18.2.0:
-    dependencies:
-      loose-envify: 1.4.0
 
   react@18.3.1:
     dependencies:

@@ -25,8 +25,7 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./*": "./src/*"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -46,8 +45,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*",
-            "./locale/*": "./lib/locale/*.json"
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -66,7 +64,6 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-mention": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
@@ -107,7 +104,6 @@
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./lib/*": "./lib/*",
-        "./locale/*": "./lib/locale/*.json"
+        "./lib/*": "./lib/*"
     }
 }

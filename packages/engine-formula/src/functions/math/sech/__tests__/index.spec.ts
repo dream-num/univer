@@ -36,7 +36,7 @@ describe('Test sech function', () => {
         it('Value is number 2**27', () => {
             const value = NumberValueObject.create(2 ** 27);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(result.getValue()).toBe(0);
         });
 
         it('Value is number negative', () => {

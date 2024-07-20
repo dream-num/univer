@@ -826,8 +826,8 @@ export interface IDistFromText {
     distR: INumberUnit; // distance between right text and table.
 }
 
-export interface IDocTablePosition {
-    positionH: IObjectPositionH;
+export interface ITableAnchor {
+    positionH: IObjectPositionH; // horzAnchor (Table Horizontal Anchor)
     positionV: IObjectPositionV;
 }
 
@@ -840,10 +840,17 @@ export interface IWidthInTableSize {
     width: INumberUnit;
 }
 
-enum TableHAlign {
-    LEFT,
+// 17.18.45 ST_JcTable (Table Alignment Type)
+enum TableAlignmentType {
+    START,
     CENTER,
-    RIGHT,
+    END,
+}
+
+// 17.18.87 ST_TblLayoutType (Table Layout Type)
+enum TableLayoutType {
+    AUTO_FIT,
+    FIXED,
 }
 
 enum TableTextWrapType {
@@ -864,17 +871,30 @@ export interface ICustomTable {
 export interface ITable {
     tableRows: ITableRow[]; // tableRows
     tableColumns: ITableColumn[]; // tableColumns
-    align: TableHAlign; // align
-    leftIndent: INumberUnit; // left align only. leftIndent
-    textWrap: TableTextWrapType;
-    position: IDocTablePosition; // position
-    dist: IDistFromText; // dist
+    align: TableAlignmentType; // 17.4.28 jc (Table Alignment)
+    layout: TableLayoutType; // 17.4.52 tblLayout (Table Layout)
+    indent: INumberUnit; // left align only. leftIndent
+    textWrap: TableTextWrapType; // 17.4.57 tblpPr (Floating Table Positioning)
+    position: ITableAnchor; // 17.4.57 tblpPr (Floating Table Positioning)
+    dist: IDistFromText; // 17.4.57 tblpPr (Floating Table Positioning)
     size: IWidthInTableSize;
+    overlap: BooleanNumber; // 17.4.56 tblOverlap (Floating Table Allows Other Tables to Overlap)
+    description?: string; // 17.4.46 tblDescription (Table Description)
 }
 
+// Specifies the meaning of the height specified for this table row
+// The meaning of the value of the val attribute is defined based on the value of the hRule
+// attribute for this table row as follows:
+//  If the value of hRule is auto, then the table row's height should be automatically
+// determined based on the height of its contents. The h value is ignored.
+//  If the value of hRule is atLeast, then the table row's height should be at least
+// the value the h attribute.
+//  If the value of hRule is exact, then the table row's height should be exactly the
+// value of the h attribute.
 enum TableCellHeightRule {
-    MIN,
-    FIX,
+    AUTO,
+    AT_LEAST,
+    EXACT,
 }
 
 export interface ITableColumn { // 合并拆分列，HTML 合并单元格
@@ -882,9 +902,8 @@ export interface ITableColumn { // 合并拆分列，HTML 合并单元格
 }
 
 export interface ITableRowSize {
-    type: TableSizeType;
-    height: INumberUnit;
-    heightRule: TableCellHeightRule;
+    val: INumberUnit;
+    hRule: TableCellHeightRule;
 }
 
 /**
@@ -892,8 +911,10 @@ export interface ITableRowSize {
  */
 export interface ITableRow {
     tableCells: ITableCell[]; // tableCells
-    size: ITableRowSize; // tableRowStyle
-    allowBreakAcrossPages: BooleanNumber; // allowBreakAcrossPages, the default is false.
+    // If omitted, then the table row shall automatically resize its height to the height required by its contents
+    // (the equivalent of an hRule value of auto)
+    trHeight: ITableRowSize; // 17.4.80 trHeight (Table Row Height)
+    cantSplit: BooleanNumber; // allowBreakAcrossPages, the default is true.
     isFirstRow: BooleanNumber; // isFirstRow.
     repeatHeaderRow: BooleanNumber; // Show header row in different pages. only for the first row.
 }
@@ -921,8 +942,9 @@ export interface ITableCellStyle {
     paddingTop: INumberUnit; // paddingTop
     paddingBottom: INumberUnit; // paddingBottom
     size: IWidthInTableSize; // size
-    contentHAlignment: ContentHAlignment; // contentAlignment
-    contentVAlignment: ContentVAlignment; // contentAlignment
+    tcFitText: BooleanNumber; // 17.4.67 tcFitText (Fit Text Within Cell)
+    // hAlign: use paragraph align to instead.
+    vAlign: VerticalAlignmentType; // 17.4.83 vAlign (Table Cell Vertical Alignment)
 }
 
 /**
@@ -933,21 +955,17 @@ export interface ITableCellBorder {
     width: INumberUnit; // width
     dashStyle: DashStyleType; // dashStyle
 }
+
+// 17.18.101ST_VerticalJc (Vertical Alignment Type)
 /**
  * The content alignments for a Shape or TableCell. The supported alignments correspond to predefined text anchoring types from the ECMA-376 standard.
  */
-export enum ContentVAlignment {
+export enum VerticalAlignmentType {
     CONTENT_ALIGNMENT_UNSPECIFIED, // An unspecified content alignment. The content alignment is inherited from the parent if one exists.
+    BOTH,
     TOP, // An alignment that aligns the content to the top of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 't'.
-    MIDDLE, // An alignment that aligns the content to the middle of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 'ctr'.
+    CENTER, // An alignment that aligns the content to the middle of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 'ctr'.
     BOTTOM, // An alignment that aligns the content to the bottom of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 'b'.
-}
-
-export enum ContentHAlignment {
-    CONTENT_ALIGNMENT_UNSPECIFIED, // An unspecified content alignment. The content alignment is inherited from the parent if one exists.
-    LEFT, // An alignment that aligns the content to the left of the content holder.
-    CENTER, // An alignment that aligns the content to the center of the content holder.
-    RIGHT, // An alignment that aligns the content to the right of the content holder.
 }
 
 /**

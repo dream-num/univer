@@ -671,6 +671,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         editor.documentDataModel.dispose();
         this._editors.delete(editorUnitId);
         this._univerInstanceService.disposeUnit(editorUnitId);
+        this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
     }
 
     refreshValueChange(editorUnitId: string) {

@@ -37,7 +37,7 @@ export const CloseFormulaPopupOperation: IOperation = {
     type: CommandType.OPERATION,
     handler(accessor) {
         const docFormulaPopupService = accessor.get(DocFormulaPopupService);
-        return docFormulaPopupService.closePopup();
+        return docFormulaPopupService.closePopup(true);
     },
 };
 

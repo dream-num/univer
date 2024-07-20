@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService, IDocumentBody, type IMutationInfo, LocaleService, makeCustomRangeStream, sequenceExecute } from '@univerjs/core';
+import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
+import { CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream, sequenceExecute } from '@univerjs/core';
 import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
 import type { IAddDocUniFormulaMutationParams, IRemoveDocUniFormulaMutationParams, IUpdateDocUniFormulaMutationParams } from '@univerjs/uni-formula';
 import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '@univerjs/uni-formula';

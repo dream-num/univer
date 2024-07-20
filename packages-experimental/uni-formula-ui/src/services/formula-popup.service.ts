@@ -76,11 +76,6 @@ export class DocFormulaPopupService extends Disposable {
         this._popupInfo$.complete();
     }
 
-    cancel(): void {
-        this.unlockPopup();
-        this.closePopup();
-    }
-
     cacheFormulaString(f: string): void {
         this._cachedFormulaString = f;
     }
@@ -94,7 +89,6 @@ export class DocFormulaPopupService extends Disposable {
             direction: 'top',
         });
 
-        // TODO: write formula string
         this._popupInfo$.next({ unitId, disposable, type, f: '', startIndex });
 
         return true;
@@ -112,13 +106,14 @@ export class DocFormulaPopupService extends Disposable {
         const info = this.popupInfo;
         if (!info) return true;
 
-        this.unlockPopup();
-        this.closePopup();
-
         const f = this._cachedFormulaString;
         if (!f) {
             this._logService.warn('[FormulaPopupService]: cannot write empty formula into the field.');
+            return false;
         }
+
+        this.unlockPopup();
+        this.closePopup();
 
         // write this formula string to doc
         return this._commandService.executeCommand(AddDocUniFormulaCommand.id, {
@@ -132,9 +127,10 @@ export class DocFormulaPopupService extends Disposable {
         this._popupLocked = false;
     }
 
-    closePopup(): boolean {
-        if (this._popupLocked) return false;
+    closePopup(force = false): boolean {
+        if (this._popupLocked && !force) return false;
 
+        this._popupLocked = false;
         this._cachedFormulaString = '';
 
         this.popupInfo?.disposable.dispose();

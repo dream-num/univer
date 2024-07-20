@@ -20,8 +20,8 @@ import { DownSingle, FolderSingle, SaveSingle } from '@univerjs/icons';
 import styles from './index.module.less';
 
 interface TreeNode {
-    name: string;
-    path?: string;
+    title: string;
+    link?: string;
     children?: TreeNode[];
 }
 
@@ -41,7 +41,7 @@ export const TreeMenu: React.FC<TreeMenuProps> = ({ data }) => {
 
     const renderTree = (nodes: TreeNode[], parentName: string = '') => {
         return nodes.map((node, index) => {
-            const nodeName = parentName ? `${parentName}-${node.name}` : node.name;
+            const nodeName = parentName ? `${parentName}-${node.title}` : node.title;
             return (
                 <li key={index}>
                     {node.children && node.children.length > 0
@@ -56,17 +56,17 @@ export const TreeMenu: React.FC<TreeMenuProps> = ({ data }) => {
                                     </span>
                                     <FolderSingle className={styles.icon} />
                                     {' '}
-                                    {node.name}
+                                    {node.title}
                                 </div>
                                 {expanded[nodeName] && <ul>{renderTree(node.children, nodeName)}</ul>}
                             </>
                         )
                         : (
-                            <Link to={node.path || '#'} className={styles.file}>
+                            <Link to={node.link || '#'} className={styles.file}>
                                 <span className={styles.arrowPlaceholder}></span>
                                 <SaveSingle className={styles.icon} />
                                 {' '}
-                                {node.name}
+                                {node.title}
                             </Link>
                         )}
                 </li>

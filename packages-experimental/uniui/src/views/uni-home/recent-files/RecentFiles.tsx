@@ -81,7 +81,10 @@ export const RecentFiles: React.FC = () => {
         <div className={styles.recentFiles}>
             <h2>Recent Files</h2>
             <div className={styles.fileListTitle}>
-                <span className={styles.fileName}>Name</span>
+                <span className={styles.fileName}>
+                    <input className={styles.fileCheck} type="checkbox" />
+                    Name
+                </span>
                 <span className={styles.fileOwner}>Owner</span>
                 <span className={styles.fileLastModified}>Last Modified</span>
                 <UnorderSingle className={styles.fileOperation} />
@@ -90,6 +93,7 @@ export const RecentFiles: React.FC = () => {
                 {mockData.map((file, index) => (
                     <div key={index} className={styles.fileRow}>
                         <div className={styles.fileName}>
+                            <input className={styles.fileCheck} type="checkbox" />
                             <span className={styles.fileIcon}>{file.icon}</span>
                             <span className={styles.fileTitle}>{file.title}</span>
                         </div>

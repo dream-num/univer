@@ -23,43 +23,43 @@ import styles from './index.module.less';
 export const Sidebar: React.FC = () => {
     const treeData = [
         {
-            name: 'R&D',
+            title: 'Sales',
             children: [
-                { name: 'Sales Performance', path: '/' },
-                { name: 'Competitor Analysis', path: '/' },
+                { title: 'Sales Performance', link: '/' },
+                { title: 'Competitor Analysis', link: '/' },
                 {
-                    name: 'User Feedback',
+                    title: 'User Feedback',
                     children: [
-                        { name: 'Survey Results', path: '/' },
-                        { name: 'Interviews', path: '/' },
+                        { title: 'Survey Results', link: '/' },
+                        { title: 'Interviews', link: '/' },
                     ],
                 },
-                { name: 'Customer Outreach', path: '/' },
+                { title: 'Customer Outreach', link: '/' },
             ],
         },
         {
-            name: 'Product',
+            title: 'Product',
             children: [
-                { name: 'Product Strategy', path: '/' },
+                { title: 'Product Strategy', link: '/' },
                 {
-                    name: 'Roadmap',
+                    title: 'Roadmap',
                     children: [
-                        { name: 'Q1 2024', path: '/' },
+                        { title: 'Q1 2024', link: '/' },
                         {
-                            name: 'Q2 2024',
+                            title: 'Q2 2024',
                             children: [
-                                { name: 'Project A', path: '/' },
-                                { name: 'Project B', path: '/' },
+                                { title: 'Project A', link: '/' },
+                                { title: 'Project B', link: '/' },
                             ],
                         },
                     ],
                 },
-                { name: 'User Research', path: '/' },
+                { title: 'User Research', link: '/' },
             ],
         },
         {
-            name: 'Legal',
-            children: [{ name: 'Legal', path: '/' }],
+            title: 'Legal',
+            children: [{ title: 'Legal', link: '/' }],
         },
     ];
     return (
@@ -99,12 +99,12 @@ export const Sidebar: React.FC = () => {
                             )}
                         </NavLink>
                     </li>
-                    <div className={styles.uniDividingLine}></div>
+                    <div className={styles.uniDivider}></div>
                 </ul>
                 <TreeMenu data={treeData} />
             </nav>
             <div className={styles.uniSidebarFooter}>
-                <div className={styles.uniDividingLine}></div>
+                <div className={styles.uniDivider}></div>
                 <NavLink to="/">
                     <PermissionSettingSingle />
                     Settings

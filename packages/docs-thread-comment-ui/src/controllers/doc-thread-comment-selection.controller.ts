@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
+import type { DocumentDataModel, ITextRange } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
@@ -43,6 +43,7 @@ export class DocThreadCommentSelectionController extends Disposable {
     }
 
     private _initSelectionChange() {
+        let lastSelection: ITextRange | undefined;
         this.disposeWithMe(
             this._commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id === SetTextSelectionsOperation.id) {
@@ -50,6 +51,10 @@ export class DocThreadCommentSelectionController extends Disposable {
                     const { unitId, ranges } = params;
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
                     const primary = ranges[0];
+                    if (lastSelection?.startOffset === primary.startOffset && lastSelection.endOffset === primary.endOffset) {
+                        return;
+                    }
+                    lastSelection = primary;
                     if (primary && doc) {
                         const { startOffset, endOffset, collapsed } = primary;
                         let customRange;

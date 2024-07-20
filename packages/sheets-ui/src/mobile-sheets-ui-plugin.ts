@@ -100,7 +100,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [IAutoFillService, { useClass: AutoFillService }],
                 [SheetPrintInterceptorService],
 
-                [SheetScrollManagerService],
                 // This would be removed from global injector and moved into RenderUnit provider.
                 // [SheetSkeletonManagerService],
                 [ISheetSelectionRenderService, { useClass: MobileSheetsSelectionRenderService }],
@@ -161,6 +160,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [SheetSkeletonManagerService],
             [SheetRenderController],
             [ISheetSelectionRenderService, { useClass: MobileSheetsSelectionRenderService }],
+            [SheetScrollManagerService],
         ] as Dependency[]).forEach((renderDep) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, renderDep));
         });

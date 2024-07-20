@@ -22,7 +22,7 @@ import {
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_FORMULA_EDITOR,
+    FOCUSING_FX_BAR_EDITOR,
     FOCUSING_SHEET,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     HorizontalAlign,
@@ -61,7 +61,7 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
-import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+import { IEditorService, ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import type { WorkbookSelections } from '@univerjs/sheets';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
@@ -109,6 +109,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @ILayoutService private readonly _layoutService: ILayoutService,
         @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IContextService private readonly _contextService: IContextService,
@@ -479,10 +480,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
             );
         });
 
-        // const canvasElement = this._context.engine.getCanvasElement();
-        // const canvasBoundingRect = canvasElement.getBoundingClientRect();
-        // startX += canvasBoundingRect.left;
-        // startY += canvasBoundingRect.top;
+        const canvasElement = this._context.engine.getCanvasElement();
+        const contentBoundingRect = this._layoutService.getContentElement().getBoundingClientRect();
+        const canvasBoundingRect = canvasElement.getBoundingClientRect();
+        startX += (canvasBoundingRect.left - contentBoundingRect.left);
+        startY += (canvasBoundingRect.top - contentBoundingRect.top);
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
@@ -675,9 +677,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
      */
     private _initialKeyboardListener(d: DisposableCollection) {
         d.add(this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
-            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
-            const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+            if (!this._isCurrentSheetFocused()) {
+                return;
+            }
 
+            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+            const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
             // TODO@Jocs: should get editor instead of current doc
             const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
             if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
@@ -712,7 +717,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId: commandUnitId } = params;
 
-                if (!this._editorService.isSheetEditor(commandUnitId)) {
+                // Only when the sheet it attached to is focused. Maybe we should change it to the render unit sys.
+                if (
+                    !this._isCurrentSheetFocused() ||
+                    !this._editorService.isSheetEditor(commandUnitId)
+                ) {
                     return;
                 }
 
@@ -758,7 +767,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                  * but move the cursor within the editor instead.
                  */
                 if (keycode != null &&
-                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
+                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR))
                 ) {
                     this._moveInEditor(keycode, isShift);
                     return;
@@ -893,7 +902,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(EDITOR_ACTIVATED, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
-        this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
+        this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
 
         this._cellEditorManagerService.setState({
             show: param.visible,
@@ -981,6 +990,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 direction,
             });
         }
+    }
+
+    // WTF: this is should not exist at all. It is because all editor instances reuse the singleton
+    // "TextSelectionManagerService" and other modules. Which will be refactored soon in August, 2024.
+    private _isCurrentSheetFocused(): boolean {
+        return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId;
     }
 }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
 import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
@@ -36,10 +36,16 @@ export interface IEditorConfigParam {
     initialSnapshot?: IDocumentData;
     cancelDefaultResizeListener?: boolean;
     canvasStyle?: IEditorCanvasStyle;
-    isSheetEditor: boolean;
 
+    isSheetEditor: boolean;
+    /**
+     * If the editor is for formula editing.
+     * @deprecated this is a temp fix before refactoring editor.
+     */
+    isFormulaEditor: boolean;
     isSingle: boolean;
     isReadonly: boolean;
+
     onlyInputFormula: boolean;
     onlyInputRange: boolean;
     onlyInputContent: boolean;
@@ -163,6 +169,11 @@ export class Editor {
 
     isSheetEditor() {
         return this._param.isSheetEditor === true;
+    }
+
+    /** @deprecated */
+    isFormulaEditor() {
+        return this._param.isFormulaEditor === true;
     }
 
     getValue() {
@@ -447,7 +458,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
         const editor = this.getEditor(editorUnitId);
 
-        if (!editor || editor.isSheetEditor()) {
+        if (!editor || editor.isSheetEditor() || editor.isFormulaEditor()) {
             return true;
         }
 
@@ -619,7 +630,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
         const documentDataModel = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
-            UniverInstanceType.UNIVER_DOC, initialSnapshot || this._getBlank(editorUnitId)
+            UniverInstanceType.UNIVER_DOC,
+            initialSnapshot || this._getBlank(editorUnitId),
+            { makeCurrent: false }
         );
 
         let render = this._renderManagerService.getRenderById(editorUnitId);
@@ -650,28 +663,14 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     private _unRegister(editorUnitId: string) {
         const editor = this._editors.get(editorUnitId);
-
         if (editor == null) {
             return;
         }
 
         this._renderManagerService.removeRender(editorUnitId);
-
         editor.documentDataModel.dispose();
-
         this._editors.delete(editorUnitId);
-
         this._univerInstanceService.disposeUnit(editorUnitId);
-
-        /**
-         * Compatible with the editor in the sheet scenario,
-         * it is necessary to refocus back to the current sheet when unloading.
-         */
-        const sheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (sheets.length > 0) {
-            const current = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            this._univerInstanceService.focusUnit(current.getUnitId());
-        }
     }
 
     refreshValueChange(editorUnitId: string) {
@@ -726,10 +725,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private _getCurrentEditorUnitId() {
         const current = this._univerInstanceService.getCurrentUniverDocInstance()!;
         return current.getUnitId();
-    }
-
-    private _refresh(param: IEditorStateParam): void {
-        this._state$.next(param);
     }
 
     private _getBlank(id: string) {

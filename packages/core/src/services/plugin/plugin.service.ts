@@ -245,7 +245,7 @@ export class PluginHolder extends Disposable {
             const exhaustUnregisteredDependents = () => {
                 const NotRegistered = dependents.find((d) => !this._checkPluginRegistered(d));
                 if (NotRegistered) {
-                    this._logService.warn(
+                    this._logService.debug(
                         '[PluginService]',
                         `plugin "${plugin.pluginName}" depends on "${NotRegistered.pluginName}" which is not registered. Univer will automatically register it with default configuration.`
                     );

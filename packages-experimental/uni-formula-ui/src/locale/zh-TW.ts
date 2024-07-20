@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs/core';
-import { BooleanNumber, CustomRangeType } from '@univerjs/core';
+import type zhCN from './zh-CN';
 
-export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
-    if (
-        customRange.rangeType === CustomRangeType.HYPERLINK ||
-        customRange.rangeType === CustomRangeType.MENTION
-    ) {
-        return {
-            ...customRange.active ? { ul: { s: BooleanNumber.TRUE } } : null,
-            cl: { rgb: '#274fee' },
-        };
-    }
+const locale: typeof zhCN = {
+    'uni-formula': {
+        popup: {
+            title: {
+                new: 'Create new formula',
+                existing: 'Edit formula',
+            },
+        },
+    },
+};
 
-    return null;
-}
+export default locale;

@@ -14,13 +14,31 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IMutation, Nullable } from '@univerjs/core';
-import { CommandType, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, Optional, RCDisposable, ResourceManagerService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import type { DocumentDataModel, ICellData, IDisposable, IDocumentBody, IMutation, Nullable } from '@univerjs/core';
+import {
+    CommandType,
+    CustomRangeType,
+    Disposable,
+    ICommandService,
+    Inject,
+    IResourceManagerService,
+    IUniverInstanceService,
+    LifecycleService,
+    LifecycleStages,
+    makeCustomRangeStream,
+    OnLifecycle,
+    Optional,
+    RCDisposable,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
 
 import { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
 import { DOC_FORMULA_PLUGIN_NAME } from '../const';
+import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '../commands/mutation';
 
 const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';
 
@@ -28,18 +46,66 @@ const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';
  * Update calculating result in a batch.
  */
 export interface IUpdateDocUniFormulaCacheMutationParams {
+    /** The doc in which formula results changed. */
     unitId: string;
+    /** Range ids. */
     ids: string[];
+    /** Calculation results. */
     cache: IDocFormulaCache[];
 }
 
-export const UpdateDocUniFormulaCacheMutation: IMutation<IUpdateDocUniFormulaCacheMutationParams> = {
+/** This mutation is internal. It should not be exposed to third-party developers. */
+const UpdateDocUniFormulaCacheMutation: IMutation<IUpdateDocUniFormulaCacheMutationParams> = {
     type: CommandType.MUTATION,
     id: 'doc.mutation.update-doc-uni-formula-cache',
     handler(accessor, params: IUpdateDocUniFormulaCacheMutationParams) {
         const { unitId, ids, cache } = params;
+
         const uniFormulaService = accessor.get(UniFormulaService);
-        return uniFormulaService.updateFormulaResults(unitId, ids, cache);
+        const instanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const data = instanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+
+        /** The document may have not loaded on this client. We are safe to ignore cache updating. */
+        if (!data) return true;
+        const body = data.getBody();
+
+        function getRange(rangeId: string) {
+            return body?.customRanges?.find((r) => r.rangeId === rangeId);
+        }
+
+        const saveCacheResult = uniFormulaService.updateFormulaResults(unitId, ids, cache);
+        if (!saveCacheResult) return false;
+
+        return ids.every((id, index) => {
+            const range = getRange(id);
+            if (!range) return true; // If we cannot find that rangeId, we are save to ignore cache.
+
+            const dataStream = makeCustomRangeStream(`${cache[index].v ?? ''}`);
+            const body: IDocumentBody = {
+                dataStream,
+                customRanges: [{
+                    startIndex: 0,
+                    endIndex: dataStream.length - 1,
+                    rangeId: id,
+                    rangeType: CustomRangeType.UNI_FORMULA,
+                    wholeEntity: true,
+                }],
+            };
+
+            const redoMutation = replaceSelectionFactory(accessor, {
+                unitId,
+                body,
+                selection: makeSelection(range.startIndex, range.endIndex),
+            });
+
+            if (redoMutation) {
+                return commandService.syncExecuteCommand(redoMutation.id, redoMutation.params, { onlyLocal: true });
+            }
+
+            return false;
+        });
     },
 };
 
@@ -54,7 +120,7 @@ export class UniFormulaService extends Disposable {
     private readonly _formulaIdToKey = new Map<string, string>();
 
     constructor(
-    @Inject(ResourceManagerService) resoureManagerService: ResourceManagerService,
+    @IResourceManagerService resourceManagerService: IResourceManagerService,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         // TODO: wzhudev We may need to register the doc formulas to formula service in later lifecycle stages.
         @ICommandService private readonly _commandSrv: ICommandService,
@@ -64,9 +130,8 @@ export class UniFormulaService extends Disposable {
     ) {
         super();
 
-        this.disposeWithMe(this._commandSrv.registerCommand(UpdateDocUniFormulaCacheMutation));
-
-        this._initDocFormulaResources(resoureManagerService);
+        this._initCommands();
+        this._initDocFormulaResources(resourceManagerService);
         this._initDocDisposingListener();
         this._debugInitFormula();
     }
@@ -77,12 +142,21 @@ export class UniFormulaService extends Disposable {
         // TODO: wzhudev: concrete disposing methods
     }
 
+    private _initCommands(): void {
+        [
+            AddDocUniFormulaMutation,
+            UpdateDocUniFormulaMutation,
+            UpdateDocUniFormulaCacheMutation,
+            RemoveDocUniFormulaMutation,
+        ].forEach((command) => this._commandSrv.registerCommand(command));
+    }
+
     /**
      * Remove all formulas under a doc.
      */
     private _unregisterDoc(unitId: string): void {
-        const existingsFormulas = Array.from(this._docFormulas.entries());
-        existingsFormulas.forEach(([_, value]) => {
+        const existingFormulas = Array.from(this._docFormulas.entries());
+        existingFormulas.forEach(([_, value]) => {
             if (value.unitId === unitId) this.unregisterDocFormula(unitId, value.rangeId);
         });
     }
@@ -129,14 +203,16 @@ export class UniFormulaService extends Disposable {
 
     updateFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean {
         // TODO: @wzhudev: should trigger re-render
-        return formulaIds.every((id, index) => {
+        formulaIds.forEach((id, index) => {
             const formulaData = this._docFormulas.get(getDocFormulaKey(unitId, id));
-            if (!formulaData) return false;
+            if (!formulaData) return true;
 
             formulaData.v = v[index].v;
             formulaData.t = v[index].t;
             return true;
         });
+
+        return true;
     }
 
     private _dataSyncDisposables = new Map<string, RCDisposable>();
@@ -204,7 +280,7 @@ export class UniFormulaService extends Disposable {
         this.registerDocFormula('test_doc', 'test_formula_id', '=\'[workbook-01]工作表11\'!A13');
     }
 
-    private _initDocFormulaResources(resourceManagerService: ResourceManagerService): void {
+    private _initDocFormulaResources(resourceManagerService: IResourceManagerService): void {
         resourceManagerService.registerPluginResource({
             pluginName: DOC_FORMULA_PLUGIN_NAME,
             businesses: [UniverInstanceType.UNIVER_DOC],

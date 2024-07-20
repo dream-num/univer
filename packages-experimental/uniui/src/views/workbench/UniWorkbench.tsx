@@ -44,7 +44,7 @@ import styles from './workbench.module.less';
 export interface IUniWorkbenchProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
 
-    onRendered: () => void;
+    onRendered: (contentEl: HTMLElement) => void;
 }
 
 export function UniWorkbench(props: IUniWorkbenchProps) {
@@ -83,10 +83,14 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
         }
-
-        onRendered();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (contentRef.current) {
+            onRendered?.(contentRef.current);
+        }
+    }, [onRendered]);
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
 

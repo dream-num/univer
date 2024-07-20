@@ -30,6 +30,7 @@ const excludeProps = new Set([
     'cancelDefaultResizeListener',
     'isSheetEditor',
     'canvasStyle',
+    'isFormulaEditor',
     'isSingle',
     'isReadonly',
     'onlyInputFormula',
@@ -50,17 +51,18 @@ export interface ITextEditorProps {
     className?: string; // Parent class name.
 
     snapshot?: IDocumentData; // The default initialization snapshot for the editor can be simply replaced with the value attribute, for cellEditor and formulaBar
+    value?: string; // default values.
+
+    // WTF: snapshot and value both exists?
 
     resizeCallBack?: (editor: Nullable<HTMLDivElement>) => void; // Container scale callback.
 
     cancelDefaultResizeListener?: boolean; // Disable the default container scaling listener, for cellEditor and formulaBar
 
-    isSheetEditor?: boolean; // Specify whether the editor is bound to a sheet. Currently, there are cellEditor and formulaBar.
-
     canvasStyle?: IEditorCanvasStyle; // Setting the style of the editor is similar to setting the drawing style of a canvas, and therefore, it should be distinguished from the CSS 'style'. At present, it only supports the 'fontsize' attribute.
 
-    value?: string; // default values.
-
+    isSheetEditor?: boolean; // Specify whether the editor is bound to a sheet. Currently, there are cellEditor and formulaBar.
+    isFormulaEditor?: boolean;
     isSingle?: boolean; // Set whether the editor allows multiline input, default is true, equivalent to input; false is equivalent to textarea.
     isReadonly?: boolean; // Set the editor to read-only state.
 
@@ -74,13 +76,10 @@ export interface ITextEditorProps {
     openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
 
     onChange?: (value: Nullable<string>) => void; // Callback for changes in the selector value.
-
     onActive?: (state: boolean) => void; // Callback for editor active.
-
     onValid?: (state: boolean) => void; // Editor input value validation, currently effective only under onlyRange and onlyFormula conditions.
 
     placeholder?: string; // Placeholder text.
-
     isValueValid?: boolean; // Whether the value is valid.
 }
 
@@ -99,23 +98,17 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         value,
         isSingle = true,
         isReadonly = false,
+        isFormulaEditor = false,
         onlyInputFormula = false,
         onlyInputRange = false,
         onlyInputContent = false,
-
         isSingleChoice = false,
-
         openForSheetUnitId,
         openForSheetSubUnitId,
-
         onChange,
-
         onActive,
-
         onValid,
-
         isValueValid = true,
-
         placeholder,
     } = props;
 
@@ -169,6 +162,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             onlyInputContent,
             openForSheetUnitId,
             openForSheetSubUnitId,
+            isFormulaEditor,
         },
         editorDom);
 
@@ -204,6 +198,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
             if (currentValue !== value) {
                 onValid && onValid(isLegality);
+                // WTF: why emit value on focus?
                 onChange && onChange(editorService.getValue(id));
             }
         }, 30);
@@ -230,6 +225,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 return;
             }
 
+            // WTF: should not use editorService to sync values. All editors instance would be notified!
             if (editor.editorUnitId !== id) {
                 return;
             }

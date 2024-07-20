@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type {
+    IDisposable,
+    Nullable } from '@univerjs/core';
 import {
     ICommandService,
     Inject,
@@ -23,6 +26,7 @@ import {
     LocaleService,
     OnLifecycle,
     RxDisposable,
+    toDisposable,
 } from '@univerjs/core';
 import { SearchSingle16 } from '@univerjs/icons';
 import type { MenuConfig } from '@univerjs/ui';
@@ -87,6 +91,13 @@ export class FindReplaceController extends RxDisposable {
         this._initShortcuts();
     }
 
+    override dispose(): void {
+        super.dispose();
+
+        this._closingListenerDisposable?.dispose();
+        this._closingListenerDisposable = null;
+    }
+
     private _initCommands(): void {
         [
             OpenFindDialogOperation,
@@ -123,15 +134,6 @@ export class FindReplaceController extends RxDisposable {
                 this._openPanel();
             }
         });
-
-        // If focusing on a non-sheet Univer document, close the find replace dialog.
-        this.disposeWithMe(
-            this._univerInstanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((focused) => {
-                if (!focused || !this._univerInstanceService.getUniverSheetInstance(focused)) {
-                    this.closePanel();
-                }
-            })
-        );
     }
 
     private _openPanel(): void {
@@ -146,9 +148,23 @@ export class FindReplaceController extends RxDisposable {
             preservePositionOnDestroy: true,
             onClose: () => this.closePanel(),
         });
+
+        this._closingListenerDisposable = toDisposable(this._univerInstanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((focused) => {
+            if (!focused || !this._univerInstanceService.getUniverSheetInstance(focused)) {
+                this.closePanel();
+            }
+        }));
     }
 
+    private _closingListenerDisposable: Nullable<IDisposable>;
     closePanel(): void {
+        if (!this._closingListenerDisposable) {
+            return;
+        }
+
+        this._closingListenerDisposable.dispose();
+        this._closingListenerDisposable = null;
+
         this._dialogService.close(FIND_REPLACE_DIALOG_ID);
         this._findReplaceService.terminate();
 

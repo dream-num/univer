@@ -31,8 +31,6 @@ export enum DataStreamTreeNodeType {
     // TABLE_CELL_END, //* \x1D 表格开始
     // TABLE_ROW_END, // \x1E  表格开始
     // TABLE_END, // \x1F  表格结束
-    // CUSTOM_RANGE_START, // \x1F  自定义范围开始
-    // CUSTOM_RANGE_END, // \x1E  自定义范围结束
 }
 
 export enum DataStreamTreeTokenType {
@@ -56,4 +54,9 @@ export enum DataStreamTreeTokenType {
     LETTER = '',
 
     SPACE = ' ',
+}
+
+/** Wrap your stream in a pair of custom range tokens. */
+export function makeCustomRangeStream(stream: string): string {
+    return `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${stream}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
 }

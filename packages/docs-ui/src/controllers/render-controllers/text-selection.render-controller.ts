@@ -213,33 +213,35 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
     }
 
     private _skeletonListener() {
+        let init = false;
         // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
         this.disposeWithMe(this._docSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
-            if (skeleton == null) {
-                return;
-            }
+            if (!skeleton) return;
 
             const { scene, mainComponent, unitId } = this._context;
+            const isInternalEditor = isInternalEditorID(unitId);
 
-            this._textSelectionRenderManager.changeRuntime(skeleton, scene, mainComponent as Documents);
+            if (init) {
+                this._textSelectionRenderManager.changeRuntime(skeleton, scene, mainComponent as Documents);
+                this._textSelectionManagerService.setCurrentSelectionNotRefresh({
+                    unitId,
+                    subUnitId: '',
+                });
 
-            this._textSelectionManagerService.setCurrentSelectionNotRefresh({
-                unitId,
-                subUnitId: '',
-            });
-
-            // The initial cursor is set at the beginning of the document,
-            // and can be set to the previous cursor position in the future.
-            // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.
-            if (!isInternalEditorID(unitId)) {
-                this._textSelectionManagerService.replaceTextRanges([
-                    {
-                        startOffset: 0,
-                        endOffset: 0,
-                    },
-                ], false);
+                // The initial cursor is set at the beginning of the document,
+                // and can be set to the previous cursor position in the future.
+                // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.
+                if (!isInternalEditor) {
+                    this._textSelectionManagerService.replaceTextRanges([
+                        {
+                            startOffset: 0,
+                            endOffset: 0,
+                        },
+                    ], false);
+                }
             }
-        })
-        );
+
+            init = true;
+        }));
     }
 }

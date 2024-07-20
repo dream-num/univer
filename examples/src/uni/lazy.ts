@@ -16,6 +16,7 @@
 
 import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
+import { UniverDocUniFormulaUIPlugin } from '@univerjs/uni-formula-ui';
 // import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
@@ -33,5 +34,6 @@ export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCt
         //     },
         // ],
         [UniverSheetsFilterUIPlugin],
+        [UniverDocUniFormulaUIPlugin],
     ];
 }

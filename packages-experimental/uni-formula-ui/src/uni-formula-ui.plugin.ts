@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
 import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 import { DOC_FORMULA_UI_PLUGIN_NAME } from './const';
+import { DocFormulaPopupService } from './services/formula-popup.service';
+import { DocUniFormulaController } from './controllers/formula-input.controller';
 
 @DependentOn(UniverDocUniFormulaPlugin)
 export class UniverDocUniFormulaUIPlugin extends Plugin {
@@ -31,5 +34,9 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
+        ([
+            [DocUniFormulaController],
+            [DocFormulaPopupService],
+        ] as Dependency[]).forEach((d) => injector.add(d));
     }
 }

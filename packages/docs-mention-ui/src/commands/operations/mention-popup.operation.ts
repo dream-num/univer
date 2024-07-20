@@ -22,9 +22,10 @@ export interface IShowMentionInfoPopupOperationParams {
     mentionId: string;
 }
 
+// FIXME: anti-pattern: use command as an event
 export const ShowMentionInfoPopupOperation: ICommand<IShowMentionInfoPopupOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'docs.operation.show-mention-info-popup',
+    id: 'doc.operation.show-mention-info-popup',
     handler(accessor, params) {
         return false;
     },
@@ -32,7 +33,7 @@ export const ShowMentionInfoPopupOperation: ICommand<IShowMentionInfoPopupOperat
 
 export const CloseMentionInfoPopupOperation: ICommand = {
     type: CommandType.OPERATION,
-    id: 'docs.operation.close-mention-info-popup',
+    id: 'doc.operation.close-mention-info-popup',
     handler(accessor) {
         return false;
     },
@@ -44,7 +45,7 @@ export interface IShowMentionEditPopupOperationParams {
 
 export const ShowMentionEditPopupOperation: ICommand<IShowMentionEditPopupOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'docs.operation.show-mention-edit-popup',
+    id: 'doc.operation.show-mention-edit-popup',
     handler(accessor, params) {
         if (!params) {
             return false;
@@ -57,7 +58,7 @@ export const ShowMentionEditPopupOperation: ICommand<IShowMentionEditPopupOperat
 
 export const CloseMentionEditPopupOperation: ICommand = {
     type: CommandType.OPERATION,
-    id: 'docs.operation.close-mention-edit-popup',
+    id: 'doc.operation.close-mention-edit-popup',
     handler(accessor) {
         const docMentionService = accessor.get(DocMentionService);
         docMentionService.endEditing();

@@ -34,6 +34,7 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_INPUT_FORMULA,
+    FORMULA_EDITOR_ACTIVATED,
     getCellInfoInMergeData,
     ICommandService,
     IContextService,
@@ -233,8 +234,6 @@ export class PromptController extends Disposable {
 
         this._userMouseListener();
 
-        this._inputFormulaListener();
-
         this._initialChangeEditor();
     }
 
@@ -271,7 +270,7 @@ export class PromptController extends Disposable {
                 const editor = this._editorService.getEditor(params.unitId);
                 if (!editor
                     || editor.onlyInputContent()
-                    || (editor.isSheetEditor() && this._editorBridgeService.isVisible().visible === false)
+                    || (editor.isSheetEditor() && !this._isFormulaEditorActivated())
                 ) {
                     return;
                 }
@@ -1792,44 +1791,6 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _inputFormulaListener() {
-        this.disposeWithMe(
-            this._editorService.inputFormula$.subscribe((param) => {
-                const { formulaString, editorUnitId } = param;
-
-                if (formulaString.substring(0, 1) !== compareToken.EQUALS) {
-                    return;
-                }
-
-                const visibleState = this._editorBridgeService.isVisible();
-                if (visibleState.visible === false) {
-                    this._editorBridgeService.changeVisible({
-                        visible: true,
-                        eventType: DeviceInputEventType.Dblclick,
-                        unitId: '',
-                    });
-                }
-
-                const lastSequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
-
-                this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
-
-                this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId);
-            })
-        );
-
-        this.disposeWithMe(
-            // TODO: unfinished
-            this._editorService.singleSelection$.subscribe((state) => {
-                if (state === true) {
-                    // this._selectionRenderService.enableSingleSelection();
-                } else {
-                    // this._selectionRenderService.disableSingleSelection();
-                }
-            })
-        );
-    }
-
     private _changeRefString() {
         const activeRange = this._textSelectionManagerService.getActiveRange();
 
@@ -1932,5 +1893,11 @@ export class PromptController extends Disposable {
         const editorUnitId = this._univerInstanceService.getCurrentUniverDocInstance()!.getUnitId();
         const editor = this._editorService.getEditor(editorUnitId);
         return editor?.render;
+    }
+
+    private _isFormulaEditorActivated(): boolean {
+        // TODO: Finally we will remove 'this._editorBridgeService.isVisible().visible === true' to
+        // just the the context value.
+        return this._editorBridgeService.isVisible().visible === true || this._contextService.getContextValue(FORMULA_EDITOR_ACTIVATED);
     }
 }

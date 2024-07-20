@@ -29,6 +29,17 @@ import { IContextService } from '../context/context.service';
 import type { UnitModel, UnitType } from '../../common/unit';
 import { UniverInstanceType } from '../../common/unit';
 
+export type UnitCtor = new (...args: any[]) => UnitModel;
+
+export interface ICreateUnitOptions {
+    /**
+     * If Univer should make the new unit as current of its type.
+     *
+     * @default true
+     */
+    makeCurrent?: boolean;
+}
+
 /**
  * IUniverInstanceService holds all the current univer instances and provides a set of
  * methods to add and remove univer instances.
@@ -49,9 +60,10 @@ export interface IUniverInstanceService {
     /** Subscribe to curtain type of units' disposing. */
     getTypeOfUnitDisposed$<T extends UnitModel>(type: UnitType): Observable<T>;
 
+    /** An observable value that emits the id of the focused unit. */
     focused$: Observable<Nullable<string>>;
+    /** Focus a unit. */
     focusUnit(unitId: string | null): void;
-
     getFocusedUnit(): Nullable<UnitModel>;
 
     getCurrentUnitForType<T extends UnitModel>(type: UnitType): Nullable<T>;
@@ -60,7 +72,7 @@ export interface IUniverInstanceService {
     getCurrentTypeOfUnit$<T extends UnitModel>(type: UnitType): Observable<Nullable<T>>;
 
     /** Create a unit with snapshot info. */
-    createUnit<T, U extends UnitModel>(type: UnitType, data: Partial<T>): U;
+    createUnit<T, U extends UnitModel>(type: UnitType, data: Partial<T>, options?: ICreateUnitOptions): U;
     /** Dispose a unit  */
     disposeUnit(unitId: string): boolean;
 
@@ -98,13 +110,19 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         this._focused$.complete();
     }
 
-    private _createHandler!: (type: UnitType, data: unknown, ctor: new (...args: any[]) => UnitModel) => UnitModel;
-    __setCreateHandler(handler: (type: UnitType, data: unknown, ctor: new (...args: any[]) => UnitModel) => UnitModel): void {
+    private _createHandler!: (
+        type: UnitType,
+        data: unknown,
+        ctor: UnitCtor,
+        options?: ICreateUnitOptions,
+    ) => UnitModel;
+
+    __setCreateHandler(handler: (type: UnitType, data: unknown, ctor: UnitCtor, options?: ICreateUnitOptions) => UnitModel): void {
         this._createHandler = handler;
     }
 
-    createUnit<T, U extends UnitModel>(type: UnitType, data: T): U {
-        const model = this._createHandler(type, data, this._ctorByType.get(type)!);
+    createUnit<T, U extends UnitModel>(type: UnitType, data: T, options?: ICreateUnitOptions): U {
+        const model = this._createHandler(type, data, this._ctorByType.get(type)!, options);
         return model as U;
     }
 
@@ -126,7 +144,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this.currentUnits$.pipe(map((units) => units.get(type) ?? null), distinctUntilChanged()) as Observable<Nullable<T>>;
     }
 
-    getCurrentUnitForType<T>(type: UnitType): Nullable<T> {
+    getCurrentUnitForType<T extends UnitModel>(type: UnitType): Nullable<T> {
         return this._currentUnits.get(type) as Nullable<T>;
     }
 
@@ -135,11 +153,6 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         if (!result) throw new Error(`[UniverInstanceService]: no document with unitId ${unitId}!`);
 
         this._currentUnits.set(result[1], result[0]);
-        this._currentUnits$.next(this._currentUnits);
-    }
-
-    private _removeCurrentUnitForType(type: UnitType): void {
-        this._currentUnits.set(type, null);
         this._currentUnits$.next(this._currentUnits);
     }
 
@@ -156,17 +169,25 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
      *
      * @param unit The unit to be added.
      */
-    __addUnit(unit: UnitModel): void {
+    __addUnit(unit: UnitModel, options?: ICreateUnitOptions): void {
         const type = unit.type;
 
         if (!this._unitsByType.has(type)) {
             this._unitsByType.set(type, []);
         }
-        this._unitsByType.get(type)!.push(unit);
 
+        const units = this._unitsByType.get(type)!;
+        const newUnitId = unit.getUnitId();
+        if (units.findIndex((u) => u.getUnitId() === newUnitId) !== -1) {
+            throw new Error(`[UniverInstanceService]: cannot create a unit with the same unit id: ${newUnitId}.`);
+        }
+
+        units.push(unit);
         this._unitAdded$.next(unit);
 
-        this.setCurrentUnitForType(unit.getUnitId());
+        if (options?.makeCurrent ?? true) {
+            this.setCurrentUnitForType(unit.getUnitId());
+        }
     }
 
     private _unitDisposed$ = new Subject<UnitModel>();
@@ -256,15 +277,27 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         const index = units.indexOf(unit);
         units.splice(index, 1);
 
-        // Firstly un-mark the unit as "current".
-        this._removeCurrentUnitForType(type);
-        this._focused$.next(null);
+        this._tryRemoveCurrentUnitForType(unitId, type);
+        this._tryBlurUnitOnRemoval(unitId);
 
-        // Then dispose the unit.
         this._unitDisposed$.next(unit);
 
         return true;
     }
+
+    private _tryRemoveCurrentUnitForType(unitId: string, type: UnitType): void {
+        const current = this.getCurrentUnitForType(type);
+        if (current?.getUnitId() === unitId) {
+            this._currentUnits.set(type, null);
+            this._currentUnits$.next(this._currentUnits);
+        }
+    }
+
+    private _tryBlurUnitOnRemoval(unitId: string): void {
+        if (this.focused?.getUnitId() === unitId) {
+            this._focused$.next(null);
+        }
+    };
 
     private _getUnitById(unitId: string): Nullable<[UnitModel, UnitType]> {
         for (const [type, units] of this._unitsByType) {

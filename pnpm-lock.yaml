@@ -333,6 +333,9 @@ importers:
       '@univerjs/uni-formula':
         specifier: workspace:*
         version: link:../packages-experimental/uni-formula
+      '@univerjs/uni-formula-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-formula-ui
       '@univerjs/uniscript':
         specifier: workspace:*
         version: link:../packages/uniscript
@@ -443,12 +446,30 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../../packages/sheets-formula
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@univerjs/uni-formula':
         specifier: workspace:*
         version: link:../uni-formula
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -471,9 +492,6 @@ importers:
         specifier: ^5.43.0
         version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
-      '@fontsource/poppins':
-        specifier: ^5.0.14
-        version: 5.0.14
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -4137,9 +4155,6 @@ packages:
 
   '@floating-ui/utils@0.2.4':
     resolution: {integrity: sha512-dWO2pw8hhi+WrXq1YJy2yCuWoL20PddgGaqTgVe4cOS9Q6qklXCiA1tJEqX6BEwRNSCP84/afac9hd4MS+zEUA==}
-
-  '@fontsource/poppins@5.0.14':
-    resolution: {integrity: sha512-nmM1zpPo3Uh4JcGAVSQuWaZNYh2FbbwWhZ5t6hRaynmJaNTBW85d3nEh9zMmzI0HX7X5xqQVdRHeDatKpOGsnA==}
 
   '@grpc/grpc-js@1.10.9':
     resolution: {integrity: sha512-5tcgUctCG0qoNyfChZifz2tJqbRbXVO9J7X6duFcOjY3HUNCxg5D0ZCK7EP9vIcZ0zRpLU9bWkyCqVCLZ46IbQ==}
@@ -12563,8 +12578,6 @@ snapshots:
       '@floating-ui/utils': 0.2.4
 
   '@floating-ui/utils@0.2.4': {}
-
-  '@fontsource/poppins@5.0.14': {}
 
   '@grpc/grpc-js@1.10.9':
     dependencies:

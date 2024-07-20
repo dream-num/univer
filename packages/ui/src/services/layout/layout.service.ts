@@ -42,15 +42,15 @@ export interface ILayoutService {
     registerFocusHandler(type: UniverInstanceType, handler: FocusHandlerFn): IDisposable;
     /** Register the root container element. */
     registerRootContainerElement(container: HTMLElement): IDisposable;
-    /** Register a canvas element. */
-    registerCanvasElement(container: HTMLCanvasElement): IDisposable;
+    /** Register a content element. */
+    registerContentElement(container: HTMLElement): IDisposable;
     /** Register an element as a container, especially floating components like Dialogs and Notifications. */
     registerContainerElement(container: HTMLElement): IDisposable;
 
-    getCanvasElement(): HTMLCanvasElement;
+    getContentElement(): HTMLElement;
 
     checkElementInCurrentContainers(element: HTMLElement): boolean;
-    checkCanvasIsFocused(): boolean;
+    checkContentIsFocused(): boolean;
 }
 export const ILayoutService = createIdentifier<ILayoutService>('ui.layout-service');
 
@@ -69,7 +69,8 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
 
     private readonly _focusHandlers = new Map<UniverInstanceType, FocusHandlerFn>();
 
-    private _canvasContainers: HTMLCanvasElement[] = [];
+    // FIXME: this don't need to be plural
+    private _contentElements: HTMLElement[] = [];
     private _allContainers: HTMLElement[] = [];
 
     constructor(
@@ -116,17 +117,17 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         return toDisposable(() => this._focusHandlers.delete(type));
     }
 
-    registerCanvasElement(container: HTMLCanvasElement): IDisposable {
-        if (this._canvasContainers.indexOf(container) === -1) {
-            this._canvasContainers.push(container);
-            return toDisposable(() => remove(this._canvasContainers, container));
+    registerContentElement(container: HTMLElement): IDisposable {
+        if (this._contentElements.indexOf(container) === -1) {
+            this._contentElements.push(container);
+            return toDisposable(() => remove(this._contentElements, container));
         }
 
-        throw new Error('[DesktopLayoutService]: canvas container already registered!');
+        throw new Error('[DesktopLayoutService]: content container already registered!');
     }
 
-    getCanvasElement(): HTMLCanvasElement {
-        return this._canvasContainers[0];
+    getContentElement(): HTMLElement {
+        return this._contentElements[0];
     }
 
     registerRootContainerElement(container: HTMLElement): IDisposable {
@@ -156,8 +157,8 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         return this._allContainers.some((container) => container.contains(element));
     }
 
-    checkCanvasIsFocused(): boolean {
-        return this._canvasContainers.some((canvas) => canvas === document.activeElement || canvas.contains(document.activeElement));
+    checkContentIsFocused(): boolean {
+        return this._contentElements.some((contentEl) => contentEl === document.activeElement || contentEl.contains(document.activeElement));
     }
 
     private _initUniverFocusListener(): void {

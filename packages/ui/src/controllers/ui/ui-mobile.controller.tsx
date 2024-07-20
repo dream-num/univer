@@ -51,7 +51,7 @@ export class MobileUIController extends Disposable implements IUIController {
             bootstrap(this._injector, this._config, (canvasElement, containerElement) => {
                 if (this._layoutService) {
                     this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
-                    this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
+                    this.disposeWithMe(this._layoutService.registerContentElement(canvasElement as HTMLCanvasElement));
                 }
 
                 this._renderManagerService.currentRender$.subscribe((renderId) => {

@@ -57,6 +57,7 @@
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uni-formula": "workspace:*",
+        "@univerjs/uni-formula-ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
         "@univerjs/uniui": "workspace:*",
         "clsx": "^2.1.1",

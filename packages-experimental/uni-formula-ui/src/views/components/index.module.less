@@ -1,0 +1,38 @@
+.doc-ui-formula-popup {
+    padding: var(--padding-base);
+    box-shadow: var(--box-shadow-base);
+    border: 1px solid rgb(var(--border-color));
+    border-radius: var(--border-radius-base);
+    background-color: rgb(var(--bg-color-overlay));
+
+    width: 360px;
+
+    &-title {
+        font-size: var(--font-size-xs);
+    }
+
+    &-editor {
+        margin-top: var(--margin-xs);
+        position: relative;
+        width: 100%;
+        height: 30px;
+        user-select: none;
+        border: 1px solid rgb(var(--border-color));
+        transition: all 0.15s;
+        border-radius: var(--border-radius-base);
+
+        &-activated {
+            border-color: rgb(var(--primary-color));
+        }
+    }
+
+    &-button-grp {
+        margin-top: var(--margin-xs);
+        text-align: right;
+        text-wrap: nowrap;
+
+        button:not(:last-of-type) {
+            margin-right: var(--margin-xxs);
+        }
+    }
+}

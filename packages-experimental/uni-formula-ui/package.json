@@ -20,7 +20,8 @@
     "keywords": [],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -58,12 +59,25 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/uni-formula": "workspace:*"
+        "@univerjs/design": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "@univerjs/uni-formula": "workspace:*",
+        "clsx": ">=2.0.0",
+        "rxjs": ">=7.0.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/shared": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@univerjs/uni-formula": "workspace:*",
+        "clsx": "^2.1.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.3",
         "vite": "^5.3.4",

@@ -46,7 +46,7 @@ export function SearchFunction() {
                 return;
             }
 
-            // const isFocusFormulaEditor = contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+            // const isFocusFormulaEditor = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
 
             const position = getPosition();
 

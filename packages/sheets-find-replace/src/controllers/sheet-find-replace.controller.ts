@@ -62,9 +62,9 @@ export class SheetsFindReplaceController extends Disposable implements IDisposab
         this.disposeWithMe(this._findReplaceService.registerFindReplaceProvider(provider));
 
         // The find replace panel should be closed when sheet cell editor is activated, or the formula editor is focused.
-        this.disposeWithMe(
-            this._contextService.subscribeContextValue$(EDITOR_ACTIVATED).pipe(filter((v) => !!v)).subscribe(() => this._findReplaceController.closePanel())
-        );
+        this.disposeWithMe(this._contextService.subscribeContextValue$(EDITOR_ACTIVATED)
+            .pipe(filter((v) => !!v))
+            .subscribe(() => this._findReplaceController.closePanel()));
     }
 
     private _initCommands(): void {

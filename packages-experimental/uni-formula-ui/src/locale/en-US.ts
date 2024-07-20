@@ -14,7 +14,25 @@
  * limitations under the License.
  */
 
-export class DocFormulaInputController {
+import type zhCN from './zh-CN';
 
-}
+const locale: typeof zhCN = {
+    'uni-formula': {
+        popup: {
+            title: {
+                new: 'Create new formula',
+                existing: 'Edit formula',
+            },
+            placeholder: 'Click here to insert formula or continue typing to close...',
+            button: {
+                confirm: 'Confirm',
+                cancel: 'Cancel',
+            },
+        },
+        command: {
+            'stream-placeholder': 'Doc Formula',
+        },
+    },
+};
 
+export default locale;

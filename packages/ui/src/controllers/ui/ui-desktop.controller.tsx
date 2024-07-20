@@ -51,10 +51,10 @@ export class DesktopUIController extends Disposable {
 
     private _bootstrapWorkbench(): void {
         this.disposeWithMe(
-            bootstrap(this._injector, this._config, (canvasElement, containerElement) => {
+            bootstrap(this._injector, this._config, (contentElement, containerElement) => {
                 if (this._layoutService) {
                     this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
-                    this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
+                    this.disposeWithMe(this._layoutService.registerContentElement(contentElement));
                 }
 
                 // TODO: this is subject to change in the future for Uni-mode
@@ -64,7 +64,7 @@ export class DesktopUIController extends Disposable {
                         if (!render.unitId) return;
                         if (isInternalEditorID(render.unitId)) return;
 
-                        render.engine.setContainer(canvasElement);
+                        render.engine.setContainer(contentElement);
                     }
                 });
 
@@ -74,7 +74,7 @@ export class DesktopUIController extends Disposable {
                     for (const [key, render] of allRenders) {
                         if (isInternalEditorID(key) || !((render) as RenderUnit).isRenderUnit) continue;
 
-                        render.engine.setContainer(canvasElement);
+                        render.engine.setContainer(contentElement);
                     }
 
                     this._lifecycleService.stage = LifecycleStages.Rendered;
@@ -93,7 +93,7 @@ export class DesktopUIController extends Disposable {
 function bootstrap(
     injector: Injector,
     options: IWorkbenchOptions,
-    callback: (canvasEl: HTMLElement, containerElement: HTMLElement) => void
+    callback: (contentEl: HTMLElement, containerElement: HTMLElement) => void
 ): IDisposable {
     let mountContainer: HTMLElement;
 
@@ -112,7 +112,7 @@ function bootstrap(
     }
 
     const ConnectedApp = connectInjector(DesktopWorkbench, injector);
-    const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
+    const onRendered = (contentElement: HTMLElement) => callback(contentElement, mountContainer);
 
     function render() {
         createRoot(

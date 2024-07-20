@@ -22,7 +22,7 @@ import {
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_FORMULA_EDITOR,
+    FOCUSING_FX_BAR_EDITOR,
     FOCUSING_SHEET,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     HorizontalAlign,
@@ -682,7 +682,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 return;
             }
 
-            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
             const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
             // TODO@Jocs: should get editor instead of current doc
             const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
@@ -768,7 +768,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                  * but move the cursor within the editor instead.
                  */
                 if (keycode != null &&
-                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
+                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR))
                 ) {
                     this._moveInEditor(keycode, isShift);
                     return;
@@ -903,7 +903,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(EDITOR_ACTIVATED, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
-        this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
+        this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
 
         this._cellEditorManagerService.setState({
             show: param.visible,

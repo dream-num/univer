@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+// NOTE: editors has the following states:
+// 1. Not focused. The `contenteditable` is not focused and the editor would not respond
+// to keyboard events.
+// 2. Focused (but not activated). The `contenteditable` is focused and editor
+// would respond to keyboard events. This is the state when a user focus a spreadsheet
+// without the editor being visible.
+// 3. Activated. User can see the cursor blinking.
+
 export const FOCUSING_SHEET = 'FOCUSING_SHEET';
 export const FOCUSING_DOC = 'FOCUSING_DOC';
 export const FOCUSING_SLIDE = 'FOCUSING_SLIDE';
@@ -25,7 +33,7 @@ export const EDITOR_ACTIVATED = 'EDITOR_ACTIVATED';
 export const FOCUSING_EDITOR_INPUT_FORMULA = 'FOCUSING_EDITOR_INPUT_FORMULA';
 
 /** The focusing state of the formula editor (Fx bar). */
-export const FOCUSING_FORMULA_EDITOR = 'FOCUSING_FORMULA_EDITOR';
+export const FOCUSING_FX_BAR_EDITOR = 'FOCUSING_FX_BAR_EDITOR';
 
 export const FOCUSING_UNIVER_EDITOR = 'FOCUSING_UNIVER_EDITOR';
 
@@ -36,3 +44,6 @@ export const FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE = 'FOCUSING_UNIVER_ED
  * The focusing state of the common drawings.
  */
 export const FOCUSING_COMMON_DRAWINGS = 'FOCUSING_COMMON_DRAWINGS';
+
+export const FORMULA_EDITOR_ACTIVATED = 'FORMULA_EDITOR_ACTIVATED';
+

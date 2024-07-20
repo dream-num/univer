@@ -473,6 +473,9 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../../packages/sheets-formula
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui

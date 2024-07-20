@@ -38,10 +38,16 @@ export interface IEditorConfigParam {
     initialSnapshot?: IDocumentData;
     cancelDefaultResizeListener?: boolean;
     canvasStyle?: IEditorCanvasStyle;
-    isSheetEditor: boolean;
 
+    isSheetEditor: boolean;
+    /**
+     * If the editor is for formula editing.
+     * @deprecated this is a temp fix before refactoring editor.
+     */
+    isFormulaEditor: boolean;
     isSingle: boolean;
     isReadonly: boolean;
+
     onlyInputFormula: boolean;
     onlyInputRange: boolean;
     onlyInputContent: boolean;
@@ -165,6 +171,11 @@ export class Editor {
 
     isSheetEditor() {
         return this._param.isSheetEditor === true;
+    }
+
+    /** @deprecated */
+    isFormulaEditor() {
+        return this._param.isFormulaEditor === true;
     }
 
     getValue() {
@@ -449,7 +460,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
         const editor = this.getEditor(editorUnitId);
 
-        if (!editor || editor.isSheetEditor()) {
+        if (!editor || editor.isSheetEditor() || editor.isFormulaEditor()) {
             return true;
         }
 
@@ -716,10 +727,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private _getCurrentEditorUnitId() {
         const current = this._univerInstanceService.getCurrentUniverDocInstance()!;
         return current.getUnitId();
-    }
-
-    private _refresh(param: IEditorStateParam): void {
-        this._state$.next(param);
     }
 
     private _getBlank(id: string) {

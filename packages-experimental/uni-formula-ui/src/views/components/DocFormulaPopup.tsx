@@ -19,11 +19,12 @@ import React, { useCallback, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { TextEditor } from '@univerjs/ui';
 import type { IDocumentData, Nullable } from '@univerjs/core';
-import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, ILogService, LocaleService } from '@univerjs/core';
+import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, ICommandService, LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import type { IDocFormulaPopupInfo } from '../../services/formula-popup.service';
 import { DOC_FORMULA_POPUP_KEY, DocFormulaPopupService } from '../../services/formula-popup.service';
 
+import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operation';
 import styles from './index.module.less';
 
 export const DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY = createInternalEditorID('UNI_FORMULA');
@@ -62,27 +63,28 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
     const { popupInfo } = props;
     const { f } = popupInfo;
 
-    const logService = useDependency(ILogService);
     const localeService = useDependency(LocaleService);
     const formulaPopupService = useDependency(DocFormulaPopupService);
+    const commandService = useDependency(ICommandService);
 
     const [formulaString, setFormulaString] = useState<Nullable<string>>(f);
     const snapshotRef = useRef(makeSnapshot(f ?? ''));
 
     const [focused, setFocused] = useState(false);
 
-    const onFormulaStringChange = (formulaString: Nullable<string>) => {
+    const onFormulaStringChange = useCallback((formulaString: string) => {
         setFormulaString(formulaString);
-        logService.log('debug, the current formula string is', formulaString);
-    };
+        formulaPopupService.cacheFormulaString(formulaString);
+    }, [formulaPopupService]);
 
     const onConfirm = useCallback(() => {
-        formulaPopupService.writeFormulaString(formulaString);
-    }, [formulaPopupService, formulaString]);
+        // TODO: call operation instead
+        commandService.executeCommand(ConfirmFormulaPopupCommand.id);
+    }, [commandService]);
 
     const onCancel = useCallback(() => {
-        formulaPopupService.cancel();
-    }, [formulaPopupService]);
+        commandService.executeCommand(CloseFormulaPopupOperation.id);
+    }, [commandService]);
 
     return (
         <div className={styles.docUiFormulaPopup}>
@@ -95,9 +97,9 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
                 placeholder={localeService.t('uni-formula.popup.placeholder')}
                 snapshot={snapshotRef.current}
                 cancelDefaultResizeListener
-                isSheetEditor
                 isSingle
-                onChange={(str) => onFormulaStringChange(str)}
+                isFormulaEditor
+                onChange={(str) => onFormulaStringChange(str ?? '')}
                 onFocus={() => {
                     formulaPopupService.lockPopup();
                     setFocused(true);
@@ -106,7 +108,7 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
             />
 
             <div className={styles.docUiFormulaPopupButtonGrp}>
-                <Button type="primary" size="small" onClick={onConfirm}>{localeService.t('uni-formula.popup.button.confirm')}</Button>
+                <Button type="primary" size="small" disabled={!formulaString} onClick={onConfirm}>{localeService.t('uni-formula.popup.button.confirm')}</Button>
                 <Button type="default" size="small" onClick={onCancel}>{localeService.t('uni-formula.popup.button.cancel')}</Button>
             </div>
         </div>

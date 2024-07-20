@@ -22,6 +22,7 @@ export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
 export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
+export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
 export { RegisterOtherFormulaService } from './services/register-other-formula.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 

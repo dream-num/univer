@@ -28,38 +28,10 @@ export interface ISelectEditorFormulaOperationParam {
     isSingleEditor?: boolean;
 }
 
+// FIXME: this is an anti-pattern, using operation as an event
+
 export const SelectEditorFormulaOperation: IOperation<ISelectEditorFormulaOperationParam> = {
     id: 'formula-ui.operation.select-editor-formula',
     type: CommandType.OPERATION,
-    handler: (accessor, params) =>
-        // const { eventType, keycode } = params;
-        // const formulaPromptService = accessor.get(IFormulaPromptService);
-        // const editorBridgeService = accessor.get(IEditorBridgeService);
-
-        // switch (keycode) {
-        //     case KeyCode.ARROW_DOWN:
-        //         formulaPromptService.navigate({ direction: Direction.DOWN });
-        //         break;
-        //     case KeyCode.ARROW_UP:
-        //         formulaPromptService.navigate({ direction: Direction.UP });
-        //         break;
-        //     // case KeyCode.ENTER:
-        //     // case KeyCode.TAB:
-        //     //     if (formulaPromptService.isSearching()) {
-        //     //         formulaPromptService.accept(true);
-        //     //     } else {
-        //     //         const editorBridgeParameters = {
-        //     //             visible: false,
-        //     //             eventType,
-        //     //             keycode,
-        //     //         };
-
-        //     //         editorBridgeService.changeVisible(editorBridgeParameters);
-        //     //     }
-        //     //     break;
-        //     default:
-        //         break;
-        // }
-
-        true,
+    handler: (accessor, params) => true,
 };

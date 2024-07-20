@@ -15,15 +15,18 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService } from '@univerjs/core';
 import { makeSelection } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
-
+import type { IShortcutItem } from '@univerjs/ui';
+import { IShortcutService, KeyCode } from '@univerjs/ui';
+import { FORMULA_PROMPT_ACTIVATED } from '@univerjs/sheets-formula';
 import type { IAddDocUniFormulaCommandParams } from '../commands/command';
 import { AddDocUniFormulaCommand } from '../commands/command';
+import { ConfirmFormulaPopupCommand } from '../commands/operation';
 
 export const DOC_FORMULA_POPUP_KEY = 'DOC_FORMULA_POPUP' as const;
 
@@ -46,12 +49,26 @@ export class DocFormulaPopupService extends Disposable {
     get popupInfo(): Nullable<IDocFormulaPopupInfo> { return this._popupInfo$.getValue(); }
 
     private _popupLocked = false;
+    private _cachedFormulaString = '';
 
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ILogService private readonly _logService: ILogService,
+        @ICommandService private readonly _commandService: ICommandService,
+        @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
+
+        const UniFormulaConfirmShortcut: IShortcutItem = {
+            id: ConfirmFormulaPopupCommand.id,
+            binding: KeyCode.ENTER,
+            description: 'shortcut.doc.confirm-formula-popup',
+            preconditions: (contextService) =>
+                !contextService.getContextValue(FORMULA_PROMPT_ACTIVATED) && this.canConfirmPopup(),
+            priority: 10000,
+        };
+
+        this.disposeWithMe(this._shortcutService.registerShortcut(UniFormulaConfirmShortcut));
     }
 
     override dispose(): void {
@@ -66,23 +83,8 @@ export class DocFormulaPopupService extends Disposable {
         this.closePopup();
     }
 
-    writeFormulaString(f: Nullable<string>): void {
-        const info = this.popupInfo;
-        if (!info) return;
-
-        this.unlockPopup();
-        this.closePopup();
-
-        if (f) {
-            throw new Error('Cannot create a empty formula!');
-        }
-
-        // write this formula string to doc
-        this._commandService.executeCommand(AddDocUniFormulaCommand.id, {
-            unitId: info.unitId,
-            f,
-            startIndex: info.startIndex,
-        } as IAddDocUniFormulaCommandParams);
+    cacheFormulaString(f: string): void {
+        this._cachedFormulaString = f;
     }
 
     showPopup(unitId: string, startIndex: number, type: 'new' | 'existing'): boolean {
@@ -104,6 +106,30 @@ export class DocFormulaPopupService extends Disposable {
         this._popupLocked = true;
     }
 
+    canConfirmPopup(): boolean {
+        return this._cachedFormulaString !== '';
+    }
+
+    async confirmPopup(): Promise<boolean> {
+        const info = this.popupInfo;
+        if (!info) return true;
+
+        this.unlockPopup();
+        this.closePopup();
+
+        const f = this._cachedFormulaString;
+        if (!f) {
+            this._logService.warn('[FormulaPopupService]: cannot write empty formula into the field.');
+        }
+
+        // write this formula string to doc
+        return this._commandService.executeCommand(AddDocUniFormulaCommand.id, {
+            unitId: info.unitId,
+            f,
+            startIndex: info.startIndex,
+        } as IAddDocUniFormulaCommandParams);
+    }
+
     unlockPopup(): void {
         this._popupLocked = false;
     }
@@ -111,8 +137,11 @@ export class DocFormulaPopupService extends Disposable {
     closePopup(): boolean {
         if (this._popupLocked) return false;
 
+        this._cachedFormulaString = '';
+
         this.popupInfo?.disposable.dispose();
         this._popupInfo$.next(null);
+
         return true;
     }
 }

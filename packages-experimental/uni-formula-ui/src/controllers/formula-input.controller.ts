@@ -22,7 +22,7 @@ import { Inject } from '@wendellhu/redi';
 
 import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/command';
 import type { IShowFormulaPopupOperationParams } from '../commands/operation';
-import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operation';
+import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand, ShowFormulaPopupOperation } from '../commands/operation';
 import { DocFormulaPopup, DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY } from '../views/components/DocFormulaPopup';
 import { DocFormulaPopupService } from '../services/formula-popup.service';
 
@@ -49,6 +49,7 @@ export class DocUniFormulaController extends Disposable {
         [
             ShowFormulaPopupOperation,
             CloseFormulaPopupOperation,
+            ConfirmFormulaPopupCommand,
             AddDocUniFormulaCommand,
             RemoveDocUniFormulaCommand,
             UpdateDocUniFormulaCommand,

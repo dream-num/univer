@@ -20,7 +20,7 @@ import {
     FOCUSING_COMMON_DRAWINGS,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_FORMULA_EDITOR,
+    FOCUSING_FX_BAR_EDITOR,
     FOCUSING_SHEET,
     FOCUSING_UNIVER_EDITOR,
 } from '@univerjs/core';
@@ -48,7 +48,7 @@ export function whenSheetEditorFocusedAndFxNotFocused(contextService: IContextSe
         contextService.getContextValue(FOCUSING_SHEET) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
         !contextService.getContextValue(EDITOR_ACTIVATED) &&
-        !contextService.getContextValue(FOCUSING_FORMULA_EDITOR) &&
+        !contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) &&
         !contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
     );
 }
@@ -77,7 +77,7 @@ export function whenEditorActivated(contextService: IContextService) {
  */
 export function whenFormulaEditorFocused(contextService: IContextService) {
     return (
-        contextService.getContextValue(FOCUSING_FORMULA_EDITOR) &&
+        contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR)
     );
 }

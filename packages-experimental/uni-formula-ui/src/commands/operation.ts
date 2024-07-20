@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
+import type { ICommand, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { DocFormulaPopupService } from '../services/formula-popup.service';
 
 export interface IShowFormulaPopupOperationParams {
     unitId: string;
     startIndex: number;
-
-    // TODO: add type param
 }
 
 export const ShowFormulaPopupOperation: IOperation<IShowFormulaPopupOperationParams> = {
@@ -34,17 +32,20 @@ export const ShowFormulaPopupOperation: IOperation<IShowFormulaPopupOperationPar
     },
 };
 
-export interface ICloseFormulaPopupOperationParams {
-    unitId: string;
-    startIndex: number;
-}
-
-export const CloseFormulaPopupOperation: IOperation<ICloseFormulaPopupOperationParams> = {
+export const CloseFormulaPopupOperation: IOperation = {
     id: 'doc.operation.close-formula-popup',
     type: CommandType.OPERATION,
-    handler(accessor, params) {
+    handler(accessor) {
         const docFormulaPopupService = accessor.get(DocFormulaPopupService);
         return docFormulaPopupService.closePopup();
     },
 };
 
+export const ConfirmFormulaPopupCommand: ICommand = {
+    id: 'doc.operation.confirm-formula-popup',
+    type: CommandType.COMMAND,
+    handler(accessor) {
+        const docFormulaPopupService = accessor.get(DocFormulaPopupService);
+        return docFormulaPopupService.confirmPopup();
+    },
+};

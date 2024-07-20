@@ -57,7 +57,7 @@ const univer = new Univer({
     locales: {
         [LocaleType.EN_US]: enUS,
     },
-    // logLevel: LogLevel.VERBOSE,
+    logLevel: LogLevel.VERBOSE,
 });
 
 univer.registerPlugin(UniverDocsPlugin, {

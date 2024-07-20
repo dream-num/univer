@@ -15,7 +15,7 @@
  */
 
 import type { Observer as RxObserver, Subscription } from 'rxjs';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 /**
  * A class serves as a medium between the observable and its observers
@@ -131,3 +131,11 @@ export class EventSubject<T> extends Subject<[T, EventState]> {
     }
 }
 
+export function fromEventSubject<T>(subject$: EventSubject<T>) {
+    return new Observable<T>((subscriber) => {
+        const ob = subject$.subscribeEvent((evt) => {
+            subscriber.next(evt);
+        });
+        return () => ob.unsubscribe();
+    });
+}

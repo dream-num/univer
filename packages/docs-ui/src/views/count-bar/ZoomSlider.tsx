@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, Workbook } from '@univerjs/core';
+import type { DocumentDataModel } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,

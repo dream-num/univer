@@ -17,7 +17,6 @@
 import React, { Component, createRef } from 'react';
 
 import type { IUniverDocsUIConfig } from '../../basics';
-import { CountBar } from '../count-bar';
 import style from './index.module.less';
 
 interface IBaseDocContainerProps {

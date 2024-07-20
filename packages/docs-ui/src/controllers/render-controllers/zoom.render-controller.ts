@@ -21,7 +21,7 @@ import {
     Inject,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { DocSkeletonManagerService, neoGetDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
+import { DocSkeletonManagerService, neoGetDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';

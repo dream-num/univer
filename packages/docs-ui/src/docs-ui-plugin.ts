@@ -148,7 +148,6 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocPageLayoutService],
             [DocRenderController],
             [DocZoomRenderController],
-            [DocContextMenuRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
@@ -161,6 +160,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocHeaderFooterController],
             [DocResizeRenderController],
             [DocHoverRenderController],
+            [DocContextMenuRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });

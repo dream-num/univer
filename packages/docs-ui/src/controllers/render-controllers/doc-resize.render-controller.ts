@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject } from '@univerjs/core';
+import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import { debounceTime, filter } from 'rxjs';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 
 export class DocResizeRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext,
-        @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService
+        @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -30,10 +33,14 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
     }
 
     private _initResize() {
-        this.disposeWithMe(this._context.engine.onTransformChange$.subscribeEvent((evt) => {
-            if (evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize) {
+        this.disposeWithMe(
+            fromEventSubject(this._context.engine.onTransformChange$).pipe(
+                filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize),
+                debounceTime(16)
+            ).subscribe(() => {
                 this._docPageLayoutService.calculatePagePosition();
-            }
-        }));
+                this._textSelectionManagerService.refreshSelection();
+            })
+        );
     }
 }

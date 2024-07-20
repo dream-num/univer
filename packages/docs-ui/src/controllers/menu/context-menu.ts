@@ -40,7 +40,7 @@ const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
 
 export const CopyMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     return {
-        id: DocCopyCommand.name,
+        id: DocCopyCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'Copy',
@@ -53,7 +53,7 @@ export const CopyMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
 
 export const CutMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     return {
-        id: DocCutCommand.name,
+        id: DocCutCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'Copy',
@@ -66,7 +66,7 @@ export const CutMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
 
 export const PasteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     return {
-        id: DocPasteCommand.name,
+        id: DocPasteCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'PasteSpecial',

@@ -107,13 +107,22 @@ export class DocUIController extends Disposable {
                 BulletListMenuItemFactory,
                 ResetBackgroundColorMenuItemFactory,
                 BackgroundColorSelectorMenuItemFactory,
-                CopyMenuFactory,
-                CutMenuFactory,
-                PasteMenuFactory,
-                DeleteMenuFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
+        });
+
+        [
+            CopyMenuFactory,
+            CutMenuFactory,
+            PasteMenuFactory,
+            DeleteMenuFactory,
+        ].forEach((factory) => {
+            try {
+                this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
+            } catch (error) {
+
+            }
         });
     }
 

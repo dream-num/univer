@@ -39,7 +39,7 @@ describe('Test chooserows function', () => {
             ]);
         });
 
-        it('ColNum value is zero or exceeds the number of columns in the array', async () => {
+        it('RowNum value is zero or exceeds the number of rows in the array', async () => {
             const array = ArrayValueObject.create('{1,2,3;2,3,4}');
             const rowNum1 = NumberValueObject.create(0);
             const resultObject = testFunction.calculate(array, rowNum1);
@@ -57,7 +57,7 @@ describe('Test chooserows function', () => {
             expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.NAME);
         });
 
-        it('ColNum value is error or string or boolean or blank cell or multi-column array', async () => {
+        it('RowNum value is error or string or boolean or blank cell or multi-row array', async () => {
             const array = ArrayValueObject.create('{1,2,3;2,3,4}');
             const rowNum1 = ErrorValueObject.create(ErrorType.NAME);
             const resultObject = testFunction.calculate(array, rowNum1);
@@ -81,7 +81,7 @@ describe('Test chooserows function', () => {
             const resultObject5 = testFunction.calculate(array, rowNum5);
             expect(getObjectValue(resultObject5)).toStrictEqual(ErrorType.VALUE);
 
-            const rowNum6 = ArrayValueObject.create('{1,2}');
+            const rowNum6 = ArrayValueObject.create('{1;2}');
             const resultObject6 = testFunction.calculate(array, rowNum6);
             expect(getObjectValue(resultObject6)).toStrictEqual(ErrorType.VALUE);
         });

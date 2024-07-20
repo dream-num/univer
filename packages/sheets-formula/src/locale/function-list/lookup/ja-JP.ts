@@ -161,8 +161,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: 'フィルターする範囲または配列。' },
+            include: { name: 'ブール配列', detail: 'ブール値の配列。TRUE は保持する行または列を示します。' },
+            ifEmpty: { name: '空の値を返す', detail: 'アイテムが保持されていない場合に返されます。' },
         },
     },
     FORMULATEXT: {
@@ -231,8 +232,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列', detail: '追加する配列。' },
+            array2: { name: '配列', detail: '追加する配列。' },
         },
     },
     HYPERLINK: {
@@ -525,8 +526,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列', detail: '追加する配列。' },
+            array2: { name: '配列', detail: '追加する配列。' },
         },
     },
     WRAPCOLS: {

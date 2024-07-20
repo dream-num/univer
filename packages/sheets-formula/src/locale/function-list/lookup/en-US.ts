@@ -172,8 +172,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The range or array to filter.' },
+            include: { name: 'include', detail: 'An array of Boolean values ​​where TRUE indicates that a row or column is to be retained.' },
+            ifEmpty: { name: 'if_empty', detail: 'If no items are reserved, return.' },
         },
     },
     FORMULATEXT: {
@@ -242,8 +243,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array', detail: 'The arrays to append.' },
+            array2: { name: 'array', detail: 'The arrays to append.' },
         },
     },
     HYPERLINK: {
@@ -536,8 +537,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array', detail: 'The arrays to append.' },
+            array2: { name: 'array', detail: 'The arrays to append.' },
         },
     },
     WRAPCOLS: {

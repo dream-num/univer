@@ -162,8 +162,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要筛选的区域或数组。' },
+            include: { name: '布尔值数组', detail: '布尔值数组，其中 TRUE 表示要保留的一行或一列。' },
+            ifEmpty: { name: '空值返回', detail: '如果未保留任何项，则返回。' },
         },
     },
     FORMULATEXT: {
@@ -232,8 +233,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组', detail: '要追加的数组。' },
+            array2: { name: '数组', detail: '要追加的数组。' },
         },
     },
     HYPERLINK: {
@@ -524,8 +525,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组', detail: '要追加的数组。' },
+            array2: { name: '数组', detail: '要追加的数组。' },
         },
     },
     WRAPCOLS: {

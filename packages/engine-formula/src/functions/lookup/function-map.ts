@@ -22,7 +22,9 @@ import { Choosecols } from './choosecols';
 import { Chooserows } from './chooserows';
 import { Column } from './column';
 import { Columns } from './columns';
+import { Filter } from './filter';
 import { Hlookup } from './hlookup';
+import { Hstack } from './hstack';
 import { Indirect } from './indirect';
 import { Lookup } from './lookup';
 import { Match } from './match';
@@ -30,6 +32,7 @@ import { Offset } from './offset';
 import { Row } from './row';
 import { Rows } from './rows';
 import { Vlookup } from './vlookup';
+import { Vstack } from './vstack';
 import { Xlookup } from './xlookup';
 import { Xmatch } from './xmatch';
 import { Index } from './index';
@@ -42,7 +45,9 @@ export const functionLookup = [
     [Chooserows, FUNCTION_NAMES_LOOKUP.CHOOSEROWS],
     [Column, FUNCTION_NAMES_LOOKUP.COLUMN],
     [Columns, FUNCTION_NAMES_LOOKUP.COLUMNS],
+    [Filter, FUNCTION_NAMES_LOOKUP.FILTER],
     [Hlookup, FUNCTION_NAMES_LOOKUP.HLOOKUP],
+    [Hstack, FUNCTION_NAMES_LOOKUP.HSTACK],
     [Index, FUNCTION_NAMES_LOOKUP.INDEX],
     [Indirect, FUNCTION_NAMES_LOOKUP.INDIRECT],
     [Lookup, FUNCTION_NAMES_LOOKUP.LOOKUP],
@@ -51,6 +56,7 @@ export const functionLookup = [
     [Row, FUNCTION_NAMES_LOOKUP.ROW],
     [Rows, FUNCTION_NAMES_LOOKUP.ROWS],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
+    [Vstack, FUNCTION_NAMES_LOOKUP.VSTACK],
     [Xlookup, FUNCTION_NAMES_LOOKUP.XLOOKUP],
     [Xmatch, FUNCTION_NAMES_LOOKUP.XMATCH],
 ];

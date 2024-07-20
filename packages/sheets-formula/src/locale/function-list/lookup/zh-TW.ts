@@ -162,8 +162,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要篩選的區域或陣列。' },
+            include: { name: '布林值數組', detail: '布林值數組，其中 TRUE 表示要保留的一行或一列。' },
+            ifEmpty: { name: '空值返回', detail: '如果未保留任何項，則傳回。' },
         },
     },
     FORMULATEXT: {
@@ -232,8 +233,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列', detail: '要附加的陣列。' },
+            array2: { name: '陣列', detail: '要附加的陣列。' },
         },
     },
     HYPERLINK: {
@@ -524,8 +525,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列', detail: '要附加的陣列。' },
+            array2: { name: '陣列', detail: '要附加的陣列。' },
         },
     },
     WRAPCOLS: {

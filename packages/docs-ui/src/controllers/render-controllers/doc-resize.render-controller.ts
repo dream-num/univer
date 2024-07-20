@@ -17,7 +17,7 @@
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { debounceTime, filter } from 'rxjs';
+import { filter, throttleTime } from 'rxjs';
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 
@@ -36,7 +36,7 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
         this.disposeWithMe(
             fromEventSubject(this._context.engine.onTransformChange$).pipe(
                 filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize),
-                debounceTime(16)
+                throttleTime(16)
             ).subscribe(() => {
                 this._docPageLayoutService.calculatePagePosition();
                 this._textSelectionManagerService.refreshSelection();

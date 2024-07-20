@@ -19,7 +19,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { debounceTime, filter } from 'rxjs';
 import { TextSelectionManagerService } from '@univerjs/docs';
-import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import { DocPageLayoutService } from '@univerjs/docs-ui';
 
 export class DocResizeRenderController extends Disposable implements IRenderModule {
     constructor(

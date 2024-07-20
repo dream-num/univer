@@ -20,7 +20,7 @@ import type { IMenuButtonItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 import { DeleteLeftCommand, TextSelectionManagerService } from '@univerjs/docs';
-import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
+import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '@univerjs/docs-ui';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);

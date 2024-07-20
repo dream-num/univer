@@ -59,7 +59,16 @@ export class SheetsNumfmtCellContentController extends Disposable {
             handler: (cell, location, next) => {
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
-                const numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
+                let numfmtValue;
+                if (cell?.s) {
+                    const style = location.workbook.getStyles().get(cell.s);
+                    if (style?.n) {
+                        numfmtValue = style.n;
+                    }
+                }
+                if (!numfmtValue) {
+                    numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
+                }
                 if (!numfmtValue) {
                     return next(cell);
                 }
@@ -75,7 +84,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 let numfmtRes: string = '';
                 const cache = renderCache.getValue(location.row, location.col);
-                if (cache && cache.parameters === originCellValue.v) {
+                if (cache && cache.parameters === `${originCellValue.v}_${numfmtValue.pattern}`) {
                     return next({ ...cell, ...cache.result });
                 }
 
@@ -96,7 +105,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 renderCache.setValue(location.row, location.col, {
                     result: res,
-                    parameters: originCellValue.v as number,
+                    parameters: `${originCellValue.v}_${numfmtValue.pattern}`,
                 });
 
                 return next({ ...cell, ...res });

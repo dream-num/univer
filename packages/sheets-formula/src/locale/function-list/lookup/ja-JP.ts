@@ -77,8 +77,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '新しい配列で返される列を含む配列。' },
+            colNum1: { name: '列番号1', detail: '返される最初の列。' },
+            colNum2: { name: '列番号2', detail: '返される追加の列。' },
         },
     },
     CHOOSEROWS: {
@@ -91,8 +92,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '新しい配列で返される行を含む配列。' },
+            rowNum1: { name: '行番号1', detail: '返される最初の行番号。' },
+            rowNum2: { name: '行番号2', detail: '返される追加の行番号。' },
         },
     },
     COLUMN: {

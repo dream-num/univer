@@ -88,8 +88,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array containing the columns to be returned in the new array.' },
+            colNum1: { name: 'col_num1', detail: 'The first column to be returned.' },
+            colNum2: { name: 'col_num2', detail: 'Additional columns to be returned.' },
         },
     },
     CHOOSEROWS: {
@@ -102,8 +103,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array containing the rows to be returned in the new array.' },
+            rowNum1: { name: 'row_num1', detail: 'The first row number to be returned.' },
+            rowNum2: { name: 'row_num2', detail: 'Additional row numbers to be returned.' },
         },
     },
     COLUMN: {

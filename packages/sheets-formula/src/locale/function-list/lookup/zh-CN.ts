@@ -78,8 +78,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '包含要在新数组中返回的列的数组。' },
+            colNum1: { name: '列号1', detail: '要返回的第一列。' },
+            colNum2: { name: '列号2', detail: '要返回的其他列。' },
         },
     },
     CHOOSEROWS: {
@@ -92,8 +93,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '包含要在新数组中返回的行的数组。' },
+            rowNum1: { name: '行号1', detail: '要返回的第一行号。' },
+            rowNum2: { name: '行号2', detail: '要返回的其他行号。' },
         },
     },
     COLUMN: {

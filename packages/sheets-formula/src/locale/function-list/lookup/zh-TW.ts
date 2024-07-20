@@ -78,8 +78,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '包含要在新陣列中傳回之欄的陣列。' },
+            colNum1: { name: '欄數1', detail: '要返回的第一欄。' },
+            colNum2: { name: '欄數2', detail: '要返回的其他欄。' },
         },
     },
     CHOOSEROWS: {
@@ -92,8 +93,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '包含要在新陣列中傳回之欄的陣列。' },
+            rowNum1: { name: '列數1', detail: '要返回的第一列數。' },
+            rowNum2: { name: '列數2', detail: '要返回的其他列數。' },
         },
     },
     COLUMN: {

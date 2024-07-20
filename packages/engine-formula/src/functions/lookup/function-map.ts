@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Address } from './address';
+import { Areas } from './areas';
+import { Choose } from './choose';
+import { Choosecols } from './choosecols';
+import { Chooserows } from './chooserows';
 import { Column } from './column';
 import { Columns } from './columns';
-import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Hlookup } from './hlookup';
 import { Indirect } from './indirect';
 import { Lookup } from './lookup';
@@ -28,23 +32,25 @@ import { Rows } from './rows';
 import { Vlookup } from './vlookup';
 import { Xlookup } from './xlookup';
 import { Xmatch } from './xmatch';
-import { Choose } from './choose';
 import { Index } from './index';
 
 export const functionLookup = [
     [Address, FUNCTION_NAMES_LOOKUP.ADDRESS],
+    [Areas, FUNCTION_NAMES_LOOKUP.AREAS],
     [Choose, FUNCTION_NAMES_LOOKUP.CHOOSE],
+    [Choosecols, FUNCTION_NAMES_LOOKUP.CHOOSECOLS],
+    [Chooserows, FUNCTION_NAMES_LOOKUP.CHOOSEROWS],
     [Column, FUNCTION_NAMES_LOOKUP.COLUMN],
     [Columns, FUNCTION_NAMES_LOOKUP.COLUMNS],
+    [Hlookup, FUNCTION_NAMES_LOOKUP.HLOOKUP],
     [Index, FUNCTION_NAMES_LOOKUP.INDEX],
     [Indirect, FUNCTION_NAMES_LOOKUP.INDIRECT],
+    [Lookup, FUNCTION_NAMES_LOOKUP.LOOKUP],
+    [Match, FUNCTION_NAMES_LOOKUP.MATCH],
     [Offset, FUNCTION_NAMES_LOOKUP.OFFSET],
     [Row, FUNCTION_NAMES_LOOKUP.ROW],
     [Rows, FUNCTION_NAMES_LOOKUP.ROWS],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
-    [Lookup, FUNCTION_NAMES_LOOKUP.LOOKUP],
-    [Match, FUNCTION_NAMES_LOOKUP.MATCH],
-    [Hlookup, FUNCTION_NAMES_LOOKUP.HLOOKUP],
     [Xlookup, FUNCTION_NAMES_LOOKUP.XLOOKUP],
     [Xmatch, FUNCTION_NAMES_LOOKUP.XMATCH],
 ];

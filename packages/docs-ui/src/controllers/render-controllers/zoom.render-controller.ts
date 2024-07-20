@@ -21,10 +21,10 @@ import {
     Inject,
     IUniverInstanceService,
 } from '@univerjs/core';
-import type { IDocObjectParam } from '@univerjs/docs';
 import { DocSkeletonManagerService, neoGetDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
+import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 
 interface ISetDocMutationParams {
     unitId: string;
@@ -37,7 +37,8 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService
     ) {
         super();
 
@@ -135,72 +136,12 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         const docObject = neoGetDocObject(this._context);
         docObject.scene.scale(zoomRatio, zoomRatio);
 
-        this._calculatePagePosition(docObject, zoomRatio);
+        this._docPageLayoutService.calculatePagePosition();
 
         if (needRefreshSelection) {
             this._textSelectionManagerService.refreshSelection();
         }
 
         docObject.scene.getTransformer()?.clearSelectedObjects();
-    }
-
-    private _calculatePagePosition(currentRender: IDocObjectParam, zoomRatio: number) {
-        const { document: docsComponent, scene, docBackground } = currentRender;
-
-        const parent = scene?.getParent();
-
-        const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
-        if (parent == null || docsWidth === Number.POSITIVE_INFINITY || docsHeight === Number.POSITIVE_INFINITY) {
-            return;
-        }
-        const { width: engineWidth, height: engineHeight } = parent;
-        let docsLeft = 0;
-        let docsTop = 0;
-
-        let sceneWidth = 0;
-
-        let sceneHeight = 0;
-
-        let scrollToX = Number.POSITIVE_INFINITY;
-
-        if (engineWidth > (docsWidth + pageMarginLeft * 2) * zoomRatio) {
-            docsLeft = engineWidth / 2 - (docsWidth * zoomRatio) / 2;
-            docsLeft /= zoomRatio;
-            sceneWidth = (engineWidth - pageMarginLeft * 2) / zoomRatio;
-
-            scrollToX = 0;
-        } else {
-            docsLeft = pageMarginLeft;
-            sceneWidth = docsWidth + pageMarginLeft * 2;
-
-            scrollToX = (sceneWidth - engineWidth / zoomRatio) / 2;
-        }
-
-        if (engineHeight > docsHeight) {
-            docsTop = engineHeight / 2 - docsHeight / 2;
-            sceneHeight = (engineHeight - pageMarginTop * 2) / zoomRatio;
-        } else {
-            docsTop = pageMarginTop;
-            sceneHeight = docsHeight + pageMarginTop * 2;
-        }
-
-        // this.docsLeft = docsLeft;
-
-        // this.docsTop = docsTop;
-
-        scene.resize(sceneWidth, sceneHeight + 200);
-
-        docsComponent.translate(docsLeft, docsTop);
-        docBackground.translate(docsLeft, docsTop);
-
-        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
-            const actualX = viewport.transViewportScroll2ScrollValue(scrollToX, 0).x;
-            viewport.scrollTo({
-                x: actualX,
-            });
-        }
-
-        return this;
     }
 }

@@ -60,9 +60,10 @@ export interface IUniverInstanceService {
     /** Subscribe to curtain type of units' disposing. */
     getTypeOfUnitDisposed$<T extends UnitModel>(type: UnitType): Observable<T>;
 
+    /** An observable value that emits the id of the focused unit. */
     focused$: Observable<Nullable<string>>;
+    /** Focus a unit. */
     focusUnit(unitId: string | null): void;
-
     getFocusedUnit(): Nullable<UnitModel>;
 
     getCurrentUnitForType<T extends UnitModel>(type: UnitType): Nullable<T>;

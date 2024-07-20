@@ -73,6 +73,7 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
 
     const onFormulaStringChange = (formulaString: Nullable<string>) => {
         setFormulaString(formulaString);
+        logService.log('debug, the current formula string is', formulaString);
     };
 
     const onConfirm = useCallback(() => {
@@ -88,21 +89,19 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
             <span className={styles.docUiFormulaPopupTitle}>
                 {popupInfo.type === 'new' ? localeService.t('uni-formula.popup.title.new') : localeService.t('uni-formula.popup.title.existing')}
             </span>
-
-            {/* TODO: @wzhudev: add two buttons to confirm and leave formula editor. */}
             <TextEditor
                 id={DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY}
                 className={clsx(styles.docUiFormulaPopupEditor, focused && styles.docUiFormulaPopupEditorActivated)}
                 placeholder={localeService.t('uni-formula.popup.placeholder')}
                 snapshot={snapshotRef.current}
                 cancelDefaultResizeListener
-                isSheetEditor={false}
-                isSingle={false}
+                isSheetEditor
+                isSingle
                 onChange={(str) => onFormulaStringChange(str)}
                 onFocus={() => {
                     formulaPopupService.lockPopup();
                     setFocused(true);
-                }} // TODO: @wzhudev show a hint to unlock by hitting a button
+                }}
                 onBlur={() => setFocused(false)}
             />
 

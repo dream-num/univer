@@ -103,20 +103,13 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         onlyInputFormula = false,
         onlyInputRange = false,
         onlyInputContent = false,
-
         isSingleChoice = false,
-
         openForSheetUnitId,
         openForSheetSubUnitId,
-
         onChange,
-
         onActive,
-
         onValid,
-
         isValueValid = true,
-
         placeholder,
     } = props;
 

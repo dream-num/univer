@@ -73,6 +73,10 @@ export class DocFormulaPopupService extends Disposable {
         this.unlockPopup();
         this.closePopup();
 
+        if (f) {
+            throw new Error('Cannot create a empty formula!');
+        }
+
         // write this formula string to doc
         this._commandService.executeCommand(AddDocUniFormulaCommand.id, {
             unitId: info.unitId,

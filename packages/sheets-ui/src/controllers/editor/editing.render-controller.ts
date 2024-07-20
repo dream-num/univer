@@ -678,9 +678,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
      */
     private _initialKeyboardListener(d: DisposableCollection) {
         d.add(this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
+            if (!this._isCurrentSheetFocused()) {
+                return;
+            }
+
             const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
             const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
-
             // TODO@Jocs: should get editor instead of current doc
             const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
             if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
@@ -715,7 +718,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId: commandUnitId } = params;
 
-                if (!this._editorService.isSheetEditor(commandUnitId)) {
+                // Only when the sheet it attached to is focused. Maybe we should change it to the render unit sys.
+                if (
+                    !this._isCurrentSheetFocused() ||
+                    !this._editorService.isSheetEditor(commandUnitId)
+                ) {
                     return;
                 }
 
@@ -984,6 +991,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 direction,
             });
         }
+    }
+
+    // WTF: this is should not exist at all. It is because all editor instances reuse the singleton
+    // "TextSelectionManagerService" and other modules. Which will be refactored soon in August, 2024.
+    private _isCurrentSheetFocused(): boolean {
+        return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId;
     }
 }
 

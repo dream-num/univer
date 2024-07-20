@@ -75,9 +75,6 @@ export class PosthogTelemetryService extends Disposable implements ITelemetrySer
     }
 
     capture(eventName: string, params?: Record<string, any> | undefined) {
-        console.log('capture', params);
-
-        if (params?.FPS.avg > 59.5) return;
         posthog.capture(eventName, params);
     }
 

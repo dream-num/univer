@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
-import { CommandType, ICommandService, Inject, Rectangle, RxDisposable } from '@univerjs/core';
-import type { IPartialRenderPerformanceMetry, IRenderContext, IRenderModule, ISampleFrameInfo, IViewportInfos, IWheelEvent, Scene, ISummaryFrameData } from '@univerjs/engine-render';
+import type { ICommandInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { CommandType, ICommandService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     PointerInput,
     Rect,
@@ -29,7 +29,6 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-import { Inject, Optional } from '@wendellhu/redi';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ITelemetryService, TelemetryEventNames } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';

@@ -49,7 +49,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         this._initCommandExecutedListener();
         this._initRenderRefresher();
 
-        setTimeout(() => this._updateViewZoom(1, true), 20);
+        setTimeout(() => this.updateViewZoom(1, true), 20);
     }
 
     private _initRenderRefresher() {
@@ -106,7 +106,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
             const zoomRatio = documentModel.zoomRatio || 1;
 
-            this._updateViewZoom(zoomRatio, false);
+            this.updateViewZoom(zoomRatio, false);
         }));
     }
 
@@ -126,12 +126,12 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
                 const zoomRatio = documentModel.zoomRatio || 1;
 
-                this._updateViewZoom(zoomRatio);
+                this.updateViewZoom(zoomRatio);
             }
         }));
     }
 
-    private _updateViewZoom(zoomRatio: number, needRefreshSelection = true) {
+    updateViewZoom(zoomRatio: number, needRefreshSelection = true) {
         const docObject = neoGetDocObject(this._context);
         docObject.scene.scale(zoomRatio, zoomRatio);
 

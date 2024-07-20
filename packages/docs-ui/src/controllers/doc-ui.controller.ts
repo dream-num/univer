@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { connectInjector, Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, ILayoutService, IMenuService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
@@ -28,6 +28,7 @@ import {
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import type { IUniverDocsUIConfig } from '../basics';
+import { DocFooter } from '../views/doc-footer';
 import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
@@ -57,7 +58,9 @@ export class DocUIController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ILayoutService private readonly _layoutService: ILayoutService,
-        @IMenuService private readonly _menuService: IMenuService
+        @IMenuService private readonly _menuService: IMenuService,
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -70,6 +73,14 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
         this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
+        this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
+    }
+
+    private _initUiParts() {
+        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
+        if (this._config.layout?.docContainerConfig?.footer && !workbook) {
+            this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(DocFooter, this._injector)));
+        }
     }
 
     private _initMenus(): void {
@@ -106,6 +117,7 @@ export class DocUIController extends Disposable {
         this._initCustomComponents();
         this._initMenus();
         this._initFocusHandler();
+        this._initUiParts();
     }
 
     private _initFocusHandler(): void {

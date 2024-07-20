@@ -506,6 +506,13 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         });
 
         const position = this._getNodePosition(startNode);
+        const textSelection = this._textSelectionInner$.value;
+        if (startNode && evt.button === 2 && textSelection) {
+            const index = this._getNodeIndex(startNode);
+            if (textSelection.textRanges.some((textRange) => textRange.startOffset! <= index && textRange.endOffset! > index)) {
+                return;
+            }
+        }
 
         if (position == null || startNode == null) {
             this._removeAllTextRanges();
@@ -1092,6 +1099,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         );
 
         return nodeInfo;
+    }
+
+    private _getNodeIndex(node: INodeInfo) {
+        const index = node.node.parent!.st + node.node.parent!.glyphGroup.indexOf(node.node);
+        return index;
     }
 
     private _detachEvent() {

@@ -49,6 +49,7 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu/menu';
+import { CopyMenuFactory, CutMenuFactory, DeleteMenuFactory, PasteMenuFactory } from './menu/context-menu';
 
 // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
@@ -107,6 +108,10 @@ export class DocUIController extends Disposable {
                 BulletListMenuItemFactory,
                 ResetBackgroundColorMenuItemFactory,
                 BackgroundColorSelectorMenuItemFactory,
+                CopyMenuFactory,
+                CutMenuFactory,
+                PasteMenuFactory,
+                DeleteMenuFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));

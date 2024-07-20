@@ -38,7 +38,7 @@ export const shouldDisableAddComment = (accessor: IAccessor) => {
 export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: StartAddCommentOperation.id,
-        group: MenuGroup.TOOLBAR_LAYOUT,
+        group: MenuGroup.CONTEXT_MENU_DATA,
         type: MenuItemType.BUTTON,
         icon: 'CommentSingle',
         title: 'threadCommentUI.panel.addComment',

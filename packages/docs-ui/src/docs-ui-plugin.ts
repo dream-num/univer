@@ -54,6 +54,7 @@ import { DocBackScrollRenderController } from './controllers/render-controllers/
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
+import { DocContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -141,6 +142,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocInterceptorService],
             [DocRenderController],
             [DocZoomRenderController],
+            [DocContextMenuRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });

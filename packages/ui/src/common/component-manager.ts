@@ -240,6 +240,7 @@ export class ComponentManager {
             AddDigitsSingle,
             ReduceDigitsSingle,
             PercentSingle,
+
         };
 
         for (const k in iconList) {

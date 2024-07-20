@@ -49,11 +49,8 @@ export class DocContextMenuRenderController extends Disposable implements IRende
                 if (!currentSelection) {
                     return;
                 }
-                const triggerMenu = () => {
-                    this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
-                };
 
-                triggerMenu();
+                this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
             }
         });
         this.disposeWithMe(documentsSubscription);

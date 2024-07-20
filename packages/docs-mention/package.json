@@ -78,16 +78,14 @@
         "vite": "^5.3.4",
         "vitest": "^2.0.3"
     },
-    "univerSpace": {
+    "univer": {
         ".": {
             "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
+            "types": "./src/index.ts"
         },
         "./*": {
             "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
+            "types": "./src/index.ts"
         },
         "./lib/*": "./lib/*"
     }

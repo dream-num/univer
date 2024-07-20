@@ -77,6 +77,17 @@ exports.buildPkg = function buildPkg() {
                     './lib/*': './lib/*',
                 },
             };
+            pkg.univer = {
+                '.': {
+                    import: './lib/es/index.js',
+                    types: './src/index.ts',
+                },
+                './*': {
+                    import: './lib/es/*',
+                    types: './src/index.ts',
+                },
+                './lib/*': './lib/*',
+            };
 
             pkg.directories = {
                 lib: 'lib',
@@ -118,10 +129,9 @@ exports.buildPkg = function buildPkg() {
                         // exports
                         pkg.exports['./locale/*'] = './src/locale/*.ts';
                         pkg.publishConfig.exports['./locale/*'] = './lib/locale/*.json';
+                        pkg.univer['./locale/*'] = './lib/locale/*.json';
                     });
             }
-
-            pkg.univerSpace = pkg.publishConfig.exports;
 
             fs.writeFileSync(
                 `${process.cwd()}/package.json`,

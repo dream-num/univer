@@ -61,6 +61,10 @@ export class Cell extends BaseFunction {
     }
 
     private _handleSingleObject(infoType: BaseValueObject, reference: FunctionVariantType, infoTypeIsArray: boolean = false) {
+        if (reference.isError()) {
+            return reference as ErrorValueObject;
+        }
+
         if (!reference.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
@@ -75,11 +79,11 @@ export class Cell extends BaseFunction {
 
         reference = (reference as ArrayValueObject).getFirstCell();
 
-        const infoTypeValue = infoType.getValue();
+        const infoTypeValue = `${infoType.getValue()}`;
 
         let result;
 
-        switch (infoTypeValue) {
+        switch (infoTypeValue.toLocaleLowerCase()) {
             case 'address':
                 return StringValueObject.create(`$${Tools.chatAtABC(_currentColumn)}$${_currentRow + 1}`);
             case 'col':

@@ -27,6 +27,21 @@ export class Weeknum extends BaseFunction {
 
     override maxParams = 2;
 
+    private returnTypeMap: {
+        [index: number]: number;
+    } = {
+            1: 0,
+            2: 1,
+            11: 1,
+            12: 2,
+            13: 3,
+            14: 4,
+            15: 5,
+            16: 6,
+            17: 0,
+            21: 4,
+        };
+
     override calculate(serialNumber: BaseValueObject, returnType?: BaseValueObject) {
         if (serialNumber.isArray()) {
             const rowCount = (serialNumber as ArrayValueObject).getRowCount();
@@ -82,22 +97,7 @@ export class Weeknum extends BaseFunction {
             }
         }
 
-        const returnTypeMap: {
-            [index: number]: number;
-        } = {
-            1: 0,
-            2: 1,
-            11: 1,
-            12: 2,
-            13: 3,
-            14: 4,
-            15: 5,
-            16: 6,
-            17: 0,
-            21: 4,
-        };
-
-        if (!(returnTypeValue in returnTypeMap)) {
+        if (!(returnTypeValue in this.returnTypeMap)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -136,7 +136,7 @@ export class Weeknum extends BaseFunction {
         } else {
             // System 1
             // The week containing January 1 is the first week of the year, and is numbered week 1.
-            const weekDay = returnTypeMap[returnTypeValue];
+            const weekDay = this.returnTypeMap[returnTypeValue];
 
             if (yearStartWeekDay < weekDay) {
                 yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay + 7 - weekDay);

@@ -18,11 +18,13 @@ import { CommandType } from '@univerjs/core';
 import type { ICommand, IDataValidationRule } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { IUpdateRulePayload } from '../../types/interfaces/i-update-rule-payload';
+import type { DataValidationChangeSource } from '../../models/data-validation-model';
 import { DataValidationModel } from '../../models/data-validation-model';
 
 export interface IAddDataValidationMutationParams extends ISheetCommandSharedParams {
     rule: IDataValidationRule | IDataValidationRule[];
     index?: number;
+    source?: DataValidationChangeSource;
 }
 
 export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParams> = {
@@ -32,9 +34,9 @@ export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParam
         if (!params) {
             return false;
         }
-        const { unitId, subUnitId, rule, index } = params;
+        const { unitId, subUnitId, rule, index, source = 'command' } = params;
         const dataValidationModel = accessor.get(DataValidationModel);
-        dataValidationModel.addRule(unitId, subUnitId, rule, index);
+        dataValidationModel.addRule(unitId, subUnitId, rule, source, index);
 
         return true;
     },
@@ -42,6 +44,7 @@ export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParam
 
 export interface IRemoveDataValidationMutationParams extends ISheetCommandSharedParams {
     ruleId: string | string[];
+    source?: DataValidationChangeSource;
 }
 
 export const RemoveDataValidationMutation: ICommand<IRemoveDataValidationMutationParams> = {
@@ -52,14 +55,14 @@ export const RemoveDataValidationMutation: ICommand<IRemoveDataValidationMutatio
             return false;
         }
 
-        const { unitId, subUnitId, ruleId } = params;
+        const { unitId, subUnitId, ruleId, source = 'command' } = params;
         const dataValidationModel = accessor.get(DataValidationModel);
         if (Array.isArray(ruleId)) {
             ruleId.forEach((item) => {
-                dataValidationModel.removeRule(unitId, subUnitId, item);
+                dataValidationModel.removeRule(unitId, subUnitId, item, source);
             });
         } else {
-            dataValidationModel.removeRule(unitId, subUnitId, ruleId);
+            dataValidationModel.removeRule(unitId, subUnitId, ruleId, source);
         }
 
         return true;
@@ -69,6 +72,7 @@ export const RemoveDataValidationMutation: ICommand<IRemoveDataValidationMutatio
 export interface IUpdateDataValidationMutationParams extends ISheetCommandSharedParams {
     payload: IUpdateRulePayload;
     ruleId: string;
+    source?: DataValidationChangeSource;
 }
 
 export const UpdateDataValidationMutation: ICommand<IUpdateDataValidationMutationParams> = {
@@ -79,9 +83,9 @@ export const UpdateDataValidationMutation: ICommand<IUpdateDataValidationMutatio
             return false;
         }
 
-        const { unitId, subUnitId, ruleId, payload } = params;
+        const { unitId, subUnitId, ruleId, payload, source = 'command' } = params;
         const dataValidationModel = accessor.get(DataValidationModel);
-        dataValidationModel.updateRule(unitId, subUnitId, ruleId, payload);
+        dataValidationModel.updateRule(unitId, subUnitId, ruleId, payload, source);
         return true;
     },
 };

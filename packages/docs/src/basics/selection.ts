@@ -68,12 +68,12 @@ export function getDeleteSelection<T extends ITextRange>(selection: T, body: IDo
 
     if (collapsed) {
         if (direction === DeleteDirection.LEFT) {
-            while (body.dataStream[startOffset - 1] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+            while (isCustomRangeSplitSymbol(body.dataStream[startOffset - 1])) {
                 endOffset -= 1;
                 startOffset -= 1;
             }
         } else {
-            while (body.dataStream[startOffset] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+            while (isCustomRangeSplitSymbol(body.dataStream[startOffset])) {
                 endOffset += 1;
                 startOffset += 1;
             }

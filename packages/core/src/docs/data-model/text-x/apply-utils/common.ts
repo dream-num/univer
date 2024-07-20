@@ -21,10 +21,10 @@ import type {
     ICustomBlock,
     ICustomDecoration,
     ICustomRange,
+    ICustomTable,
     IDocumentBody,
     IParagraph,
     ISectionBreak,
-    ITable,
     ITextRun,
 } from '../../../../types/interfaces';
 import { DataStreamTreeTokenType } from '../../types';
@@ -735,7 +735,7 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
-    const removeTables: ITable[] = [];
+    const removeTables: ICustomTable[] = [];
     if (tables) {
         const newTables = [];
         for (let i = 0, len = tables.length; i < len; i++) {

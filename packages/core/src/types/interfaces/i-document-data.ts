@@ -31,7 +31,7 @@ export interface IDocumentData extends IReferenceSource, IExtraModelData {
     rev?: number;
     locale?: LocaleType;
     title?: string;
-    body?: IDocumentBody;
+    body?: IDocumentBody; // Rich text.
     documentStyle: IDocumentStyle;
     settings?: IDocumentSettings;
     // The type of data depends on how the plug-in is defined
@@ -853,6 +853,7 @@ enum TableTextWrapType {
 
 export interface ICustomTable {
     startIndex: number;
+    endIndex: number;
     // A unique ID associated with a table.
     tableId: string;
 }
@@ -861,14 +862,10 @@ export interface ICustomTable {
  * Properties of table
  */
 export interface ITable {
-    // startIndex: number;
-    // endIndex: number;
-    // rows: number; // rows
-    // columns: number; // columns
     tableRows: ITableRow[]; // tableRows
     tableColumns: ITableColumn[]; // tableColumns
     align: TableHAlign; // align
-    leftIndent: INumberUnit; // leftIndent
+    leftIndent: INumberUnit; // left align only. leftIndent
     textWrap: TableTextWrapType;
     position: IDocTablePosition; // position
     dist: IDistFromText; // dist
@@ -880,7 +877,7 @@ enum TableCellHeightRule {
     FIX,
 }
 
-export interface ITableColumn {
+export interface ITableColumn { // 合并拆分列，HTML 合并单元格
     size: IWidthInTableSize;
 }
 
@@ -894,8 +891,6 @@ export interface ITableRowSize {
  * Properties of row of table
  */
 export interface ITableRow {
-    // st: number; // startIndex
-    // ed: number; // endIndex
     tableCells: ITableCell[]; // tableCells
     size: ITableRowSize; // tableRowStyle
     allowBreakAcrossPages: BooleanNumber; // allowBreakAcrossPages, the default is false.
@@ -907,8 +902,6 @@ export interface ITableRow {
  * Properties of table cell
  */
 export interface ITableCell {
-    // st: number; // startIndex
-    // ed: number; // endIndex
     tableCellStyle: ITableCellStyle; // tableCellStyle
 }
 

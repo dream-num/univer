@@ -195,20 +195,13 @@ export class SheetScrollManagerService implements IRenderModule {
         }
 
         const worksheetScrollInfoMap = this._scrollStateMap.get(unitId)!;
-        // const overallOffsetByRowColOffset = this.calcViewportScrollFromRowColOffset(scrollInfo);
         const newScrollInfo: IScrollState = {
             sheetViewStartRow,
             sheetViewStartColumn,
             offsetX,
             offsetY,
-            // viewportScrollX: overallOffsetByRowColOffset.overallScrollX,
-            // viewportScrollY: overallOffsetByRowColOffset.overallScrollY,
         };
-        // console.log('newScrollInfo', newScrollInfo);
         worksheetScrollInfoMap.set(sheetId, newScrollInfo);
-        // if (notifyScrollInfo === true) {
-        //     this._notifyCurrentScrollInfo({ unitId, sheetId });
-        // }
     }
 
     private _clearByParamAndNotify(param: IScrollStateSearchParam): void {
@@ -234,7 +227,7 @@ export class SheetScrollManagerService implements IRenderModule {
     private _scrollStateNext(param: IScrollStateSearchParam): void {
         const scrollInfo = this._getCurrentScroll(param);
 
-        // subscriber is scrollManagerService.rawScrollInfo$.subscribe
+        // subscriber can be found in scrollManagerService.rawScrollInfo$.subscribe
         this._scrollInfo$.next(scrollInfo);
     }
 }

@@ -763,12 +763,11 @@ export class Viewport {
     }
 
     /**
-     * engine.renderLoop ---> scene.render ---> layer.render ---> viewport.render
+     * call stack: engine.renderLoop ---> scene.render ---> layer.render ---> viewport.render
      * that means each layer call all viewports to render
-     * @param parentCtx 如果 layer._allowCache true, 那么 parentCtx 是 layer 中的 cacheCtx
+     * @param parentCtx parentCtx is cacheCtx from layer when layer._allowCache is true
      * @param objects
      * @param isMaxLayer
-     * @param isLast last viewport would
      */
     render(parentCtx?: UniverRenderingContext, objects: BaseObject[] = [], isMaxLayer = false) {
         if (!this.shouldIntoRender()) {

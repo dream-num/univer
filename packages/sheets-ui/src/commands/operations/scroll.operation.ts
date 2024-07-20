@@ -18,14 +18,14 @@ import type { IOperation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IScrollManagerWithSearchParam } from '../../services/scroll-manager.service';
+import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
 export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
     id: 'sheet.operation.set-scroll',
     type: CommandType.OPERATION,
 
-    handler: (accessor, params: IScrollManagerWithSearchParam) => {
+    handler: (accessor, params: IScrollStateWithSearchParam) => {
         if (!params) {
             return false;
         }

@@ -30,7 +30,7 @@ import { getSelectionsService, ScrollToCellOperation } from '@univerjs/sheets';
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
-import type { IScrollManagerParam, IScrollManagerSearchParam } from '../../services/scroll-manager.service';
+import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -78,7 +78,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     private _init() {
         this._initCommandListener();
         this._initScrollEventListener();
-        // this._scrollSubscribeBinding();
         this._initSkeletonListener();
     }
 

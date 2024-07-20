@@ -19,7 +19,7 @@ import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceTyp
 
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IScrollManagerParam } from '../../services/scroll-manager.service';
+import type { IScrollState } from '../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SetScrollOperation } from '../operations/scroll.operation';
 import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
@@ -55,6 +55,7 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
 
         const { unitId, subUnitId, worksheet } = target;
         const { xSplit, ySplit } = worksheet.getConfig().freeze;
+        const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
         const currentScroll = scrollManagerService.getCurrentScrollState();
         const { offsetX = 0, offsetY = 0 } = params || {};
         const {
@@ -94,11 +95,9 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
-        const { workbook, worksheet } = target;
-        const currentScroll: Readonly<Nullable<IScrollState>> = scrollManagerService.getCurrentScrollState();
         const { workbook, worksheet, unitId } = target;
         const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
-        const currentScroll: Readonly<Nullable<IScrollManagerParam>> = scrollManagerService.getCurrentScrollInfo();
+        const currentScroll: Readonly<Nullable<IScrollState>> = scrollManagerService.getCurrentScrollState();
 
         if (!worksheet) {
             return false;

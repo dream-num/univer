@@ -72,6 +72,7 @@ import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
 
+import type { IViewportScrollState } from '../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset, getSheetObject } from '../utils/component-tools';

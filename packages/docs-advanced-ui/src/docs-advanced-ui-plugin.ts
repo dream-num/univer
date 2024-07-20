@@ -26,7 +26,7 @@ import { DocAdvancedUIController } from './controllers/doc-advanced-ui.controlle
 const DOC_ADVANCED_UI_PLUGIN_NAME = 'DOC_ADVANCED_UI_PLUGIN_NAME';
 
 /**
- * Plugin for docs editor ui
+ * Plugin for docs editor ui, shouldn't register to sheets
  */
 @DependentOn(UniverDocsUIPlugin)
 export class UniverDocsAdvancedUIPlugin extends Plugin {

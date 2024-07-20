@@ -190,8 +190,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
 
                 acc[key] = {
-                    max,
-                    min,
+                    max: Math.round(max * 100) / 100,
+                    min: Math.round(min * 100) / 100,
                     avg: Math.round(avg * 100) / 100,
                 };
 

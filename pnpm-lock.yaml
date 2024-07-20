@@ -321,9 +321,6 @@ importers:
       '@univerjs/slides-ui':
         specifier: workspace:*
         version: link:../packages/slides-ui
-      '@univerjs/telemetry':
-        specifier: workspace:*
-        version: link:../packages/telemetry
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../packages/thread-comment

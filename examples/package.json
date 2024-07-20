@@ -53,7 +53,6 @@
         "@univerjs/sheets-zen-editor": "workspace:*",
         "@univerjs/slides": "workspace:*",
         "@univerjs/slides-ui": "workspace:*",
-        "@univerjs/telemetry": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

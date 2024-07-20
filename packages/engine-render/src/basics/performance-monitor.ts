@@ -16,7 +16,6 @@
 
 import { Disposable } from '@univerjs/core';
 import type { Nullable } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 
 export const DEFAULT_FRAME_SAMPLE_SIZE = 60;
 
@@ -69,15 +68,6 @@ export class PerformanceMonitor extends Disposable {
     private _frameCount: number = 0; // number of all frames in whole life time.
 
     /**
-     * frameTime list in past second
-     */
-    private _frameTimeListPastSec: Partial<IBasicFrameInfo>[] = [];
-    lastSecondFramesList$ = new BehaviorSubject<Partial<IBasicFrameInfo>[]>([]);
-
-    private _frameTimeDetail: Nullable<Record<string, any>> = null;
-    // frameTime$: BehaviorSubject<Nullable<Record<string, any>>> = new BehaviorSubject<Nullable<Record<string, any>>>(null);
-
-    /**
      * constructor
      * @param frameSampleSize The number of samples required to saturate the sliding window
      */
@@ -88,9 +78,6 @@ export class PerformanceMonitor extends Disposable {
 
     override dispose(): void {
         super.dispose();
-        this.lastSecondFramesList$.complete();
-        // this.frameTime$.complete();
-        this._frameTimeListPastSec = [];
     }
 
     /**
@@ -141,10 +128,6 @@ export class PerformanceMonitor extends Disposable {
         return this._rollingFrameTime.isSaturated();
     }
 
-    clearFrameDetail() {
-        this._frameTimeDetail = null;
-    }
-
     /**
      * Returns true if sampling is enabled
      */
@@ -188,6 +171,7 @@ export class PerformanceMonitor extends Disposable {
     }
 
     endFrame(timestamp: number) {
+        this.sampleFrame(timestamp);
         this._lastFrameTimeMs = timestamp;
     }
 

@@ -356,7 +356,7 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.restore();
 
         cacheCtx.save();
-        // 所以 cacheCtx.setTransform 已经包含了 rowHeaderWidth + viewport + scroll 距离
+        // 所以 cacheCtx.setTransform is rowHeaderWidth + viewport + scroll
         const m = mainCtx.getTransform();
         // cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
         cacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);
@@ -364,9 +364,8 @@ export class Spreadsheet extends SheetComponent {
         // The 'leftOrigin' is the offset of the viewport relative to the sheet corner, which is the position of cell(0, 0), and it does not consider scaling.
         // - (leftOrigin - bufferEdgeX)  ----> - leftOrigin + bufferEdgeX
         cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
-        // when extension drawing, use sheet content corrdinate so viewport corrdinate, that measn ext does not take rowheader into consideration
+        // when extension drawing, sheet content corrdinate was used by sheet extension, not viewport corrdinate, that means ext does not take rowheader into consideration
         this.draw(cacheCtx, viewportInfo);
-        // this.testShowRuler(cacheCtx, viewportInfo);
         cacheCtx.restore();
     }
 

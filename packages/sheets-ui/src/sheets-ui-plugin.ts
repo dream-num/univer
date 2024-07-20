@@ -20,7 +20,6 @@ import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { ITelemetryService, PosthogTelemetryService, TelemetryController } from '@univerjs/telemetry';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';

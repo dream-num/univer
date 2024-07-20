@@ -242,9 +242,6 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
         if (this._cacheCanvas != null) {
             return;
         }
-        const scene = this.getScene();
-        if (scene == null) return;
-
         this._cacheCanvas = new Canvas();
         const engine = scene.getEngine() as Engine;
         this._cacheCanvas.setSize(engine.width, engine.height);

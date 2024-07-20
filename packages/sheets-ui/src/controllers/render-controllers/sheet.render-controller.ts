@@ -29,7 +29,6 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-import { Inject, Optional } from '@wendellhu/redi';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ITelemetryService, TelemetryEventNames } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';

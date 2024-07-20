@@ -14,7 +14,28 @@
  * limitations under the License.
  */
 
-export function convertToDashCase(input: string): string {
+import lightTheme from './lightTheme.module.less';
+import darkTheme from './darkTheme.module.less';
+
+export function initTheme() {
+    applyTheme();
+
+    const observer = new MutationObserver(applyTheme);
+    observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class'],
+    });
+}
+
+function applyTheme() {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const theme = isDarkMode ? darkTheme : lightTheme;
+    Object.keys(theme).forEach((key) => {
+        document.documentElement.style.setProperty(convertToDashCase(key), theme[key]);
+    });
+};
+
+function convertToDashCase(input: string): string {
     const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
 
     return `--${dashCase}`;

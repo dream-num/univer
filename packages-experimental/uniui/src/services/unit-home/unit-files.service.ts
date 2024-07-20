@@ -42,9 +42,15 @@ export interface IUnitFile {
     parentName?: string;
 }
 
+export interface ITreeMenuUnitFile {
+    uniId: string;
+    type: UnitType;
+    title: string;
+    children?: ITreeMenuUnitFile[];
+}
 export const mockData: IUnitFile [] = [
     {
-        uniId: '0',
+        uniId: '1',
         type: UnitType.FOLDER,
         title: 'Sales',
         description: 'Sales team resources and project management.',
@@ -53,7 +59,7 @@ export const mockData: IUnitFile [] = [
         lastModified: '2024/01/23',
     },
     {
-        uniId: '1',
+        uniId: '1-1',
         type: UnitType.PROJECT,
         icon: '🎉',
         color: '#FFC107',
@@ -64,11 +70,11 @@ export const mockData: IUnitFile [] = [
         pages: 1,
         lastModified: '2024/01/23',
         owner: 'Elson',
-        parentId: '0',
+        parentId: '1',
         parentName: 'Sales',
     },
     {
-        uniId: '2',
+        uniId: '1-2',
         type: UnitType.SLIDE,
         color: '#FF5722',
         title: 'Competitor Analysis',
@@ -78,11 +84,35 @@ export const mockData: IUnitFile [] = [
         pages: 0,
         lastModified: '2024/01/23',
         owner: 'Elson',
-        parentId: '0',
+        parentId: '1',
         parentName: 'Sales',
     },
     {
-        uniId: '3',
+        uniId: '1-3',
+        type: UnitType.SHEET,
+        icon: '💁‍♂️',
+        title: 'User Feedback',
+        description: 'User feedback and survey results.',
+        collaborators: ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5'],
+        owner: 'Elson',
+        lastModified: '2024/01/23',
+        parentId: '1',
+        parentName: 'Sales',
+    },
+    {
+        uniId: '1-4',
+        type: UnitType.DOC,
+        title: 'Customer Outreach',
+        description: 'Customer outreach and communication resources.',
+        collaborators: ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5'],
+        owner: 'Elson',
+        lastModified: '2024/01/23',
+        parentId: '1',
+        parentName: 'Sales',
+    },
+
+    {
+        uniId: '2',
         type: UnitType.FOLDER,
         title: 'Product',
         description: 'Product development resources and project management.',
@@ -91,22 +121,88 @@ export const mockData: IUnitFile [] = [
         lastModified: '2024/01/23',
     },
     {
-        uniId: '4',
-        type: UnitType.SHEET,
-        icon: '📈',
-        color: '#4CAF50',
+        uniId: '2-1',
+        type: UnitType.FOLDER,
         title: 'Product Strategy',
+        description: 'Product development resources and project management.',
+        collaborators: ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5'],
+        owner: 'Elson',
+        lastModified: '2024/01/23',
+        parentId: '2',
+        parentName: 'Product',
+    },
+    {
+        uniId: '2-1-1',
+        type: UnitType.SHEET,
+        icon: '🤔',
+        color: '#4CAF50',
+        title: 'Product 1',
         description: 'Product development resources and project management.',
         collaborators: ['avatar1'],
         link: 'https://univer.ai',
         pages: 2,
         lastModified: '2024/01/23',
         owner: 'Elson',
-        parentId: '3',
+        parentId: '2-1',
+        parentName: 'Product Strategy',
+    },
+    {
+        uniId: '2-1-2',
+        type: UnitType.DOC,
+        icon: '😎',
+        color: '#2196F3',
+        title: 'Product 2',
+        description: 'Product development resources and project management.',
+        collaborators: ['avatar1'],
+        link: 'https://univer.ai',
+        pages: 3,
+        lastModified: '2024/01/23',
+        owner: 'Elson',
+        parentId: '2-1',
+        parentName: 'Product Strategy',
+    },
+    {
+        uniId: '2-2',
+        type: UnitType.FOLDER,
+        title: 'Roadmap',
+        description: 'Product development resources and project management.',
+        collaborators: ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5'],
+        owner: 'Elson',
+        lastModified: '2024/01/23',
+        parentId: '2',
         parentName: 'Product',
     },
     {
-        uniId: '5',
+        uniId: '2-2-1',
+        type: UnitType.SHEET,
+        color: '#4CAF50',
+        title: 'Q1 2024',
+        description: 'Product development resources and project management.',
+        collaborators: ['avatar1'],
+        link: 'https://univer.ai',
+        pages: 2,
+        lastModified: '2024/01/23',
+        owner: 'Elson',
+        parentId: '2-2',
+        parentName: 'Roadmap',
+    },
+    {
+        uniId: '2-2-2',
+        type: UnitType.SHEET,
+        color: '#4CAF50',
+        title: 'Q2 2024',
+        description: 'Product development resources and project management.',
+        collaborators: ['avatar1'],
+        link: 'https://univer.ai',
+        pages: 2,
+        lastModified: '2024/01/23',
+        owner: 'Elson',
+        parentId: '2-2',
+        parentName: 'Roadmap',
+    },
+
+    {
+        uniId: '3',
         type: UnitType.FOLDER,
         title: 'Legal',
         description: 'Legal documents and compliance resources.',
@@ -115,9 +211,9 @@ export const mockData: IUnitFile [] = [
         lastModified: '2024/01/23',
     },
     {
-        uniId: '6',
+        uniId: '3-1',
         type: UnitType.DOC,
-        icon: '📄',
+        icon: '📝',
         color: '#2196F3',
         title: 'Legal',
         description: 'Legal documents and compliance resources.',
@@ -126,7 +222,7 @@ export const mockData: IUnitFile [] = [
         pages: 3,
         lastModified: '2024/01/23',
         owner: 'Elson',
-        parentId: '5',
+        parentId: '3',
         parentName: 'Legal',
     },
 ];
@@ -142,7 +238,11 @@ export class UnitFilesService extends Disposable {
     }
 
     getUnitFiles(): IUnitFile[] {
-        return this._unitFiles;
+        return this._unitFiles.filter((file) => file.type !== UnitType.FOLDER);
+    }
+
+    getTreeMenuFiles(): ITreeMenuUnitFile[] {
+        return buildTreeMenu(this._unitFiles);
     }
 
     private _requestUnitFiles() {
@@ -172,4 +272,51 @@ export class UnitFilesService extends Disposable {
         this._unitFiles.splice(index, 1);
         this._unitFiles$.next(this._unitFiles);
     }
+}
+
+function buildTreeMenu(unitFiles: IUnitFile[]): ITreeMenuUnitFile[] {
+    // Create a map for quick lookup of parent nodes
+    const map = new Map<string, ITreeMenuUnitFile>();
+
+    // Initialize an array to hold root nodes
+    const roots: ITreeMenuUnitFile[] = [];
+
+    // Iterate through all unitFiles
+    unitFiles.forEach((file) => {
+        // Create an ITreeMenuUnitFile object
+        const treeFile: ITreeMenuUnitFile = {
+            uniId: file.uniId,
+            type: file.type,
+            title: file.title,
+            children: [],
+        };
+
+        // Put this object into the map
+        map.set(file.uniId, treeFile);
+
+        // If there is a parentId, find the parent node and add this node to its children
+        if (file.parentId) {
+            const parent = map.get(file.parentId);
+            if (parent) {
+                parent.children!.push(treeFile);
+            }
+        } else {
+            // If there is no parentId, this is a root node
+            roots.push(treeFile);
+        }
+    });
+
+    // Remove children arrays that have no child nodes
+    const cleanTree = (node: ITreeMenuUnitFile) => {
+        if (node.children!.length === 0) {
+            delete node.children;
+        } else {
+            node.children!.forEach(cleanTree);
+        }
+    };
+
+    // Clean the root nodes array
+    roots.forEach(cleanTree);
+
+    return roots;
 }

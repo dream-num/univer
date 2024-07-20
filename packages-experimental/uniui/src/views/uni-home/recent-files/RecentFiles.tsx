@@ -15,68 +15,25 @@
  */
 
 import React from 'react';
-import { MoreHorizontalSingle, UnorderSingle } from '@univerjs/icons';
+import { Doc, FolderSingle, MoreHorizontalSingle, SaveSingle, Slide, UnorderSingle, Xlsx } from '@univerjs/icons';
+import { useDependency } from '@univerjs/core';
+import { UnitFilesService, UnitType } from '../../../services/unit-home/unit-files.service';
 import styles from './index.module.less';
 
-export const mockData = [
-    {
-        icon: '🎉',
-        title: 'Sales performance',
-        description: 'Key metrics monitoring and updates for sales team.',
-        collaborators: ['./assets/images/avatar1.png'],
-        link: 'https://univer.ai',
-        pages: 0,
-        lastModified: '2024/01/23',
-        owner: 'Elson',
-    },
-    {
-        icon: '📅',
-        title: 'Roadmap',
-        description: 'Product development timeline and priorities.',
-        collaborators: ['./assets/images/avatar2.png'],
-        pages: 3,
-        lastModified: '2024/01/23',
-        owner: 'Elson',
-    },
-    {
-        icon: '📞',
-        title: 'Customer outreach',
-        description: 'Manage potential customers and sales training materials.',
-        collaborators: ['./assets/images/avatar1.png', './assets/images/avatar3.png', './assets/images/avatar4.png', './assets/images/avatar5.png'],
-        pages: 8,
-        lastModified: '2024/01/23',
-        owner: 'Elson',
-    },
-    {
-        icon: '📝',
-        title: 'User feedback',
-        description: 'Interview records & customized solutions for customer success.',
-        collaborators: ['./assets/images/avatar1.png', './assets/images/avatar3.png', './assets/images/avatar4.png', './assets/images/avatar5.png'],
-        pages: 5,
-        lastModified: '2024/01/23',
-        owner: 'Elson',
-    },
-    {
-        icon: '🎉',
-        title: 'Sales Performance 2',
-        description: 'Key metrics monitoring and updates for sales team.',
-        collaborators: ['./assets/images/avatar2.png'],
-        pages: 0,
-        lastModified: '2024/01/24',
-        owner: 'Elson',
-    },
-    {
-        icon: '📅',
-        title: 'Roadmap 2',
-        description: 'Product development timeline and priorities.',
-        collaborators: ['./assets/images/avatar2.png'],
-        pages: 3,
-        lastModified: '2024/01/25',
-        owner: 'Elson',
-    },
-];
+const IconMap = {
+    [UnitType.FOLDER]: <FolderSingle />,
+    [UnitType.PROJECT]: <SaveSingle />,
+    [UnitType.SLIDE]: <Slide />,
+    [UnitType.DOC]: <Doc />,
+    [UnitType.SHEET]: <Xlsx />,
+    [UnitType.MIND_MAP]: <SaveSingle />,
+    [UnitType.BOARD]: <SaveSingle />,
+};
 
 export const RecentFiles: React.FC = () => {
+    const unitFilesService = useDependency(UnitFilesService);
+    const unitFiles = unitFilesService.getUnitFiles();
+
     return (
         <div className={styles.recentFiles}>
             <h2>Recent Files</h2>
@@ -90,11 +47,11 @@ export const RecentFiles: React.FC = () => {
                 <UnorderSingle className={styles.fileOperation} />
             </div>
             <div className={styles.fileList}>
-                {mockData.map((file, index) => (
+                {unitFiles.map((file, index) => (
                     <div key={index} className={styles.fileRow}>
                         <div className={styles.fileName}>
                             <input className={styles.fileCheck} type="checkbox" />
-                            <span className={styles.fileIcon}>{file.icon}</span>
+                            <span className={styles.fileIcon}>{file.icon || IconMap[file.type]}</span>
                             <span className={styles.fileTitle}>{file.title}</span>
                         </div>
                         <div className={styles.fileOwner}>{file.owner}</div>

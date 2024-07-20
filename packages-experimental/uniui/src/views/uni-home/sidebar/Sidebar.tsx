@@ -17,51 +17,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { DetailsSingle, FolderFillSingle, FolderSingle, HomeFillSingle, HomeSingle, PermissionSettingSingle, TrashFillSingle, TrashSingle } from '@univerjs/icons';
+import { useDependency } from '@univerjs/core';
+import { UnitFilesService } from '../../../services/unit-home/unit-files.service';
 import { TreeMenu } from './tree-menu/TreeMenu';
 import styles from './index.module.less';
 
 export const Sidebar: React.FC = () => {
-    const treeData = [
-        {
-            title: 'Sales',
-            children: [
-                { title: 'Sales Performance', link: '/' },
-                { title: 'Competitor Analysis', link: '/' },
-                {
-                    title: 'User Feedback',
-                    children: [
-                        { title: 'Survey Results', link: '/' },
-                        { title: 'Interviews', link: '/' },
-                    ],
-                },
-                { title: 'Customer Outreach', link: '/' },
-            ],
-        },
-        {
-            title: 'Product',
-            children: [
-                { title: 'Product Strategy', link: '/' },
-                {
-                    title: 'Roadmap',
-                    children: [
-                        { title: 'Q1 2024', link: '/' },
-                        {
-                            title: 'Q2 2024',
-                            children: [
-                                { title: 'Project A', link: '/' },
-                                { title: 'Project B', link: '/' },
-                            ],
-                        },
-                    ],
-                },
-                { title: 'User Research', link: '/' },
-            ],
-        },
-        {
-            title: 'Legal',
-            children: [{ title: 'Legal', link: '/' }],
-        },
-    ];
+    const unitFilesService = useDependency(UnitFilesService);
+    const treeMenuFiles = unitFilesService.getTreeMenuFiles();
+
     return (
         <div className={styles.uniSidebar}>
             <div className={styles.uniSidebarHeader}>
@@ -101,7 +65,7 @@ export const Sidebar: React.FC = () => {
                     </li>
                     <div className={styles.uniDivider}></div>
                 </ul>
-                <TreeMenu data={treeData} />
+                <TreeMenu data={treeMenuFiles} />
             </nav>
             <div className={styles.uniSidebarFooter}>
                 <div className={styles.uniDivider}></div>

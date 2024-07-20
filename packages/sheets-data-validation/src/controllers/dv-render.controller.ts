@@ -23,7 +23,7 @@ import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { bufferTime, debounceTime } from 'rxjs';
+import { bufferTime, debounceTime, filter } from 'rxjs';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { ListValidator } from '../validators';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
@@ -311,19 +311,26 @@ export class SheetsDataValidationRenderController extends RxDisposable {
     }
 
     private _initAutoHeight() {
-        this._dataValidationModel.ruleChange$.pipe(bufferTime(16)).subscribe((infos) => {
-            const ranges: IRange[] = [];
-            infos.forEach((info) => {
-                if (info.rule?.ranges) {
-                    ranges.push(...info.rule.ranges);
+        this._dataValidationModel.ruleChange$
+            .pipe(
+                // patched data-validation change don't need to re-calc row height
+                // re-calc of row height will be triggered precisely by the origin command
+                filter((change) => change.source === 'command'),
+                bufferTime(16)
+            )
+            .subscribe((infos) => {
+                const ranges: IRange[] = [];
+                infos.forEach((info) => {
+                    if (info.rule?.ranges) {
+                        ranges.push(...info.rule.ranges);
+                    }
+                });
+
+                if (ranges.length) {
+                    const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
+                    sequenceExecute(mutations.redos, this._commandService);
                 }
             });
-
-            if (ranges.length) {
-                const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
-                sequenceExecute(mutations.redos, this._commandService);
-            }
-        });
     }
 }
 
@@ -510,19 +517,23 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
     }
 
     private _initAutoHeight() {
-        this._dataValidationModel.ruleChange$.pipe(bufferTime(16)).subscribe((infos) => {
-            const ranges: IRange[] = [];
-            infos.forEach((info) => {
-                if (info.rule?.ranges) {
-                    ranges.push(...info.rule.ranges);
+        this._dataValidationModel.ruleChange$
+            .pipe(
+                filter((change) => change.source === 'command'),
+                bufferTime(16)
+            ).subscribe((infos) => {
+                const ranges: IRange[] = [];
+                infos.forEach((info) => {
+                    if (info.rule?.ranges) {
+                        ranges.push(...info.rule.ranges);
+                    }
+                });
+
+                if (ranges.length) {
+                    const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
+                    sequenceExecute(mutations.redos, this._commandService);
                 }
             });
-
-            if (ranges.length) {
-                const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(ranges);
-                sequenceExecute(mutations.redos, this._commandService);
-            }
-        });
     }
 }
 

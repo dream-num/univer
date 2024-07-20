@@ -37,7 +37,7 @@ export interface IAddDataValidationCommandParams extends ISheetCommandSharedPara
 export const AddDataValidationCommand: ICommand<IAddDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.addRule',
-    async  handler(accessor, params) {
+    async handler(accessor, params) {
         const logService = accessor.get(ILogService);
         logService.warn('[Deprecated] AddDataValidationCommand is deprecated, please use AddSheetDataValidationCommand in @univerjs/sheets-data-validation instead!');
         if (!params) {
@@ -83,7 +83,7 @@ export interface IRemoveDataValidationCommandParams extends ISheetCommandSharedP
 
 export const removeDataValidationUndoFactory = (accessor: Injector, redoParams: IRemoveDataValidationMutationParams) => {
     const dataValidationModel = accessor.get(DataValidationModel);
-    const { unitId, subUnitId, ruleId } = redoParams;
+    const { unitId, subUnitId, ruleId, source } = redoParams;
     if (Array.isArray(ruleId)) {
         const rules = ruleId.map((id) => dataValidationModel.getRuleById(unitId, subUnitId, id)).filter(Boolean) as ISheetDataValidationRule[];
         return [{
@@ -92,6 +92,7 @@ export const removeDataValidationUndoFactory = (accessor: Injector, redoParams: 
                 unitId,
                 subUnitId,
                 rule: rules,
+                source,
             } as IAddDataValidationMutationParams,
         }];
     }

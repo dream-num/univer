@@ -34,7 +34,6 @@ export class DataValidationModelController extends Disposable {
         return new SheetDataValidationManager(
             unitId,
             subUnitId,
-            [],
             this._injector
         );
     }

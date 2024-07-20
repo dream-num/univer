@@ -68,7 +68,7 @@ export class DataValidationResourceController extends Disposable {
                     Object.keys(value).forEach((subunitId) => {
                         const ruleList = value[subunitId];
                         ruleList.forEach((rule) => {
-                            this._dataValidationModel.addRule(unitID, subunitId, rule);
+                            this._dataValidationModel.addRule(unitID, subunitId, rule, 'patched');
                         });
                     });
                 },

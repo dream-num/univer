@@ -16,7 +16,7 @@
 
 export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryService, DataValidatorRegistryScope } from './services/data-validator-registry.service';
-export { DataValidationModel } from './models/data-validation-model';
+export { DataValidationModel, type DataValidationChangeSource } from './models/data-validation-model';
 
 export {
     createDefaultNewRule,

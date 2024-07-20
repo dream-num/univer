@@ -74,7 +74,6 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
         this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
-        this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
     }
 
     private _initUiParts() {

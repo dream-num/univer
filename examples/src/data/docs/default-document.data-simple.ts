@@ -14,17 +14,71 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
+import type { IDocumentData, IParagraph } from '@univerjs/core';
 import { BooleanNumber, DocumentFlavor } from '@univerjs/core';
+
+const TABLE_START = '\x1A'; // 表格开始
+const TABLE_ROW_START = '\x1B'; // 表格行开始
+const TABLE_CELL_START = '\x1C'; // 表格单元格开始
+const TABLE_CELL_END = '\x1D'; // 表格单元格结束
+const TABLE_ROW_END = '\x0E'; // 表格行结束
+const TABLE_END = '\x0F'; // 表格结束
+
+function createTableDataStream(tables: string[][]) {
+    const row = tables.length;
+    const col = tables[0].length;
+    let dataStream = TABLE_START;
+
+    for (let i = 0; i < row; i++) {
+        dataStream += TABLE_ROW_START;
+        for (let j = 0; j < col; j++) {
+            dataStream += `${TABLE_CELL_START + tables[i][j]}\r${TABLE_CELL_END}`;
+        }
+        dataStream += TABLE_ROW_END;
+    }
+
+    return dataStream + TABLE_END;
+}
+
+const exampleTables = [
+    ['姓名', '语文', '数学', '英语', '总分'],
+    ['张三', '80', '90', '70', '240'],
+    ['李四', '80', '90', '70', '240'],
+    ['王五', '80', '90', '70', '240'],
+    ['赵六', '80', '90', '70', '240'],
+];
+
+const dataStream = `这是一个表格的用例\r${createTableDataStream(exampleTables)}班级成绩统计\r\n`;
+
+function createParagraphs(dataStream: string) {
+    const paragraphs: IParagraph[] = [];
+    for (let i = 0; i < dataStream.length; i++) {
+        const char = dataStream[i];
+        if (char === '\r') {
+            paragraphs.push({
+                startIndex: i,
+                paragraphStyle: {
+                    spaceAbove: { v: 10 },
+                    lineSpacing: 2,
+                    spaceBelow: { v: 0 },
+                },
+            });
+        }
+    }
+
+    return paragraphs;
+}
+
+const paragraphs = createParagraphs(dataStream);
 
 export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     id: 'default-document-id',
     body: {
-        dataStream: '荷塘𠮷\r作者：朱自清 👨‍👩‍👧‍👦 Today Office\r\n',
+        dataStream,
         textRuns: [
             {
                 st: 0,
-                ed: 4,
+                ed: 9,
                 ts: {
                     fs: 24,
                     ff: 'Microsoft YaHei',
@@ -38,8 +92,8 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                 },
             },
             {
-                st: 5,
-                ed: 36,
+                st: 9,
+                ed: dataStream.length - 2,
                 ts: {
                     fs: 18,
                     ff: 'Times New Roman',
@@ -50,37 +104,10 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                 },
             },
         ],
-        paragraphs: [
-            {
-                startIndex: 4,
-                paragraphStyle: {
-                    spaceAbove: { v: 10 },
-                    lineSpacing: 2,
-                    spaceBelow: { v: 0 },
-                },
-            },
-            {
-                startIndex: 36,
-                paragraphStyle: {
-                    spaceAbove: { v: 10 },
-                    lineSpacing: 2,
-                    spaceBelow: { v: 0 },
-                },
-            },
-        ],
+        paragraphs,
         sectionBreaks: [
             {
-                startIndex: 37,
-                // columnProperties: [
-                //     {
-                //         width: 250,
-                //         paddingEnd: 15,
-                //     },
-                // ],
-                // columnSeparatorType: ColumnSeparatorType.NONE,
-                // sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
-                // textDirection: textDirectionDocument,
-                // contentDirection: textDirection!,
+                startIndex: dataStream.length - 1,
             },
         ],
     },
@@ -95,7 +122,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
         marginRight: 40,
         marginLeft: 40,
         renderConfig: {
-            vertexAngle: 90,
+            vertexAngle: 0,
             centerAngle: 0,
         },
     },

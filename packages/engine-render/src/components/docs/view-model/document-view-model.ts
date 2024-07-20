@@ -16,9 +16,13 @@
 
 import type { ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IDisposable, IDocumentBody, ITextRun, Nullable } from '@univerjs/core';
 import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, toDisposable } from '@univerjs/core';
-
 import { BehaviorSubject } from 'rxjs';
 import { DataStreamTreeNode } from './data-stream-tree-node';
+
+interface ITableCache {
+    table: DataStreamTreeNode;
+    isFinished: boolean;
+}
 
 export interface ICustomRangeInterceptor {
     getCustomRange: (index: number) => Nullable<ICustomRangeForInterceptor>;
@@ -466,56 +470,87 @@ export class DocumentViewModel implements IDisposable {
 
     protected _transformToTree(dataStream: string) {
         const dataStreamLen = dataStream.length;
-
         let content = '';
         const sectionList: DataStreamTreeNode[] = [];
-        let nodeList: DataStreamTreeNode[] = [];
-        let currentBlocks: number[] = [];
+        // Only use to cache the outer paragraphs.
+        const paragraphList: DataStreamTreeNode[] = [];
+        const tableList: ITableCache[] = [];
+        const tableRowList: DataStreamTreeNode[] = [];
+        const tableCellList: DataStreamTreeNode[] = [];
+        const currentBlocks: number[] = [];
 
-        // let paragraphIndex = 0;
         for (let i = 0; i < dataStreamLen; i++) {
             const char = dataStream[i];
 
             if (char === DataStreamTreeTokenType.PARAGRAPH) {
                 content += DataStreamTreeTokenType.PARAGRAPH;
 
-                const node = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, content);
+                const paragraphNode = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, content);
 
-                // const isBullet = this._checkParagraphBullet(paragraphIndex);
-                // const isIndent = isBullet === true ? true : this._checkParagraphIndent(paragraphIndex);
-                // paragraphIndex++;
-                node.setIndexRange(i - content.length + 1, i);
-                node.addBlocks(currentBlocks);
-                // node.isBullet = isBullet;
-                // node.isIndent = isIndent;
-                nodeList.push(node);
+                const lastTableCache = tableList[tableList.length - 1];
+                if (lastTableCache && lastTableCache.isFinished) {
+                    // Paragraph Node will only has one table node.
+                    this._batchParent(paragraphNode, [lastTableCache.table], DataStreamTreeNodeType.PARAGRAPH);
+
+                    tableList.pop();
+                }
+
+                // Paragraph start and end index is from the first char of the paragraph to the last char of the paragraph. not include the Table content.
+                paragraphNode.setIndexRange(i - content.length + 1, i);
+                paragraphNode.addBlocks(currentBlocks);
+                currentBlocks.length = 0;
                 content = '';
-                currentBlocks = [];
+
+                if (tableCellList.length > 0) {
+                    const lastCell = tableCellList[tableCellList.length - 1];
+
+                    this._batchParent(lastCell, [paragraphNode], DataStreamTreeNodeType.TABLE_CELL);
+                } else {
+                    paragraphList.push(paragraphNode);
+                }
             } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
-                const sectionTree = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
+                const sectionNode = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
 
-                this._batchParent(sectionTree, nodeList);
+                this._batchParent(sectionNode, paragraphList);
 
-                const lastNode = nodeList[nodeList.length - 1];
+                const lastNode = paragraphList[paragraphList.length - 1];
 
                 if (lastNode && lastNode.content) {
                     lastNode.content += DataStreamTreeTokenType.SECTION_BREAK;
                 }
 
-                sectionList.push(sectionTree);
-                nodeList = [];
+                sectionList.push(sectionNode);
+                paragraphList.length = 0;
             } else if (char === DataStreamTreeTokenType.TABLE_START) {
-                nodeList.push(DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE));
+                const tableNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE);
+
+                tableList.push({
+                    table: tableNode,
+                    isFinished: false,
+                });
             } else if (char === DataStreamTreeTokenType.TABLE_ROW_START) {
-                nodeList.push(DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_ROW));
+                const rowNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_ROW);
+
+                tableRowList.push(rowNode);
             } else if (char === DataStreamTreeTokenType.TABLE_CELL_START) {
-                nodeList.push(DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_CELL));
+                const cellNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_CELL);
+
+                tableCellList.push(cellNode);
             } else if (char === DataStreamTreeTokenType.TABLE_END) {
-                this._processPreviousNodesUntil(nodeList, DataStreamTreeNodeType.TABLE);
+                const lastTable = tableList[tableList.length - 1];
+                lastTable.isFinished = true;
+                content = '';
             } else if (char === DataStreamTreeTokenType.TABLE_ROW_END) {
-                this._processPreviousNodesUntil(nodeList, DataStreamTreeNodeType.TABLE_ROW);
+                const rowNode = tableRowList.pop();
+                const lastTableCache = tableList[tableList.length - 1];
+
+                this._batchParent(lastTableCache.table, [rowNode!], DataStreamTreeNodeType.TABLE);
             } else if (char === DataStreamTreeTokenType.TABLE_CELL_END) {
-                this._processPreviousNodesUntil(nodeList, DataStreamTreeNodeType.TABLE_CELL);
+                const cellNode = tableCellList.pop();
+
+                const lastRow = tableRowList[tableRowList.length - 1];
+
+                this._batchParent(lastRow, [cellNode!], DataStreamTreeNodeType.TABLE_ROW);
             } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
                 currentBlocks.push(i);
                 content += char;
@@ -525,49 +560,6 @@ export class DocumentViewModel implements IDisposable {
         }
 
         return sectionList;
-    }
-
-    private _processPreviousNodesUntil(nodeList: DataStreamTreeNode[], untilNodeType: DataStreamTreeNodeType) {
-        const nodeCollection: DataStreamTreeNode[] = [];
-        let node = nodeList.pop();
-        while (node) {
-            if (node.nodeType === untilNodeType) {
-                break;
-            }
-
-            nodeCollection.push(node);
-
-            node = nodeList.pop();
-        }
-
-        const recentTree = nodeList[nodeList.length - 1];
-        this._batchParent(recentTree, nodeCollection, DataStreamTreeNodeType.TABLE);
-
-        if (untilNodeType === DataStreamTreeNodeType.TABLE_CELL) {
-            const firstNode = nodeCollection[0];
-            const lastNode = nodeCollection[nodeCollection.length];
-            firstNode.content = DataStreamTreeTokenType.TABLE_CELL_START + firstNode.content || '';
-            firstNode.startIndex -= 1;
-            lastNode.content += DataStreamTreeTokenType.TABLE_CELL_END;
-            lastNode.endIndex += 1;
-        } else if (untilNodeType === DataStreamTreeNodeType.TABLE_ROW) {
-            const firstNode = nodeCollection[0].children[0];
-            let lastNode = nodeCollection[nodeCollection.length];
-            lastNode = lastNode.children[lastNode.children.length - 1];
-            firstNode.content = DataStreamTreeTokenType.TABLE_ROW_START + firstNode.content || '';
-            firstNode.startIndex -= 1;
-            lastNode.content += DataStreamTreeTokenType.TABLE_ROW_END;
-            lastNode.endIndex += 1;
-        } else if (untilNodeType === DataStreamTreeNodeType.TABLE) {
-            const firstNode = nodeCollection[0].children[0].children[0];
-            let lastNode = nodeCollection[nodeCollection.length];
-            lastNode = lastNode.children[lastNode.children.length - 1];
-            lastNode = lastNode.children[lastNode.children.length - 1];
-            firstNode.content = DataStreamTreeTokenType.TABLE_START + firstNode.content || '';
-            firstNode.startIndex -= 1;
-            lastNode.content += DataStreamTreeTokenType.TABLE_END;
-            lastNode.endIndex += 1;
-        }
     }
 
     private _batchParent(
@@ -585,8 +577,9 @@ export class DocumentViewModel implements IDisposable {
         }
 
         const startOffset = nodeType === DataStreamTreeNodeType.SECTION_BREAK ? 0 : 1;
+        const allChildren = parent.children;
 
-        parent.setIndexRange(children[0].startIndex - startOffset, children[children.length - 1].endIndex + 1);
+        parent.setIndexRange(allChildren[0].startIndex - startOffset, allChildren[allChildren.length - 1].endIndex + 1);
     }
 
     private _buildHeaderFooterViewModel() {
@@ -777,10 +770,4 @@ export class DocumentViewModel implements IDisposable {
             }
         });
     }
-
-    // private move() {}
-
-    // private split() {}
-
-    // private merge() {}
 }

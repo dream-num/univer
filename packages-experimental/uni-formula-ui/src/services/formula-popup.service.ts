@@ -18,10 +18,11 @@ import type { IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, ILogService, Inject } from '@univerjs/core';
 import { makeSelection } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { IShortcutItem } from '@univerjs/ui';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { FORMULA_PROMPT_ACTIVATED } from '@univerjs/sheets-formula';
+import { UniFormulaService } from '@univerjs/uni-formula';
 import type { IAddDocUniFormulaCommandParams } from '../commands/command';
 import { AddDocUniFormulaCommand } from '../commands/command';
 import { ConfirmFormulaPopupCommand } from '../commands/operation';
@@ -47,10 +48,16 @@ export class DocFormulaPopupService extends Disposable {
     get popupInfo(): Nullable<IDocFormulaPopupInfo> { return this._popupInfo$.getValue(); }
 
     private _popupLocked = false;
+    get popupLocked(): boolean { return this._popupLocked; }
+
+    private readonly _popupHovered$ = new Subject<boolean>();
+    readonly popupHovered$ = this._popupHovered$.asObservable();
+
     private _cachedFormulaString = '';
 
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
+        @Inject(UniFormulaService) private readonly _uniFormulaService: UniFormulaService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService
@@ -74,23 +81,34 @@ export class DocFormulaPopupService extends Disposable {
 
         this._popupInfo$.next(null);
         this._popupInfo$.complete();
+
+        this._popupHovered$.complete();
     }
 
     cacheFormulaString(f: string): void {
         this._cachedFormulaString = f;
     }
 
-    showPopup(unitId: string, startIndex: number, type: 'new' | 'existing'): boolean {
+    hoverPopup(hovered: boolean): void {
+        this._popupHovered$.next(hovered);
+    }
+
+    showPopup(unitId: string, startIndex: number, type: 'new'): boolean;
+    showPopup(unitId: string, startIndex: number, type: 'existing', rangeId: string): boolean;
+    showPopup(unitId: string, startIndex: number, type: 'new' | 'existing', rangeId?: string): boolean;
+    showPopup(unitId: string, startIndex: number, type: 'new' | 'existing', rangeId?: string): boolean {
         this.closePopup();
 
+        const f = (rangeId && type === 'existing')
+            ? this._uniFormulaService.getFormulaWithRangeId(unitId, rangeId)?.f ?? '='
+            : '=';
         const disposable = this._docCanvasPopupManagerService.attachPopupToRange(makeSelection(startIndex), {
             componentKey: DOC_FORMULA_POPUP_KEY,
             onClickOutside: () => this.closePopup(), // user may update ref range selections
             direction: 'top',
         });
 
-        this._popupInfo$.next({ unitId, disposable, type, f: '', startIndex });
-
+        this._popupInfo$.next({ unitId, disposable, type, f, startIndex });
         return true;
     }
 
@@ -135,6 +153,7 @@ export class DocFormulaPopupService extends Disposable {
 
         this.popupInfo?.disposable.dispose();
         this._popupInfo$.next(null);
+        this._popupHovered$.next(false);
 
         return true;
     }

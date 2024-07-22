@@ -15,6 +15,7 @@
  */
 
 export { UniverDocUniFormulaPlugin } from './uni-formula.plugin';
+export { UniFormulaService, type IUpdateDocUniFormulaCacheMutationParams } from './services/uni-formula.service';
 export { DOC_FORMULA_PLUGIN_NAME } from './const';
 
 // #region - all commands
@@ -27,6 +28,5 @@ export {
     RemoveDocUniFormulaMutation,
     UpdateDocUniFormulaMutation,
 } from './commands/mutation';
-export { UpdateDocUniFormulaCacheMutation } from './services/uni-formula.service';
 
 // #endregion

@@ -161,6 +161,10 @@ export class UniFormulaService extends Disposable {
         });
     }
 
+    getFormulaWithRangeId(unitId: string, rangeId: string): Nullable<IDocFormulaReference> {
+        return this._docFormulas.get(getDocFormulaKey(unitId, rangeId)) ?? null;
+    }
+
     /**
      * Register a doc formula into the formula system.
      */
@@ -202,7 +206,6 @@ export class UniFormulaService extends Disposable {
     }
 
     updateFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean {
-        // TODO: @wzhudev: should trigger re-render
         formulaIds.forEach((id, index) => {
             const formulaData = this._docFormulas.get(getDocFormulaKey(unitId, id));
             if (!formulaData) return true;

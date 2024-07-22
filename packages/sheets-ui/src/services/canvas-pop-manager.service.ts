@@ -269,22 +269,31 @@ export class SheetCanvasPopManagerService extends Disposable {
         const primaryWithCoord = skeleton.getCellByIndex(row, col);
         const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
+        // TODO@wzhudev: we should calculate the transform of it's parent elements.
+
         const { scaleX, scaleY } = scene.getAncestorScale();
         const scrollXY = {
             x: activeViewport.viewportScrollX,
             y: activeViewport.viewportScrollY,
         };
 
-        const canvasClientRect = engine.getCanvasElement().getBoundingClientRect();
-        const { top, left } = canvasClientRect;
+        const canvasElement = engine.getCanvasElement();
+        const canvasClientRect = canvasElement.getBoundingClientRect();
+        const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+        const { top, left, width } = canvasClientRect; // real width affected by scale
+        const scaleAdjust = width / widthOfCanvas;
 
         return {
-            left: ((cellInfo.startX - scrollXY.x) * scaleX) + left,
-            right: (cellInfo.endX - scrollXY.x) * scaleX + left,
-            top: ((cellInfo.startY - scrollXY.y) * scaleY) + top,
-            bottom: ((cellInfo.endY - scrollXY.y) * scaleY) + top,
+            left: ((cellInfo.startX - scrollXY.x) * scaleAdjust * scaleX) + left,
+            right: (cellInfo.endX - scrollXY.x) * scaleAdjust * scaleX + left,
+            top: ((cellInfo.startY - scrollXY.y) * scaleAdjust * scaleY) + top,
+            bottom: ((cellInfo.endY - scrollXY.y) * scaleAdjust * scaleY) + top,
         };
     }
 
     // #endregion
+}
+
+function pxToNum(width: string): number {
+    return Number.parseInt(width.replace('px', ''));
 }

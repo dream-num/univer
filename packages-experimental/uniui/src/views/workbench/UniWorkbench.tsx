@@ -80,6 +80,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
+    const focusedUnit = useObservable(instanceService.focused$);
+
     const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
 
     const focusUnit = useCallback((unitId: string) => {
@@ -172,6 +174,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             onContextMenu={(e) => e.preventDefault()}
                         >
                             <ReactFlow
+                                draggable={!focusedUnit}
                                 nodes={nodes}
                                 nodeTypes={nodeTypes}
                                 onNodesChange={onNodesChange}

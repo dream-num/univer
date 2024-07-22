@@ -21,14 +21,23 @@ import { DocFormulaPopupService } from '../services/formula-popup.service';
 export interface IShowFormulaPopupOperationParams {
     unitId: string;
     startIndex: number;
+
+    type?: 'new' | 'existing';
+    rangeId?: string;
 }
 
 export const ShowFormulaPopupOperation: IOperation<IShowFormulaPopupOperationParams> = {
     id: 'doc.operation.show-formula-popup',
     type: CommandType.OPERATION,
     handler(accessor, params: IShowFormulaPopupOperationParams) {
+        const { type = 'new', startIndex, unitId, rangeId } = params;
         const docFormulaPopupService = accessor.get(DocFormulaPopupService);
-        return docFormulaPopupService.showPopup(params.unitId, params.startIndex, 'new');
+
+        if (type === 'existing' && !rangeId) {
+            return false;
+        }
+
+        return docFormulaPopupService.showPopup(unitId, startIndex, type, rangeId);
     },
 };
 

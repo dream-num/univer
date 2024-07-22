@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { CustomRangeType, Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs';
 import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
 import { ComponentManager, IEditorService } from '@univerjs/ui';
+import { DocHoverManagerService } from '@univerjs/docs-ui';
 
 import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/command';
 import type { IShowFormulaPopupOperationParams } from '../commands/operation';
@@ -33,6 +34,8 @@ export class DocUniFormulaController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService,
+        @ILogService private readonly _logService: ILogService,
+        @Inject(DocHoverManagerService) private readonly _docHoverManagerService: DocHoverManagerService,
         @Inject(DocFormulaPopupService) private readonly _docFormulaPopupService: DocFormulaPopupService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
@@ -42,6 +45,7 @@ export class DocUniFormulaController extends Disposable {
         this._initKeyboardListeners();
         this._initComponents();
         this._initCommands();
+        this._initHoverListener();
     }
 
     private _initCommands(): void {
@@ -65,6 +69,8 @@ export class DocUniFormulaController extends Disposable {
             const currentEditor = this._editorService.getFocusEditor();
             const focusedUnit = this._instanceSrv.getFocusedUnit();
 
+            const { id } = commandInfo;
+
             if (
                 currentEditor?.editorUnitId === DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY ||
                 focusedUnit?.type !== UniverInstanceType.UNIVER_DOC
@@ -72,31 +78,88 @@ export class DocUniFormulaController extends Disposable {
                 return;
             }
 
-            if (commandInfo.id === InsertCommand.id) {
+            if (id === InsertCommand.id) {
                 const params = commandInfo.params as IInsertCommandParams;
                 const activeRange = this._textSelectionManagerService.getActiveRange();
                 if (params.body.dataStream === FORMULA_INPUT_TRIGGER_CHAR && activeRange) {
-                    this._commandService.executeCommand(ShowFormulaPopupOperation.id, {
+                    this._showPopup({
                         startIndex: activeRange.startOffset - 1,
                         unitId: focusedUnit.getUnitId(),
-                    } as IShowFormulaPopupOperationParams);
+                    });
                 } else if (this._docFormulaPopupService.popupInfo) {
-                    this._commandService.executeCommand(CloseFormulaPopupOperation.id);
+                    this._closePopup();
                 }
             }
 
-            if (commandInfo.id === MoveCursorOperation.id) {
-                this._commandService.executeCommand(CloseFormulaPopupOperation.id);
-            }
-
-            if (commandInfo.id === DeleteLeftCommand.id) {
-                const activeRange = this._textSelectionManagerService.getActiveRange();
-                // if (activeRange && activeRange.endOffset <= this._docMentionPopupService.editPopup.anchor) {
-                //     this._commandService.executeCommand(CloseMentionEditPopupOperation.id);
-                // }
-                this._commandService.executeCommand(CloseFormulaPopupOperation.id);
+            if (id === MoveCursorOperation.id || id === DeleteLeftCommand.id) {
+                this._closePopup();
             }
         }));
+    }
+
+    private _initHoverListener(): void {
+        this.disposeWithMe(this._docHoverManagerService.activeCustomRanges$.subscribe((customRanges) => {
+            const focusedUnit = this._instanceSrv.getFocusedUnit();
+
+            if (
+                !focusedUnit ||
+                this._docFormulaPopupService.popupInfo?.type === 'new' ||
+                this._docFormulaPopupService.popupLocked
+            ) {
+                return;
+            }
+
+            const formulaCustomRange = customRanges.find((range) => range.rangeType === CustomRangeType.UNI_FORMULA);
+            if (formulaCustomRange) {
+                const { startIndex, rangeId } = formulaCustomRange;
+                this._logService.debug('[DocUniFormulaController]: activeCustomRanges', customRanges);
+                this._showPopup({
+                    startIndex,
+                    unitId: focusedUnit.getUnitId(),
+                    rangeId,
+                    type: 'existing',
+                });
+            } else {
+                if (!this._hovered) {
+                    this._closePopup(500);
+                }
+            }
+        }));
+
+        this.disposeWithMe(this._docFormulaPopupService.popupHovered$.subscribe((hovered) => {
+            if (hovered) {
+                this._removeTimer();
+            }
+
+            this._hovered = hovered;
+        }));
+    }
+
+    private _hovered = false;
+
+    private _removeTimer(): void {
+        if (this._closePopupTimer !== null) {
+            window.clearTimeout(this._closePopupTimer);
+            this._closePopupTimer = null;
+        }
+    }
+
+    private _showPopup(params: IShowFormulaPopupOperationParams): void {
+        this._removeTimer();
+        this._commandService.executeCommand(ShowFormulaPopupOperation.id, params);
+    }
+
+    private _closePopupTimer: number | null = null;
+    private _closePopup(timeout: number = 0): void {
+        if (!this._docFormulaPopupService.popupInfo) {
+            return;
+        }
+
+        if (timeout === 0) {
+            this._commandService.executeCommand(CloseFormulaPopupOperation.id);
+        } else {
+            this._closePopupTimer = window.setTimeout(() => this._closePopup(0), timeout);
+        }
     }
 }
 

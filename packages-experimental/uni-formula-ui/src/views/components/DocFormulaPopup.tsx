@@ -81,12 +81,16 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
         commandService.executeCommand(ConfirmFormulaPopupCommand.id);
     }, [commandService]);
 
+    const onHovered = useCallback((hovered: boolean) => {
+        formulaPopupService.hoverPopup(hovered);
+    }, [formulaPopupService]);
+
     const onCancel = useCallback(() => {
         commandService.executeCommand(CloseFormulaPopupOperation.id);
     }, [commandService]);
 
     return (
-        <div className={styles.docUiFormulaPopup}>
+        <div className={styles.docUiFormulaPopup} onMouseEnter={() => onHovered(true)} onMouseLeave={() => onHovered(false)}>
             <span className={styles.docUiFormulaPopupTitle}>
                 {popupInfo.type === 'new' ? localeService.t('uni-formula.popup.title.new') : localeService.t('uni-formula.popup.title.existing')}
             </span>
@@ -96,6 +100,7 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
                 placeholder={localeService.t('uni-formula.popup.placeholder')}
                 snapshot={snapshotRef.current}
                 cancelDefaultResizeListener
+                value={f ?? ''}
                 isSingle
                 isFormulaEditor
                 onChange={(str) => onFormulaStringChange(str ?? '')}

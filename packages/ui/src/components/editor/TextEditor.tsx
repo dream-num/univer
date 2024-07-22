@@ -51,9 +51,10 @@ export interface ITextEditorProps {
     className?: string; // Parent class name.
 
     snapshot?: IDocumentData; // The default initialization snapshot for the editor can be simply replaced with the value attribute, for cellEditor and formulaBar
+
     value?: string; // default values.
 
-    // WTF: snapshot and value both exists?
+    // WTF: snapshot and value both exists? And use have to set value and snapshot.textStream separately>
 
     resizeCallBack?: (editor: Nullable<HTMLDivElement>) => void; // Container scale callback.
 

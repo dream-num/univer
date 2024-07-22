@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, Workbook } from '@univerjs/core';
 import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import { ClearSelectionAllCommand, ClearSelectionFormatCommand, RangeMergeUtil, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
-import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import type { IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingClearController)
 export class ConditionalFormattingClearController extends Disposable {
@@ -51,45 +51,76 @@ export class ConditionalFormattingClearController extends Disposable {
                     if (!worksheet) {
                         return defaultV;
                     }
+                    const unitId = workbook.getUnitId();
+                    const subUnitId = worksheet.getSheetId();
 
-                    const allRules = this._conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), worksheet.getSheetId());
+                    const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
                     if (!allRules || !allRules.length) {
                         return defaultV;
                     }
-                    allRules.filter((rule) => {
-                        return ranges.some((range) => rule.ranges.some((ruleRange) => Rectangle.getIntersects(ruleRange, range)));
-                    }).forEach((rule) => {
-                        const mergeUtil = new RangeMergeUtil();
-                        const mergeRanges = mergeUtil.add(...rule.ranges).subtract(...ranges).merge();
-                        if (mergeRanges.length) {
-                            const redo: IMutationInfo<ISetConditionalRuleMutationParams> = {
-                                id: SetConditionalRuleMutation.id,
-                                params: {
-                                    unitId: workbook.getUnitId(),
-                                    subUnitId: worksheet.getSheetId(),
-                                    rule: { ...rule, ranges: mergeRanges },
-                                },
-                            };
-                            const undo = setConditionalRuleMutationUndoFactory(this._injector, redo.params);
-                            redos.push(redo);
-                            undos.push(...undo);
-                        } else {
-                            const redo: IMutationInfo<IDeleteConditionalRuleMutationParams> = {
-                                id: DeleteConditionalRuleMutation.id,
-                                params: {
-                                    unitId: workbook.getUnitId(),
-                                    subUnitId: worksheet.getSheetId(),
-                                    cfId: rule.cfId,
-                                },
-                            };
-                            const undo = DeleteConditionalRuleMutationUndoFactory(this._injector, redo.params);
-                            redos.push(redo);
-                            undos.push(...undo);
-                        }
-                    });
+                    const { redos: interceptRedos, undos: interceptUndos } = generateClearCfMutations(this._injector, allRules, ranges, unitId, subUnitId);
+                    redos.push(...interceptRedos);
+                    undos.push(...interceptUndos);
                 }
                 return defaultV;
             },
         }));
+
+        this.disposeWithMe(this._sheetInterceptorService.interceptRangesCommand({
+            getMutations: ({ unitId, subUnitId, ranges }) => {
+                const redos: IMutationInfo[] = [];
+                const undos: IMutationInfo[] = [];
+                const emptyInterceptorArr = { redos, undos };
+                if (!ranges || !ranges.length) {
+                    return emptyInterceptorArr;
+                }
+                const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
+                if (!allRules || !allRules.length) {
+                    return emptyInterceptorArr;
+                }
+                const { redos: interceptRedos, undos: interceptUndos } = generateClearCfMutations(this._injector, allRules, ranges, unitId, subUnitId);
+                redos.push(...interceptRedos);
+                undos.push(...interceptUndos);
+
+                return emptyInterceptorArr;
+            },
+        }));
     }
+}
+
+export function generateClearCfMutations(injector: Injector, allRules: IConditionFormattingRule<IConditionalFormattingRuleConfig>[], ranges: IRange[], unitId: string, subUnitId: string) {
+    const redos: IMutationInfo[] = [];
+    const undos: IMutationInfo[] = [];
+    allRules.filter((rule) => {
+        return ranges.some((range) => rule.ranges.some((ruleRange) => Rectangle.getIntersects(ruleRange, range)));
+    }).forEach((rule) => {
+        const mergeUtil = new RangeMergeUtil();
+        const mergeRanges = mergeUtil.add(...rule.ranges).subtract(...ranges).merge();
+        if (mergeRanges.length) {
+            const redo: IMutationInfo<ISetConditionalRuleMutationParams> = {
+                id: SetConditionalRuleMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    rule: { ...rule, ranges: mergeRanges },
+                },
+            };
+            const undo = setConditionalRuleMutationUndoFactory(injector, redo.params);
+            redos.push(redo);
+            undos.push(...undo);
+        } else {
+            const redo: IMutationInfo<IDeleteConditionalRuleMutationParams> = {
+                id: DeleteConditionalRuleMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    cfId: rule.cfId,
+                },
+            };
+            const undo = DeleteConditionalRuleMutationUndoFactory(injector, redo.params);
+            redos.push(redo);
+            undos.push(...undo);
+        }
+    });
+    return { redos, undos };
 }

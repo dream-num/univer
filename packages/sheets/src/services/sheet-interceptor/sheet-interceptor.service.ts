@@ -44,9 +44,15 @@ export interface ICommandInterceptor {
     getMutations(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor;
 }
 
+export interface IRangesInfo {
+    unitId: string;
+    subUnitId: string;
+    ranges: IRange[];
+}
+
 export interface ICommandInterceptorOnlyWithRanges {
     priority?: number;
-    getMutations(ranges: IRange[]): IUndoRedoCommandInfosByInterceptor;
+    getMutations(rangesInfo: IRangesInfo): IUndoRedoCommandInfosByInterceptor;
 }
 
 /**
@@ -126,7 +132,7 @@ export class SheetInterceptorService extends Disposable {
      * @returns
      */
 
-    onCommandExecute(info: ICommandInfo | IRange[]): IUndoRedoCommandInfosByInterceptor {
+    onCommandExecute(info: ICommandInfo | IRangesInfo): IUndoRedoCommandInfosByInterceptor {
         const isCommandInfo = this._isCommandInfo(info);
         const infos = isCommandInfo ? this._commandInterceptors.map((i) => i.getMutations(info)) : this._commandRangesInterceptors.map((i) => i.getMutations(info));
 
@@ -238,7 +244,7 @@ export class SheetInterceptorService extends Disposable {
         }
     }
 
-    private _isCommandInfo(info: ICommandInfo | IRange[]): info is ICommandInfo {
+    private _isCommandInfo(info: ICommandInfo | IRangesInfo): info is ICommandInfo {
         return !!(info as ICommandInfo).id;
     }
 }

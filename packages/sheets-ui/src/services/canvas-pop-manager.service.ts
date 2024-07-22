@@ -269,8 +269,6 @@ export class SheetCanvasPopManagerService extends Disposable {
         const primaryWithCoord = skeleton.getCellByIndex(row, col);
         const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
-        // TODO@wzhudev: we should calculate the transform of it's parent elements.
-
         const { scaleX, scaleY } = scene.getAncestorScale();
         const scrollXY = {
             x: activeViewport.viewportScrollX,
@@ -279,6 +277,8 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const canvasElement = engine.getCanvasElement();
         const canvasClientRect = canvasElement.getBoundingClientRect();
+
+        // We should take the scale into account when canvas is scaled by CSS.
         const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
         const { top, left, width } = canvasClientRect; // real width affected by scale
         const scaleAdjust = width / widthOfCanvas;

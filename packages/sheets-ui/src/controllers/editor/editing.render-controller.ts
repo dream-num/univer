@@ -294,7 +294,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const { verticalAlign, paddingData, fill } = documentLayoutObject;
 
         let editorWidth = endX - startX;
-
         let editorHeight = endY - startY;
 
         if (editorWidth < actualWidth) {
@@ -396,7 +395,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
      * determine whether a scrollbar appears,
      * and calculate the editor's boundaries relative to the browser.
      */
-
     private _editAreaProcessing(
         editorWidth: number,
         editorHeight: number,
@@ -407,17 +405,27 @@ export class EditingRenderController extends Disposable implements IRenderModule
         scaleY: number = 1
     ) {
         const editorObject = this._getEditorObject();
-
         if (editorObject == null) {
             return;
         }
 
+        function pxToNum(width: string): number {
+            return Number.parseInt(width.replace('px', ''));
+        }
+
+        const engine = this._context.engine;
+        const canvasElement = engine.getCanvasElement();
+        const canvasClientRect = canvasElement.getBoundingClientRect();
+
+        // We should take the scale into account when canvas is scaled by CSS.
+        const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+        const { top, left, width } = canvasClientRect; // real width affected by scale
+        const scaleAdjust = width / widthOfCanvas;
+
         let { startX, startY } = actualRangeWithCoord;
 
-        const { document: documentComponent, scene, engine: docEngine } = editorObject;
-
-        const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
-
+        const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
+        const viewportMain = editorScene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
         const clientHeight =
             document.body.clientHeight -
             startY -
@@ -451,23 +459,20 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         startX -= FIX_ONE_PIXEL_BLUR_OFFSET;
-
         startY -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
-        // physicHeight = editorHeight;
+        this._addBackground(editorScene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
-        this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
+        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = editorScene.getPrecisionScale();
 
-        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
-
-        scene.transformByState({
-            width: editorWidth / scaleX,
-            height: editorHeight / scaleY,
-            scaleX,
-            scaleY,
+        editorScene.transformByState({
+            width: editorWidth * scaleAdjust / scaleX,
+            height: editorHeight * scaleAdjust / scaleY,
+            scaleX: scaleX * scaleAdjust,
+            scaleY: scaleY * scaleAdjust,
         });
 
-        documentComponent.resize(editorWidth / scaleX, editorHeight / scaleY);
+        documentComponent.resize(editorWidth * scaleAdjust / scaleX, editorHeight * scaleAdjust / scaleY);
 
         /**
          * resize canvas
@@ -480,18 +485,17 @@ export class EditingRenderController extends Disposable implements IRenderModule
             );
         });
 
-        const canvasElement = this._context.engine.getCanvasElement();
         const contentBoundingRect = this._layoutService.getContentElement().getBoundingClientRect();
         const canvasBoundingRect = canvasElement.getBoundingClientRect();
-        startX += (canvasBoundingRect.left - contentBoundingRect.left);
-        startY += (canvasBoundingRect.top - contentBoundingRect.top);
+        startX = startX * scaleAdjust + (canvasBoundingRect.left - contentBoundingRect.left);
+        startY = startY * scaleAdjust + (canvasBoundingRect.top - contentBoundingRect.top);
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
             startX,
             startY,
-            endX: editorWidth + startX,
-            endY: physicHeight + startY,
+            endX: editorWidth * scaleAdjust + startX,
+            endY: physicHeight * scaleAdjust + startY,
             show: true,
         });
     }

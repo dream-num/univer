@@ -77,6 +77,20 @@ const paragraphs = createParagraphs(dataStream);
 const tableCell: ITableCell = {
     rowSpan: 1,
     columnSpan: 1,
+    margin: {
+        start: {
+            v: 10,
+        },
+        end: {
+            v: 10,
+        },
+        top: {
+            v: 5,
+        },
+        bottom: {
+            v: 5,
+        },
+    },
 };
 
 const tableRow: ITableRow = {
@@ -167,7 +181,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                 st: 9,
                 ed: dataStream.length - 2,
                 ts: {
-                    fs: 18,
+                    fs: 14,
                     ff: 'Times New Roman',
                     cl: {
                         rgb: 'rgb(30, 30, 30)',

@@ -59,11 +59,14 @@ export function createTableSkeleton(
                 col
             );
 
+            const { marginTop = 0, marginBottom = 0 } = cellPageSkeleton;
+            const pageHeight = cellPageSkeleton.height + marginTop + marginBottom;
             cellPageSkeleton.left = left;
+            cellPageSkeleton.pageHeight = pageHeight;
             left += cellPageSkeleton.pageWidth;
             cellPageSkeleton.parent = rowSkeleton;
             rowSkeleton.cells.push(cellPageSkeleton);
-            rowHeight = Math.max(rowHeight, cellPageSkeleton.height);
+            rowHeight = Math.max(rowHeight, pageHeight);
         }
 
         rowSkeleton.height = rowHeight;

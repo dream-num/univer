@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -24,7 +24,8 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
-import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { SheetUIController, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniSheetUIController } from '@univerjs/uni-sheets-ui';
 import { UniverUniUIPlugin } from '@univerjs/uniui';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { FUniver } from '@univerjs/facade';
@@ -76,7 +77,15 @@ univer.registerPlugin(UniverDrawingPlugin);
 univer.registerPlugin(UniverDocsUIPlugin);
 
 univer.registerPlugin(UniverSheetsPlugin);
-univer.registerPlugin(UniverSheetsUIPlugin);
+univer.registerPlugin(UniverSheetsUIPlugin, {
+    override: [
+        [SheetUIController, {
+            useFactory: (injector) => {
+                injector.createInstance(UniSheetUIController, {});
+            }, deps: [Injector],
+        }],
+    ],
+});
 
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);

@@ -23,6 +23,7 @@ export { SheetsRenderService } from './services/sheets-render.service';
 export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
+export { SheetUIController, type IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
 export {
@@ -88,6 +89,8 @@ export { FormulaEditorController } from './controllers/editor/formula-editor.con
 export { StatusBarController } from './controllers/status-bar.controller';
 export { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
+export { RenderSheetFooter, RenderSheetHeader, RenderSheetContent } from './views/sheet-container/SheetContainer';
+export { SheetBar } from './views/sheet-bar/SheetBar';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
 export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';
 export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';

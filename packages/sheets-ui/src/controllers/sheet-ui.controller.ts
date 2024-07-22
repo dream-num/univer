@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DependencyOverride } from '@univerjs/core';
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import {
     SetBoldCommand,
@@ -230,6 +231,8 @@ import { sheetPermissionAddProtectContextMenuFactory, sheetPermissionChangeSheet
 
 export interface IUniverSheetsUIConfig {
     menu: MenuConfig;
+
+    override?: DependencyOverride;
 }
 
 export const DefaultSheetUiConfig = {};
@@ -237,14 +240,14 @@ export const DefaultSheetUiConfig = {};
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverSheetsUIConfig>,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @ILayoutService private readonly _layoutService: ILayoutService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IMenuService private readonly _menuService: IMenuService,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService
+        protected readonly _config: Partial<IUniverSheetsUIConfig>,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @ILayoutService protected readonly _layoutService: ILayoutService,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @IShortcutService protected readonly _shortcutService: IShortcutService,
+        @IMenuService protected readonly _menuService: IMenuService,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService
     ) {
         super();
 
@@ -507,7 +510,7 @@ export class SheetUIController extends Disposable {
         });
     }
 
-    private _initWorkbenchParts(): void {
+    protected _initWorkbenchParts(): void {
         const uiController = this._uiPartsService;
         const injector = this._injector;
 
@@ -516,7 +519,7 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
     }
 
-    private _initFocusHandler(): void {
+    protected _initFocusHandler(): void {
         this.disposeWithMe(
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_SHEET, (_unitId: string) => {
                 // DEBT: `_unitId` is not used hence we cannot support Univer mode now

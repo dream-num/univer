@@ -20,8 +20,6 @@ import type { Subject } from 'rxjs';
 
 import type { ISidebarMethodOptions } from '../../views/components/sidebar/interface';
 
-export const ISidebarService = createIdentifier<ISidebarService>('univer.sidebar-service');
-
 export interface ISidebarService {
     readonly sidebarOptions$: Subject<ISidebarMethodOptions>;
     readonly scrollEvent$: Subject<Event>;
@@ -29,3 +27,6 @@ export interface ISidebarService {
     open(params: ISidebarMethodOptions): IDisposable;
     close(): void;
 }
+
+export const ILeftSidebarService = createIdentifier<ISidebarService>('ui.left-sidebar.service');
+export const ISidebarService = createIdentifier<ISidebarService>('ui.sidebar.service');

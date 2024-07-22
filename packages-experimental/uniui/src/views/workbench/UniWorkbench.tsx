@@ -48,7 +48,7 @@ import '@xyflow/react/dist/style.css';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
 import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
-import { UniSidebar } from '../uni-sidebar/UniSidebar';
+import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
 import { UniControls } from './UniControls';
 import styles from './workbench.module.less';
 
@@ -222,11 +222,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             </div>
                         )}
 
-                        <aside className={styles.workbenchContainerLeftSidebar}>
-                            <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
-                        </aside>
-
-                        <UniSidebar />
+                        <LeftSidebar />
+                        <RightSidebar />
 
                         {/* footer */}
                         {footer && (

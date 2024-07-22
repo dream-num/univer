@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export { UniverUniUIPlugin } from './plugin';
-export { UniUIPart } from './views/outline/Outline';
+export { UniSheetUIController } from './controllers/uni-sheet-ui.controller';

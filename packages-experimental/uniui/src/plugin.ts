@@ -46,6 +46,7 @@ import {
     IEditorService,
     IGlobalZoneService,
     ILayoutService,
+    ILeftSidebarService,
     IMenuService,
     IMessageService,
     INotificationService,
@@ -71,6 +72,7 @@ import {
 } from '@univerjs/ui';
 import { UniverUniUIController } from './controllers/uniui-desktop.controller';
 import { UnitGridService } from './services/unit-grid/unit-grid.service';
+import { UniuiLeftSidebarController } from './controllers/uniui-leftsidebar.controller';
 
 const UI_BOOTSTRAP_DELAY = 16;
 
@@ -112,6 +114,7 @@ export class UniverUniUIPlugin extends Plugin {
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
+            [ILeftSidebarService, { useClass: DesktopSidebarService, lazy: true }],
             [IZenZoneService, { useClass: DesktopZenZoneService, lazy: true }],
             [IGlobalZoneService, { useClass: DesktopGlobalZoneService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
@@ -132,6 +135,7 @@ export class UniverUniUIPlugin extends Plugin {
             [ShortcutPanelController, {
                 useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
             }],
+            [UniuiLeftSidebarController],
         ], this._config.override);
         dependencies.forEach((dependency) => injector.add(dependency));
     }

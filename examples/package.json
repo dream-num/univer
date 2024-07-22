@@ -58,6 +58,7 @@
         "@univerjs/ui": "workspace:*",
         "@univerjs/uni-formula": "workspace:*",
         "@univerjs/uni-formula-ui": "workspace:*",
+        "@univerjs/uni-sheets-ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
         "@univerjs/uniui": "workspace:*",
         "clsx": "^2.1.1",

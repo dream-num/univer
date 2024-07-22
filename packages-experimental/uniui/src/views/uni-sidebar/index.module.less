@@ -1,14 +1,12 @@
 .uni-sidebar {
     position: fixed;
-    transform: translateX(calc(100% + 12px));
 
+    border: 1px solid rgb(var(--border-color));
     border-radius: 10px;
     overflow: hidden;
     box-sizing: border-box;
     box-shadow: var(--box-shadow-lg);
-    width: 340px;
     top: 72px;
-    right: 12px;
     bottom: 12px;
     z-index: 20;
 
@@ -17,10 +15,21 @@
 
     transition: all 0.15s;
 
+    &-left {
+        left: 12px;
+        transform: translateX(calc(-100% - 12px));
+        width: 180px;
+    }
+
+    &-right {
+        min-width: 280px;
+        max-width: 400px;
+        right: 12px;
+        transform: translateX(calc(100% + 12px));
+    }
+
     &&-open {
-        border: 1px solid rgb(var(--border-color));
         transform: translateX(0);
-        width: 380px;
     }
 
     &-container {

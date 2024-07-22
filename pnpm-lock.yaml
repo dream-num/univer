@@ -336,6 +336,9 @@ importers:
       '@univerjs/uni-formula-ui':
         specifier: workspace:*
         version: link:../packages-experimental/uni-formula-ui
+      '@univerjs/uni-sheets-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-sheets-ui
       '@univerjs/uniscript':
         specifier: workspace:*
         version: link:../packages/uniscript
@@ -483,6 +486,48 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
+  packages-experimental/uni-sheets-ui:
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@univerjs/uniui':
+        specifier: workspace:*
+        version: link:../uniui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.5.3
+        version: 5.5.3
+      vite:
+        specifier: ^5.3.4
+        version: 5.3.4(@types/node@20.14.11)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^2.0.3
+        version: 2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+
   packages-experimental/uniui:
     dependencies:
       '@univerjs/icons':
@@ -513,6 +558,9 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui

@@ -19,11 +19,27 @@ import { useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { ISidebarMethodOptions } from '@univerjs/ui';
-import { CustomLabel, ISidebarService, useObservable } from '@univerjs/ui';
+import { CustomLabel, ILeftSidebarService, ISidebarService, useObservable } from '@univerjs/ui';
 import styles from './index.module.less';
 
-export function UniSidebar() {
+export interface IUniSidebarProps {
+    position: 'left' | 'right';
+    sidebarService: ISidebarService;
+    showClose?: boolean;
+}
+
+export function LeftSidebar() {
+    const sidebarService = useDependency(ILeftSidebarService);
+    return <UniSidebar position="left" sidebarService={sidebarService} showClose={false} />;
+}
+
+export function RightSidebar() {
     const sidebarService = useDependency(ISidebarService);
+    return <UniSidebar position="right" sidebarService={sidebarService} />;
+}
+
+export function UniSidebar(props: IUniSidebarProps) {
+    const { sidebarService, position, showClose = true } = props;
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +85,8 @@ export function UniSidebar() {
 
     const rootClassName = clsx(styles.uniSidebar, {
         [styles.uniSidebarOpen]: options?.visible,
+        [styles.uniSidebarLeft]: position === 'left',
+        [styles.uniSidebarRight]: position === 'right',
     });
 
     const width = useMemo(() => {
@@ -93,13 +111,15 @@ export function UniSidebar() {
     return (
         <aside className={rootClassName} style={{ width }}>
             <section className={styles.uniSidebarContainer} ref={scrollRef}>
-                <header className={styles.uniSidebarHeader}>
-                    {options?.header}
+                { showClose && (
+                    <header className={styles.uniSidebarHeader}>
+                        {options?.header}
 
-                    <a className={styles.uniSidebarHeaderClose} onClick={handleClose}>
-                        <CloseSingle />
-                    </a>
-                </header>
+                        <a className={styles.uniSidebarHeaderClose} onClick={handleClose}>
+                            <CloseSingle />
+                        </a>
+                    </header>
+                )}
 
                 <section className={styles.uniSidebarBody}>{options?.children}</section>
 

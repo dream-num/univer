@@ -75,7 +75,7 @@ export { IGlobalZoneService } from './services/global-zone/global-zone.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { ShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
-export { ISidebarService } from './services/sidebar/sidebar.service';
+export { ISidebarService, ILeftSidebarService } from './services/sidebar/sidebar.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
 export { UniverMobileUIPlugin } from './mobile-ui-plugin';

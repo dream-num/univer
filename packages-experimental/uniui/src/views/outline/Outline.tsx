@@ -14,3 +14,20 @@
  * limitations under the License.
  */
 
+import { ComponentContainer, useComponentsOfPart } from '@univerjs/ui';
+import React from 'react';
+
+export enum UniUIPart {
+    OUTLINE = 'OUTLINE',
+}
+
+export function Outline() {
+    const outlineComponent = useComponentsOfPart(UniUIPart.OUTLINE);
+    return (
+        <div>
+            <ComponentContainer key="outline" components={outlineComponent} />
+        </div>
+    );
+}
+
+Outline.componentName = 'Outline';

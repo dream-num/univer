@@ -65,7 +65,7 @@ import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui'
 import type { WorkbookSelections } from '@univerjs/sheets';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
-import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
+import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
@@ -76,6 +76,7 @@ import styles from '../../views/sheet-container/index.module.less';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
+import { isCJKLocale, normalizeString } from '../utils/char-tools';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -118,6 +119,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
@@ -837,7 +839,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
             worksheet.getCellRaw(row, column) || {},
             documentLayoutObject,
             this._lexerTreeBuilder,
-            (model) => this._resourceLoaderService.saveDoc(model)
+            (model) => this._resourceLoaderService.saveDoc(model),
+            this._localService,
+            this._functionService
         );
 
         if (!cellData) {
@@ -988,7 +992,9 @@ export function getCellDataByInput(
     cellData: ICellData,
     documentLayoutObject: IDocumentLayoutObject,
     lexerTreeBuilder: LexerTreeBuilder,
-    getSnapshot: (data: DocumentDataModel) => IDocumentData
+    getSnapshot: (data: DocumentDataModel) => IDocumentData,
+    localeService: LocaleService,
+    functionService: IFunctionService
 ) {
     cellData = Tools.deepClone(cellData);
 
@@ -1010,16 +1016,23 @@ export function getCellDataByInput(
     const lastString = data.substring(data.length - 2, data.length);
     let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
+    const currentLocale = localeService.getCurrentLocale();
+    if (isCJKLocale(currentLocale)) {
+        newDataStream = normalizeString(newDataStream, lexerTreeBuilder, functionService);
+    }
+
     if (isFormulaString(newDataStream)) {
         if (cellData.f === newDataStream) {
             return null;
         }
+
         const bracketCount = lexerTreeBuilder.checkIfAddBracket(newDataStream);
         for (let i = 0; i < bracketCount; i++) {
             newDataStream += matchToken.CLOSE_BRACKET;
         }
 
         cellData.f = newDataStream;
+        cellData.si = null; // Disassociate from the original formula
         cellData.v = null;
         cellData.p = null;
     } else if (isForceString(newDataStream)) {
@@ -1066,4 +1079,3 @@ function isRichText(body: IDocumentBody) {
         customBlocks.length > 0
     );
 }
-

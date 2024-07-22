@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import { CellValueType, Direction, Tools } from '@univerjs/core';
+import { CellValueType, Direction, isFormulaId, isFormulaString, Tools } from '@univerjs/core';
 
 export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
 export const chnNumChar2 = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -394,7 +394,7 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             const num = Number(data[data.length - 1]?.v) * (Number(data[1]?.v) / Number(data[0]?.v)) ** i;
 
             if (d) {
-                if (d.t !== CellValueType.BOOLEAN) {
+                if (needsUpdateCellValue(d)) {
                     d.v = num;
                 }
                 applyData.push(d);
@@ -410,7 +410,7 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             const y = forecast(data.length + i, dataNumArr, xArr, forward);
 
             if (d) {
-                if (d.t !== CellValueType.BOOLEAN) {
+                if (needsUpdateCellValue(d)) {
                     d.v = y;
                 }
                 applyData.push(d);
@@ -780,4 +780,21 @@ export function getAutoFillRepeatRange(sourceRange: IRange, targetRange: IRange)
     }
 
     return repeats;
+}
+
+/**
+ * Formulas or Boolean values do not need to update cell.v
+ * @param cell
+ * @returns
+ */
+export function needsUpdateCellValue(cell: ICellData) {
+    if (isFormulaString(cell.f) || isFormulaId(cell.si)) {
+        return false;
+    }
+
+    if (cell.t === CellValueType.BOOLEAN) {
+        return false;
+    }
+
+    return true;
 }

@@ -24,6 +24,8 @@ import type {
     IUnitExcludedCell,
 } from '../../basics/common';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type { IFormulaDirtyData } from '../../commands/mutations/set-formula-calculation.mutation';
+import type { IAllRuntimeData } from '../../services/runtime.service';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -67,8 +69,10 @@ export class FormulaDependencyTree extends Disposable {
 
     featureId: Nullable<string>;
 
+    isPassive: boolean = true;
+
     getDirtyData: Nullable<
-        (tree: FormulaDependencyTree) => {
+        (tree: FormulaDependencyTree, dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
             runtimeCellData: IRuntimeUnitDataType;
             dirtyRanges: IFeatureDirtyRangeType;
         }

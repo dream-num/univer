@@ -82,7 +82,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
         const dependencies: Dependency[] = [
             // Services
             [IFunctionService, { useClass: FunctionService }],
-            [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
             [ISuperTableService, { useClass: SuperTableService }],
@@ -114,6 +113,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
                 [IDependencyManagerService, { useClass: DependencyManagerService }],
+                [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
 
                 //Controller
                 [CalculateController],

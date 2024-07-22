@@ -16,7 +16,7 @@
 
 // Refer to packages/ui/src/views/App.tsx
 
-import { IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
+import { debounce, IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import type { ILocale } from '@univerjs/design';
 import {
@@ -31,11 +31,13 @@ import {
     UNI_DISABLE_CHANGING_FOCUS_KEY,
     useComponentsOfPart,
     useObservable,
-    ZenZone,
 } from '@univerjs/ui';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
+import type {
+    NodeTypes,
+} from '@xyflow/react';
 import {
     Background,
     ReactFlow,
@@ -44,6 +46,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { MenuSingle } from '@univerjs/icons';
 import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { UniControls } from './UniControls';
 import styles from './workbench.module.less';
@@ -70,6 +74,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const messageService = useDependency(IMessageService);
     const unitGridService = useDependency(UnitGridService);
     const instanceService = useDependency(IUniverInstanceService);
+    const renderManagerService = useDependency(IRenderManagerService);
 
     const contentRef = useRef<HTMLDivElement>(null);
 
@@ -80,10 +85,9 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
-    const focusedUnit = useObservable(instanceService.focused$);
-
     const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
 
+    const focusedUnit = useObservable(instanceService.focused$);
     const focusUnit = useCallback((unitId: string) => {
         instanceService.focusUnit(unitId);
         instanceService.setCurrentUnitForType(unitId);
@@ -103,6 +107,11 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     }, [onRendered]);
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const resizeUnits = useCallback(debounce(() => {
+        renderManagerService.getRenderAll().forEach(((renderer) => renderer.engine.resize()));
+    }, 400), [renderManagerService]); // TODO: this is not
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
@@ -130,13 +139,14 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         };
     }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
 
-    const nodeTypes = {
+    const nodeTypes: NodeTypes = {
         customNode: UnitNode,
     };
 
     const initialNodes = unitGrid.map((unitId, index) => ({
         id: unitId,
         type: 'customNode',
+        dragHandle: '.univer-uni-node-drag-handle',
         style: {
             width: '660px',
             height: '600px',
@@ -176,7 +186,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             onContextMenu={(e) => e.preventDefault()}
                         >
                             <ReactFlow
-                                nodesDraggable={!disableReactFlowBehavior}
                                 zoomOnDoubleClick={!disableReactFlowBehavior}
                                 zoomOnPinch={!disableReactFlowBehavior}
                                 zoomOnScroll={!disableReactFlowBehavior}
@@ -185,6 +194,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 nodes={nodes}
                                 nodeTypes={nodeTypes}
                                 onNodesChange={onNodesChange}
+                                // TODO: should call every units canvas to resize in a debounce mananer
+                                onResize={resizeUnits}
                                 fitView
                                 onWheel={() => instanceService.focusUnit(null)}
                                 onPointerDown={(event) => {
@@ -211,20 +222,13 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             </div>
                         )}
 
-                        {/* content */}
-                        <section className={styles.workbenchContainer}>
-                            <div className={styles.workbenchContainerWrapper}>
-                                <aside className={styles.workbenchContainerLeftSidebar}>
-                                    <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
-                                </aside>
+                        <aside className={styles.workbenchContainerLeftSidebar}>
+                            <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
+                        </aside>
 
-                                <aside className={styles.workbenchContainerSidebar}>
-                                    <Sidebar />
-                                </aside>
-                            </div>
-
-                            <ZenZone />
-                        </section>
+                        <aside className={styles.workbenchContainerSidebar}>
+                            <Sidebar />
+                        </aside>
 
                         {/* footer */}
                         {footer && (
@@ -251,10 +255,16 @@ interface IUnitNodeProps {
 
 function UnitNode({ data }: IUnitNodeProps) {
     return (
-        <UnitRenderer
-            key={data.unitId}
-            {...data}
-        />
+        <div className={styles.uniNodeContainer}>
+            <UnitRenderer
+                key={data.unitId}
+                {...data}
+            />
+            <div className={styles.uniNodeDragHandle}>
+                <MenuSingle />
+            </div>
+        </div>
+
     );
 }
 

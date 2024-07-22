@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, FOCUSING_SHEET, ICommandService, IContextService, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
@@ -25,12 +25,13 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
-        this._skeletonListener();
-        this._zoomEventBinding();
+        this._initSkeletonListener();
+        this._initZoomEventListener();
     }
 
     updateZoom(worksheetId: string, zoomRatio: number): boolean {
@@ -45,15 +46,12 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
         return true;
     }
 
-    private _zoomEventBinding() {
-        const scene = this._getSheetObject()?.scene;
-        if (scene == null) {
-            return;
-        }
+    private _initZoomEventListener() {
+        const scene = this._getSheetObject().scene;
 
         this.disposeWithMe(
             scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
-                if (!e.ctrlKey) {
+                if (!e.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
                     return;
                 }
 
@@ -83,7 +81,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
         );
     }
 
-    private _skeletonListener() {
+    private _initSkeletonListener() {
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
             if (param == null) {
                 return;
@@ -106,6 +104,6 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._context.unit, this._context);
+        return getSheetObject(this._context.unit, this._context)!;
     }
 }

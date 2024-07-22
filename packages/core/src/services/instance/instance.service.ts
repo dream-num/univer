@@ -24,7 +24,7 @@ import type { Nullable } from '../../shared';
 import { Disposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
 import { SlideDataModel } from '../../slides/slide-model';
-import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
+import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE, FOCUSING_UNIT } from '../context/context';
 import { IContextService } from '../context/context.service';
 import type { UnitModel, UnitType } from '../../common/unit';
 import { UniverInstanceType } from '../../common/unit';
@@ -243,17 +243,25 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         this._focused$.next(id);
 
         if (this.focused instanceof Workbook) {
+            this._contextService.setContextValue(FOCUSING_UNIT, true);
             this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, true);
             this._contextService.setContextValue(FOCUSING_SLIDE, false);
         } else if (this.focused instanceof DocumentDataModel) {
+            this._contextService.setContextValue(FOCUSING_UNIT, true);
             this._contextService.setContextValue(FOCUSING_DOC, true);
             this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, false);
         } else if (this.focused instanceof SlideDataModel) {
+            this._contextService.setContextValue(FOCUSING_UNIT, true);
             this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, true);
+        } else {
+            this._contextService.setContextValue(FOCUSING_UNIT, false);
+            this._contextService.setContextValue(FOCUSING_DOC, false);
+            this._contextService.setContextValue(FOCUSING_SHEET, false);
+            this._contextService.setContextValue(FOCUSING_SLIDE, false);
         }
     }
 

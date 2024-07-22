@@ -35,10 +35,9 @@ const EDITOR_DEFAULT_POSITION = {
 };
 
 /**
- * Floating editor's container.
+ * Cell editor container.
  * @returns
  */
-
 export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,

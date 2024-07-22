@@ -17,7 +17,9 @@
 import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
+    FOCUSING_DOC,
     ICommandService,
+    IContextService,
     Inject,
     IUniverInstanceService,
 } from '@univerjs/core';
@@ -33,6 +35,7 @@ interface ISetDocMutationParams {
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -41,10 +44,6 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
     ) {
         super();
 
-        this._init();
-    }
-
-    private _init() {
         this._initSkeletonListener();
         this._initCommandExecutedListener();
         this._initRenderRefresher();
@@ -64,7 +63,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             }
 
             this.disposeWithMe(scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
-                if (!e.ctrlKey) {
+                if (!e.ctrlKey || !this._contextService.getContextValue(FOCUSING_DOC)) {
                     return;
                 }
 

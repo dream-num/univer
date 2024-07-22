@@ -22,6 +22,8 @@
 // without the editor being visible.
 // 3. Activated. User can see the cursor blinking.
 
+export const FOCUSING_UNIT = 'FOCUSING_UNIT';
+
 export const FOCUSING_SHEET = 'FOCUSING_SHEET';
 export const FOCUSING_DOC = 'FOCUSING_DOC';
 export const FOCUSING_SLIDE = 'FOCUSING_SLIDE';

@@ -17,7 +17,11 @@
 import type { IUnitRange, Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable } from '@univerjs/core';
 
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
+import type { IRemoveFeatureCalculationMutationParam } from '../commands/mutations/set-feature-calculation.mutation';
+import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
 import type { IAllRuntimeData } from './runtime.service';
 import type { IFormulaDirtyData } from './current-data.service';
 
@@ -25,7 +29,7 @@ export interface IFeatureCalculationManagerParam {
     unitId: string;
     subUnitId: string;
     dependencyRanges: IUnitRange[];
-    getDirtyData: (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
+    getDirtyData: (tree: FormulaDependencyTree, dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
         runtimeCellData: IRuntimeUnitDataType;
         dirtyRanges: IFeatureDirtyRangeType;
     };
@@ -34,15 +38,17 @@ export interface IFeatureCalculationManagerParam {
 export interface IFeatureCalculationManagerService {
     dispose(): void;
 
-    remove(featureId: string): void;
+    remove(unitId: string, subUnitId: string, featureIds: string[]): void;
 
-    get(featureId: string): Nullable<IFeatureCalculationManagerParam>;
+    get(unitId: string, subUnitId: string, featureId: string): Nullable<IFeatureCalculationManagerParam>;
 
-    has(featureId: string): boolean;
+    has(unitId: string, subUnitId: string, featureId: string): boolean;
 
-    register(featureId: string, referenceExecutor: IFeatureCalculationManagerParam): void;
+    register(unitId: string, subUnitId: string, featureId: string, referenceExecutor: IFeatureCalculationManagerParam): void;
 
-    getReferenceExecutorMap(): Map<string, IFeatureCalculationManagerParam>;
+    getReferenceExecutorMap(): Map<string, Map<string, Map<string, IFeatureCalculationManagerParam>>>;
+
+    onChanged$: Observable<IRemoveFeatureCalculationMutationParam>;
 }
 
 /**
@@ -52,26 +58,57 @@ export interface IFeatureCalculationManagerService {
  * thereby completing the calculation of the entire dependency tree.
  */
 export class FeatureCalculationManagerService extends Disposable implements IFeatureCalculationManagerService {
-    private _referenceExecutorMap: Map<string, IFeatureCalculationManagerParam> = new Map();
+    private _referenceExecutorMap: Map<string, Map<string, Map<string, IFeatureCalculationManagerParam>>> = new Map(); // unitId -> subUnitId -> featureId -> IFeatureCalculationManagerParam
+
+    private _onChanged$ = new Subject<IRemoveFeatureCalculationMutationParam>();
+    readonly onChanged$ = this._onChanged$.asObservable();
 
     override dispose(): void {
         this._referenceExecutorMap.clear();
     }
 
-    remove(featureId: string) {
-        this._referenceExecutorMap.delete(featureId);
+    remove(unitId: string, subUnitId: string, featureIds: string[]) {
+        featureIds.forEach((featureId) => {
+            this._referenceExecutorMap.get(unitId)?.get(subUnitId)?.delete(featureId);
+        });
+
+        this._onChanged$.next({
+            unitId,
+            subUnitId,
+            featureIds,
+        });
     }
 
-    get(featureId: string) {
-        return this._referenceExecutorMap.get(featureId);
+    get(unitId: string, subUnitId: string, featureId: string) {
+        return this._referenceExecutorMap.get(unitId)?.get(subUnitId)?.get(featureId);
     }
 
-    has(featureId: string) {
-        return this._referenceExecutorMap.has(featureId);
+    has(unitId: string, subUnitId: string, featureId: string): boolean {
+        return this._referenceExecutorMap.get(unitId)?.get(subUnitId)?.has(featureId) !== null;
     }
 
-    register(featureId: string, referenceExecutor: IFeatureCalculationManagerParam) {
-        this._referenceExecutorMap.set(featureId, referenceExecutor);
+    register(unitId: string, subUnitId: string, featureId: string, referenceExecutor: IFeatureCalculationManagerParam) {
+        let unitMap = this._referenceExecutorMap.get(unitId);
+
+        if (!unitMap) {
+            unitMap = new Map();
+            this._referenceExecutorMap.set(unitId, unitMap);
+        }
+
+        let subUnitMap = unitMap.get(subUnitId);
+
+        if (!subUnitMap) {
+            subUnitMap = new Map();
+            unitMap.set(subUnitId, subUnitMap);
+        }
+
+        this._onChanged$.next({
+            unitId,
+            subUnitId,
+            featureIds: [featureId],
+        });
+
+        subUnitMap.set(featureId, referenceExecutor);
     }
 
     getReferenceExecutorMap() {

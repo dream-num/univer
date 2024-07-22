@@ -16,12 +16,23 @@
 
 import type { Workbook } from '@univerjs/core';
 import {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     Inject,
 } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
 import type { Documents, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IContextMenuService, MenuPosition } from '@univerjs/ui';
+
+const SKIP_UNIT_IDS = [
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+];
 
 /**
  * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct
@@ -35,12 +46,13 @@ export class DocContextMenuRenderController extends Disposable implements IRende
     ) {
         super();
 
-        this._init();
+        if (SKIP_UNIT_IDS.includes(this._context.unitId)) {
+            this._init();
+        }
     }
 
     private _init(): void {
         const documentsPointerDownObserver = (this._context?.mainComponent as Documents)?.onPointerDown$;
-
         // Content range context menu
         const documentsSubscription = documentsPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {

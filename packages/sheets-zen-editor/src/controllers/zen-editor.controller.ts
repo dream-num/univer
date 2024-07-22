@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, ICustomBlock, ICustomRange, IDocumentData, IDrawings, IParagraph, ITextRun } from '@univerjs/core';
+import type { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandInfo, ICustomBlock, ICustomRange, IDocumentData, IDrawings, IParagraph, ITextRun } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -46,8 +46,6 @@ import { takeUntil } from 'rxjs';
 
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
 import { IZenEditorManagerService } from '../services/zen-editor.service';
-
-export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = '__defaultDocumentZenEditorSpecialUnitId_20231218__';
 
 @OnLifecycle(LifecycleStages.Steady, ZenEditorController)
 export class ZenEditorController extends RxDisposable {

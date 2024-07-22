@@ -158,7 +158,7 @@ export class SelectionShapeExtension {
         const { leftControl, rightControl, topControl, bottomControl } = this._control;
 
         [leftControl, rightControl, topControl, bottomControl].forEach((control) => {
-            control.onPointerDown$.subscribeEvent(() => {
+            control.onPointerEnter$.subscribeEvent(() => {
                 const permissionCheck = this._injector.get(ISheetSelectionRenderService, Quantity.OPTIONAL)
                     ?.interceptor.fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
                 if (permissionCheck === false) {

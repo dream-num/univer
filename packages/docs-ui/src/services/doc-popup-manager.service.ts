@@ -137,18 +137,18 @@ export class DocCanvasPopManagerService extends Disposable {
             if (!endPosition || !startPosition) {
                 return;
             }
-
+            const { scaleX, scaleY } = scene.getAncestorScale();
             const documentOffsetConfig = document.getOffsetConfig();
             const { docsLeft, docsTop } = documentOffsetConfig;
-            const top = engine.getCanvasElement().getBoundingClientRect().top;
+            const { top, left } = engine.getCanvasElement().getBoundingClientRect();
             const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
             const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
             const bounds = getLineBounding(borderBoxPointGroup);
             const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
-                left: i.left + docsLeft,
-                right: i.right + docsLeft,
-                top: i.top + docsTop + top,
-                bottom: i.bottom + docsTop + top,
+                left: i.left + docsLeft * scaleX + left,
+                right: i.right + docsLeft * scaleX + left,
+                top: i.top + docsTop * scaleY + top,
+                bottom: i.bottom + docsTop * scaleY + top,
             }));
             return res;
         };

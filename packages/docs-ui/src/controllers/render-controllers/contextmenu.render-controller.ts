@@ -46,7 +46,7 @@ export class DocContextMenuRenderController extends Disposable implements IRende
     ) {
         super();
 
-        if (SKIP_UNIT_IDS.includes(this._context.unitId)) {
+        if (!SKIP_UNIT_IDS.includes(this._context.unitId)) {
             this._init();
         }
     }

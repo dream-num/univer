@@ -99,7 +99,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
                     useFactory: () => this._injector.createInstance(FormulaController, this._config?.function),
                 },
             ],
-            [SetFeatureCalculationController],
             [SetDefinedNameController],
             [SetSuperTableController],
         ];
@@ -119,6 +118,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [CalculateController],
                 [SetOtherFormulaController],
                 [SetDependencyController],
+                [SetFeatureCalculationController],
 
                 // Calculation engine
                 [FormulaDependencyGenerator],

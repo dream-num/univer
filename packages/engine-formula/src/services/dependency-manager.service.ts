@@ -18,7 +18,6 @@ import type { Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable, ObjectMatrix } from '@univerjs/core';
 import { FormulaDependencyTreeCache } from '../engine/dependency/dependency-tree';
 import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
-import type { IDirtyUnitFeatureMap } from '../basics/common';
 
 export interface IOtherFormulaDependencyParam {
     [unitId: string]: Nullable<{ [sheetId: string]: { [formulaId: string]: Nullable<FormulaDependencyTree> } }>;

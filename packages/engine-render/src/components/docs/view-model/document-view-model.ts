@@ -58,7 +58,7 @@ export class DocumentViewModel implements IDisposable {
             return;
         }
 
-        this.children = this._transformToTree(_documentDataModel.getBody()!.dataStream);
+        this.children = this._parseToViewTree(_documentDataModel.getBody()!.dataStream);
 
         this._buildHeaderFooterViewModel();
     }
@@ -101,6 +101,10 @@ export class DocumentViewModel implements IDisposable {
         return this._documentDataModel.getBody();
     }
 
+    getSnapshot() {
+        return this._documentDataModel.getSnapshot();
+    }
+
     getDataModel() {
         return this._documentDataModel;
     }
@@ -124,7 +128,7 @@ export class DocumentViewModel implements IDisposable {
     reset(documentDataModel: DocumentDataModel) {
         this._documentDataModel = documentDataModel;
 
-        this.children = this._transformToTree(documentDataModel.getBody()!.dataStream);
+        this.children = this._parseToViewTree(documentDataModel.getBody()!.dataStream);
 
         this._buildHeaderFooterViewModel();
     }
@@ -410,17 +414,25 @@ export class DocumentViewModel implements IDisposable {
     }
 
     getTable(index: number) {
-        const tables = this.getBody()!.tables;
-        if (tables == null) {
+        const tables = this.getBody()?.tables;
+        const tableSource = this.getSnapshot().tableSource;
+        if (tables == null || tableSource == null) {
             return;
         }
+
+        let tableId: Nullable<string> = null;
 
         for (let i = this._tableBlockCurrentIndex; i < tables.length; i++) {
             const table = tables[i];
             if (table.startIndex === index) {
                 this._tableBlockCurrentIndex = i;
-                return table;
+                tableId = table.tableId;
+                break;
             }
+        }
+
+        if (tableId != null && tableSource[tableId] != null) {
+            return tableSource[tableId];
         }
     }
 
@@ -468,7 +480,7 @@ export class DocumentViewModel implements IDisposable {
         return this.getCustomDecorationRaw(index);
     }
 
-    protected _transformToTree(dataStream: string) {
+    protected _parseToViewTree(dataStream: string) {
         const dataStreamLen = dataStream.length;
         let content = '';
         const sectionList: DataStreamTreeNode[] = [];

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, IParagraph } from '@univerjs/core';
-import { BooleanNumber, DocumentFlavor } from '@univerjs/core';
+import type { IDocumentData, IParagraph, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
 
 const TABLE_START = '\x1A'; // 表格开始
 const TABLE_ROW_START = '\x1B'; // 表格行开始
@@ -50,6 +50,9 @@ const exampleTables = [
 
 const dataStream = `这是一个表格的用例\r${createTableDataStream(exampleTables)}班级成绩统计\r\n`;
 
+const startIndex = dataStream.indexOf(TABLE_START);
+const endIndex = dataStream.indexOf(TABLE_END);
+
 function createParagraphs(dataStream: string) {
     const paragraphs: IParagraph[] = [];
     for (let i = 0; i < dataStream.length; i++) {
@@ -70,6 +73,76 @@ function createParagraphs(dataStream: string) {
 }
 
 const paragraphs = createParagraphs(dataStream);
+
+const tableCell: ITableCell = {
+    tableCellStyle: {
+        rowSpan: 1,
+        columnSpan: 1,
+    },
+};
+
+const tableRow: ITableRow = {
+    tableCells: [...new Array(exampleTables[0].length).fill(Tools.deepClone(tableCell))],
+    trHeight: {
+        val: { v: 30 },
+        hRule: TableCellHeightRule.AUTO,
+    },
+};
+
+const tableColumn: ITableColumn = {
+    size: {
+        type: TableSizeType.SPECIFIED,
+        width: {
+            v: 100,
+        },
+    },
+};
+
+const table: ITable = {
+    tableRows: [...new Array(exampleTables.length).fill(Tools.deepClone(tableRow))],
+    tableColumns: [...new Array(exampleTables[0].length).fill(Tools.deepClone(tableColumn))],
+    align: TableAlignmentType.START,
+    indent: {
+        v: 0,
+    },
+    textWrap: TableTextWrapType.NONE,
+    position: {
+        positionH: {
+            relativeFrom: ObjectRelativeFromH.PAGE,
+            posOffset: 0,
+        },
+        positionV: {
+            relativeFrom: ObjectRelativeFromV.PAGE,
+            posOffset: 0,
+        },
+    },
+    dist: {
+        distB: 0,
+        distL: 0,
+        distR: 0,
+        distT: 0,
+    },
+    cellMargin: {
+        start: {
+            v: 5,
+        },
+        end: {
+            v: 5,
+        },
+        top: {
+            v: 5,
+        },
+        bottom: {
+            v: 5,
+        },
+    },
+    size: {
+        type: TableSizeType.UNSPECIFIED,
+        width: {
+            v: 1000,
+        },
+    },
+};
 
 export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     id: 'default-document-id',
@@ -105,11 +178,19 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
             },
         ],
         paragraphs,
+        tables: [{
+            startIndex,
+            endIndex,
+            tableId: 'table-id',
+        }],
         sectionBreaks: [
             {
                 startIndex: dataStream.length - 1,
             },
         ],
+    },
+    tableSource: {
+        'table-id': table,
     },
     documentStyle: {
         pageSize: {

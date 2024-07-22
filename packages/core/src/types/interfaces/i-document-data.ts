@@ -40,7 +40,7 @@ export interface IDocumentData extends IReferenceSource, IExtraModelData {
 }
 
 export interface IReferenceSource {
-    tables?: ITables; // Table
+    tableSource?: ITables; // Table
     footers?: IFooters;
     headers?: IHeaders;
     lists?: ILists;
@@ -820,10 +820,10 @@ export interface IShading {
 }
 
 export interface IDistFromText {
-    distT: INumberUnit; // distance between top text and table.
-    distB: INumberUnit; // distance between bottom text and table.
-    distL: INumberUnit; // distance between left text and table.
-    distR: INumberUnit; // distance between right text and table.
+    distT: number; // distance between top text and table.
+    distB: number; // distance between bottom text and table.
+    distL: number; // distance between left text and table.
+    distR: number; // distance between right text and table.
 }
 
 export interface ITableAnchor {
@@ -831,7 +831,7 @@ export interface ITableAnchor {
     positionV: IObjectPositionV;
 }
 
-enum TableSizeType {
+export enum TableSizeType {
     UNSPECIFIED,
     SPECIFIED,
 }
@@ -841,19 +841,19 @@ export interface IWidthInTableSize {
 }
 
 // 17.18.45 ST_JcTable (Table Alignment Type)
-enum TableAlignmentType {
+export enum TableAlignmentType {
     START,
     CENTER,
     END,
 }
 
 // 17.18.87 ST_TblLayoutType (Table Layout Type)
-enum TableLayoutType {
+export enum TableLayoutType {
     AUTO_FIT,
     FIXED,
 }
 
-enum TableTextWrapType {
+export enum TableTextWrapType {
     NONE,
     WRAP,
 }
@@ -872,13 +872,14 @@ export interface ITable {
     tableRows: ITableRow[]; // tableRows
     tableColumns: ITableColumn[]; // tableColumns
     align: TableAlignmentType; // 17.4.28 jc (Table Alignment)
-    layout: TableLayoutType; // 17.4.52 tblLayout (Table Layout)
     indent: INumberUnit; // left align only. leftIndent
     textWrap: TableTextWrapType; // 17.4.57 tblpPr (Floating Table Positioning)
     position: ITableAnchor; // 17.4.57 tblpPr (Floating Table Positioning)
     dist: IDistFromText; // 17.4.57 tblpPr (Floating Table Positioning)
     size: IWidthInTableSize;
-    overlap: BooleanNumber; // 17.4.56 tblOverlap (Floating Table Allows Other Tables to Overlap)
+    cellMargin?: ITableCellMargin; // cellMargin
+    layout?: TableLayoutType; // 17.4.52 tblLayout (Table Layout)
+    overlap?: BooleanNumber; // 17.4.56 tblOverlap (Floating Table Allows Other Tables to Overlap)
     description?: string; // 17.4.46 tblDescription (Table Description)
 }
 
@@ -891,7 +892,7 @@ export interface ITable {
 // the value the h attribute.
 //  If the value of hRule is exact, then the table row's height should be exactly the
 // value of the h attribute.
-enum TableCellHeightRule {
+export enum TableCellHeightRule {
     AUTO,
     AT_LEAST,
     EXACT,
@@ -914,9 +915,9 @@ export interface ITableRow {
     // If omitted, then the table row shall automatically resize its height to the height required by its contents
     // (the equivalent of an hRule value of auto)
     trHeight: ITableRowSize; // 17.4.80 trHeight (Table Row Height)
-    cantSplit: BooleanNumber; // allowBreakAcrossPages, the default is true.
-    isFirstRow: BooleanNumber; // isFirstRow.
-    repeatHeaderRow: BooleanNumber; // Show header row in different pages. only for the first row.
+    cantSplit?: BooleanNumber; // allowBreakAcrossPages, the default is true.
+    isFirstRow?: BooleanNumber; // isFirstRow.
+    repeatHeaderRow?: BooleanNumber; // Show header row in different pages. only for the first row.
 }
 
 /**
@@ -926,25 +927,29 @@ export interface ITableCell {
     tableCellStyle: ITableCellStyle; // tableCellStyle
 }
 
+export interface ITableCellMargin {
+    start: INumberUnit; // start
+    end: INumberUnit; // end
+    top: INumberUnit; // top
+    bottom: INumberUnit; // bottom
+}
+
 /**
  * Properties of style of table cell
  */
 export interface ITableCellStyle {
-    rowSpan: number; // rowSpan
-    columnSpan: number; // columnSpan
-    backgroundColor: IColorStyle; // backgroundColor
-    borderLeft: ITableCellBorder; // borderLeft
-    borderRight: ITableCellBorder; // borderRight
-    borderTop: ITableCellBorder; // borderTop
-    borderBottom: ITableCellBorder; // borderBottom
-    paddingLeft: INumberUnit; // paddingLeft
-    paddingRight: INumberUnit; // paddingRight
-    paddingTop: INumberUnit; // paddingTop
-    paddingBottom: INumberUnit; // paddingBottom
-    size: IWidthInTableSize; // size
-    tcFitText: BooleanNumber; // 17.4.67 tcFitText (Fit Text Within Cell)
+    margin?: ITableCellMargin; // margin
+    rowSpan?: number; // rowSpan
+    columnSpan?: number; // columnSpan
+    backgroundColor?: IColorStyle; // backgroundColor
+    borderLeft?: ITableCellBorder; // borderLeft
+    borderRight?: ITableCellBorder; // borderRight
+    borderTop?: ITableCellBorder; // borderTop
+    borderBottom?: ITableCellBorder; // borderBottom
+    size?: IWidthInTableSize; // size
+    tcFitText?: BooleanNumber; // 17.4.67 tcFitText (Fit Text Within Cell)
     // hAlign: use paragraph align to instead.
-    vAlign: VerticalAlignmentType; // 17.4.83 vAlign (Table Cell Vertical Alignment)
+    vAlign?: VerticalAlignmentType; // 17.4.83 vAlign (Table Cell Vertical Alignment)
 }
 
 /**

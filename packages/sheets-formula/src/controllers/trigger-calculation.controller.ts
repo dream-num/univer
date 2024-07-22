@@ -48,6 +48,7 @@ export class TriggerCalculationController extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
 
     private _executingDirtyData: IFormulaDirtyData = {
+        forceCalculation: false,
         dirtyRanges: [],
         dirtyNameMap: {},
         dirtyDefinedNameMap: {},
@@ -201,6 +202,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
+            forceCalculation: false,
             // numfmtItemMap,
         };
     }
@@ -223,6 +225,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
+            forceCalculation: false,
         };
     }
 
@@ -432,6 +435,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyDefinedNameMap: {},
             dirtyUnitFeatureMap: {},
             dirtyUnitOtherFormulaMap: {},
+            forceCalculation: false,
         };
     }
 

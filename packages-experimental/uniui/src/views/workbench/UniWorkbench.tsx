@@ -52,7 +52,7 @@ import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
 import { useUnitTitle } from '../hooks/title';
 import { UniControls } from './UniControls';
 import styles from './workbench.module.less';
-
+import { type FloatingToolbarRef, UniFloatingToolbar } from './UniFloatToolbar';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
 
 export interface IUniWorkbenchProps extends IWorkbenchOptions {
@@ -78,6 +78,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const renderManagerService = useDependency(IRenderManagerService);
 
     const contentRef = useRef<HTMLDivElement>(null);
+    const selectedNodeRef = useRef<HTMLElement | null>(null);
+    const floatingToolbarRef = useRef<FloatingToolbarRef>(null);
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
@@ -167,6 +169,14 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 
+    const onMove = useCallback(() => {
+        floatingToolbarRef.current?.update();
+    }, [floatingToolbarRef]);
+
+    useEffect(() => {
+        selectedNodeRef.current = document.querySelector(`[data-id="${focusedUnit}"]`);
+    }, [focusedUnit, selectedNodeRef]);
+
     const disableReactFlowBehavior = !!focusedUnit;
 
     return (
@@ -208,6 +218,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
                                     instanceService.focusUnit(null);
                                 }}
+                                onMove={onMove}
                             >
                                 <Background></Background>
                             </ReactFlow>
@@ -224,6 +235,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 </div>
                             </div>
                         )}
+                        <UniFloatingToolbar ref={floatingToolbarRef} node={nodes.find((n) => n.id === focusedUnit)?.data} anchorRef={selectedNodeRef} />
 
                         <LeftSidebar />
                         <RightSidebar />
@@ -271,7 +283,7 @@ function UnitNode({ data }: IUnitNodeProps) {
     );
 }
 
-interface IUnitRendererProps {
+export interface IUnitRendererProps {
     unitId: string;
 
     gridService: UnitGridService;

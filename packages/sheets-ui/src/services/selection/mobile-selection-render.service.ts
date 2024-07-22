@@ -692,8 +692,6 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         const { scene } = this._context;
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (!viewportMain) return;
-        // const sub = this._scrollManagerService.scrollInfo$.subscribe((param) => {
-        // const sub = viewportMain.onScrollAfter$.subscribeEvent((param) => {
         const sub = this._scrollManagerService.validViewportScrollInfo$.subscribe((param) => {
             if (param == null) {
                 return;

@@ -437,7 +437,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
-                viewportMain?.resetCanvasSizeAndUpdateScrollBar();
+                viewportMain?.resetCanvasSizeAndUpdateScroll();
             }
         } else {
             scrollBar = null;
@@ -615,8 +615,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
             const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
-            scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
-                y: Number.POSITIVE_INFINITY,
+            scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
+                viewportScrollX: Number.POSITIVE_INFINITY,
             });
 
             this._textSelectionManagerService.replaceTextRanges([

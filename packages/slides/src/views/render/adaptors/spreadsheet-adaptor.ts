@@ -204,13 +204,13 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             const { scrollX, scrollY, viewportScrollX, viewportScrollY } = param;
 
             viewTop
-                .updateScroll({
+                .updateScrollVal({
                     scrollX,
                     viewportScrollX,
                 });
 
             viewLeft
-                .updateScroll({
+                .updateScrollVal({
                     scrollY,
                     viewportScrollY,
                 });

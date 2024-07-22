@@ -880,7 +880,7 @@ export class SelectionShapeExtension {
                 }
 
                 if (this._isSelectionInViewport(movingRange, currentViewport)) {
-                    viewportMain.scrollTo({
+                    viewportMain.scrollToBarPos({
                         x: scrollTimer.scrollTimerType === ScrollTimerType.X ? 0 : undefined,
                         y: scrollTimer.scrollTimerType === ScrollTimerType.Y ? 0 : undefined,
                     });

@@ -349,7 +349,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
             const actualX = viewport.transScroll2ViewportScrollValue(scrollToX, 0).x;
-            viewport.scrollTo({
+            viewport.scrollToBarPos({
                 x: actualX,
             });
         }

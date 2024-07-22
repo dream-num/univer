@@ -18,8 +18,8 @@ import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
-import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, getNormalSelectionStyle, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
+import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -142,16 +142,6 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }));
     }
 
-    private _refreshSelection(params: readonly ISelectionWithStyle[]) {
-        const selections = params.map((selectionWithStyle) => {
-            const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-            selectionData.style = getNormalSelectionStyle(this._themeService);
-            return selectionData;
-        });
-
-        this.updateControlForCurrentByRangeData(selections);
-    }
-
     private _normalSelectionDisabled(): boolean {
         return this._contextService.getContextValue(DISABLE_NORMAL_SELECTIONS);
     }
@@ -228,8 +218,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                 } as ISetSelectionsOperationParams);
             }
 
-            // for col width & row height resize
             const currentSelections = this._workbookSelections.getCurrentSelections();
+            // for col width & row height resize
             if (currentSelections != null) {
                 this._refreshSelection(currentSelections);
             }

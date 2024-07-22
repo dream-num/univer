@@ -197,6 +197,12 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
             this._changeRuntime(skeleton, scene, viewportMain);
+
+            // for col width & row height resize
+            const currentSelections = this._workbookSelections.getCurrentSelections();
+            if (currentSelections != null) {
+                this._refreshSelection(currentSelections);
+            }
         }));
     }
 

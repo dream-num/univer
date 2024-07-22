@@ -168,7 +168,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         protected readonly _renderManagerService: IRenderManagerService
     ) {
         super();
-
         this._resetStyle();
         this._initMoving();
     }
@@ -259,8 +258,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
-        const currentControls = this.getSelectionControls();
-        if (!currentControls) {
+        const selectionControls = this.getSelectionControls();
+        if (!selectionControls) {
             return;
         }
 
@@ -275,9 +274,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         for (let i = 0, len = selections.length; i < len; i++) {
             const { rangeWithCoord, primaryWithCoord, style } = selections[i];
 
-            const control = currentControls[i];
+            const control = selectionControls[i];
 
-            control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+            control && control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
         }
     }
 
@@ -981,6 +980,16 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             rangeType,
         };
         this._updateSelectionControlRange(activeControl, newSelectionRange, currentCell);
+    }
+
+    protected _refreshSelection(params: readonly ISelectionWithStyle[]) {
+        const selections = params.map((selectionWithStyle) => {
+            const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
+            selectionData.style = getNormalSelectionStyle(this._themeService);
+            return selectionData;
+        });
+
+        this.updateControlForCurrentByRangeData(selections);
     }
 }
 

@@ -101,8 +101,10 @@ export function HelpFunction() {
     }
 
     function getPosition() {
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance()!;
-
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!documentDataModel) {
+            return;
+        }
         const editorUnitId = documentDataModel.getUnitId();
 
         if (!editorService.isEditor(editorUnitId)) {

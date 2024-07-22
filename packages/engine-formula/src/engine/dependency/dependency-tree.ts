@@ -24,6 +24,8 @@ import type {
     IUnitExcludedCell,
 } from '../../basics/common';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type { IFormulaDirtyData } from '../../services/current-data.service';
+import type { IAllRuntimeData } from '../../services/runtime.service';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -68,7 +70,7 @@ export class FormulaDependencyTree extends Disposable {
     featureId: Nullable<string>;
 
     getDirtyData: Nullable<
-        (tree: FormulaDependencyTree) => {
+        (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
             runtimeCellData: IRuntimeUnitDataType;
             dirtyRanges: IFeatureDirtyRangeType;
         }

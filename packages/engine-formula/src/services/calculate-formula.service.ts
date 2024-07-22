@@ -286,7 +286,7 @@ export class CalculateFormulaService extends Disposable {
                  * and return the dirty area marked by the feature,
                  * so as to allow the formulas depending on the dirty area to continue the calculation.
                  */
-                const { runtimeCellData, dirtyRanges } = getDirtyData(tree);
+                const { runtimeCellData, dirtyRanges } = getDirtyData(this._currentConfigService.getDirtyData(), this._runtimeService.getAllRuntimeData());
 
                 this._runtimeService.setRuntimeFeatureCellData(tree.featureId, runtimeCellData);
 

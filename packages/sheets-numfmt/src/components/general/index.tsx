@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { LocaleService, useDependency } from '@univerjs/core';
 import type { FC } from 'react';
 import React from 'react';
 

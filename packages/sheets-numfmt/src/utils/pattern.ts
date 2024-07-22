@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import numfmt from '@univerjs/engine-numfmt';
+import { numfmt } from '@univerjs/engine-numfmt';
 import { LocaleType } from '@univerjs/core';
 import type { FormatType } from '@univerjs/sheets';
 

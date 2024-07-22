@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
-import { Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, Tools, UniverInstanceType } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, Tools, UniverInstanceType } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, ISidebarService } from '@univerjs/ui';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';

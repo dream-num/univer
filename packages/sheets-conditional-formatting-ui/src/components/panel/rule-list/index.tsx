@@ -19,9 +19,8 @@ import { Select, Tooltip } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
 import { useHighlightRange } from '@univerjs/sheets-ui';
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ICellPermission } from '@univerjs/sheets';
 import { SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';

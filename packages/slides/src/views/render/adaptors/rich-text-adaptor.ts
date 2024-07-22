@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import type { IPageElement } from '@univerjs/core';
-import { LocaleService, PageElementType } from '@univerjs/core';
+import type { Injector, IPageElement } from '@univerjs/core';
+import { Inject, LocaleService, PageElementType } from '@univerjs/core';
 import type { IRichTextProps, Scene } from '@univerjs/engine-render';
 import { RichText } from '@univerjs/engine-render';
-import type { Injector } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 

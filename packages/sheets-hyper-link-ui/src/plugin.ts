@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
-import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
+import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';

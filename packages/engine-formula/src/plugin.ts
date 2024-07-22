@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
-import type { Ctor, Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Plugin } from '@univerjs/core';
+import type { Ctor, Dependency } from '@univerjs/core';
 
 import type { IFunctionNames } from './basics/function';
 import { CalculateController } from './controller/calculate.controller';

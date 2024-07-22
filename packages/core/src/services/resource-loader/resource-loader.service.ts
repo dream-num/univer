@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Inject } from '@wendellhu/redi';
+import { Inject } from '../../common/di';
 import type { Workbook } from '../../sheets/workbook';
 import type { IWorkbookData } from '../../types/interfaces';
 import type { IResourceHook } from '../resource-manager/type';

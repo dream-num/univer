@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DependencyIdentifier } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, merge, of, skip } from 'rxjs';
+import type { DependencyIdentifier } from '../../common/di';
+import { Inject, Injector } from '../../common/di';
 
 import { Disposable } from '../../shared/lifecycle';
 import { ILogService } from '../log/log.service';

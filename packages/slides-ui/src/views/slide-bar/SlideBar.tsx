@@ -16,11 +16,10 @@
 
 import type { SlideDataModel } from '@univerjs/core';
 import clsx from 'clsx';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Scrollbar } from '@univerjs/design';
 import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useObservable } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
@@ -59,7 +58,7 @@ export function SlideSideBar() {
 
     useEffect(() => {
         setDivRefs(slideList.map((_) => React.createRef()));
-    }, [slideList]);
+    }, [slideList.length]);
 
     useEffect(() => {
         canvasView.activePageId$.subscribe((id) => {

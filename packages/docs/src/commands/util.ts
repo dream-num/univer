@@ -15,8 +15,7 @@
  */
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IAccessor } from '@wendellhu/redi';
-import type { DocumentDataModel } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor } from '@univerjs/core';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
 /**

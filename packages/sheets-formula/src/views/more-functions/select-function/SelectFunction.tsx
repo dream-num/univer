@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import { Input, Select } from '@univerjs/design';
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { FunctionType } from '@univerjs/engine-formula';
 import { CheckMarkSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import type { ISearchItem } from '../../../services/description.service';

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IStyleBase, Univer } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, Injector, IStyleBase, Univer } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';

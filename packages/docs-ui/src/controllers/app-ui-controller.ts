@@ -15,8 +15,7 @@
  */
 
 import type { LocaleType } from '@univerjs/core';
-import { LocaleService, RxDisposable } from '@univerjs/core';
-import { Inject, Injector, Optional } from '@wendellhu/redi';
+import { Inject, Injector, LocaleService, Optional, RxDisposable } from '@univerjs/core';
 import { ILayoutService } from '@univerjs/ui';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 

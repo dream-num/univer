@@ -15,9 +15,8 @@
  */
 
 /* eslint-disable node/prefer-global/process */
-import type { DocumentDataModel, ICommand, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
 import { CommandType, IResourceLoaderService, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 import { RecordController } from '../../controllers/local-save/record.controller';
 import { ExportController } from '../../controllers/local-save/export.controller';
 

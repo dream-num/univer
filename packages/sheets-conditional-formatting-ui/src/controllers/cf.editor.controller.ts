@@ -16,13 +16,13 @@
 
 import {
     Disposable,
+    Inject,
     LifecycleStages,
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
 
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 import { ConditionalFormattingService, getStringFromDataStream } from '@univerjs/sheets-conditional-formatting';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingEditorController)

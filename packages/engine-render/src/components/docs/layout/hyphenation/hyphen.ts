@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
-import type { Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
 import { Lang } from './lang';
 import { EnUs } from './patterns/en-us';
 import type { IHyphenPattern, RawHyphenPattern } from './tools';

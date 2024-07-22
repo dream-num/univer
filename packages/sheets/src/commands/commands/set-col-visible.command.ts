@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange, Nullable,
-    Worksheet } from '@univerjs/core';
+import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -24,7 +23,6 @@ import {
     RANGE_TYPE,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
 import {

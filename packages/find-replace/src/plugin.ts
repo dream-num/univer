@@ -15,7 +15,7 @@
  */
 
 import { LocaleService, Plugin, Tools } from '@univerjs/core';
-import { type Dependency, Inject, Injector } from '@wendellhu/redi';
+import { type Dependency, Inject, Injector } from '@univerjs/core';
 
 import type { IUniverFindReplaceConfig } from './controllers/find-replace.controller';
 import { DefaultFindReplaceConfig, FindReplaceController } from './controllers/find-replace.controller';

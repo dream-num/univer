@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { CancelHyperLinkCommand, HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import React, { useEffect, useState } from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
-import { ICommandService, LocaleService } from '@univerjs/core';
 import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { IMessageService } from '@univerjs/ui';

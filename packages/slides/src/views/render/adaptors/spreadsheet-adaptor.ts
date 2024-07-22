@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { EventState, ICellData, IPageElement } from '@univerjs/core';
-import { IContextService, LocaleService, ObjectMatrix, PageElementType, Styles, Worksheet } from '@univerjs/core';
+import type { EventState, ICellData, Injector, IPageElement } from '@univerjs/core';
+import { IContextService, Inject, LocaleService, ObjectMatrix, PageElementType, Styles, Worksheet } from '@univerjs/core';
 import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 import {
     getColor,
@@ -29,8 +29,6 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/engine-render';
-import type { Injector } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
@@ -206,13 +204,13 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             const { scrollX, scrollY, viewportScrollX, viewportScrollY } = param;
 
             viewTop
-                .updateScroll({
+                .updateScrollVal({
                     scrollX,
                     viewportScrollX,
                 });
 
             viewLeft
-                .updateScroll({
+                .updateScrollVal({
                     scrollY,
                     viewportScrollY,
                 });

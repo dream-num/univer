@@ -16,10 +16,8 @@
 
 import type { Meta } from '@storybook/react';
 import React, { useState } from 'react';
-import { LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { RediContext } from '@wendellhu/redi/react-bindings';
-import type { IAccessor } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, LocaleType, Plugin, RediContext, Univer, UniverInstanceType } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
 import { of } from 'rxjs';
 import { IMenuService, MenuService } from '../../../services/menu/menu.service';
 import { IShortcutService, ShortcutService } from '../../../services/shortcut/shortcut.service';

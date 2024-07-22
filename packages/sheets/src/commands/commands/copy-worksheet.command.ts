@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -23,7 +23,6 @@ import {
     LocaleService,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type {
     IInsertSheetMutationParams,

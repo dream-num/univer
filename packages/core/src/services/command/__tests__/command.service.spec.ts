@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { Injector } from '../../../common/di';
 
 import { ContextService, IContextService } from '../../context/context.service';
 import { DesktopLogService, ILogService } from '../../log/log.service';

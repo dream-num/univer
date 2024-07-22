@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IFunctionNames } from '@univerjs/engine-formula';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL } from '@univerjs/engine-formula';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 

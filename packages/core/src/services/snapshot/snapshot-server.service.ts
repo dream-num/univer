@@ -35,7 +35,7 @@ import type {
     ISaveSnapshotResponse,
     ISheetBlock,
 } from '@univerjs/protocol';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '../../common/di';
 
 import type { ILogContext } from '../log/context';
 

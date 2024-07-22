@@ -15,10 +15,9 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, isRangesEqual, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { DataValidationModel, RemoveDataValidationMutation, removeDataValidationUndoFactory, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
@@ -163,6 +162,7 @@ export class DataValidationRefRangeController extends Disposable {
                         type: UpdateRuleType.RANGE,
                         payload: resultRanges,
                     },
+                    source: 'patched',
                 };
                 // in ref-range case, there won't be any overlap about rule ranges
                 const redos = [{ id: UpdateDataValidationMutation.id, params: redoParams }];
@@ -176,6 +176,7 @@ export class DataValidationRefRangeController extends Disposable {
                             type: UpdateRuleType.RANGE,
                             payload: oldRanges,
                         },
+                        source: 'patched',
                     },
                 }];
                 return { redos, undos };

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@wendellhu/redi';
+import type { IAccessor } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 
 export type OneOrMany<T> = T | T[];

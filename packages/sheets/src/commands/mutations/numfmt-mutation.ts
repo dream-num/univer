@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import { cellToRange, CommandType, Range } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { rangeMerge } from '../../basics/rangeMerge';
 import { createUniqueKey, groupByKey } from '../../basics/utils';

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { debounce, useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 
-import { debounce } from '@univerjs/core';
 import { IStatusBarService } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
 import { CopyableStatisticItem } from './CopyableStatisticItem';

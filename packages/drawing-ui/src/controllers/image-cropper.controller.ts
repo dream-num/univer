@@ -15,14 +15,13 @@
  */
 
 import type { ICommandInfo, ISrcRect, Nullable, Workbook } from '@univerjs/core';
-import { checkIfMove, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { checkIfMove, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import type { IDrawingSearch, IImageData, ITransformState } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 import { filter, switchMap } from 'rxjs';
 import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../commands/operations/image-crop.operation';

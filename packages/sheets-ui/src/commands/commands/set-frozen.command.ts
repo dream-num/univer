@@ -19,6 +19,7 @@ import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService,
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, SetFrozenMutation, SetFrozenMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
 export enum SetSelectionFrozenType {
@@ -50,8 +51,11 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
         }
         const currentSelection = selections[selections?.length - 1];
         const { range } = currentSelection;
-        const scrollManagerService = accessor.get(SheetScrollManagerService);
-        const { sheetViewStartRow = 0, sheetViewStartColumn = 0 } = scrollManagerService.getCurrentScrollInfo() || {};
+
+        const renderManagerSrv = accessor.get(IRenderManagerService);
+        const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
+
+        const { sheetViewStartRow = 0, sheetViewStartColumn = 0 } = scrollManagerService.getCurrentScrollState() || {};
         let startRow;
         let startColumn;
         let ySplit;

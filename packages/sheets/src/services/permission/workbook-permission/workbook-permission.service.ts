@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../worksheet-permission/utils';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';

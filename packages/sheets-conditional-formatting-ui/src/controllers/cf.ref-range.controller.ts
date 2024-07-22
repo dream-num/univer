@@ -15,10 +15,9 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, isRangesEqual, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 

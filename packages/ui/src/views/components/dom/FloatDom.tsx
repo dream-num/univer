@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import React, { memo } from 'react';
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';

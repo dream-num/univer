@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDocumentBody, IDocumentData, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -28,6 +28,7 @@ import {
     HorizontalAlign,
     ICommandService,
     IContextService,
+    Inject,
     IResourceLoaderService,
     isFormulaString,
     IUndoRedoService,
@@ -61,8 +62,6 @@ import {
     ScrollBar,
 } from '@univerjs/engine-render';
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 import type { WorkbookSelections } from '@univerjs/sheets';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
@@ -437,7 +436,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
-                viewportMain?.resetCanvasSizeAndUpdateScrollBar();
+                viewportMain?.resetCanvasSizeAndUpdateScroll();
             }
         } else {
             scrollBar = null;
@@ -480,9 +479,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
             );
         });
 
-        const canvasElement = this._context.engine.getCanvasElement();
-        const canvasBoundingRect = canvasElement.getBoundingClientRect();
-        startX += canvasBoundingRect.left;
+        // const canvasElement = this._context.engine.getCanvasElement();
+        // const canvasBoundingRect = canvasElement.getBoundingClientRect();
+        // startX += canvasBoundingRect.left;
         // startY += canvasBoundingRect.top;
 
         // Update cell editor container position and size.
@@ -614,8 +613,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
             const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
-            scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
-                y: Number.POSITIVE_INFINITY,
+            scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
+                viewportScrollX: Number.POSITIVE_INFINITY,
             });
 
             this._textSelectionManagerService.replaceTextRanges([

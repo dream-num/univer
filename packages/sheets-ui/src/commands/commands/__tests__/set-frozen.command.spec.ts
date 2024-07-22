@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import type { IFreeze, Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
@@ -70,7 +69,7 @@ describe('Test commands used for change selections', () => {
     }
 
     const scrollTo = (startRow: number, startColumn: number, offsetX = 0, offsetY = 0) => {
-        scrollManagerService.setScrollInfoToCurrSheetAndEmitEvent({
+        scrollManagerService.setScrollStateToCurrSheetAndEmitEvent({
             sheetViewStartRow: startRow,
             sheetViewStartColumn: startColumn,
             offsetX,

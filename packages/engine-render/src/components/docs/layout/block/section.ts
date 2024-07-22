@@ -100,7 +100,7 @@ export function dealWithSection(
 
     if (ctx.isDirty && ctx.layoutStartPointer[segmentId] != null) {
         // Rollback the skeleton to the layout start point.
-        _rollbackPages(ctx.layoutStartPointer[segmentId] as NonNullable<number>, allCurrentSkeletonPages);
+        _rollbackPages(ctx.layoutStartPointer[segmentId] as number, allCurrentSkeletonPages);
     }
 
     return {

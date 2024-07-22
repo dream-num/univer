@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import type { APPLY_TYPE } from '../../services/auto-fill/type';

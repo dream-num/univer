@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, IExecutionOptions } from '@univerjs/core';
+import type { IAccessor, ICommand, IExecutionOptions } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
 import { SetWorksheetActiveOperation } from '../operations/set-worksheet-active.operation';

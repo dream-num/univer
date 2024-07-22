@@ -15,9 +15,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
-import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
 import { CFRuleType, CFSubRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighlightCell, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';

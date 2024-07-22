@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
@@ -23,7 +23,6 @@ import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/s
 import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 
 interface ISheetUrlParams {
     gid?: string;

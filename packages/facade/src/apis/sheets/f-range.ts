@@ -26,7 +26,7 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import { BooleanNumber, ICommandService, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, ICommandService, Inject, Injector, WrapStrategy } from '@univerjs/core';
 import type {
     ISetHorizontalTextAlignCommandParams,
     ISetStyleCommandParams,
@@ -45,7 +45,6 @@ import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import { Inject, Injector } from '@wendellhu/redi';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, Injector, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { Inject, Injector } from '@wendellhu/redi';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 
 @OnLifecycle(LifecycleStages.Starting, DataValidationModelController)
@@ -35,7 +34,6 @@ export class DataValidationModelController extends Disposable {
         return new SheetDataValidationManager(
             unitId,
             subUnitId,
-            [],
             this._injector
         );
     }

@@ -15,8 +15,7 @@
  */
 
 import type { ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
-import { LifecycleStages, runOnLifecycle } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, LifecycleStages, runOnLifecycle } from '@univerjs/core';
 
 // eslint-disable-next-line ts/consistent-type-definitions
 export type INumfmtItem = {

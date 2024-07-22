@@ -15,9 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
 import { ClearSelectionAllCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
@@ -129,7 +128,7 @@ export class DataValidationController extends RxDisposable {
 
                     selections && ruleMatrix.removeRange(selections);
                     const diffs = ruleMatrix.diff(manager.getDataValidations());
-                    const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector);
+                    const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector, 'patched');
 
                     return {
                         undos: undoMutations,

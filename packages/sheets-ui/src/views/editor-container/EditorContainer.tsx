@@ -15,8 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IContextService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';

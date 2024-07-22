@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-drawing",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -60,7 +60,6 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
@@ -68,7 +67,6 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "typescript": "^5.5.3",
         "vite": "^5.3.4",
         "vitest": "^2.0.3"

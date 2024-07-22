@@ -125,6 +125,10 @@ export class NullValueObject extends BaseValueObject {
         return NumberValueObject.create(0).cos();
     }
 
+    override cosh(): BaseValueObject {
+        return NumberValueObject.create(0).cosh();
+    }
+
     override acos(): BaseValueObject {
         return NumberValueObject.create(0).acos();
     }
@@ -341,6 +345,10 @@ export class BooleanValueObject extends BaseValueObject {
 
     override cos(): BaseValueObject {
         return this._convertToNumber().cos();
+    }
+
+    override cosh(): BaseValueObject {
+        return this._convertToNumber().cosh();
     }
 
     override acos(): BaseValueObject {
@@ -886,6 +894,22 @@ export class NumberValueObject extends BaseValueObject {
         return NumberValueObject.create(result);
     }
 
+    override cosh(): BaseValueObject {
+        const currentValue = this.getValue();
+
+        if (!Number.isFinite(currentValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = Math.cosh(currentValue);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return NumberValueObject.create(result);
+    }
+
     override acos(): BaseValueObject {
         const currentValue = this.getValue();
 
@@ -1170,7 +1194,8 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = round(currentValue, value);
+            // for excel negative special handle
+            const result = currentValue < 0 ? -round(Math.abs(currentValue), value) : round(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -1201,7 +1226,8 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = floor(currentValue, value);
+            // for excel negative special handle
+            const result = currentValue < 0 ? -floor(Math.abs(currentValue), value) : floor(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -1232,7 +1258,8 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = ceil(currentValue, value);
+            // for excel negative special handle
+            const result = currentValue < 0 ? -ceil(Math.abs(currentValue), value) : ceil(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);

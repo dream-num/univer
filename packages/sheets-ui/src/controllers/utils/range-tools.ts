@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@wendellhu/redi';
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
+import type { IAccessor, ICellData, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 
 export interface IDiscreteRange {

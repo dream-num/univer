@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, IDocumentData, Injector, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     CellValueType,
@@ -27,7 +27,6 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';

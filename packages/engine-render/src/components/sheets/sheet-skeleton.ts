@@ -27,6 +27,7 @@ import {
     getColorStyle,
     HorizontalAlign,
     IContextService,
+    Inject,
     isCellCoverable,
     isNullCell,
     isWhiteColor,
@@ -61,7 +62,6 @@ import type {
     Worksheet,
 } from '@univerjs/core';
 
-import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';

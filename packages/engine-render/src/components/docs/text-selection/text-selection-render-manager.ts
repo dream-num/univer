@@ -15,8 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 
@@ -910,7 +909,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const scrollBefore = viewport.onScrollBefore$.subscribeEvent((param: IScrollObserverParam) => {
+        const scrollBefore = viewport.onScrollAfter$.subscribeEvent((param: IScrollObserverParam) => {
             const viewport = param.viewport;
             if (!viewport) {
                 return;
@@ -921,7 +920,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             activeRangeInstance?.activeStatic();
         });
 
-        const scrollStop = viewport.onScrollStop$.subscribeEvent((param: IScrollObserverParam) => {
+        const scrollStop = viewport.onScrollEnd$.subscribeEvent((param: IScrollObserverParam) => {
             const viewport = param.viewport;
             if (!viewport) {
                 return;

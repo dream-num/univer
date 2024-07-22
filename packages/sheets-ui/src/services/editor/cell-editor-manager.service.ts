@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IPosition, Nullable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import type { IDisposable, IPosition, Nullable } from '@univerjs/core';
+import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 

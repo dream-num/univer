@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, IDisposable, IMutationInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import {
+    createIdentifier,
     Disposable,
     ErrorService,
     extractPureTextFromCell,
     ICommandService,
     ILogService,
+    Inject,
+    Injector,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
     ThemeService,
-    toDisposable,
-    Tools,
-    UniverInstanceType,
-} from '@univerjs/core';
+    toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     getPrimaryForRange,
@@ -37,8 +37,6 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 import { PastePluginLark, PastePluginUniver, PastePluginWord } from '@univerjs/docs-ui';

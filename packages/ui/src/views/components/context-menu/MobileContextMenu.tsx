@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import { Popup } from '@univerjs/design';
 import type { IMouseEvent } from '@univerjs/engine-render';

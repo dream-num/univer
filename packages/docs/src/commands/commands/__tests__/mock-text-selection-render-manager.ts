@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ITextSelectionInnerParam } from '@univerjs/engine-render';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export class TextSelectionRenderManager {

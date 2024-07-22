@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, Nullable } from '@univerjs/core';
+import type { IAccessor, ICommand, Nullable } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -23,7 +23,6 @@ import {
 import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
 import { ArrangeTypeEnum } from '@univerjs/drawing';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
     arrangeType: ArrangeTypeEnum;

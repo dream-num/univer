@@ -15,10 +15,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Injector } from '@wendellhu/redi';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { createDefaultNewRule, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import type { IFormulaInputProps } from '@univerjs/data-validation';
 import { Checkbox, FormLayout, Input } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 

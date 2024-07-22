@@ -18,15 +18,14 @@ import type { IRange, Univer } from '@univerjs/core';
 import {
     DisposableCollection,
     ICommandService,
-    RANGE_TYPE,
-} from '@univerjs/core';
+    Injector,
+    RANGE_TYPE } from '@univerjs/core';
 import {
     SetBoldCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { BoldMenuItemFactory } from '../menu';

@@ -15,8 +15,7 @@
  */
 
 import type { ISheetDataValidationRule } from '@univerjs/core';
-import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '../models/data-validation-model';
 
 type DataValidationJSON = Record<string, ISheetDataValidationRule[]>;
@@ -69,7 +68,7 @@ export class DataValidationResourceController extends Disposable {
                     Object.keys(value).forEach((subunitId) => {
                         const ruleList = value[subunitId];
                         ruleList.forEach((rule) => {
-                            this._dataValidationModel.addRule(unitID, subunitId, rule);
+                            this._dataValidationModel.addRule(unitID, subunitId, rule, 'patched');
                         });
                     });
                 },

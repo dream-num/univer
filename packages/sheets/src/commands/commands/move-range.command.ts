@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import {
     cellToRange,
     CommandType,
@@ -28,7 +28,6 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';

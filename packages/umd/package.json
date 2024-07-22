@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/umd",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "private": false,
     "description": "UMD bundle for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -83,7 +83,6 @@
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@wendellhu/redi": "0.16.0",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.11",
         "lodash": "^4.17.21",

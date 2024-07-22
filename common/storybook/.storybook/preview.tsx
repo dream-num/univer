@@ -16,7 +16,9 @@
 
 import React from 'react';
 import type { Preview } from '@storybook/react';
-import { ConfigProvider, defaultTheme, enUS, greenTheme, themeInstance, zhCN } from '@univerjs/design';
+import { ConfigProvider, defaultTheme, greenTheme, themeInstance } from '@univerjs/design';
+import zhCN from '@univerjs/design/locale/zh-CN';
+import enUS from '@univerjs/design/locale/en-US';
 import {
     CommandService,
     ConfigService,
@@ -28,6 +30,7 @@ import {
     IContextService,
     ILocalStorageService,
     ILogService,
+    Injector,
     IPermissionService,
     IResourceManagerService,
     IUndoRedoService,
@@ -38,12 +41,11 @@ import {
     LocaleType,
     LocalUndoRedoService,
     PermissionService,
+    RediContext,
     ResourceManagerService,
     ThemeService,
     UniverInstanceService,
 } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
-import { RediContext } from '@wendellhu/redi/react-bindings';
 import { DesktopLocalStorageService } from '@univerjs/ui';
 
 export const themes: Record<string, Record<string, string>> = {
@@ -107,7 +109,7 @@ const preview: Preview = {
 
         injector.get(LocaleService).setLocale(context.globals.i18n);
         themeInstance.setTheme(document.body, themes[context.globals.theme]);
-        const designLocale = context.globals.i18n === LocaleType.ZH_CN ? zhCN : enUS;
+        const designLocale = context.globals.i18n === LocaleType.ZH_CN ? zhCN.design : enUS.design;
 
         return (
             <RediContext.Provider value={{ injector }}>

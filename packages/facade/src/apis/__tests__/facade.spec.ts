@@ -15,10 +15,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ICellData, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
-import type { Injector } from '@wendellhu/redi';
 
 import type {
     ColumnHeaderLayout,
@@ -26,9 +25,9 @@ import type {
     RowHeaderLayout,
     SheetComponent,
     SpreadsheetColumnHeader,
-    SpreadsheetRowHeader } from '@univerjs/engine-render';
-import {
-    IRenderManagerService } from '@univerjs/engine-render';
+    SpreadsheetRowHeader,
+} from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { RegisterFunctionMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';

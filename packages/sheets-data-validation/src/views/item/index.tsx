@@ -16,7 +16,7 @@
 
 import { ICommandService, type ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidatorRegistryService, RemoveDataValidationCommand } from '@univerjs/data-validation';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle } from '@univerjs/icons';

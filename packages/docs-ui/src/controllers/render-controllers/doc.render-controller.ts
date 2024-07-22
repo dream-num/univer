@@ -15,13 +15,12 @@
  */
 
 import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
-import { ICommandService, IConfigService, RxDisposable } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, RxDisposable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
 import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 export class DocRenderController extends RxDisposable implements IRenderModule {

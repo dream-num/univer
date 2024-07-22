@@ -15,8 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, sortRules } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, sortRules } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
 import {

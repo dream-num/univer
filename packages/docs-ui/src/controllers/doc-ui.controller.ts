@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, ILayoutService, IMenuService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';

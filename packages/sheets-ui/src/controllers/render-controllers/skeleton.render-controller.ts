@@ -15,8 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 

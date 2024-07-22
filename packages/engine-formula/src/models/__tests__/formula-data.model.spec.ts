@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { IUniverInstanceService, LocaleType, ObjectMatrix } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { FormulaDataModel, initSheetFormulaData } from '../formula-data.model';

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';

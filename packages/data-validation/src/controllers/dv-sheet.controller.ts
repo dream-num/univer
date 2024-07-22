@@ -15,10 +15,9 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams } from '../commands/mutations/data-validation.mutation';
 import { AddDataValidationMutation, RemoveDataValidationMutation } from '../commands/mutations/data-validation.mutation';
 import { DataValidationModel } from '../models/data-validation-model';
@@ -62,11 +61,13 @@ export class DataValidationSheetController extends Disposable {
                             unitId,
                             subUnitId,
                             ruleId: ids,
+                            source: 'patched',
                         };
                         const undoParams: IAddDataValidationMutationParams = {
                             unitId,
                             subUnitId,
                             rule: rules,
+                            source: 'patched',
                         };
 
                         return {

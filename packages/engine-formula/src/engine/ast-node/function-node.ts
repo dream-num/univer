@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@univerjs/core';
 
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';

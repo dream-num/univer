@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, Nullable } from '@univerjs/core';
+import type { IDataValidationRule, IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, distinctUntilChanged, filter } from 'rxjs';
 
 export class DataValidationPanelService extends Disposable {

@@ -15,11 +15,10 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { CustomRangeType, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools, UniverInstanceType, updateAttributeByDelete } from '@univerjs/core';
+import { CustomRangeType, Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools, UniverInstanceType, updateAttributeByDelete } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { IDocClipboardService } from '@univerjs/docs-ui';
-import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkClipboardController)
 export class DocHyperLinkClipboardController extends Disposable {

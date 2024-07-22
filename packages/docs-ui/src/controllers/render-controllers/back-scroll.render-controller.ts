@@ -15,12 +15,11 @@
  */
 
 import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, RxDisposable } from '@univerjs/core';
+import { Inject, IUniverInstanceService, RxDisposable } from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { getAnchorBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 const ANCHOR_WIDTH = 1.5;
@@ -119,7 +118,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         }
 
         const config = viewportMain.transViewportScroll2ScrollValue(offsetX, offsetY);
-        viewportMain.scrollBy(config);
+        viewportMain.scrollByBarDeltaValue(config);
     }
 
     // Let the selection show on the current screen.

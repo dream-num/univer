@@ -16,13 +16,14 @@
 
 import {
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     Plugin,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency } from '@univerjs/core';
 import { IEditorService, IShortcutService } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
@@ -53,6 +54,8 @@ import { DocBackScrollRenderController } from './controllers/render-controllers/
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
+import { DocHoverManagerService } from './services/doc-hover-manager.service';
+import { DocHoverRenderController } from './controllers/render-controllers/doc-hover.render-controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -109,6 +112,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
+            [DocHoverManagerService],
         ];
 
         dependencies.forEach((d) => injector.add(d));
@@ -150,6 +154,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocBackScrollRenderController],
             [DocTextSelectionRenderController],
             [DocHeaderFooterController],
+            [DocHoverRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });

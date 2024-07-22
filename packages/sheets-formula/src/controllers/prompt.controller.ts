@@ -19,6 +19,7 @@
 import type {
     DocumentDataModel,
     ICommandInfo,
+    IDisposable,
     IRange,
     IRangeWithCoord,
     ITextRun,
@@ -36,6 +37,7 @@ import {
     getCellInfoInMergeData,
     ICommandService,
     IContextService,
+    Inject,
     isFormulaString,
     IUniverInstanceService,
     LifecycleStages,
@@ -93,8 +95,6 @@ import {
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
@@ -1814,7 +1814,7 @@ export class PromptController extends Disposable {
 
                 this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 
-                this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId);
+                this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId, true, false);
             })
         );
 
@@ -1830,6 +1830,9 @@ export class PromptController extends Disposable {
         );
     }
 
+    /**
+     * Absolute range, triggered by F4
+     */
     private _changeRefString() {
         const activeRange = this._textSelectionManagerService.getActiveRange();
 

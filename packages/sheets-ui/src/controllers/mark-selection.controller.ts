@@ -15,8 +15,7 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { Disposable, ICommandService } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';

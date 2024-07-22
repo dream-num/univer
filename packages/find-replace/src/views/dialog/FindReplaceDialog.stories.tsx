@@ -15,12 +15,11 @@
  */
 
 import type { Meta } from '@storybook/react';
-import type { Dependency } from '@wendellhu/redi';
-import { RediContext } from '@wendellhu/redi/react-bindings';
+import type { Dependency } from '@univerjs/core';
+import { LocaleService, LocaleType, RediContext } from '@univerjs/core';
 import React, { useContext, useMemo, useState } from 'react';
 
 import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
-import { LocaleService, LocaleType } from '@univerjs/core';
 import { FindReplaceService, IFindReplaceService } from '../../services/find-replace.service';
 import { FindReplaceController } from '../../controllers/find-replace.controller';
 import enUS from '../../locale/en-US';

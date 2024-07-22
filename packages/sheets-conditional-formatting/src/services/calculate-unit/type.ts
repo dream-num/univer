@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@wendellhu/redi';
-import type { ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
+import type { IAccessor, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
 import type { CFRuleType } from '../../base/const';
 import type { IConditionFormattingRule } from '../../models/type';
 

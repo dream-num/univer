@@ -15,12 +15,11 @@
  */
 
 /* eslint-disable max-lines-per-function */
-import type { IFreeze, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
-import { ColorKit, UniverInstanceType } from '@univerjs/core';
+import type { IFreeze, Injector, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
+import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, isRectIntersect, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
-import { type Injector, Quantity } from '@wendellhu/redi';
 
 import type { Subscription } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -881,7 +880,7 @@ export class SelectionShapeExtension {
                 }
 
                 if (this._isSelectionInViewport(movingRange, currentViewport)) {
-                    viewportMain.scrollTo({
+                    viewportMain.scrollToBarPos({
                         x: scrollTimer.scrollTimerType === ScrollTimerType.X ? 0 : undefined,
                         y: scrollTimer.scrollTimerType === ScrollTimerType.Y ? 0 : undefined,
                     });

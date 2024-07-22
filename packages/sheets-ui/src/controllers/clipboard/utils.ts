@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
+import type { IAccessor, ICellData, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
 import { cellToRange, DEFAULT_STYLES, IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
@@ -36,9 +36,8 @@ import {
     SetSelectionsOperation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 
-import numfmt from '@univerjs/engine-numfmt';
+import { numfmt } from '@univerjs/engine-numfmt';
 import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';

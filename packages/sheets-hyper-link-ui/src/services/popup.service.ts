@@ -17,10 +17,9 @@
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
+import type { IDisposable } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Disposable } from '@univerjs/core';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 
 export interface IHyperLinkPopup {

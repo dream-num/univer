@@ -16,6 +16,7 @@
 
 import type {
     HorizontalAlign,
+    IAccessor,
     ICellData,
     IColorStyle,
     ICommand,
@@ -37,7 +38,6 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';

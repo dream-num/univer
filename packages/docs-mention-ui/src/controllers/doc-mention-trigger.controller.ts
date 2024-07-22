@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs';
 import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
 import { DocMentionService } from '@univerjs/docs-mention';
-import { Inject } from '@wendellhu/redi';
 import { DocMentionPopupService } from '../services/doc-mention-popup.service';
 import { CloseMentionEditPopupOperation, ShowMentionEditPopupOperation } from '../commands/operations/mention-popup.operation';
 

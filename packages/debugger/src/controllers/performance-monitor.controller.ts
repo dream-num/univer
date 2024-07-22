@@ -15,9 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { Inject, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs';
 

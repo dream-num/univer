@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import { connectInjector, Disposable, Inject, Injector, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import type { IUniverUIConfig, IWorkbenchOptions } from '@univerjs/ui';
 import { BuiltInUIPart, CanvasPopup, FloatDom, IUIPartsService } from '@univerjs/ui';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
-import { connectInjector } from '@wendellhu/redi/react-bindings';
+import type { IDisposable } from '@univerjs/core';
 import React from 'react';
 import { delay, filter, take } from 'rxjs';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';

@@ -15,10 +15,9 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { Inject } from '@wendellhu/redi';
 import { bufferTime, filter } from 'rxjs/operators';
 import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';

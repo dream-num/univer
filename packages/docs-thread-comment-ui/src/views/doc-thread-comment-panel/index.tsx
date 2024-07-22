@@ -15,9 +15,8 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
-import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import { RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';

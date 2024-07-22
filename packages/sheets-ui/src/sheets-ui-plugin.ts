@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { DependentOn, IUniverInstanceService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import type { Dependency, Workbook } from '@univerjs/core';
+import { DependentOn, Inject, Injector, IUniverInstanceService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';

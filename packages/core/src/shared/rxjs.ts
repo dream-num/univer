@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+import type { IDisposable } from '../common/di';
 
 type CallbackFn<T extends readonly unknown[]> = (cb: (...args: T) => void) => IDisposable;
 

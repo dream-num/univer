@@ -20,6 +20,7 @@ import {
     debounce,
     Disposable,
     ICommandService,
+    Inject,
     InterceptorManager,
     IUniverInstanceService,
     LifecycleStages,
@@ -43,7 +44,6 @@ import {
     SetRangeValuesMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
 
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';

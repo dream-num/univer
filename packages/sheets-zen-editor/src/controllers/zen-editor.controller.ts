@@ -21,6 +21,7 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     ICommandService,
+    Inject,
     IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
@@ -41,7 +42,6 @@ import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-re
 import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui';
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
@@ -318,7 +318,7 @@ export class ZenEditorController extends RxDisposable {
         const viewport = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN) as Viewport;
         if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
             const actualX = viewport.transScroll2ViewportScrollValue(scrollToX, 0).x;
-            viewport.scrollTo({
+            viewport.scrollToBarPos({
                 x: actualX,
             });
         }

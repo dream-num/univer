@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
-import { DisposableCollection, ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { ICommandInfo, IDisposable, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
+import { DisposableCollection, ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -24,8 +24,6 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
 import { merge } from 'rxjs';
 import { IRangeSelectorService } from '@univerjs/ui';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';

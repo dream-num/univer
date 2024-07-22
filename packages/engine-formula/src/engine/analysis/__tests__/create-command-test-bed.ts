@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LocaleType,
     LogLevel,
@@ -25,10 +27,7 @@ import {
     Plugin,
     Univer,
     UniverInstanceType,
-
 } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import type { ISheetData } from '../../../basics/common';
 import type { FormulaDataModel } from '../../../models/formula-data.model';

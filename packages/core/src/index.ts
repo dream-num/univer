@@ -16,6 +16,8 @@
 
 import { installShims } from './common/shims';
 
+installShims();
+
 export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
 export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';
@@ -52,7 +54,7 @@ export type { TPriority } from './docs/data-model/text-x/text-x';
 export { JSONX, JSON1 } from './docs/data-model/json-x/json-x';
 export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
-export { type IEventObserver, EventState, EventSubject } from './observer/observable';
+export { type IEventObserver, EventState, EventSubject, fromEventSubject } from './observer/observable';
 export { Plugin } from './services/plugin/plugin';
 export { PluginService, DependentOn } from './services/plugin/plugin.service';
 export {
@@ -187,4 +189,5 @@ export { normalizeBody, getCustomRangeSlice, getCustomDecorationSlice } from './
 export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
 export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
 export { nameCharacterCheck } from './shared/name';
-installShims();
+
+export * from './common/di';

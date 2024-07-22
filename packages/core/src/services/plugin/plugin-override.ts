@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, DependencyItem } from '@wendellhu/redi';
+import type { Dependency, DependencyIdentifier, DependencyItem } from '../../common/di';
 
 export type NullableDependencyPair<T> = [DependencyIdentifier<T>, DependencyItem<T> | null];
 

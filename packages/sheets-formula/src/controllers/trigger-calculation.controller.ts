@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, throttle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, throttle } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
@@ -42,8 +42,6 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 import { IProgressService } from '@univerjs/ui';
-
-import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, TriggerCalculationController)
 export class TriggerCalculationController extends Disposable {

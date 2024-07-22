@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleService, ThemeService } from '@univerjs/core';
+import { LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { createPortal } from 'react-dom';

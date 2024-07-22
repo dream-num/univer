@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ErrorService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { Disposable, ErrorService, Inject, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { Inject } from '@wendellhu/redi';
 
 import { IMessageService } from '../../services/message/message.service';
 

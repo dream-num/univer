@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IColorStyle, ISlidePage, Nullable, SlideDataModel } from '@univerjs/core';
-import { debounce, getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { debounce, getColorStyle, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
@@ -25,7 +25,6 @@ import {
     Slide,
     Viewport,
 } from '@univerjs/engine-render';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { Subject, takeUntil } from 'rxjs';
 import { ObjectProvider } from './object-provider';
@@ -113,7 +112,7 @@ export class CanvasView extends RxDisposable {
 
         const { x, y } = viewMain.transViewportScroll2ScrollValue(viewPortLeft, viewPortTop);
 
-        viewMain.scrollTo({
+        viewMain.scrollToBarPos({
             x,
             y,
         });

@@ -15,8 +15,7 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
 import { CreateCopySingle } from '@univerjs/icons';
 import { Button, Select } from '@univerjs/design';

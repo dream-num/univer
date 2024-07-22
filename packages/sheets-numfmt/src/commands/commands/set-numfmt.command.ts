@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -37,7 +37,6 @@ import {
     SetNumfmtMutation,
     transformCellsToRange,
 } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetNumfmtCommandParams {
     unitId?: string;

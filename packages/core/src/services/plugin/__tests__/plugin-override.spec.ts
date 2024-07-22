@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
 import { describe, expect, it } from 'vitest';
+import { createIdentifier } from '../../../common/di';
 import { mergeOverrideWithDependencies } from '../plugin-override';
 
 describe('test dependency override', () => {

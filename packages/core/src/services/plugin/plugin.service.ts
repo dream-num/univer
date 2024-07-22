@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Ctor, IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import { skip } from 'rxjs';
+import type { Ctor, IDisposable } from '../../common/di';
+import { Inject, Injector } from '../../common/di';
 
 import { Disposable } from '../../shared/lifecycle';
 import { type UnitType, UniverInstanceType } from '../../common/unit';

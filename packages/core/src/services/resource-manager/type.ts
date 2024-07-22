@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import type { UniverInstanceType } from '@univerjs/core';
+import type { IDisposable } from '../../common/di';
+import { createIdentifier } from '../../common/di';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 
 type IBusinessName = 'SHEET' | 'DOC';

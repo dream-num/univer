@@ -16,11 +16,13 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
+import type { Ctor, Dependency, DependencyIdentifier, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ILogService,
+    Inject,
+    Injector,
     IUniverInstanceService,
     LogLevel,
     Plugin,
@@ -28,8 +30,6 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Ctor, Dependency, DependencyIdentifier } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
 import type { DocumentSkeleton, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
 

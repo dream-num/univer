@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { IMenuService, IShortcutService, IZenZoneService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../commands/commands/zen-editor.command';
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';

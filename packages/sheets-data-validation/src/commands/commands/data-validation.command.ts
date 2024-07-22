@@ -15,12 +15,11 @@
  */
 
 import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, sequenceExecuteAsync, Tools } from '@univerjs/core';
-import type { CellValue, ICellData, ICommand, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import type { IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
+import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { DataValidationChangeSource, IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { AddDataValidationMutation, createDefaultNewRule, DataValidationModel, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import type { IAccessor } from '@wendellhu/redi';
 import type { SheetDataValidationManager } from '../../models/sheet-data-validation-manager';
 import { OpenValidationPanelOperation } from '../operations/data-validation.operation';
 import type { RangeMutation } from '../../models/rule-matrix';
@@ -52,7 +51,8 @@ export function getDataValidationDiffMutations(
     unitId: string,
     subUnitId: string,
     diffs: RangeMutation[],
-    accessor: IAccessor
+    accessor: IAccessor,
+    source: DataValidationChangeSource = 'command'
 ) {
     const redoMutations: IMutationInfo[] = [];
     const undoMutations: IMutationInfo[] = [];
@@ -94,6 +94,7 @@ export function getDataValidationDiffMutations(
                         unitId,
                         subUnitId,
                         ruleId: diff.rule.uid,
+                        source,
                     },
                 });
                 undoMutations.unshift({
@@ -103,6 +104,7 @@ export function getDataValidationDiffMutations(
                         subUnitId,
                         rule: diff.rule,
                         index: diff.index,
+                        source,
                     },
                 });
                 break;
@@ -117,6 +119,7 @@ export function getDataValidationDiffMutations(
                             type: UpdateRuleType.RANGE,
                             payload: diff.newRanges,
                         },
+                        source,
                     } as IUpdateDataValidationMutationParams,
                 });
                 undoMutations.unshift({
@@ -129,6 +132,7 @@ export function getDataValidationDiffMutations(
                             type: UpdateRuleType.RANGE,
                             payload: diff.oldRanges,
                         },
+                        source,
                     } as IUpdateDataValidationMutationParams,
                 });
                 const rule = manager.getRuleById(diff.ruleId);
@@ -146,6 +150,7 @@ export function getDataValidationDiffMutations(
                         unitId,
                         subUnitId,
                         rule: diff.rule,
+                        source,
                     } as IAddDataValidationMutationParams,
                 });
                 undoMutations.unshift({
@@ -154,6 +159,7 @@ export function getDataValidationDiffMutations(
                         unitId,
                         subUnitId,
                         ruleId: diff.rule.uid,
+                        source,
                     },
                 });
                 if (diff.rule.type === DataValidationType.CHECKBOX) {

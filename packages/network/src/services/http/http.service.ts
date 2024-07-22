@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, remove, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';

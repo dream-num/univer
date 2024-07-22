@@ -16,9 +16,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { Button, type ISegmentedProps, Segmented } from '@univerjs/design';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
-import { ICommandService, LocaleService } from '@univerjs/core';
 
 import { of } from 'rxjs';
 import { SheetsFilterService } from '@univerjs/sheets-filter';

@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
-import { CommandType, ICommandService, Rectangle, RxDisposable } from '@univerjs/core';
+import { CommandType, ICommandService, Inject, Rectangle, RxDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     Layer,
@@ -29,7 +29,6 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 
@@ -424,10 +423,10 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 const isLimitedStore = viewMain.limitedScroll();
                 if (evt.inputIndex === PointerInput.MouseWheelX) {
                     const deltaFactor = Math.abs(evt.deltaX);
-                        // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+                    // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
                     const scrollNum = deltaFactor;
-                        // 展示更多右侧内容，evt.deltaX > 0
-                        // 展示更多左侧内容, evt.deltaX < 0
+                    // show more content on the right，evt.deltaX > 0
+                    // show more content on the left, evt.deltaX < 0
                     if (evt.deltaX > 0) {
                         offsetX = scrollNum;
                     } else {
@@ -435,7 +434,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                     }
                     this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                        // 临界点时执行浏览器行为
+                    // 临界点时执行浏览器行为
                     if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                         if (!isLimitedStore?.isLimitedX) {
                             state.stopPropagation();

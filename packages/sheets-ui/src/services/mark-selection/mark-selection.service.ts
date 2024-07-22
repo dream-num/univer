@@ -15,10 +15,9 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { createIdentifier, Inject } from '@wendellhu/redi';
 
 // import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SelectionControl } from '../selection/selection-shape';

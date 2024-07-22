@@ -20,5 +20,6 @@ export { UniverSheetsZenEditorPlugin } from './plugin';
 
 export { OpenZenEditorOperation } from './commands/operations/zen-editor.operation';
 export { CancelZenEditCommand, ConfirmZenEditCommand } from './commands/commands/zen-editor.command';
+export { DOCS_ZEN_EDITOR_UNIT_ID_KEY } from './controllers/zen-editor.controller';
 
 // #endregion

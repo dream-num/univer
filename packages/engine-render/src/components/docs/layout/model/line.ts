@@ -23,6 +23,7 @@ import type {
     IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonTable,
     LineType,
 } from '../../../../basics/i-document-skeleton-cached';
 import { Path2 } from '../../../../basics/path2';
@@ -128,6 +129,7 @@ export function calculateLineTopByDrawings(
 ) {
     let maxTop = lineTop;
     const pageSkeDrawings = page.skeDrawings;
+    const skeTables = page.skeTables;
     const headersDrawings = headerPage?.skeDrawings;
     const footersDrawings = footerPage?.skeDrawings;
 
@@ -158,7 +160,25 @@ export function calculateLineTopByDrawings(
         }
     });
 
+    skeTables?.forEach((table) => {
+        const top = _getLineTopWidthWrapNone(table, lineHeight, lineTop);
+        if (top) {
+            maxTop = Math.max(maxTop, top);
+        }
+    });
+
     return maxTop;
+}
+
+function _getLineTopWidthWrapNone(table: IDocumentSkeletonTable, lineHeight: number, lineTop: number) {
+    const { top, height } = table;
+
+    // No need to consider the dist.
+    if (top + height < lineTop || top > lineHeight + lineTop) {
+        return;
+    }
+
+    return top + height;
 }
 
 function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHeight: number, lineTop: number) {

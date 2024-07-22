@@ -23,6 +23,7 @@ import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonTable,
 } from '../../../../../basics/i-document-skeleton-cached';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
@@ -444,6 +445,7 @@ function _lineOperator(
     const {
         paragraphStyle = {},
         paragraphAffectSkeDrawings,
+        skeTableInParagraph,
         skeHeaders,
         skeFooters,
         pDrawingAnchor,
@@ -536,6 +538,10 @@ function _lineOperator(
             .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
 
         __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, paragraphStart, pDrawingAnchor?.get(paragraphIndex)?.top);
+    }
+
+    if (skeTableInParagraph != null && skeTableInParagraph.size > 0) {
+        _updateAndPositionTable(lineTop, lastPage, skeTableInParagraph);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -643,6 +649,23 @@ function __updateAndPositionDrawings(
         column,
         drawings
     );
+}
+
+// TODO: @JOCS, handle text wrap position.
+function _updateAndPositionTable(
+    lineTop: number,
+    page: IDocumentSkeletonPage,
+    skeTableInParagraph: Map<string, IDocumentSkeletonTable>
+) {
+    if (skeTableInParagraph.size === 0) {
+        return;
+    }
+
+    for (const [tableId, table] of skeTableInParagraph) {
+        table.top = lineTop;
+
+        page.skeTables.set(tableId, table);
+    }
 }
 
 function _getCustomBlockIdsInLine(line: IDocumentSkeletonLine) {

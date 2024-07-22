@@ -15,9 +15,9 @@
  */
 
 import type { IBullet, IDocDrawingBase, IDrawings, Nullable } from '@univerjs/core';
-import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
+import { DataStreamTreeNodeType, DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
-import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import type { ILayoutContext } from '../../tools';
@@ -25,6 +25,7 @@ import { getLastNotFullColumnInfo } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import { createTableSkeleton } from '../table';
 import type { IShapedText } from './shaping';
 import { layoutParagraph } from './layout-ruler';
 import { dealWithBullet } from './bullet';
@@ -130,7 +131,7 @@ export function lineBreaking(
         localeService,
     } = sectionBreakConfig;
 
-    const { endIndex, blocks = [] } = paragraphNode;
+    const { endIndex, blocks = [], children } = paragraphNode;
     const { segmentId } = curPage;
 
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
@@ -141,6 +142,7 @@ export function lineBreaking(
 
     const paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const skeTableInParagraph: Map<string, IDocumentSkeletonTable> = new Map();
 
     let segmentDrawingAnchorCache = drawingAnchor?.get(segmentId);
 
@@ -154,6 +156,7 @@ export function lineBreaking(
         paragraphStyle,
         paragraphAffectSkeDrawings,
         paragraphInlineSkeDrawings,
+        skeTableInParagraph,
         skeHeaders,
         skeFooters,
         pDrawingAnchor: segmentDrawingAnchorCache,
@@ -191,6 +194,18 @@ export function lineBreaking(
         } else {
             paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
+    }
+
+    if (children.length === 1 && children[0].nodeType === DataStreamTreeNodeType.TABLE) {
+        const tableSkeleton = createTableSkeleton(
+            ctx,
+            curPage,
+            viewModel,
+            children[0],
+            sectionBreakConfig
+        );
+
+        skeTableInParagraph.set(tableSkeleton.tableId, tableSkeleton);
     }
 
     let allPages = [curPage];

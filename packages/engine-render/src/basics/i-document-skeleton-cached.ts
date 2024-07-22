@@ -22,6 +22,7 @@ import type {
     IDocumentRenderConfig,
     INestingLevel,
     IParagraphProperties,
+    ITable,
     ITextStyle,
     PageOrientType,
 } from '@univerjs/core';
@@ -122,6 +123,7 @@ export interface IDocumentSkeletonTable {
     st: number; // startIndex 开始索引
     ed: number; // endIndex 结束索引
     tableId: string; // 表格的id
+    tableSource: ITable;
     parent?: IDocumentSkeletonPage;
 }
 

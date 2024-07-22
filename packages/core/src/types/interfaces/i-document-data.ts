@@ -877,6 +877,7 @@ export interface ITable {
     position: ITableAnchor; // 17.4.57 tblpPr (Floating Table Positioning)
     dist: IDistFromText; // 17.4.57 tblpPr (Floating Table Positioning)
     size: IWidthInTableSize;
+    tableId: string;
     cellMargin?: ITableCellMargin; // cellMargin
     layout?: TableLayoutType; // 17.4.52 tblLayout (Table Layout)
     overlap?: BooleanNumber; // 17.4.56 tblOverlap (Floating Table Allows Other Tables to Overlap)
@@ -924,20 +925,6 @@ export interface ITableRow {
  * Properties of table cell
  */
 export interface ITableCell {
-    tableCellStyle: ITableCellStyle; // tableCellStyle
-}
-
-export interface ITableCellMargin {
-    start: INumberUnit; // start
-    end: INumberUnit; // end
-    top: INumberUnit; // top
-    bottom: INumberUnit; // bottom
-}
-
-/**
- * Properties of style of table cell
- */
-export interface ITableCellStyle {
     margin?: ITableCellMargin; // margin
     rowSpan?: number; // rowSpan
     columnSpan?: number; // columnSpan
@@ -950,6 +937,13 @@ export interface ITableCellStyle {
     tcFitText?: BooleanNumber; // 17.4.67 tcFitText (Fit Text Within Cell)
     // hAlign: use paragraph align to instead.
     vAlign?: VerticalAlignmentType; // 17.4.83 vAlign (Table Cell Vertical Alignment)
+}
+
+export interface ITableCellMargin {
+    start: INumberUnit; // start
+    end: INumberUnit; // end
+    top: INumberUnit; // top
+    bottom: INumberUnit; // bottom
 }
 
 /**

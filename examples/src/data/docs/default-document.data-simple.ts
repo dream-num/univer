@@ -75,10 +75,8 @@ function createParagraphs(dataStream: string) {
 const paragraphs = createParagraphs(dataStream);
 
 const tableCell: ITableCell = {
-    tableCellStyle: {
-        rowSpan: 1,
-        columnSpan: 1,
-    },
+    rowSpan: 1,
+    columnSpan: 1,
 };
 
 const tableRow: ITableRow = {
@@ -101,6 +99,7 @@ const tableColumn: ITableColumn = {
 const table: ITable = {
     tableRows: [...new Array(exampleTables.length).fill(Tools.deepClone(tableRow))],
     tableColumns: [...new Array(exampleTables[0].length).fill(Tools.deepClone(tableColumn))],
+    tableId: 'table-id',
     align: TableAlignmentType.START,
     indent: {
         v: 0,

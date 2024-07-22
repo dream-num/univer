@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeNodeType } from '@univerjs/core';
 import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { ILayoutContext } from '../../tools';
@@ -33,14 +32,7 @@ export function dealWidthParagraph(
     sectionBreakConfig: ISectionBreakConfig
 ): IDocumentSkeletonPage[] {
     clearFontCreateConfigCache();
-    const { content = '', children } = paragraphNode;
-    // Pre Steps: Layout table in paragraph if have.
-    let tablePages: IDocumentSkeletonPage[] = [curPage];
-
-    // Paragraph will only have one table at start.
-    if (children.length === 1 && children[0].nodeType === DataStreamTreeNodeType.TABLE) {
-        tablePages = dealWithTable(ctx, viewModel, children[0], curPage, sectionBreakConfig);
-    }
+    const { content = '' } = paragraphNode;
 
     // Step 1: Text Shaping.
     const shapedTextList = shaping(
@@ -52,12 +44,11 @@ export function dealWidthParagraph(
     );
 
     // Step 2: Line Breaking.
-    const lastPage = tablePages.pop()!;
-    const contentPages = lineBreaking(
+    const allPages = lineBreaking(
         ctx,
         viewModel,
         shapedTextList,
-        lastPage,
+        curPage,
         paragraphNode,
         sectionBreakConfig
     );
@@ -65,21 +56,12 @@ export function dealWidthParagraph(
     // Step 3: Line Adjustment.
     // Handle line adjustment(stretch and shrink) and punctuation adjustment.
     lineAdjustment(
-        contentPages,
+        allPages,
         viewModel,
         paragraphNode,
         sectionBreakConfig
     );
 
-    return [...tablePages, ...contentPages];
+    return allPages;
 }
 
-function dealWithTable(
-    ctx: ILayoutContext,
-    viewModel: DocumentViewModel,
-    tableNode: DataStreamTreeNode,
-    curPage: IDocumentSkeletonPage,
-    sectionBreakConfig: ISectionBreakConfig
-): IDocumentSkeletonPage[] {
-    return [];
-}

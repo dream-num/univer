@@ -20,6 +20,7 @@ import { type IPointerEvent, type IRenderContext, type IRenderModule, SHEET_VIEW
 import { type ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 
 /**
  * On mobile devices, the context menu would popup when
@@ -32,7 +33,8 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
-        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -68,7 +70,9 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
             let clientX = 0;
             let clientY = 0;
 
-            const rowHeaderWidth = 46;
+            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const rowHeaderWidth = skeleton.rowHeaderWidth;
+
             // TODO @lumixraku popup should positioned by transform not topleft.
             // using transform & transform-origin would be easy to position popup
             switch (rangeType) {

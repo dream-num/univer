@@ -52,9 +52,9 @@ export class ScrollTimer {
     constructor(
         private _scene: Scene,
         private _scrollTimerType: ScrollTimerType = ScrollTimerType.ALL,
-        private _padding?: IPaddingData,
-        private _smoothRatioX = 0.4,
-        private _smoothRatioY = 0.1
+        private _padding?: IPaddingData
+        // private _smoothRatioX = 0.4,
+        // private _smoothRatioY = 0.05
     ) {
         if (!this._padding) {
             this._padding = { t: 0, b: 15, l: 0, r: 60 };
@@ -112,24 +112,24 @@ export class ScrollTimer {
 
         if (this._scrollTimerType & ScrollTimerType.X) {
             if (this._moveX < leftBounding + l) {
-                x = (this._moveX - leftBounding - l) * this._smoothRatioX;
+                x = (this._moveX - leftBounding - l);
                 shouldScroll = true;
             }
 
             if (this._moveX > rightBounding - r) {
-                x = (this._moveX - rightBounding + r) * this._smoothRatioX;
+                x = (this._moveX - rightBounding + r);
                 shouldScroll = true;
             }
         }
 
         if (this._scrollTimerType & ScrollTimerType.Y) {
             if (this._moveY < topBounding + t) {
-                y = (this._moveY - topBounding - t) * this._smoothRatioY;
+                y = (this._moveY - topBounding - t);
                 shouldScroll = true;
             }
 
             if (this._moveY > bottomBounding - b) {
-                y = (this._moveY - bottomBounding + b) * this._smoothRatioY;
+                y = (this._moveY - bottomBounding + b);
                 shouldScroll = true;
             }
         }
@@ -138,15 +138,19 @@ export class ScrollTimer {
             return;
         }
 
-        const limited = viewport?.scrollBy({
-            x,
-            y,
+        // const limited = viewport?.scrollBy({
+        //     x,
+        //     y,
+        // });
+        const limited = viewport?.scrollByViewportDeltaVal({
+            viewportScrollX: x,
+            viewportScrollY: y,
         });
 
-        const actualScroll = viewport?.transScroll2ViewportScrollValue(x, y);
+        const viewportScrollVal = viewport?.transScroll2ViewportScrollValue(x, y);
 
-        this._scrollX = actualScroll?.x || 0;
-        this._scrollY = actualScroll?.y || 0;
+        this._scrollX = viewportScrollVal?.x || 0;
+        this._scrollY = viewportScrollVal?.y || 0;
 
         if (limited) {
             const ancestorScene = this._findAncestorScene(viewport?.scene);
@@ -173,8 +177,6 @@ export class ScrollTimer {
     }
 
     getViewportByCoord(scene?: Scene) {
-        // return scene?.getActiveViewportByCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
-
         return scene?.findViewportByPosToViewport(Vector2.FromArray([this._offsetX, this._offsetY]));
     }
 

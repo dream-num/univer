@@ -32,14 +32,16 @@ export const HEADER_MENU_SHAPE_RECT_BACKGROUND_FILL = 'rgba(120, 120, 120, 0.01)
 
 export const HEADER_MENU_SHAPE_RECT_FILL = 'rgb(68, 71, 70)';
 
-export const HEADER_MENU_SHAPE_WIDTH_HEIGHT = 12;
+export const HEADER_MENU_SHAPE_SIZE = 12;
+
+export const MAX_HEADER_MENU_SHAPE_SIZE = 44;
 
 export const HEADER_MENU_SHAPE_THUMB_SIZE = 4;
 
 export class HeaderMenuResizeShape<
     T extends IHeaderMenuShapeResizeProps = IHeaderMenuShapeResizeProps
 > extends Shape<T> {
-    private _size: number = HEADER_MENU_SHAPE_WIDTH_HEIGHT;
+    private _size: number = HEADER_MENU_SHAPE_SIZE;
 
     private _color: string = HEADER_MENU_SHAPE_RECT_FILL;
 
@@ -75,7 +77,7 @@ export class HeaderMenuResizeShape<
 
         const scale = Math.max(scaleX, scaleY);
 
-        const HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE = HEADER_MENU_SHAPE_WIDTH_HEIGHT / scale;
+        const HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE = HEADER_MENU_SHAPE_SIZE / scale;
 
         const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
 
@@ -135,13 +137,13 @@ export class HeaderMenuResizeShape<
 
         if (this.mode === HEADER_RESIZE_SHAPE_TYPE.VERTICAL) {
             this.transformByState({
-                width: HEADER_MENU_SHAPE_WIDTH_HEIGHT,
+                width: HEADER_MENU_SHAPE_SIZE,
                 height: this.size,
             });
         } else {
             this.transformByState({
                 width: this.size,
-                height: HEADER_MENU_SHAPE_WIDTH_HEIGHT,
+                height: HEADER_MENU_SHAPE_SIZE,
             });
         }
 

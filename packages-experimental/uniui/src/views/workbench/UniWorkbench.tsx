@@ -49,6 +49,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
 import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
+import { useUnitTitle } from '../hooks/title';
 import { UniControls } from './UniControls';
 import styles from './workbench.module.less';
 
@@ -186,6 +187,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             onContextMenu={(e) => e.preventDefault()}
                         >
                             <ReactFlow
+                                maxZoom={1}
+                                minZoom={1}
                                 zoomOnDoubleClick={!disableReactFlowBehavior}
                                 zoomOnPinch={!disableReactFlowBehavior}
                                 zoomOnScroll={!disableReactFlowBehavior}
@@ -249,6 +252,8 @@ interface IUnitNodeProps {
 }
 
 function UnitNode({ data }: IUnitNodeProps) {
+    const title = useUnitTitle(data.unitId);
+
     return (
         <div className={styles.uniNodeContainer}>
             <UnitRenderer
@@ -257,6 +262,9 @@ function UnitNode({ data }: IUnitNodeProps) {
             />
             <div className={styles.uniNodeDragHandle}>
                 <MenuSingle />
+            </div>
+            <div className={styles.uniNodeTitle}>
+                {title}
             </div>
         </div>
 

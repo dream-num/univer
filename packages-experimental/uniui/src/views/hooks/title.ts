@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import type { UniverType } from '@univerjs/protocol';
-import type { Observable } from 'rxjs';
-import { Disposable } from '../shared';
+import { IUniverInstanceService, useDependency } from '@univerjs/core';
+import { useObservable } from '@univerjs/ui';
+import { useMemo } from 'react';
 
-export { UniverType as UniverInstanceType } from '@univerjs/protocol';
-
-export type UnitType = UniverType | number;
-
-export abstract class UnitModel<_D = object, T extends UnitType = UnitType> extends Disposable {
-    abstract readonly type: T;
-    abstract getUnitId(): string;
-
-    abstract name$: Observable<string>;
+export function useUnitTitle(unitId: string): string | undefined {
+    const instanceService = useDependency(IUniverInstanceService);
+    const unit = useMemo(() => instanceService.getUnit(unitId), [unitId, instanceService]);
+    const title = useObservable<string>(unit?.name$, '', false, [unit]);
+    return title;
 }

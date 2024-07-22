@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type { Nullable } from '../../shared';
 import { Tools } from '../../shared/tools';
 import type {
@@ -49,12 +50,16 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         throw new Error('Method not implemented.');
     }
 
+    private readonly _name$ = new BehaviorSubject<string>('');
+    override name$ = this._name$.asObservable();
+
     protected snapshot: IDocumentData;
 
     constructor(snapshot: Partial<IDocumentData>) {
         super();
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
+        this._name$.next(this.snapshot.title ?? 'No Title');
     }
 
     get drawings() {

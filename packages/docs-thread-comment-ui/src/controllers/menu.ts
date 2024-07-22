@@ -21,14 +21,20 @@ import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '
 import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { debounceTime, Observable } from 'rxjs';
-import { StartAddCommentOperation } from '../commands/operations/show-comment-panel.operation';
+import { StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 
 export const shouldDisableAddComment = (accessor: IAccessor) => {
     const renderManagerService = accessor.get(IRenderManagerService);
+    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const render = renderManagerService.getCurrent();
     const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
     const editArea = skeleton?.getViewModel().getEditArea();
     if (editArea === DocumentEditArea.FOOTER || editArea === DocumentEditArea.HEADER) {
+        return true;
+    }
+
+    const range = textSelectionManagerService.getActiveRange();
+    if (!range || range.collapsed) {
         return true;
     }
 
@@ -43,7 +49,7 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         icon: 'CommentSingle',
         title: 'threadCommentUI.panel.addComment',
         tooltip: 'threadCommentUI.panel.addComment',
-        positions: [MenuPosition.TOOLBAR_START, MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         disabled$: new Observable(function (subscribe) {
             const textSelectionService = accessor.get(TextSelectionManagerService);
@@ -55,5 +61,18 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 observer.unsubscribe();
             };
         }),
+    };
+}
+
+export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: ToggleCommentPanelOperation.id,
+        group: MenuGroup.CONTEXT_MENU_DATA,
+        type: MenuItemType.BUTTON,
+        icon: 'CommentSingle',
+        title: 'threadCommentUI.panel.addComment',
+        tooltip: 'threadCommentUI.panel.addComment',
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

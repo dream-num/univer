@@ -52,6 +52,30 @@ export const ShowCommentPanelOperation: ICommand<IShowCommentPanelOperationParam
     },
 };
 
+export const ToggleCommentPanelOperation: ICommand = {
+    id: 'docs.operation.toggle-comment-panel',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const panelService = accessor.get(ThreadCommentPanelService);
+        const sidebarService = accessor.get(ISidebarService);
+
+        if (!panelService.panelVisible) {
+            sidebarService.open({
+                header: { title: 'threadCommentUI.panel.title' },
+                children: { label: DocThreadCommentPanel.componentKey },
+                width: 320,
+                onClose: () => panelService.setPanelVisible(false),
+            });
+            panelService.setPanelVisible(true);
+        } else {
+            sidebarService.close();
+            panelService.setPanelVisible(false);
+            panelService.setActiveComment(null);
+        }
+        return true;
+    },
+};
+
 export const StartAddCommentOperation: ICommand = {
     id: 'docs.operation.start-add-comment',
     type: CommandType.OPERATION,

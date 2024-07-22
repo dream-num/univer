@@ -72,7 +72,6 @@ export const PasteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
         icon: 'PasteSpecial',
         title: 'rightClick.paste',
         positions: [MenuPosition.CONTEXT_MENU],
-        disabled$: getDisableOnCollapsedObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };

@@ -44,16 +44,7 @@ export class DocContextMenuRenderController extends Disposable implements IRende
         // Content range context menu
         const documentsSubscription = documentsPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
-                const selections = this._textSelectionManagerService.getCurrentSelections();
-                const currentSelection = selections?.[0];
-                if (!currentSelection) {
-                    return;
-                }
-                const triggerMenu = () => {
-                    this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
-                };
-
-                triggerMenu();
+                this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
             }
         });
         this.disposeWithMe(documentsSubscription);

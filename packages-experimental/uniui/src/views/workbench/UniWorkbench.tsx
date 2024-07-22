@@ -26,7 +26,6 @@ import {
     ContextMenu,
     IMessageService,
     type IWorkbenchOptions,
-    Sidebar,
     Toolbar,
     UNI_DISABLE_CHANGING_FOCUS_KEY,
     useComponentsOfPart,
@@ -49,6 +48,7 @@ import '@xyflow/react/dist/style.css';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
 import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
+import { UniSidebar } from '../uni-sidebar/UniSidebar';
 import { UniControls } from './UniControls';
 import styles from './workbench.module.less';
 
@@ -226,9 +226,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
                         </aside>
 
-                        <aside className={styles.workbenchContainerSidebar}>
-                            <Sidebar />
-                        </aside>
+                        <UniSidebar />
 
                         {/* footer */}
                         {footer && (

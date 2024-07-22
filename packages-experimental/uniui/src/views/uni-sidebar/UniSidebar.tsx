@@ -18,10 +18,11 @@ import { CloseSingle } from '@univerjs/icons';
 import { useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useRef } from 'react';
+import type { ISidebarMethodOptions } from '@univerjs/ui';
 import { CustomLabel, ISidebarService, useObservable } from '@univerjs/ui';
 import styles from './index.module.less';
 
-export function Sidebar() {
+export function UniSidebar() {
     const sidebarService = useDependency(ISidebarService);
     const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -66,8 +67,8 @@ export function Sidebar() {
         };
     }, [sidebarService]);
 
-    const rootClassName = clsx(styles.sidebar, {
-        [styles.sidebarOpen]: options?.visible,
+    const rootClassName = clsx(styles.uniSidebar, {
+        [styles.uniSidebarOpen]: options?.visible,
     });
 
     const width = useMemo(() => {
@@ -90,20 +91,20 @@ export function Sidebar() {
         options?.onClose?.();
     }
     return (
-        <section className={rootClassName} style={{ width }}>
-            <section className={styles.sidebarContainer} ref={scrollRef}>
-                <header className={styles.sidebarHeader}>
+        <aside className={rootClassName} style={{ width }}>
+            <section className={styles.uniSidebarContainer} ref={scrollRef}>
+                <header className={styles.uniSidebarHeader}>
                     {options?.header}
 
-                    <a className={styles.sidebarHeaderClose} onClick={handleClose}>
+                    <a className={styles.uniSidebarHeaderClose} onClick={handleClose}>
                         <CloseSingle />
                     </a>
                 </header>
 
-                <section className={styles.sidebarBody}>{options?.children}</section>
+                <section className={styles.uniSidebarBody}>{options?.children}</section>
 
-                {options?.footer && <footer className={styles.sidebarFooter}>{options.footer}</footer>}
+                {options?.footer && <footer className={styles.uniSidebarFooter}>{options.footer}</footer>}
             </section>
-        </section>
+        </aside>
     );
 }

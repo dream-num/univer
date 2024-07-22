@@ -76,15 +76,7 @@
         }
 
         &-left-sidebar {
-            height: 100%;
-        }
-
-        &-sidebar {
-            position: absolute;
-            height: calc(100% - 20px);
-            width: 320px;
-            top: 20px;
-            bottom: 20px;
+            width: 340px;
         }
     }
 
@@ -114,6 +106,10 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
+
+    > * {
+        pointer-events: all;
+    }
 }
 
 .flow-layer {

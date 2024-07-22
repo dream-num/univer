@@ -1,16 +1,24 @@
-.sidebar {
-    position: relative;
-    transform: translateX(100%);
+.uni-sidebar {
+    position: fixed;
+    transform: translateX(calc(100% + 12px));
 
+    border-radius: 10px;
+    overflow: hidden;
     box-sizing: border-box;
-    width: 0;
-    height: 100%;
+    box-shadow: var(--box-shadow-lg);
+    width: 340px;
+    top: 72px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 20;
 
+    background-color: rgb(var(--bg-color-secondary));
     color: rgb(var(--text-color));
 
     transition: all 0.15s;
 
     &&-open {
+        border: 1px solid rgb(var(--border-color));
         transform: translateX(0);
         width: 380px;
     }
@@ -27,8 +35,6 @@
         margin: auto;
 
         background-color: rgb(var(--bg-color-secondary));
-        border-bottom: 1px solid rgb(var(--border-color));
-        border-left: 1px solid rgb(var(--border-color));
 
         scrollbar-color: rgba(var(--scrollbar-color), 0.7) transparent;
         scrollbar-gutter: auto;

@@ -106,6 +106,7 @@ export { GlobalZone } from './views/components/global-zone/GlobalZone';
 export { builtInGlobalComponents } from './views/parts';
 export { DesktopContextMenu as ContextMenu } from './views/components/context-menu/ContextMenu';
 export { Sidebar } from './views/components/sidebar/Sidebar';
+export { type ISidebarMethodOptions } from './views/components/sidebar/interface';
 export { ZenZone } from './views/components/zen-zone/ZenZone';
 export { CanvasPopup } from './views/components/popup/CanvasPopup';
 export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';

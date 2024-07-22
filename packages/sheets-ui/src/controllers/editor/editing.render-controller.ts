@@ -1079,7 +1079,3 @@ function isRichText(body: IDocumentBody) {
         customBlocks.length > 0
     );
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> 026cf027a (fix(sheet): handle formula node type)

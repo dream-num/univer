@@ -17,7 +17,7 @@
 import { LocaleType } from '@univerjs/core';
 import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
-import Numfmt from '@univerjs/engine-numfmt';
+import { numfmt } from '@univerjs/engine-numfmt';
 
 const fullWidthToHalfWidthMap: { [key: string]: string } = {
     '０': '0', '１': '1', '２': '2', '３': '3', '４': '4',
@@ -90,7 +90,7 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
     }
 
     // Formatting Numbers
-    const parsedValue = Numfmt.parseValue(normalStr);
+    const parsedValue = numfmt.parseValue(normalStr);
 
     return parsedValue == null ? str : normalStr;
 }
@@ -115,7 +115,7 @@ function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder
                 const endIndex = node.endIndex + 1;
                 normalStr = replaceString(str.slice(startIndex, endIndex), normalStr, startIndex, endIndex);
             } else if (node.nodeType !== sequenceNodeType.ARRAY) {
-                const parsedValue = Numfmt.parseValue(token);
+                const parsedValue = numfmt.parseValue(token);
 
                 if (parsedValue == null) {
                     const startIndex = node.startIndex + 1;

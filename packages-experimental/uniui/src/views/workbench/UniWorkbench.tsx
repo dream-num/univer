@@ -81,7 +81,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
     const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
-    const focused = useObservable(instanceService.focused$);
 
     const focusUnit = useCallback((unitId: string) => {
         instanceService.focusUnit(unitId);
@@ -146,7 +145,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         focusable: true,
         data: {
             unitId,
-            focused: focused === unitId,
             gridService: unitGridService,
             instanceService,
             onFocus: focusUnit,
@@ -244,19 +242,20 @@ function UnitNode({ data }: IUnitNodeProps) {
 
 interface IUnitRendererProps {
     unitId: string;
-    focused: boolean;
 
     gridService: UnitGridService;
     instanceService: IUniverInstanceService;
-
-    onFocus: (unitId: string) => void;
 }
 
 function UnitRenderer(props: IUnitRendererProps) {
-    const { unitId, gridService, focused, onFocus } = props;
+    const { unitId, gridService } = props;
     const mountRef = useRef<HTMLDivElement>(null);
 
+    const instanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
+
+    const focusedUnit = useObservable(instanceService.focused$);
+    const focused = focusedUnit === unitId;
     const disableChangingUnitFocusing = useObservable(
         () => contextService.subscribeContextValue$(UNI_DISABLE_CHANGING_FOCUS_KEY),
         false,
@@ -266,9 +265,9 @@ function UnitRenderer(props: IUnitRendererProps) {
 
     const focus = useCallback(() => {
         if (!disableChangingUnitFocusing && !focused) {
-            onFocus(unitId);
+            instanceService.focusUnit(unitId);
         }
-    }, [focused, onFocus, disableChangingUnitFocusing, unitId]);
+    }, [disableChangingUnitFocusing, focused, instanceService, unitId]);
 
     useEffect(() => {
         if (mountRef.current) {

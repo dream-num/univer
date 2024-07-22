@@ -179,6 +179,8 @@ function _getNullPage(
         angle: 0,
         width: 0,
         height: 0,
+        // Only use in cell.
+        left: 0,
         marginLeft: 0,
         marginRight: 0,
         originMarginTop: 0,
@@ -189,6 +191,7 @@ function _getNullPage(
         st: 0,
         ed: 0,
         skeDrawings: new Map(),
+        skeTables: new Map(),
         type,
         segmentId,
     };

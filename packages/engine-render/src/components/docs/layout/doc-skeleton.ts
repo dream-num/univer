@@ -186,7 +186,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const pageIndex = pageType !== DocumentSkeletonPageType.BODY
             ? 0 // Because header or footer only has one page.
-            : skeletonData.pages.indexOf(page);
+            : skeletonData.pages.indexOf(page as IDocumentSkeletonPage);
 
         return {
             glyph: glyphIndex,

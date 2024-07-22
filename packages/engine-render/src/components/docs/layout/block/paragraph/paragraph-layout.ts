@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DataStreamTreeNodeType } from '@univerjs/core';
 import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { ILayoutContext } from '../../tools';
@@ -32,9 +33,16 @@ export function dealWidthParagraph(
     sectionBreakConfig: ISectionBreakConfig
 ): IDocumentSkeletonPage[] {
     clearFontCreateConfigCache();
+    const { content = '', children } = paragraphNode;
+    // Pre Steps: Layout table in paragraph if have.
+    let tablePages: IDocumentSkeletonPage[] = [curPage];
+
+    // Paragraph will only have one table at start.
+    if (children.length === 1 && children[0].nodeType === DataStreamTreeNodeType.TABLE) {
+        tablePages = dealWithTable(ctx, viewModel, children[0], curPage, sectionBreakConfig);
+    }
 
     // Step 1: Text Shaping.
-    const { content = '' } = paragraphNode;
     const shapedTextList = shaping(
         ctx,
         content,
@@ -44,11 +52,12 @@ export function dealWidthParagraph(
     );
 
     // Step 2: Line Breaking.
-    const allPages = lineBreaking(
+    const lastPage = tablePages.pop()!;
+    const contentPages = lineBreaking(
         ctx,
         viewModel,
         shapedTextList,
-        curPage,
+        lastPage,
         paragraphNode,
         sectionBreakConfig
     );
@@ -56,35 +65,21 @@ export function dealWidthParagraph(
     // Step 3: Line Adjustment.
     // Handle line adjustment(stretch and shrink) and punctuation adjustment.
     lineAdjustment(
-        allPages,
+        contentPages,
         viewModel,
         paragraphNode,
         sectionBreakConfig
     );
 
-    return allPages;
+    return [...tablePages, ...contentPages];
 }
 
-function _checkAndPush(pages: IDocumentSkeletonPage[], currentPages: IDocumentSkeletonPage[]) {
-    const curLast = pages.slice(-1)[0];
-    const newFirst = currentPages[0];
-    if (curLast === newFirst) {
-        if (currentPages.length === 1) {
-            return curLast;
-        }
-        currentPages.shift();
-    }
-
-    pages.push(...currentPages);
-
-    return pages.slice(-1)[0];
+function dealWithTable(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    tableNode: DataStreamTreeNode,
+    curPage: IDocumentSkeletonPage,
+    sectionBreakConfig: ISectionBreakConfig
+): IDocumentSkeletonPage[] {
+    return [];
 }
-
-// function _getAllSkeDrawings(curPage: IDocumentSkeletonPage, pageWidth: number, skeletonResourceReference: ISkeletonResourceReference, paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing>) {
-//     const { skeHeaders, skeFooters, skeListLevel } = skeletonResourceReference;
-//     const affectAllSkeDrawings = new Map([
-//         ...(skeHeaders?.get(curPage.headerId)?.get(pageWidth)?.skeDrawings || []),
-//         ...(skeFooters?.get(curPage.footerId)?.get(pageWidth)?.skeDrawings || []),
-//         ...paragraphAffectSkeDrawings,
-//     ]);
-// }

@@ -504,15 +504,15 @@ export function glyphIterator(
 }
 
 export function lineIterator(
-    pages: IDocumentSkeletonPage[],
+    pagesOrCells: (IDocumentSkeletonPage)[],
     cb: (
         line: IDocumentSkeletonLine,
         column: IDocumentSkeletonColumn,
         section: IDocumentSkeletonSection,
         page: IDocumentSkeletonPage
     ) => void) {
-    for (const page of pages) {
-        const { sections } = page;
+    for (const pageOrCell of pagesOrCells) {
+        const { sections } = pageOrCell;
 
         for (const section of sections) {
             const { columns } = section;
@@ -522,7 +522,7 @@ export function lineIterator(
 
                 for (const line of lines) {
                     if (cb && isFunction(cb)) {
-                        cb(line, column, section, page);
+                        cb(line, column, section, pageOrCell);
                     }
                 }
             }

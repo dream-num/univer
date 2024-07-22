@@ -12,6 +12,14 @@
         // height: 32px;
     }
 
+    &-toolbar-wrapper {
+        width: calc(100% - 700px);
+        background-color: rgb(var(--bg-color-secondary));
+        border: 2px solid rgb(var(--border-color));
+        border-radius: 8px;
+        pointer-events: auto;
+    }
+
     &-container {
         position: relative;
         display: flex;
@@ -23,6 +31,9 @@
             position: relative;
             z-index: 10;
             width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         &-wrapper {
@@ -31,6 +42,7 @@
             grid-template-rows: 100%;
             height: 100%;
             overflow: hidden;
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
         }
 
         &-content {
@@ -48,6 +60,8 @@
         &-canvas-container {
             position: relative;
             display: flex;
+            height: 100%;
+            width: 100%;
         }
 
         &-canvas {
@@ -71,6 +85,37 @@
     }
 
     &-footer {
-        // height: 36px;
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        width: calc(100% - 700px);
+        background-color: rgb(var(--bg-color-secondary));
+        border: 2px solid rgb(var(--border-color));
+        border-radius: 8px;
+        pointer-events: auto;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     }
+}
+
+:global {
+    .react-flow__attribution {
+        display: none !important;
+    }
+}
+
+.float-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.flow-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }

@@ -36,7 +36,16 @@ import {
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
+import {
+    Background,
+    ReactFlow,
+    ReactFlowProvider,
+    useNodesState,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+
 import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
+import { UniControls } from './UniControls';
 import styles from './workbench.module.less';
 
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
@@ -120,6 +129,33 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         };
     }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
 
+    const nodeTypes = {
+        customNode: UnitNode,
+    };
+
+    const initialNodes = unitGrid.map((unitId, index) => ({
+        id: unitId,
+        type: 'customNode',
+        style: {
+            width: '660px',
+            height: '600px',
+            display: 'flex',
+            border: '1px solid #ccc',
+            backgroundColor: '#fff',
+        },
+        focusable: true,
+        data: {
+            unitId,
+            focused: focused === unitId,
+            gridService: unitGridService,
+            instanceService,
+            onFocus: focusUnit,
+        },
+        position: { x: index * 750, y: 0 },
+    }));
+
+    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
             {/**
@@ -127,67 +163,82 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
               * bubbled to this element and refocus the input element.
               */}
-            <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
-                {/* header */}
-                {header && (
-                    <header className={styles.workbenchContainerHeader}>
-                        <Toolbar headerMenuComponents={headerMenuComponents} />
-                    </header>
-                )}
+            <ReactFlowProvider>
+                <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
 
-                {/* content */}
-                <section className={styles.workbenchContainer}>
-                    <div className={styles.workbenchContainerWrapper}>
-                        <aside className={styles.workbenchContainerLeftSidebar}>
-                            <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
-                        </aside>
-
-                        <section className={styles.workbenchContainerContent}>
-                            <header>
-                                {header && <ComponentContainer key="header" components={headerComponents} />}
-                            </header>
-
-                            <section
-                                className={styles.workbenchContainerCanvasContainer}
-                                ref={contentRef}
-                                data-range-selector
-                                onContextMenu={(e) => e.preventDefault()}
+                    <div className={styles.flowLayer}>
+                        <section
+                            className={styles.workbenchContainerCanvasContainer}
+                            ref={contentRef}
+                            data-range-selector
+                            onContextMenu={(e) => e.preventDefault()}
+                        >
+                            <ReactFlow
+                                nodes={nodes}
+                                nodeTypes={nodeTypes}
+                                onNodesChange={onNodesChange}
+                                fitView
                             >
-                                {/* Render units. */}
-                                {unitGrid?.map((unitId) => (
-                                    <UnitRenderer
-                                        key={unitId}
-                                        unitId={unitId}
-                                        focused={focused === unitId}
-                                        onFocus={focusUnit}
-                                        gridService={unitGridService}
-                                        instanceService={instanceService}
-                                    />
-                                ))}
-                                <ComponentContainer key="content" components={contentComponents} />
-                            </section>
+                                <Background></Background>
+                            </ReactFlow>
+                            <ComponentContainer key="content" components={contentComponents} />
+                        </section>
+                    </div>
+                    <div className={styles.floatLayer}>
+                        {/* header */}
+                        {header && (
+                            <div className={styles.workbenchContainerHeader}>
+                                <div className={styles.workbenchToolbarWrapper}>
+                                    <Toolbar headerMenuComponents={headerMenuComponents} />
+                                    <ComponentContainer key="header" components={headerComponents} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* content */}
+                        <section className={styles.workbenchContainer}>
+                            <div className={styles.workbenchContainerWrapper}>
+                                <aside className={styles.workbenchContainerLeftSidebar}>
+                                    <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
+                                </aside>
+
+                                <aside className={styles.workbenchContainerSidebar}>
+                                    <Sidebar />
+                                </aside>
+                            </div>
+
+                            <ZenZone />
                         </section>
 
-                        <aside className={styles.workbenchContainerSidebar}>
-                            <Sidebar />
-                        </aside>
+                        {/* footer */}
+                        {footer && (
+                            <div className={styles.workbenchFooter}>
+                                <ComponentContainer key="footer" components={footerComponents} />
+                            </div>
+                        )}
+                        {/* uni mode controller buttons */}
+                        <UniControls />
                     </div>
-
-                    {/* footer */}
-                    {footer && (
-                        <footer className={styles.workbenchFooter}>
-                            <ComponentContainer key="footer" components={footerComponents} />
-                        </footer>
-                    )}
-
-                    <ZenZone />
-                </section>
-            </div>
-            <ComponentContainer key="global" components={globalComponents} />
-            <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
-            {contextMenu && <ContextMenu />}
-            <FloatingContainer />
+                </div>
+                <ComponentContainer key="global" components={globalComponents} />
+                <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
+                {contextMenu && <ContextMenu />}
+                <FloatingContainer />
+            </ReactFlowProvider>
         </ConfigProvider>
+    );
+}
+
+interface IUnitNodeProps {
+    data: IUnitRendererProps;
+}
+
+function UnitNode({ data }: IUnitNodeProps) {
+    return (
+        <UnitRenderer
+            key={data.unitId}
+            {...data}
+        />
     );
 }
 

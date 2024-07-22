@@ -156,6 +156,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 
+    const disableReactFlowBehavior = !!focusedUnit;
+
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
             {/**
@@ -174,11 +176,18 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             onContextMenu={(e) => e.preventDefault()}
                         >
                             <ReactFlow
-                                draggable={!focusedUnit}
+                                nodesDraggable={!disableReactFlowBehavior}
+                                zoomOnDoubleClick={!disableReactFlowBehavior}
+                                zoomOnPinch={!disableReactFlowBehavior}
+                                zoomOnScroll={!disableReactFlowBehavior}
+                                panOnDrag={!disableReactFlowBehavior}
+                                panOnScroll={!disableReactFlowBehavior}
                                 nodes={nodes}
                                 nodeTypes={nodeTypes}
                                 onNodesChange={onNodesChange}
                                 fitView
+                                onWheel={() => instanceService.focusUnit(null)}
+                                onPointerDown={() => instanceService.focusUnit(null)}
                             >
                                 <Background></Background>
                             </ReactFlow>
@@ -287,7 +296,8 @@ function UnitRenderer(props: IUnitRendererProps) {
             // We bind these focusing events on capture phrase so the
             // other event handlers would have correct currently focused unit.
             onPointerUpCapture={focus}
-            onWheelCapture={focus}
+            onPointerDown={(event) => event.stopPropagation()}
+            onWheel={(event) => event.stopPropagation()}
         >
         </div>
     );

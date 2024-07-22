@@ -40,14 +40,14 @@ export class UnitGridService extends Disposable {
         this._init();
     }
 
-    setContainerForRender(unitId: string, element: HTMLElement) {
-        this._renderSrv.getRenderById(unitId)?.engine.setContainer(element);
-    }
-
     override dispose(): void {
         super.dispose();
 
         this._unitGrid$.complete();
+    }
+
+    setContainerForRender(unitId: string, element: HTMLElement) {
+        this._renderSrv.getRenderById(unitId)?.engine.setContainer(element);
     }
 
     private _init(): void {

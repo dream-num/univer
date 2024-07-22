@@ -31,6 +31,8 @@ import { Match } from './match';
 import { Offset } from './offset';
 import { Row } from './row';
 import { Rows } from './rows';
+import { Sort } from './sort';
+import { Sortby } from './sortby';
 import { Vlookup } from './vlookup';
 import { Vstack } from './vstack';
 import { Xlookup } from './xlookup';
@@ -55,6 +57,8 @@ export const functionLookup = [
     [Offset, FUNCTION_NAMES_LOOKUP.OFFSET],
     [Row, FUNCTION_NAMES_LOOKUP.ROW],
     [Rows, FUNCTION_NAMES_LOOKUP.ROWS],
+    [Sort, FUNCTION_NAMES_LOOKUP.SORT],
+    [Sortby, FUNCTION_NAMES_LOOKUP.SORTBY],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
     [Vstack, FUNCTION_NAMES_LOOKUP.VSTACK],
     [Xlookup, FUNCTION_NAMES_LOOKUP.XLOOKUP],

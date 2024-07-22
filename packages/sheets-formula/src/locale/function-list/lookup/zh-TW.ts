@@ -398,8 +398,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要排序的範圍或陣列。' },
+            sortIndex: { name: '排序索引', detail: '表示排序依據(按行或按列)的數字。' },
+            sortOrder: { name: '排序順序', detail: '表示所需排序順序的數字；1表示順序(預設)，-1表示降序。' },
+            byCol: { name: '排序方向', detail: '表示所需排序方向的邏輯值；FALSE指依行排序(預設)，TRUE指依列排序。' },
         },
     },
     SORTBY: {
@@ -412,8 +414,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要排序的範圍或陣列。' },
+            byArray1: { name: '排序數組1', detail: '若要基於其進行排序的範圍或陣列。' },
+            sortOrder1: { name: '排序順序1', detail: '表示所需排序順序的數字；1表示順序(預設)，-1表示降序。' },
+            byArray2: { name: '排序數組2', detail: '若要基於其進行排序的範圍或陣列。' },
+            sortOrder2: { name: '排序順序2', detail: '表示所需排序順序的數字；1表示順序(預設)，-1表示降序。' },
         },
     },
     TAKE: {

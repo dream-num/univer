@@ -411,8 +411,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The range or array to be sorted.' },
+            sortIndex: { name: 'sort_index', detail: 'A number indicating the sort order (by row or by column).' },
+            sortOrder: { name: 'sort_order', detail: 'A number representing the desired sort order; 1 for ascending (default), -1 for descending.' },
+            byCol: { name: 'by_col', detail: 'Logical value indicating the desired sort direction; FALSE sorts by rows (default), TRUE sorts by columns.' },
         },
     },
     SORTBY: {
@@ -425,8 +427,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The range or array to be sorted.' },
+            byArray1: { name: 'by_array1', detail: 'The range or array to sort based on.' },
+            sortOrder1: { name: 'sort_order1', detail: 'A number representing the desired sort order; 1 for ascending (default), -1 for descending.' },
+            byArray2: { name: 'by_array2', detail: 'The range or array to sort based on.' },
+            sortOrder2: { name: 'sort_order2', detail: 'A number representing the desired sort order; 1 for ascending (default), -1 for descending.' },
         },
     },
     TAKE: {

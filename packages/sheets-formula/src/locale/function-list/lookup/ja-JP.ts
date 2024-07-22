@@ -400,8 +400,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '並べ替える範囲または配列。' },
+            sortIndex: { name: 'ソートインデックス', detail: '(行または列) による順序を表す数値。' },
+            sortOrder: { name: '並べ替え順序', detail: '希望の並べ替え順序を表す数値。連続 (デフォルト) の場合は 1、降順の場合は -1。' },
+            byCol: { name: '仕分け方向', detail: '希望するソート方向を示す論理値。行でソートする場合は FALSE (デフォルト)、列でソートする場合は TRUE。' },
         },
     },
     SORTBY: {
@@ -414,8 +416,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '並べ替える範囲または配列。' },
+            byArray1: { name: '配列の並べ替え1', detail: '並べ替えに基づいて並べ替える範囲または配列。' },
+            sortOrder1: { name: '並べ替え順序1', detail: '希望の並べ替え順序を表す数値。連続 (デフォルト) の場合は 1、降順の場合は -1。' },
+            byArray2: { name: '配列の並べ替え2', detail: '並べ替えに基づいて並べ替える範囲または配列。' },
+            sortOrder2: { name: '並べ替え順序2', detail: '希望の並べ替え順序を表す数値。連続 (デフォルト) の場合は 1、降順の場合は -1。' },
         },
     },
     TAKE: {

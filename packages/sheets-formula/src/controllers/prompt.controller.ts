@@ -1814,9 +1814,8 @@ export class PromptController extends Disposable {
 
                 this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 
-                    this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId, true, false);
-                })
-            )
+                this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId, true, false);
+            })
         );
 
         this.disposeWithMe(

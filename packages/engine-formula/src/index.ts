@@ -115,7 +115,7 @@ export { matchRefDrawToken } from './basics/match-token';
 export { IDefinedNamesService, DefinedNamesService, type IDefinedNamesServiceParam, type IDefinedNameMapItem } from './services/defined-names.service';
 export { isFormulaTransformable, transformFormula } from './engine/utils/relative-formula';
 export { IFormulaRuntimeService, FormulaRuntimeService } from './services/runtime.service';
-export { IFormulaCurrentConfigService, FormulaCurrentConfigService } from './services/current-data.service';
+export { IFormulaCurrentConfigService, FormulaCurrentConfigService, type IFormulaDirtyData } from './services/current-data.service';
 
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 
@@ -140,7 +140,6 @@ export {
     type ISetFormulaCalculationStartMutation,
     type ISetFormulaCalculationNotificationMutation,
     type ISetFormulaCalculationResultMutation,
-    type IFormulaDirtyData,
 } from './commands/mutations/set-formula-calculation.mutation';
 export { SetFormulaDataMutation, type ISetFormulaDataMutationParams } from './commands/mutations/set-formula-data.mutation';
 export { SetOtherFormulaMutation, RemoveOtherFormulaMutation, type ISetOtherFormulaMutationParams, type IRemoveOtherFormulaMutationParams } from './commands/mutations/set-other-formula.mutation';

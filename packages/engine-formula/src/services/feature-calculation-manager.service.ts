@@ -18,13 +18,14 @@ import type { IUnitRange, Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable } from '@univerjs/core';
 
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
-import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
+import type { IAllRuntimeData } from './runtime.service';
+import type { IFormulaDirtyData } from './current-data.service';
 
 export interface IFeatureCalculationManagerParam {
     unitId: string;
     subUnitId: string;
     dependencyRanges: IUnitRange[];
-    getDirtyData: (currentDependencyTree: FormulaDependencyTree) => {
+    getDirtyData: (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
         runtimeCellData: IRuntimeUnitDataType;
         dirtyRanges: IFeatureDirtyRangeType;
     };

@@ -187,7 +187,13 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 onNodesChange={onNodesChange}
                                 fitView
                                 onWheel={() => instanceService.focusUnit(null)}
-                                onPointerDown={() => instanceService.focusUnit(null)}
+                                onPointerDown={(event) => {
+                                    if (event.target instanceof HTMLElement && event.target.classList.contains('univer-render-canvas')) {
+                                        return;
+                                    }
+
+                                    instanceService.focusUnit(null);
+                                }}
                             >
                                 <Background></Background>
                             </ReactFlow>
@@ -296,7 +302,6 @@ function UnitRenderer(props: IUnitRendererProps) {
             // We bind these focusing events on capture phrase so the
             // other event handlers would have correct currently focused unit.
             onPointerUpCapture={focus}
-            onPointerDown={(event) => event.stopPropagation()}
             onWheel={(event) => event.stopPropagation()}
         >
         </div>

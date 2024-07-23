@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, IParagraph, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
-import { BooleanNumber, DocumentFlavor, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, HorizontalAlign, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
 
 const TABLE_START = '\x1A'; // 表格开始
 const TABLE_ROW_START = '\x1B'; // 表格行开始
@@ -41,14 +41,14 @@ function createTableDataStream(tables: string[][]) {
 }
 
 const exampleTables = [
-    ['姓名', '语文', '数学', '英语', '总分'],
+    ['姓名\r这是一个段落\r这是二个段落\r这是三个段落\r这是四个段落', '语文', '数学', '英语', '总分'],
     ['张三', '80', '90', '70', '240'],
     ['李四', '80', '90', '70', '240'],
     ['王五', '80', '90', '70', '240'],
     ['赵六', '80', '90', '70', '240'],
 ];
 
-const dataStream = `这是一个表格的用例\r${createTableDataStream(exampleTables)}班级成绩统计\r\n`;
+const dataStream = `这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r${createTableDataStream(exampleTables)}班级成绩统计\r\n`;
 
 const startIndex = dataStream.indexOf(TABLE_START);
 const endIndex = dataStream.indexOf(TABLE_END);
@@ -64,6 +64,7 @@ function createParagraphs(dataStream: string) {
                     spaceAbove: { v: 10 },
                     lineSpacing: 2,
                     spaceBelow: { v: 0 },
+                    horizontalAlign: HorizontalAlign.CENTER,
                 },
             });
         }
@@ -137,10 +138,10 @@ const table: ITable = {
     },
     cellMargin: {
         start: {
-            v: 5,
+            v: 10,
         },
         end: {
-            v: 5,
+            v: 10,
         },
         top: {
             v: 5,

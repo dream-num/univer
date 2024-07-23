@@ -15,7 +15,7 @@
  */
 
 import type { INumberUnit, Nullable } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
@@ -651,7 +651,6 @@ function __updateAndPositionDrawings(
     );
 }
 
-// TODO: @JOCS, handle text wrap position.
 function _updateAndPositionTable(
     lineTop: number,
     page: IDocumentSkeletonPage,
@@ -662,7 +661,21 @@ function _updateAndPositionTable(
     }
 
     for (const [tableId, table] of skeTableInParagraph) {
-        table.top = lineTop;
+        const { tableSource } = table;
+
+        switch (tableSource.textWrap) {
+            case TableTextWrapType.NONE: {
+                table.top = lineTop;
+                break;
+            }
+            case TableTextWrapType.WRAP: {
+                // TODO: @JOCS, handle text wrap position.
+                break;
+            }
+            default: {
+                throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
+            }
+        }
 
         page.skeTables.set(tableId, table);
     }

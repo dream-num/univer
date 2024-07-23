@@ -287,16 +287,19 @@ export class DocumentViewModel implements IDisposable {
         }
     }
 
-    getParagraph(index: number) {
+    getParagraph(index: number, fromStart = false) {
         const paragraphs = this.getBody()!.paragraphs;
         if (paragraphs == null) {
             return;
         }
 
-        for (let i = this._paragraphCurrentIndex; i < paragraphs.length; i++) {
+        for (let i = fromStart ? 0 : this._paragraphCurrentIndex; i < paragraphs.length; i++) {
             const paragraph = paragraphs[i];
             if (paragraph.startIndex === index) {
-                this._paragraphCurrentIndex = i;
+                if (!fromStart) {
+                    this._paragraphCurrentIndex = i;
+                }
+
                 return paragraph;
             }
         }

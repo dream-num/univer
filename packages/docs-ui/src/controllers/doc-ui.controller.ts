@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, ILayoutService, IMenuService } from '@univerjs/ui';
 
@@ -28,6 +28,8 @@ import {
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import type { IUniverDocsUIConfig } from '../basics';
+import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
+import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
@@ -56,6 +58,7 @@ export class DocUIController extends Disposable {
         private readonly _config: Partial<IUniverDocsUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @ICommandService private readonly _commandService: ICommandService,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IMenuService private readonly _menuService: IMenuService
     ) {
@@ -106,6 +109,15 @@ export class DocUIController extends Disposable {
         this._initCustomComponents();
         this._initMenus();
         this._initFocusHandler();
+        this._initCommands();
+    }
+
+    private _initCommands(): void {
+        [
+            CoreHeaderFooterCommand,
+            OpenHeaderFooterPanelCommand,
+            SidebarDocHeaderFooterPanelOperation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initFocusHandler(): void {

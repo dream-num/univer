@@ -247,16 +247,19 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
             this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, true);
             this._contextService.setContextValue(FOCUSING_SLIDE, false);
+            this.setCurrentUnitForType(id!);
         } else if (this.focused instanceof DocumentDataModel) {
             this._contextService.setContextValue(FOCUSING_UNIT, true);
             this._contextService.setContextValue(FOCUSING_DOC, true);
             this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, false);
+            this.setCurrentUnitForType(id!);
         } else if (this.focused instanceof SlideDataModel) {
             this._contextService.setContextValue(FOCUSING_UNIT, true);
             this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, true);
+            this.setCurrentUnitForType(id!);
         } else {
             this._contextService.setContextValue(FOCUSING_UNIT, false);
             this._contextService.setContextValue(FOCUSING_DOC, false);

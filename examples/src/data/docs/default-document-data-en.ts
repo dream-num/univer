@@ -30,7 +30,7 @@ import {
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
-    id: 'd',
+    id: 'd-en',
     drawings: {
         shapeTest1: {
             unitId: 'd',

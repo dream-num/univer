@@ -23,14 +23,10 @@ import {
     Inject,
     IUniverInstanceService,
 } from '@univerjs/core';
-import type { IDocObjectParam } from '@univerjs/docs';
+import type { IDocObjectParam, ISetDocZoomRatioOperationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, neoGetDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
-
-interface ISetDocMutationParams {
-    unitId: string;
-}
 
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -113,18 +109,9 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         const updateCommandList = [SetDocZoomRatioOperation.id];
 
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (updateCommandList.includes(command.id)) {
-                const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-                if (!documentModel) return;
-
-                const params = command.params;
-                const { unitId } = params as ISetDocMutationParams;
-                if (!(unitId === documentModel.getUnitId())) {
-                    return;
-                }
-
+            if (updateCommandList.includes(command.id) && (command.params as ISetDocZoomRatioOperationParams).unitId === this._context.unitId) {
+                const documentModel = this._context.unit;
                 const zoomRatio = documentModel.zoomRatio || 1;
-
                 this._updateViewZoom(zoomRatio);
             }
         }));

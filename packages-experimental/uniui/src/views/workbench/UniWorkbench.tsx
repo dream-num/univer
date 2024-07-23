@@ -86,7 +86,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
     const headerMenuComponents = useComponentsOfPart(BuiltInUIPart.HEADER_MENU);
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
-    const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
     const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
@@ -147,6 +146,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         customNode: UnitNode,
     };
 
+    const MAX_COUNT_IN_ROW = 3;
     const initialNodes = unitGrid.map((unitId, index) => ({
         id: unitId,
         type: 'customNode',
@@ -166,7 +166,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             instanceService,
             onFocus: focusUnit,
         },
-        position: { x: index * 750, y: 0 },
+        position: { x: (index % MAX_COUNT_IN_ROW) * 750, y: Math.floor(index / MAX_COUNT_IN_ROW) * 750 + 40 },
     }));
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);

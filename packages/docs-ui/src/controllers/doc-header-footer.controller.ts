@@ -23,10 +23,9 @@ import { ComponentManager, IEditorService } from '@univerjs/ui';
 import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
-import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
+import { CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
 import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';
-import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 
 const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
 const HEADER_FOOTER_FILL_COLOR = 'rgba(58, 96, 247, 0.08)';
@@ -152,16 +151,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
         this._init();
         this._drawHeaderFooterLabel();
-        this._registerCommands();
         this._initCustomComponents();
-    }
-
-    private _registerCommands() {
-        [
-            CoreHeaderFooterCommand,
-            OpenHeaderFooterPanelCommand,
-            SidebarDocHeaderFooterPanelOperation,
-        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initCustomComponents(): void {

@@ -214,10 +214,8 @@ export class SheetFindModel extends FindModel {
         }));
 
         this.disposeWithMe(
-            fromCallback(this._commandService.onCommandExecuted.bind(this._commandService.onCommandExecuted))
-                .pipe(
-                    filter(([command, options]) => command.id === SetWorksheetActiveOperation.id && !options?.fromFindReplace)
-                )
+            fromCallback(this._commandService.onCommandExecuted.bind(this._commandService))
+                .pipe(filter(([command, options]) => command.id === SetWorksheetActiveOperation.id && !options?.fromFindReplace))
                 .subscribe(() => {
                     const activeSheet = this._workbook.getActiveSheet();
                     if (!activeSheet) {

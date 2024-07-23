@@ -985,9 +985,13 @@ export function getCellDataByInput(
         return null;
     }
 
-    cellData.t = undefined;
+    //TODO: Text inputs such as dates and percentages need to be
+    // automatically recognized to calculate the correct `v` value and `t` value.
+
+    // cellData.t = undefined;
 
     const data = body.dataStream;
+    const cellValue = data.trim();
     const lastString = data.substring(data.length - 2, data.length);
     let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
@@ -1010,6 +1014,14 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.FORCE_STRING;
+    } else if (Tools.isStringNumber(cellValue) && cellData.t !== CellValueType.STRING) {
+        if (cellData.v === Number(cellValue)) {
+            return null;
+        }
+        cellData.v = Number(cellValue);
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
     } else if (isRichText(body)) {
         if (body.dataStream === '\r\n') {
             cellData.v = '';

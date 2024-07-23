@@ -127,7 +127,7 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: '2', f: null, si: null, p: null });
+            expect(cellData).toEqual({ v: 2, f: null, si: null, p: null });
         });
         it('Rich text cell', () => {
             const cell = {
@@ -163,7 +163,7 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: '', f: null, si: null, p: null, t: undefined });
+            expect(cellData).toEqual({ v: '', f: null, si: null, p: null, t: 2 });
         });
 
         it('Clear formula cell with rich text', () => {
@@ -178,7 +178,7 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: null, f: null, si: null, p: richTextDemo, t: undefined });
+            expect(cellData).toEqual({ v: null, f: null, si: null, p: richTextDemo, t: 2 });
         });
 
         it('Input force string, normal string', () => {

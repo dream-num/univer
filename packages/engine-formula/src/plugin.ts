@@ -82,7 +82,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
         const dependencies: Dependency[] = [
             // Services
             [IFunctionService, { useClass: FunctionService }],
-            [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
             [ISuperTableService, { useClass: SuperTableService }],
@@ -100,7 +99,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
                     useFactory: () => this._injector.createInstance(FormulaController, this._config?.function),
                 },
             ],
-            [SetFeatureCalculationController],
             [SetDefinedNameController],
             [SetSuperTableController],
         ];
@@ -114,11 +112,13 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
                 [IDependencyManagerService, { useClass: DependencyManagerService }],
+                [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
 
                 //Controller
                 [CalculateController],
                 [SetOtherFormulaController],
                 [SetDependencyController],
+                [SetFeatureCalculationController],
 
                 // Calculation engine
                 [FormulaDependencyGenerator],

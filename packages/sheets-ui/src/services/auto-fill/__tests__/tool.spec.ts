@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-export { UniverSheetsZenEditorPlugin } from './plugin';
-export { DOCS_ZEN_EDITOR_UNIT_ID_KEY } from './controllers/zen-editor.controller';
+import { describe, expect, it } from 'vitest';
+import { CellValueType } from '@univerjs/core';
+import { needsUpdateCellValue } from '../tools';
 
-// #region - all commands
-
-export { OpenZenEditorOperation } from './commands/operations/zen-editor.operation';
-export { CancelZenEditCommand, ConfirmZenEditCommand } from './commands/commands/zen-editor.command';
-
-// #endregion
+describe('Test tool', () => {
+    it('Function needsUpdateCellValue', () => {
+        expect(needsUpdateCellValue({ f: '=A1' })).toBeFalsy();
+        expect(needsUpdateCellValue({ si: 'id1' })).toBeFalsy();
+        expect(needsUpdateCellValue({ t: CellValueType.BOOLEAN })).toBeFalsy();
+        expect(needsUpdateCellValue({ v: 1, t: CellValueType.NUMBER })).toBeTruthy();
+    });
+});

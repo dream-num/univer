@@ -28,6 +28,11 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const position = useObservable(layer.position$);
     const Component = typeof layer.componentKey === 'string' ? componentManager.get(layer.componentKey) : layer.componentKey;
 
+    const layerProps: any = {
+        data: layer.data,
+        ...layer.props,
+    };
+
     return position
         ? (
             <div
@@ -65,7 +70,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
                         ...(position.absolute.top) ? { top: 0 } : { bottom: 0 },
                     }}
                 >
-                    {Component ? <Component {...layer.props} /> : null}
+                    {Component ? <Component {...layerProps} /> : null}
                 </div>
             </div>
         )

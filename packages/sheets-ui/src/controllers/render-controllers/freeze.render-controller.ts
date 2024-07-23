@@ -28,7 +28,7 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 import type {
     IInsertColCommandParams,
@@ -72,6 +72,7 @@ import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
 
+import type { IViewportScrollState } from '../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset, getSheetObject } from '../utils/component-tools';
@@ -403,7 +404,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const scene = sheetObject.scene;
 
         const scale = Math.max(scene.scaleX, scene.scaleY);
-        const currentScroll = this._scrollManagerService.getCurrentScrollInfo();
+        const currentScroll = this._scrollManagerService.getCurrentScrollState();
 
         const skeletonViewHeight = (sheetObject.engine.height - skeleton.columnHeaderHeight) / scale;
         const start = currentScroll?.sheetViewStartRow ?? 0;
@@ -597,7 +598,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 // alert(`moveColumnTo: ${this._changeToColumn}`);
             }
 
-            const sheetViewScroll = this._scrollManagerService.getCurrentScrollInfo() || {
+            const sheetViewScroll = this._scrollManagerService.getCurrentScrollState() || {
                 sheetViewStartRow: 0,
                 sheetViewStartColumn: 0,
             };
@@ -721,15 +722,17 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const { viewMain, viewRowBottom, viewColumnRight, viewMainLeft, viewMainTop } = viewports;
+        const { viewRowBottom, viewColumnRight, viewMainLeft, viewMainTop } = viewports;
 
         this.disposeWithMe(
-            viewMain.onScrollAfter$.subscribeEvent((param: IScrollObserverParam) => {
+            this._scrollManagerService.validViewportScrollInfo$.subscribe((param: Nullable<IViewportScrollState>) => {
+                if (!param) return;
+
                 const { scrollX, scrollY, viewportScrollX, viewportScrollY } = param;
 
                 if (viewRowBottom.isActive) {
                     viewRowBottom
-                        .updateScroll({
+                        .updateScrollVal({
                             scrollY,
                             viewportScrollY,
                         });
@@ -737,14 +740,14 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
                 if (viewColumnRight.isActive) {
                     viewColumnRight
-                        .updateScroll({
+                        .updateScrollVal({
                             scrollX,
                             viewportScrollX,
                         });
                 }
                 if (viewMainLeft.isActive) {
                     viewMainLeft
-                        .updateScroll({
+                        .updateScrollVal({
                             scrollY,
                             viewportScrollY,
                         });
@@ -752,7 +755,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
                 if (viewMainTop.isActive) {
                     viewMainTop
-                        .updateScroll({
+                        .updateScrollVal({
                             scrollX,
                             viewportScrollX,
                         });
@@ -884,9 +887,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 right: 0,
             });
             viewMainTop
-                .updateScroll({
+                .updateScrollVal({
                     viewportScrollY: startSheetView.startY,
-                    x: viewMain.scrollX,
+                    rawScrollX: viewMain.scrollX,
                     viewportScrollX: viewMain.viewportScrollX,
                 });
             viewRowTop.resizeWhenFreezeChange({
@@ -896,7 +899,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 height: topGap,
             });
             viewRowTop
-                .updateScroll({
+                .updateScrollVal({
                     viewportScrollY: startSheetView.startY,
                 });
             viewRowBottom.resizeWhenFreezeChange({
@@ -939,9 +942,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 right: 0,
             });
             viewMainLeft
-                .updateScroll({
+                .updateScrollVal({
                     viewportScrollX: startSheetView.startX,
-                    y: viewMain.scrollY,
+                    rawScrollY: viewMain.scrollY,
                     viewportScrollY: viewMain.viewportScrollY,
                 });
             viewColumnLeft.resizeWhenFreezeChange({
@@ -951,7 +954,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 height: columnHeaderHeightAndMarginTop,
             });
             viewColumnLeft
-                .updateScroll({
+                .updateScrollVal({
                     viewportScrollX: startSheetView.startX,
                 });
             viewColumnRight.resizeWhenFreezeChange({
@@ -1003,9 +1006,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 bottom: 0,
             });
             viewMainLeft
-                .updateScroll({
+                .updateScrollVal({
                     viewportScrollX: startSheetView.startX,
-                    y: viewMain.scrollY,
+                    rawScrollY: viewMain.scrollY,
                     viewportScrollY: viewMain.viewportScrollY,
                 });
             viewMainTop.resizeWhenFreezeChange({
@@ -1015,9 +1018,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 right: 0,
             });
             viewMainTop
-                .updateScroll({
+                .updateScrollVal({
                     viewportScrollY: startSheetView.startY,
-                    x: viewMain.scrollX,
+                    rawScrollX: viewMain.scrollX,
                     viewportScrollX: viewMain.viewportScrollX,
                 });
             viewMainLeftTop.resizeWhenFreezeChange({
@@ -1028,7 +1031,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             });
 
             viewMainLeftTop
-                .updateScroll({
+                .updateScrollVal({
                     viewportScrollX: startSheetView.startX,
                     viewportScrollY: startSheetView.startY,
                 });
@@ -1041,7 +1044,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             });
 
             viewRowTop
-                .updateScroll({
+                .updateScrollVal({
                     viewportScrollY: startSheetView.startY,
                 });
 
@@ -1060,7 +1063,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             });
 
             viewColumnLeft
-                .updateScroll({
+                .updateScrollVal({
                     viewportScrollX: startSheetView.startX,
                 });
 

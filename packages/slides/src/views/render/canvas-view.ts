@@ -112,7 +112,7 @@ export class CanvasView extends RxDisposable {
 
         const { x, y } = viewMain.transViewportScroll2ScrollValue(viewPortLeft, viewPortTop);
 
-        viewMain.scrollTo({
+        viewMain.scrollToBarPos({
             x,
             y,
         });

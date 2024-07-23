@@ -347,7 +347,7 @@ export class ScrollBar extends BaseScrollBar {
 
         this.verticalBarRect && this._eventSub.add(this.verticalBarRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
-            this._view.scrollTo({
+            this._view.scrollToBarPos({
                 y: e.offsetY - this._view.top - this.verticalThumbHeight / 2,
             });
             state.stopPropagation();
@@ -438,7 +438,7 @@ export class ScrollBar extends BaseScrollBar {
         // 水平滚动条槽的点击滚动事件
         this.horizonBarRect && this._eventSub.add(this.horizonBarRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
-            this._view.scrollTo({
+            this._view.scrollToBarPos({
                 x: e.offsetX - this._view.left - this.horizontalThumbWidth / 2,
             });
             state.stopPropagation();

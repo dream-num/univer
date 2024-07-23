@@ -76,9 +76,8 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
 
         const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
-            const actualX = viewport.transViewportScroll2ScrollValue(scrollToX, 0).x;
-            viewport.scrollTo({
-                x: actualX,
+            viewport.scrollToViewportPos({
+                viewportScrollX: scrollToX,
             });
         }
 

@@ -317,7 +317,7 @@ export class ZenEditorController extends RxDisposable {
         const viewport = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN) as Viewport;
         if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
             const actualX = viewport.transScroll2ViewportScrollValue(scrollToX, 0).x;
-            viewport.scrollTo({
+            viewport.scrollToBarPos({
                 x: actualX,
             });
         }

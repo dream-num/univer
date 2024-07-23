@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-export { UniverSheetsZenEditorPlugin } from './plugin';
-export { DOCS_ZEN_EDITOR_UNIT_ID_KEY } from './controllers/zen-editor.controller';
-
-// #region - all commands
-
-export { OpenZenEditorOperation } from './commands/operations/zen-editor.operation';
-export { CancelZenEditCommand, ConfirmZenEditCommand } from './commands/commands/zen-editor.command';
-
-// #endregion
+export type Serializable =
+    | { [property: string]: Serializable }
+    | readonly Serializable[]
+    | string
+    | number
+    | boolean
+    | null;

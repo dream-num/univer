@@ -120,11 +120,11 @@ export class DocEditorBridgeController extends Disposable {
                 if (scrollBar == null) {
                     viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
                 } else {
-                    viewportMain?.resetCanvasSizeAndUpdateScrollBar();
+                    viewportMain?.resetCanvasSizeAndUpdateScroll();
                 }
             } else {
                 scrollBar = null;
-                viewportMain?.scrollTo({ x: 0, y: 0 });
+                viewportMain?.scrollToBarPos({ x: 0, y: 0 });
                 viewportMain?.getScrollBar()?.dispose();
             }
         } else {
@@ -132,11 +132,11 @@ export class DocEditorBridgeController extends Disposable {
                 if (scrollBar == null) {
                     viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false });
                 } else {
-                    viewportMain?.resetCanvasSizeAndUpdateScrollBar();
+                    viewportMain?.resetCanvasSizeAndUpdateScroll();
                 }
             } else {
                 scrollBar = null;
-                viewportMain?.scrollTo({ x: 0, y: 0 });
+                viewportMain?.scrollToBarPos({ x: 0, y: 0 });
                 viewportMain?.getScrollBar()?.dispose();
             }
         }

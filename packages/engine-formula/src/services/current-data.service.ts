@@ -34,6 +34,15 @@ import type {
 } from '../basics/common';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 
+export interface IFormulaDirtyData {
+    forceCalculation: boolean;
+    dirtyRanges: IUnitRange[];
+    dirtyNameMap: IDirtyUnitSheetNameMap;
+    dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap;
+    dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
+    dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
+}
+
 export interface IFormulaCurrentConfigService {
     load(config: IFormulaDatasetConfig): void;
 
@@ -79,6 +88,8 @@ export interface IFormulaCurrentConfigService {
 
     setExecuteUnitId(unitId: string): void;
     setExecuteSubUnitId(subUnitId: string): void;
+
+    getDirtyData(): IFormulaDirtyData;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -236,6 +247,17 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._excludedCell = config.excludedCell;
 
         this._mergeNameMap(this._sheetNameMap, this._dirtyNameMap);
+    }
+
+    getDirtyData(): IFormulaDirtyData {
+        return {
+            forceCalculation: this._forceCalculate,
+            dirtyRanges: this._dirtyRanges,
+            dirtyNameMap: this._dirtyNameMap,
+            dirtyDefinedNameMap: this._dirtyDefinedNameMap,
+            dirtyUnitFeatureMap: this._dirtyUnitFeatureMap,
+            dirtyUnitOtherFormulaMap: this._dirtyUnitOtherFormulaMap,
+        };
     }
 
     loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell) {

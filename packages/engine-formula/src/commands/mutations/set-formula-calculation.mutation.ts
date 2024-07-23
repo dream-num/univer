@@ -14,30 +14,19 @@
  * limitations under the License.
  */
 
-import type { IExecutionOptions, IMutation, IUnitRange, Nullable } from '@univerjs/core';
+import type { IExecutionOptions, IMutation, Nullable } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
 import type {
-    IDirtyUnitFeatureMap,
-    IDirtyUnitOtherFormulaMap,
-    IDirtyUnitSheetDefinedNameMap,
-    IDirtyUnitSheetNameMap,
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataPrimitiveType,
 } from '../../basics/common';
 import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
-
-export interface IFormulaDirtyData {
-    dirtyRanges: IUnitRange[];
-    dirtyNameMap: IDirtyUnitSheetNameMap;
-    dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap;
-    dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
-    dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
-}
+import type { IFormulaDirtyData } from '../../services/current-data.service';
 
 export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
     options: Nullable<IExecutionOptions>;
-    forceCalculation?: boolean;
+    forceCalculation: boolean;
 }
 /**
  * TODO: @DR-Univer

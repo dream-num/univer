@@ -80,7 +80,7 @@ export class DragManagerService extends Disposable {
 
         const skeletonParam = currentRender.with(SheetSkeletonManagerService).getCurrent();
         const scrollManagerService = currentRender.with(SheetScrollManagerService);
-        const scrollInfo = scrollManagerService.getCurrentScrollInfo();
+        const scrollInfo = scrollManagerService.getCurrentScrollState();
 
         if (!skeletonParam || !scrollInfo || !currentRender) return;
 

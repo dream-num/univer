@@ -203,33 +203,67 @@ export class FormulaDependencyGenerator extends Disposable {
          * which can determine the execution timing of the external application
          * registration Executor based on the dependency relationship.
          */
-        this._featureCalculationManagerService.getReferenceExecutorMap().forEach((params, featureId) => {
-            const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
 
-            if (this._dependencyManagerService.hasFeatureFormulaDependency(unitId, subUnitId, featureId)) {
-                return true;
-            }
+        const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
+        featureMap.forEach((subUnitMap, _) => {
+            subUnitMap.forEach((featureMap, _) => {
+                featureMap.forEach((params, featureId) => {
+                    const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
 
-            const FDtree = new FormulaDependencyTree();
+                    if (this._dependencyManagerService.hasFeatureFormulaDependency(unitId, subUnitId, featureId)) {
+                        this._makePassiveDirtyForFeatureFormulas(this._dependencyManagerService.getFeatureFormulaDependency(unitId, subUnitId, featureId)!);
+                        return true;
+                    }
 
-            FDtree.unitId = unitId;
-            FDtree.subUnitId = subUnitId;
+                    const FDtree = new FormulaDependencyTree();
 
-            FDtree.getDirtyData = getDirtyData;
+                    FDtree.unitId = unitId;
+                    FDtree.subUnitId = subUnitId;
 
-            FDtree.featureId = featureId;
+                    FDtree.getDirtyData = getDirtyData;
 
-            FDtree.rangeList = dependencyRanges.map((range) => {
-                return {
-                    gridRange: range,
-                    token: serializeRangeToRefString({ ...range, sheetName: this._currentConfigService.getSheetName(range.unitId, range.sheetId) }),
-                };
+                    FDtree.featureId = featureId;
+
+                    FDtree.rangeList = dependencyRanges.map((range) => {
+                        return {
+                            gridRange: range,
+                            token: serializeRangeToRefString({ ...range, sheetName: this._currentConfigService.getSheetName(range.unitId, range.sheetId) }),
+                        };
+                    });
+
+                    this._dependencyManagerService.addFeatureFormulaDependency(unitId, subUnitId, featureId, FDtree);
+
+                    this._makePassiveDirtyForFeatureFormulas(FDtree);
+
+                    treeList.push(FDtree);
+                });
             });
-
-            this._dependencyManagerService.addFeatureFormulaDependency(featureId, FDtree);
-
-            treeList.push(FDtree);
         });
+    }
+
+    private _makePassiveDirtyForFeatureFormulas(tree: FormulaDependencyTree) {
+        const featureId = tree.featureId;
+
+        if (featureId == null) {
+            tree.isPassive = true;
+            return;
+        }
+
+        const featureMap = this._currentConfigService.getDirtyUnitFeatureMap();
+
+        if (featureMap == null) {
+            tree.isPassive = true;
+            return;
+        }
+
+        const featureState = featureMap[tree.unitId]?.[tree.subUnitId]?.[featureId];
+
+        if (featureState == null) {
+            tree.isPassive = true;
+            return;
+        }
+
+        tree.isPassive = false;
     }
 
     private _registerOtherFormulas(otherFormulaData: IOtherFormulaData, otherFormulaDataKeys: string[], treeList: FormulaDependencyTree[]) {

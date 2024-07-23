@@ -343,11 +343,15 @@ export function isLegalUrl(url: string) {
         if (hasProtocol(url)) {
             return true;
         } else {
-            const urlObj = new URL(normalizeUrl(url));
-            const topLevelDomain = urlObj.hostname.split('.').pop();
-            if (topLevelDomain && topLevelDomainSet.has(topLevelDomain)) {
-                return true;
-            };
+            try {
+                const urlObj = new URL(normalizeUrl(url));
+                const topLevelDomain = urlObj.hostname.split('.').pop();
+                if (topLevelDomain && topLevelDomainSet.has(topLevelDomain)) {
+                    return true;
+                };
+            } catch (error) {
+                return false;
+            }
         }
     }
 

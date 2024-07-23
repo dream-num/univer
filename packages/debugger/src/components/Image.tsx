@@ -21,7 +21,7 @@ const image = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEB
 
 export const ImageDemo = (props: any) => {
     const logService = useDependency(ILogService);
-    logService.log('123', props);
+    logService.log('===123', props);
 
     return <img src={image} style={{ width: '100%', height: '100%' }} />;
 };

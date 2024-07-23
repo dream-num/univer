@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { BehaviorSubject, type Observable } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared';
 import { DEFAULT_SLIDE } from '../types/const';
@@ -22,6 +23,9 @@ import { PageType } from '../types/interfaces';
 
 export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNIVER_SLIDE> {
     override type: UniverInstanceType.UNIVER_SLIDE = UniverInstanceType.UNIVER_SLIDE;
+
+    private readonly _name$: BehaviorSubject<string>;
+    override name$: Observable<string>;
 
     private _snapshot: ISlideData;
 
@@ -32,6 +36,9 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
 
         this._snapshot = { ...DEFAULT_SLIDE, ...snapshot };
         this._unitId = this._snapshot.id ?? Tools.generateRandomId(6);
+
+        this._name$ = new BehaviorSubject(this._snapshot.title);
+        this.name$ = this._name$.asObservable();
     }
 
     getContainer() {

@@ -210,7 +210,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 onNodesChange={onNodesChange}
                                 onResize={resizeUnits}
                                 fitView
-                                onWheel={() => instanceService.focusUnit(null)}
                                 onPointerDown={(event) => {
                                     if (event.target instanceof HTMLElement
                                         && (

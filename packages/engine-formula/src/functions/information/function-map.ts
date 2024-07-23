@@ -15,6 +15,8 @@
  */
 
 import { FUNCTION_NAMES_INFORMATION } from './function-names';
+import { Cell } from './cell';
+import { ErrorType } from './error-type';
 import { Isblank } from './isblank';
 import { Iserr } from './iserr';
 import { Iserror } from './iserror';
@@ -26,8 +28,11 @@ import { Isnumber } from './isnumber';
 import { Isodd } from './isodd/isodd';
 import { Isref } from './isref';
 import { Istext } from './istext';
+import { Type } from './type';
 
 export const functionInformation = [
+    [Cell, FUNCTION_NAMES_INFORMATION.CELL],
+    [ErrorType, FUNCTION_NAMES_INFORMATION.ERROR_TYPE],
     [Isblank, FUNCTION_NAMES_INFORMATION.ISBLANK],
     [Iserr, FUNCTION_NAMES_INFORMATION.ISERR],
     [Iseven, FUNCTION_NAMES_INFORMATION.ISEVEN],
@@ -39,4 +44,5 @@ export const functionInformation = [
     [Isnumber, FUNCTION_NAMES_INFORMATION.ISNUMBER],
     [Isref, FUNCTION_NAMES_INFORMATION.ISREF],
     [Istext, FUNCTION_NAMES_INFORMATION.ISTEXT],
+    [Type, FUNCTION_NAMES_INFORMATION.TYPE],
 ];

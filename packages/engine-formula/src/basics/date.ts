@@ -296,6 +296,10 @@ export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, 
 }
 
 export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject): (ErrorValueObject | number) {
+    if (serialNumberObject.isError()) {
+        return serialNumberObject as ErrorValueObject;
+    }
+
     const dateValue = serialNumberObject.getValue();
 
     if (serialNumberObject.isString()) {
@@ -328,7 +332,7 @@ export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject)
 }
 
 export function getWeekDayByDateSerialNumber(dateSerialNumber: number): number {
-    // special date 1990-02-29(serialNumber = 60)
+    // special date 1900-02-29(serialNumber = 60)
     const isDate19000229 = Math.floor(dateSerialNumber) === 60;
 
     let date = excelSerialToDate(dateSerialNumber);

@@ -33,7 +33,13 @@ export const SetFeatureCalculationMutation: IMutation<ISetFeatureCalculationMuta
     handler: () => true,
 };
 
-export const RemoveFeatureCalculationMutation: IMutation<{ featureId: string }> = {
+export interface IRemoveFeatureCalculationMutationParam {
+    featureIds: string[];
+    unitId: string;
+    subUnitId: string;
+}
+
+export const RemoveFeatureCalculationMutation: IMutation<IRemoveFeatureCalculationMutationParam> = {
     id: 'formula.mutation.remove-feature-calculation',
     type: CommandType.MUTATION,
     handler: () => true,

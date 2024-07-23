@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IPosition, ITransformState, Nullable, Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, Inject, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { IDisposable, IPosition, ITransformState, Nullable, Serializable, Worksheet } from '@univerjs/core';
+import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
@@ -37,7 +37,14 @@ export interface ICanvasFloatDom {
     componentKey: string;
     unitId?: string;
     subUnitId?: string;
+    /**
+     * props of component, wouldn't save to snapshot
+     */
     props?: Record<string, any>;
+    /**
+     * data of component, will save to snapshot, json-like data
+     */
+    data?: Serializable;
 }
 
 interface ICanvasFloatDomInfo {
@@ -154,8 +161,9 @@ export interface ISheetCanvasFloatDomHook {
     onGetFloatDomProps: (id: string) => Record<string, any>;
 }
 
+@OnLifecycle(LifecycleStages.Starting, SheetCanvasFloatDomManagerService)
 export class SheetCanvasFloatDomManagerService extends Disposable {
-    private _domLayerMap: Map<string, Map<string, Map<string, ICanvasFloatDom>>> = new Map();
+    private _domLayerMap: Map<string, Map<string, Map<string, { props?: any }>>> = new Map();
     private _domLayerInfoMap: Map<string, ICanvasFloatDomInfo> = new Map();
 
     private _transformChange$ = new Subject<{ id: string; value: ITransformState }>();
@@ -240,7 +248,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return;
                     }
 
-                    const { transform, drawingType } = floatDomParam;
+                    const { transform, drawingType, data } = floatDomParam;
 
                     if (drawingType !== DrawingTypeEnum.DRAWING_DOM) {
                         return;
@@ -308,6 +316,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                             canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                         },
                         props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
+                        data,
                     });
 
                     const listener = rect.onTransformChange$.subscribeEvent(() => {
@@ -322,6 +331,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     });
                     listener && disposableCollection.add(listener);
                     this._domLayerInfoMap.set(drawingId, info);
+                    map.set(drawingId, {});
                 });
             })
         );
@@ -444,7 +454,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
 
         const { unitId, subUnitId } = target;
-        const { initPosition, componentKey } = layer;
+        const { initPosition, componentKey, data } = layer;
         const id = Tools.generateRandomId();
 
         const sheetTransform = this._getPosition(initPosition, unitId);
@@ -467,6 +477,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 width: initPosition.endX - initPosition.startX,
                 height: initPosition.endY - initPosition.startY,
             },
+            data,
         };
 
         this._commandService.executeCommand(InsertSheetDrawingCommand.id, {

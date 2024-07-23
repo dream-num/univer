@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the first, or starting date of a given period.' },
+            endDate: { name: 'end_date', detail: 'A date that represents the last, or ending, date of the period.' },
+            method: { name: 'method', detail: 'The type of information that you want returned.' },
         },
     },
     DATEVALUE: {
@@ -80,8 +81,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            endDate: { name: 'end_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
+            startDate: { name: 'start_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
         },
     },
     DAYS360: {
@@ -94,8 +95,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
+            endDate: { name: 'end_date', detail: 'Start_date and End_date are the two dates between which you want to know the number of days.' },
+            method: { name: 'method', detail: 'A logical value that specifies whether to use the U.S. or European method in the calculation.' },
         },
     },
     EDATE: {
@@ -122,8 +124,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the starting date.' },
+            months: { name: 'months', detail: 'The number of months before or after start_date.' },
         },
     },
     HOUR: {
@@ -149,8 +151,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            date: { name: 'date', detail: 'Date is the date-time code used by Excel for date and time calculation.' },
         },
     },
     MINUTE: {
@@ -299,8 +300,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'serial_number', detail: 'A date within the week.' },
+            returnType: { name: 'return_type', detail: 'A number that determines on which day the week begins. The default is 1.' },
         },
     },
     WORKDAY: {
@@ -357,8 +358,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'start_date', detail: 'A date that represents the start date.' },
+            endDate: { name: 'end_date', detail: 'A date that represents the end date.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
 };

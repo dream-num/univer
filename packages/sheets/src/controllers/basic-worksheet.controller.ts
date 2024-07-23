@@ -170,6 +170,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetNumfmtMutation,
             ReorderRangeMutation,
             EmptyMutation,
+            SetWorksheetColWidthMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -239,7 +240,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorkbookNameCommand,
                 SetWorksheetActivateCommand,
                 SetWorksheetActiveOperation,
-                SetWorksheetColWidthMutation,
+
                 SetWorksheetHideCommand,
                 SetWorksheetHideMutation,
                 SetWorksheetNameCommand,

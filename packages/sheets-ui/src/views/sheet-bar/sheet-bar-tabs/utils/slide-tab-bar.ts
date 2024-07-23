@@ -561,6 +561,9 @@ export class SlideTabBar {
 
             if (!this._activeTabItem) return;
 
+            // When blurring after editing the table name, _activeTabItemIndex and _compareIndex may not be equal, causing slideEnd to be triggered
+            const isFromScroll = this._autoScrollTime !== null;
+
             this._closeAutoScroll();
             this._activeTabItem.disableFixed();
             // this._sortedItems();
@@ -575,7 +578,7 @@ export class SlideTabBar {
 
             this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
             this._activeTabItem?.removeEventListener('pointerup', this._upAction);
-            if (this._config.onSlideEnd && this._activeTabItemIndex !== this._compareIndex) {
+            if (this._config.onSlideEnd && this._activeTabItemIndex !== this._compareIndex && isFromScroll) {
                 this.removeListener();
                 this._config.onSlideEnd(upEvent, this._compareIndex || 0);
             }

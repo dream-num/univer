@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IPosition, ITransformState, Nullable, Worksheet } from '@univerjs/core';
+import type { IDisposable, IPosition, ITransformState, JSONLike, Nullable, Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, Inject, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
@@ -37,7 +37,14 @@ export interface ICanvasFloatDom {
     componentKey: string;
     unitId?: string;
     subUnitId?: string;
+    /**
+     * props of component, wouldn't save to snapshot
+     */
     props?: Record<string, any>;
+    /**
+     * data of component, will save to snapshot, json-like data
+     */
+    data?: JSONLike;
 }
 
 interface ICanvasFloatDomInfo {
@@ -240,7 +247,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return;
                     }
 
-                    const { transform, drawingType } = floatDomParam;
+                    const { transform, drawingType, data } = floatDomParam;
 
                     if (drawingType !== DrawingTypeEnum.DRAWING_DOM) {
                         return;
@@ -308,6 +315,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                             canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                         },
                         props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
+                        data,
                     });
 
                     const listener = rect.onTransformChange$.subscribeEvent(() => {
@@ -444,7 +452,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
 
         const { unitId, subUnitId } = target;
-        const { initPosition, componentKey } = layer;
+        const { initPosition, componentKey, data } = layer;
         const id = Tools.generateRandomId();
 
         const sheetTransform = this._getPosition(initPosition, unitId);
@@ -467,6 +475,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 width: initPosition.endX - initPosition.startX,
                 height: initPosition.endY - initPosition.startY,
             },
+            data,
         };
 
         this._commandService.executeCommand(InsertSheetDrawingCommand.id, {

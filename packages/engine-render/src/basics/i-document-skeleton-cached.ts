@@ -34,6 +34,7 @@ export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     top: number;
     st: number; // startIndex 文本开始索引
     ed?: number; // endIndex 文本结束索引
+    parent?: unknown;
 }
 
 export interface ISkeletonResourceReference {

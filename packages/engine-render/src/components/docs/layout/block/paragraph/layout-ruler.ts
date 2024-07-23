@@ -675,6 +675,7 @@ function _updateAndPositionTable(
 
         if (newTable != null) {
             page.skeTables.set(newTable.tableId, newTable);
+            newTable.parent = page;
         }
 
         skeTableInParagraph.clear();
@@ -685,6 +686,7 @@ function _updateAndPositionTable(
         return true;
     } else {
         page.skeTables.set(tableId, table);
+        table.parent = page;
 
         return false;
     }

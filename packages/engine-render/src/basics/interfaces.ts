@@ -160,6 +160,7 @@ export interface INodeSearch {
     page: number;
     segmentPage: number; // The index of the page where the header and footer reside.
     pageType: DocumentSkeletonPageType;
+    path: (string | number)[];
 }
 
 export interface INodePosition extends INodeSearch {

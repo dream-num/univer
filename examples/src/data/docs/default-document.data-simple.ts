@@ -48,7 +48,7 @@ const exampleTables = [
     ['赵六', '80', '90', '70', '240'],
 ];
 
-const dataStream = `这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r这是一个表格的用例\r${createTableDataStream(exampleTables)}班级成绩统计\r\n`;
+const dataStream = `这是一个表格的用例\r${createTableDataStream(exampleTables)}班级成绩统计\r\n`;
 
 const startIndex = dataStream.indexOf(TABLE_START);
 const endIndex = dataStream.indexOf(TABLE_END);

@@ -20,6 +20,7 @@ import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
 import { getDT, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { getSelectionText, TextSelectionManagerService } from '@univerjs/docs';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
@@ -84,6 +85,7 @@ export const StartAddCommentOperation: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const textSelectionRenderService = accessor.get(ITextSelectionRenderManager);
         const userManagerService = accessor.get(UserManagerService);
         const docCommentService = accessor.get(DocThreadCommentService);
         const commandService = accessor.get(ICommandService);
@@ -128,6 +130,7 @@ export const StartAddCommentOperation: ICommand = {
             threadId: commentId,
         };
 
+        textSelectionRenderService.blurEditor();
         docCommentService.startAdd(comment);
         panelService.setActiveComment({
             unitId,

@@ -152,6 +152,9 @@ export interface ITextSelectionRenderManager {
     hasFocus(): boolean;
     focus(): void;
     blur(): void;
+
+    focusEditor(): void;
+    blurEditor(): void;
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, document: Documents): void;
     dispose(): void;
     handleDblClick(evt: IPointerEvent | IMouseEvent): void;
@@ -230,6 +233,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _document: Nullable<Documents>;
     private _scenePointerMoveSubs: Array<Subscription> = [];
     private _scenePointerUpSubs: Array<Subscription> = [];
+    private _editorFocusing = true;
 
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
@@ -360,11 +364,24 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     focus(): void {
+        if (!this._editorFocusing) {
+            return;
+        }
         this._input.focus();
     }
 
     blur() {
         this._input.blur();
+    }
+
+    focusEditor(): void {
+        this._editorFocusing = true;
+        this.focus();
+    }
+
+    blurEditor(): void {
+        this._editorFocusing = false;
+        this.blur();
     }
 
     // FIXME: for editor cell editor we don't need to blur the input element
@@ -494,7 +511,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         if (!this._scene || !this._isSelectionEnabled) {
             return;
         }
-
+        this._editorFocusing = true;
         const scene = this._scene;
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;

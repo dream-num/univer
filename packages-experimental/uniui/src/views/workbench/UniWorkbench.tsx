@@ -197,8 +197,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             onContextMenu={(e) => e.preventDefault()}
                         >
                             <ReactFlow
-                                maxZoom={1}
-                                minZoom={1}
+                                maxZoom={2}
+                                minZoom={0.2}
                                 zoomOnDoubleClick={!disableReactFlowBehavior}
                                 zoomOnPinch={!disableReactFlowBehavior}
                                 zoomOnScroll={!disableReactFlowBehavior}
@@ -207,7 +207,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 nodes={nodes}
                                 nodeTypes={nodeTypes}
                                 onNodesChange={onNodesChange}
-                                // TODO: should call every units canvas to resize in a debounce mananer
                                 onResize={resizeUnits}
                                 fitView
                                 onWheel={() => instanceService.focusUnit(null)}
@@ -222,6 +221,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             >
                                 <Background></Background>
                             </ReactFlow>
+
+                            {/* Sheet cell editors etc. Their size would not be affected the scale of ReactFlow. */}
                             <ComponentContainer key="content" components={contentComponents} />
                         </section>
                     </div>

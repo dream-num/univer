@@ -97,6 +97,7 @@ import {
 } from '@univerjs/sheets-ui';
 import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 
+import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs';
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
@@ -224,7 +225,7 @@ export class PromptController extends Disposable {
 
         this._initSelectionsEndListener();
 
-        this._initialExitEditor();
+        this._closeRangePromptWhenEditorInvisible();
 
         this._initialEditorInputChange();
 
@@ -333,16 +334,22 @@ export class PromptController extends Disposable {
         );
     }
 
-    private _initialExitEditor() {
-        this.disposeWithMe(
-            this._editorBridgeService.afterVisible$.subscribe((visibleParam) => {
-                if (visibleParam.visible === true) {
-                    return;
-                }
+    private _closeRangePromptWhenEditorInvisible() {
+        // NOTE: to be refactored
 
-                this._closeRangePrompt();
+        this.disposeWithMe(this._editorBridgeService.afterVisible$
+            .pipe(distinctUntilKeyChanged('visible'))
+            .subscribe((visibleParam) => {
+                if (!visibleParam.visible) this._closeRangePrompt();
             })
+
         );
+
+        this.disposeWithMe(this._contextService.subscribeContextValue$(FORMULA_EDITOR_ACTIVATED)
+            .pipe(distinctUntilChanged())
+            .subscribe((activated) => {
+                if (!activated) this._closeRangePrompt();
+            }));
     }
 
     private _initialChangeEditor() {

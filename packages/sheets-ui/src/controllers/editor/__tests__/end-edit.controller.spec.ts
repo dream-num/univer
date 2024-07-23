@@ -18,9 +18,11 @@ import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univ
 import { CellValueType, IContextService, IResourceLoaderService, LocaleService } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCellDataByInput } from '../editing.render-controller';
+import { normalizeString } from '../../utils/char-tools';
 import { createTestBed } from './create-test-bed';
+import { IMockFunctionService, MockFunctionService } from './mock-function.service';
 
 const richTextDemo: IDocumentData = {
     id: 'd',
@@ -67,6 +69,19 @@ const richTextDemo: IDocumentData = {
     },
 };
 
+vi.mock('@univerjs/engine-formula', async () => {
+    const actual = await vi.importActual('@univerjs/engine-formula');
+    const { IMockFunctionService, MockFunctionService } = await import(
+        './mock-function.service'
+    );
+
+    return {
+        ...actual,
+        IMockFunctionService,
+        MockFunctionService,
+    };
+});
+
 describe('Test EndEditController', () => {
     let univer: Univer;
     let workbook: Workbook;
@@ -77,9 +92,12 @@ describe('Test EndEditController', () => {
     let spreadsheetSkeleton: SpreadsheetSkeleton;
     let resourceLoaderService: IResourceLoaderService;
     let getCellDataByInputCell: (cell: ICellData, inputCell: ICellData) => ICellData | null;
+    let normalizeStringByLexer: (str: string) => string;
 
     beforeEach(() => {
-        const testBed = createTestBed();
+        const testBed = createTestBed(undefined, [
+            [IMockFunctionService, { useClass: MockFunctionService }],
+        ]);
 
         univer = testBed.univer;
         workbook = testBed.sheet;
@@ -106,8 +124,13 @@ describe('Test EndEditController', () => {
             if (!documentLayoutObject) {
                 throw new Error('documentLayoutObject is undefined');
             }
+            // @ts-ignore
+            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot(), localeService, get(IMockFunctionService));
+        };
 
-            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot());
+        normalizeStringByLexer = (str: string) => {
+            // @ts-ignore
+            return normalizeString(str, lexerTreeBuilder, get(IMockFunctionService));
         };
     });
 
@@ -148,7 +171,7 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: null, f: '=SUM(1)', p: null });
+            expect(cellData).toEqual({ v: null, f: '=SUM(1)', si: null, p: null, t: undefined });
         });
         it('Clear formula cell', () => {
             const cell = {
@@ -193,6 +216,57 @@ describe('Test EndEditController', () => {
 
             cellData = getCellDataByInputCell(cell, { v: "'=SUM" });
             expect(cellData).toEqual({ v: '=SUM', t: CellValueType.FORCE_STRING, f: null, si: null, p: null });
+        });
+
+        it('Function normalizeString', () => {
+            // boolean
+            expect(normalizeStringByLexer('ｔｒｕｅ')).toEqual('TRUE');
+
+            // force string
+            expect(normalizeStringByLexer('＇ｔｒｕｅ')).toEqual("'ｔｒｕｅ");
+
+            // formatted number
+            expect(normalizeStringByLexer('１００％')).toEqual('100%');
+            expect(normalizeStringByLexer('＄１００')).toEqual('$100');
+            expect(normalizeStringByLexer('０．１１')).toEqual('0.11');
+            expect(normalizeStringByLexer('２０２０－１－１')).toEqual('2020-1-1');
+            expect(normalizeStringByLexer('１０ｅ＋１')).toEqual('10e+1');
+
+            // formula
+            expect(normalizeStringByLexer('＝ｗ')).toEqual('=ｗ');
+            expect(normalizeStringByLexer('=a1')).toEqual('=A1');
+
+            expect(normalizeStringByLexer('＝＂１＂')).toEqual('="１"');
+            expect(normalizeStringByLexer('＝＇１＇')).toEqual("=＇１'"); // invalid in Excel
+            expect(normalizeStringByLexer('＝“２”')).toEqual('=“２”');
+            expect(normalizeStringByLexer('＝“ｗ”')).toEqual('=“ｗ”');
+            expect(normalizeStringByLexer('＝“１')).toEqual('=“１');
+            expect(normalizeStringByLexer('=‘１’')).toEqual('=‘１’');
+            expect(normalizeStringByLexer('=‘１')).toEqual('=‘１');
+
+            expect(normalizeStringByLexer('＝１００％＋２＋ｗ')).toEqual('=100%+2+ｗ');
+            expect(normalizeStringByLexer('＝ｔｒｕｅ＋１')).toEqual('=TRUE+1');
+            expect(normalizeStringByLexer('＝ｔｒｕｅ＋ｗ')).toEqual('=TRUE+ｗ');
+            expect(normalizeStringByLexer('＝ｉｆ')).toEqual('=ｉｆ');
+            expect(normalizeStringByLexer('＝ｉｆ（')).toEqual('=IF('); // invalid in Excel
+            expect(normalizeStringByLexer('＝＠ｉｆ（ｔｒｕｅ＝１，＂　Ａ＄，＂＆＂＋－×＝＜＞％＄＠＆＊＃＂，＂false＂）')).toEqual('=@IF(TRUE=1,"　Ａ＄，"&"＋－×＝＜＞％＄＠＆＊＃","false")');
+            expect(normalizeStringByLexer('＝ｉｆ（０，１，”３“）')).toEqual('=IF(0,1,”３“)');
+            expect(normalizeStringByLexer('＝ｉｆ（Ａ１＝＂＊２？３＂，１，２）')).toEqual('=IF(A1="＊２？３",1,2)');
+            expect(normalizeStringByLexer('＝｛１，２｝')).toEqual('={1,2}');
+
+            // normal string
+            expect(normalizeStringByLexer('１００％＋２－×＝＜＞％＄＠＆＊＃')).toEqual('１００％＋２－×＝＜＞％＄＠＆＊＃');
+            expect(normalizeStringByLexer('＄ｗ')).toEqual('＄ｗ');
+            expect(normalizeStringByLexer('ｔｒｕｅ＋１')).toEqual('ｔｒｕｅ＋１');
+
+            // TODO@Dushusir: Differences from Excel, pending,
+            // '＝＠＠ｉｆ＠ｓ'
+            // '＝＠＠ｉｆ＋＠ｓ'
+            // '=SUM(  "1"  ,  2  )'
+            // '＝＋－ｉｆ'
+            // eslint-disable-next-line no-irregular-whitespace
+            // '＝ｉｆ（１，“Ａ”，“false　”）'
+            // '＝Ａ１＋Ｂ２－Ｃ３＊（Ｄ４＞＝Ｅ５）／（Ｆ６＜Ｇ７）'
         });
     });
 });

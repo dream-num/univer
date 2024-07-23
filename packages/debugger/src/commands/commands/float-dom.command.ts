@@ -35,6 +35,9 @@ export const CreateFloatDomCommand: ICommand = {
             props: {
                 a: 1,
             },
+            data: {
+                aa: '128',
+            },
         });
         return true;
     },

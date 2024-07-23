@@ -92,10 +92,10 @@ export class DocCanvasPopManagerService extends Disposable {
             };
 
             const offsetBound = transformBound2OffsetBound(bound, scene);
-            const topOffset = engine.getCanvasElement().getBoundingClientRect().top;
+            const { top: topOffset, left: leftOffset } = engine.getCanvasElement().getBoundingClientRect();
             const position = {
-                left: offsetBound.left,
-                right: offsetBound.right,
+                left: offsetBound.left + leftOffset,
+                right: offsetBound.right + leftOffset,
                 top: offsetBound.top + topOffset,
                 bottom: offsetBound.bottom + topOffset,
             };
@@ -142,15 +142,15 @@ export class DocCanvasPopManagerService extends Disposable {
             const { docsLeft, docsTop } = documentOffsetConfig;
             const canvasElement = engine.getCanvasElement();
             const canvasClientRect = canvasElement.getBoundingClientRect();
-            const { top } = canvasClientRect;
+            const { top, left } = canvasClientRect;
 
             const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
             const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
             const bounds = getLineBounding(borderBoxPointGroup);
             const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
                 // FIXME: this position is incorrect in uni-mode.
-                left: i.left + docsLeft,
-                right: i.right + docsLeft,
+                left: i.left + docsLeft + left,
+                right: i.right + docsLeft + left,
                 top: i.top + docsTop + top,
                 bottom: i.bottom + docsTop + top,
             }));

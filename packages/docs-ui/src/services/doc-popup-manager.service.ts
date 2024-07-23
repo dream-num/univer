@@ -16,7 +16,7 @@
 
 import type { IDisposable, ITextRange } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor, pxToNum } from '@univerjs/engine-render';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
 import { ICanvasPopupService } from '@univerjs/ui';
@@ -142,17 +142,19 @@ export class DocCanvasPopManagerService extends Disposable {
             const { docsLeft, docsTop } = documentOffsetConfig;
             const canvasElement = engine.getCanvasElement();
             const canvasClientRect = canvasElement.getBoundingClientRect();
-            const { top, left } = canvasClientRect;
+            const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+            const { top, left, width } = canvasClientRect; // real width affected by scale
+            const scaleAdjust = width / widthOfCanvas;
+
             const { scaleX, scaleY } = scene.getAncestorScale();
             const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
             const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
             const bounds = getLineBounding(borderBoxPointGroup);
             const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
-                // FIXME: this position is incorrect in uni-mode.
-                left: i.left + docsLeft * scaleX + left,
-                right: i.right + docsLeft * scaleX + left,
-                top: i.top + docsTop * scaleY + top,
-                bottom: i.bottom + docsTop * scaleY + top,
+                left: (i.left + docsLeft * scaleX) * scaleAdjust + left,
+                right: (i.right + docsLeft * scaleX) * scaleAdjust + left,
+                top: (i.top + docsTop * scaleY) * scaleAdjust + top,
+                bottom: (i.bottom + docsTop * scaleY) * scaleAdjust + top,
             }));
 
             return res;

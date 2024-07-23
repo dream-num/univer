@@ -39,6 +39,7 @@ import type {
 } from '@xyflow/react';
 import {
     Background,
+    NodeResizer,
     ReactFlow,
     ReactFlowProvider,
     useNodesState,
@@ -49,7 +50,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
 import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
-import { useUnitTitle } from '../hooks/title';
+import { useUnitFocused, useUnitTitle } from '../hooks/title';
 import { UniControls } from './UniControls';
 import styles from './workbench.module.less';
 import { type FloatingToolbarRef, UniFloatingToolbar } from './UniFloatToolbar';
@@ -154,6 +155,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             width: '660px',
             height: '600px',
             display: 'flex',
+            borderRadius: '8px',
             border: '1px solid #ccc',
             backgroundColor: '#fff',
         },
@@ -197,8 +199,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             onContextMenu={(e) => e.preventDefault()}
                         >
                             <ReactFlow
-                                maxZoom={1}
-                                minZoom={1}
+                                maxZoom={2}
+                                minZoom={0.5}
                                 zoomOnDoubleClick={!disableReactFlowBehavior}
                                 zoomOnPinch={!disableReactFlowBehavior}
                                 zoomOnScroll={!disableReactFlowBehavior}
@@ -207,12 +209,14 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 nodes={nodes}
                                 nodeTypes={nodeTypes}
                                 onNodesChange={onNodesChange}
-                                // TODO: should call every units canvas to resize in a debounce mananer
                                 onResize={resizeUnits}
                                 fitView
-                                onWheel={() => instanceService.focusUnit(null)}
                                 onPointerDown={(event) => {
-                                    if (event.target instanceof HTMLElement && event.target.classList.contains('univer-render-canvas')) {
+                                    if (event.target instanceof HTMLElement
+                                        && (
+                                            event.target.classList.contains('univer-render-canvas')
+                                            || event.target.classList.contains('react-flow__resize-control'))
+                                    ) {
                                         return;
                                     }
 
@@ -222,6 +226,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             >
                                 <Background></Background>
                             </ReactFlow>
+
+                            {/* Sheet cell editors etc. Their size would not be affected the scale of ReactFlow. */}
                             <ComponentContainer key="content" components={contentComponents} />
                         </section>
                     </div>
@@ -264,17 +270,38 @@ interface IUnitNodeProps {
 }
 
 function UnitNode({ data }: IUnitNodeProps) {
-    const title = useUnitTitle(data.unitId);
+    const { unitId } = data;
+    const title = useUnitTitle(unitId);
+    const focused = useUnitFocused(unitId);
+
+    const instanceService = useDependency(IUniverInstanceService);
+    const contextService = useDependency(IContextService);
+
+    const disableChangingUnitFocusing = useObservable(
+        () => contextService.subscribeContextValue$(UNI_DISABLE_CHANGING_FOCUS_KEY),
+        false,
+        false,
+        []
+    );
+
+    const focus = useCallback(() => {
+        if (!disableChangingUnitFocusing && !focused) {
+            instanceService.focusUnit(unitId);
+        }
+    }, [disableChangingUnitFocusing, focused, instanceService, unitId]);
 
     return (
-        <div className={styles.uniNodeContainer}>
+        <div className={styles.uniNodeContainer} onPointerDownCapture={focus}>
+            <NodeResizer isVisible={focused} minWidth={180} minHeight={100} />
             <UnitRenderer
                 key={data.unitId}
                 {...data}
             />
+
             <div className={styles.uniNodeDragHandle}>
                 <MenuSingle />
             </div>
+
             <div className={styles.uniNodeTitle}>
                 {title}
             </div>
@@ -295,22 +322,9 @@ function UnitRenderer(props: IUnitRendererProps) {
     const mountRef = useRef<HTMLDivElement>(null);
 
     const instanceService = useDependency(IUniverInstanceService);
-    const contextService = useDependency(IContextService);
 
     const focusedUnit = useObservable(instanceService.focused$);
     const focused = focusedUnit === unitId;
-    const disableChangingUnitFocusing = useObservable(
-        () => contextService.subscribeContextValue$(UNI_DISABLE_CHANGING_FOCUS_KEY),
-        false,
-        false,
-        []
-    );
-
-    const focus = useCallback(() => {
-        if (!disableChangingUnitFocusing && !focused) {
-            instanceService.focusUnit(unitId);
-        }
-    }, [disableChangingUnitFocusing, focused, instanceService, unitId]);
 
     useEffect(() => {
         if (mountRef.current) {
@@ -326,7 +340,6 @@ function UnitRenderer(props: IUnitRendererProps) {
             ref={mountRef}
             // We bind these focusing events on capture phrase so the
             // other event handlers would have correct currently focused unit.
-            onPointerUpCapture={focus}
             onWheel={(event) => event.stopPropagation()}
         >
         </div>

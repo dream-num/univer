@@ -33,6 +33,8 @@ import { Row } from './row';
 import { Rows } from './rows';
 import { Sort } from './sort';
 import { Sortby } from './sortby';
+import { Transpose } from './transpose';
+import { Unique } from './unique';
 import { Vlookup } from './vlookup';
 import { Vstack } from './vstack';
 import { Xlookup } from './xlookup';
@@ -59,6 +61,8 @@ export const functionLookup = [
     [Rows, FUNCTION_NAMES_LOOKUP.ROWS],
     [Sort, FUNCTION_NAMES_LOOKUP.SORT],
     [Sortby, FUNCTION_NAMES_LOOKUP.SORTBY],
+    [Transpose, FUNCTION_NAMES_LOOKUP.TRANSPOSE],
+    [Unique, FUNCTION_NAMES_LOOKUP.UNIQUE],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
     [Vstack, FUNCTION_NAMES_LOOKUP.VSTACK],
     [Xlookup, FUNCTION_NAMES_LOOKUP.XLOOKUP],

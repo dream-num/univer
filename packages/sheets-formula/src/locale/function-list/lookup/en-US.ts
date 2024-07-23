@@ -486,8 +486,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'A range of cells or an array in a worksheet.' },
         },
     },
     UNIQUE: {
@@ -500,8 +499,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The range or array from which unique rows or columns are returned.' },
+            byCol: { name: 'by_col', detail: 'Is a logical value: compares rows to each other and returns unique values ​​= FALSE, or is omitted; compares columns to each other and returns unique values ​​= TRUE.' },
+            exactlyOnce: { name: 'exactly_once', detail: 'Is a logical value: returns rows or columns from the array that appear only once = TRUE; returns all distinct rows or columns from the array = FALSE, or has been omitted.' },
         },
     },
     VLOOKUP: {

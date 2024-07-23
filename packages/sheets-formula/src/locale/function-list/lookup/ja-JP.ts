@@ -475,8 +475,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: 'ワークシート内のセルの範囲または配列。' },
         },
     },
     UNIQUE: {
@@ -489,8 +488,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '一意の行または列が返される範囲または配列を返します。' },
+            byCol: { name: '列ごと', detail: '論理値です。行を相互に比較して一意の値 = FALSE を返します。省略されます。列を相互に比較して一意の値 = TRUE を返します。' },
+            exactlyOnce: { name: '1回だけ', detail: '論理値です。配列から 1 回だけ出現する行または列を返します = TRUE; 配列からすべての個別の行または列を返します = FALSE、または省略されます。' },
         },
     },
     VLOOKUP: {

@@ -473,8 +473,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '工作表中的单元格区域或数组。' },
         },
     },
     UNIQUE: {
@@ -487,8 +486,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '从中返回唯一行或列的范围或数组。' },
+            byCol: { name: '依据列', detail: '是一个逻辑值：将行彼此比较并返回唯一值 = FALSE，或已省略；将列彼此比较并返回唯一值 = TRUE。' },
+            exactlyOnce: { name: '仅一次', detail: '是一个逻辑值：从数组中返回只出现一次的行或列 = TRUE；从数组中返回所有不同的行或列 = FALSE，或已省略。' },
         },
     },
     VLOOKUP: {

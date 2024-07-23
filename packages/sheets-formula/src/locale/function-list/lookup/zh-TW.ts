@@ -473,8 +473,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '工作表中的儲存格區域或陣列。' },
         },
     },
     UNIQUE: {
@@ -487,8 +486,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '從中傳回唯一行或列的範圍或陣列。' },
+            byCol: { name: '依據列', detail: '是一個邏輯值：將行彼此比較並傳回唯一值 = FALSE，或已省略；將列彼此比較並傳回唯一值 = TRUE。' },
+            exactlyOnce: { name: '僅一次', detail: '是邏輯值：從陣列傳回只出現一次的行或列 = TRUE；從陣列傳回所有不同的行或列 = FALSE，或已省略。' },
         },
     },
     VLOOKUP: {

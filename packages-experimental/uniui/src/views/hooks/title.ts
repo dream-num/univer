@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { IUniverInstanceService, useDependency } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { useMemo } from 'react';
@@ -23,4 +24,10 @@ export function useUnitTitle(unitId: string): string | undefined {
     const unit = useMemo(() => instanceService.getUnit(unitId), [unitId, instanceService]);
     const title = useObservable<string>(unit?.name$, '', false, [unit]);
     return title;
+}
+
+export function useUnitFocused(unitId: string): boolean {
+    const instanceService = useDependency(IUniverInstanceService);
+    const focusedUnitId = useObservable<Nullable<string>>(instanceService.focused$);
+    return unitId === focusedUnitId;
 }

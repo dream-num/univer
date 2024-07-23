@@ -41,9 +41,7 @@ export class UniverDebuggerPlugin extends Plugin {
             [PerformanceMonitorController],
             [E2EMemoryController],
         ] as Dependency[]).forEach((d) => injector.add(d));
-    }
 
-    override onRendered(): void {
         this._injector.add([
             DebuggerController,
             {

@@ -155,6 +155,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             width: '660px',
             height: '600px',
             display: 'flex',
+            borderRadius: '8px',
             border: '1px solid #ccc',
             backgroundColor: '#fff',
         },

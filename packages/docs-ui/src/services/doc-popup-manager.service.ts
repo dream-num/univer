@@ -90,14 +90,19 @@ export class DocCanvasPopManagerService extends Disposable {
                 top,
                 bottom: top + height,
             };
+            const canvasElement = engine.getCanvasElement();
+            const canvasClientRect = canvasElement.getBoundingClientRect();
+            const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
 
             const offsetBound = transformBound2OffsetBound(bound, scene);
-            const { top: topOffset, left: leftOffset } = engine.getCanvasElement().getBoundingClientRect();
+            const { top: topOffset, left: leftOffset, width: domWidth } = canvasClientRect;
+            const scaleAdjust = domWidth / widthOfCanvas;
+
             const position = {
-                left: offsetBound.left + leftOffset,
-                right: offsetBound.right + leftOffset,
-                top: offsetBound.top + topOffset,
-                bottom: offsetBound.bottom + topOffset,
+                left: (offsetBound.left * scaleAdjust) + leftOffset,
+                right: (offsetBound.right * scaleAdjust) + leftOffset,
+                top: (offsetBound.top * scaleAdjust) + topOffset,
+                bottom: (offsetBound.bottom * scaleAdjust) + topOffset,
             };
             return position;
         };

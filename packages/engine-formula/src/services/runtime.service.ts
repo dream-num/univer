@@ -459,10 +459,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             this._runtimeArrayFormulaCellData[unitId] = {};
         }
 
-        const arrayFormulaCellData = this._runtimeArrayFormulaCellData[unitId]!;
+        const runtimeArrayFormulaCellData = this._runtimeArrayFormulaCellData[unitId]!;
 
-        if (arrayFormulaCellData[sheetId] == null) {
-            arrayFormulaCellData[sheetId] = new ObjectMatrix<Nullable<ICellData>>();
+        if (runtimeArrayFormulaCellData[sheetId] == null) {
+            runtimeArrayFormulaCellData[sheetId] = new ObjectMatrix<Nullable<ICellData>>();
         }
 
         if (this._runtimeClearArrayFormulaCellData[unitId] === undefined) {
@@ -477,7 +477,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const sheetData = unitData[sheetId];
 
-        const arrayUnitData = arrayFormulaCellData[sheetId];
+        const runtimeArrayUnitData = runtimeArrayFormulaCellData[sheetId];
 
         const clearArrayUnitData = clearArrayFormulaCellData[sheetId];
 
@@ -521,6 +521,25 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 const errorObject = objectValueToCellValue(ErrorValueObject.create(ErrorType.SPILL));
                 sheetData.setValue(row, column, errorObject);
                 clearArrayUnitData.setValue(row, column, errorObject);
+
+                /**
+                 * When there are values within the array formula range, the entire formula will result in an error.
+                 * In this case, you need to clear the previous range data to prevent other formulas from referencing the old values.
+                 */
+                const unitData = this._currentConfigService.getUnitData();
+                objectValueRefOrArray.iterator((_, rowIndex, columnIndex) => {
+                    const currentRow = rowIndex - startRow + row;
+                    const currentColumn = columnIndex - startColumn + column;
+
+                    if (rowIndex === startRow && columnIndex === startColumn) {
+                        runtimeArrayUnitData.setValue(row, column, errorObject);
+                    } else if (unitData[unitId]?.[sheetId]?.cellData?.getValue(currentRow, currentColumn) != null) {
+                        const cell = unitData[unitId]?.[sheetId]?.cellData.getValue(currentRow, currentColumn);
+                        runtimeArrayUnitData.setValue(currentRow, currentColumn, cell);
+                    } else {
+                        runtimeArrayUnitData.setValue(currentRow, currentColumn, { v: '' });
+                    }
+                });
             } else {
                 const spillError = ErrorValueObject.create(ErrorType.SPILL);
                 objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
@@ -541,7 +560,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                     const currentRow = rowIndex - startRow + row;
                     const currentColumn = columnIndex - startColumn + column;
 
-                    arrayUnitData.setValue(currentRow, currentColumn, value);
+                    runtimeArrayUnitData.setValue(currentRow, currentColumn, value);
                 });
             }
         } else {

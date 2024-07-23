@@ -20,6 +20,7 @@ import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
@@ -50,8 +51,8 @@ export class DocThreadCommentSelectionController extends Disposable {
                     const params = commandInfo.params as ISetTextSelectionsOperationParams;
                     const { unitId, ranges } = params;
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-                    const primary = ranges[0];
-                    if (lastSelection?.startOffset === primary.startOffset && lastSelection.endOffset === primary.endOffset) {
+                    const primary = ranges[0] as ITextRangeWithStyle | undefined;
+                    if (lastSelection?.startOffset === primary?.startOffset && lastSelection?.endOffset === primary?.endOffset) {
                         return;
                     }
                     lastSelection = primary;

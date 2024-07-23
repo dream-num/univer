@@ -136,6 +136,7 @@ export class UniverUniUIPlugin extends Plugin {
                 useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
             }],
             [UniuiLeftSidebarController],
+            // [UniuiToolbarController],
         ], this._config.override);
         dependencies.forEach((dependency) => injector.add(dependency));
     }

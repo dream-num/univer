@@ -62,7 +62,11 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": ">=2.0.0",

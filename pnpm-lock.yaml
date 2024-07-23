@@ -533,9 +533,21 @@ importers:
       '@floating-ui/react-dom':
         specifier: ^2.1.1
         version: 2.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/docs-drawing-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-drawing-ui
       '@univerjs/icons':
         specifier: ^0.1.65
         version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../packages/sheets
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-drawing-ui
       '@xyflow/react':
         specifier: ^12.0.3
         version: 12.0.3(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

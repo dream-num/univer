@@ -26,7 +26,6 @@ import {
     ContextMenu,
     IMessageService,
     type IWorkbenchOptions,
-    Toolbar,
     UNI_DISABLE_CHANGING_FOCUS_KEY,
     useComponentsOfPart,
     useObservable,
@@ -51,9 +50,10 @@ import { MenuSingle } from '@univerjs/icons';
 import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
 import { useUnitFocused, useUnitTitle } from '../hooks/title';
-import { UniControls } from './UniControls';
+import { type FloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
+import { UniControls } from '../uni-controls/UniControls';
+import { UniToolbar } from '../uni-toolbar/UniToolbar';
 import styles from './workbench.module.less';
-import { type FloatingToolbarRef, UniFloatingToolbar } from './UniFloatToolbar';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
 
 export interface IUniWorkbenchProps extends IWorkbenchOptions {
@@ -236,7 +236,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                         {header && (
                             <div className={styles.workbenchContainerHeader}>
                                 <div className={styles.workbenchToolbarWrapper}>
-                                    <Toolbar headerMenuComponents={headerMenuComponents} />
+                                    <UniToolbar />
                                     <ComponentContainer key="header" components={headerComponents} />
                                 </div>
                             </div>

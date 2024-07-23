@@ -42,6 +42,7 @@ import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 
+import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { DEFAULT_DOCUMENT_DATA_CN, DEFAULT_DOCUMENT_DATA_EN, DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
 import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
@@ -137,6 +138,7 @@ univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
+univer.registerPlugin(UniverDocsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {

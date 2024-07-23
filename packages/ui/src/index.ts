@@ -113,7 +113,8 @@ export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canv
 export { FloatDom } from './views/components/dom/FloatDom';
 export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
 export { Toolbar } from './views/components/doc-bars/Toolbar';
-
+export { ToolbarItem } from './views/components/doc-bars/ToolbarItem';
+export { ToolbarButton } from './views/components/doc-bars/Button/ToolbarButton';
 // #endregion
 
 // #region - all commands

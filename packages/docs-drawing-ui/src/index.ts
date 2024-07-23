@@ -31,4 +31,6 @@ export { EditDocDrawingOperation } from './commands/operations/edit-doc-drawing.
 export { InsertDocImageOperation } from './commands/operations/insert-image.operation';
 export { SidebarDocDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 
+export { IMAGE_MENU_ID } from './views/menu/image.menu';
+
 // #endregion

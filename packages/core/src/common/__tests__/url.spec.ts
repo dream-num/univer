@@ -21,14 +21,14 @@ describe('Test url utils', () => {
     it('should return true on legal url', () => {
         expect(isLegalUrl('https://univer.ai/')).toBeTruthy();
         expect(isLegalUrl('univer.ai')).toBeTruthy();
-        expect(isLegalUrl('univer.univer')).toBeFalsy();
     });
 
     it('should return false on illegal url', () => {
         expect(isLegalUrl('https://univer')).toBeFalsy();
         expect(isLegalUrl('univer')).toBeFalsy();
         expect(isLegalUrl('192.168')).toBeFalsy();
-        expect(isLegalUrl('咋看手机看到. 是多少')).toBeFalsy();
+        expect(isLegalUrl('咋看手机看到.是多少')).toBeFalsy();
+        expect(isLegalUrl('univer.univer')).toBeFalsy();
     });
 
     it('should add protocol to no protocol url', () => {

@@ -65,9 +65,10 @@ export const CellLinkEdit = () => {
                 setId(link.id);
                 const customLink = sidePanelService.findCustomHyperLink(link)
                 if (customLink) {
-                    setType(customLink.type);
-                    setPayload(customLink.payload);
-                    setDisplay(customLink.display);
+                    const customLinkInfo = customLink.convert(link)
+                    setType(customLinkInfo.type);
+                    setPayload(customLinkInfo.payload);
+                    setDisplay(customLinkInfo.display);
                     return;
                 }
                 setDisplay(link.display);

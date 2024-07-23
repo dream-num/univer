@@ -58,10 +58,10 @@ export class SheetsHyperLinkSidePanelService extends Disposable {
         return Array.from(this._customHyperLinks.values()).map(({ option }) => option);
     }
 
-    findCustomHyperLink(link: ICellHyperLink): { display: string, payload: string, type: string } | undefined {
+    findCustomHyperLink(link: ICellHyperLink) {
         const customLink = Array.from(this._customHyperLinks.values()).find(item => item.match(link));
 
-        return customLink?.convert(link)
+        return customLink
     }
 
     registerCustomHyperLink(customHyperLink: ICustomHyperLinkView) {

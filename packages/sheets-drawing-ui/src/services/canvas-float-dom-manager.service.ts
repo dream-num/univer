@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IPosition, ITransformState, JSONLike, Nullable, Worksheet } from '@univerjs/core';
+import type { IDisposable, IPosition, ITransformState, Nullable, Serializable, Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
@@ -44,7 +44,7 @@ export interface ICanvasFloatDom {
     /**
      * data of component, will save to snapshot, json-like data
      */
-    data?: JSONLike;
+    data?: Serializable;
 }
 
 interface ICanvasFloatDomInfo {

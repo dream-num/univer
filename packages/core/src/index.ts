@@ -17,7 +17,7 @@
 import { installShims } from './common/shims';
 
 installShims();
-export type { JSONLike } from './common/json';
+export type { Serializable } from './common/json';
 export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
 export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';

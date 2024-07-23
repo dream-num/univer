@@ -52,10 +52,6 @@ export class UniverDebuggerPlugin extends Plugin {
         this._debuggerController = this._injector.get(DebuggerController);
     }
 
-    override onRendered(): void {
-
-    }
-
     getDebuggerController() {
         return this._debuggerController;
     }

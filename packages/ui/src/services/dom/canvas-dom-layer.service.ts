@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPosition, JSONLike } from '@univerjs/core';
+import type { IPosition, Serializable } from '@univerjs/core';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 export interface IFloatDomLayout extends IPosition {
@@ -36,7 +36,7 @@ export interface IFloatDom {
     onPointerUp: (evt: PointerEvent | MouseEvent) => void;
     onWheel: (evt: WheelEvent) => void;
     props?: Record<string, any>;
-    data?: JSONLike;
+    data?: Serializable;
 }
 
 export class CanvasFloatDomService {

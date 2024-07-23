@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export type JSONLike =
-    | { [property: string]: JSONLike }
-    | readonly JSONLike[]
+export type Serializable =
+    | { [property: string]: Serializable }
+    | readonly Serializable[]
     | string
     | number
     | boolean

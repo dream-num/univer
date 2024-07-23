@@ -308,6 +308,8 @@ export class FormulaDataModel extends Disposable {
                     columnCount: sheetConfig.columnCount,
                     rowData: sheetConfig.rowData,
                     columnData: sheetConfig.columnData,
+                    defaultRowHeight: sheetConfig.defaultRowHeight,
+                    defaultColumnWidth: sheetConfig.defaultColumnWidth,
                 };
                 sheetNameMap[sheet.getName()] = sheet.getSheetId();
             }

@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '指定した期間の最初の日付または開始日を表す日付。' },
+            endDate: { name: '終了日', detail: '期間の最後の日付または終了日を表す日付。' },
+            method: { name: '単位', detail: '返される情報の種類。' },
         },
     },
     DATEVALUE: {
@@ -80,8 +81,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            endDate: { name: '終了日', detail: '開始日と終了日を指定し、その間の日数を求めます。' },
+            startDate: { name: '開始日', detail: '開始日と終了日を指定し、その間の日数を求めます。' },
         },
     },
     DAYS360: {
@@ -94,8 +95,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '開始日と終了日を指定し、その間の日数を求めます。' },
+            endDate: { name: '終了日', detail: '開始日と終了日を指定し、その間の日数を求めます。' },
+            method: { name: '方法', detail: '計算に米国方式とヨーロッパ方式のどちらを採用するかを、論理値で指定します。' },
         },
     },
     EDATE: {
@@ -122,8 +124,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '起算日を表す日付を指定します。' },
+            months: { name: '月', detail: '開始日から起算した月数を指定します。' },
         },
     },
     HOUR: {
@@ -149,8 +151,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            date: { name: '日付', detail: 'で日付や時刻の計算に使用されるコードのことです。' },
         },
     },
     MINUTE: {
@@ -299,8 +300,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '日付を指定します。' },
+            returnType: { name: '週の基準', detail: ' 週の始まりを何曜日とするかを数値で指定します。 既定値は 1 です。' },
         },
     },
     WORKDAY: {
@@ -357,8 +358,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '起算日を表す日付を指定します。' },
+            endDate: { name: '終了日', detail: '対象期間の最終日を表す日付を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
 };

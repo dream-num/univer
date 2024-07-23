@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
+import { FUNCTION_NAMES_DATE } from './function-names';
 import { DateFunction } from './date';
+import { Datedif } from './datedif';
 import { Datevalue } from './datevalue';
 import { Day } from './day';
+import { Days } from './days';
+import { Days360 } from './days360';
 import { Edate } from './edate';
-import { FUNCTION_NAMES_DATE } from './function-names';
+import { Eomonth } from './eomonth';
 import { Hour } from './hour';
+import { Isoweeknum } from './isoweeknum';
 import { Minute } from './minute';
 import { Month } from './month';
 import { Networkdays } from './networkdays';
@@ -30,16 +35,23 @@ import { Time } from './time';
 import { Timevalue } from './timevalue';
 import { Today } from './today';
 import { Weekday } from './weekday';
+import { Weeknum } from './weeknum';
 import { Workday } from './workday';
 import { WorkdayIntl } from './workday-intl';
 import { Year } from './year';
+import { Yearfrac } from './yearfrac';
 
 export const functionDate = [
     [DateFunction, FUNCTION_NAMES_DATE.DATE],
+    [Datedif, FUNCTION_NAMES_DATE.DATEDIF],
     [Datevalue, FUNCTION_NAMES_DATE.DATEVALUE],
     [Day, FUNCTION_NAMES_DATE.DAY],
+    [Days, FUNCTION_NAMES_DATE.DAYS],
+    [Days360, FUNCTION_NAMES_DATE.DAYS360],
     [Edate, FUNCTION_NAMES_DATE.EDATE],
+    [Eomonth, FUNCTION_NAMES_DATE.EOMONTH],
     [Hour, FUNCTION_NAMES_DATE.HOUR],
+    [Isoweeknum, FUNCTION_NAMES_DATE.ISOWEEKNUM],
     [Minute, FUNCTION_NAMES_DATE.MINUTE],
     [Month, FUNCTION_NAMES_DATE.MONTH],
     [Networkdays, FUNCTION_NAMES_DATE.NETWORKDAYS],
@@ -50,7 +62,9 @@ export const functionDate = [
     [Timevalue, FUNCTION_NAMES_DATE.TIMEVALUE],
     [Today, FUNCTION_NAMES_DATE.TODAY],
     [Weekday, FUNCTION_NAMES_DATE.WEEKDAY],
+    [Weeknum, FUNCTION_NAMES_DATE.WEEKNUM],
     [Workday, FUNCTION_NAMES_DATE.WORKDAY],
     [WorkdayIntl, FUNCTION_NAMES_DATE.WORKDAY_INTL],
     [Year, FUNCTION_NAMES_DATE.YEAR],
+    [Yearfrac, FUNCTION_NAMES_DATE.YEARFRAC],
 ];

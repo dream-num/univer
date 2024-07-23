@@ -15,7 +15,6 @@
  */
 
 export { UniverSheetsZenEditorPlugin } from './plugin';
-export { DOCS_ZEN_EDITOR_UNIT_ID_KEY } from './controllers/zen-editor.controller';
 
 // #region - all commands
 

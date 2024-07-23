@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, Inject } from '@univerjs/core';
+import { Disposable, FORMULA_EDITOR_ACTIVATED, ICommandService, IContextService, ILogService, Inject } from '@univerjs/core';
 import { makeSelection } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -58,6 +58,7 @@ export class DocFormulaPopupService extends Disposable {
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(UniFormulaService) private readonly _uniFormulaService: UniFormulaService,
+        @IContextService private readonly _contextService: IContextService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService
@@ -114,6 +115,7 @@ export class DocFormulaPopupService extends Disposable {
 
     lockPopup(): void {
         this._popupLocked = true;
+        this._contextService.setContextValue(FORMULA_EDITOR_ACTIVATED, true);
     }
 
     canConfirmPopup(): boolean {
@@ -154,6 +156,8 @@ export class DocFormulaPopupService extends Disposable {
         this.popupInfo?.disposable.dispose();
         this._popupInfo$.next(null);
         this._popupHovered$.next(false);
+
+        this._contextService.setContextValue(FORMULA_EDITOR_ACTIVATED, false);
 
         return true;
     }

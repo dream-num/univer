@@ -95,6 +95,7 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
+import type { Editor } from '@univerjs/ui';
 import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs';
@@ -1906,5 +1907,9 @@ export class PromptController extends Disposable {
         // TODO: Finally we will remove 'this._editorBridgeService.isVisible().visible === true' to
         // just the the context value.
         return this._editorBridgeService.isVisible().visible === true || this._contextService.getContextValue(FORMULA_EDITOR_ACTIVATED);
+    }
+
+    private _isSheetOrFormulaEditor(editor: Editor): boolean {
+        return editor.isSheetEditor() || editor.isFormulaEditor();
     }
 }

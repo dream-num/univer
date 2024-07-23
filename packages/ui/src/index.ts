@@ -83,7 +83,7 @@ export * from './utils';
 export { Menu } from './components/menu/desktop/Menu';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 export { ComponentContainer, useComponentsOfPart, type IComponentContainerProps } from './views/components/ComponentContainer';
-export { IEditorService, EditorService } from './services/editor/editor.service';
+export { IEditorService, EditorService, Editor } from './services/editor/editor.service';
 export { TextEditor } from './components/editor/TextEditor';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { ProgressBar } from './components/progress-bar/ProgressBar';

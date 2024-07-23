@@ -35,7 +35,7 @@ export function createTableSkeleton(
         throw new Error('Table not found');
     }
 
-    const tableSkeleton = _getNullTableSkeleton(startIndex, endIndex, table);
+    const tableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
     let rowTop = 0;
     let tableWidth = 0;
 
@@ -104,7 +104,7 @@ function _getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignm
     }
 }
 
-function _getNullTableSkeleton(
+export function getNullTableSkeleton(
     st: number,
     ed: number,
     table: ITable
@@ -134,5 +134,24 @@ function _getNullTableRowSkeleton(
         st,
         ed,
         parent,
+    };
+}
+
+export function getTableSliceId(tableId: string, sliceIndex: number) {
+    return `${tableId}#-#${sliceIndex}`;
+}
+
+export function getTableIdAndSliceIndex(tableSliceId: string) {
+    if (!tableSliceId.includes('#-#')) {
+        return {
+            tableId: tableSliceId,
+            sliceIndex: 0,
+        };
+    }
+
+    const [tableId, sliceIndex] = tableSliceId.split('#-#');
+    return {
+        tableId,
+        sliceIndex: Number(sliceIndex),
     };
 }

@@ -23,6 +23,7 @@ import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
     IDocumentSkeletonTable,
 } from '../../../../../basics/i-document-skeleton-cached';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
@@ -57,6 +58,7 @@ import {
     lineIterator,
 } from '../../tools';
 import { BreakPointType } from '../../line-breaker/break';
+import { getNullTableSkeleton, getTableIdAndSliceIndex, getTableSliceId } from '../table';
 
 export function layoutParagraph(
     ctx: ILayoutContext,
@@ -453,30 +455,13 @@ function _lineOperator(
     } = paragraphConfig;
 
     const {
-        // namedStyleType = NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED,
-        // horizontalAlign = HorizontalAlign.UNSPECIFIED,
-
         // direction,
         spaceAbove,
         spaceBelow,
-
-        // borderBetween,
-        // borderTop,
-        // borderBottom,
-        // borderLeft,
-        // borderRight,
-
         indentFirstLine,
         hanging,
         indentStart,
         indentEnd,
-        // tabStops = [],
-
-        // keepLines = BooleanNumber.FALSE,
-        // keepNext = BooleanNumber.FALSE,
-        // wordWrap = BooleanNumber.FALSE,
-        // widowControl = BooleanNumber.FALSE,
-        // shading,
     } = paragraphStyle;
 
     const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } = getLineHeightConfig(
@@ -517,6 +502,8 @@ function _lineOperator(
     const headerPage = skeHeaders?.get(headerId)?.get(pageWidth);
     const footerPage = skeFooters?.get(footerId)?.get(pageWidth);
 
+    let needOpenNewPageByTableLayout = false;
+
     // Handle float object relative to line.
     // FIXME: @jocs, it will not update the last line's drawings.
     if (preLine) {
@@ -541,7 +528,7 @@ function _lineOperator(
     }
 
     if (skeTableInParagraph != null && skeTableInParagraph.size > 0) {
-        _updateAndPositionTable(lineTop, lastPage, skeTableInParagraph);
+        needOpenNewPageByTableLayout = _updateAndPositionTable(lineTop, lastPage, section, skeTableInParagraph);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -550,9 +537,9 @@ function _lineOperator(
         lastPage,
         headerPage,
         footerPage
-    ); // WRAP_TOP_AND_BOTTOM 的 drawing 会改变行的起始 top
+    ); // WRAP_TOP_AND_BOTTOM 的 drawing 和 WRAP NONE 的 table 会改变行的起始 top
 
-    if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) {
+    if ((lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) || needOpenNewPageByTableLayout) {
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
@@ -654,31 +641,114 @@ function __updateAndPositionDrawings(
 function _updateAndPositionTable(
     lineTop: number,
     page: IDocumentSkeletonPage,
+    section: IDocumentSkeletonSection,
     skeTableInParagraph: Map<string, IDocumentSkeletonTable>
-) {
+): boolean {
     if (skeTableInParagraph.size === 0) {
-        return;
+        return false;
     }
 
-    for (const [tableId, table] of skeTableInParagraph) {
-        const { tableSource } = table;
+    // Paragraph will only have one table.
+    const [tableId, table] = skeTableInParagraph.entries().next().value;
+    const { tableSource } = table;
 
-        switch (tableSource.textWrap) {
-            case TableTextWrapType.NONE: {
-                table.top = lineTop;
-                break;
-            }
-            case TableTextWrapType.WRAP: {
-                // TODO: @JOCS, handle text wrap position.
-                break;
-            }
-            default: {
-                throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
-            }
+    switch (tableSource.textWrap) {
+        case TableTextWrapType.NONE: {
+            table.top = lineTop;
+            break;
+        }
+        case TableTextWrapType.WRAP: {
+            // TODO: @JOCS, handle text wrap position.
+            break;
+        }
+        default: {
+            throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
+        }
+    }
+
+    const { top, height } = table;
+
+    if (top + height > section.height) {
+        // Need split table.
+        const availableHeight = section.height - top;
+        const [newTable, remainTable] = _splitTable(table, availableHeight);
+
+        if (newTable != null) {
+            page.skeTables.set(newTable.tableId, newTable);
         }
 
+        skeTableInParagraph.clear();
+
+        if (remainTable != null) {
+            skeTableInParagraph.set(remainTable.tableId, remainTable);
+        }
+        return true;
+    } else {
         page.skeTables.set(tableId, table);
+
+        return false;
     }
+}
+
+// FIXME: @JOCS 重新创建两个 table skeleton 比复用之前 table 更好？
+function _splitTable(
+    table: IDocumentSkeletonTable,
+    availableHeight: number
+): [
+        Nullable<IDocumentSkeletonTable>,
+        Nullable<IDocumentSkeletonTable>
+    ] {
+    // 处理极端情况，表格第一行高度都大于可用高度，那么表格从下一页开始排版
+    if (table.rows[0].height > availableHeight) {
+        return [null, table];
+    }
+
+    const { tableId: tableSliceId, tableSource } = table;
+    const { tableId, sliceIndex } = getTableIdAndSliceIndex(tableSliceId);
+    const newTable = getNullTableSkeleton(0, 0, tableSource);
+
+    // Reset table id;
+    newTable.tableId = getTableSliceId(tableId, sliceIndex);
+    newTable.left = table.left;
+    newTable.width = table.width;
+    newTable.height = 0;
+    newTable.top = table.top;
+    table.top = 0;
+
+    let remainHeight = availableHeight;
+
+    while (table.rows.length && remainHeight >= table.rows[0].height) {
+        const row = table.rows.shift()!;
+
+        newTable.rows.push(row);
+
+        table.height -= row.height;
+        newTable.height += row.height;
+
+        // Reset row's parent index.
+        row.parent = newTable;
+
+        remainHeight -= row.height;
+    }
+
+    table.tableId = getTableSliceId(tableId, sliceIndex + 1);
+
+    // Reset st and ed.
+
+    newTable.st = newTable.rows[0].st - 1;
+    newTable.ed = newTable.rows[newTable.rows.length - 1].ed + 1;
+
+    if (table.rows.length > 0) {
+        table.st = table.rows[0].st - 1;
+        table.ed = table.rows[table.rows.length - 1].ed + 1;
+
+        // Reset row top.
+        for (const row of table.rows) {
+            row.top -= newTable.height;
+        }
+    }
+
+    return [newTable, table.rows.length > 0 ? table : null];
 }
 
 function _getCustomBlockIdsInLine(line: IDocumentSkeletonLine) {

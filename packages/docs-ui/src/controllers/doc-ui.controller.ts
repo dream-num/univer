@@ -16,7 +16,7 @@
 
 import { connectInjector, Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
@@ -50,6 +50,7 @@ import {
     UnderlineMenuItemFactory,
 } from './menu/menu';
 import { CopyMenuFactory, CutMenuFactory, DeleteMenuFactory, PasteMenuFactory } from './menu/context-menu';
+import { BoldShortCut, ItalicShortCut, StrikeThroughShortCut, SubscriptShortCut, SuperscriptShortCut, UnderlineShortCut } from './shortcut/toolbar.shortcut';
 
 // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
@@ -61,7 +62,8 @@ export class DocUIController extends Disposable {
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IMenuService private readonly _menuService: IMenuService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
 
@@ -126,11 +128,25 @@ export class DocUIController extends Disposable {
         });
     }
 
+    private _initShortCut() {
+        [
+            BoldShortCut,
+            ItalicShortCut,
+            UnderlineShortCut,
+            StrikeThroughShortCut,
+            SubscriptShortCut,
+            SuperscriptShortCut,
+        ].forEach((shortcut) => {
+            this.disposeWithMe(this._shortcutService.registerShortcut(shortcut));
+        });
+    }
+
     private _init(): void {
         this._initCustomComponents();
         this._initMenus();
         this._initFocusHandler();
         this._initUiParts();
+        this._initShortCut();
     }
 
     private _initFocusHandler(): void {

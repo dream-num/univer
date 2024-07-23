@@ -826,12 +826,17 @@ export class EditingRenderController extends Disposable implements IRenderModule
             const selections = this._workbookSelections.getCurrentSelections();
             if (selections) {
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    unitId: this._context.unit,
+                    unitId: this._context.unitId,
                     subUnitId: worksheetId,
-                    selections,
+                    selections: [...selections],
                 });
             }
-
+            /**
+             * Fix: After exiting the editor with the ESC key,
+             * the = formula retains the previously entered content, causing duplication.
+             */
+            this._editorBridgeService.disableForceKeepVisible();
+            this._editorBridgeService.refreshEditCellState();
             return;
         }
 

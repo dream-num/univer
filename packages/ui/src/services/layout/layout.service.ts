@@ -29,6 +29,7 @@ const givingBackFocusElements = [
     'univer-button',
     'univer-sheet-bar-btn',
     'univer-render-canvas',
+    'univer-workbench-layout',
 ];
 
 export interface ILayoutService {

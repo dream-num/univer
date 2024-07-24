@@ -18,7 +18,7 @@ import type { DocumentDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Observable } from 'rxjs';
+import { debounceTime, Observable } from 'rxjs';
 import { RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { StartAddCommentOperation } from '../../commands/operations/show-comment-panel.operation';
@@ -33,7 +33,11 @@ export const DocThreadCommentPanel = () => {
     const doc = useObservable(doc$);
     const subUnitId$ = useMemo(() => new Observable<string>((sub) => sub.next(DEFAULT_DOC_SUBUNIT_ID)), []);
     const textSelectionManagerService = useDependency(TextSelectionManagerService);
-    const textRange = useObservable(textSelectionManagerService.textSelection$)?.textRanges[0];
+    const selectionChange$ = useMemo(
+        () => textSelectionManagerService.textSelection$.pipe(debounceTime(16)),
+        [textSelectionManagerService.textSelection$]
+    );
+    useObservable(selectionChange$);
     const commandService = useDependency(ICommandService);
     const docCommentService = useDependency(DocThreadCommentService);
     const tempComment = useObservable(docCommentService.addingComment$);
@@ -67,7 +71,13 @@ export const DocThreadCommentPanel = () => {
     if (!doc) {
         return null;
     }
-    const isInValidSelection = textRange && textRange.endOffset === textRange.startOffset;
+
+    const activeRange = textSelectionManagerService.getActiveRange();
+    const isInValidSelection = Boolean(
+        activeRange &&
+        (activeRange.endOffset === activeRange.startOffset || activeRange.segmentId)
+    );
+
     const unitId = doc.getUnitId();
 
     return (

@@ -18,7 +18,7 @@ import type { ICommand, ITextRange } from '@univerjs/core';
 import { CommandType, CustomDecorationType, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
 import { addCustomDecorationBySelectionFactory } from '@univerjs/docs';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { AddCommentCommand, AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+import { AddCommentCommand, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 

@@ -26,7 +26,7 @@ export interface IUniuiToolbarConfig {
 
 export const DefaultUniuiToolbarConfig = {};
 
-@OnLifecycle(LifecycleStages.Steady, UniuiToolbarController)
+@OnLifecycle(LifecycleStages.Ready, UniuiToolbarController)
 export class UniuiToolbarController extends Disposable {
     constructor(
         @IMenuService protected readonly _menuService: IMenuService,

@@ -17,7 +17,7 @@
 import { flip, offset, shift, useFloating } from '@floating-ui/react-dom';
 import React, { useEffect, useImperativeHandle } from 'react';
 import { IUniverInstanceService, LocaleService, type Nullable, useDependency, useObservable } from '@univerjs/core';
-import { ToolbarItem, useToolbarCollapseObserver, useToolbarGroups } from '@univerjs/ui';
+import { ToolbarItem, useToolbarGroups } from '@univerjs/ui';
 import type { IUnitRendererProps } from '../workbench/UniWorkbench';
 import { DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
 import styles from './index.module.less';
@@ -38,17 +38,6 @@ const UNI_FLOATING_TOOLBAR_SCHEMA: string[] = [
     ZEN_MENU_ID,
 ];
 
-export const UnitName = ({ unitId }: { unitId: string }) => {
-    const instanceService = useDependency(IUniverInstanceService);
-    const unit = instanceService.getUnit(unitId);
-    const name = useObservable(unit?.name$);
-    return (
-        <div className={styles.unitName}>
-            {name}
-        </div>
-    );
-};
-
 export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: Nullable<IUnitRendererProps>; anchorRef: React.MutableRefObject<HTMLElement | null> }>(({ node, anchorRef }, ref) => {
     const { x, y, refs, strategy, update } = useFloating({
         placement: 'top',
@@ -56,10 +45,8 @@ export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: N
     });
     const localeService = useDependency(LocaleService);
 
-    const { visibleItems } = useToolbarGroups(MENU_POSITIONS);
+    const { visibleItems } = useToolbarGroups(MENU_POSITIONS, UNI_MENU_POSITIONS.TOOLBAR_FLOAT);
     const uniVisibleItems = UNI_FLOATING_TOOLBAR_SCHEMA.map((id) => visibleItems.find((item) => item.id === id)).filter((item) => !!item);
-
-    const { toolbarRef, collapsedId } = useToolbarCollapseObserver(uniVisibleItems);
 
     const { setReference, setFloating } = refs;
 
@@ -83,15 +70,13 @@ export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: N
             ref={setFloating}
             style={{ position: strategy, top: y ?? 0, left: x ?? 0 }}
         >
-            <div ref={toolbarRef} className={styles.uniToolbar}>
-
+            <div className={styles.uniToolbar}>
                 <UnitName unitId={node.unitId} />
+                <UniDiv />
                 <div className={styles.toolbarGroup}>
                     {uniVisibleItems.map(
                         (subItem) =>
-                            !collapsedId.includes(subItem.id) && (
-                                <ToolbarItem key={subItem.id} {...subItem} />
-                            )
+                            <ToolbarItem key={subItem.id} {...subItem} />
                     )}
                 </div>
             </div>
@@ -99,3 +84,17 @@ export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: N
     );
 });
 
+export function UniDiv() {
+    return <div className={styles.uniDiv}></div>;
+}
+
+export function UnitName({ unitId }: { unitId: string }) {
+    const instanceService = useDependency(IUniverInstanceService);
+    const unit = instanceService.getUnit(unitId);
+    const name = useObservable(unit?.name$);
+    return (
+        <div className={styles.unitName}>
+            {name}
+        </div>
+    );
+};

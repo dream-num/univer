@@ -73,6 +73,7 @@ import {
 import { UniverUniUIController } from './controllers/uniui-desktop.controller';
 import { UnitGridService } from './services/unit-grid/unit-grid.service';
 import { UniuiLeftSidebarController } from './controllers/uniui-leftsidebar.controller';
+import { UniuiToolbarController } from './controllers/uniui-toolbar.controller';
 
 const UI_BOOTSTRAP_DELAY = 16;
 
@@ -136,7 +137,7 @@ export class UniverUniUIPlugin extends Plugin {
                 useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
             }],
             [UniuiLeftSidebarController],
-            // [UniuiToolbarController],
+            [UniuiToolbarController],
         ], this._config.override);
         dependencies.forEach((dependency) => injector.add(dependency));
     }

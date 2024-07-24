@@ -48,9 +48,9 @@ export interface IToolbarRenderHookHandler {
  * you can use this hook to get the toolbar status.
  * @returns toolbar status
  */
-export function useToolbarGroups(categories: MenuPositionWithCustom[]): IToolbarRenderHookHandler {
+export function useToolbarGroups(categories: MenuPositionWithCustom[], initCategory?: string): IToolbarRenderHookHandler {
     const menuService = useDependency(IMenuService);
-    const [category, setCategory] = useState<MenuPositionWithCustom>(MenuPosition.TOOLBAR_START);
+    const [category, setCategory] = useState<MenuPositionWithCustom>(initCategory ?? MenuPosition.TOOLBAR_START);
     const [groups, setGroups] = useState<IMenuGroup[]>([]);
     const [visibleItems, setVisibleItems] = useState<IDisplayMenuItem<IMenuItem>[]>([]);
 

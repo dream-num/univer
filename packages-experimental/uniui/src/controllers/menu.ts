@@ -16,7 +16,6 @@
 
 import type { IAccessor } from '@univerjs/core';
 import { type IMenuButtonItem, MenuGroup, MenuItemType } from '@univerjs/ui';
-import { BehaviorSubject, Observable } from 'rxjs';
 
 export const UNIT_LINE_COLOR_MENU_ID = 'UNIT_LINE_COLOR_MENU_ID';
 export const DOWNLOAD_MENU_ID = 'DOWNLOAD_MENU_ID';
@@ -40,8 +39,7 @@ export function UnitLineColorMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
         ],
-        disabled$: new BehaviorSubject<boolean>(false).asObservable(),
-        hidden$: new BehaviorSubject<boolean>(false).asObservable(),
+
     };
 }
 
@@ -55,8 +53,7 @@ export function DownloadMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
         ],
-        disabled$: new BehaviorSubject<boolean>(false).asObservable(),
-        hidden$: new BehaviorSubject<boolean>(false).asObservable(),
+
     };
 }
 
@@ -70,8 +67,7 @@ export function ShareMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
         ],
-        disabled$: new Observable<boolean>(),
-        hidden$: new Observable<boolean>(),
+
     };
 }
 
@@ -85,14 +81,12 @@ export function LockMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
         ],
-        disabled$: new Observable<boolean>(),
-        hidden$: new Observable<boolean>(),
     };
 }
 
 export function PrintMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: SHARE_MENU_ID,
+        id: PRINT_MENU_ID,
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_OTHERS,
         title: '',
@@ -100,14 +94,13 @@ export function PrintMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
         ],
-        disabled$: new Observable<boolean>(),
-        hidden$: new Observable<boolean>(),
+
     };
 }
 
 export function ZenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: SHARE_MENU_ID,
+        id: ZEN_MENU_ID,
         type: MenuItemType.BUTTON,
         title: '',
         icon: 'ZenSingle',
@@ -115,7 +108,5 @@ export function ZenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
         ],
-        disabled$: new Observable<boolean>(),
-        hidden$: new Observable<boolean>(),
     };
 }

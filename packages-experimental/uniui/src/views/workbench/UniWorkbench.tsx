@@ -224,7 +224,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 }}
                                 onMove={onMove}
                             >
-                                <Background></Background>
+                                <Background bgColor="#f4f6f8" color="#d9d9d9"></Background>
                             </ReactFlow>
 
                             {/* Sheet cell editors etc. Their size would not be affected the scale of ReactFlow. */}

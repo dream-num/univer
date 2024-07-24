@@ -96,7 +96,7 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         if (node) {
             node.style.width = `${dimension.width}px`;
             node.style.height = `${dimension.height}px`;
-            this._cacheLayout();
+            this._cacheData();
         }
     }
 
@@ -105,7 +105,7 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         if (node) {
             node.position.x = position.x;
             node.position.y = position.y;
-            this._cacheLayout();
+            this._cacheData();
         }
     }
 
@@ -123,6 +123,10 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         if (raw) {
             this._cachedGrid = raw;
         }
+    }
+
+    protected _cacheData(): void {
+        this._localStorageService.setItem(getLocalCacheKey('static'), this.unitGrid);
     }
 
     protected _onRendererCreated(renderer: IRender): void {
@@ -165,11 +169,7 @@ export class UnitGridService extends Disposable implements IUnitGridService {
 
     private _emitLayoutChange(): void {
         this._unitGrid$.next(this._unitGrid.slice());
-        this._cacheLayout();
-    }
-
-    private _cacheLayout(): void {
-        this._localStorageService.setItem(getLocalCacheKey('static'), this.unitGrid);
+        this._cacheData();
     }
 }
 

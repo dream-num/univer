@@ -18,13 +18,16 @@ import type { IRange, Nullable } from '@univerjs/core';
 import { Disposable, Inject, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
-import type { IDirtyUnitSheetNameMap, IFormulaData, IOtherFormulaData, IUnitData } from '../../basics/common';
+import type { IDirtyUnitSheetNameMap, IFeatureDirtyRangeType, IFormulaData, IOtherFormulaData, IUnitData } from '../../basics/common';
 import type { ErrorType } from '../../basics/error-type';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { prefixToken, suffixToken } from '../../basics/token';
+import type { IFormulaDirtyData } from '../../services/current-data.service';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
 import { IFeatureCalculationManagerService } from '../../services/feature-calculation-manager.service';
 import { IOtherFormulaManagerService } from '../../services/other-formula-manager.service';
+import type { IAllRuntimeData } from '../../services/runtime.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { Lexer } from '../analysis/lexer';
 import type { LexerNode } from '../analysis/lexer-node';
@@ -203,42 +206,45 @@ export class FormulaDependencyGenerator extends Disposable {
          * which can determine the execution timing of the external application
          * registration Executor based on the dependency relationship.
          */
-
         const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
         featureMap.forEach((subUnitMap, _) => {
             subUnitMap.forEach((featureMap, _) => {
                 featureMap.forEach((params, featureId) => {
-                    const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
-
-                    if (this._dependencyManagerService.hasFeatureFormulaDependency(unitId, subUnitId, featureId)) {
-                        this._makePassiveDirtyForFeatureFormulas(this._dependencyManagerService.getFeatureFormulaDependency(unitId, subUnitId, featureId)!);
-                        return true;
-                    }
-
-                    const FDtree = new FormulaDependencyTree();
-
-                    FDtree.unitId = unitId;
-                    FDtree.subUnitId = subUnitId;
-
-                    FDtree.getDirtyData = getDirtyData;
-
-                    FDtree.featureId = featureId;
-
-                    FDtree.rangeList = dependencyRanges.map((range) => {
-                        return {
-                            gridRange: range,
-                            token: serializeRangeToRefString({ ...range, sheetName: this._currentConfigService.getSheetName(range.unitId, range.sheetId) }),
-                        };
-                    });
-
-                    this._dependencyManagerService.addFeatureFormulaDependency(unitId, subUnitId, featureId, FDtree);
-
-                    this._makePassiveDirtyForFeatureFormulas(FDtree);
-
-                    treeList.push(FDtree);
+                    treeList.push(this._getFeatureFormulaTree(featureId, params));
                 });
             });
         });
+    }
+
+    private _getFeatureFormulaTree(featureId: string, params: IFeatureCalculationManagerParam) {
+        const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
+        if (this._dependencyManagerService.hasFeatureFormulaDependency(unitId, subUnitId, featureId)) {
+            const tree = this._dependencyManagerService.getFeatureFormulaDependency(unitId, subUnitId, featureId)!;
+            this._makePassiveDirtyForFeatureFormulas(tree);
+            return tree;
+        }
+
+        const FDtree = new FormulaDependencyTree();
+
+        FDtree.unitId = unitId;
+        FDtree.subUnitId = subUnitId;
+
+        FDtree.getDirtyData = getDirtyData;
+
+        FDtree.featureId = featureId;
+
+        FDtree.rangeList = dependencyRanges.map((range) => {
+            return {
+                gridRange: range,
+                token: serializeRangeToRefString({ ...range, sheetName: this._currentConfigService.getSheetName(range.unitId, range.sheetId) }),
+            };
+        });
+
+        this._dependencyManagerService.addFeatureFormulaDependency(unitId, subUnitId, featureId, FDtree);
+
+        this._makePassiveDirtyForFeatureFormulas(FDtree);
+
+        return FDtree;
     }
 
     private _makePassiveDirtyForFeatureFormulas(tree: FormulaDependencyTree) {
@@ -622,9 +628,66 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
+        this._dependencyFeatureCalculation(newTreeList);
+
         dependencyTreeCache.dispose();
 
         return newTreeList;
+    }
+
+    private _dependencyFeatureCalculation(newTreeList: FormulaDependencyTree[]) {
+        const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
+        let isAdded = false;
+        featureMap.forEach((subUnitMap, _) => {
+            subUnitMap.forEach((featureMap, _) => {
+                featureMap.forEach((params, featureId) => {
+                    const { getDirtyData } = params;
+                    const allDependency = getDirtyData({} as IFormulaDirtyData, {} as IAllRuntimeData);
+                    const dirtyRanges = allDependency.dirtyRanges;
+                    const dirtyRangesToMap = this._convertDirtyRangesToMap(dirtyRanges);
+                    const intersectTrees = this._intersectFeatureCalculation(dirtyRangesToMap, newTreeList);
+                    if (intersectTrees.length > 0) {
+                        const featureTree = this._getFeatureFormulaTree(featureId, params);
+                        intersectTrees.forEach((tree) => {
+                            if (tree.children.includes(featureTree)) {
+                                return;
+                            }
+                            tree.pushChildren(featureTree);
+                        });
+                        newTreeList.push(featureTree);
+                        isAdded = true;
+                    }
+                });
+            });
+        });
+
+        return isAdded;
+    }
+
+    private _convertDirtyRangesToMap(dirtyRanges: IFeatureDirtyRangeType) {
+        const map = new Map<string, Map<string, IRange[]>>();
+        for (const unitId in dirtyRanges) {
+            const unitMap = dirtyRanges[unitId];
+            const unitRangeMap = new Map<string, IRange[]>();
+            for (const subUnitId in unitMap) {
+                const ranges = unitMap[subUnitId];
+                unitRangeMap.set(subUnitId, ranges);
+            }
+            map.set(unitId, unitRangeMap);
+        }
+        return map;
+    }
+
+    private _intersectFeatureCalculation(dirtyRangesToMap: Map<string, Map<string, IRange[]>>, newTreeList: FormulaDependencyTree[]) {
+        const dependencyTree = [];
+        for (let i = 0, len = newTreeList.length; i < len; i++) {
+            const tree = newTreeList[i];
+            const isAdded = tree.dependencyRange(dirtyRangesToMap, {});
+            if (isAdded) {
+                dependencyTree.push(tree);
+            }
+        }
+        return dependencyTree;
     }
 
     private _includeTreeFeature(tree: FormulaDependencyTree) {

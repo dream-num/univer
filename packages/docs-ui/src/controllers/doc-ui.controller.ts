@@ -50,7 +50,7 @@ import {
     UnderlineMenuItemFactory,
 } from './menu/menu';
 import { CopyMenuFactory, CutMenuFactory, DeleteMenuFactory, PasteMenuFactory } from './menu/context-menu';
-import { BoldShortCut, ItalicShortCut, StrikeThroughShortCut, SubscriptShortCut, SuperscriptShortCut, UnderlineShortCut } from './shortcut/toolbar.shortcut';
+import { AlignCenterShortCut, AlignJustifyShortCut, AlignLeftShortCut, AlignRightShortCut, BoldShortCut, BulletListShortCut, ItalicShortCut, OrderListShortCut, StrikeThroughShortCut, SubscriptShortCut, SuperscriptShortCut, UnderlineShortCut } from './shortcut/toolbar.shortcut';
 
 // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
@@ -136,6 +136,12 @@ export class DocUIController extends Disposable {
             StrikeThroughShortCut,
             SubscriptShortCut,
             SuperscriptShortCut,
+            AlignCenterShortCut,
+            AlignJustifyShortCut,
+            AlignRightShortCut,
+            AlignLeftShortCut,
+            OrderListShortCut,
+            BulletListShortCut,
         ].forEach((shortcut) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(shortcut));
         });

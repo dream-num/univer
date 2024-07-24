@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { SetInlineFormatBoldCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
+import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand, BulletListCommand, OrderListCommand, SetInlineFormatBoldCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { whenDocAndEditorFocused } from '../../shortcuts/utils';
@@ -52,5 +52,43 @@ export const SubscriptShortCut: IShortcutItem = {
 export const SuperscriptShortCut: IShortcutItem = {
     id: SetInlineFormatSuperscriptCommand.id,
     binding: KeyCode.PERIOD | MetaKeys.CTRL_COMMAND,
+    preconditions: whenDocAndEditorFocused,
+};
+
+// L E R J
+
+export const AlignLeftShortCut: IShortcutItem = {
+    id: AlignLeftCommand.id,
+    binding: KeyCode.L | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    preconditions: whenDocAndEditorFocused,
+};
+
+export const AlignRightShortCut: IShortcutItem = {
+    id: AlignRightCommand.id,
+    binding: KeyCode.R | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    preconditions: whenDocAndEditorFocused,
+};
+
+export const AlignCenterShortCut: IShortcutItem = {
+    id: AlignCenterCommand.id,
+    binding: KeyCode.E | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    preconditions: whenDocAndEditorFocused,
+};
+
+export const AlignJustifyShortCut: IShortcutItem = {
+    id: AlignJustifyCommand.id,
+    binding: KeyCode.J | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    preconditions: whenDocAndEditorFocused,
+};
+
+export const OrderListShortCut: IShortcutItem = {
+    id: OrderListCommand.id,
+    binding: KeyCode.Digit7 | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
+    preconditions: whenDocAndEditorFocused,
+};
+
+export const BulletListShortCut: IShortcutItem = {
+    id: BulletListCommand.id,
+    binding: KeyCode.Digit8 | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
     preconditions: whenDocAndEditorFocused,
 };

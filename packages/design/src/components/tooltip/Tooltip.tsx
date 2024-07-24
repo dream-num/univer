@@ -55,6 +55,8 @@ export const Tooltip = forwardRef<NullableTooltipRef, ITooltipProps>((props, ref
     const { mountContainer } = useContext(ConfigContext);
     const [tooltipEl, setTooltipEl] = useState<HTMLElement>();
     const tooltipRef = useRef<NullableTooltipRef>(null);
+
+    // FIXME: cannot set value in a render method
     const refHandler = useCallback((ref: NullableTooltipRef) => {
         if (ref?.nativeElement) {
             setTooltipEl(ref.nativeElement);

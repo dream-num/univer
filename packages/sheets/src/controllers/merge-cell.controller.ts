@@ -16,12 +16,14 @@
 
 import type { ICommandInfo, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import {
+    createInterceptorKey,
     Dimension,
     Disposable,
     DisposableCollection,
     ICommandService,
     Inject,
     Injector,
+    InterceptorManager,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -73,6 +75,7 @@ import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-r
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../commands/commands/move-rows-cols.command';
+import { getSheetCommandTarget } from '../commands/commands/utils/target-util';
 
 const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
 const mutationIdArrByMove = [MoveRowsMutation.id, MoveColsMutation.id];
@@ -118,9 +121,14 @@ export function getAddMergeMutationRangeByType(selection: IRange[], type?: Dimen
     return ranges;
 }
 
+export const MERGE_CELL_INTERCEPTOR_CHECK = createInterceptorKey<boolean, IRange[]>('mergeCellPermissionCheck');
+
 @OnLifecycle(LifecycleStages.Steady, MergeCellController)
 export class MergeCellController extends Disposable {
     disposableCollection = new DisposableCollection();
+
+    public readonly interceptor = new InterceptorManager({ MERGE_CELL_INTERCEPTOR_CHECK });
+
     constructor(
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
@@ -178,6 +186,45 @@ export class MergeCellController extends Disposable {
                 }
 
                 return { redos: [], undos: [] };
+            },
+        });
+
+        this._sheetInterceptorService.interceptRangesCommand({
+            getMutations: ({ unitId, subUnitId, ranges }) => {
+                const redos: IMutationInfo[] = [];
+                const undos: IMutationInfo[] = [];
+                const emptyInterceptorArr = { redos, undos };
+                if (!ranges || !ranges.length) {
+                    return emptyInterceptorArr;
+                }
+                const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
+                if (!target) {
+                    return emptyInterceptorArr;
+                }
+                const { worksheet } = target;
+                const mergeData = worksheet.getMergeData();
+                const lapRanges = mergeData.filter((item) => ranges.some((range) => Rectangle.intersects(item, range)));
+                if (lapRanges.length) {
+                    redos.push({
+                        id: RemoveWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ranges: lapRanges,
+                        },
+                    });
+                    undos.push({
+                        id: AddWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ranges: lapRanges,
+                        },
+                    });
+                    return { undos, redos };
+                }
+
+                return emptyInterceptorArr;
             },
         });
     }

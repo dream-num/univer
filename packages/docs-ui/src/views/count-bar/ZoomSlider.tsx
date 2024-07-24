@@ -23,7 +23,7 @@ import {
     useObservable,
 } from '@univerjs/core';
 import { Slider } from '@univerjs/design';
-import { SetDocZoomRatioCommand, SetDocZoomRatioOperation } from '@univerjs/docs';
+import { SetDocZoomRatioOperation } from '@univerjs/docs';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
@@ -65,7 +65,7 @@ export function ZoomSlider() {
 
         const zoomRatio = value / 100;
 
-        commandService.executeCommand(SetDocZoomRatioCommand.id, {
+        commandService.executeCommand(SetDocZoomRatioOperation.id, {
             unitId: documentDataModel.getUnitId(),
             zoomRatio,
         });

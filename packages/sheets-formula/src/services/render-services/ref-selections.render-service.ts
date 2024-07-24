@@ -18,8 +18,8 @@ import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
-import { BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type ISelectionWithStyle, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
+import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 
 /**
@@ -174,12 +174,14 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
     private _initSelectionChangeListener(): void {
         // When selection completes, we need to update the selections' rendering and clear event handlers.
+
+        // beforeSelectionMoveEnd$ was triggered when pointerup after press and moving to change selection area.
+        // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
         this.disposeWithMe(this._workbookSelections.beforeSelectionMoveEnd$.subscribe((selectionsWithStyles) => {
-            // Clear already existed selections.
+            // Clear existed selections.
             this._reset();
 
-            // The selections' style would be colorful here. PromptController would change the color of
-            // selections later.
+            // The selections' style would be colorful here. PromptController would change the color of selections later.
             for (const selectionWithStyle of selectionsWithStyles) {
                 const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
                 this._addSelectionControlBySelectionData(selectionData);
@@ -204,6 +206,19 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
                 this._refreshSelection(currentSelections);
             }
         }));
+    }
+
+    protected override _refreshSelection(params: readonly ISelectionWithStyle[]) {
+        const selections = params.map((selectionWithStyle) => {
+            const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
+            selectionData.style = getRefSelectionStyle(this._themeService);
+            return selectionData;
+        });
+        if (selections.length === 0) {
+            this._reset();
+        } else {
+            this.updateControlForCurrentByRangeData(selections);
+        }
     }
 
     private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {

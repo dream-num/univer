@@ -1527,6 +1527,8 @@ export class PromptController extends Disposable {
             }
         }
 
+        const unitId = skeleton?.worksheet.getUnitId();
+        const sheetId = skeleton?.worksheet.getSheetId();
         const refString = this._generateRefString({
             range: {
                 startRow: Math.min(startRow, endRow),
@@ -1534,6 +1536,8 @@ export class PromptController extends Disposable {
                 startColumn: Math.min(startColumn, endColumn),
                 endColumn: Math.max(startColumn, endColumn),
                 ...refType,
+                sheetId,
+                unitId,
             },
             primary,
             style: null,

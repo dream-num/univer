@@ -166,5 +166,6 @@ export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.oper
 export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-permission-open-dialog.operation';
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
+export { attachSelectionWithCoord, attachPrimaryWithCoord } from './services/selection/util';
 
 // #endregion

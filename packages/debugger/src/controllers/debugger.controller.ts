@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 
@@ -66,6 +66,7 @@ export interface IUniverDebuggerConfig {
 
 export const DefaultDebuggerConfig = {};
 
+@OnLifecycle(LifecycleStages.Ready, DebuggerController)
 export class DebuggerController extends Disposable {
     constructor(
         private readonly _config: Partial<IUniverDebuggerConfig>,

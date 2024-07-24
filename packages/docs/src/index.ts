@@ -92,3 +92,5 @@ export { DocInterceptorService } from './services/doc-interceptor/doc-intercepto
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
 export { ChangeListNestingLevelType } from './commands/commands/list.command';
+export { getCommandSkeleton } from './commands/util';
+export { generateParagraphs } from './commands/commands/break-line.command';

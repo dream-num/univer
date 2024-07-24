@@ -14,112 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommand, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
-import { CommandType, DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
+import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { generateParagraphs, getCommandSkeleton, getInsertSelection, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { genEmptyTableDataStream, genTableSource } from '../../basics/table';
 
 export const CreateDocTableCommandId = 'doc.command.create-table';
-
-function generateEmptyTableDataStream(rowCount: number, colCount: number) {
-    let dataStream: string = DataStreamTreeTokenType.TABLE_START;
-
-    for (let i = 0; i < rowCount; i++) {
-        dataStream += DataStreamTreeTokenType.TABLE_ROW_START;
-
-        for (let j = 0; j < colCount; j++) {
-            dataStream += `${DataStreamTreeTokenType.TABLE_CELL_START}\r\n${DataStreamTreeTokenType.TABLE_CELL_END}`;
-        }
-
-        dataStream += DataStreamTreeTokenType.TABLE_ROW_END;
-    }
-
-    return dataStream + DataStreamTreeTokenType.TABLE_END;
-}
-
-// eslint-disable-next-line max-lines-per-function
-function genTableSource(rowCount: number, colCount: number, pageContentWidth: number) {
-    const tableCell: ITableCell = {
-        margin: {
-            start: {
-                v: 10,
-            },
-            end: {
-                v: 10,
-            },
-            top: {
-                v: 5,
-            },
-            bottom: {
-                v: 5,
-            },
-        },
-    };
-    const tableRow: ITableRow = {
-        tableCells: [...new Array(colCount).fill(null).map(() => Tools.deepClone(tableCell))],
-        trHeight: {
-            val: { v: 30 },
-            hRule: TableCellHeightRule.AUTO,
-        },
-    };
-    const tableColumn: ITableColumn = {
-        size: {
-            type: TableSizeType.SPECIFIED,
-            width: {
-                v: pageContentWidth / colCount,
-            },
-        },
-    };
-    const tableRows = [...new Array(rowCount).fill(null).map(() => Tools.deepClone(tableRow))];
-    const tableColumns = [...new Array(colCount).fill(null).map(() => Tools.deepClone(tableColumn))];
-    const tableId = generateRandomId(6);
-    const table: ITable = {
-        tableRows,
-        tableColumns,
-        tableId,
-        align: TableAlignmentType.START,
-        indent: {
-            v: 0,
-        },
-        textWrap: TableTextWrapType.NONE,
-        position: {
-            positionH: {
-                relativeFrom: ObjectRelativeFromH.PAGE,
-                posOffset: 0,
-            },
-            positionV: {
-                relativeFrom: ObjectRelativeFromV.PAGE,
-                posOffset: 0,
-            },
-        },
-        dist: {
-            distB: 0,
-            distL: 0,
-            distR: 0,
-            distT: 0,
-        },
-        cellMargin: {
-            start: {
-                v: 10,
-            },
-            end: {
-                v: 10,
-            },
-            top: {
-                v: 5,
-            },
-            bottom: {
-                v: 5,
-            },
-        },
-        size: {
-            type: TableSizeType.UNSPECIFIED,
-            width: {
-                v: pageContentWidth,
-            },
-        },
-    };
-
-    return table;
-}
 
 export interface ICreateDocTableCommandParams {
     rowCount: number;
@@ -132,8 +34,128 @@ export const ICreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
     id: CreateDocTableCommandId,
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: ICreateDocTableCommandParams) => {
-        // console.log(params);
-        return true;
+        const { rowCount, colCount } = params;
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const activeRange = textSelectionManagerService.getActiveRange();
+        if (activeRange == null) {
+            return false;
+        }
+        const { segmentId, segmentPage } = activeRange;
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        if (docDataModel == null || body == null) {
+            return false;
+        }
+
+        const unitId = docDataModel.getUnitId();
+        const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
+
+        if (skeleton == null) {
+            return false;
+        }
+        const { startOffset } = getInsertSelection(activeRange, body);
+
+        const paragraphs = body.paragraphs ?? [];
+        const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
+        const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
+        const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
+        const isInParagraph = preGlyph && preGlyph.content !== '\r';
+
+        if (curGlyph == null) {
+            return false;
+        }
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
+
+        // 4 is cal by `\r + TableStart + RowStart + CellStart`, 3 is cal by `TableStart + RowStart + CellStart`.
+        const cursor = startOffset + (isInParagraph ? 4 : 3);
+        const textRanges: ITextRangeWithStyle[] = [{
+            startOffset: cursor,
+            endOffset: cursor,
+            collapsed: true,
+        }];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+            },
+        };
+
+        // Step 1: Break lines if necessary.
+        if (startOffset > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: startOffset,
+                segmentId,
+            });
+        }
+
+        if (isInParagraph) {
+            textX.push({
+                t: TextXActionType.INSERT,
+                body: {
+                    dataStream: DataStreamTreeTokenType.PARAGRAPH,
+                    paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
+                },
+                len: 1,
+                line: 0,
+                segmentId,
+            });
+        }
+
+        // Step 2: Insert table.
+        const tableDataStream = genEmptyTableDataStream(rowCount, colCount);
+        const page = curGlyph.parent?.parent?.parent?.parent?.parent;
+        if (page == null) {
+            return false;
+        }
+        const { pageWidth, marginLeft, marginRight } = page;
+        const tableSource = genTableSource(rowCount, colCount, pageWidth - marginLeft - marginRight);
+
+        textX.push({
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: tableDataStream,
+                tables: [
+                    {
+                        startIndex: 0,
+                        endIndex: tableDataStream.length,
+                        tableId: tableSource.tableId,
+                    },
+                ],
+            },
+            len: tableDataStream.length,
+            line: 0,
+            segmentId,
+        });
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+
+        // Step 3: Insert table source;
+        const insertTableSource = jsonX.insertOp(['tableSource', tableSource.tableId], tableSource);
+        rawActions.push(insertTableSource!);
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
     },
 };

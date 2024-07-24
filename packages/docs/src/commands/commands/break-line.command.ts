@@ -22,7 +22,7 @@ import { getInsertSelection } from '../../basics/selection';
 import { DocCustomRangeService } from '../../services/doc-custom-range.service';
 import { InsertCommand } from './core-editing.command';
 
-function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
+export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
     const paragraphs: IParagraph[] = [];
 
     for (let i = 0, len = dataStream.length; i < len; i++) {

@@ -21,9 +21,10 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+    ICommandService,
     Inject,
 } from '@univerjs/core';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { Documents, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IContextMenuService, MenuPosition } from '@univerjs/ui';
 
@@ -42,16 +43,18 @@ export class DocContextMenuRenderController extends Disposable implements IRende
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
         if (!SKIP_UNIT_IDS.includes(this._context.unitId)) {
-            this._init();
+            this._initPointerDown();
+            this._initEditChange();
         }
     }
 
-    private _init(): void {
+    private _initPointerDown(): void {
         const documentsPointerDownObserver = (this._context?.mainComponent as Documents)?.onPointerDown$;
         // Content range context menu
         const documentsSubscription = documentsPointerDownObserver.subscribeEvent((event) => {
@@ -60,5 +63,17 @@ export class DocContextMenuRenderController extends Disposable implements IRende
             }
         });
         this.disposeWithMe(documentsSubscription);
+    }
+
+    private _initEditChange(): void {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command) => {
+                if (command.id === RichTextEditingMutation.id) {
+                    if (this._contextMenuService.visible) {
+                        this._contextMenuService.hideContextMenu();
+                    }
+                }
+            })
+        );
     }
 }

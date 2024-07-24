@@ -137,7 +137,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
         this._calculatePagePosition(docObject, zoomRatio);
 
-        if (needRefreshSelection) {
+        if (needRefreshSelection && !this._editorService.isEditor(this._context.unitId)) {
             this._textSelectionManagerService.refreshSelection();
         }
 

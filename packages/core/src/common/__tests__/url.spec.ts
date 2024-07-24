@@ -27,7 +27,8 @@ describe('Test url utils', () => {
         expect(isLegalUrl('https://univer')).toBeFalsy();
         expect(isLegalUrl('univer')).toBeFalsy();
         expect(isLegalUrl('192.168')).toBeFalsy();
-        expect(isLegalUrl('咋看手机看到. 是多少')).toBeFalsy();
+        expect(isLegalUrl('咋看手机看到.是多少')).toBeFalsy();
+        expect(isLegalUrl('univer.univer')).toBeFalsy();
     });
 
     it('should add protocol to no protocol url', () => {

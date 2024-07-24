@@ -26,7 +26,8 @@ import type {
     ThemeService,
 } from '@univerjs/core';
 import {
-    createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+    createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE, UniverInstanceType,
+} from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderManagerService, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
@@ -51,6 +52,8 @@ export interface ISheetSelectionRenderService {
     readonly controlFillConfig$: Observable<IControlFillConfig | null>;
     readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
+
+    get selectionMoving(): boolean;
 
     interceptor: InterceptorManager<{
         RANGE_MOVE_PERMISSION_CHECK: IInterceptor<boolean, null>;
@@ -147,6 +150,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected readonly _selectionMoveStart$ = new Subject<ISelectionWithCoordAndStyle[]>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
+    private _selectionMoving = false;
+
+    get selectionMoving() {
+        return this._selectionMoving;
+    }
+
     protected _activeViewport: Nullable<Viewport>;
 
     readonly interceptor = new InterceptorManager({ RANGE_MOVE_PERMISSION_CHECK, RANGE_FILL_PERMISSION_CHECK });
@@ -161,6 +170,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         super();
 
         this._resetStyle();
+        this._initMoving();
+    }
+
+    private _initMoving() {
+        this.disposeWithMe(this._selectionMoving$.subscribe(() => {
+            this._selectionMoving = true;
+        }));
+
+        this.disposeWithMe(this._selectionMoveEnd$.subscribe(() => {
+            this._selectionMoving = false;
+        }));
     }
 
     protected _setStyle(style: ISelectionStyle) {
@@ -365,7 +385,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         // ---> _selectionMoveEnd$.next --> _initSelectionChangeListener _reset --> _clearSelectionControls
 
         this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-
         // when selection mouse up, enable the short cut service
         this._shortcutService.setDisable(false);
     }

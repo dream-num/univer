@@ -48,7 +48,7 @@ export class UniuiLeftSidebarController extends Disposable {
                 this._leftSidebarService.open({
                     children: { label: OUTLINE_COMPONENT },
                     visible: true,
-                    width: 160,
+                    width: 176,
                 });
             } else {
                 this._leftSidebarService.close();

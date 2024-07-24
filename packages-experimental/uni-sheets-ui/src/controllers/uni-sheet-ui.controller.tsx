@@ -16,10 +16,11 @@
 
 import type { Workbook } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
-import { type IUniverSheetsUIConfig, RenderSheetContent, SheetBar, SheetUIController } from '@univerjs/sheets-ui';
+import { type IUniverSheetsUIConfig, RenderSheetContent, SheetUIController } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { UniUIPart } from '@univerjs/uniui';
 import React from 'react';
+import { UniSheetBar } from '../views/uni-sheet-bar/UniSheetBar';
 
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class UniSheetUIController extends SheetUIController {
@@ -61,9 +62,7 @@ function RenderOutline() {
     if (!workbook) return null;
 
     return (
-        <section>
-            <SheetBar />
-        </section>
+        <UniSheetBar />
     );
 }
 

@@ -35,7 +35,8 @@
     &-container {
         overflow-y: auto;
         display: grid;
-        grid-template-rows: auto 1fr auto;
+        grid-template-rows: auto;
+        // grid-template-rows: auto 1fr auto;
 
         box-sizing: border-box;
         width: 100%;
@@ -75,8 +76,12 @@
     }
 
     &-body {
-        padding: 0 var(--padding-xl);
+        padding: var(--padding-sm);
         box-sizing: border-box;
+
+        & > div {
+            height: 100%;
+        }
     }
 
     &-footer {

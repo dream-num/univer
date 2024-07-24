@@ -68,12 +68,16 @@
         "clsx": ">=2.0.0",
         "rxjs": ">=7.0.0"
     },
+    "dependencies": {
+        "@univerjs/icons": "^0.1.65"
+    },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/shared": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniui": "workspace:*",

@@ -77,8 +77,8 @@
 
     border-radius: 10px;
     border: 1px solid var(--, #ecedef);
+    overflow: hidden;
 
-    /* 浮动工具 */
     box-shadow: 0px 2px 4px 0px rgba(30, 34, 43, 0.06);
 
     user-select: none;
@@ -355,4 +355,96 @@
     width: 1px;
     height: 24px;
     background: #ecedef;
+}
+
+.uni-formula-bar-full-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(---White, #fff);
+    z-index: 10;
+
+    .uni-formula-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 100%;
+        padding: 6px;
+        box-sizing: border-box;
+    }
+
+    .uni-formula-input {
+        flex: 1;
+        border-radius: var(--radius-m, 6px);
+        border: 1px solid var(---Hyacinth-Blue-500, #274fee);
+        background: #f0f3fe;
+        box-shadow: 0px 0px 4px 0px rgba(39, 79, 238, 0.4);
+        overflow: hidden;
+    }
+
+    .formula-icon {
+        padding: 6px 0;
+
+        &-disable {
+            color: rgb(var(--grey-200));
+            cursor: not-allowed;
+        }
+
+        &-wrapper {
+            position: relative;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            box-sizing: border-box;
+            width: 80px;
+            height: 100%;
+
+            font-size: var(--font-size-xs);
+
+            border-right: 1px solid rgb(var(--border-color));
+
+            .icon-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                padding: var(--padding-xs);
+
+                font-size: var(--font-size-lg);
+
+                border-radius: var(--border-radius-base);
+
+                &-success {
+                    &.formula-active {
+                        cursor: pointer;
+                        color: rgb(var(--success-color));
+                        &:hover {
+                            background-color: rgb(var(--grey-50));
+                        }
+                    }
+                }
+
+                &-error {
+                    &.formula-active {
+                        cursor: pointer;
+                        color: rgb(var(--error-color));
+                        &:hover {
+                            background-color: rgb(var(--grey-50));
+                        }
+                    }
+                }
+
+                &-fx {
+                    cursor: pointer;
+                    &:hover {
+                        background-color: rgb(var(--grey-50));
+                    }
+                }
+            }
+        }
+    }
 }

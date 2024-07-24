@@ -36,6 +36,12 @@ const locale: typeof zhCN = {
             main: 'Цвет фона текста',
             right: 'Выбрать цвет',
         },
+        table: {
+            main: 'Table',
+            insert: 'Insert Table',
+            colCount: 'Column count',
+            rowCount: 'Row count',
+        },
         resetColor: 'Сбросить',
         order: 'Упорядоченный список',
         unorder: 'Неупорядоченный список',

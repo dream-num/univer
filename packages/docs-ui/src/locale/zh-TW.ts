@@ -36,6 +36,12 @@ const locale: typeof zhCN = {
             main: '文字背景色',
             right: '背景色選擇',
         },
+        table: {
+            main: 'Table',
+            insert: 'Insert Table',
+            colCount: 'Column count',
+            rowCount: 'Row count',
+        },
         resetColor: '重置顏色',
         order: '有序列表',
         unorder: '無序列表',

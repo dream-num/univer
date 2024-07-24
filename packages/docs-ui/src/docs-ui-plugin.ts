@@ -66,6 +66,7 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
+import { DocTableController } from './controllers/doc-table.controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -129,6 +130,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocEditorBridgeController],
             [DocAutoFormatController],
 
+            [DocTableController],
             [DocsRenderService],
             [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             [IDocClipboardService, { useClass: DocClipboardService }],

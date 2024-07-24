@@ -34,6 +34,12 @@ const locale = {
             main: '文本背景色',
             right: '背景色选择',
         },
+        table: {
+            main: '表格',
+            insert: '插入表格',
+            colCount: '列数',
+            rowCount: '行数',
+        },
         resetColor: '重置颜色',
         order: '有序列表',
         unorder: '无序列表',

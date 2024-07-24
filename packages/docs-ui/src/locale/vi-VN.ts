@@ -36,6 +36,12 @@ const locale: typeof zhCN = {
             main: 'Màu nền văn bản',
             right: 'Chọn màu nền',
         },
+        table: {
+            main: 'Table',
+            insert: 'Insert Table',
+            colCount: 'Column count',
+            rowCount: 'Row count',
+        },
         resetColor: 'Đặt lại màu',
         order: 'Danh sách có thứ tự',
         unorder: 'Danh sách không thứ tự',

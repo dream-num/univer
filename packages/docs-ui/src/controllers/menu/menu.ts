@@ -46,7 +46,7 @@ import {
     SetInlineFormatUnderlineCommand,
     SetTextSelectionsOperation,
     TextSelectionManagerService } from '@univerjs/docs';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
@@ -65,6 +65,7 @@ import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../compone
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../components/list-type-picker';
+import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
@@ -417,6 +418,31 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
             return one || two;
         }),
+    };
+}
+
+export const TableIcon = 'GridSingle';
+const TABLE_MENU_ID = 'doc.menu.table';
+
+export function TableMenuFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: TABLE_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        positions: [MenuPosition.TOOLBAR_START],
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        icon: TableIcon,
+        tooltip: 'toolbar.table.main',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function InsertTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DocCreateTableOperation.id,
+        title: 'toolbar.table.insert',
+        type: MenuItemType.BUTTON,
+        positions: [TABLE_MENU_ID],
+        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 

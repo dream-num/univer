@@ -328,7 +328,7 @@ export function createSkeletonCellPage(
         cellSectionBreakConfig
     ).pages[0];
 
-    updateBlockIndex([page]);
+    updateBlockIndex([page], sectionNode.startIndex);
 
     return page;
 }

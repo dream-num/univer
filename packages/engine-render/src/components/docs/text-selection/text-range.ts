@@ -55,7 +55,6 @@ export function cursorConvertToTextRange(
     const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE, segmentId = '', segmentPage } = range;
     const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
     const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage) : null;
-
     const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId);
 
     textRange.refresh();

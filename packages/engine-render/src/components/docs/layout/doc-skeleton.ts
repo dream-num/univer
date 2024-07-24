@@ -1085,17 +1085,23 @@ export class DocumentSkeleton extends Skeleton {
             }
 
             // Find node from tables.
-            for (const table of skeTables.values()) {
-                const { rows } = table;
+            if (segmentId === '') {
+                for (const table of skeTables.values()) {
+                    const { rows } = table;
 
-                for (const row of rows) {
-                    const { cells } = row;
+                    for (const row of rows) {
+                        const { cells } = row;
 
-                    for (const cell of cells) {
-                        const { st, ed } = cell;
+                        for (const cell of cells) {
+                            const { st, ed } = cell;
 
-                        if (charIndex > st && charIndex < ed) {
-                            segmentPage = cell;
+                            if (charIndex > st && charIndex < ed) {
+                                segmentPage = cell;
+                                break;
+                            }
+                        }
+
+                        if (segmentPage) {
                             break;
                         }
                     }
@@ -1103,10 +1109,6 @@ export class DocumentSkeleton extends Skeleton {
                     if (segmentPage) {
                         break;
                     }
-                }
-
-                if (segmentPage) {
-                    break;
                 }
             }
 

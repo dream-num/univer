@@ -477,6 +477,11 @@ export const DeleteRightCommand: ICommand = {
             const needDeleteGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
             const nextGlyph = skeleton.findNodeByCharIndex(startOffset + 1);
 
+            // Handle delete in cell.
+            if (needDeleteGlyph == null) {
+                return false;
+            }
+
             if (needDeleteGlyph.content === '\r') {
                 result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                     direction: DeleteDirection.RIGHT,

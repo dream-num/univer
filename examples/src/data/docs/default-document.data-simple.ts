@@ -16,6 +16,7 @@
 
 import type { IDocumentData, IParagraph, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
 import { BooleanNumber, DocumentFlavor, HorizontalAlign, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
+import { ptToPixel } from '@univerjs/engine-render';
 
 const TABLE_START = '\x1A'; // 表格开始
 const TABLE_ROW_START = '\x1B'; // 表格行开始
@@ -64,7 +65,7 @@ function createParagraphs(dataStream: string) {
                     spaceAbove: { v: 10 },
                     lineSpacing: 2,
                     spaceBelow: { v: 0 },
-                    horizontalAlign: HorizontalAlign.CENTER,
+                    horizontalAlign: HorizontalAlign.LEFT,
                 },
             });
         }
@@ -111,9 +112,14 @@ const tableColumn: ITableColumn = {
     },
 };
 
+const tableRows = [...new Array(exampleTables.length).fill(null).map(() => Tools.deepClone(tableRow))];
+const tableColumns = [...new Array(exampleTables[0].length).fill(null).map(() => Tools.deepClone(tableColumn))];
+
+tableColumns[0].size.width.v = 250;
+
 const table: ITable = {
-    tableRows: [...new Array(exampleTables.length).fill(Tools.deepClone(tableRow))],
-    tableColumns: [...new Array(exampleTables[0].length).fill(Tools.deepClone(tableColumn))],
+    tableRows,
+    tableColumns,
     tableId: 'table-id',
     align: TableAlignmentType.START,
     indent: {
@@ -160,6 +166,10 @@ const table: ITable = {
 
 export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     id: 'default-document-id',
+    headers: {},
+    footers: {},
+    drawings: {},
+    drawingsOrder: [],
     body: {
         dataStream,
         textRuns: [
@@ -208,17 +218,27 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     },
     documentStyle: {
         pageSize: {
-            width: 595,
-            height: 842,
+            width: ptToPixel(595),
+            height: ptToPixel(842),
         },
         documentFlavor: DocumentFlavor.TRADITIONAL,
-        marginTop: 50,
-        marginBottom: 50,
-        marginRight: 40,
-        marginLeft: 40,
+        marginTop: ptToPixel(50),
+        marginBottom: ptToPixel(50),
+        marginRight: ptToPixel(50),
+        marginLeft: ptToPixel(50),
         renderConfig: {
             vertexAngle: 0,
             centerAngle: 0,
         },
+        defaultHeaderId: '',
+        defaultFooterId: '',
+        evenPageHeaderId: '',
+        evenPageFooterId: '',
+        firstPageHeaderId: '',
+        firstPageFooterId: '',
+        evenAndOddHeaders: BooleanNumber.FALSE,
+        useFirstPageHeaderFooter: BooleanNumber.FALSE,
+        marginHeader: 30,
+        marginFooter: 30,
     },
 };

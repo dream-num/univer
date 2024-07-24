@@ -484,11 +484,13 @@ export class DocumentViewModel implements IDisposable {
     }
 
     protected _parseToViewTree(dataStream: string) {
-        const dataStreamLen = dataStream.length;
         let content = '';
+        const dataStreamLen = dataStream.length;
         const sectionList: DataStreamTreeNode[] = [];
         // Only use to cache the outer paragraphs.
         const paragraphList: DataStreamTreeNode[] = [];
+        // Use to cache paragraphs in cell.
+        const cellParagraphList: DataStreamTreeNode[] = [];
         const tableList: ITableCache[] = [];
         const tableRowList: DataStreamTreeNode[] = [];
         const tableCellList: DataStreamTreeNode[] = [];
@@ -517,25 +519,31 @@ export class DocumentViewModel implements IDisposable {
                 content = '';
 
                 if (tableCellList.length > 0) {
-                    const lastCell = tableCellList[tableCellList.length - 1];
-
-                    this._batchParent(lastCell, [paragraphNode], DataStreamTreeNodeType.TABLE_CELL);
+                    cellParagraphList.push(paragraphNode);
                 } else {
                     paragraphList.push(paragraphNode);
                 }
             } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
                 const sectionNode = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
+                const tempParagraphList = tableCellList.length > 0 ? cellParagraphList : paragraphList;
 
-                this._batchParent(sectionNode, paragraphList);
+                this._batchParent(sectionNode, tempParagraphList);
 
-                const lastNode = paragraphList[paragraphList.length - 1];
+                const lastNode = tempParagraphList[tempParagraphList.length - 1];
 
                 if (lastNode && lastNode.content) {
                     lastNode.content += DataStreamTreeTokenType.SECTION_BREAK;
                 }
 
-                sectionList.push(sectionNode);
-                paragraphList.length = 0;
+                if (tableCellList.length > 0) {
+                    const lastCell = tableCellList[tableCellList.length - 1];
+
+                    this._batchParent(lastCell, [sectionNode], DataStreamTreeNodeType.TABLE_CELL);
+                } else {
+                    sectionList.push(sectionNode);
+                }
+
+                tempParagraphList.length = 0;
             } else if (char === DataStreamTreeTokenType.TABLE_START) {
                 const tableNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE);
 

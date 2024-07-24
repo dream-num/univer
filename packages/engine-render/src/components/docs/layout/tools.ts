@@ -321,7 +321,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
     let prePageStartIndex = start;
 
     for (const page of pages) {
-        const { sections } = page;
+        const { sections, skeTables } = page;
         const pageStartIndex = prePageStartIndex;
         const pageEndIndex = pageStartIndex;
         let preSectionStartIndex = pageStartIndex;
@@ -346,8 +346,14 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 // const preLine: Nullable<IDocumentSkeletonLine> = null;
 
                 for (const line of lines) {
-                    const { divides, lineHeight, top } = line;
-                    const lineStartIndex = preLineStartIndex;
+                    const { divides, lineHeight, top, isBehindTable, tableId } = line;
+                    let lineStartIndex = preLineStartIndex;
+                    if (isBehindTable && tableId) {
+                        const table = skeTables.get(tableId);
+                        if (table) {
+                            lineStartIndex = table.ed;
+                        }
+                    }
                     const lineEndIndex = lineStartIndex;
                     let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
@@ -417,8 +423,6 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     maxColumnWidth = Math.max(maxColumnWidth, actualWidth);
                     // Please do not use pre line's top and height to calculate the current's top,
                     // because of float objects will between lines.
-                    // line.top = (preLine?.top || 0) + (preLine?.lineHeight || 0);
-                    // preLine = line;
                     preLineStartIndex = line.ed;
                 }
                 column.st = columStartIndex + 1;

@@ -29,6 +29,7 @@ import type {
 import { Path2 } from '../../../../basics/path2';
 import { Transform } from '../../../../basics/transform';
 import { Vector2 } from '../../../../basics/vector2';
+import type { IParagraphConfig } from '../../../../basics';
 
 interface IDrawingsSplit {
     left: number;
@@ -66,6 +67,7 @@ export function createSkeletonLine(
     columnWidth: number,
     lineIndex: number = 0,
     isParagraphStart: boolean = false,
+    paragraphConfig: IParagraphConfig,
     page: IDocumentSkeletonPage,
     headerPage: Nullable<IDocumentSkeletonPage>,
     footerPage: Nullable<IDocumentSkeletonPage>
@@ -81,6 +83,7 @@ export function createSkeletonLine(
         marginTop = 0,
         spaceBelowApply = 0,
     } = lineBoundingBox;
+    const { skeTableInParagraph } = paragraphConfig;
     const pageSkeDrawings = page.skeDrawings ?? new Map();
     const headersDrawings = headerPage?.skeDrawings;
     const footersDrawings = footerPage?.skeDrawings;
@@ -96,6 +99,12 @@ export function createSkeletonLine(
     lineSke.paddingBottom = paddingBottom;
     lineSke.marginTop = marginTop; // marginTop is initialized when it is created, and marginBottom is not calculated when it is created, it will be determined according to the situation of the next paragraph
     lineSke.spaceBelowApply = spaceBelowApply;
+
+    if (isParagraphStart && skeTableInParagraph && skeTableInParagraph.size > 0) {
+        const tableId = skeTableInParagraph.keys().next().value;
+        lineSke.isBehindTable = true;
+        lineSke.tableId = tableId;
+    }
 
     const affectSkeDrawings = new Map(Array.from(pageSkeDrawings).filter(([_, drawing]) => drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE));
 
@@ -587,6 +596,8 @@ function _getLineSke(lineType: LineType, paragraphIndex: number): IDocumentSkele
         divideLen: 0, // divideLen 被对象分割为多少块
         st: -1, // startIndex 文本开始索引
         ed: -1, // endIndex 文本结束索引
+        isBehindTable: false, // isBehindTable 是否在表格后面
+        tableId: '', // tableId 表格id
         lineIndex: 0, // lineIndex 行号
         paragraphStart: false,
     };

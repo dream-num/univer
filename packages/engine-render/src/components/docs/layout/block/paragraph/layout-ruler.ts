@@ -528,7 +528,7 @@ function _lineOperator(
     }
 
     if (skeTableInParagraph != null && skeTableInParagraph.size > 0) {
-        needOpenNewPageByTableLayout = _updateAndPositionTable(lineTop, lastPage, section, skeTableInParagraph);
+        needOpenNewPageByTableLayout = _updateAndPositionTable(lineTop, marginTop, lastPage, section, skeTableInParagraph);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -592,6 +592,7 @@ function _lineOperator(
         column.width,
         lineIndex,
         paragraphStart,
+        paragraphConfig,
         lastPage,
         headerPage,
         footerPage
@@ -640,6 +641,7 @@ function __updateAndPositionDrawings(
 
 function _updateAndPositionTable(
     lineTop: number,
+    marginTop: number,
     page: IDocumentSkeletonPage,
     section: IDocumentSkeletonSection,
     skeTableInParagraph: Map<string, IDocumentSkeletonTable>
@@ -654,7 +656,7 @@ function _updateAndPositionTable(
 
     switch (tableSource.textWrap) {
         case TableTextWrapType.NONE: {
-            table.top = lineTop;
+            table.top = lineTop + marginTop;
             break;
         }
         case TableTextWrapType.WRAP: {

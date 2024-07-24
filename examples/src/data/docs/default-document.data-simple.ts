@@ -33,7 +33,7 @@ function createTableDataStream(tables: string[][]) {
     for (let i = 0; i < row; i++) {
         dataStream += TABLE_ROW_START;
         for (let j = 0; j < col; j++) {
-            dataStream += `${TABLE_CELL_START + tables[i][j]}\r${TABLE_CELL_END}`;
+            dataStream += `${TABLE_CELL_START + tables[i][j]}\r\n${TABLE_CELL_END}`;
         }
         dataStream += TABLE_ROW_END;
     }

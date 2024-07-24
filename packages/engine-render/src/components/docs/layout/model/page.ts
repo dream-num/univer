@@ -282,7 +282,7 @@ function _createSkeletonHeaderFooter(
 export function createSkeletonCellPage(
     ctx: ILayoutContext,
     viewModel: DocumentViewModel,
-    sectionNode: DataStreamTreeNode,
+    cellNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     tableConfig: ITable,
     row: number,
@@ -292,6 +292,8 @@ export function createSkeletonCellPage(
     const { skeletonResourceReference } = ctx;
     const { cellMargin, tableRows, tableColumns, tableId } = tableConfig;
     const cellConfig = tableRows[row].tableCells[col];
+    // Table cell only has one section.
+    const sectionNode = cellNode.children[0];
     const {
         start = { v: 10 },
         end = { v: 10 },
@@ -328,7 +330,7 @@ export function createSkeletonCellPage(
         cellSectionBreakConfig
     ).pages[0];
 
-    updateBlockIndex([page], sectionNode.startIndex);
+    updateBlockIndex([page], cellNode.startIndex);
 
     return page;
 }

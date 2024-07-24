@@ -84,7 +84,7 @@ export class FeatureCalculationManagerService extends Disposable implements IFea
     }
 
     has(unitId: string, subUnitId: string, featureId: string): boolean {
-        return this._referenceExecutorMap.get(unitId)?.get(subUnitId)?.has(featureId) !== null;
+        return Boolean(this._referenceExecutorMap.get(unitId)?.get(subUnitId)?.has(featureId));
     }
 
     register(unitId: string, subUnitId: string, featureId: string, referenceExecutor: IFeatureCalculationManagerParam) {

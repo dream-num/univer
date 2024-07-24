@@ -471,15 +471,16 @@ export class EditingRenderController extends Disposable implements IRenderModule
         documentComponent.resize(editorWidth / scaleX, editorHeight / scaleY);
 
         /**
+         * sometimes requestIdleCallback is invalid, so use setTimeout to ensure the successful execution of the resizeBySize method.
          * resize canvas
          * When modifying the selection area for a formula, it is necessary to add a setTimeout to ensure successful updating.
          */
-        requestIdleCallback(() => {
+        setTimeout(() => {
             docEngine.resizeBySize(
                 fixLineWidthByScale(editorWidth, precisionScaleX),
                 fixLineWidthByScale(physicHeight, precisionScaleY)
             );
-        });
+        }, 0);
 
         // const canvasElement = this._context.engine.getCanvasElement();
         // const canvasBoundingRect = canvasElement.getBoundingClientRect();

@@ -28,6 +28,7 @@ export type {
     IUnitSheetNameMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetDefinedNameMap,
+    IFeatureDirtyRangeType,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ErrorType, ERROR_TYPE_SET } from './basics/error-type';

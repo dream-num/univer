@@ -24,16 +24,16 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.CELL.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.CELL.functionParameter.number1.name',
-                detail: 'formula.functionList.CELL.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.CELL.functionParameter.infoType.name',
+                detail: 'formula.functionList.CELL.functionParameter.infoType.detail',
+                example: '"type"',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.CELL.functionParameter.number2.name',
-                detail: 'formula.functionList.CELL.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.CELL.functionParameter.reference.name',
+                detail: 'formula.functionList.CELL.functionParameter.reference.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -46,16 +46,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ERROR_TYPE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ERROR_TYPE.functionParameter.number1.name',
-                detail: 'formula.functionList.ERROR_TYPE.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ERROR_TYPE.functionParameter.number2.name',
-                detail: 'formula.functionList.ERROR_TYPE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ERROR_TYPE.functionParameter.errorVal.name',
+                detail: 'formula.functionList.ERROR_TYPE.functionParameter.errorVal.detail',
+                example: '"#NULL!"',
                 require: 1,
                 repeat: 0,
             },
@@ -387,16 +380,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.TYPE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.TYPE.functionParameter.number1.name',
-                detail: 'formula.functionList.TYPE.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.TYPE.functionParameter.number2.name',
-                detail: 'formula.functionList.TYPE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.TYPE.functionParameter.value.name',
+                detail: 'formula.functionList.TYPE.functionParameter.value.detail',
+                example: 'A2',
                 require: 1,
                 repeat: 0,
             },

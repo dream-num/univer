@@ -21,6 +21,7 @@ import {
     createInterceptorKey,
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    EDITOR_ACTIVATED,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     IContextService,
@@ -179,6 +180,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
          */
         if (!this._editorService.getFocusEditor()) {
             this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            /**
+             * Fix: When the sheet loads for the first time, copying and pasting triggers the editor, and the edits are ineffective.
+             */
+            this._contextService.setContextValue(EDITOR_ACTIVATED, false);
             this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
             this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
         }

@@ -47,7 +47,7 @@ import '@xyflow/react/dist/style.css';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
-import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
+import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
 import { useUnitFocused, useUnitTitle } from '../hooks/title';
 import { type FloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
@@ -74,7 +74,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const messageService = useDependency(IMessageService);
-    const unitGridService = useDependency(UnitGridService);
+    const unitGridService = useDependency(IUnitGridService);
     const instanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
 
@@ -84,11 +84,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
-    const headerMenuComponents = useComponentsOfPart(BuiltInUIPart.HEADER_MENU);
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
-
-    const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
 
     const focusedUnit = useObservable(instanceService.focused$);
     const focusUnit = useCallback((unitId: string) => {
@@ -146,30 +143,26 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         customNode: UnitNode,
     };
 
-    const MAX_COUNT_IN_ROW = 3;
-    const initialNodes = unitGrid.map((unitId, index) => ({
-        id: unitId,
+    const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
+    const gridNodes = useMemo(() => unitGrid.map((item) => ({
+        id: item.id,
         type: 'customNode',
         dragHandle: '.univer-uni-node-drag-handle',
-        style: {
-            width: '660px',
-            height: '600px',
-            display: 'flex',
-            borderRadius: '8px',
-            border: '1px solid #ccc',
-            backgroundColor: '#fff',
-        },
+        style: item.style,
         focusable: true,
         data: {
-            unitId,
+            unitId: item.data.unitId,
             gridService: unitGridService,
             instanceService,
             onFocus: focusUnit,
         },
-        position: { x: (index % MAX_COUNT_IN_ROW) * 750, y: Math.floor(index / MAX_COUNT_IN_ROW) * 750 + 40 },
-    }));
+        position: item.position,
+    })), [unitGrid]);
 
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+    const [nodes, setNodes, onNodesChange] = useNodesState(gridNodes);
+    useEffect(() => {
+        setNodes(gridNodes);
+    }, [gridNodes]);
 
     const onMove = useCallback(() => {
         floatingToolbarRef.current?.update();
@@ -208,7 +201,17 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 panOnScroll={!disableReactFlowBehavior}
                                 nodes={nodes}
                                 nodeTypes={nodeTypes}
-                                onNodesChange={onNodesChange}
+                                onNodesChange={(nodes) => {
+                                    nodes.forEach((node) => {
+                                        if (node.type === 'dimensions' && node.resizing) {
+                                            unitGridService.changeDimension(node.id, { width: node.dimensions!.width, height: node.dimensions!.height });
+                                        } else if (node.type === 'position') {
+                                            unitGridService.changePosition(node.id, { x: node.position!.x, y: node.position!.y });
+                                        }
+                                    });
+
+                                    onNodesChange(nodes);
+                                }}
                                 onResize={resizeUnits}
                                 fitView
                                 onPointerDown={(event) => {
@@ -313,7 +316,7 @@ function UnitNode({ data }: IUnitNodeProps) {
 export interface IUnitRendererProps {
     unitId: string;
 
-    gridService: UnitGridService;
+    gridService: IUnitGridService;
     instanceService: IUniverInstanceService;
 }
 

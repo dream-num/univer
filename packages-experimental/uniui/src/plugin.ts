@@ -71,7 +71,7 @@ import {
     ZIndexManager,
 } from '@univerjs/ui';
 import { UniverUniUIController } from './controllers/uniui-desktop.controller';
-import { UnitGridService } from './services/unit-grid/unit-grid.service';
+import { IUnitGridService, UnitGridService } from './services/unit-grid/unit-grid.service';
 import { UniuiLeftSidebarController } from './controllers/uniui-leftsidebar.controller';
 import { UniuiToolbarController } from './controllers/uniui-toolbar.controller';
 
@@ -103,7 +103,7 @@ export class UniverUniUIPlugin extends Plugin {
             [ComponentManager],
             [ZIndexManager],
             [ShortcutPanelService],
-            [UnitGridService],
+            [IUnitGridService, { useClass: UnitGridService }],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: ShortcutService }],

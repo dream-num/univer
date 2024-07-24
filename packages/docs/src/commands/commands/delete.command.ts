@@ -17,6 +17,7 @@
 import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
+    DataStreamTreeTokenType,
     getCustomDecorationSlice,
     getCustomRangeSlice,
     ICommandService,
@@ -477,8 +478,8 @@ export const DeleteRightCommand: ICommand = {
             const needDeleteGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
             const nextGlyph = skeleton.findNodeByCharIndex(startOffset + 1);
 
-            // Handle delete in cell.
-            if (needDeleteGlyph == null) {
+            // Handle delete key at cell content end.
+            if (needDeleteGlyph.streamType === DataStreamTreeTokenType.PARAGRAPH && nextGlyph?.streamType === DataStreamTreeTokenType.SECTION_BREAK) {
                 return false;
             }
 

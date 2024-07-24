@@ -62,7 +62,7 @@ function createParagraphs(dataStream: string) {
             paragraphs.push({
                 startIndex: i,
                 paragraphStyle: {
-                    spaceAbove: { v: 10 },
+                    spaceAbove: { v: 5 },
                     lineSpacing: 2,
                     spaceBelow: { v: 0 },
                     horizontalAlign: HorizontalAlign.LEFT,
@@ -190,6 +190,30 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
             },
             {
                 st: 9,
+                ed: 12,
+                ts: {
+                    fs: 14,
+                    ff: 'Times New Roman',
+                    cl: {
+                        rgb: 'rgb(30, 30, 30)',
+                    },
+                    bl: BooleanNumber.FALSE,
+                },
+            },
+            {
+                st: 13,
+                ed: 15,
+                ts: {
+                    fs: 14,
+                    ff: 'Times New Roman',
+                    cl: {
+                        rgb: 'rgb(130, 30, 30)',
+                    },
+                    bl: BooleanNumber.TRUE,
+                },
+            },
+            {
+                st: 16,
                 ed: dataStream.length - 2,
                 ts: {
                     fs: 14,

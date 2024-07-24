@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
+import { DataStreamTreeNodeType } from '@univerjs/core';
+import type { IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { ILayoutContext } from '../../tools';
 import { clearFontCreateConfigCache } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import { createTableSkeleton } from '../table';
 import { shaping } from './shaping';
 import { lineBreaking } from './linebreaking';
 import { lineAdjustment } from './line-adjustment';
@@ -32,7 +34,21 @@ export function dealWidthParagraph(
     sectionBreakConfig: ISectionBreakConfig
 ): IDocumentSkeletonPage[] {
     clearFontCreateConfigCache();
-    const { content = '' } = paragraphNode;
+    const { content = '', children } = paragraphNode;
+    const skeTableInParagraph: Map<string, IDocumentSkeletonTable> = new Map();
+
+    // Need to create table before shaping....
+    if (children.length === 1 && children[0].nodeType === DataStreamTreeNodeType.TABLE) {
+        const tableSkeleton = createTableSkeleton(
+            ctx,
+            curPage,
+            viewModel,
+            children[0],
+            sectionBreakConfig
+        );
+
+        skeTableInParagraph.set(tableSkeleton.tableId, tableSkeleton);
+    }
 
     // Step 1: Text Shaping.
     const shapedTextList = shaping(
@@ -50,7 +66,8 @@ export function dealWidthParagraph(
         shapedTextList,
         curPage,
         paragraphNode,
-        sectionBreakConfig
+        sectionBreakConfig,
+        skeTableInParagraph
     );
 
     // Step 3: Line Adjustment.

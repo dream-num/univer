@@ -1086,6 +1086,7 @@ export class DocumentSkeleton extends Skeleton {
 
             // Find node from tables.
             if (segmentId === '') {
+                let foundCell = false;
                 for (const table of skeTables.values()) {
                     const { rows } = table;
 
@@ -1095,18 +1096,19 @@ export class DocumentSkeleton extends Skeleton {
                         for (const cell of cells) {
                             const { st, ed } = cell;
 
-                            if (charIndex > st && charIndex < ed) {
+                            if (charIndex >= st && charIndex <= ed) {
                                 segmentPage = cell;
+                                foundCell = true;
                                 break;
                             }
                         }
 
-                        if (segmentPage) {
+                        if (foundCell) {
                             break;
                         }
                     }
 
-                    if (segmentPage) {
+                    if (foundCell) {
                         break;
                     }
                 }

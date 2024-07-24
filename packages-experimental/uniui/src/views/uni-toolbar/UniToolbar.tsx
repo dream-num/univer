@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleService, RedoCommand, UndoCommand, useDependency } from '@univerjs/core';
-import { Dropdown, Tooltip } from '@univerjs/design';
-import { MoreFunctionSingle } from '@univerjs/icons';
-import { MenuPosition, ToolbarButton, ToolbarItem, useToolbarCollapseObserver, useToolbarGroups } from '@univerjs/ui';
+import { RedoCommand, UndoCommand } from '@univerjs/core';
+import { MenuPosition, ToolbarItem, useToolbarGroups } from '@univerjs/ui';
 import type { ComponentType } from 'react';
 import React from 'react';
 import { SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeTextColorCommand } from '@univerjs/sheets-ui';
@@ -60,55 +58,15 @@ const UNI_TOOLBAR_SCHEMA = [
 ];
 
 export function UniToolbar() {
-    const localeService = useDependency(LocaleService);
-
     const { visibleItems } = useToolbarGroups(MENU_POSITIONS);
     const uniVisibleItems = UNI_TOOLBAR_SCHEMA.map((id) => visibleItems.find((item) => item.id === id)).filter((item) => !!item);
 
-    const { toolbarRef, collapsedId } = useToolbarCollapseObserver(uniVisibleItems);
-
     return (
-        <div ref={toolbarRef} className={styles.uniToolbar}>
-
+        <div className={styles.uniToolbar}>
             <UniFormulaBar />
             <div className={styles.toolbarGroup}>
-                {uniVisibleItems.map(
-                    (subItem) =>
-                        !collapsedId.includes(subItem.id) && (
-                            <ToolbarItem key={subItem.id} {...subItem} />
-                        )
-                )}
+                {uniVisibleItems.map((subItem) => <ToolbarItem key={subItem.id} {...subItem} />)}
             </div>
-
-            {collapsedId.length > 0 && (
-                <Tooltip title={localeService.t('more')} placement="bottom">
-                    <div>
-                        <Dropdown
-                            forceRender
-                            className={styles.toolbarMore}
-                            overlay={(
-                                <div className={styles.toolbarMoreContainer} onClick={(e) => e.stopPropagation()}>
-                                    <div className={styles.toolbarGroup}>
-                                        {uniVisibleItems.map(
-                                            (subItem) =>
-                                                collapsedId.includes(subItem.id) && (
-                                                    <ToolbarItem key={subItem.id} {...subItem} />
-                                                )
-                                        )}
-                                    </div>
-
-                                </div>
-                            )}
-                        >
-                            <span>
-                                <ToolbarButton className={styles.toolbarItemTextButton}>
-                                    <MoreFunctionSingle />
-                                </ToolbarButton>
-                            </span>
-                        </Dropdown>
-                    </div>
-                </Tooltip>
-            )}
         </div>
 
     );

@@ -46,13 +46,17 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
 
     const dirname = process.cwd();
 
+    const esbuild = {};
+
+    // don't minify identifiers for univerjs packages
+    if (pkg.name.startsWith('@univerjs/')) {
+        esbuild.minifyIdentifiers = false;
+        esbuild.keepNames = true;
+    }
+
     /** @type {import('vite').UserConfig} */
     const originalConfig = {
-        // optimizeDeps: {
-        //     esbuildOptions: {
-        //         keepNames: true,
-        //     },
-        // },
+        esbuild,
         build: {
             target: 'chrome70',
             outDir: 'lib',

@@ -156,21 +156,19 @@ export const RuleEdit = (props: IRuleEditProps) => {
 
     useEffect(() => {
         // If the child table which  the rule being edited is deleted, exit edit mode
-        if (props.rule?.cfId !== undefined) {
-            const disposable = commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === RemoveSheetMutation.id) {
-                    const params = commandInfo.params as IRemoveSheetMutationParams;
-                    if (params.subUnitId === subUnitId && params.unitId === unitId) {
-                        props.onCancel();
-                    }
-                }
-                if (commandInfo.id === SetWorksheetActiveOperation.id) {
+        const disposable = commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === RemoveSheetMutation.id) {
+                const params = commandInfo.params as IRemoveSheetMutationParams;
+                if (params.subUnitId === subUnitId && params.unitId === unitId) {
                     props.onCancel();
                 }
-            });
-            return () => disposable.dispose();
-        }
-    }, [props.rule?.cfId]);
+            }
+            if (commandInfo.id === SetWorksheetActiveOperation.id) {
+                props.onCancel();
+            }
+        });
+        return () => disposable.dispose();
+    }, []);
 
     const onStyleChange = (config: unknown) => {
         result.current = config as Parameters<IStyleEditorProps['onChange']>;

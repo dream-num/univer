@@ -191,8 +191,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '貸付期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間', detail: '貸付期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '現在の貸付額、つまり将来行われる一連の支払いを、現時点で一括支払いした場合の合計金額を指定します。' },
+            startPeriod: { name: '開始期', detail: '計算の対象となる最初の期を指定します。 最初の期から順に、1 から始まる番号が割り当てられます。' },
+            endPeriod: { name: '終了期', detail: '計算の対象となる最後の期を指定します。' },
+            type: { name: '型', detail: '支払いがいつ行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     CUMPRINC: {
@@ -205,8 +209,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '貸付期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間', detail: '貸付期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '現在の貸付額、つまり将来行われる一連の支払いを、現時点で一括支払いした場合の合計金額を指定します。' },
+            startPeriod: { name: '開始期', detail: '計算の対象となる最初の期を指定します。 最初の期から順に、1 から始まる番号が割り当てられます。' },
+            endPeriod: { name: '終了期', detail: '計算の対象となる最後の期を指定します。' },
+            type: { name: '型', detail: '支払いがいつ行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     DB: {

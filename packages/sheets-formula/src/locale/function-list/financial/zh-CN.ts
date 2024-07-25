@@ -191,8 +191,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '利率。' },
+            nper: { name: '期数', detail: '总付款期数。' },
+            pv: { name: '现值', detail: '现值。' },
+            startPeriod: { name: '首期', detail: '计算中的首期。付款期数从1开始计数。' },
+            endPeriod: { name: '末期', detail: '计算中的末期。' },
+            type: { name: '类型', detail: '付款时间类型。' },
         },
     },
     CUMPRINC: {
@@ -205,8 +209,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '利率。' },
+            nper: { name: '期数', detail: '总付款期数。' },
+            pv: { name: '现值', detail: '现值。' },
+            startPeriod: { name: '首期', detail: '计算中的首期。付款期数从1开始计数。' },
+            endPeriod: { name: '末期', detail: '计算中的末期。' },
+            type: { name: '类型', detail: '付款时间类型。' },
         },
     },
     DB: {

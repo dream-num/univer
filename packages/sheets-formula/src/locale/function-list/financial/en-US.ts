@@ -191,8 +191,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods.' },
+            pv: { name: 'pv', detail: 'The present value.' },
+            startPeriod: { name: 'start_period', detail: 'The first period in the calculation. Payment periods are numbered beginning with 1.' },
+            endPeriod: { name: 'end_period', detail: 'The last period in the calculation.' },
+            type: { name: 'type', detail: 'The timing of the payment.' },
         },
     },
     CUMPRINC: {
@@ -205,8 +209,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods.' },
+            pv: { name: 'pv', detail: 'The present value.' },
+            startPeriod: { name: 'start_period', detail: 'The first period in the calculation. Payment periods are numbered beginning with 1.' },
+            endPeriod: { name: 'end_period', detail: 'The last period in the calculation.' },
+            type: { name: 'type', detail: 'The timing of the payment.' },
         },
     },
     DB: {

@@ -191,8 +191,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '這是利率。' },
+            nper: { name: '期數', detail: '這是總付款期數。' },
+            pv: { name: '現值', detail: '這是現值。' },
+            startPeriod: { name: '首期', detail: '這是計算中的第一個週期。付款週期的編號由1開始。' },
+            endPeriod: { name: '末期', detail: '這是計算中的最後一個週期。' },
+            type: { name: '類型', detail: '這是付款的時機。' },
         },
     },
     CUMPRINC: {
@@ -205,8 +209,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '這是利率。' },
+            nper: { name: '期數', detail: '這是總付款期數。' },
+            pv: { name: '現值', detail: '這是現值。' },
+            startPeriod: { name: '首期', detail: '這是計算中的第一個週期。付款週期的編號由1開始。' },
+            endPeriod: { name: '末期', detail: '這是計算中的最後一個週期。' },
+            type: { name: '類型', detail: '這是付款的時機。' },
         },
     },
     DB: {

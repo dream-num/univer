@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/check-error';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/financial';
 import { excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';

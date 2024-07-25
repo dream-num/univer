@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { Nullable, UniverInstanceType } from '@univerjs/core';
 import { createIdentifier, Disposable, ILocalStorageService, isInternalEditorID } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -27,6 +27,7 @@ export interface IProjectNode {
     id: string;
     data: {
         unitId: string;
+        type: UniverInstanceType;
     };
     style: {
         width: string;
@@ -119,18 +120,18 @@ export class UnitGridService extends Disposable implements IUnitGridService {
 
     private _cachedGrid: Nullable<IUnitGrid> = null;
     protected async _initData(): Promise<void> {
-        const raw = await this._localStorageService.getItem<IUnitGrid>(getLocalCacheKey('static'));
+        const raw = await this._localStorageService.getItem<IUnitGrid>(getGridUnitLocalCacheKey('static'));
         if (raw) {
             this._cachedGrid = raw;
         }
     }
 
     protected _cacheData(): void {
-        this._localStorageService.setItem(getLocalCacheKey('static'), this.unitGrid);
+        this._localStorageService.setItem(getGridUnitLocalCacheKey('static'), this.unitGrid);
     }
 
     protected _onRendererCreated(renderer: IRender): void {
-        const { unitId } = renderer;
+        const { unitId, type } = renderer;
         if (isInternalEditorID(unitId)) {
             return;
         }
@@ -143,6 +144,7 @@ export class UnitGridService extends Disposable implements IUnitGridService {
             id: unitId,
             data: {
                 unitId,
+                type,
             },
             style: {
                 width: '660px',
@@ -173,6 +175,6 @@ export class UnitGridService extends Disposable implements IUnitGridService {
     }
 }
 
-export function getLocalCacheKey(projectId: string): string {
+export function getGridUnitLocalCacheKey(projectId: string): string {
     return `project-cache-${projectId}`;
 }

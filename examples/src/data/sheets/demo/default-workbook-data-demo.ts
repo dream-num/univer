@@ -23927,7 +23927,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             name: 'SHEET_DRAWING_PLUGIN',
             data: JSON.stringify({
                 'sheet-0011': {
-
                     data: {
                         sF2ogx: {
                             unitId: 'workbook-01',
@@ -23943,9 +23942,15 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         //     drawingId: 'UPBpL-A3RvKoOqPdd8VIq',
                         //     drawingType: 8,
                         //     componentKey: 'ImageDemo',
-                        //     sheetTransform: { from: { column: 2, columnOffset: 8, row: 9, rowOffset: 9 }, to: { column: 4, columnOffset: 62, row: 23, rowOffset: 0 } }, transform: { flipY: false, flipX: false, angle: 0, skewX: 0, skewY: 0, left: 200, top: 200, width: 200, height: 200 }, data: { aa: '128' },
+                        //     sheetTransform: {
+                        //         from: { column: 2, columnOffset: 8, row: 9, rowOffset: 9 },
+                        //         to: { column: 4, columnOffset: 62, row: 23, rowOffset: 0 },
+                        //     },
+                        //     transform: { flipY: false, flipX: false, angle: 0, skewX: 0, skewY: 0, left: 200, top: 200, width: 200, height: 200 },
+                        //     data: { aa: '128' },
                         // },
-                    }, order: [
+                    },
+                    order: [
                         'sF2ogx',
                         // 'UPBpL-A3RvKoOqPdd8VIq'
                     ],

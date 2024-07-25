@@ -94,7 +94,6 @@ export class UniuiToolbarController extends Disposable {
                 FakeFontSizeSelectorMenuItemFactory,
                 FakeBackgroundColorSelectorMenuItemFactory,
                 FakeImageMenuFactory,
-                FakeBackgroundColorSelectorMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));

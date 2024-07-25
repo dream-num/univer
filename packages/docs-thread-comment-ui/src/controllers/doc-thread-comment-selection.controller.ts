@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
+import type { DocumentDataModel, ITextRange } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
@@ -43,13 +44,18 @@ export class DocThreadCommentSelectionController extends Disposable {
     }
 
     private _initSelectionChange() {
+        let lastSelection: ITextRange | undefined;
         this.disposeWithMe(
             this._commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id === SetTextSelectionsOperation.id) {
                     const params = commandInfo.params as ISetTextSelectionsOperationParams;
                     const { unitId, ranges } = params;
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-                    const primary = ranges[0];
+                    const primary = ranges[0] as ITextRangeWithStyle | undefined;
+                    if (lastSelection?.startOffset === primary?.startOffset && lastSelection?.endOffset === primary?.endOffset) {
+                        return;
+                    }
+                    lastSelection = primary;
                     if (primary && doc) {
                         const { startOffset, endOffset, collapsed } = primary;
                         let customRange;

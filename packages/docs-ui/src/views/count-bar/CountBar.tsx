@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-export { UniverSheetsZenEditorPlugin } from './plugin';
+import React from 'react';
 
-// #region - all commands
+import styles from './index.module.less';
+import { ZoomSlider } from './ZoomSlider';
 
-export { OpenZenEditorOperation } from './commands/operations/zen-editor.operation';
-export { CancelZenEditCommand, ConfirmZenEditCommand } from './commands/commands/zen-editor.command';
+interface ICountBarProps {
+    changeRatio?: (ratio: string) => void;
+    onChange?: (value: string) => void;
+}
 
-// #endregion
+export function CountBar(props: ICountBarProps) {
+    return (
+        <section className={styles.docCountBar}>
+            <ZoomSlider />
+        </section>
+    );
+}

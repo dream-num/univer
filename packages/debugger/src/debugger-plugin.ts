@@ -48,11 +48,10 @@ export class UniverDebuggerPlugin extends Plugin {
                 useFactory: () => this._injector.createInstance(DebuggerController, this._config),
             },
         ]);
-
-        this._debuggerController = this._injector.get(DebuggerController);
     }
 
     getDebuggerController() {
+        this._debuggerController = this._injector.get(DebuggerController);
         return this._debuggerController;
     }
 }

@@ -57,7 +57,7 @@ univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverDebuggerPlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    footer: false,
+    // footer: false,
 });
 
 univer.registerPlugin(UniverDocsPlugin);

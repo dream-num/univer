@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { ICommandService, useDependency } from '@univerjs/core';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
 
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
-import { DOCS_ZEN_EDITOR_UNIT_ID_KEY } from '../../controllers/zen-editor.controller';
 import { IZenEditorManagerService } from '../../services/zen-editor.service';
 import styles from './index.module.less';
 

@@ -21,14 +21,19 @@ import type { IDisposable } from '@univerjs/core';
 export interface IContextMenuHandler {
     /** A callback to open context menu with given position and menu type. */
     handleContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
+    hideContextMenu(): void;
+
+    get visible(): boolean;
 }
 
 export interface IContextMenuService {
     disabled: boolean;
+    get visible(): boolean;
 
     enable(): void;
     disable(): void;
     triggerContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
+    hideContextMenu(): void;
 
     registerContextMenuHandler(handler: IContextMenuHandler): IDisposable;
 }
@@ -39,6 +44,10 @@ export class ContextMenuService extends Disposable implements IContextMenuServic
     private _currentHandler: IContextMenuHandler | null = null;
 
     disabled: boolean = false;
+
+    get visible(): boolean {
+        return this._currentHandler?.visible ?? false;
+    }
 
     disable(): void {
         this.disabled = true;
@@ -53,6 +62,10 @@ export class ContextMenuService extends Disposable implements IContextMenuServic
 
         if (this.disabled) return;
         this._currentHandler?.handleContextMenu(event, menuType);
+    }
+
+    hideContextMenu(): void {
+        this._currentHandler?.hideContextMenu();
     }
 
     registerContextMenuHandler(handler: IContextMenuHandler): IDisposable {

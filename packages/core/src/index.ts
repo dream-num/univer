@@ -31,6 +31,7 @@ export {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     createInternalEditorID,
     isInternalEditorID,
 } from './common/const';

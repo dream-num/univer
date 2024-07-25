@@ -16,7 +16,7 @@
 
 import type { IDisposable, ITextRange } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor, pxToNum } from '@univerjs/engine-render';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
 import { ICanvasPopupService } from '@univerjs/ui';
@@ -90,14 +90,19 @@ export class DocCanvasPopManagerService extends Disposable {
                 top,
                 bottom: top + height,
             };
+            const canvasElement = engine.getCanvasElement();
+            const canvasClientRect = canvasElement.getBoundingClientRect();
+            const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
 
             const offsetBound = transformBound2OffsetBound(bound, scene);
-            const topOffset = engine.getCanvasElement().getBoundingClientRect().top;
+            const { top: topOffset, left: leftOffset, width: domWidth } = canvasClientRect;
+            const scaleAdjust = domWidth / widthOfCanvas;
+
             const position = {
-                left: offsetBound.left,
-                right: offsetBound.right,
-                top: offsetBound.top + topOffset,
-                bottom: offsetBound.bottom + topOffset,
+                left: (offsetBound.left * scaleAdjust) + leftOffset,
+                right: (offsetBound.right * scaleAdjust) + leftOffset,
+                top: (offsetBound.top * scaleAdjust) + topOffset,
+                bottom: (offsetBound.bottom * scaleAdjust) + topOffset,
             };
             return position;
         };
@@ -140,16 +145,23 @@ export class DocCanvasPopManagerService extends Disposable {
 
             const documentOffsetConfig = document.getOffsetConfig();
             const { docsLeft, docsTop } = documentOffsetConfig;
-            const top = engine.getCanvasElement().getBoundingClientRect().top;
+            const canvasElement = engine.getCanvasElement();
+            const canvasClientRect = canvasElement.getBoundingClientRect();
+            const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+            const { top, left, width } = canvasClientRect; // real width affected by scale
+            const scaleAdjust = width / widthOfCanvas;
+
+            const { scaleX, scaleY } = scene.getAncestorScale();
             const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
             const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
             const bounds = getLineBounding(borderBoxPointGroup);
             const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
-                left: i.left + docsLeft,
-                right: i.right + docsLeft,
-                top: i.top + docsTop + top,
-                bottom: i.bottom + docsTop + top,
+                left: (i.left + docsLeft * scaleX) * scaleAdjust + left,
+                right: (i.right + docsLeft * scaleX) * scaleAdjust + left,
+                top: (i.top + docsTop * scaleY) * scaleAdjust + top,
+                bottom: (i.bottom + docsTop * scaleY) * scaleAdjust + top,
             }));
+
             return res;
         };
 

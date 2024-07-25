@@ -20,9 +20,9 @@ import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { CommentSingle } from '@univerjs/icons';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
-import { ShowCommentPanelOperation, StartAddCommentOperation } from '../commands/operations/show-comment-panel.operation';
+import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
-import { AddDocCommentMenuItemFactory } from './menu';
+import { AddDocCommentMenuItemFactory, ToolbarDocCommentMenuItemFactory } from './menu';
 
 export interface IDocThreadCommentUIConfig {
     menu: MenuConfig;
@@ -49,13 +49,17 @@ export class DocThreadCommentUIController extends Disposable {
             DeleteDocCommentComment,
             ShowCommentPanelOperation,
             StartAddCommentOperation,
+            ToggleCommentPanelOperation,
         ].forEach((command) => {
             this.disposeWithMe(this._commandService.registerCommand(command));
         });
     }
 
     private _initMenus() {
-        [AddDocCommentMenuItemFactory].forEach((menuFactory) => {
+        [
+            AddDocCommentMenuItemFactory,
+            ToolbarDocCommentMenuItemFactory,
+        ].forEach((menuFactory) => {
             this.disposeWithMe(this._menuService.addMenuItem(menuFactory(this._injector), this._config.menu));
         });
     }

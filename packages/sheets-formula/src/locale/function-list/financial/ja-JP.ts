@@ -143,8 +143,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPNUM: {
@@ -157,8 +159,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPPCD: {
@@ -171,8 +175,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     CUMIPMT: {

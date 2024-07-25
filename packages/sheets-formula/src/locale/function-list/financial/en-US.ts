@@ -143,8 +143,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPNUM: {
@@ -157,8 +159,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPPCD: {
@@ -171,8 +175,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     CUMIPMT: {

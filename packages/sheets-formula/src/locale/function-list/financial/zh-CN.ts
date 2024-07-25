@@ -143,8 +143,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPNUM: {
@@ -157,8 +159,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPPCD: {
@@ -171,8 +175,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     CUMIPMT: {

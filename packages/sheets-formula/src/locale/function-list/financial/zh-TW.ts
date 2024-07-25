@@ -143,8 +143,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     COUPNUM: {
@@ -157,8 +159,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     COUPPCD: {
@@ -171,8 +175,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     CUMIPMT: {

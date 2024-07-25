@@ -21,6 +21,9 @@ import { Amorlinc } from './amorlinc';
 import { Coupdaybs } from './coupdaybs';
 import { Coupdays } from './coupdays';
 import { Coupdaysnc } from './coupdaysnc';
+import { Coupncd } from './coupncd';
+import { Coupnum } from './coupnum';
+import { Couppcd } from './couppcd';
 
 export const functionFinancial = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
@@ -29,4 +32,7 @@ export const functionFinancial = [
     [Coupdaybs, FUNCTION_NAMES_FINANCIAL.COUPDAYBS],
     [Coupdays, FUNCTION_NAMES_FINANCIAL.COUPDAYS],
     [Coupdaysnc, FUNCTION_NAMES_FINANCIAL.COUPDAYSNC],
+    [Coupncd, FUNCTION_NAMES_FINANCIAL.COUPNCD],
+    [Coupnum, FUNCTION_NAMES_FINANCIAL.COUPNUM],
+    [Couppcd, FUNCTION_NAMES_FINANCIAL.COUPPCD],
 ];

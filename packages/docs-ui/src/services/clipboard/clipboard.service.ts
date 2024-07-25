@@ -323,11 +323,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         if (!text.includes('\r') && Tools.isLegalUrl(text)) {
             const id = Tools.generateRandomId();
             const docDataModel = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)!;
+            const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${dataStream}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
             const range = this._docCustomRangeService.copyCustomRange(
                 docDataModel.getUnitId(),
                 {
                     startIndex: 0,
-                    endIndex: dataStream.length - 1,
+                    endIndex: urlText.length - 1,
                     rangeId: id,
                     rangeType: CustomRangeType.HYPERLINK,
                     data: text,
@@ -335,7 +336,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             );
 
             return {
-                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${dataStream}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                dataStream: urlText,
                 customRanges: [range],
             };
         }

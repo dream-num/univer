@@ -28,7 +28,7 @@ export const DOC_LINK_ICON = 'doc-hyper-link-icon';
 export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ShowDocHyperLinkEditPopupOperation.id,
-        group: MenuGroup.TOOLBAR_LAYOUT,
+        group: MenuGroup.CONTEXT_MENU_DATA,
         type: MenuItemType.BUTTON,
         icon: DOC_LINK_ICON,
         title: 'docLink.menu.tooltip',

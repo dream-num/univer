@@ -54,6 +54,9 @@ import { DocBackScrollRenderController } from './controllers/render-controllers/
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
+import { DocContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
+import { DocPageLayoutService } from './services/doc-page-layout.service';
+import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocHoverManagerService } from './services/doc-hover-manager.service';
 import { DocHoverRenderController } from './controllers/render-controllers/doc-hover.render-controller';
 
@@ -142,6 +145,7 @@ export class UniverDocsUIPlugin extends Plugin {
         ([
             [DocSkeletonManagerService],
             [DocInterceptorService],
+            [DocPageLayoutService],
             [DocRenderController],
             [DocZoomRenderController],
         ] as Dependency[]).forEach((m) => {
@@ -154,7 +158,9 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocBackScrollRenderController],
             [DocTextSelectionRenderController],
             [DocHeaderFooterController],
+            [DocResizeRenderController],
             [DocHoverRenderController],
+            [DocContextMenuRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });

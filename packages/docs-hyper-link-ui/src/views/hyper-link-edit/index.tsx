@@ -76,9 +76,9 @@ export const DocHyperLinkEdit = () => {
     }, [editingId, hyperLinkModel, textSelectionManagerService, univerInstanceService]);
 
     useEffect(() => {
-        textSelectionRenderManager.blur();
+        textSelectionRenderManager.blurEditor();
         return () => {
-            textSelectionRenderManager.focus();
+            textSelectionRenderManager.focusEditor();
         };
     }, [textSelectionRenderManager]);
 

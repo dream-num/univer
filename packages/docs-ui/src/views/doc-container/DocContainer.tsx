@@ -205,7 +205,8 @@ export class DocContainer extends Component<IBaseDocContainerProps> {
                             style={{
                                 display: config.footer ? 'block' : 'none',
                             }}
-                        />
+                        >
+                        </footer>
                     </div>
                     <aside
                         style={{

@@ -20,6 +20,7 @@ import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
 import { getDT, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { getSelectionText, TextSelectionManagerService } from '@univerjs/docs';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
@@ -52,6 +53,30 @@ export const ShowCommentPanelOperation: ICommand<IShowCommentPanelOperationParam
     },
 };
 
+export const ToggleCommentPanelOperation: ICommand = {
+    id: 'docs.operation.toggle-comment-panel',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const panelService = accessor.get(ThreadCommentPanelService);
+        const sidebarService = accessor.get(ISidebarService);
+
+        if (!panelService.panelVisible) {
+            sidebarService.open({
+                header: { title: 'threadCommentUI.panel.title' },
+                children: { label: DocThreadCommentPanel.componentKey },
+                width: 320,
+                onClose: () => panelService.setPanelVisible(false),
+            });
+            panelService.setPanelVisible(true);
+        } else {
+            sidebarService.close();
+            panelService.setPanelVisible(false);
+            panelService.setActiveComment(null);
+        }
+        return true;
+    },
+};
+
 export const StartAddCommentOperation: ICommand = {
     id: 'docs.operation.start-add-comment',
     type: CommandType.OPERATION,
@@ -60,6 +85,7 @@ export const StartAddCommentOperation: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const textSelectionRenderService = accessor.get(ITextSelectionRenderManager);
         const userManagerService = accessor.get(UserManagerService);
         const docCommentService = accessor.get(DocThreadCommentService);
         const commandService = accessor.get(ICommandService);
@@ -104,6 +130,7 @@ export const StartAddCommentOperation: ICommand = {
             threadId: commentId,
         };
 
+        textSelectionRenderService.blurEditor();
         docCommentService.startAdd(comment);
         panelService.setActiveComment({
             unitId,

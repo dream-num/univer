@@ -241,7 +241,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         // TODO: memory leak? This extension seems never released.
         // eslint-disable-next-line no-new
-        new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
+        new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector, {
+            selectionMoveEnd: () => {
+                this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+            },
+        });
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
@@ -982,13 +986,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._updateSelectionControlRange(activeControl, newSelectionRange, currentCell);
     }
 
-    protected _refreshSelection(params: readonly ISelectionWithStyle[]) {
+    protected _refreshSelectionControl(params: readonly ISelectionWithStyle[]) {
         const selections = params.map((selectionWithStyle) => {
             const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
             selectionData.style = getNormalSelectionStyle(this._themeService);
             return selectionData;
         });
-
         this.updateControlForCurrentByRangeData(selections);
     }
 }

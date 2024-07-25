@@ -40,7 +40,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
         @IRenderManagerService renderManagerService: IRenderManagerService,
-        @IRefSelectionsService refSelectionsService: SheetsSelectionsService,
+        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super(
@@ -50,7 +50,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             renderManagerService
         );
 
-        this._workbookSelections = refSelectionsService.getWorkbookSelections(this._context.unitId);
+        this._workbookSelections = this._refSelectionsService.getWorkbookSelections(this._context.unitId);
 
         this._initSelectionChangeListener();
         this._initSkeletonChangeListener();
@@ -154,9 +154,6 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initUserActionSyncListener() {
-        // When user completes range selection, we should update the range into the `IRefSelectionService`,
-        // and later the selections would be updated to the `SelectionManagerService`.
-        // Note that it would also trigger the callback in `_initSelectionChangeListener`.
         this.disposeWithMe(this.selectionMoveEnd$.subscribe((params) => this._updateSelections(params)));
     }
 
@@ -190,6 +187,9 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initSkeletonChangeListener(): void {
+        // not only change sheet would cause currentSkeleton$, there many cmds will emit currentSkeleton$
+        // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
+        // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (!param) {
                 return;
@@ -203,15 +203,15 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             // for col width & row height resize
             const currentSelections = this._workbookSelections.getCurrentSelections();
             if (currentSelections != null) {
-                this._refreshSelection(currentSelections);
+                this._refreshSelectionControl(currentSelections);
             }
         }));
     }
 
-    protected override _refreshSelection(params: readonly ISelectionWithStyle[]) {
+    protected override _refreshSelectionControl(params: readonly ISelectionWithStyle[]) {
         const selections = params.map((selectionWithStyle) => {
             const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-            selectionData.style = getRefSelectionStyle(this._themeService);
+            // selectionData.style = getRefSelectionStyle(this._themeService);
             return selectionData;
         });
         if (selections.length === 0) {

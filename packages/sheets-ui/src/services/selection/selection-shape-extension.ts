@@ -86,7 +86,8 @@ export class SelectionShapeExtension {
 
         /** @deprecated injection in extensions should be strictly limited. */
         // TODO@ybzky: remove injector here, permission control should be update from the outside.
-        private readonly _injector: Injector
+        private readonly _injector: Injector,
+        private _selectionHooks: Record<string, () => void>
     ) {
         this._initialControl();
 
@@ -369,6 +370,7 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
+            this._selectionHooks.selectionMoveEnd?.();
             this._control.selectionMoved$.next(this._targetSelection);
         });
     }
@@ -516,6 +518,11 @@ export class SelectionShapeExtension {
         this._control.selectionScaling$.next(this._targetSelection);
     }
 
+    /**
+     * Events for 8 control point
+     * @param evt
+     * @param cursor
+     */
     private _widgetEvent(evt: IMouseEvent | IPointerEvent, cursor: CURSOR_TYPE) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
@@ -587,6 +594,7 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
+            this._selectionHooks.selectionMoveEnd?.();
             this._control.selectionScaled$.next(this._targetSelection);
         });
     }

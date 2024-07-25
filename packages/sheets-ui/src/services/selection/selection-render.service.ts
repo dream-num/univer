@@ -45,7 +45,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
         @IRenderManagerService renderManagerService: IRenderManagerService,
-        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
@@ -58,7 +58,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             renderManagerService
         );
 
-        this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
+        this._workbookSelections = _selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
     }
 
@@ -138,7 +138,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const param = this._workbookSelections.getCurrentSelections();
             if (!param) return;
 
-            this._refreshSelection(param);
+            this._refreshSelectionControl(param);
         }));
     }
 
@@ -221,7 +221,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const currentSelections = this._workbookSelections.getCurrentSelections();
             // for col width & row height resize
             if (currentSelections != null) {
-                this._refreshSelection(currentSelections);
+                this._refreshSelectionControl(currentSelections);
             }
         }));
     }

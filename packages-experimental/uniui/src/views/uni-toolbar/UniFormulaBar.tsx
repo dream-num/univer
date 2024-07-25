@@ -47,11 +47,15 @@ export const UniFormulaBar = () => {
     return (
         <>
             <div
-                className={styles.uniFormulaBar}
+                className={clsx(styles.uniFormulaBar, {
+                    [styles.uniFormulaBarDisable]: !focusedId,
+                })}
                 onClick={() => handleOpenWrite()}
             >
                 <FxSingle />
-                <span>Write formula</span>
+                <span className={styles.uniFormulaBarText}>
+                    Write formula
+                </span>
             </div>
             {visible && (
                 <div

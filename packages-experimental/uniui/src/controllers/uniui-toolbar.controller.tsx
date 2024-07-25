@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { DownloadSingle, LockSingle, PrintSingle, ShareSingle, ZenSingle } from '@univerjs/icons';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { DownloadMenuItemFactory, LockMenuItemFactory, PrintMenuItemFactory, ShareMenuItemFactory, ZenMenuItemFactory } from './menu';
+import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '@univerjs/sheets-ui';
+import { SetInlineFormatBoldCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
+import { generateCloneMutation } from '../controllers/utils';
+import { DOC_BOLD_MUTATION_ID, DOC_ITALIC_MUTATION_ID, DOC_STRIKE_MUTATION_ID, DOC_UNDERLINE_MUTATION_ID, DocBoldMenuItemFactory, DocItalicMenuItemFactory, DocStrikeThroughMenuItemFactory, DocUnderlineMenuItemFactory, DownloadMenuItemFactory, FakeBackgroundColorSelectorMenuItemFactory, FakeFontFamilySelectorMenuItemFactory, FakeFontSizeSelectorMenuItemFactory, FakeImageMenuFactory, FakeTextColorSelectorMenuItemFactory, FontGroupMenuItemFactory, LockMenuItemFactory, PrintMenuItemFactory, ShareMenuItemFactory, SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID, SheetBoldMenuItemFactory, SheetItalicMenuItemFactory, SheetStrikeThroughMenuItemFactory, SheetUnderlineMenuItemFactory, ZenMenuItemFactory } from './menu';
 
 export interface IUniuiToolbarConfig {
     menu: MenuConfig;
@@ -31,11 +34,28 @@ export class UniuiToolbarController extends Disposable {
     constructor(
         @IMenuService protected readonly _menuService: IMenuService,
         @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @ICommandService protected readonly _commandService: ICommandService
     ) {
         super();
         this._initComponent();
         this._initMenus();
+        this._initMutations();
+    }
+
+    private _initMutations() {
+        [
+            generateCloneMutation(SHEET_BOLD_MUTATION_ID, SetRangeBoldCommand),
+            generateCloneMutation(SHEET_ITALIC_MUTATION_ID, SetRangeItalicCommand),
+            generateCloneMutation(SHEET_UNDERLINE_MUTATION_ID, SetRangeUnderlineCommand),
+            generateCloneMutation(SHEET_STRIKE_MUTATION_ID, SetRangeStrickThroughCommand),
+            generateCloneMutation(DOC_BOLD_MUTATION_ID, SetInlineFormatBoldCommand),
+            generateCloneMutation(DOC_ITALIC_MUTATION_ID, SetInlineFormatItalicCommand),
+            generateCloneMutation(DOC_UNDERLINE_MUTATION_ID, SetInlineFormatUnderlineCommand),
+            generateCloneMutation(DOC_STRIKE_MUTATION_ID, SetInlineFormatStrikethroughCommand),
+        ].forEach((mutation) => {
+            this.disposeWithMe(this._commandService.registerCommand(mutation));
+        });
     }
 
     private _initComponent(): void {
@@ -60,6 +80,21 @@ export class UniuiToolbarController extends Disposable {
                 LockMenuItemFactory,
                 PrintMenuItemFactory,
                 ZenMenuItemFactory,
+                FontGroupMenuItemFactory,
+                SheetBoldMenuItemFactory,
+                SheetItalicMenuItemFactory,
+                SheetUnderlineMenuItemFactory,
+                SheetStrikeThroughMenuItemFactory,
+                DocBoldMenuItemFactory,
+                DocItalicMenuItemFactory,
+                DocUnderlineMenuItemFactory,
+                DocStrikeThroughMenuItemFactory,
+                FakeFontFamilySelectorMenuItemFactory,
+                FakeTextColorSelectorMenuItemFactory,
+                FakeFontSizeSelectorMenuItemFactory,
+                FakeBackgroundColorSelectorMenuItemFactory,
+                FakeImageMenuFactory,
+                FakeBackgroundColorSelectorMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));

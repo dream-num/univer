@@ -26,7 +26,8 @@ export const FontFamily = (props: IFontFamilyProps) => {
     const localeService = useDependency(LocaleService);
 
     const viewValue = useMemo(() => {
-        let fontFamily = localeService.t(`fontFamily.${(`${value}` ?? '').replace(/\s/g, '')}`);
+        if (value == null) return '';
+        let fontFamily = localeService.t(`fontFamily.${(`${value ?? ''}`).replace(/\s/g, '')}`);
 
         // Handle font family from copy paste.
         if (fontFamily.startsWith('fontFamily.') && typeof value === 'string') {

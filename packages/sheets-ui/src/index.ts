@@ -171,4 +171,6 @@ export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
 export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
+export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
+export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
 // #endregion

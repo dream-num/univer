@@ -145,7 +145,6 @@ if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
     univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_EN);
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
-    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
 }
 
 // debugger plugin
@@ -163,6 +162,8 @@ setTimeout(() => {
     import('./lazy').then((lazy) => {
         const plugins = lazy.default();
         plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
+
+        univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
     });
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 

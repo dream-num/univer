@@ -547,6 +547,7 @@ export class Scene extends ThinScene {
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1);
         }
+        // console.log('scene render after', this.isDirty());
     }
 
     async requestRender(parentCtx?: UniverRenderingContext) {

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IMenuItem } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../components/upload-component/component-name';
@@ -51,3 +52,34 @@ export function UploadSlideFloatImageMenuFactory(_accessor: IAccessor): IMenuIte
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };
 }
+
+// export function AddTextMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
+//     // const formatPainterService = accessor.get(IFormatPainterService);
+
+//     return {
+//         id: SlideAddTextOperation.id,
+//         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+//         type: MenuItemType.BUTTON,
+//         icon: IMAGE_TEXT_ICON_ID,
+//         title: 'addText',
+//         tooltip: 'addText',
+//         positions: [MenuPosition.TOOLBAR_START],
+//         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
+//         // disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
+//         // activated$: new Observable<boolean>((subscriber) => {
+//         //     console.log('activated$activated$');
+//         //     let active = false;
+//         //     active = true;
+//         // // const status$ = formatPainterService.status$.subscribe((s) => {
+//         // //     active = s !== FormatPainterStatus.OFF;
+//         // //     subscriber.next(active);
+//         // // });
+
+//         //     subscriber.next(active);
+
+//         //     return () => {
+//         //     // status$.unsubscribe();
+//         //     };
+//         // }),
+//     };
+// }

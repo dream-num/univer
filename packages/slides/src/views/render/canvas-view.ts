@@ -16,7 +16,7 @@
 
 import type { EventState, IColorStyle, ISlidePage, Nullable, SlideDataModel } from '@univerjs/core';
 import { debounce, getColorStyle, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { IWheelEvent } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Rect,
@@ -35,10 +35,11 @@ export enum SLIDE_KEY {
     VIEW = '__mainView__',
 }
 @OnLifecycle(LifecycleStages.Ready, CanvasView)
-export class CanvasView extends RxDisposable {
+export class CanvasView extends RxDisposable implements IRenderModule {
     private _objectProvider: ObjectProvider | null = null;
 
     constructor(
+        private readonly _context: IRenderContext<any>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
@@ -46,6 +47,7 @@ export class CanvasView extends RxDisposable {
         super();
         this._initializeDependencies(this._injector);
         this._initialize();
+        console.log('CanvasView _context', this._context);
     }
 
     private _initialize() {
@@ -388,6 +390,13 @@ export class CanvasView extends RxDisposable {
         this._renderManagerService.createRender(pageId);
     }
 
+    private _sceneMap = new Map<string, Scene>();
+    /**
+     *
+     * @param pageId
+     * @param page
+     * @returns
+     */
     private _createScene(pageId: string, page: ISlidePage) {
         const render = this._currentRender();
 
@@ -397,6 +406,8 @@ export class CanvasView extends RxDisposable {
 
         const { scene: mainScene, mainComponent } = render;
 
+        window.msc = mainScene;
+
         const slide = mainComponent as Slide;
 
         const { width, height } = slide;
@@ -405,6 +416,10 @@ export class CanvasView extends RxDisposable {
             width,
             height,
         });
+        if (!window.sc) {
+            window.sc = {};
+        }
+        window.sc[pageId] = scene;
 
         const viewMain = new Viewport(`PageViewer_${pageId}`, scene, {
             left: 0,
@@ -448,5 +463,9 @@ export class CanvasView extends RxDisposable {
 
     private _initializeDependencies(slideInjector: Injector) {
         this._objectProvider = slideInjector.createInstance(ObjectProvider);
+    }
+
+    getRenderUnitByPageId(pageId: string) {
+
     }
 }

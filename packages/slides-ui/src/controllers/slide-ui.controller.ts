@@ -16,18 +16,20 @@
 
 import type { DependencyOverride } from '@univerjs/core';
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
 import type { MenuConfig } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, IMenuService, IUIPartsService } from '@univerjs/ui';
-import { AddImageSingle, GraphSingle } from '@univerjs/icons';
-import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
+import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
+import { InsertSlideShapeRectangleOperation } from '../commands/operations/insert-shape.operation';
+import { SlideAddTextOperation } from '../commands/operations/insert-text.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
 import { UploadFileMenu } from '../components/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
-import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
-import { InsertSlideShapeRectangleOperation } from '../commands/operations/insert-shape.operation';
+import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
+import { AddTextMenuItemFactory, TEXT_ICON_ID } from './text.menu';
 
 export interface IUniverSlidesDrawingConfig {
     menu?: MenuConfig;
@@ -66,6 +68,7 @@ export class SlideUIController extends Disposable {
             UploadSlideFloatImageMenuFactory,
             SlideShapeMenuFactory,
             UploadSlideFloatShapeMenuFactory,
+            AddTextMenuItemFactory,
         ].forEach((menuFactory) => {
             this._menuService.addMenuItem(menuFactory(this._injector), menu);
         });
@@ -74,6 +77,7 @@ export class SlideUIController extends Disposable {
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(IMAGE_UPLOAD_ICON, AddImageSingle));
+        this.disposeWithMe(componentManager.register(TEXT_ICON_ID, TextSingle));
         this.disposeWithMe(componentManager.register(GRAPH_SINGLE_ICON, GraphSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
         // this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
@@ -84,6 +88,7 @@ export class SlideUIController extends Disposable {
             ActivateSlidePageOperation,
             SetSlidePageThumbOperation,
             InsertSlideFloatImageOperation,
+            SlideAddTextOperation,
             InsertSlideShapeRectangleOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }

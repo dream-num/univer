@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -147,10 +147,21 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         const dependencies = this._renderDependencies.get(type)!;
         dependencies.push(ctor);
 
-        for (const [renderUnitId, render] of this._renderMap) {
-            const renderType = this._univerInstanceService.getUnitType(renderUnitId);
-            if (renderType === type) {
-                (render as RenderUnit).addRenderDependencies([ctor]);
+        if (type === UniverInstanceType.UNIVER_SLIDE) {
+            for (const [renderUnitId, render] of this._renderMap) {
+                // const renderType = this._univerInstanceService.getUnitType(renderUnitId);
+                // renderUnitId  slide_test  cover_1 rect_1....
+                const unit = this._univerInstanceService.getUnit(renderUnitId);
+                if (unit) {
+                    (render as RenderUnit).addRenderDependencies([ctor]);
+                }
+            }
+        } else {
+            for (const [renderUnitId, render] of this._renderMap) {
+                const renderType = this._univerInstanceService.getUnitType(renderUnitId);
+                if (renderType === type) {
+                    (render as RenderUnit).addRenderDependencies([ctor]);
+                }
             }
         }
 
@@ -217,7 +228,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             height,
         });
 
-        const unit = this._univerInstanceService.getUnit(unitId)!;
+        const unit = this._univerInstanceService.getUnit(unitId);
         let renderUnit: IRender;
 
         if (unit) {
@@ -256,6 +267,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     }
 
     private _addRenderUnit(unitId: string, item: IRender) {
+        console.log('_addRenderUnit to renderMap', unitId, item);
         this._renderMap.set(unitId, item);
     }
 

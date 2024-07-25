@@ -165,7 +165,7 @@ export {
 export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
 
-export { generateNullCellValue } from './basics/utils';
+export { generateNullCellValue, generateNullCell } from './basics/utils';
 
 // #region - all commands
 

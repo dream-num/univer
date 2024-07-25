@@ -42,7 +42,7 @@ export function createTableSkeleton(
     for (const rowNode of rowNodes) {
         const { children: cellNodes, startIndex, endIndex } = rowNode;
         const row = rowNodes.indexOf(rowNode);
-        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, tableSkeleton);
+        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, tableSkeleton);
         tableSkeleton.rows.push(rowSkeleton);
         let left = 0;
         let rowHeight = 0;
@@ -125,10 +125,12 @@ export function getNullTableSkeleton(
 function _getNullTableRowSkeleton(
     st: number,
     ed: number,
+    index: number,
     parent: IDocumentSkeletonTable
 ): IDocumentSkeletonRow {
     return {
         cells: [],
+        index,
         height: 0,
         top: 0,
         st,

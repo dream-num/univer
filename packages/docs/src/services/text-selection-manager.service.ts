@@ -186,7 +186,7 @@ export class TextSelectionManagerService extends RxDisposable {
         }
 
         // Remove all textRanges.
-        this._textSelectionRenderManager.removeAllTextRanges();
+        this._textSelectionRenderManager.removeAllRanges();
         // Add new textRanges.
         this._textSelectionRenderManager.addTextRanges(textRanges, isEditing, options);
     }
@@ -247,7 +247,7 @@ export class TextSelectionManagerService extends RxDisposable {
         const allTextSelectionInfo = this._getTextRanges(param);
 
         // Remove all textRanges.
-        this._textSelectionRenderManager.removeAllTextRanges();
+        this._textSelectionRenderManager.removeAllRanges();
 
         if (
             allTextSelectionInfo &&

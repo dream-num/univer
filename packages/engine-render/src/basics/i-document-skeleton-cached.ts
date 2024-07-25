@@ -96,7 +96,7 @@ export interface IDocumentSkeletonPage {
     ed: number; // endIndex 文本结束索引
     skeDrawings: Map<string, IDocumentSkeletonDrawing>;
     skeTables: Map<string, IDocumentSkeletonTable>; // 页面中表格的 skeletons
-    segmentId: string; // 如果是页眉、页脚，就是页眉页脚的id，如果是正文页面，为空字符串
+    segmentId: string; // 如果是页眉、页脚，就是页眉页脚的 id，如果是正文页面，为空字符串
     type: DocumentSkeletonPageType; // 页面类型，页眉、页脚或正文、单元格
     renderConfig?: IDocumentRenderConfig;
     parent?: IDocumentSkeletonCached | IDocumentSkeletonRow;
@@ -130,6 +130,7 @@ export interface IDocumentSkeletonTable {
 
 export interface IDocumentSkeletonRow {
     cells: IDocumentSkeletonPage[];
+    index: number; // 行号
     height: number; // 实际的高度
     top: number; // top 相对于表格上沿
     st: number; // startIndex 文本开始索引

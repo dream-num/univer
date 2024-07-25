@@ -121,7 +121,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
         });
 
         // To make sure input always has focus.
-        textSelectionRenderService.removeAllTextRanges();
+        textSelectionRenderService.removeAllRanges();
         textSelectionRenderService.blur();
     };
 

@@ -16,7 +16,6 @@
 
 import type { ITextRange, Nullable } from '@univerjs/core';
 import { BooleanNumber, COLORS, Tools } from '@univerjs/core';
-
 import type { INodePosition } from '../../../basics/interfaces';
 import type { ISuccinctTextRangeParam, ITextSelectionStyle } from '../../../basics/range';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RANGE_DIRECTION } from '../../../basics/range';
@@ -36,6 +35,8 @@ import {
     NodePositionConvertToCursor,
     NodePositionMap,
 } from './convert-cursor';
+import type { IDocRange } from './range-interface';
+import { DOC_RANGE_TYPE } from './range-interface';
 
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
@@ -54,8 +55,12 @@ export function cursorConvertToTextRange(
 ): Nullable<TextRange> {
     const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE, segmentId = '', segmentPage } = range;
     const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
-    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage) : null;
-    const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId);
+    const focusNodePosition = startOffset !== endOffset
+        ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage)
+        : null;
+    const textRange = new TextRange(
+        scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId
+    );
 
     textRange.refresh();
 
@@ -68,7 +73,6 @@ export function getAnchorBounding(pointsGroup: IPoint[][]) {
     const endPoint = points[2];
 
     const { x: startX, y: startY } = startPoint;
-
     const { x: endX, y: endY } = endPoint;
 
     return {
@@ -101,7 +105,8 @@ export function getLineBounding(pointsGroup: IPoint[][]) {
     });
 }
 
-export class TextRange {
+export class TextRange implements IDocRange {
+    public rangeType: DOC_RANGE_TYPE = DOC_RANGE_TYPE.TEXT;
     // Identifies whether the range is the current one, most of which is the last range.
     private _current = false;
     // The rendered range graphic when collapsed is false

@@ -293,7 +293,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
-        const { divide, line, column, section, page, isBack, segmentPage, pageType, path } = position;
+        const { divide, line, column, section, isBack, segmentPage, pageType, path } = position;
 
         let { glyph } = position;
 
@@ -615,6 +615,7 @@ export class DocumentSkeleton extends Skeleton {
         cache: INearestCache,
         x: number,
         y: number
+    // eslint-disable-next-line ts/no-explicit-any
     ): any {
         const { sections, skeTables } = segmentPage;
         this._findLiquid.translateSave();

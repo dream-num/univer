@@ -181,6 +181,38 @@ function getOffsetInDivide(
     };
 }
 
+export function pushToPoints(position: IPosition) {
+    const { startX, startY, endX, endY } = position;
+    const points: Array<{ x: number; y: number }> = [];
+
+    points.push({
+        x: startX,
+        y: startY,
+    });
+
+    points.push({
+        x: endX,
+        y: startY,
+    });
+
+    points.push({
+        x: endX,
+        y: endY,
+    });
+
+    points.push({
+        x: startX,
+        y: endY,
+    });
+
+    points.push({
+        x: startX,
+        y: startY,
+    });
+
+    return points;
+}
+
 export function getPageFromPath(skeletonData: IDocumentSkeletonCached, path: (string | number)[]): Nullable<IDocumentSkeletonPage> {
     const pathCopy = [...path];
     let page: Nullable<IDocumentSkeletonPage> = null;
@@ -320,8 +352,8 @@ export class NodePositionConvertToCursor {
                 };
             }
 
-            borderBoxPointGroup.push(this._pushToPoints(borderBoxPosition));
-            contentBoxPointGroup.push(this._pushToPoints(contentBoxPosition));
+            borderBoxPointGroup.push(pushToPoints(borderBoxPosition));
+            contentBoxPointGroup.push(pushToPoints(contentBoxPosition));
 
             cursorList.push({
                 startOffset: isStartBack ? startOffset : startOffset + firstGlyph.count,
@@ -457,38 +489,6 @@ export class NodePositionConvertToCursor {
             start_next,
             end_next,
         };
-    }
-
-    private _pushToPoints(position: IPosition) {
-        const { startX, startY, endX, endY } = position;
-        const points: Array<{ x: number; y: number }> = [];
-
-        points.push({
-            x: startX,
-            y: startY,
-        });
-
-        points.push({
-            x: endX,
-            y: startY,
-        });
-
-        points.push({
-            x: endX,
-            y: endY,
-        });
-
-        points.push({
-            x: startX,
-            y: endY,
-        });
-
-        points.push({
-            x: startX,
-            y: startY,
-        });
-
-        return points;
     }
 
     private _selectionIterator(

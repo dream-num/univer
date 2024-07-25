@@ -25,8 +25,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: '发行日', detail: '有价证券的发行日。' },
+            firstInterest: { name: '首次计息日', detail: '有价证券的首次计息日。' },
+            settlement: { name: '到期日', detail: '有价证券的到期日。' },
+            rate: { name: '利率', detail: '有价证券的年息票利率。' },
+            par: { name: '面值', detail: '有价证券的票面值。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
+            calcMethod: { name: '计算方法', detail: '是一个逻辑值：从发行日期开始的应计利息 = TRUE 或忽略；从最后票息支付日期开始计算 = FALSE。' },
         },
     },
     ACCRINTM: {
@@ -39,8 +45,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: '发行日', detail: '有价证券的发行日。' },
+            settlement: { name: '到期日', detail: '有价证券的到期日。' },
+            rate: { name: '利率', detail: '有价证券的年息票利率。' },
+            par: { name: '面值', detail: '有价证券的票面值。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     AMORDEGRC: {
@@ -67,8 +76,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '资产原值。' },
+            datePurchased: { name: '购买日期', detail: '购入资产的日期。' },
+            firstPeriod: { name: '首个期间', detail: '第一个期间结束时的日期。' },
+            salvage: { name: '残值', detail: '资产在使用寿命结束时的残值。' },
+            period: { name: '期间', detail: '期间。' },
+            rate: { name: '折旧率', detail: '折旧率。' },
+            basis: { name: '基准', detail: '要使用的年基准。' },
         },
     },
     COUPDAYBS: {
@@ -81,8 +95,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPDAYS: {
@@ -95,8 +111,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPDAYSNC: {
@@ -109,8 +127,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPNCD: {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
+import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -90,7 +90,13 @@ export class Days360 extends BaseFunction {
                 return methodObject;
             }
 
-            return this._getResult(startDateSerialNumber, endDateSerialNumber, methodObject);
+        const methodValue = +methodObject.getValue();
+
+            const { days } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, !methodValue ? 0 : 4);
+
+            const result = endDateSerialNumber >= startDateSerialNumber ? days : -days;
+
+            return NumberValueObject.create(result);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -98,57 +104,5 @@ export class Days360 extends BaseFunction {
         }
 
         return resultArray;
-    }
-
-    private _getResult(startDateSerialNumber: number, endDateSerialNumber: number, methodObject: BaseValueObject) {
-        const startDateDate = excelSerialToDate(startDateSerialNumber);
-        const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
-        const startMonth = startDateSerialNumber > 0 ? startDateDate.getUTCMonth() + 1 : 1;
-        let startDay = startDateSerialNumber > 0 ? startDateDate.getUTCDate() : 0;
-
-        let endDateDate = excelSerialToDate(endDateSerialNumber);
-        let endYear = endDateSerialNumber > 0 ? endDateDate.getUTCFullYear() : 1900;
-        let endMonth = endDateSerialNumber > 0 ? endDateDate.getUTCMonth() + 1 : 1;
-        let endDay = endDateSerialNumber > 0 ? endDateDate.getUTCDate() : 0;
-
-        const methodValue = +methodObject.getValue();
-
-        if (!methodValue) {
-            // U.S. (NASD) method.
-            // If the starting date is the last day of a month, it becomes equal to the 30th day of the same month.
-            // If the ending date is the last day of a month and the starting date is earlier than the 30th day of a month, the ending date becomes equal to the 1st day of the next month; otherwise the ending date becomes equal to the 30th day of the same month.
-            if (startDay === 31) {
-                startDay = 30;
-            }
-
-            if (endDay === 31) {
-                if (startDay < 30) {
-                    endDateDate = excelSerialToDate(endDateSerialNumber + 1);
-                    endYear = endDateDate.getUTCFullYear();
-                    endMonth = endDateDate.getUTCMonth() + 1;
-                    endDay = endDateDate.getUTCDate();
-                } else {
-                    endDay = 30;
-                }
-            }
-        } else {
-            // European method. Starting dates and ending dates that occur on the 31st day of a month become equal to the 30th day of the same month.
-            if (startDay === 31) {
-                startDay = 30;
-            }
-
-            if (endDay === 31) {
-                endDay = 30;
-            }
-        }
-
-        const daysInYears = (endYear - startYear) * 360;
-        const daysInStartMonth = endDateSerialNumber >= startDateSerialNumber ? 30 - startDay : -startDay;
-        const daysInEndMonth = endDateSerialNumber >= startDateSerialNumber ? endDay : endDay - 30;
-        const daysInMidMonths = (endDateSerialNumber >= startDateSerialNumber ? (endMonth - startMonth - 1) : (endMonth - startMonth + 1)) * 30;
-
-        const totalDays = daysInYears + daysInStartMonth + daysInEndMonth + daysInMidMonths;
-
-        return NumberValueObject.create(totalDays);
     }
 }

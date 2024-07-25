@@ -25,8 +25,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: 'issue', detail: "The security's issue date." },
+            firstInterest: { name: 'first_interest', detail: "The security's first interest date." },
+            settlement: { name: 'settlement', detail: "The security's maturity date." },
+            rate: { name: 'rate', detail: "The security's annual coupon rate." },
+            par: { name: 'par', detail: "The security's par value." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
+            calcMethod: { name: 'calc_method', detail: 'Is a logical value: interest accrues from the issue date = TRUE or ignored; interest accrues from the last coupon payment date = FALSE.' },
         },
     },
     ACCRINTM: {
@@ -39,8 +45,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: 'issue', detail: "The security's issue date." },
+            settlement: { name: 'settlement', detail: "The security's maturity date." },
+            rate: { name: 'rate', detail: "The security's annual coupon rate." },
+            par: { name: 'par', detail: "The security's par value." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     AMORDEGRC: {
@@ -67,8 +76,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The cost of the asset.' },
+            datePurchased: { name: 'date_purchased', detail: 'The date of the purchase of the asset.' },
+            firstPeriod: { name: 'first_period', detail: 'The date of the end of the first period.' },
+            salvage: { name: 'salvage', detail: 'The salvage value at the end of the life of the asset.' },
+            period: { name: 'period', detail: 'The period.' },
+            rate: { name: 'rate', detail: 'The rate of depreciation.' },
+            basis: { name: 'basis', detail: 'The year basis to be used.' },
         },
     },
     COUPDAYBS: {
@@ -81,8 +95,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPDAYS: {
@@ -95,8 +111,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPDAYSNC: {
@@ -109,8 +127,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPNCD: {

@@ -14,4 +14,19 @@
  * limitations under the License.
  */
 
-export const functionFinancial = [];
+import { FUNCTION_NAMES_FINANCIAL } from './function-names';
+import { Accrint } from './accrint';
+import { Accrintm } from './accrintm';
+import { Amorlinc } from './amorlinc';
+import { Coupdaybs } from './coupdaybs';
+import { Coupdays } from './coupdays';
+import { Coupdaysnc } from './coupdaysnc';
+
+export const functionFinancial = [
+    [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
+    [Accrintm, FUNCTION_NAMES_FINANCIAL.ACCRINTM],
+    [Amorlinc, FUNCTION_NAMES_FINANCIAL.AMORLINC],
+    [Coupdaybs, FUNCTION_NAMES_FINANCIAL.COUPDAYBS],
+    [Coupdays, FUNCTION_NAMES_FINANCIAL.COUPDAYS],
+    [Coupdaysnc, FUNCTION_NAMES_FINANCIAL.COUPDAYSNC],
+];

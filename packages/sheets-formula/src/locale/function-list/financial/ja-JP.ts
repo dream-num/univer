@@ -25,8 +25,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: '発行日', detail: '証券の発行日を指定します。' },
+            firstInterest: { name: '初回利払日', detail: '証券の利息が最初に支払われる日付を指定します。' },
+            settlement: { name: '受渡日', detail: '証券の満期日を指定します。' },
+            rate: { name: '利率', detail: '証券の年利を指定します。' },
+            par: { name: '額面', detail: '証券の額面価格を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
+            calcMethod: { name: '計算方式', detail: '論理値です: 発行日からの未払い利息 = TRUE、または最後のクーポン支払日から計算 = FALSE。' },
         },
     },
     ACCRINTM: {
@@ -39,8 +45,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: '発行日', detail: '証券の発行日を指定します。' },
+            settlement: { name: '受渡日', detail: '証券の満期日を指定します。' },
+            rate: { name: '利率', detail: '証券の年利を指定します。' },
+            par: { name: '額面', detail: '証券の額面価格を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     AMORDEGRC: {
@@ -67,8 +76,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '価格', detail: '資産を購入した時点での価格を指定します。' },
+            datePurchased: { name: '購入日', detail: '資産を購入した日付を指定します。' },
+            firstPeriod: { name: '開始期', detail: '最初の会計期が終了する日付を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格を指定します。' },
+            period: { name: '期', detail: '会計期 (会計年度) を指定します。' },
+            rate: { name: '減価償却率', detail: '減価償却率を指定します。' },
+            basis: { name: '基準', detail: '1 年を何日として計算するかを表す数値を指定します。' },
         },
     },
     COUPDAYBS: {
@@ -81,8 +95,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPDAYS: {
@@ -95,8 +111,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPDAYSNC: {
@@ -109,8 +127,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPNCD: {

@@ -46,6 +46,12 @@ import { FormulaDependencyTree, FormulaDependencyTreeCache } from './dependency-
 
 const FORMULA_CACHE_LRU_COUNT = 100000;
 
+interface IFeatureFormulaParam {
+    unitId: string;
+    subUnitId: string;
+    featureId: string;
+}
+
 @OnLifecycle(LifecycleStages.Rendered, FormulaDependencyGenerator)
 export class FormulaDependencyGenerator extends Disposable {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
@@ -220,7 +226,7 @@ export class FormulaDependencyGenerator extends Disposable {
         const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
         if (this._dependencyManagerService.hasFeatureFormulaDependency(unitId, subUnitId, featureId)) {
             const tree = this._dependencyManagerService.getFeatureFormulaDependency(unitId, subUnitId, featureId)!;
-            this._makePassiveDirtyForFeatureFormulas(tree);
+
             return tree;
         }
 
@@ -242,34 +248,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
         this._dependencyManagerService.addFeatureFormulaDependency(unitId, subUnitId, featureId, FDtree);
 
-        this._makePassiveDirtyForFeatureFormulas(FDtree);
-
         return FDtree;
-    }
-
-    private _makePassiveDirtyForFeatureFormulas(tree: FormulaDependencyTree) {
-        const featureId = tree.featureId;
-
-        if (featureId == null) {
-            tree.isPassive = true;
-            return;
-        }
-
-        const featureMap = this._currentConfigService.getDirtyUnitFeatureMap();
-
-        if (featureMap == null) {
-            tree.isPassive = true;
-            return;
-        }
-
-        const featureState = featureMap[tree.unitId]?.[tree.subUnitId]?.[featureId];
-
-        if (featureState == null) {
-            tree.isPassive = true;
-            return;
-        }
-
-        tree.isPassive = false;
     }
 
     private _registerOtherFormulas(otherFormulaData: IOtherFormulaData, otherFormulaDataKeys: string[], treeList: FormulaDependencyTree[]) {
@@ -636,32 +615,76 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     private _dependencyFeatureCalculation(newTreeList: FormulaDependencyTree[]) {
+        /**
+         * Clear the dependency relationships of all featureCalculation nodes in the tree.
+         * Because each execution requires rebuilding the reverse dependencies,
+         * the previous dependencies may become outdated due to data changes in applications such as pivot tables,
+         * which can result in an outdated dirty mark range.
+         */
+        this._clearFeatureCalculationNode(newTreeList);
+
         const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
-        let isAdded = false;
         featureMap.forEach((subUnitMap, _) => {
             subUnitMap.forEach((featureMap, _) => {
                 featureMap.forEach((params, featureId) => {
-                    const { getDirtyData } = params;
+                    const { unitId, subUnitId, getDirtyData } = params;
                     const allDependency = getDirtyData({} as IFormulaDirtyData, {} as IAllRuntimeData);
                     const dirtyRanges = allDependency.dirtyRanges;
                     const dirtyRangesToMap = this._convertDirtyRangesToMap(dirtyRanges);
-                    const intersectTrees = this._intersectFeatureCalculation(dirtyRangesToMap, newTreeList);
+                    const intersectTrees = this._intersectFeatureCalculation(dirtyRangesToMap, newTreeList, { unitId, subUnitId, featureId });
                     if (intersectTrees.length > 0) {
-                        const featureTree = this._getFeatureFormulaTree(featureId, params);
+                        let featureTree = this._getExistTreeList({ unitId, subUnitId, featureId }, newTreeList);
+                        if (featureTree == null) {
+                            featureTree = this._getFeatureFormulaTree(featureId, params);
+                            newTreeList.push(featureTree);
+                        }
+                        featureTree.parents = [];
                         intersectTrees.forEach((tree) => {
                             if (tree.children.includes(featureTree)) {
                                 return;
                             }
                             tree.pushChildren(featureTree);
                         });
-                        newTreeList.push(featureTree);
-                        isAdded = true;
                     }
                 });
             });
         });
+    }
 
-        return isAdded;
+    private _clearFeatureCalculationNode(newTreeList: FormulaDependencyTree[]) {
+        const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
+
+        newTreeList.forEach((tree) => {
+            tree.children = tree.children.filter((child) => {
+                if (!child.featureId) {
+                    return true;
+                }
+                if (featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(child.featureId)) {
+                    return false;
+                }
+                return true;
+            });
+
+            tree.parents = tree.parents.filter((parent) => {
+                if (!parent.featureId) {
+                    return true;
+                }
+                if (featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(parent.featureId)) {
+                    return false;
+                }
+                return true;
+            });
+        });
+    }
+
+    private _getExistTreeList(param: IFeatureFormulaParam, treeList: FormulaDependencyTree[]) {
+        const { unitId, subUnitId, featureId } = param;
+        for (let i = 0, len = treeList.length; i < len; i++) {
+            const tree = treeList[i];
+            if (tree.unitId === unitId && tree.subUnitId === subUnitId && tree.featureId === featureId) {
+                return tree;
+            }
+        }
     }
 
     private _convertDirtyRangesToMap(dirtyRanges: IFeatureDirtyRangeType) {
@@ -678,10 +701,13 @@ export class FormulaDependencyGenerator extends Disposable {
         return map;
     }
 
-    private _intersectFeatureCalculation(dirtyRangesToMap: Map<string, Map<string, IRange[]>>, newTreeList: FormulaDependencyTree[]) {
+    private _intersectFeatureCalculation(dirtyRangesToMap: Map<string, Map<string, IRange[]>>, newTreeList: FormulaDependencyTree[], param: IFeatureFormulaParam) {
         const dependencyTree = [];
         for (let i = 0, len = newTreeList.length; i < len; i++) {
             const tree = newTreeList[i];
+            if (tree.unitId === param.unitId && tree.subUnitId === param.subUnitId && tree.featureId === param.featureId) {
+                continue;
+            }
             const isAdded = tree.dependencyRange(dirtyRangesToMap, {});
             if (isAdded) {
                 dependencyTree.push(tree);

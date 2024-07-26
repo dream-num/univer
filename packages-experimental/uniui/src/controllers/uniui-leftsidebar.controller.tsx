@@ -54,6 +54,12 @@ export class UniuiLeftSidebarController extends Disposable {
                 this._leftSidebarService.close();
             }
         }));
+
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.pipe(
+            distinctUntilChanged()
+        ).subscribe(() => {
+            this._leftSidebarService.close();
+        }));
     }
 }
 

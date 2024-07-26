@@ -20,6 +20,7 @@ import { RangeProtectionPermissionEditPoint, SetRangeValuesMutation, SetSelectio
 import { deriveStateFromActiveSheet$, FONT_FAMILY_COMPONENT, FONT_SIZE_COMPONENT, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, type IMenuButtonItem, type IMenuItem, type IMenuSelectorItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { map, Observable } from 'rxjs';
+import { DisposeUnitOperation } from '../commands/operations/uni.operation';
 
 export const UNIT_LINE_COLOR_MENU_ID = 'UNIT_LINE_COLOR_MENU_ID';
 export const DOWNLOAD_MENU_ID = 'DOWNLOAD_MENU_ID';
@@ -27,6 +28,7 @@ export const SHARE_MENU_ID = 'SHARE_MENU_ID';
 export const LOCK_MENU_ID = 'LOCK_MENU_ID';
 export const PRINT_MENU_ID = 'PRINT_MENU_ID';
 export const ZEN_MENU_ID = 'ZEN_MENU_ID';
+export const DELETE_MENU_ID = DisposeUnitOperation.id;
 export const FRAME_SIZE_MENU_ID = 'FRAME_SIZE_MENU_ID';
 
 export const FONT_GROUP_MENU_ID = 'FONT_GROUP_MENU_ID';
@@ -587,6 +589,19 @@ export function ZenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         title: '',
         icon: 'ZenSingle',
+        group: MenuGroup.TOOLBAR_OTHERS,
+        positions: [
+            UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
+        ],
+    };
+}
+
+export function DeleteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DELETE_MENU_ID,
+        type: MenuItemType.BUTTON,
+        title: 'Delete',
+        icon: 'DeleteSingle',
         group: MenuGroup.TOOLBAR_OTHERS,
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,

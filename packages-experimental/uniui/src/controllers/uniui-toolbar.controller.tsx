@@ -15,13 +15,14 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { DownloadSingle, LockSingle, PrintSingle, ShareSingle, ZenSingle } from '@univerjs/icons';
+import { DeleteSingle, DownloadSingle, LockSingle, PrintSingle, ShareSingle, ZenSingle } from '@univerjs/icons';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '@univerjs/sheets-ui';
 import { SetInlineFormatBoldCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
 import { generateCloneMutation } from '../controllers/utils';
-import { DOC_BOLD_MUTATION_ID, DOC_ITALIC_MUTATION_ID, DOC_STRIKE_MUTATION_ID, DOC_UNDERLINE_MUTATION_ID, DocBoldMenuItemFactory, DocItalicMenuItemFactory, DocStrikeThroughMenuItemFactory, DocUnderlineMenuItemFactory, DownloadMenuItemFactory, FakeBackgroundColorSelectorMenuItemFactory, FakeFontFamilySelectorMenuItemFactory, FakeFontSizeSelectorMenuItemFactory, FakeImageMenuFactory, FakeTextColorSelectorMenuItemFactory, FontGroupMenuItemFactory, LockMenuItemFactory, PrintMenuItemFactory, ShareMenuItemFactory, SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID, SheetBoldMenuItemFactory, SheetItalicMenuItemFactory, SheetStrikeThroughMenuItemFactory, SheetUnderlineMenuItemFactory, ZenMenuItemFactory } from './menu';
+import { DisposeUnitOperation } from '../commands/operations/uni.operation';
+import { DeleteMenuItemFactory, DOC_BOLD_MUTATION_ID, DOC_ITALIC_MUTATION_ID, DOC_STRIKE_MUTATION_ID, DOC_UNDERLINE_MUTATION_ID, DocBoldMenuItemFactory, DocItalicMenuItemFactory, DocStrikeThroughMenuItemFactory, DocUnderlineMenuItemFactory, DownloadMenuItemFactory, FakeBackgroundColorSelectorMenuItemFactory, FakeFontFamilySelectorMenuItemFactory, FakeFontSizeSelectorMenuItemFactory, FakeImageMenuFactory, FakeTextColorSelectorMenuItemFactory, FontGroupMenuItemFactory, LockMenuItemFactory, PrintMenuItemFactory, ShareMenuItemFactory, SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID, SheetBoldMenuItemFactory, SheetItalicMenuItemFactory, SheetStrikeThroughMenuItemFactory, SheetUnderlineMenuItemFactory, ZenMenuItemFactory } from './menu';
 
 export interface IUniuiToolbarConfig {
     menu: MenuConfig;
@@ -41,6 +42,7 @@ export class UniuiToolbarController extends Disposable {
         this._initComponent();
         this._initMenus();
         this._initMutations();
+        this._initCommands();
     }
 
     private _initMutations() {
@@ -66,6 +68,7 @@ export class UniuiToolbarController extends Disposable {
             LockSingle,
             PrintSingle,
             ZenSingle,
+            DeleteSingle,
         };
         for (const k in iconList) {
             this.disposeWithMe(componentManager.register(k, iconList[k]));
@@ -80,6 +83,7 @@ export class UniuiToolbarController extends Disposable {
                 LockMenuItemFactory,
                 PrintMenuItemFactory,
                 ZenMenuItemFactory,
+                DeleteMenuItemFactory,
                 FontGroupMenuItemFactory,
                 SheetBoldMenuItemFactory,
                 SheetItalicMenuItemFactory,
@@ -97,6 +101,14 @@ export class UniuiToolbarController extends Disposable {
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
+        });
+    }
+
+    private _initCommands(): void {
+        [
+            DisposeUnitOperation,
+        ].forEach((c) => {
+            this.disposeWithMe(this._commandService.registerCommand(c));
         });
     }
 }

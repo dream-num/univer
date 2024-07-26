@@ -19,7 +19,7 @@ import React, { useEffect, useImperativeHandle } from 'react';
 import { IUniverInstanceService, LocaleService, type Nullable, useDependency, useObservable } from '@univerjs/core';
 import { ToolbarItem, useToolbarGroups } from '@univerjs/ui';
 import type { IUnitRendererProps } from '../workbench/UniWorkbench';
-import { DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
+import { DELETE_MENU_ID, DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
 import styles from './index.module.less';
 
 export interface FloatingToolbarRef {
@@ -36,6 +36,7 @@ const UNI_FLOATING_TOOLBAR_SCHEMA: string[] = [
     LOCK_MENU_ID,
     PRINT_MENU_ID,
     ZEN_MENU_ID,
+    DELETE_MENU_ID,
 ];
 
 export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: Nullable<IUnitRendererProps>; anchorRef: React.MutableRefObject<HTMLElement | null> }>(({ node, anchorRef }, ref) => {

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { TextEditor, useObservable } from '@univerjs/ui';
 import type { IDocumentData, Nullable } from '@univerjs/core';
-import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { BooleanNumber, createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, HorizontalAlign, ICommandService, LocaleService, useDependency, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { IDocFormulaPopupInfo } from '../../services/formula-popup.service';
 import { DOC_FORMULA_POPUP_KEY, DocFormulaPopupService } from '../../services/formula-popup.service';
 
@@ -41,6 +40,23 @@ function makeSnapshot(f: string): IDocumentData {
         },
         documentStyle: {
             documentFlavor: DocumentFlavor.MODERN,
+            marginTop: 5,
+            marginBottom: 5,
+            marginRight: 0,
+            marginLeft: 0,
+            paragraphLineGapDefault: 0,
+            pageSize: {
+                width: Number.POSITIVE_INFINITY,
+                height: Number.POSITIVE_INFINITY,
+            },
+            renderConfig: {
+                horizontalAlign: HorizontalAlign.UNSPECIFIED,
+                verticalAlign: VerticalAlign.TOP,
+                centerAngle: 0,
+                vertexAngle: 0,
+                wrapStrategy: WrapStrategy.OVERFLOW,
+                isRenderStyle: BooleanNumber.FALSE,
+            },
         },
     };
 }
@@ -89,11 +105,21 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
         commandService.executeCommand(CloseFormulaPopupOperation.id);
     }, [commandService]);
 
+    const handleEscKey = useCallback((event: { key: string }) => {
+        if (event.key === 'Escape') {
+            onCancel();
+        }
+    }, [onCancel]);
+
+    useEffect(() => {
+        document.addEventListener('keydown', handleEscKey);
+        return () => {
+            document.removeEventListener('keydown', handleEscKey);
+        };
+    }, [handleEscKey]);
+
     return (
         <div className={styles.docUiFormulaPopup} onMouseEnter={() => onHovered(true)} onMouseLeave={() => onHovered(false)}>
-            <span className={styles.docUiFormulaPopupTitle}>
-                {popupInfo.type === 'new' ? localeService.t('uni-formula.popup.title.new') : localeService.t('uni-formula.popup.title.existing')}
-            </span>
             <TextEditor
                 id={DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY}
                 className={clsx(styles.docUiFormulaPopupEditor, focused && styles.docUiFormulaPopupEditorActivated)}
@@ -111,10 +137,10 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
                 onBlur={() => setFocused(false)}
             />
 
-            <div className={styles.docUiFormulaPopupButtonGrp}>
+            {/* <div className={styles.docUiFormulaPopupButtonGrp}>
                 <Button type="primary" size="small" disabled={!formulaString} onClick={onConfirm}>{localeService.t('uni-formula.popup.button.confirm')}</Button>
                 <Button type="default" size="small" onClick={onCancel}>{localeService.t('uni-formula.popup.button.cancel')}</Button>
-            </div>
+            </div> */}
         </div>
     );
 }

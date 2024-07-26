@@ -640,10 +640,10 @@ export class FormulaDependencyGenerator extends Disposable {
                         }
                         featureTree.parents = [];
                         intersectTrees.forEach((tree) => {
-                            if (tree.children.includes(featureTree)) {
+                            if (tree.children.includes(featureTree!)) {
                                 return;
                             }
-                            tree.pushChildren(featureTree);
+                            tree.pushChildren(featureTree!);
                         });
                     }
                 });

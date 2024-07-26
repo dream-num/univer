@@ -56,7 +56,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._initSkeletonChangeListener();
         this._initUserActionSyncListener();
 
-        this._setStyle(getRefSelectionStyle(this._themeService));
+        this._setStyle(getDefaultRefSelectionStyle(this._themeService));
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
     }
 
@@ -170,12 +170,12 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initSelectionChangeListener(): void {
-        // When selection completes, we need to update the selections' rendering and clear event handlers.
-
-        // beforeSelectionMoveEnd$ was triggered when pointerup after press and moving to change selection area.
+        // selectionMoveEnd$ beforeSelectionMoveEnd$ was triggered when pointerup after dragging to change selection area.
         // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
-        this.disposeWithMe(this._workbookSelections.beforeSelectionMoveEnd$.subscribe((selectionsWithStyles) => {
-            // Clear existed selections.
+
+        // beforeSelectionMoveEnd$ would triggered when change skeleton(change sheet).
+        // but
+        this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((selectionsWithStyles) => {
             this._reset();
 
             // The selections' style would be colorful here. PromptController would change the color of selections later.
@@ -187,7 +187,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initSkeletonChangeListener(): void {
-        // not only change sheet would cause currentSkeleton$, there many cmds will emit currentSkeleton$
+        // not only change sheet would cause currentSkeleton$, a lot of cmds will emit currentSkeleton$
         // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
         // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
@@ -202,23 +202,18 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
             // for col width & row height resize
             const currentSelections = this._workbookSelections.getCurrentSelections();
-            if (currentSelections != null) {
-                this._refreshSelectionControl(currentSelections);
-            }
+            this._refreshSelectionControl(currentSelections || []);
         }));
     }
 
     protected override _refreshSelectionControl(params: readonly ISelectionWithStyle[]) {
         const selections = params.map((selectionWithStyle) => {
             const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-            // selectionData.style = getRefSelectionStyle(this._themeService);
             return selectionData;
         });
-        if (selections.length === 0) {
-            this._reset();
-        } else {
-            this.updateControlForCurrentByRangeData(selections);
-        }
+
+        this._reset();
+        this.updateControlForCurrentByRangeData(selections);
     }
 
     private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
@@ -236,7 +231,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
  * @param themeService
  * @returns The selection's style.
  */
-function getRefSelectionStyle(themeService: ThemeService) {
+function getDefaultRefSelectionStyle(themeService: ThemeService) {
     const style = getNormalSelectionStyle(themeService);
     style.strokeDash = 8;
     style.hasAutoFill = false;

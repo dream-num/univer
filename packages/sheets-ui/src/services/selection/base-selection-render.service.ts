@@ -392,6 +392,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._shortcutService.setDisable(false);
     }
 
+    /**
+     * Clear existed selections.
+     */
     protected _reset() {
         this._clearSelectionControls();
         this._downObserver?.unsubscribe();

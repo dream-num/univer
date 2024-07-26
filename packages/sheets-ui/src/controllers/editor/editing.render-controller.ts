@@ -181,7 +181,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this.disposeWithMe(this._editorBridgeService.visible$
             .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
             .subscribe((param) => {
-                if (param.unitId === this._context.unitId && param.visible) {
+                if ((param.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY || param.unitId === this._context.unitId) && param.visible) {
                     this._isUnitEditing = true;
                     this._handleEditorVisible(param);
                 } else if (this._isUnitEditing) {

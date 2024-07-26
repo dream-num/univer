@@ -62,8 +62,6 @@ export function cursorConvertToTextRange(
         scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId
     );
 
-    textRange.refresh();
-
     return textRange;
 }
 
@@ -128,6 +126,8 @@ export class TextRange implements IDocRange {
         private _segmentId: string = ''
     ) {
         this._anchorBlink();
+
+        this.refresh();
     }
 
     private _anchorBlink() {

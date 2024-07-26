@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import { type Nullable, Tools } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '../../../basics';
 import { DocumentSkeletonPageType } from '../../../basics';
 import type { IDocumentOffsetConfig } from '../document';
@@ -59,6 +59,17 @@ export function isValidRectRange(anchorNodePosition: INodePosition, focusNodePos
     }
 
     return true;
+}
+
+export function isInSameTableCell(anchorNodePosition: INodePosition, focusNodePosition: INodePosition): boolean {
+    const { path: anchorPath } = anchorNodePosition;
+    const { path: focusPath } = focusNodePosition;
+
+    if (anchorPath.indexOf('cells') === -1 || focusPath.indexOf('cells') === -1) {
+        return false;
+    }
+
+    return Tools.diffValue(anchorPath, focusPath);
 }
 
 // Return true if a is before b.

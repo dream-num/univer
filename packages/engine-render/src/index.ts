@@ -36,10 +36,10 @@ export { DocumentViewModel } from './components/docs/view-model/document-view-mo
 export { getAnchorBounding, TEXT_RANGE_LAYER_INDEX, TextRange, getLineBounding } from './components/docs/text-selection/text-range';
 export { NodePositionConvertToCursor } from './components/docs/text-selection/convert-cursor';
 export { Liquid } from './components/docs/liquid';
+export { getCanvasOffsetByEngine } from './components/docs/text-selection/selection-utils';
 export {
     ITextSelectionRenderManager,
     TextSelectionRenderManager,
-    getCanvasOffsetByEngine,
 } from './components/docs/text-selection/text-selection-render-manager';
 export type { IActiveTextRange, IEditorInputConfig, ITextSelectionInnerParam } from './components/docs/text-selection/text-selection-render-manager';
 export { Documents } from './components/docs/document';

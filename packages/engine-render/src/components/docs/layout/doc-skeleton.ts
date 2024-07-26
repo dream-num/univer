@@ -241,6 +241,29 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
+    findCharIndexByPosition(position: INodePosition): Nullable<number> {
+        const glyph = this.findGlyphByPosition(position);
+        const divide = glyph?.parent;
+
+        if (divide == null) {
+            return;
+        }
+
+        const { st, glyphGroup } = divide;
+
+        let index = st;
+
+        for (const g of glyphGroup) {
+            index += g.count;
+
+            if (g === glyph) {
+                break;
+            }
+        }
+
+        return index;
+    }
+
     findNodePositionByCharIndex(charIndex: number, isBack: boolean = true, segmentId = '', segmentPIndex = -1): Nullable<INodePosition> {
         const nodes = this._findNodeByIndex(charIndex, segmentId, segmentPIndex);
 

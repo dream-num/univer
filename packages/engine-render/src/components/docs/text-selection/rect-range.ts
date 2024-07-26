@@ -23,7 +23,7 @@ import type { DocumentSkeleton } from '../layout/doc-skeleton';
 import { RegularPolygon } from '../../../shape';
 import type { IDocRange } from './range-interface';
 import { DOC_RANGE_TYPE } from './range-interface';
-import { compareNodePositionInTable, isValidRectRange, NodePositionConvertToRectRange } from './convert-rect-range';
+import { compareNodePositionInTable, NodePositionConvertToRectRange } from './convert-rect-range';
 import { TEXT_RANGE_LAYER_INDEX } from './text-range';
 
 const RECT_RANGE_KEY_PREFIX = '__DocTableRectRange__';
@@ -63,10 +63,6 @@ export class RectRange implements IDocRange {
         public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
         private _segmentId: string = ''
     ) {
-        if (!isValidRectRange(anchorNodePosition, focusNodePosition)) {
-            throw new Error('The anchor and focus must be in the same table, and cannot be in the same cell.');
-        }
-
         this.refresh();
     }
 
@@ -129,6 +125,7 @@ export class RectRange implements IDocRange {
 
     dispose(): void {
         this._rangeShape?.dispose();
+        this._rangeShape = null;
     }
 
     refresh(): void {

@@ -18,7 +18,7 @@ import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } fro
 
 import { ComponentManager } from '@univerjs/ui';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
-import { DocCreateTableConfirm } from '../views/table/create/tableCreate';
+import { DocCreateTableConfirm } from '../views/table/create/TableCreate';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../views/table/create/component-name';
 import { ICreateDocTableCommand } from '../commands/commands/doc-table.command';
 

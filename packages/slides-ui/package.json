@@ -73,10 +73,14 @@
         "clsx": ">=2.0.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0"
     },
+    "dependencies": {
+        "@univerjs/icons": "^0.1.65"
+    },
     "devDependencies": {
         "@types/react": "^18.3.3",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/slides": "workspace:*",

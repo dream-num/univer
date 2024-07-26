@@ -26,7 +26,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 
-import { Subject, takeUntil } from 'rxjs';
+import { takeUntil } from 'rxjs';
 import { ObjectProvider } from './object-provider';
 
 export enum SLIDE_KEY {
@@ -37,9 +37,6 @@ export enum SLIDE_KEY {
 @OnLifecycle(LifecycleStages.Ready, CanvasView)
 export class CanvasView extends RxDisposable {
     private _objectProvider: ObjectProvider | null = null;
-
-    private _activePageId: string = '';
-    readonly activePageId$ = new Subject<string>();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -91,9 +88,7 @@ export class CanvasView extends RxDisposable {
 
         const slide = render.mainComponent as Slide;
 
-        this._activePageId = pageId;
-
-        this.activePageId$.next(pageId);
+        model.setActivePage(page);
 
         if (slide?.hasPage(id)) {
             slide.changePage(id);
@@ -237,6 +232,10 @@ export class CanvasView extends RxDisposable {
         currentRender.components.set(SLIDE_KEY.COMPONENT, slideComponent);
 
         this._createSlidePages(slideDataModel, slideComponent);
+        window.x = (w) => {
+            this._createSlidePages(w, slideComponent);
+        };
+        window.y = this;
 
         engine.runRenderLoop(() => {
             scene.render();
@@ -360,8 +359,6 @@ export class CanvasView extends RxDisposable {
         //     }
         // }, 0);
 
-        this._activePageId = pageOrder[0];
-
         slide.activeFirstPage();
     }
 
@@ -437,11 +434,11 @@ export class CanvasView extends RxDisposable {
         const transformer = scene.getTransformer();
 
         transformer?.changeEnd$.subscribe(() => {
-            this._thumbSceneRender(this._activePageId, slide);
+            this._thumbSceneRender(pageId, slide);
         });
 
         transformer?.clearControl$.subscribe(() => {
-            this._thumbSceneRender(this._activePageId, slide);
+            this._thumbSceneRender(pageId, slide);
         });
 
         slide.addPage(scene);

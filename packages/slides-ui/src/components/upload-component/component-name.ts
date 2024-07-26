@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+export const COMPONENT_UPLOAD_FILE_MENU = 'COMPONENT_UPLOAD_FILE_MENU';
 
-const locale: typeof zhCN = {
-    slide: {
-        shape: {
-            insert: {
-                title: 'Insert Shape',
-                rectangle: 'Insert Rectangle',
-            },
-        },
-    },
-};
-
-export default locale;
+export enum UploadFileType {
+    cellImage,
+    floatImage,
+}

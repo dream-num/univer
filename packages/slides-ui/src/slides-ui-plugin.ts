@@ -17,16 +17,22 @@
 import type { Dependency, SlideDataModel } from '@univerjs/core';
 import { Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
 
+import type { MenuConfig } from '@univerjs/ui';
+import { IImageIoService, ImageIoService } from '@univerjs/drawing';
 import { SlideUIController } from './controllers/slide-ui.controller';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
+
+export interface IUniverSlidesUIConfig {
+    menu: MenuConfig;
+}
 
 export class UniverSlidesUIPlugin extends Plugin {
     static override pluginName = SLIDE_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SLIDE;
 
     constructor(
-        _config: unknown,
+        private readonly _config: Partial<IUniverSlidesUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
@@ -34,7 +40,15 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
-        ([[SlideUIController]] as Dependency[]).forEach((d) => injector.add(d));
+        ([
+            [
+                SlideUIController,
+                {
+                    useFactory: () => this._injector.createInstance(SlideUIController, this._config),
+                },
+            ],
+            [IImageIoService, { useClass: ImageIoService }],
+        ] as Dependency[]).forEach((d) => injector.add(d));
     }
 
     override onRendered(): void {

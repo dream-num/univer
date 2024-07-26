@@ -15,9 +15,13 @@
  */
 
 const locale = {
-    toolbar: {
-        undo: '撤销',
-        redo: '重做',
+    slide: {
+        shape: {
+            insert: {
+                title: '插入图形',
+                rectangle: '插入矩形',
+            },
+        },
     },
 };
 

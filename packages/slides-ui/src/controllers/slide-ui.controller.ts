@@ -14,11 +14,28 @@
  * limitations under the License.
  */
 
+import type { DependencyOverride } from '@univerjs/core';
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
+import type { MenuConfig } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IMenuService, IUIPartsService } from '@univerjs/ui';
+import { AddImageSingle, GraphSingle } from '@univerjs/icons';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
+import { UploadFileMenu } from '../components/upload-component/UploadFile';
+import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
+import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
+import { InsertSlideShapeRectangleOperation } from '../commands/operations/insert-shape.operation';
+import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
+import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
+
+export interface IUniverSlidesDrawingConfig {
+    menu?: MenuConfig;
+    overrides?: DependencyOverride;
+}
+
+export const DefaultSlidesDrawingConfig: IUniverSlidesDrawingConfig = {
+};
 
 /**
  * This controller registers UI parts of slide workbench to the base-ui workbench.
@@ -26,20 +43,48 @@ import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.ope
 @OnLifecycle(LifecycleStages.Ready, SlideUIController)
 export class SlideUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSlidesDrawingConfig>,
         @Inject(Injector) private readonly _injector: Injector,
+        @IMenuService private readonly _menuService: IMenuService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
         this._initCommands();
+        this._initCustomComponents();
         this._initUIComponents();
+        this._initMenus();
+    }
+
+    private _initMenus(): void {
+        const { menu = {} } = this._config;
+
+        [
+            SlideImageMenuFactory,
+            UploadSlideFloatImageMenuFactory,
+            SlideShapeMenuFactory,
+            UploadSlideFloatShapeMenuFactory,
+        ].forEach((menuFactory) => {
+            this._menuService.addMenuItem(menuFactory(this._injector), menu);
+        });
+    }
+
+    private _initCustomComponents(): void {
+        const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(IMAGE_UPLOAD_ICON, AddImageSingle));
+        this.disposeWithMe(componentManager.register(GRAPH_SINGLE_ICON, GraphSingle));
+        this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
+        // this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
     }
 
     private _initCommands(): void {
         [
             ActivateSlidePageOperation,
             SetSlidePageThumbOperation,
+            InsertSlideFloatImageOperation,
+            InsertSlideShapeRectangleOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

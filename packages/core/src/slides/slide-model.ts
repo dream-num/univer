@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
+import type { Nullable } from '../shared';
 import { Tools } from '../shared';
 import { DEFAULT_SLIDE } from '../types/const';
 import type { ISlideData, ISlidePage } from '../types/interfaces';
@@ -22,6 +24,23 @@ import { PageType } from '../types/interfaces';
 
 export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNIVER_SLIDE> {
     override type: UniverInstanceType.UNIVER_SLIDE = UniverInstanceType.UNIVER_SLIDE;
+    private readonly _activePage$ = new BehaviorSubject<Nullable<ISlidePage>>(null);
+    private get _activePage(): Nullable<ISlidePage> {
+        const activePage = this._activePage$.getValue();
+
+        if (!activePage) {
+            const activePageId = this.getPageOrder()?.[0];
+            if (!activePageId) {
+                return null;
+            }
+
+            return this.getPages()?.[activePageId];
+        }
+
+        return activePage;
+    }
+
+    readonly activePage$ = this._activePage$.asObservable();
 
     private _snapshot: ISlideData;
 
@@ -75,7 +94,7 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         return {
             id: 'cover_1',
             pageType: PageType.SLIDE,
-            zIndex: 1,
+            zIndex: 10,
             title: 'cover',
             description: 'this is first page, cover',
             pageBackgroundFill: {
@@ -83,5 +102,19 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
             },
             pageElements: {},
         };
+    }
+
+    setActivePage(page: Nullable<ISlidePage>) {
+        this._activePage$.next(page);
+    }
+
+    getActivePage() {
+        return this._activePage;
+    }
+
+    updatePage(pageId: string, page: ISlidePage) {
+        if (!this._snapshot.body) return;
+
+        this._snapshot.body.pages[pageId] = page;
     }
 }

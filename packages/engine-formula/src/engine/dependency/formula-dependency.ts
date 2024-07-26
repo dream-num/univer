@@ -224,11 +224,6 @@ export class FormulaDependencyGenerator extends Disposable {
 
     private _getFeatureFormulaTree(featureId: string, params: IFeatureCalculationManagerParam) {
         const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
-        if (this._dependencyManagerService.hasFeatureFormulaDependency(unitId, subUnitId, featureId)) {
-            const tree = this._dependencyManagerService.getFeatureFormulaDependency(unitId, subUnitId, featureId)!;
-
-            return tree;
-        }
 
         const FDtree = new FormulaDependencyTree();
 

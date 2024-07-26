@@ -31,7 +31,9 @@ import { Ipmt } from './ipmt';
 import { Ispmt } from './ispmt';
 import { Nper } from './nper';
 import { Pmt } from './pmt';
+import { Ppmt } from './ppmt';
 import { Pv } from './pv';
+import { Rate } from './rate';
 
 export const functionFinancial = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
@@ -50,5 +52,7 @@ export const functionFinancial = [
     [Ispmt, FUNCTION_NAMES_FINANCIAL.ISPMT],
     [Nper, FUNCTION_NAMES_FINANCIAL.NPER],
     [Pmt, FUNCTION_NAMES_FINANCIAL.PMT],
+    [Ppmt, FUNCTION_NAMES_FINANCIAL.PPMT],
     [Pv, FUNCTION_NAMES_FINANCIAL.PV],
+    [Rate, FUNCTION_NAMES_FINANCIAL.RATE],
 ];

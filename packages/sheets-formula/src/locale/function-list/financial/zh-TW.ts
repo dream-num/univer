@@ -577,8 +577,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '這是各期的利率。' },
+            per: { name: '期數', detail: '這是求算利息的期次，其值必須介於1到nper之間。' },
+            nper: { name: '總期數', detail: '這是年金的總付款期數。' },
+            pv: { name: '現值', detail: '一系列未來付款的現值或目前總額。' },
+            fv: { name: '餘額', detail: '這是最後一次付款完成後，所能獲得的未來值或現金餘額。' },
+            type: { name: '類型', detail: '數字0或1，指出付款期限。' },
         },
     },
     PRICE: {
@@ -650,8 +654,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '總期數', detail: '這是年金的總付款期數。' },
+            pmt: { name: '金額', detail: '這是各期給付的金額；不得在年金期限內變更。' },
+            pv: { name: '現值', detail: '一系列未來付款的現值或目前總額。' },
+            fv: { name: '餘額', detail: '這是最後一次付款完成後，所能獲得的未來值或現金餘額。' },
+            type: { name: '類型', detail: '數字0或1，指出付款期限。' },
+            guess: { name: '猜測值', detail: '這是對利率的猜測值。' },
         },
     },
     RECEIVED: {

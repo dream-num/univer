@@ -578,8 +578,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '各期利率。' },
+            per: { name: '期数', detail: '用于计算其利息数额的期数，必须在1到nper之间。' },
+            nper: { name: '总期数', detail: '年金的付款总期数。' },
+            pv: { name: '现值', detail: '现值，或一系列未来付款的当前值的累积和。' },
+            fv: { name: '余额', detail: '未来值，或在最后一次付款后希望得到的现金余额。' },
+            type: { name: '类型', detail: '数字0或1，用以指定各期的付款时间是在期初还是期末。' },
         },
     },
     PRICE: {
@@ -651,8 +655,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '总期数', detail: '年金的付款总期数。' },
+            pmt: { name: '金额', detail: '各期所应支付的金额，在整个年金期间保持不变。' },
+            pv: { name: '现值', detail: '现值，或一系列未来付款的当前值的累积和。' },
+            fv: { name: '余额', detail: '未来值，或在最后一次付款后希望得到的现金余额。' },
+            type: { name: '类型', detail: '数字0或1，用以指定各期的付款时间是在期初还是期末。' },
+            guess: { name: '猜测值', detail: '预期利率。' },
         },
     },
     RECEIVED: {

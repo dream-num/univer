@@ -66,10 +66,11 @@ export class UnitGridService extends Disposable implements IUnitGridService {
     // TODO@wzhudev: currently we only support at maximum 2 units rendered side by side.
     // In the future we would introduce a grid system (very much like vscode's) to support more
     // units and more complex layout.
-    private _unitGrid: IUnitGrid = [];
+    protected _unitGrid: IUnitGrid = [];
     private readonly _unitGrid$ = new BehaviorSubject<IUnitGrid>(this._unitGrid);
     readonly unitGrid$ = this._unitGrid$.asObservable();
     get unitGrid() { return this._unitGrid; }
+    get cachedGrid() { return this._cachedGrid; }
 
     private _nodeIndex = 0;
 
@@ -118,7 +119,7 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         this.disposeWithMe(this._renderSrv.disposed$.subscribe((unitId) => this._onRenderedDisposed(unitId)));
     }
 
-    private _cachedGrid: Nullable<IUnitGrid> = null;
+    protected _cachedGrid: Nullable<IUnitGrid> = null;
     protected async _initData(): Promise<void> {
         const raw = await this._localStorageService.getItem<IUnitGrid>(getGridUnitLocalCacheKey('static'));
         if (raw) {
@@ -136,6 +137,10 @@ export class UnitGridService extends Disposable implements IUnitGridService {
             return;
         }
 
+        this._insertNewNode(unitId, type);
+    }
+
+    private _insertNewNode(unitId: string, type: UniverInstanceType): void {
         const index = this._nodeIndex;
         this._nodeIndex += 1;
 

@@ -325,8 +325,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pmt: { name: 'pmt', detail: 'The payment made each period; it cannot change over the life of the annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     FVSCHEDULE: {
@@ -367,8 +370,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            per: { name: 'per', detail: 'The period for which you want to find the interest and must be in the range 1 to nper.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     IRR: {

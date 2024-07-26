@@ -95,3 +95,15 @@ export function calculateFV(rate: number, nper: number, pmt: number, pv: number,
 
     return -result;
 }
+
+export function calculateIPMT(rate: number, per: number, nper: number, pv: number, fv: number, type: number): number {
+    // type = 0  Payment at the end of the period
+    // type = 1  Payment at the beginning of the period
+    const payment = calculatePMT(rate, nper, pv, fv, type);
+
+    const result = per === 1
+        ? (type === 1 ? 0 : -pv)
+        : (type === 1 ? calculateFV(rate, per - 2, payment, pv, 1) - payment : calculateFV(rate, per - 1, payment, pv, 0));
+
+    return result * rate;
+}

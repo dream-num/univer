@@ -26,6 +26,8 @@ import { Coupnum } from './coupnum';
 import { Couppcd } from './couppcd';
 import { Cumipmt } from './cumipmt';
 import { Cumprinc } from './cumprinc';
+import { Fv } from './fv';
+import { Ipmt } from './ipmt';
 
 export const functionFinancial = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
@@ -39,4 +41,6 @@ export const functionFinancial = [
     [Couppcd, FUNCTION_NAMES_FINANCIAL.COUPPCD],
     [Cumipmt, FUNCTION_NAMES_FINANCIAL.CUMIPMT],
     [Cumprinc, FUNCTION_NAMES_FINANCIAL.CUMPRINC],
+    [Fv, FUNCTION_NAMES_FINANCIAL.FV],
+    [Ipmt, FUNCTION_NAMES_FINANCIAL.IPMT],
 ];

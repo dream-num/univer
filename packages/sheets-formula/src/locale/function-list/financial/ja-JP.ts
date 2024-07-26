@@ -76,12 +76,12 @@ export default {
             },
         ],
         functionParameter: {
-            cost: { name: '価格', detail: '資産を購入した時点での価格を指定します。' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
             datePurchased: { name: '購入日', detail: '資産を購入した日付を指定します。' },
             firstPeriod: { name: '開始期', detail: '最初の会計期が終了する日付を指定します。' },
             salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格を指定します。' },
             period: { name: '期', detail: '会計期 (会計年度) を指定します。' },
-            rate: { name: '減価償却率', detail: '減価償却率を指定します。' },
+            rate: { name: '率', detail: '減価償却率を指定します。' },
             basis: { name: '基準', detail: '1 年を何日として計算するかを表す数値を指定します。' },
         },
     },
@@ -192,11 +192,11 @@ export default {
         ],
         functionParameter: {
             rate: { name: '利率', detail: '貸付期間を通じて一定の利率を指定します。' },
-            nper: { name: '期間', detail: '貸付期間全体での支払回数の合計を指定します。' },
+            nper: { name: '期間内支払回数', detail: '貸付期間全体での支払回数の合計を指定します。' },
             pv: { name: '現在価値', detail: '現在の貸付額、つまり将来行われる一連の支払いを、現時点で一括支払いした場合の合計金額を指定します。' },
             startPeriod: { name: '開始期', detail: '計算の対象となる最初の期を指定します。 最初の期から順に、1 から始まる番号が割り当てられます。' },
             endPeriod: { name: '終了期', detail: '計算の対象となる最後の期を指定します。' },
-            type: { name: '型', detail: '支払いがいつ行われるかを、数値の 0 または 1 で指定します。' },
+            type: { name: '支払期日', detail: '支払いがいつ行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     CUMPRINC: {
@@ -210,11 +210,11 @@ export default {
         ],
         functionParameter: {
             rate: { name: '利率', detail: '貸付期間を通じて一定の利率を指定します。' },
-            nper: { name: '期間', detail: '貸付期間全体での支払回数の合計を指定します。' },
+            nper: { name: '期間内支払回数', detail: '貸付期間全体での支払回数の合計を指定します。' },
             pv: { name: '現在価値', detail: '現在の貸付額、つまり将来行われる一連の支払いを、現時点で一括支払いした場合の合計金額を指定します。' },
             startPeriod: { name: '開始期', detail: '計算の対象となる最初の期を指定します。 最初の期から順に、1 から始まる番号が割り当てられます。' },
             endPeriod: { name: '終了期', detail: '計算の対象となる最後の期を指定します。' },
-            type: { name: '型', detail: '支払いがいつ行われるかを、数値の 0 または 1 で指定します。' },
+            type: { name: '支払期日', detail: '支払いがいつ行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     DB: {
@@ -325,8 +325,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間内支払回数', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pmt: { name: '定期支払額', detail: '各期間に行われた支払い。それは年金の生活の中で変わることはできません' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     FVSCHEDULE: {
@@ -367,8 +370,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            per: { name: '期', detail: '金利支払額を求める期を 1 ～ "期間" の範囲で指定します。' },
+            nper: { name: '期間', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     IRR: {

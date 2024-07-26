@@ -134,7 +134,7 @@ describe('Test cumprinc function', () => {
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
-        it('Value is normal', () => {
+        it('Value is array', () => {
             const rate = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['2012-3-29', 'test', true, false, ErrorType.NAME],

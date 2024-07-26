@@ -65,7 +65,6 @@ export interface IUniWorkbenchProps extends IWorkbenchOptions {
 export function UniWorkbench(props: IUniWorkbenchProps) {
     const {
         header = true,
-        footer = true,
         contextMenu = true,
         mountContainer,
         onRendered,
@@ -82,7 +81,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const selectedNodeRef = useRef<HTMLElement | null>(null);
     const floatingToolbarRef = useRef<FloatingToolbarRef>(null);
 
-    const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
@@ -166,7 +164,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     const onMove = useCallback(() => {
         floatingToolbarRef.current?.update();
-    }, [floatingToolbarRef]);
+    }, [floatingToolbarRef, selectedNodeRef]);
 
     useEffect(() => {
         selectedNodeRef.current = document.querySelector(`[data-id="${focusedUnit}"]`);
@@ -213,7 +211,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                     onNodesChange(nodes);
                                 }}
                                 onResize={resizeUnits}
-                                fitView
+                                fitView={true}
                                 onPointerDown={(event) => {
                                     if (event.target instanceof HTMLElement
                                         && (
@@ -249,12 +247,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                         <LeftSidebar />
                         <RightSidebar />
 
-                        {/* footer */}
-                        {footer && (
-                            <div className={styles.workbenchFooter}>
-                                <ComponentContainer key="footer" components={footerComponents} />
-                            </div>
-                        )}
                         {/* uni mode controller buttons */}
                         <UniControls />
                     </div>

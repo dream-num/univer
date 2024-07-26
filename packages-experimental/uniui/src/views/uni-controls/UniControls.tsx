@@ -17,7 +17,7 @@
 import {
     useReactFlow,
 } from '@xyflow/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FullscreenSingle, IncreaseSingle, ViewModeSingle, ZoomReduceSingle } from '@univerjs/icons';
 import { UniDiv } from '../uni-toolbar/UniFloatToolbar';
 import styles from './index.module.less';
@@ -48,6 +48,14 @@ export const UniControls = () => {
         document.body.requestFullscreen();
     };
     const [zoomLevel, setZoomLevel] = useState(1);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fitView();
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [fitView]);
 
     return (
         <div className={styles.uniControls}>

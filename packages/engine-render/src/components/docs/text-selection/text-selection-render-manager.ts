@@ -144,19 +144,20 @@ export interface ITextSelectionRenderManager {
     getSegmentPage(): number;
     setStyle(style: ITextSelectionStyle): void;
     resetStyle(): void;
-    removeAllRanges(): void;
 
+    removeAllRanges(): void;
     addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean, options?: { [key: string]: boolean }): void;
 
     sync(): void;
+
     activate(x: number, y: number): void;
     deactivate(): void;
     hasFocus(): boolean;
     focus(): void;
     blur(): void;
-
     focusEditor(): void;
     blurEditor(): void;
+
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, document: Documents): void;
     dispose(): void;
     handleDblClick(evt: IPointerEvent | IMouseEvent): void;

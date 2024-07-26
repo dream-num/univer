@@ -402,8 +402,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資の利率を指定します。' },
+            per: { name: '期', detail: '関心を見つける期間であり、1 から Nper の間である必要があります。' },
+            nper: { name: '期間', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値を指定します。ローンの場合、Pv はローン金額です。' },
         },
     },
     MDURATION: {
@@ -458,8 +460,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            pmt: { name: '定期支払額', detail: '各期間に行われた支払い。それは年金の生活の中で変わることはできません' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     NPV: {
@@ -556,8 +561,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間内支払回数', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     PPMT: {
@@ -626,8 +634,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間内支払回数', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pmt: { name: '定期支払額', detail: '各期間に行われた支払い。それは年金の生活の中で変わることはできません' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     RATE: {

@@ -17,72 +17,67 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Ipmt } from '../index';
+import { Pmt } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 
-describe('Test ipmt function', () => {
-    const testFunction = new Ipmt(FUNCTION_NAMES_FINANCIAL.IPMT);
+describe('Test pmt function', () => {
+    const testFunction = new Pmt(FUNCTION_NAMES_FINANCIAL.PMT);
 
-    describe('Ipmt', () => {
+    describe('Pmt', () => {
         it('Value is normal', () => {
-            const rate = NumberValueObject.create(0.1 / 12);
-            const per = NumberValueObject.create(1);
-            const nper = NumberValueObject.create(3 * 12);
-            const pv = NumberValueObject.create(80000);
+            const rate = NumberValueObject.create(0.08 / 12);
+            const nper = NumberValueObject.create(10);
+            const pv = NumberValueObject.create(100000);
             const fv = NumberValueObject.create(0);
             const type = NumberValueObject.create(0);
-            const result = testFunction.calculate(rate, per, nper, pv, fv, type);
-            expect(result.getValue()).toStrictEqual(-666.6666666666666);
+            const result = testFunction.calculate(rate, nper, pv, fv, type);
+            expect(result.getValue()).toStrictEqual(-10370.320893591643);
 
             const type2 = NumberValueObject.create(1);
-            const result2 = testFunction.calculate(rate, per, nper, pv, fv, type2);
-            expect(result2.getValue()).toStrictEqual(0);
+            const result2 = testFunction.calculate(rate, nper, pv, fv, type2);
+            expect(result2.getValue()).toStrictEqual(-10301.643271779778);
         });
 
         it('Value is error', () => {
             const rate = ErrorValueObject.create(ErrorType.NAME);
-            const per = NumberValueObject.create(1);
-            const nper = NumberValueObject.create(3 * 12);
-            const pv = NumberValueObject.create(80000);
+            const nper = NumberValueObject.create(10);
+            const pv = NumberValueObject.create(100000);
             const fv = NumberValueObject.create(0);
             const type = NumberValueObject.create(0);
-            const result = testFunction.calculate(rate, per, nper, pv, fv, type);
+            const result = testFunction.calculate(rate, nper, pv, fv, type);
             expect(result.getValue()).toStrictEqual(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
             const rate = BooleanValueObject.create(true);
-            const per = NumberValueObject.create(1);
-            const nper = NumberValueObject.create(3 * 12);
-            const pv = NumberValueObject.create(80000);
+            const nper = NumberValueObject.create(10);
+            const pv = NumberValueObject.create(100000);
             const fv = NumberValueObject.create(0);
             const type = NumberValueObject.create(0);
-            const result = testFunction.calculate(rate, per, nper, pv, fv, type);
-            expect(result.getValue()).toStrictEqual(-80000);
+            const result = testFunction.calculate(rate, nper, pv, fv, type);
+            expect(result.getValue()).toStrictEqual(-100097.75171065493);
         });
 
         it('Value is blank cell', () => {
             const rate = NullValueObject.create();
-            const per = NumberValueObject.create(1);
-            const nper = NumberValueObject.create(3 * 12);
-            const pv = NumberValueObject.create(80000);
+            const nper = NumberValueObject.create(10);
+            const pv = NumberValueObject.create(100000);
             const fv = NumberValueObject.create(0);
             const type = NumberValueObject.create(0);
-            const result = testFunction.calculate(rate, per, nper, pv, fv, type);
-            expect(result.getValue()).toStrictEqual(-0 | 0);
+            const result = testFunction.calculate(rate, nper, pv, fv, type);
+            expect(result.getValue()).toStrictEqual(-10000);
         });
 
         it('Value is normal string', () => {
             const rate = StringValueObject.create('test');
-            const per = NumberValueObject.create(1);
-            const nper = NumberValueObject.create(3 * 12);
-            const pv = NumberValueObject.create(80000);
+            const nper = NumberValueObject.create(10);
+            const pv = NumberValueObject.create(100000);
             const fv = NumberValueObject.create(0);
             const type = NumberValueObject.create(0);
-            const result = testFunction.calculate(rate, per, nper, pv, fv, type);
+            const result = testFunction.calculate(rate, nper, pv, fv, type);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
@@ -100,9 +95,9 @@ describe('Test ipmt function', () => {
                 row: 0,
                 column: 0,
             });
-            const per = ArrayValueObject.create({
+            const nper = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [true, 2, false, null],
+                    [true, -200, false, null],
                 ]),
                 rowCount: 1,
                 columnCount: 4,
@@ -111,29 +106,14 @@ describe('Test ipmt function', () => {
                 row: 0,
                 column: 0,
             });
-            const nper = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [true],
-                    [10],
-                    [false],
-                    [null],
-                ]),
-                rowCount: 4,
-                columnCount: 1,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const pv = NumberValueObject.create(80000);
+            const pv = NumberValueObject.create(100000);
             const fv = NumberValueObject.create(0);
             const type = NumberValueObject.create(0);
-            const result = testFunction.calculate(rate, per, nper, pv, fv, type);
+            const result = testFunction.calculate(rate, nper, pv, fv, type);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [ErrorType.VALUE, ErrorType.NUM, ErrorType.NUM, ErrorType.NA],
-                [-80000, 0, ErrorType.NAME, ErrorType.NA],
-                [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NA],
-                [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [ErrorType.VALUE, 0.05211730735859072, ErrorType.NUM, ErrorType.NA],
+                [-200000, 500, ErrorType.NAME, ErrorType.NA],
+                [ErrorType.NUM, 2.684927120963371e-65, ErrorType.NUM, ErrorType.NA],
             ]);
         });
     });

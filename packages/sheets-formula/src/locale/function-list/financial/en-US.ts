@@ -402,8 +402,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate for the investment.' },
+            per: { name: 'per', detail: 'The period for which you want to find the interest, and must be between 1 and Nper.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods for the investment.' },
+            pv: { name: 'pv', detail: 'The present value of the investment. For a loan, Pv is the loan amount.' },
         },
     },
     MDURATION: {
@@ -458,8 +460,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            pmt: { name: 'pmt', detail: 'The payment made each period; it cannot change over the life of the annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     NPV: {
@@ -556,8 +561,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     PPMT: {
@@ -626,8 +634,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pmt: { name: 'pmt', detail: 'The payment made each period; it cannot change over the life of the annuity.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     RATE: {

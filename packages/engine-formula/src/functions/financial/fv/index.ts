@@ -108,6 +108,10 @@ export class Fv extends BaseFunction {
 
             const result = calculateFV(rateValue, nperValue, pmtValue, pvValue, typeValue ? 1 : 0);
 
+            if (Number.isNaN(result) || !Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
             if (rowIndex === 0 && columnIndex === 0) {
                 return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
             } else {

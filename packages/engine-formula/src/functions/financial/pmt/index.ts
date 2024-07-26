@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { calculateIPMT } from '../../../basics/financial';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -22,19 +21,19 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { calculatePMT } from '../../../basics/financial';
 
-export class Ipmt extends BaseFunction {
-    override minParams = 4;
+export class Pmt extends BaseFunction {
+    override minParams = 3;
 
-    override maxParams = 6;
+    override maxParams = 5;
 
-    override calculate(rate: BaseValueObject, per: BaseValueObject, nper: BaseValueObject, pv: BaseValueObject, fv?: BaseValueObject, type?: BaseValueObject) {
+    override calculate(rate: BaseValueObject, nper: BaseValueObject, pv: BaseValueObject, fv?: BaseValueObject, type?: BaseValueObject) {
         fv = fv ?? NumberValueObject.create(0);
         type = type ?? NumberValueObject.create(0);
 
         const maxRowLength = Math.max(
             rate.isArray() ? (rate as ArrayValueObject).getRowCount() : 1,
-            per.isArray() ? (per as ArrayValueObject).getRowCount() : 1,
             nper.isArray() ? (nper as ArrayValueObject).getRowCount() : 1,
             pv.isArray() ? (pv as ArrayValueObject).getRowCount() : 1,
             fv.isArray() ? (fv as ArrayValueObject).getRowCount() : 1,
@@ -43,7 +42,6 @@ export class Ipmt extends BaseFunction {
 
         const maxColumnLength = Math.max(
             rate.isArray() ? (rate as ArrayValueObject).getColumnCount() : 1,
-            per.isArray() ? (per as ArrayValueObject).getColumnCount() : 1,
             nper.isArray() ? (nper as ArrayValueObject).getColumnCount() : 1,
             pv.isArray() ? (pv as ArrayValueObject).getColumnCount() : 1,
             fv.isArray() ? (fv as ArrayValueObject).getColumnCount() : 1,
@@ -51,14 +49,12 @@ export class Ipmt extends BaseFunction {
         );
 
         const rateArray = expandArrayValueObject(maxRowLength, maxColumnLength, rate, ErrorValueObject.create(ErrorType.NA));
-        const perArray = expandArrayValueObject(maxRowLength, maxColumnLength, per, ErrorValueObject.create(ErrorType.NA));
         const nperArray = expandArrayValueObject(maxRowLength, maxColumnLength, nper, ErrorValueObject.create(ErrorType.NA));
         const pvArray = expandArrayValueObject(maxRowLength, maxColumnLength, pv, ErrorValueObject.create(ErrorType.NA));
         const fvArray = expandArrayValueObject(maxRowLength, maxColumnLength, fv, ErrorValueObject.create(ErrorType.NA));
         const typeArray = expandArrayValueObject(maxRowLength, maxColumnLength, type, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = rateArray.map((rateObject, rowIndex, columnIndex) => {
-            let perObject = perArray.get(rowIndex, columnIndex) as BaseValueObject;
             let nperObject = nperArray.get(rowIndex, columnIndex) as BaseValueObject;
             let pvObject = pvArray.get(rowIndex, columnIndex) as BaseValueObject;
             let fvObject = fvArray.get(rowIndex, columnIndex) as BaseValueObject;
@@ -70,14 +66,6 @@ export class Ipmt extends BaseFunction {
 
             if (rateObject.isError()) {
                 return rateObject;
-            }
-
-            if (perObject.isString()) {
-                perObject = perObject.convertToNumberObjectValue();
-            }
-
-            if (perObject.isError()) {
-                return perObject;
             }
 
             if (nperObject.isString()) {
@@ -113,17 +101,16 @@ export class Ipmt extends BaseFunction {
             }
 
             const rateValue = +rateObject.getValue();
-            const perValue = +perObject.getValue();
             const nperValue = +nperObject.getValue();
             const pvValue = +pvObject.getValue();
             const fvValue = +fvObject.getValue();
             const typeValue = +typeObject.getValue();
 
-            if (perValue < 1 || Math.floor(perValue) > Math.ceil(nperValue)) {
+            if (rateValue <= -1) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = calculateIPMT(rateValue, perValue, nperValue, pvValue, fvValue, typeValue ? 1 : 0);
+            const result = calculatePMT(rateValue, nperValue, pvValue, fvValue, typeValue ? 1 : 0);
 
             if (Number.isNaN(result) || !Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);

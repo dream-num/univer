@@ -786,16 +786,16 @@ export const FUNCTION_LIST_FINANCIAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.FVSCHEDULE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.FVSCHEDULE.functionParameter.number1.name',
-                detail: 'formula.functionList.FVSCHEDULE.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.FVSCHEDULE.functionParameter.principal.name',
+                detail: 'formula.functionList.FVSCHEDULE.functionParameter.principal.detail',
+                example: '1',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.FVSCHEDULE.functionParameter.number2.name',
-                detail: 'formula.functionList.FVSCHEDULE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.FVSCHEDULE.functionParameter.schedule.name',
+                detail: 'formula.functionList.FVSCHEDULE.functionParameter.schedule.detail',
+                example: '{0.09,0.11,0.1}',
                 require: 1,
                 repeat: 0,
             },

@@ -351,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            principal: { name: 'principal', detail: 'The present value.' },
+            schedule: { name: 'schedule', detail: 'An array of interest rates to apply.' },
         },
     },
     INTRATE: {

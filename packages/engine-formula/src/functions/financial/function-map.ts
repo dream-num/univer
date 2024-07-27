@@ -33,6 +33,7 @@ import { Dollarde } from './dollarde';
 import { Dollarfr } from './dollarfr';
 import { Effect } from './effect';
 import { Fv } from './fv';
+import { Fvschedule } from './fvschedule';
 import { Ipmt } from './ipmt';
 import { Ispmt } from './ispmt';
 import { Nper } from './nper';
@@ -60,6 +61,7 @@ export const functionFinancial = [
     [Dollarfr, FUNCTION_NAMES_FINANCIAL.DOLLARFR],
     [Effect, FUNCTION_NAMES_FINANCIAL.EFFECT],
     [Fv, FUNCTION_NAMES_FINANCIAL.FV],
+    [Fvschedule, FUNCTION_NAMES_FINANCIAL.FVSCHEDULE],
     [Ipmt, FUNCTION_NAMES_FINANCIAL.IPMT],
     [Ispmt, FUNCTION_NAMES_FINANCIAL.ISPMT],
     [Nper, FUNCTION_NAMES_FINANCIAL.NPER],

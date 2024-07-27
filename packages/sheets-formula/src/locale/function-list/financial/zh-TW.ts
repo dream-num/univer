@@ -351,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            principal: { name: '初始資金', detail: '這是現值。' },
+            schedule: { name: '利率陣列', detail: '這是要套用的利率陣列。' },
         },
     },
     INTRATE: {

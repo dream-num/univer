@@ -351,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            principal: { name: '元金', detail: '現在の貸付額、つまり将来行われる一連の支払いを、現時点で一括支払いした場合の合計金額を指定します。' },
+            schedule: { name: '利率配列', detail: '投資期間内の変動金利を配列として指定します。' },
         },
     },
     INTRATE: {

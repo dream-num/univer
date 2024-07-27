@@ -170,13 +170,13 @@ export class Textafter extends BaseFunction {
                 }
             }
 
+            if (delimiterValue.length > textValue.length) {
+                return ErrorValueObject.create(ErrorType.NA);
+            }
+
             // if instance_num is greater than the length of text returns a #VALUE! error
             if (Math.abs(instanceNumValue) > textValue.length) {
                 return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (delimiterValue.length > textValue.length) {
-                return ErrorValueObject.create(ErrorType.NA);
             }
 
             const matchNum = textValue.match(new RegExp(delimiterValue, `g${!matchModeValue ? '' : 'i'}`));

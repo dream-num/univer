@@ -331,7 +331,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     });
                     listener && disposableCollection.add(listener);
                     this._domLayerInfoMap.set(drawingId, info);
-                    map.set(drawingId, {});
+                    map.set(drawingId, {
+                        ...map.get(drawingId),
+                    });
                 });
             })
         );

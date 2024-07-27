@@ -122,7 +122,8 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {} } = paragraph;
             const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
-            const { hanging: listHanging, indentStart: listIndentStart } = lists[listType].nestingLevel[0];
+            const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
+            const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
             const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
 
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);

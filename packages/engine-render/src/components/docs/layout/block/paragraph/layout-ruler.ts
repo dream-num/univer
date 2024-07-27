@@ -72,6 +72,13 @@ export function layoutParagraph(
             // 如果是一个段落的开头，需要加入bullet
             const { gridType = GridType.LINES, charSpace = 0, defaultTabStop = 10.5 } = sectionBreakConfig;
 
+            const paragraphProperties = bulletSkeleton.paragraphProperties || {};
+
+            paragraphConfig.paragraphStyle = {
+                ...paragraphConfig.paragraphStyle,
+                ...paragraphProperties,
+            };
+
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);

@@ -34,8 +34,10 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphSymbol: '\u25CF',
-                hanging: { v: 21 },
-                indentStart: { v: 21 },
+                paragraphProperties: {
+                    hanging: { v: 21 },
+                    indentStart: { v: 21 },
+                },
             },
             {
                 bulletAlignment: BulletAlignment.START,
@@ -45,8 +47,10 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphSymbol: '\u25A0',
-                hanging: { v: 21 },
-                indentStart: { v: 42 },
+                paragraphProperties: {
+                    hanging: { v: 21 },
+                    indentStart: { v: 42 },
+                },
             },
             {
                 bulletAlignment: BulletAlignment.START,
@@ -56,8 +60,10 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphSymbol: '\u25C6',
-                hanging: { v: 21 },
-                indentStart: { v: 63 },
+                paragraphProperties: {
+                    hanging: { v: 21 },
+                    indentStart: { v: 63 },
+                },
             },
         ] as INestingLevel[],
     } as IListData,
@@ -72,8 +78,10 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphType: GlyphType.DECIMAL,
-                hanging: { v: 21 },
-                indentStart: { v: 21 },
+                paragraphProperties: {
+                    hanging: { v: 21 },
+                    indentStart: { v: 21 },
+                },
             },
             {
                 bulletAlignment: BulletAlignment.START,
@@ -83,8 +91,10 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphType: GlyphType.DECIMAL,
-                hanging: { v: 21 },
-                indentStart: { v: 42 },
+                paragraphProperties: {
+                    hanging: { v: 21 },
+                    indentStart: { v: 42 },
+                },
             },
             {
                 bulletAlignment: BulletAlignment.START,
@@ -94,8 +104,10 @@ export const PRESET_LIST_TYPE = {
                 },
                 startNumber: 0,
                 glyphType: GlyphType.DECIMAL,
-                hanging: { v: 21 },
-                indentStart: { v: 63 },
+                paragraphProperties: {
+                    hanging: { v: 21 },
+                    indentStart: { v: 63 },
+                },
             },
         ] as INestingLevel[],
     } as IListData,

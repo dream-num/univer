@@ -227,8 +227,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '资产原值。' },
+            salvage: { name: '残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
+            period: { name: '期间', detail: '您要计算折旧的时期。' },
+            month: { name: '月份', detail: '第一年的月份数。如果省略月份，则假定其值为12。' },
         },
     },
     DDB: {
@@ -241,8 +244,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '资产原值。' },
+            salvage: { name: '残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
+            period: { name: '期间', detail: '您要计算折旧的时期。' },
+            factor: { name: '速率', detail: '余额递减速率。如果省略影响因素，则假定为2（双倍余额递减法）。' },
         },
     },
     DISC: {

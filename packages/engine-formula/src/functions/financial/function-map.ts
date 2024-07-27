@@ -26,6 +26,8 @@ import { Coupnum } from './coupnum';
 import { Couppcd } from './couppcd';
 import { Cumipmt } from './cumipmt';
 import { Cumprinc } from './cumprinc';
+import { Db } from './db';
+import { Ddb } from './ddb';
 import { Fv } from './fv';
 import { Ipmt } from './ipmt';
 import { Ispmt } from './ispmt';
@@ -47,6 +49,8 @@ export const functionFinancial = [
     [Couppcd, FUNCTION_NAMES_FINANCIAL.COUPPCD],
     [Cumipmt, FUNCTION_NAMES_FINANCIAL.CUMIPMT],
     [Cumprinc, FUNCTION_NAMES_FINANCIAL.CUMPRINC],
+    [Db, FUNCTION_NAMES_FINANCIAL.DB],
+    [Ddb, FUNCTION_NAMES_FINANCIAL.DDB],
     [Fv, FUNCTION_NAMES_FINANCIAL.FV],
     [Ipmt, FUNCTION_NAMES_FINANCIAL.IPMT],
     [Ispmt, FUNCTION_NAMES_FINANCIAL.ISPMT],

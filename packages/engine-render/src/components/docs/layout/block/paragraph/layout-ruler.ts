@@ -689,6 +689,7 @@ function _updateAndPositionTable(
     } else {
         page.skeTables.set(tableId, table);
         table.parent = page;
+        skeTableInParagraph.clear();
 
         return false;
     }

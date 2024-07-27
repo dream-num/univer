@@ -1155,8 +1155,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要截尾取整的数字。' },
+            numDigits: { name: '位数', detail: '用于指定取整精度的数字。num_digits 的默认值为 0（零）。' },
         },
     },
 };

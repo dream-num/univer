@@ -77,8 +77,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '新しい配列で返される列を含む配列。' },
+            colNum1: { name: '列番号1', detail: '返される最初の列。' },
+            colNum2: { name: '列番号2', detail: '返される追加の列。' },
         },
     },
     CHOOSEROWS: {
@@ -91,8 +92,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '新しい配列で返される行を含む配列。' },
+            rowNum1: { name: '行番号1', detail: '返される最初の行番号。' },
+            rowNum2: { name: '行番号2', detail: '返される追加の行番号。' },
         },
     },
     COLUMN: {
@@ -159,8 +161,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: 'フィルターする範囲または配列。' },
+            include: { name: 'ブール配列', detail: 'ブール値の配列。TRUE は保持する行または列を示します。' },
+            ifEmpty: { name: '空の値を返す', detail: 'アイテムが保持されていない場合に返されます。' },
         },
     },
     FORMULATEXT: {
@@ -229,8 +232,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列', detail: '追加する配列。' },
+            array2: { name: '配列', detail: '追加する配列。' },
         },
     },
     HYPERLINK: {
@@ -397,8 +400,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '並べ替える範囲または配列。' },
+            sortIndex: { name: 'ソートインデックス', detail: '(行または列) による順序を表す数値。' },
+            sortOrder: { name: '並べ替え順序', detail: '希望の並べ替え順序を表す数値。連続 (デフォルト) の場合は 1、降順の場合は -1。' },
+            byCol: { name: '仕分け方向', detail: '希望するソート方向を示す論理値。行でソートする場合は FALSE (デフォルト)、列でソートする場合は TRUE。' },
         },
     },
     SORTBY: {
@@ -411,8 +416,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '並べ替える範囲または配列。' },
+            byArray1: { name: '配列の並べ替え1', detail: '並べ替えに基づいて並べ替える範囲または配列。' },
+            sortOrder1: { name: '並べ替え順序1', detail: '希望の並べ替え順序を表す数値。連続 (デフォルト) の場合は 1、降順の場合は -1。' },
+            byArray2: { name: '配列の並べ替え2', detail: '並べ替えに基づいて並べ替える範囲または配列。' },
+            sortOrder2: { name: '並べ替え順序2', detail: '希望の並べ替え順序を表す数値。連続 (デフォルト) の場合は 1、降順の場合は -1。' },
         },
     },
     TAKE: {
@@ -467,8 +475,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: 'ワークシート内のセルの範囲または配列。' },
         },
     },
     UNIQUE: {
@@ -481,8 +488,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '一意の行または列が返される範囲または配列を返します。' },
+            byCol: { name: '列ごと', detail: '論理値です。行を相互に比較して一意の値 = FALSE を返します。省略されます。列を相互に比較して一意の値 = TRUE を返します。' },
+            exactlyOnce: { name: '1回だけ', detail: '論理値です。配列から 1 回だけ出現する行または列を返します = TRUE; 配列からすべての個別の行または列を返します = FALSE、または省略されます。' },
         },
     },
     VLOOKUP: {
@@ -523,8 +531,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列', detail: '追加する配列。' },
+            array2: { name: '配列', detail: '追加する配列。' },
         },
     },
     WRAPCOLS: {

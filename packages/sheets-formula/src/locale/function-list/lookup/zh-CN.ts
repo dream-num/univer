@@ -78,8 +78,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '包含要在新数组中返回的列的数组。' },
+            colNum1: { name: '列号1', detail: '要返回的第一列。' },
+            colNum2: { name: '列号2', detail: '要返回的其他列。' },
         },
     },
     CHOOSEROWS: {
@@ -92,8 +93,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '包含要在新数组中返回的行的数组。' },
+            rowNum1: { name: '行号1', detail: '要返回的第一行号。' },
+            rowNum2: { name: '行号2', detail: '要返回的其他行号。' },
         },
     },
     COLUMN: {
@@ -160,8 +162,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要筛选的区域或数组。' },
+            include: { name: '布尔值数组', detail: '布尔值数组，其中 TRUE 表示要保留的一行或一列。' },
+            ifEmpty: { name: '空值返回', detail: '如果未保留任何项，则返回。' },
         },
     },
     FORMULATEXT: {
@@ -230,8 +233,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组', detail: '要追加的数组。' },
+            array2: { name: '数组', detail: '要追加的数组。' },
         },
     },
     HYPERLINK: {
@@ -395,8 +398,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要排序的范围或数组。' },
+            sortIndex: { name: '排序索引', detail: '表示排序依据(按行或按列)的数字。' },
+            sortOrder: { name: '排序顺序', detail: '表示所需排序顺序的数字；1表示顺序(默认)，-1表示降序。' },
+            byCol: { name: '排序方向', detail: '表示所需排序方向的逻辑值；FALSE指按行排序(默认)，TRUE指按列排序。' },
         },
     },
     SORTBY: {
@@ -409,8 +414,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要排序的范围或数组。' },
+            byArray1: { name: '排序数组1', detail: '要基于其进行排序的范围或数组。' },
+            sortOrder1: { name: '排序顺序1', detail: '表示所需排序顺序的数字；1表示顺序(默认)，-1表示降序。' },
+            byArray2: { name: '排序数组2', detail: '要基于其进行排序的范围或数组。' },
+            sortOrder2: { name: '排序顺序2', detail: '表示所需排序顺序的数字；1表示顺序(默认)，-1表示降序。' },
         },
     },
     TAKE: {
@@ -465,8 +473,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '工作表中的单元格区域或数组。' },
         },
     },
     UNIQUE: {
@@ -479,8 +486,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '从中返回唯一行或列的范围或数组。' },
+            byCol: { name: '依据列', detail: '是一个逻辑值：将行彼此比较并返回唯一值 = FALSE，或已省略；将列彼此比较并返回唯一值 = TRUE。' },
+            exactlyOnce: { name: '仅一次', detail: '是一个逻辑值：从数组中返回只出现一次的行或列 = TRUE；从数组中返回所有不同的行或列 = FALSE，或已省略。' },
         },
     },
     VLOOKUP: {
@@ -522,8 +530,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组', detail: '要追加的数组。' },
+            array2: { name: '数组', detail: '要追加的数组。' },
         },
     },
     WRAPCOLS: {

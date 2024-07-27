@@ -38,7 +38,7 @@ export interface ICanvasFloatDom {
     unitId?: string;
     subUnitId?: string;
     /**
-     * props of component, wouldn't save to snapshot
+     * @deprecated use `data`, everything add to float-dom needs to be serializable, for saving to disk.
      */
     props?: Record<string, any>;
     /**

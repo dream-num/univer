@@ -53,3 +53,4 @@ export { DEFAULT_PADDING_DATA } from './components/sheets/sheet-skeleton';
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
 export { lineIterator, glyphIterator } from './components/docs/layout/tools';
 export { getOneTextSelectionRange } from './components/docs/text-selection/convert-cursor';
+export { getLastLine } from './components/docs/layout/tools';

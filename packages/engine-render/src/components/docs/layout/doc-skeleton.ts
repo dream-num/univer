@@ -228,11 +228,31 @@ export class DocumentSkeleton extends Skeleton {
 
         const sectionIndex = page.sections.indexOf(section);
 
-        const pageIndex = pageType !== DocumentSkeletonPageType.BODY
-            ? 0 // Because header or footer only has one page.
-            : skeletonData.pages.indexOf(page);
+        let pageIndex = -1;
 
         const path = getPagePath(page);
+
+        switch (pageType) {
+            case DocumentSkeletonPageType.HEADER:
+            case DocumentSkeletonPageType.FOOTER: {
+                pageIndex = 0;
+                break;
+            }
+
+            case DocumentSkeletonPageType.BODY: {
+                pageIndex = skeletonData.pages.indexOf(page);
+                break;
+            }
+
+            case DocumentSkeletonPageType.CELL: {
+                pageIndex = path[1] as number;
+                break;
+            }
+
+            default: {
+                throw new Error('Invalid page type');
+            }
+        }
 
         return {
             glyph: glyphIndex,
@@ -289,13 +309,37 @@ export class DocumentSkeleton extends Skeleton {
 
         const path = getPagePath(page);
 
+        let pageIndex = -1;
+
+        switch (pageType) {
+            case DocumentSkeletonPageType.HEADER:
+            case DocumentSkeletonPageType.FOOTER: {
+                pageIndex = 0;
+                break;
+            }
+
+            case DocumentSkeletonPageType.BODY: {
+                pageIndex = pages.indexOf(page);
+                break;
+            }
+
+            case DocumentSkeletonPageType.CELL: {
+                pageIndex = path[1] as number;
+                break;
+            }
+
+            default: {
+                throw new Error('Invalid page type');
+            }
+        }
+
         return {
             glyph: divide.glyphGroup.indexOf(glyph),
             divide: line.divides.indexOf(divide),
             line: column.lines.indexOf(line),
             column: section.columns.indexOf(column),
             section: page.sections.indexOf(section),
-            page: pageType === DocumentSkeletonPageType.BODY ? pages.indexOf(page) : 0,
+            page: pageIndex,
             pageType,
             segmentPage: segmentPageIndex,
             isBack,

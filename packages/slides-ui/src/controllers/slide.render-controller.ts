@@ -20,11 +20,6 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 export class SlideRenderController extends RxDisposable implements IRenderModule {
     constructor(private readonly _context: IRenderContext<any>) {
         super();
-        console.log('SlideRenderController _context', this._context);
-    }
-
-    addSubRenderUnit(unit: any) {
-
     }
 
     override dispose() {

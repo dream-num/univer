@@ -16,10 +16,7 @@
 
 import type { ICommand, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, PageElementType, Tools, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService, RichText } from '@univerjs/engine-render';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
-import { SlideUIController } from '../../controllers/slide-ui.controller';
 
 export interface ISlideAddTextParam {
     text: string;
@@ -30,10 +27,10 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
     type: CommandType.OPERATION,
     handler: async (accessor, params) => {
         const elementId = Tools.generateRandomId(6);
-        const defaultWidth = 100;
+        const defaultWidth = 220;
         const defaultheight = 40;
 
-        const textContent = params?.text || 'Text here';
+        const textContent = params?.text || 'A New Text';
         const elmentData = {
             id: elementId,
             zIndex: 2,
@@ -62,10 +59,7 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         activePage.pageElements[elementId] = elmentData;
         slideData.updatePage(activePage.id, activePage);
 
-        const rms = accessor.get(IRenderManagerService);
-        console.log('cmd: IRenderManagerService', rms);
         const canvasview = accessor.get(CanvasView);
-        console.log('cmd: canvasview', canvasview);
         const sceneObject = canvasview.createObjectToPage(elmentData, activePage.id);
         if (sceneObject) {
             canvasview.setObjectActiveByPage(sceneObject, activePage.id);

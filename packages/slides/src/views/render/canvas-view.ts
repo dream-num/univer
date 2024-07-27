@@ -43,7 +43,6 @@ export class CanvasView extends RxDisposable implements IRenderModule {
     private _objectProvider: ObjectProvider | null = null;
 
     constructor(
-        private readonly _renderContext: IRenderContext<any>,
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
@@ -51,7 +50,6 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         super();
         this._initializeDependencies(this._injector);
         this._initialize();
-        console.log('CanvasView _context', this._renderContext);
     }
 
     private _initialize() {
@@ -403,28 +401,18 @@ export class CanvasView extends RxDisposable implements IRenderModule {
      */
     private _createScene(pageId: string, page: ISlidePage) {
         const render = this._currentRender();
-
         if (!render || !this._objectProvider) {
             return;
         }
 
         const { scene: mainScene, mainComponent } = render;
-
-        window.msc = mainScene;
-
         const slide = mainComponent as Slide;
-
         const { width, height } = slide;
-
         const pageScene = new Scene(pageId, slide, {
             width,
             height,
         });
         this._sceneMap.set(pageId, pageScene);
-        if (!window.sc) {
-            window.sc = {};
-        }
-        window.sc[pageId] = pageScene;
 
         const viewMain = new Viewport(`PageViewer_${pageId}`, pageScene, {
             left: 0,
@@ -434,7 +422,6 @@ export class CanvasView extends RxDisposable implements IRenderModule {
             isRelativeX: true,
             isRelativeY: true,
         });
-
         viewMain.closeClip();
 
         const { pageElements, pageBackgroundFill } = page;
@@ -472,6 +459,7 @@ export class CanvasView extends RxDisposable implements IRenderModule {
 
     getRenderUnitByPageId(pageId: PageID) {
         const scene = this._sceneMap.get(pageId);
+        // no render context
         // const { engine, unit } = this._renderContext;
         return {
             scene,
@@ -489,9 +477,6 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         const { scene } = this.getRenderUnitByPageId(pageID);
         if (!scene) return;
 
-        // const elements = {
-        //     [element.id]: element,
-        // };
         const object = this._objectProvider.convertToRenderObject(element, scene);
         if (object) {
             scene.addObject(object);

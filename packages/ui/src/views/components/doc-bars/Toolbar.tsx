@@ -54,9 +54,6 @@ export function Toolbar(props: IToolbarProps) {
     // Should the header when there is at least one header menu components or menu groups.
     const hasHeaderMenu = useMemo(() => (headerMenuComponents && headerMenuComponents.size > 0) || groups.length > 1, [headerMenuComponents, groups]);
 
-    // console.log('toolbar style', styles.toolbar);
-    // console.log('toolbar groupsByKey', groupsByKey);
-
     return (
         <>
             {hasHeaderMenu

@@ -147,17 +147,14 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         const dependencies = this._renderDependencies.get(type)!;
         dependencies.push(ctor);
 
-        if (type === UniverInstanceType.UNIVER_SLIDE) {
-            for (const [renderUnitId, render] of this._renderMap) {
+        for (const [renderUnitId, render] of this._renderMap) {
+            if (type === UniverInstanceType.UNIVER_SLIDE) {
                 // const renderType = this._univerInstanceService.getUnitType(renderUnitId);
                 // renderUnitId  slide_test  cover_1 rect_1....
-                const unit = this._univerInstanceService.getUnit(renderUnitId);
-                if (unit) {
+                if (this._univerInstanceService.getUnit(renderUnitId)) {
                     (render as RenderUnit).addRenderDependencies([ctor]);
                 }
-            }
-        } else {
-            for (const [renderUnitId, render] of this._renderMap) {
+            } else {
                 const renderType = this._univerInstanceService.getUnitType(renderUnitId);
                 if (renderType === type) {
                     (render as RenderUnit).addRenderDependencies([ctor]);
@@ -267,7 +264,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     }
 
     private _addRenderUnit(unitId: string, item: IRender) {
-        console.log('_addRenderUnit to renderMap', unitId, item);
         this._renderMap.set(unitId, item);
     }
 

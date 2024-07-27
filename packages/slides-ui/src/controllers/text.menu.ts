@@ -23,8 +23,6 @@ import { SlideAddTextOperation } from '../commands/operations/insert-text.operat
 export const TEXT_ICON_ID = 'text-single';
 
 export function AddTextMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
-  // const formatPainterService = accessor.get(IFormatPainterService);
-
     return {
         id: SlideAddTextOperation.id,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
@@ -34,21 +32,5 @@ export function AddTextMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
         tooltip: 'addText',
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
-      // disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
-      // activated$: new Observable<boolean>((subscriber) => {
-      //     console.log('activated$activated$');
-      //     let active = false;
-      //     active = true;
-      // // const status$ = formatPainterService.status$.subscribe((s) => {
-      // //     active = s !== FormatPainterStatus.OFF;
-      // //     subscriber.next(active);
-      // // });
-
-      //     subscriber.next(active);
-
-      //     return () => {
-      //     // status$.unsubscribe();
-      //     };
-      // }),
     };
 }

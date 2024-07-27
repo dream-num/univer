@@ -46,7 +46,6 @@ export class UniverSlidesPlugin extends Plugin {
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
         this._initializeDependencies(this._injector);
-        console.log('UniverSlidesPlugin IRenderManagerService', this._renderManagerService);
     }
 
     initialize(): void {
@@ -54,7 +53,7 @@ export class UniverSlidesPlugin extends Plugin {
     }
 
     override onReady(): void {
-        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, CanvasView as any));
+
     }
 
     getConfig() {
@@ -73,6 +72,8 @@ export class UniverSlidesPlugin extends Plugin {
         return this._canvasEngine;
     }
 
+
+    // no one is using this! 
     // getCanvasView() {
     //     return this._canvasView;
     // }

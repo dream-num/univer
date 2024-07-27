@@ -25,10 +25,6 @@ import { SlideRenderController } from './controllers/slide.render-controller';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
-// export interface IUniverSlidesUIConfig {
-//     menu: MenuConfig;
-// }
-
 export class UniverSlidesUIPlugin extends Plugin {
     static override pluginName = SLIDE_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SLIDE;
@@ -55,12 +51,10 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     override onReady(): void {
-        (
-            [
-                SlideRenderController,
-            ]
-        ).forEach((m) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m as any));
+        ([
+            [SlideRenderController],
+        ] as Dependency[]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
         });
     }
 

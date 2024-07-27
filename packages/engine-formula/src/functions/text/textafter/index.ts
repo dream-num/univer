@@ -34,6 +34,10 @@ export class Textafter extends BaseFunction {
         matchEnd = matchEnd ?? NumberValueObject.create(0);
         ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
 
+        if (instanceNum.isNull()) {
+            instanceNum = NumberValueObject.create(1);
+        }
+
         if (delimiter.isArray()) {
             delimiter = (delimiter as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
@@ -169,6 +173,10 @@ export class Textafter extends BaseFunction {
             // if instance_num is greater than the length of text returns a #VALUE! error
             if (Math.abs(instanceNumValue) > textValue.length) {
                 return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            if (delimiterValue.length > textValue.length) {
+                return ErrorValueObject.create(ErrorType.NA);
             }
 
             const matchNum = textValue.match(new RegExp(delimiterValue, `g${!matchModeValue ? '' : 'i'}`));

@@ -21,18 +21,23 @@ import { ArrayValueObject } from '../../../engine/value-object/array-value-objec
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 
-import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 
 import { BaseFunction } from '../../base-function';
 import { calculateMaxDimensions } from '../../../engine/utils/value-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 
 export class Sortby extends BaseFunction {
-    override minParams = 3;
+    override minParams = 2;
 
     override maxParams = 255;
 
     override calculate(array: BaseValueObject, ...variants: BaseValueObject[]) {
+        // if has byArray1 no sortOrder, sortOrder default 1. but has multiple byArray, sortOrder length must be equal to byArray length
+        if (variants.length === 1) {
+            variants.push(NumberValueObject.create(1));
+        }
+
         const variantsError = this._getVariantsError(array, ...variants);
 
         const { maxRowLength, maxColumnLength } = calculateMaxDimensions(variants);
@@ -103,13 +108,17 @@ export class Sortby extends BaseFunction {
 
                     sortOrders.push(sortOrderValue);
 
-                    let byArrayValue = byArray.getArrayValue();
+                    if (byArray.isArray()) {
+                        let byArrayValue = byArray.getArrayValue();
 
-                    if (byArray1ColumnCount === 1) {
-                        byArrayValue = this._transposeArray(byArrayValue);
+                        if (byArray1ColumnCount === 1) {
+                            byArrayValue = this._transposeArray(byArrayValue);
+                        }
+
+                        byArrays.push(byArrayValue[0]);
+                    } else {
+                        byArrays.push([byArray]);
                     }
-
-                    byArrays.push(byArrayValue[0]);
                 }
 
                 if (isError) {
@@ -123,17 +132,19 @@ export class Sortby extends BaseFunction {
 
                 let arrayValue = array.getArrayValue();
 
-                if (byArray1RowCount === 1) {
-                    arrayValue = arrayValue.concat(byArrays);
-                    arrayValue = this._transposeArray(arrayValue);
-                    arrayValue.sort(this._sort(arrayRowCount, sortOrders as Array<1 | -1>));
-                    arrayValue = this._transposeArray(arrayValue).slice(0, arrayRowCount);
-                } else if (byArray1ColumnCount === 1) {
-                    arrayValue = this._transposeArray(arrayValue);
-                    arrayValue = arrayValue.concat(byArrays);
-                    arrayValue = this._transposeArray(arrayValue);
-                    arrayValue.sort(this._sort(arrayColumnCount, sortOrders as Array<1 | -1>));
-                    arrayValue = arrayValue.map((row) => row.slice(0, arrayColumnCount));
+                if (!(byArray1RowCount === 1 && byArray1ColumnCount === 1)) {
+                    if (byArray1RowCount === 1) {
+                        arrayValue = arrayValue.concat(byArrays);
+                        arrayValue = this._transposeArray(arrayValue);
+                        arrayValue.sort(this._sort(arrayRowCount, sortOrders as Array<1 | -1>));
+                        arrayValue = this._transposeArray(arrayValue).slice(0, arrayRowCount);
+                    } else if (byArray1ColumnCount === 1) {
+                        arrayValue = this._transposeArray(arrayValue);
+                        arrayValue = arrayValue.concat(byArrays);
+                        arrayValue = this._transposeArray(arrayValue);
+                        arrayValue.sort(this._sort(arrayColumnCount, sortOrders as Array<1 | -1>));
+                        arrayValue = arrayValue.map((row) => row.slice(0, arrayColumnCount));
+                    }
                 }
 
                 const result = ArrayValueObject.create({
@@ -194,16 +205,18 @@ export class Sortby extends BaseFunction {
         const byArray1RowCount = variants[0].isArray() ? (variants[0] as ArrayValueObject).getRowCount() : 1;
         const byArray1ColumnCount = variants[0].isArray() ? (variants[0] as ArrayValueObject).getColumnCount() : 1;
 
-        if (byArray1RowCount > 1 && byArray1ColumnCount > 1) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
+        if (byArray1RowCount > 1 || byArray1ColumnCount > 1) {
+            if (byArray1RowCount > 1 && byArray1ColumnCount > 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
 
-        if (byArray1RowCount === 1 && byArray1ColumnCount !== arrayColumnCount) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
+            if (byArray1RowCount === 1 && byArray1ColumnCount !== arrayColumnCount) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
 
-        if (byArray1ColumnCount === 1 && byArray1RowCount !== arrayRowCount) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            if (byArray1ColumnCount === 1 && byArray1RowCount !== arrayRowCount) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
         }
 
         for (let i = 2; i < variants.length; i++) {

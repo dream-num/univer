@@ -32,7 +32,7 @@ export class Rept extends BaseFunction {
         }
 
         if (numberTimes.isError()) {
-            return text;
+            return numberTimes;
         }
 
         // get max row length
@@ -57,10 +57,6 @@ export class Rept extends BaseFunction {
                 return textObject;
             }
 
-            if (numberTimesObject.isError()) {
-                return numberTimesObject;
-            }
-
             let textValue = textObject.getValue();
 
             if (textObject.isNull()) {
@@ -75,15 +71,16 @@ export class Rept extends BaseFunction {
 
             if (numberTimesObject.isString()) {
                 numberTimesObject = numberTimesObject.convertToNumberObjectValue();
-
-                if (numberTimesObject.isError()) {
-                    return numberTimesObject;
-                }
             }
 
+            if (numberTimesObject.isError()) {
+                return numberTimesObject;
+            }
+
+            const stringMaxLength = 32767;
             const numberTimesValue = Math.floor(+numberTimesObject.getValue());
 
-            if (numberTimesValue < 0) {
+            if (numberTimesValue < 0 || numberTimesValue > stringMaxLength / (textValue as string).length) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
@@ -93,7 +90,7 @@ export class Rept extends BaseFunction {
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
-            return (resultArray as ArrayValueObject).get(0, 0) as StringValueObject;
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         return resultArray;

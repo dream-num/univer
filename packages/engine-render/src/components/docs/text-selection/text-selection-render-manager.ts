@@ -722,30 +722,19 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         };
     }
 
-    private _interactTextRange(textRange: TextRange) {
-        const newTextSelection: TextRange[] = [];
-        let hasIntersection = false;
+    private _interactTextRanges(textRanges: TextRange[]) {
+        const newTextRanges: TextRange[] = [];
 
-        this._rangeList.forEach((range) => {
-            if (range === textRange) {
-                return true;
-            }
-
-            if (!textRange.isIntersection(range)) {
-                newTextSelection.push(range);
-            } else {
-                hasIntersection = true;
+        for (const range of this._rangeList) {
+            if (textRanges.some((textRange) => textRange.isIntersection(range))) {
                 range.dispose();
+                continue;
             }
-        });
 
-        if (!hasIntersection) {
-            return;
+            newTextRanges.push(range);
         }
 
-        newTextSelection.push(textRange);
-
-        this._rangeList = newTextSelection;
+        this._rangeList = newTextRanges;
     }
 
     private _removeAllRanges() {
@@ -967,22 +956,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { textRanges, rectRanges } = ranges;
 
+        if (this._rangeList.length > 0 && textRanges.length > 0) {
+            this._interactTextRanges(textRanges);
+        }
+
         this._addTextRangesToCache(textRanges);
         this._addRectRangesToCache(rectRanges);
 
-        // const activeRangeInstance = this._getActiveRangeInstance();
-
-        // if (!activeRangeInstance) {
-        //     return;
-        // }
-
-        // activeRangeInstance.focusNodePosition = focusNodePosition;
-
-        // activeRangeInstance.refresh();
-
         this.deactivate();
-
-        // this._interactTextRange(activeRangeInstance);
 
         this._scene?.getEngine()?.setRemainCapture();
     }

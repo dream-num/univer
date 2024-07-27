@@ -31,6 +31,7 @@ import { Ddb } from './ddb';
 import { Disc } from './disc';
 import { Dollarde } from './dollarde';
 import { Dollarfr } from './dollarfr';
+import { Effect } from './effect';
 import { Fv } from './fv';
 import { Ipmt } from './ipmt';
 import { Ispmt } from './ispmt';
@@ -57,6 +58,7 @@ export const functionFinancial = [
     [Disc, FUNCTION_NAMES_FINANCIAL.DISC],
     [Dollarde, FUNCTION_NAMES_FINANCIAL.DOLLARDE],
     [Dollarfr, FUNCTION_NAMES_FINANCIAL.DOLLARFR],
+    [Effect, FUNCTION_NAMES_FINANCIAL.EFFECT],
     [Fv, FUNCTION_NAMES_FINANCIAL.FV],
     [Ipmt, FUNCTION_NAMES_FINANCIAL.IPMT],
     [Ispmt, FUNCTION_NAMES_FINANCIAL.ISPMT],

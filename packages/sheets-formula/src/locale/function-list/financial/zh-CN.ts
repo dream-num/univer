@@ -320,8 +320,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nominalRate: { name: '名义利率', detail: '名义利率。' },
+            npery: { name: '期数', detail: '每年的复利期数。' },
         },
     },
     FV: {

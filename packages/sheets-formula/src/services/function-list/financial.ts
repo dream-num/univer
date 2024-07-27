@@ -721,16 +721,16 @@ export const FUNCTION_LIST_FINANCIAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.EFFECT.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.EFFECT.functionParameter.number1.name',
-                detail: 'formula.functionList.EFFECT.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.EFFECT.functionParameter.nominalRate.name',
+                detail: 'formula.functionList.EFFECT.functionParameter.nominalRate.detail',
+                example: '0.0525',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.EFFECT.functionParameter.number2.name',
-                detail: 'formula.functionList.EFFECT.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.EFFECT.functionParameter.npery.name',
+                detail: 'formula.functionList.EFFECT.functionParameter.npery.detail',
+                example: '4',
                 require: 1,
                 repeat: 0,
             },

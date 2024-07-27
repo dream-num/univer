@@ -320,8 +320,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nominalRate: { name: 'nominal_rate', detail: 'The nominal interest rate.' },
+            npery: { name: 'npery', detail: 'The number of compounding periods per year.' },
         },
     },
     FV: {

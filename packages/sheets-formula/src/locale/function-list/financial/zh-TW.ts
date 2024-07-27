@@ -365,8 +365,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            investment: { name: '投資額', detail: '這是證券的投資額。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     IPMT: {
@@ -455,8 +458,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            effectRate: { name: '實質利率', detail: '這是實質利率。' },
+            npery: { name: '期數', detail: '每年以複利計算之期數。' },
         },
     },
     NPER: {

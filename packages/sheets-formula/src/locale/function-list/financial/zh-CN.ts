@@ -365,8 +365,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            investment: { name: '投资额', detail: '有价证券的投资额。' },
+            redemption: { name: '清偿价', detail: '有价证券到期时的兑换值。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     IPMT: {
@@ -455,8 +458,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            effectRate: { name: '实际利率', detail: '实际利率。' },
+            npery: { name: '期数', detail: '每年的复利期数。' },
         },
     },
     NPER: {

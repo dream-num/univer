@@ -365,8 +365,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            investment: { name: '投資額', detail: '証券への投資額を指定します。' },
+            redemption: { name: '償還価額', detail: '満期日における証券の償還額を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     IPMT: {
@@ -455,8 +458,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            effectRate: { name: '実効利率', detail: '実効年利率を指定します。' },
+            npery: { name: '複利計算回数', detail: '1 年あたりの複利計算回数を指定します。' },
         },
     },
     NPER: {

@@ -365,8 +365,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            investment: { name: 'investment', detail: 'The amount invested in the security.' },
+            redemption: { name: 'redemption', detail: 'The amount to be received at maturity.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     IPMT: {
@@ -455,8 +458,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            effectRate: { name: 'effect_rate', detail: 'The effective interest rate.' },
+            npery: { name: 'npery', detail: 'The number of compounding periods per year.' },
         },
     },
     NPER: {

@@ -34,8 +34,10 @@ import { Dollarfr } from './dollarfr';
 import { Effect } from './effect';
 import { Fv } from './fv';
 import { Fvschedule } from './fvschedule';
+import { Intrate } from './intrate';
 import { Ipmt } from './ipmt';
 import { Ispmt } from './ispmt';
+import { Nominal } from './nominal';
 import { Nper } from './nper';
 import { Pmt } from './pmt';
 import { Ppmt } from './ppmt';
@@ -62,8 +64,10 @@ export const functionFinancial = [
     [Effect, FUNCTION_NAMES_FINANCIAL.EFFECT],
     [Fv, FUNCTION_NAMES_FINANCIAL.FV],
     [Fvschedule, FUNCTION_NAMES_FINANCIAL.FVSCHEDULE],
+    [Intrate, FUNCTION_NAMES_FINANCIAL.INTRATE],
     [Ipmt, FUNCTION_NAMES_FINANCIAL.IPMT],
     [Ispmt, FUNCTION_NAMES_FINANCIAL.ISPMT],
+    [Nominal, FUNCTION_NAMES_FINANCIAL.NOMINAL],
     [Nper, FUNCTION_NAMES_FINANCIAL.NPER],
     [Pmt, FUNCTION_NAMES_FINANCIAL.PMT],
     [Ppmt, FUNCTION_NAMES_FINANCIAL.PPMT],

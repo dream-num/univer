@@ -56,9 +56,15 @@ function removeDupPages(ctx: ILayoutContext) {
     });
 }
 
+interface IDistance {
+    coordInPage: boolean;
+    distance: number;
+    nestLevel: number;
+}
+
 interface INearestCache {
     nearestNodeList: INodeInfo[];
-    nearestNodeDistanceList: number[];
+    nearestNodeDistanceList: IDistance[];
     nearestNodeDistanceY: number;
 }
 
@@ -465,7 +471,7 @@ export class DocumentSkeleton extends Skeleton {
         if (restrictions == null) {
             for (let pi = 0, len = pages.length; pi < len; pi++) {
                 const page = pages[pi];
-                const { headerId, footerId, pageWidth, skeTables } = page;
+                const { headerId, footerId, pageWidth } = page;
 
                 let exactMatch = null;
 
@@ -637,11 +643,17 @@ export class DocumentSkeleton extends Skeleton {
         pi: number,
         cache: INearestCache,
         x: number,
-        y: number
+        y: number,
+        nestLevel: number = 0
     // eslint-disable-next-line ts/no-explicit-any
     ): any {
         const { sections, skeTables } = segmentPage;
         this._findLiquid.translateSave();
+        const pointInPage = x >= this._findLiquid.x
+            && x <= this._findLiquid.x + segmentPage.pageWidth
+            && y >= this._findLiquid.y
+            && y <= this._findLiquid.y + segmentPage.pageHeight;
+
         switch (pageType) {
             case DocumentSkeletonPageType.HEADER: {
                 this._findLiquid.translatePagePadding({
@@ -666,6 +678,7 @@ export class DocumentSkeleton extends Skeleton {
         for (const section of sections) {
             const { columns } = section;
 
+            this._findLiquid.translateSave();
             this._findLiquid.translateSection(section);
 
             for (const column of columns) {
@@ -740,19 +753,23 @@ export class DocumentSkeleton extends Skeleton {
                                         ratioY: y / (startY_fin + endY_fin),
                                     });
 
-                                    cache.nearestNodeDistanceList.push(distanceX);
+                                    cache.nearestNodeDistanceList.push({
+                                        coordInPage: pointInPage,
+                                        distance: distanceX,
+                                        nestLevel,
+                                    });
 
                                     cache.nearestNodeDistanceY = Number.NEGATIVE_INFINITY;
                                     continue;
                                 }
 
-                                if (distanceY < cache.nearestNodeDistanceY) {
+                                if (distanceY < cache.nearestNodeDistanceY && pointInPage) {
                                     cache.nearestNodeDistanceY = distanceY;
                                     cache.nearestNodeList = [];
                                     cache.nearestNodeDistanceList = [];
                                 }
 
-                                if (distanceY === cache.nearestNodeDistanceY) {
+                                if (distanceY === cache.nearestNodeDistanceY || pointInPage) {
                                     cache.nearestNodeList.push({
                                         node: glyph,
                                         segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
@@ -761,7 +778,11 @@ export class DocumentSkeleton extends Skeleton {
                                         ratioY: y / (startY_fin + endY_fin),
                                     });
 
-                                    cache.nearestNodeDistanceList.push(distanceX);
+                                    cache.nearestNodeDistanceList.push({
+                                        coordInPage: pointInPage,
+                                        distance: distanceX,
+                                        nestLevel,
+                                    });
                                 }
                             }
                             this._findLiquid.translateRestore();
@@ -771,6 +792,8 @@ export class DocumentSkeleton extends Skeleton {
                 }
                 this._findLiquid.translateRestore();
             }
+
+            this._findLiquid.translateRestore();
         }
 
         let exactMatch = null;
@@ -798,7 +821,8 @@ export class DocumentSkeleton extends Skeleton {
                             pi,
                             cache,
                             x,
-                            y
+                            y,
+                            nestLevel + 1
                         );
 
                         this._findLiquid?.translateRestore();
@@ -812,14 +836,47 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         if (exactMatch) {
+            this._findLiquid.translateRestore();
             return exactMatch;
         }
 
         this._findLiquid.translateRestore();
     }
 
-    private _getNearestNode(nearestNodeList: INodeInfo[], nearestNodeDistanceList: number[]) {
-        const miniValue = Math.min(...nearestNodeDistanceList);
+    private _getNearestNode(nearestNodeList: INodeInfo[], nearestNodeDistanceList: IDistance[]) {
+        if (nearestNodeDistanceList.length === 0) {
+            return;
+        }
+
+        if (nearestNodeDistanceList.length === 1) {
+            return nearestNodeList[0];
+        }
+
+        let miniValue = nearestNodeDistanceList[0];
+
+        for (let i = 1; i < nearestNodeDistanceList.length; i++) {
+            const { distance, nestLevel, coordInPage } = nearestNodeDistanceList[i];
+
+            if (nestLevel > miniValue.nestLevel) {
+                miniValue = nearestNodeDistanceList[i];
+                continue;
+            }
+
+            if (nestLevel === miniValue.nestLevel) {
+                if (coordInPage === miniValue.coordInPage) {
+                    if (distance < miniValue.distance) {
+                        miniValue = nearestNodeDistanceList[i];
+                        continue;
+                    }
+                } else {
+                    if (coordInPage) {
+                        miniValue = nearestNodeDistanceList[i];
+                        continue;
+                    }
+                }
+            }
+        }
+
         const miniValueIndex = nearestNodeDistanceList.indexOf(miniValue);
 
         return nearestNodeList[miniValueIndex];

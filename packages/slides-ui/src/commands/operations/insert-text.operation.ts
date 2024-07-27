@@ -16,8 +16,9 @@
 
 import type { ICommand, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, PageElementType, Tools, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RichText } from '@univerjs/engine-render';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { CanvasView } from '@univerjs/slides';
 import { SlideUIController } from '../../controllers/slide-ui.controller';
 
 export interface ISlideAddTextParam {
@@ -35,9 +36,9 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         const textContent = params?.text || 'Text here';
         const elmentData = {
             id: elementId,
-            zIndex: 0,
-            left: 430,
-            top: 42,
+            zIndex: 2,
+            left: 230,
+            top: 142,
             width: defaultWidth,
             height: defaultheight,
             title: 'text',
@@ -52,7 +53,7 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
                 bl: 1,
             },
         };
-        // const rs = accessor.get(IRenderManagerService);
+
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         if (!slideData) return false;
@@ -60,6 +61,15 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         const activePage = slideData.getActivePage()!;
         activePage.pageElements[elementId] = elmentData;
         slideData.updatePage(activePage.id, activePage);
+
+        const rms = accessor.get(IRenderManagerService);
+        console.log('cmd: IRenderManagerService', rms);
+        const canvasview = accessor.get(CanvasView);
+        console.log('cmd: canvasview', canvasview);
+        const sceneObject = canvasview.createObjectToPage(elmentData, activePage.id);
+        if (sceneObject) {
+            canvasview.setObjectActiveByPage(sceneObject, activePage.id);
+        }
 
         return true;
     },

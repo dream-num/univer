@@ -17,10 +17,8 @@
 import type { Dependency, SlideDataModel } from '@univerjs/core';
 import { Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
 
-import type { MenuConfig } from '@univerjs/ui';
 import { IImageIoService, ImageIoService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CanvasView } from '@univerjs/slides';
 import { SlideUIController } from './controllers/slide-ui.controller';
 import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
@@ -59,7 +57,6 @@ export class UniverSlidesUIPlugin extends Plugin {
     override onReady(): void {
         (
             [
-                CanvasView,
                 SlideRenderController,
             ]
         ).forEach((m) => {

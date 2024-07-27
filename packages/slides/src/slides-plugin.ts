@@ -16,7 +16,7 @@
 
 import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
-import { IRenderingEngine } from '@univerjs/engine-render';
+import { IRenderingEngine, IRenderManagerService } from '@univerjs/engine-render';
 import type { Dependency } from '@univerjs/core';
 
 import { CanvasView } from './views/render';
@@ -35,20 +35,26 @@ export class UniverSlidesPlugin extends Plugin {
 
     private _canvasEngine: Engine | null = null;
 
-    private _canvasView: CanvasView | null = null;
+    // private _canvasView: CanvasView | null = null;
 
     constructor(
         config: Partial<IUniverSlidesConfig> = {},
-        @Inject(Injector) override readonly _injector: Injector
+        @Inject(Injector) override readonly _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
         this._initializeDependencies(this._injector);
+        console.log('UniverSlidesPlugin IRenderManagerService', this._renderManagerService);
     }
 
     initialize(): void {
         this.initCanvasEngine();
+    }
+
+    override onReady(): void {
+        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, CanvasView as any));
     }
 
     getConfig() {
@@ -67,9 +73,9 @@ export class UniverSlidesPlugin extends Plugin {
         return this._canvasEngine;
     }
 
-    getCanvasView() {
-        return this._canvasView;
-    }
+    // getCanvasView() {
+    //     return this._canvasView;
+    // }
 
     private _initializeDependencies(slideInjector: Injector) {
         const dependencies: Dependency[] = [[CanvasView]];

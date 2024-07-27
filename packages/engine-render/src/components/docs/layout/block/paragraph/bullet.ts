@@ -78,9 +78,11 @@ export function getDefaultBulletSke(listId: string, startIndex: number = 1): IDo
             spr: 0.5,
             spo: 0,
         },
-        indentFirstLine: { v: 0 },
-        hanging: { v: 21 },
-        indentStart: { v: 0 },
+        paragraphProperties: {
+            indentFirstLine: { v: 0 },
+            hanging: { v: 21 },
+            indentStart: { v: 0 },
+        },
     };
 }
 
@@ -96,13 +98,10 @@ function _getBulletSke(
     const {
         bulletAlignment,
         glyphFormat,
-        textStyle: textStyleFirst,
+        textStyle: textStyleFirst = {},
         startNumber,
         glyphType,
         glyphSymbol,
-        indentFirstLine,
-        hanging,
-        indentStart,
     } = nesting;
 
     const textStyle = { ...textStyleConfig, ...textStyleFirst };
@@ -131,9 +130,7 @@ function _getBulletSke(
         nestingLevel: nesting,
         bulletAlign: bulletAlignment,
         bulletType: glyphSymbol ? false : !!glyphType, // 默认是无序列表，假如glyphSymbol为空且glyphType不为空才是有序列表
-        indentFirstLine,
-        hanging,
-        indentStart,
+        paragraphProperties: nesting.paragraphProperties,
     };
 }
 

@@ -20,8 +20,8 @@ import type {
     DataStreamTreeTokenType,
     IDocDrawingBase,
     IDocumentRenderConfig,
-    IIndentStart,
     INestingLevel,
+    IParagraphProperties,
     ITextStyle,
     PageOrientType,
 } from '@univerjs/core';
@@ -196,7 +196,7 @@ export interface IDocumentSkeletonGlyph {
     drawingId?: string; // drawing.drawingId
 }
 
-export interface IDocumentSkeletonBullet extends IIndentStart {
+export interface IDocumentSkeletonBullet {
     listId: string; // listId
     symbol: string; // symbol 列表的内容
     ts: ITextStyle; // 文字样式
@@ -206,6 +206,7 @@ export interface IDocumentSkeletonBullet extends IIndentStart {
     nestingLevel?: INestingLevel;
     bulletAlign?: BulletAlignment;
     bulletType?: boolean; // bulletType false unordered, true ordered;
+    paragraphProperties?: IParagraphProperties;
     // bp: number; // bulletPosition 列表离页边的距离
     // ti: number; // textIndent 内容距列表的距离，取Max(textIndent, followWith+)
     // fw: number; // followWidth 内容距离列表的间隔距离

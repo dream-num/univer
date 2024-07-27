@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, fromEventSubject, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { filter, throttleTime } from 'rxjs';
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+
+const SKIP_UNIT_IDS = [
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+];
 
 export class DocResizeRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -28,8 +34,9 @@ export class DocResizeRenderController extends Disposable implements IRenderModu
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
-
-        this._initResize();
+        if (!SKIP_UNIT_IDS.includes(this._context.unitId)) {
+            this._initResize();
+        }
     }
 
     private _initResize() {

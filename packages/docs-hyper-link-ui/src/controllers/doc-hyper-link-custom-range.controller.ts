@@ -16,7 +16,7 @@
 
 import { CustomRangeType, Disposable, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DocCustomRangeService } from '@univerjs/docs';
-import { DocHyperLinkModel } from '../models/hyper-link.model';
+import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkCustomRangeController)
 export class DocHyperLinkCustomRangeController extends Disposable {

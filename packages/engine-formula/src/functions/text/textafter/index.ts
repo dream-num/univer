@@ -27,6 +27,7 @@ export class Textafter extends BaseFunction {
     override maxParams = 6;
 
     override calculate(text: BaseValueObject, delimiter: BaseValueObject, instanceNum?: BaseValueObject, matchMode?: BaseValueObject, matchEnd?: BaseValueObject, ifNotFound?: BaseValueObject) {
+        let instanceNumIsNull = false; // special handle
         const onlyThreeVariant = !matchMode;
 
         instanceNum = instanceNum ?? NumberValueObject.create(1);
@@ -35,6 +36,7 @@ export class Textafter extends BaseFunction {
         ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
 
         if (instanceNum.isNull()) {
+            instanceNumIsNull = true;
             instanceNum = NumberValueObject.create(1);
         }
 
@@ -170,13 +172,13 @@ export class Textafter extends BaseFunction {
                 }
             }
 
-            if (delimiterValue.length > textValue.length) {
-                return ErrorValueObject.create(ErrorType.NA);
+            // if instance_num is greater than the length of text returns a #VALUE! error
+            if (!instanceNumIsNull && Math.abs(instanceNumValue) > textValue.length) {
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            // if instance_num is greater than the length of text returns a #VALUE! error
-            if (Math.abs(instanceNumValue) > textValue.length) {
-                return ErrorValueObject.create(ErrorType.VALUE);
+            if (delimiterValue.length > textValue.length) {
+                return ErrorValueObject.create(ErrorType.NA);
             }
 
             const matchNum = textValue.match(new RegExp(delimiterValue, `g${!matchModeValue ? '' : 'i'}`));

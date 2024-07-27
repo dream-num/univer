@@ -44,6 +44,7 @@ import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromSelec
 
 export interface ITextSelectionInnerParam {
     textRanges: TextRange[];
+    rectRanges: RectRange[];
     segmentId: string;
     isEditing: boolean;
     style: ITextSelectionStyle;
@@ -256,6 +257,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
+            rectRanges: this._getAllRectRanges(),
             segmentId,
             segmentPage,
             style,
@@ -292,6 +294,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
+            rectRanges: this._getAllRectRanges(),
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
             style: this._selectionStyle,
@@ -570,6 +573,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             const selectionInfo = {
                 textRanges: this._getAllTextRanges(),
+                rectRanges: this._getAllRectRanges(),
                 segmentId: this._currentSegmentId,
                 segmentPage: this._currentSegmentPage,
                 style: this._selectionStyle,

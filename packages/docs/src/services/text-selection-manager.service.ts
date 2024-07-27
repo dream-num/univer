@@ -173,6 +173,7 @@ export class TextSelectionManagerService extends RxDisposable {
         this._addByParam({
             ...this._currentSelection,
             textRanges: textRanges as TextRange[],
+            rectRanges: [],
             segmentId: '',
             segmentPage: -1,
             isEditing,
@@ -259,7 +260,7 @@ export class TextSelectionManagerService extends RxDisposable {
     }
 
     private _replaceByParam(insertParam: ITextSelectionManagerInsertParam) {
-        const { unitId, subUnitId, style, segmentId, textRanges, isEditing, segmentPage } = insertParam;
+        const { unitId, subUnitId, style, segmentId, textRanges, rectRanges, isEditing, segmentPage } = insertParam;
 
         if (!this._textSelectionInfo.has(unitId)) {
             this._textSelectionInfo.set(unitId, new Map());
@@ -267,11 +268,11 @@ export class TextSelectionManagerService extends RxDisposable {
 
         const unitTextRange = this._textSelectionInfo.get(unitId)!;
 
-        unitTextRange.set(subUnitId, { textRanges, style, segmentId, isEditing, segmentPage });
+        unitTextRange.set(subUnitId, { textRanges, rectRanges, style, segmentId, isEditing, segmentPage });
     }
 
     private _addByParam(insertParam: ITextSelectionManagerInsertParam): void {
-        const { unitId, subUnitId, textRanges, style, segmentId, isEditing, segmentPage } = insertParam;
+        const { unitId, subUnitId, textRanges, rectRanges, style, segmentId, isEditing, segmentPage } = insertParam;
 
         if (!this._textSelectionInfo.has(unitId)) {
             this._textSelectionInfo.set(unitId, new Map());
@@ -280,7 +281,7 @@ export class TextSelectionManagerService extends RxDisposable {
         const unitTextRange = this._textSelectionInfo.get(unitId)!;
 
         if (!unitTextRange.has(subUnitId)) {
-            unitTextRange.set(subUnitId, { textRanges, style, segmentId, isEditing, segmentPage });
+            unitTextRange.set(subUnitId, { textRanges, rectRanges, style, segmentId, isEditing, segmentPage });
         } else {
             const OldTextRanges = unitTextRange.get(subUnitId)!;
             OldTextRanges.textRanges.push(...textRanges);

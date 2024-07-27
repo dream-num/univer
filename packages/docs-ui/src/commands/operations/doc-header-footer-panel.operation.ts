@@ -25,7 +25,7 @@ export interface IUIComponentCommandParams {
 
 export const SidebarDocHeaderFooterPanelOperation: ICommand = {
     id: 'sidebar.operation.doc-header-footer-panel',
-    type: CommandType.COMMAND,
+    type: CommandType.OPERATION,
     handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
         const sidebarService = accessor.get(ISidebarService);
         const localeService = accessor.get(LocaleService);

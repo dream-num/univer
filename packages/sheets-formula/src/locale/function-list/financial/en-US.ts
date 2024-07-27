@@ -261,8 +261,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            pr: { name: 'pr', detail: "The security's price per $100 face value." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     DOLLARDE: {
@@ -275,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            fractionalDollar: { name: 'fractional_dollar', detail: 'A number expressed as an integer part and a fraction part, separated by a decimal symbol.' },
+            fraction: { name: 'fraction', detail: 'The integer to use in the denominator of the fraction.' },
         },
     },
     DOLLARFR: {
@@ -289,8 +292,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            decimalDollar: { name: 'decimal_dollar', detail: 'A decimal number.' },
+            fraction: { name: 'fraction', detail: 'The integer to use in the denominator of the fraction.' },
         },
     },
     DURATION: {

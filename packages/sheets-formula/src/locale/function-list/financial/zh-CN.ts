@@ -261,8 +261,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            pr: { name: '价格', detail: '有价证券的价格（按面值为￥100计算）。' },
+            redemption: { name: '清偿价', detail: '面值￥100的有价证券的清偿价值。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     DOLLARDE: {
@@ -275,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            fractionalDollar: { name: '分数', detail: '以整数部份和分数部分表示的数字，用小数点隔开。' },
+            fraction: { name: '分母', detail: '用作分数中的分母的整数。' },
         },
     },
     DOLLARFR: {
@@ -289,8 +292,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            decimalDollar: { name: '小数', detail: '小数。' },
+            fraction: { name: '分母', detail: '用作分数中的分母的整数。' },
         },
     },
     DURATION: {

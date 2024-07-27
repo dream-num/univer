@@ -28,6 +28,9 @@ import { Cumipmt } from './cumipmt';
 import { Cumprinc } from './cumprinc';
 import { Db } from './db';
 import { Ddb } from './ddb';
+import { Disc } from './disc';
+import { Dollarde } from './dollarde';
+import { Dollarfr } from './dollarfr';
 import { Fv } from './fv';
 import { Ipmt } from './ipmt';
 import { Ispmt } from './ispmt';
@@ -51,6 +54,9 @@ export const functionFinancial = [
     [Cumprinc, FUNCTION_NAMES_FINANCIAL.CUMPRINC],
     [Db, FUNCTION_NAMES_FINANCIAL.DB],
     [Ddb, FUNCTION_NAMES_FINANCIAL.DDB],
+    [Disc, FUNCTION_NAMES_FINANCIAL.DISC],
+    [Dollarde, FUNCTION_NAMES_FINANCIAL.DOLLARDE],
+    [Dollarfr, FUNCTION_NAMES_FINANCIAL.DOLLARFR],
     [Fv, FUNCTION_NAMES_FINANCIAL.FV],
     [Ipmt, FUNCTION_NAMES_FINANCIAL.IPMT],
     [Ispmt, FUNCTION_NAMES_FINANCIAL.ISPMT],

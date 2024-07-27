@@ -261,8 +261,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            pr: { name: '現在価値', detail: '額面 $100 に対する証券の価値を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     DOLLARDE: {
@@ -275,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            fractionalDollar: { name: '分数表現', detail: '整数部と小数部を小数点で区切って表現した数値です。' },
+            fraction: { name: '分母', detail: '分数の分母となる整数を指定します。' },
         },
     },
     DOLLARFR: {
@@ -289,8 +292,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            decimalDollar: { name: '小数値', detail: '小数で表された数値を指定します。' },
+            fraction: { name: '分母', detail: '分数の分母となる整数を指定します。' },
         },
     },
     DURATION: {

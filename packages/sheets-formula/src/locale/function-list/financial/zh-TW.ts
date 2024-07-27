@@ -261,8 +261,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            pr: { name: '價格', detail: '這是證券每$100面額的價格。' },
+            redemption: { name: '贖回價', detail: '這是證券每$100面額的贖回價值。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     DOLLARDE: {
@@ -275,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            fractionalDollar: { name: '分數', detail: '這是以整數部分和分數部分表示，並以小數點符號分隔的數字。' },
+            fraction: { name: '分母', detail: '這是用於分數之分母的整數。' },
         },
     },
     DOLLARFR: {
@@ -289,8 +292,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            decimalDollar: { name: '小數', detail: '這是小數。' },
+            fraction: { name: '分母', detail: '這是用於分數之分母的整數。' },
         },
     },
     DURATION: {

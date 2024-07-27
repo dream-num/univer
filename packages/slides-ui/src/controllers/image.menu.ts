@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IMenuItem } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../components/upload-component/component-name';

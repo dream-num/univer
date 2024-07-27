@@ -37,7 +37,7 @@ export class RichTextAdaptor extends ObjectAdaptor {
         return this;
     }
 
-    override convert(pageElement: IPageElement, mainScene: Scene) {
+    override convert(pageElement: IPageElement, _mainScene: Scene) {
         const {
             id,
             zIndex,

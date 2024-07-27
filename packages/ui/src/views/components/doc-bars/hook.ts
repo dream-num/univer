@@ -82,6 +82,7 @@ export function useToolbarGroups(categories: MenuPositionWithCustom[]): IToolbar
         return () => s.unsubscribe();
     }, [menuService, category, categories]);
 
+    // groupsByKey  see menu/menu.ts @MenuGroup
     const groupsByKey = useMemo(() => {
         return groups.find((g) => g.name === category)?.menuItems.reduce(
             (acc, item) => {

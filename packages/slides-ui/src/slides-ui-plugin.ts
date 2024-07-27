@@ -17,23 +17,22 @@
 import type { Dependency, SlideDataModel } from '@univerjs/core';
 import { Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
 
-import type { MenuConfig } from '@univerjs/ui';
 import { IImageIoService, ImageIoService } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SlideUIController } from './controllers/slide-ui.controller';
+import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
+import { SlideRenderController } from './controllers/slide.render-controller';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
-
-export interface IUniverSlidesUIConfig {
-    menu: MenuConfig;
-}
 
 export class UniverSlidesUIPlugin extends Plugin {
     static override pluginName = SLIDE_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SLIDE;
 
     constructor(
-        private readonly _config: Partial<IUniverSlidesUIConfig> = {},
+        private readonly _config: Partial<IUniverSlidesDrawingConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
@@ -49,6 +48,14 @@ export class UniverSlidesUIPlugin extends Plugin {
             ],
             [IImageIoService, { useClass: ImageIoService }],
         ] as Dependency[]).forEach((d) => injector.add(d));
+    }
+
+    override onReady(): void {
+        ([
+            [SlideRenderController],
+        ] as Dependency[]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
+        });
     }
 
     override onRendered(): void {

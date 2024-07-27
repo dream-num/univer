@@ -71,7 +71,8 @@
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": ">=2.0.0",
-        "react": "^16.9.0 || ^17.0.0 || ^18.0.0"
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
+        "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.65"

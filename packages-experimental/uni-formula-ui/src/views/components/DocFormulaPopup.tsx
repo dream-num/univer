@@ -19,6 +19,7 @@ import clsx from 'clsx';
 import { TextEditor, useObservable } from '@univerjs/ui';
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import { BooleanNumber, createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, HorizontalAlign, ICommandService, LocaleService, useDependency, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import type { IDocFormulaPopupInfo } from '../../services/formula-popup.service';
 import { DOC_FORMULA_POPUP_KEY, DocFormulaPopupService } from '../../services/formula-popup.service';
 
@@ -136,11 +137,21 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
                 }}
                 onBlur={() => setFocused(false)}
             />
+            <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: !formulaString })}>
+                <span
+                    className={clsx(styles.iconContainer, styles.iconContainerError)}
+                    onClick={onCancel}
+                >
+                    <CloseSingle />
+                </span>
 
-            {/* <div className={styles.docUiFormulaPopupButtonGrp}>
-                <Button type="primary" size="small" disabled={!formulaString} onClick={onConfirm}>{localeService.t('uni-formula.popup.button.confirm')}</Button>
-                <Button type="default" size="small" onClick={onCancel}>{localeService.t('uni-formula.popup.button.cancel')}</Button>
-            </div> */}
+                <span
+                    className={clsx(styles.iconContainer, styles.iconContainerSuccess)}
+                    onClick={onConfirm}
+                >
+                    <CheckMarkSingle />
+                </span>
+            </div>
         </div>
     );
 }

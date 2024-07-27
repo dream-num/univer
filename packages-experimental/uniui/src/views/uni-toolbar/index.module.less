@@ -374,21 +374,25 @@
     z-index: 10;
 
     .uni-formula-box {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 8px;
         height: 100%;
-        padding: 6px;
         box-sizing: border-box;
+        padding: 8px;
     }
 
     .uni-formula-input {
+        position: relative;
         flex: 1;
+        background: #f0f3fe;
+        overflow: hidden;
         border-radius: var(--radius-m, 6px);
         border: 1px solid var(---Hyacinth-Blue-500, #274fee);
         background: #f0f3fe;
         box-shadow: 0px 0px 4px 0px rgba(39, 79, 238, 0.4);
-        overflow: hidden;
+        height: 100%;
     }
 
     .formula-icon {
@@ -452,6 +456,20 @@
                     }
                 }
             }
+        }
+    }
+    .formula-icon {
+        display: flex;
+    }
+    .icon-container {
+        display: flex;
+        padding: var(--radius-m, 6px);
+        align-items: center;
+        gap: 10px;
+        border-radius: 8px;
+        &:hover {
+            background: var(--hyacinth-blue-5007, rgba(39, 79, 238, 0.07));
+            color: #274fee;
         }
     }
 }

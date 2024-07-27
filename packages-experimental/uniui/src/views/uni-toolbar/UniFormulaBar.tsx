@@ -204,18 +204,16 @@ export function FormulaBar() {
 
     return (
         <div className={styles.uniFormulaBox}>
-            <div className={styles.uniFormulaInput}>
-                <TextEditor
-                    id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                    isSheetEditor={true}
-                    resizeCallBack={resizeCallBack}
-                    cancelDefaultResizeListener={true}
-                    onContextMenu={(e) => e.preventDefault()}
-                    className={styles.formulaContent}
-                    snapshot={INITIAL_SNAPSHOT}
-                    isSingle={true}
-                />
-            </div>
+            <TextEditor
+                id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                isSheetEditor={true}
+                resizeCallBack={resizeCallBack}
+                cancelDefaultResizeListener={true}
+                onContextMenu={(e) => e.preventDefault()}
+                className={clsx(styles.uniFormulaInput, styles.formulaContent)}
+                snapshot={INITIAL_SNAPSHOT}
+                isSingle={true}
+            />
             <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: disable })}>
                 <span
                     className={clsx(styles.iconContainer, styles.iconContainerError)}

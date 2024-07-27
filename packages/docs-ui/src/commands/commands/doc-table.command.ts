@@ -19,7 +19,7 @@ import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceS
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { generateParagraphs, getCommandSkeleton, getInsertSelection, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { genEmptyTableDataStream, genTableSource } from '../../basics/table';
+import { genEmptyTable, genTableSource } from '../../basics/table';
 
 export const CreateDocTableCommandId = 'doc.command.create-table';
 
@@ -115,7 +115,7 @@ export const ICreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         }
 
         // Step 2: Insert table.
-        const tableDataStream = genEmptyTableDataStream(rowCount, colCount);
+        const { dataStream: tableDataStream, paragraphs: tableParagraphs, sectionBreaks } = genEmptyTable(rowCount, colCount);
         const page = curGlyph.parent?.parent?.parent?.parent?.parent;
         if (page == null) {
             return false;
@@ -127,6 +127,8 @@ export const ICreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: tableDataStream,
+                paragraphs: tableParagraphs,
+                sectionBreaks,
                 tables: [
                     {
                         startIndex: 0,

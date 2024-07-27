@@ -14,23 +14,42 @@
  * limitations under the License.
  */
 
-import type { ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
+import type { IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
 import { DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
 
-export function genEmptyTableDataStream(rowCount: number, colCount: number) {
+export function genEmptyTable(rowCount: number, colCount: number) {
     let dataStream: string = DataStreamTreeTokenType.TABLE_START;
+    const paragraphs: IParagraph[] = [];
+    const sectionBreaks: ISectionBreak[] = [];
 
     for (let i = 0; i < rowCount; i++) {
         dataStream += DataStreamTreeTokenType.TABLE_ROW_START;
 
         for (let j = 0; j < colCount; j++) {
             dataStream += `${DataStreamTreeTokenType.TABLE_CELL_START}\r\n${DataStreamTreeTokenType.TABLE_CELL_END}`;
+            paragraphs.push({
+                startIndex: dataStream.length - 2,
+                paragraphStyle: {
+                    spaceAbove: { v: 3 },
+                    lineSpacing: 2,
+                    spaceBelow: { v: 0 },
+                },
+            });
+            sectionBreaks.push({
+                startIndex: dataStream.length - 1,
+            });
         }
 
         dataStream += DataStreamTreeTokenType.TABLE_ROW_END;
     }
 
-    return dataStream + DataStreamTreeTokenType.TABLE_END;
+    dataStream += DataStreamTreeTokenType.TABLE_END;
+
+    return {
+        dataStream,
+        paragraphs,
+        sectionBreaks,
+    };
 }
 
 // eslint-disable-next-line max-lines-per-function

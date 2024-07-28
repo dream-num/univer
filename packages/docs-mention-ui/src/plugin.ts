@@ -21,6 +21,7 @@ import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
 import { DocMentionPopupService } from './services/doc-mention-popup.service';
 import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
 import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
+import { DocMentionCustomRangeController } from './controllers/doc-mention-custom-range.controller';
 
 @DependentOn(UniverDocsMentionPlugin)
 export class UniverDocsMentionUIPlugin extends Plugin {
@@ -39,6 +40,7 @@ export class UniverDocsMentionUIPlugin extends Plugin {
             [DocMentionPopupService],
             [DocMentionUIController],
             [DocMentionTriggerController],
+            [DocMentionCustomRangeController],
         ];
 
         deps.forEach((dep) => {

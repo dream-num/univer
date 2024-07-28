@@ -16,7 +16,7 @@
 
 import { CustomRangeType, Disposable, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DocCustomRangeService } from '@univerjs/docs';
-import { DocMentionModel } from '../models/doc-mention.model';
+import { DocMentionModel } from '@univerjs/docs-mention';
 
 @OnLifecycle(LifecycleStages.Ready, DocMentionCustomRangeController)
 export class DocMentionCustomRangeController extends Disposable {

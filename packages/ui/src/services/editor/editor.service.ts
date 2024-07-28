@@ -482,14 +482,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._blur$.next(null);
     }
 
-    focus(editorUnitId?: string) {
+    focus(editorUnitId: string | undefined = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId()) {
         if (editorUnitId == null) {
-            const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
-            if (!documentDataModel) {
-                return;
-            }
-
-            editorUnitId = documentDataModel.getUnitId();
+            return;
         }
 
         const editor = this.getEditor(editorUnitId);
@@ -509,20 +504,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         });
     }
 
-    setFormula(formulaString: string, editorUnitId?: string) {
-        if (editorUnitId == null) {
-            editorUnitId = this._getCurrentEditorUnitId();
-        }
+    setFormula(formulaString: string, editorUnitId = this._getCurrentEditorUnitId()) {
         this._inputFormula$.next({ formulaString, editorUnitId });
     }
 
-    setValue(val: string, editorUnitId?: string) {
-        if (editorUnitId == null) {
-            editorUnitId = this._getCurrentEditorUnitId();
-        }
-
+    setValue(val: string, editorUnitId: string = this._getCurrentEditorUnitId()) {
         this.setValueNoRefresh(val, editorUnitId);
-
         this._refreshValueChange(editorUnitId);
     }
 
@@ -545,13 +532,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return editor.getValue();
     }
 
-    setRichValue(body: IDocumentBody, editorUnitId?: string) {
-        if (editorUnitId == null) {
-            editorUnitId = this._getCurrentEditorUnitId();
-        }
-
+    setRichValue(body: IDocumentBody, editorUnitId: string = this._getCurrentEditorUnitId()) {
         this._setValue$.next({ body, editorUnitId });
-
         this._refreshValueChange(editorUnitId);
     }
 
@@ -569,10 +551,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         super.dispose();
     }
 
-    getEditor(id?: string): Readonly<Nullable<Editor>> {
-        if (id == null) {
-            id = this._getCurrentEditorUnitId();
-        }
+    getEditor(id: string = this._getCurrentEditorUnitId()): Readonly<Nullable<Editor>> {
         return this._editors.get(id);
     }
 

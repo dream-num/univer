@@ -156,9 +156,8 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         l: '',
     };
 
-    cssTextArray.forEach((s) => {
-        const originStr = s;
-        s = s.toLowerCase();
+    cssTextArray.forEach((originStr) => {
+        const s = originStr.toLowerCase();
         const key = textTrim(s.substr(0, s.indexOf(':')));
         const value = textTrim(s.substr(s.indexOf(':') + 1));
 

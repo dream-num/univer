@@ -65,7 +65,8 @@ export class CanvasView extends RxDisposable {
         });
     }
 
-    activePage(pageId?: string) {
+    activePage(_pageId?: string) {
+        let pageId = _pageId;
         const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
         let page: Nullable<ISlidePage>;
         if (pageId) {

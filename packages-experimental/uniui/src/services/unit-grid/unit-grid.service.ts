@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier, Disposable, ILocalStorageService, isInternalEditorID } from '@univerjs/core';
+import { createIdentifier, Disposable, ILocalStorageService, isInternalEditorID, IUniverInstanceService } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
@@ -76,7 +76,8 @@ export class UnitGridService extends Disposable implements IUnitGridService {
 
     constructor(
         @IRenderManagerService protected readonly _renderSrv: IRenderManagerService,
-        @ILocalStorageService protected readonly _localStorageService: ILocalStorageService
+        @ILocalStorageService protected readonly _localStorageService: ILocalStorageService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -116,7 +117,12 @@ export class UnitGridService extends Disposable implements IUnitGridService {
 
         this._renderSrv.getRenderAll().forEach((renderer) => this._onRendererCreated(renderer));
         this.disposeWithMe(this._renderSrv.created$.subscribe((renderer) => this._onRendererCreated(renderer)));
-        this.disposeWithMe(this._renderSrv.disposed$.subscribe((unitId) => this._onRenderedDisposed(unitId)));
+        // When hot reload in development mode, render dispose will be triggered, causing data to be cleared. Replace it with unitDispose
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unitModel) => {
+            const unitId = unitModel.getUnitId();
+            this._onRenderedDisposed(unitId);
+        }));
+        // this.disposeWithMe(this._renderSrv.disposed$.subscribe((unitId) => this._onRenderedDisposed(unitId)));
     }
 
     protected _cachedGrid: Nullable<IUnitGrid> = null;

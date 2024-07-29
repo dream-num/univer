@@ -171,7 +171,7 @@ export function getRangeInfoFromRanges(textRange: Nullable<TextRange>, rectRange
         return null;
     }
 
-    if (rectRanges) {
+    if (rectRanges && rectRanges.length > 0) {
         let startOffset = Number.POSITIVE_INFINITY;
         let endOffset = Number.NEGATIVE_INFINITY;
         const segmentId = '';

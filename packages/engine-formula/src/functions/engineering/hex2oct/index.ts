@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean, isValidBinaryNumber } from '../../../basics/engineering';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 
-export class Bin2oct extends BaseFunction {
+export class Hex2oct extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 2;
@@ -59,17 +59,25 @@ export class Bin2oct extends BaseFunction {
 
         const numberValue = `${numberObject.getValue()}`;
 
-        // Return error if number is not binary or contains more than 10 characters (10 digits)
-        if (!isValidBinaryNumber(numberValue)) {
+        // Return error if number is not hexadecimal or contains more than ten characters (10 digits)
+        if (!/^[0-9A-Fa-f]{1,10}$/.test(numberValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        // Convert hexadecimal number to decimal
+        const decimal = Number.parseInt(numberValue, 16);
+
+        // Return error if number is positive and greater than 0x1fffffff (536870911)
+        if (decimal > 536870911 && decimal < 1098974756864) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
         let result;
 
-        if (numberValue.length === 10 && numberValue.substring(0, 1) === '1') {
-            result = (1073741312 + Number.parseInt(numberValue.substring(1), 2)).toString(8);
+        if (decimal >= 1098974756864) {
+            result = (decimal - 1098437885952).toString(8);
         } else {
-            result = Number.parseInt(numberValue, 2).toString(8);
+            result = decimal.toString(8);
 
             if (places) {
                 if (placesValue < result.length) {

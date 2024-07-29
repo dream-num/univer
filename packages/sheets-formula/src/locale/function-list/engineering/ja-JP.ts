@@ -346,8 +346,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '16 進数', detail: '変換する 16 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     HEX2DEC: {
@@ -360,8 +360,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '16 進数', detail: '変換する 16 進数を指定します。' },
         },
     },
     HEX2OCT: {
@@ -374,8 +373,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '16 進数', detail: '変換する 16 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     IMABS: {

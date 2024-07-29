@@ -425,14 +425,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'số thập lục phân', detail: 'Số thập lục phân mà bạn muốn chuyển đổi.' },
+            places: { name: 'Số ký tự', detail: 'Số ký tự sử dụng.' },
         },
     },
     HEX2DEC: {
@@ -445,14 +439,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'số thập lục phân', detail: 'Số thập lục phân mà bạn muốn chuyển đổi.' },
         },
     },
     HEX2OCT: {
@@ -465,14 +452,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'số thập lục phân', detail: 'Số thập lục phân mà bạn muốn chuyển đổi.' },
+            places: { name: 'Số ký tự', detail: 'Số ký tự sử dụng.' },
         },
     },
     IMABS: {

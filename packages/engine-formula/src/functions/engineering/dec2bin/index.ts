@@ -86,6 +86,6 @@ export class Dec2bin extends BaseFunction {
             }
         }
 
-        return StringValueObject.create(result.toLocaleUpperCase());
+        return StringValueObject.create(result);
     }
 }

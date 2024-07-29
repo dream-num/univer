@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean, isValidBinaryNumber } from '../../../basics/engineering';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 
-export class Bin2oct extends BaseFunction {
+export class Hex2bin extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 2;
@@ -59,17 +59,30 @@ export class Bin2oct extends BaseFunction {
 
         const numberValue = `${numberObject.getValue()}`;
 
-        // Return error if number is not binary or contains more than 10 characters (10 digits)
-        if (!isValidBinaryNumber(numberValue)) {
+        // Return error if number is not hexadecimal or contains more than ten characters (10 digits)
+        if (!/^[0-9A-Fa-f]{1,10}$/.test(numberValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        // Check if number is negative
+        const negative = !!(numberValue.length === 10 && numberValue.substring(0, 1).toLocaleUpperCase() === 'F');
+
+        // Convert hexadecimal number to decimal
+        const decimal = negative ? Number.parseInt(numberValue, 16) - 1099511627776 : Number.parseInt(numberValue, 16);
+
+        // Return error if number is lower than -512 or greater than 511
+        if (decimal < -512 || decimal > 511) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
         let result;
 
-        if (numberValue.length === 10 && numberValue.substring(0, 1) === '1') {
-            result = (1073741312 + Number.parseInt(numberValue.substring(1), 2)).toString(8);
+        if (negative) {
+            const toStr = (512 + decimal).toString(2);
+
+            result = `1${'0'.repeat(9 - toStr.length)}${toStr}`;
         } else {
-            result = Number.parseInt(numberValue, 2).toString(8);
+            result = decimal.toString(2);
 
             if (places) {
                 if (placesValue < result.length) {

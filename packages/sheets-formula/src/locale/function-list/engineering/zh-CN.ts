@@ -346,8 +346,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十六进制数', detail: '要转换的十六进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     HEX2DEC: {
@@ -360,8 +360,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十六进制数', detail: '要转换的十六进制数。' },
         },
     },
     HEX2OCT: {
@@ -374,8 +373,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十六进制数', detail: '要转换的十六进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     IMABS: {

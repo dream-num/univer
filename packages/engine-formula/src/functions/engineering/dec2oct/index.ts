@@ -84,6 +84,6 @@ export class Dec2oct extends BaseFunction {
             }
         }
 
-        return StringValueObject.create(result.toLocaleUpperCase());
+        return StringValueObject.create(result);
     }
 }

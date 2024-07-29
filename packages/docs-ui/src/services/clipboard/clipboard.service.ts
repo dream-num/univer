@@ -73,7 +73,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         try {
-            const activeRange = this._textSelectionManagerService.getActiveRange();
+            const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
             const isCopyInHeaderFooter = !!activeRange?.segmentId;
             this._setClipboardData(documentBodyList, !isCopyInHeaderFooter);
         } catch (e) {
@@ -105,7 +105,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             segmentId,
             endOffset: activeEndOffset,
             style,
-        } = this._textSelectionManagerService.getActiveRange() ?? {};
+        } = this._textSelectionManagerService.getActiveTextRangeWithStyle() ?? {};
         const ranges = this._textSelectionManagerService.getCurrentTextRanges();
 
         if (segmentId == null) {
@@ -163,7 +163,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
         body.customRanges = body.customRanges?.map((range) => this._docCustomRangeService.copyCustomRange(unitId, range));
 
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
         const ranges = this._textSelectionManagerService.getCurrentTextRanges();
 
@@ -236,7 +236,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     private _getDocumentBodyInRanges(sliceType: SliceBodyType): IDocumentBody[] {
         const ranges = this._textSelectionManagerService.getCurrentTextRanges();
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         const results: IDocumentBody[] = [];
         const body = docDataModel?.getBody();

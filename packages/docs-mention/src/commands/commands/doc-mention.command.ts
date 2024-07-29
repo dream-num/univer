@@ -38,7 +38,7 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         const { mention, unitId, startIndex } = params;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (!activeRange) {
             return false;
         }

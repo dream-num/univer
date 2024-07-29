@@ -19,7 +19,7 @@ import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceS
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { generateParagraphs, getCommandSkeleton, getInsertSelection, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { genEmptyTable, genTableSource } from '../../basics/table';
+import { genEmptyTable, genTableSource } from './table';
 
 export const CreateDocTableCommandId = 'doc.command.create-table';
 
@@ -30,7 +30,7 @@ export interface ICreateDocTableCommandParams {
 /**
  * The command to create a table at cursor point.
  */
-export const ICreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
+export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
     id: CreateDocTableCommandId,
     type: CommandType.COMMAND,
 
@@ -41,7 +41,7 @@ export const ICreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (activeRange == null) {
             return false;
         }

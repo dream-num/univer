@@ -69,7 +69,7 @@ export class DocHyperLinkPopupService extends Disposable {
             this._editPopup.dispose();
         }
         this._editingLink$.next(linkInfo);
-        let activeRange: Nullable<ITextRange> = this._textSelectionManagerService.getActiveRange();
+        let activeRange: Nullable<ITextRange> = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         if (linkInfo) {
             const { unitId, rangeIndex } = linkInfo;
             const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);

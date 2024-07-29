@@ -61,7 +61,7 @@ export const BreakLineCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const customRangeService = accessor.get(DocCustomRangeService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (activeRange == null) {
             return false;
         }

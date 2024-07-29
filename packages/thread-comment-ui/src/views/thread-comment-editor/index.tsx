@@ -91,7 +91,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     setLocalComment?.({ ...comment, text: transformTextNodes2Document(parseMentions(e.target.value)) });
                 }}
                 onFocus={() => {
-                    const activeRange = textSelectionManagerService.getActiveRange();
+                    const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
                     if (activeRange && activeRange.collapsed) {
                         textSelectionRenderManager.removeAllTextRanges();
                     }

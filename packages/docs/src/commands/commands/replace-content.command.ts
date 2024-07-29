@@ -176,7 +176,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         }
 
         const body = docDataModel.getBody();
-        const selection = params.selection ?? textSelectionManagerService.getActiveRange();
+        const selection = params.selection ?? textSelectionManagerService.getActiveTextRangeWithStyle();
         if (!selection || !body) {
             return false;
         }

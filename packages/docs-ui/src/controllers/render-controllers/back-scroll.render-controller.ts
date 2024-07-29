@@ -123,7 +123,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
 
     // Let the selection show on the current screen.
     private _scrollToSelection(unitId: string) {
-        const activeTextRange = this._textSelectionManagerService.getActiveRange();
+        const activeTextRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         if (activeTextRange == null) {
             return;
         }

@@ -95,7 +95,7 @@ export class MoveCursorController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _handleShiftMoveSelection(direction: Direction) {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         const allRanges = this._textSelectionManagerService.getCurrentTextRanges()!;
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         if (!docDataModel) {
@@ -204,7 +204,7 @@ export class MoveCursorController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _handleMoveCursor(direction: Direction) {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         const allRanges = this._textSelectionManagerService.getCurrentTextRanges();
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         if (docDataModel == null) {

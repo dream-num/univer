@@ -724,7 +724,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-    const activeTextRange = textSelectionService.getActiveRange();
+    const activeTextRange = textSelectionService.getActiveTextRangeWithStyle();
 
     if (docDataModel == null || activeTextRange == null) {
         return;
@@ -762,7 +762,7 @@ function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-    const activeTextRange = textSelectionService.getActiveRange();
+    const activeTextRange = textSelectionService.getActiveTextRangeWithStyle();
 
     if (docDataModel == null || activeTextRange == null) {
         return;

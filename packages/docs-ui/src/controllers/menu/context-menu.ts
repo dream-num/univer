@@ -22,12 +22,13 @@ import { combineLatest, Observable } from 'rxjs';
 import { DeleteLeftCommand, TextSelectionManagerService } from '@univerjs/docs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
+import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../../commands/commands/table/doc-table-insert.command';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     return new Observable<boolean>((subscriber) => {
         const observable = textSelectionManagerService.textSelection$.subscribe(() => {
-            const range = textSelectionManagerService.getActiveRange();
+            const range = textSelectionManagerService.getActiveTextRangeWithStyle();
             if (range && !range.collapsed) {
                 subscriber.next(false);
             } else {
@@ -46,7 +47,7 @@ const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
     return new Observable<boolean>((subscriber) => {
         const observable = textSelectionManagerService.textSelection$.subscribe(() => {
             const rectRanges = textSelectionManagerService.getCurrentRectRanges();
-            const activeRange = textSelectionManagerService.getActiveRange();
+            const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
             if (rectRanges && rectRanges.length) {
                 subscriber.next(false);
                 return;
@@ -154,7 +155,7 @@ export function TableInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
 
 export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'InsertRowBeforeCommand.id',
+        id: DocTableInsertRowAboveCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.insertRowAbove',
         icon: 'InsertRowAbove',
@@ -166,7 +167,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
 
 export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'InsertRowAfterCommand.id',
+        id: DocTableInsertRowBellowCommand.id,
         type: MenuItemType.BUTTON,
         positions: [TABLE_INSERT_MENU_ID],
         title: 'table.insertRowBelow',
@@ -178,7 +179,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
 
 export function InsertColumnLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'InsertColumnLeftMenuItemFactory.id',
+        id: DocTableInsertColumnLeftCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.insertColumnLeft',
         icon: 'LeftInsertColumn',
@@ -190,7 +191,7 @@ export function InsertColumnLeftMenuItemFactory(accessor: IAccessor): IMenuButto
 
 export function InsertColumnRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'InsertColumnRightMenuItemFactory.id',
+        id: DocTableInsertColumnRightCommand.id,
         type: MenuItemType.BUTTON,
         positions: [TABLE_INSERT_MENU_ID],
         title: 'table.insertColumnRight',

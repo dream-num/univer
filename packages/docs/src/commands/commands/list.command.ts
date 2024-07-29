@@ -55,7 +55,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         let listType: string = params.listType;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (docDataModel == null || activeRange == null) {
             return false;
         }

@@ -28,7 +28,7 @@ export const SelectAllOperation: ICommand<ISelectAllOperationParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const activeTextRange = textSelectionManagerService.getActiveRange();
+        const activeTextRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (docDataModel == null || activeTextRange == null) {
             return false;
         }

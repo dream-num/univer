@@ -92,6 +92,30 @@ export class RectRange implements IDocRange {
         return false;
     }
 
+    get startRow() {
+        return this._startRow;
+    }
+
+    get startColumn() {
+        return this._startCol;
+    }
+
+    get endRow() {
+        return this._endRow;
+    }
+
+    get endColumn() {
+        return this._endCol;
+    }
+
+    get tableId() {
+        return this._tableId;
+    }
+
+    get segmentId() {
+        return this._segmentId;
+    }
+
     get spanEntireRow(): boolean {
         const viewModel = this._docSkeleton.getViewModel();
         const table = viewModel.getSnapshot().tableSource?.[this._tableId];

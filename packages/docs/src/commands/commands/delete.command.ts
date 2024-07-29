@@ -58,7 +58,7 @@ export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
         if (activeRange == null || documentDataModel == null) {
@@ -151,7 +151,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
 
         const { direction, range } = params;
 
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         const ranges = textSelectionManagerService.getCurrentTextRanges();
 
         if (activeRange == null || ranges == null) {
@@ -259,7 +259,7 @@ export const DeleteLeftCommand: ICommand = {
 
         const unitId = docDataModel.getUnitId();
         const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         const ranges = textSelectionManagerService.getCurrentTextRanges();
         const skeleton = docSkeletonManagerService?.getSkeleton();
         if (activeRange == null || skeleton == null || ranges == null) {
@@ -452,7 +452,7 @@ export const DeleteRightCommand: ICommand = {
         const docSkeletonManagerService = getCommandSkeleton(accessor, docDataModel.getUnitId());
         const commandService = accessor.get(ICommandService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         const ranges = textSelectionManagerService.getCurrentTextRanges();
         const skeleton = docSkeletonManagerService?.getSkeleton();
         if (activeRange == null || skeleton == null || ranges == null) {

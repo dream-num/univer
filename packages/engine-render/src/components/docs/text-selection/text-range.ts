@@ -234,6 +234,10 @@ export class TextRange implements IDocRange {
         return compare ? RANGE_DIRECTION.FORWARD : RANGE_DIRECTION.BACKWARD;
     }
 
+    get segmentId() {
+        return this._segmentId;
+    }
+
     getAbsolutePosition() {
         const anchor = this.anchorNodePosition;
         const focus = this.focusNodePosition;

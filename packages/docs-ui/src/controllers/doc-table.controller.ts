@@ -20,7 +20,8 @@ import { ComponentManager } from '@univerjs/ui';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { DocCreateTableConfirm } from '../views/table/create/TableCreate';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../views/table/create/component-name';
-import { ICreateDocTableCommand } from '../commands/commands/doc-table.command';
+import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';
+import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from '../commands/commands/table/doc-table-insert.command';
 
 @OnLifecycle(LifecycleStages.Rendered, DocTableController)
 export class DocTableController extends Disposable {
@@ -41,7 +42,13 @@ export class DocTableController extends Disposable {
 
     private _registerCommands() {
         [
-            ICreateDocTableCommand,
+            CreateDocTableCommand,
+            DocTableInsertRowCommand,
+            DocTableInsertRowAboveCommand,
+            DocTableInsertRowBellowCommand,
+            DocTableInsertColumnCommand,
+            DocTableInsertColumnLeftCommand,
+            DocTableInsertColumnRightCommand,
             DocCreateTableOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }

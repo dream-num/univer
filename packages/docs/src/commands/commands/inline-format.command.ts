@@ -35,7 +35,7 @@ function handleInlineFormat(
     textSelectionManagerService: TextSelectionManagerService,
     commandService: ICommandService
 ) {
-    const { segmentId } = textSelectionManagerService.getActiveRange() ?? {};
+    const { segmentId } = textSelectionManagerService.getActiveTextRangeWithStyle() ?? {};
 
     if (segmentId == null) {
         return false;

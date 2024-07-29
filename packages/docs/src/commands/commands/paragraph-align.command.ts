@@ -50,7 +50,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         const { alignType } = params;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (docDataModel == null || activeRange == null) {
             return false;
         }

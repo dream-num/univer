@@ -15,7 +15,7 @@
  */
 
 import { DataStreamTreeNodeType } from '@univerjs/core';
-import type { IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { ILayoutContext } from '../../tools';
 import { clearFontCreateConfigCache } from '../../tools';
@@ -35,19 +35,17 @@ export function dealWidthParagraph(
 ): IDocumentSkeletonPage[] {
     clearFontCreateConfigCache();
     const { content = '', children } = paragraphNode;
-    const skeTableInParagraph: Map<string, IDocumentSkeletonTable> = new Map();
+    let tableSkeleton = null;
 
     // Need to create table before shaping....
     if (children.length === 1 && children[0].nodeType === DataStreamTreeNodeType.TABLE) {
-        const tableSkeleton = createTableSkeleton(
+        tableSkeleton = createTableSkeleton(
             ctx,
             curPage,
             viewModel,
             children[0],
             sectionBreakConfig
         );
-
-        skeTableInParagraph.set(tableSkeleton.tableId, tableSkeleton);
     }
 
     // Step 1: Text Shaping.
@@ -67,7 +65,7 @@ export function dealWidthParagraph(
         curPage,
         paragraphNode,
         sectionBreakConfig,
-        skeTableInParagraph
+        tableSkeleton
     );
 
     // Step 3: Line Adjustment.

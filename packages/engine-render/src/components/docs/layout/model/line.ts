@@ -83,7 +83,7 @@ export function createSkeletonLine(
         marginTop = 0,
         spaceBelowApply = 0,
     } = lineBoundingBox;
-    const { skeTableInParagraph } = paragraphConfig;
+    const { skeTablesInParagraph } = paragraphConfig;
     const pageSkeDrawings = page.skeDrawings ?? new Map();
     const headersDrawings = headerPage?.skeDrawings;
     const footersDrawings = footerPage?.skeDrawings;
@@ -100,8 +100,8 @@ export function createSkeletonLine(
     lineSke.marginTop = marginTop; // marginTop is initialized when it is created, and marginBottom is not calculated when it is created, it will be determined according to the situation of the next paragraph
     lineSke.spaceBelowApply = spaceBelowApply;
 
-    if (isParagraphStart && skeTableInParagraph && skeTableInParagraph.size > 0) {
-        const tableId = skeTableInParagraph.keys().next().value;
+    if (isParagraphStart && Array.isArray(skeTablesInParagraph) && skeTablesInParagraph.length > 0) {
+        const tableId = skeTablesInParagraph[skeTablesInParagraph.length - 1].tableId;
         lineSke.isBehindTable = true;
         lineSke.tableId = tableId;
     }

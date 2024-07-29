@@ -122,7 +122,7 @@ export function lineBreaking(
     curPage: IDocumentSkeletonPage,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
-    skeTableInParagraph: Map<string, IDocumentSkeletonTable>
+    tableSkeleton: Nullable<IDocumentSkeletonTable>
 ): IDocumentSkeletonPage[] {
     const { skeletonResourceReference } = ctx;
     const {
@@ -155,7 +155,7 @@ export function lineBreaking(
         paragraphStyle,
         paragraphAffectSkeDrawings,
         paragraphInlineSkeDrawings,
-        skeTableInParagraph,
+        skeTablesInParagraph: tableSkeleton ? [{ tableId: tableSkeleton.tableId, table: tableSkeleton, hasPositioned: false }] : undefined,
         skeHeaders,
         skeFooters,
         pDrawingAnchor: segmentDrawingAnchorCache,

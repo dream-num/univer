@@ -27,7 +27,7 @@ import type {
     IDocumentSkeletonTable,
 } from '../../../../../basics/i-document-skeleton-cached';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import {
     calculateLineTopByDrawings,
     collisionDetection,
@@ -447,7 +447,7 @@ function _lineOperator(
     const {
         paragraphStyle = {},
         paragraphAffectSkeDrawings,
-        skeTableInParagraph,
+        skeTablesInParagraph,
         skeHeaders,
         skeFooters,
         pDrawingAnchor,
@@ -527,8 +527,8 @@ function _lineOperator(
         __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, paragraphStart, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
-    if (skeTableInParagraph != null && skeTableInParagraph.size > 0) {
-        needOpenNewPageByTableLayout = _updateAndPositionTable(lineTop, marginTop, lastPage, section, skeTableInParagraph);
+    if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
+        needOpenNewPageByTableLayout = _updateAndPositionTable(lineTop, marginTop, lastPage, section, skeTablesInParagraph);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -644,14 +644,20 @@ function _updateAndPositionTable(
     marginTop: number,
     page: IDocumentSkeletonPage,
     section: IDocumentSkeletonSection,
-    skeTableInParagraph: Map<string, IDocumentSkeletonTable>
+    skeTablesInParagraph: IParagraphTableCache[]
 ): boolean {
-    if (skeTableInParagraph.size === 0) {
+    if (skeTablesInParagraph.length === 0) {
         return false;
     }
 
     // Paragraph will only have one table.
-    const [tableId, table] = skeTableInParagraph.entries().next().value;
+    const lastTable = skeTablesInParagraph[skeTablesInParagraph.length - 1];
+
+    if (lastTable.hasPositioned) {
+        return false;
+    }
+
+    const { tableId, table } = lastTable;
     const { tableSource } = table;
 
     switch (tableSource.textWrap) {
@@ -672,24 +678,32 @@ function _updateAndPositionTable(
 
     if (top + height > section.height) {
         // Need split table.
+        skeTablesInParagraph.pop();
         const availableHeight = section.height - top;
         const [newTable, remainTable] = _splitTable(table, availableHeight);
 
         if (newTable != null) {
             page.skeTables.set(newTable.tableId, newTable);
             newTable.parent = page;
+            skeTablesInParagraph.push({
+                table: newTable,
+                tableId: newTable.tableId,
+                hasPositioned: true,
+            });
         }
 
-        skeTableInParagraph.clear();
-
         if (remainTable != null) {
-            skeTableInParagraph.set(remainTable.tableId, remainTable);
+            skeTablesInParagraph.push({
+                table: remainTable,
+                tableId: remainTable.tableId,
+                hasPositioned: false,
+            });
         }
         return true;
     } else {
         page.skeTables.set(tableId, table);
         table.parent = page;
-        skeTableInParagraph.clear();
+        lastTable.hasPositioned = true;
 
         return false;
     }

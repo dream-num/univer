@@ -107,11 +107,17 @@ export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, I
     evenAndOddHeaders?: BooleanNumber;
 }
 
+export interface IParagraphTableCache {
+    tableId: string;
+    table: IDocumentSkeletonTable;
+    hasPositioned: boolean;
+}
+
 export interface IParagraphConfig {
     paragraphIndex: number;
     paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
-    skeTableInParagraph?: Map<string, IDocumentSkeletonTable>;
+    skeTablesInParagraph?: IParagraphTableCache[];
     // headerAndFooterAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     bulletSkeleton?: IDocumentSkeletonBullet;
     // pageContentWidth: number;

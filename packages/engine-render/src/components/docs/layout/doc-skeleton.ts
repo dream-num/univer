@@ -280,11 +280,11 @@ export class DocumentSkeleton extends Skeleton {
         let index = st;
 
         for (const g of glyphGroup) {
-            index += g.count;
-
             if (g === glyph) {
                 break;
             }
+
+            index += g.count;
         }
 
         return index;
@@ -370,11 +370,9 @@ export class DocumentSkeleton extends Skeleton {
 
         let { glyph } = position;
 
-        if (isBack === true) {
-            glyph -= 1;
+        if (isBack === false) {
+            glyph += 1;
         }
-
-        glyph = glyph < 0 ? 0 : glyph;
 
         let skePage: Nullable<IDocumentSkeletonPage> = null;
 
@@ -408,8 +406,10 @@ export class DocumentSkeleton extends Skeleton {
         const glyphGroup =
             skePage.sections[section].columns[column].lines[line].divides[divide].glyphGroup;
 
+        glyph = Math.min(glyph, glyphGroup.length - 1);
+
         if (glyphGroup[glyph].glyphType === GlyphType.LIST) {
-            return glyphGroup[glyph + 1];
+            glyph += 1;
         }
 
         return glyphGroup[glyph];

@@ -23,7 +23,7 @@ import { SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetIn
 import { SetBackgroundColorCommand } from '@univerjs/sheets';
 import { IMAGE_MENU_ID as DocsImageMenuId } from '@univerjs/docs-drawing-ui';
 import { IMAGE_MENU_ID as SheetsImageMenuId } from '@univerjs/sheets-drawing-ui';
-import { FAKE_BG_COLOR_MENU_ID, FAKE_FONT_COLOR_MENU_ID, FAKE_FONT_FAMILY_MENU_ID, FAKE_FONT_SIZE_MENU_ID, FAKE_IMAGE_MENU_ID, FONT_GROUP_MENU_ID, UNI_MENU_POSITIONS } from '../../controllers/menu';
+import { FAKE_BG_COLOR_MENU_ID, FAKE_FONT_COLOR_MENU_ID, FAKE_FONT_FAMILY_MENU_ID, FAKE_FONT_GROUP_MENU_ID, FAKE_FONT_SIZE_MENU_ID, FAKE_IMAGE_MENU_ID, FONT_GROUP_MENU_ID, UNI_MENU_POSITIONS } from '../../controllers/menu';
 import styles from './index.module.less';
 import { UniFormulaBar } from './UniFormulaBar';
 
@@ -45,7 +45,7 @@ const UNI_TOOLBAR_SCHEMA = [
     [RedoCommand.id],
     [SetRangeFontFamilyCommand.id, SetInlineFormatFontFamilyCommand.id, FAKE_FONT_FAMILY_MENU_ID],
     [SetRangeFontSizeCommand.id, SetInlineFormatFontSizeCommand.id, FAKE_FONT_SIZE_MENU_ID],
-    [FONT_GROUP_MENU_ID],
+    [FONT_GROUP_MENU_ID, FAKE_FONT_GROUP_MENU_ID],
     [SetRangeTextColorCommand.id, SetInlineFormatTextColorCommand.id, FAKE_FONT_COLOR_MENU_ID],
     [SetBackgroundColorCommand.id, SetInlineFormatTextBackgroundColorCommand.id, FAKE_BG_COLOR_MENU_ID],
     [SheetsImageMenuId, DocsImageMenuId, FAKE_IMAGE_MENU_ID],

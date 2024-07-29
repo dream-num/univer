@@ -19,15 +19,19 @@ import {
 } from '@xyflow/react';
 import React, { useEffect, useState } from 'react';
 import { FullscreenSingle, IncreaseSingle, ViewModeSingle, ZoomReduceSingle } from '@univerjs/icons';
+import { Tooltip } from '@univerjs/design';
 import { UniDiv } from '../uni-toolbar/UniFloatToolbar';
 import styles from './index.module.less';
 
-export const UniControlButton = (props: { children?: React.ReactElement; onClick: () => void; style?: React.CSSProperties }) => {
-    const { children, onClick, style } = props;
+export const UniControlButton = (props: { tooltips: string; children?: React.ReactElement; onClick: () => void; style?: React.CSSProperties }) => {
+    const { children, onClick, style, tooltips } = props;
     return (
-        <div className={styles.uniControlButton} onClick={onClick} style={style}>
-            {children}
-        </div>
+        <Tooltip title={tooltips}>
+            <div className={styles.uniControlButton} onClick={onClick} style={style}>
+                {children}
+            </div>
+        </Tooltip>
+
     );
 };
 
@@ -59,20 +63,20 @@ export const UniControls = () => {
 
     return (
         <div className={styles.uniControls}>
-            <UniControlButton onClick={onFullscreenHandler}>
+            <UniControlButton tooltips="Full screen" onClick={onFullscreenHandler}>
                 <FullscreenSingle />
             </UniControlButton>
-            <UniControlButton onClick={onZoomInHandler}>
+            <UniControlButton tooltips="Zoom in" onClick={onZoomInHandler}>
                 <IncreaseSingle />
             </UniControlButton>
-            <UniControlButton onClick={onFitViewHandler}>
+            <UniControlButton tooltips="Fit view" onClick={onFitViewHandler}>
                 <ViewModeSingle />
             </UniControlButton>
-            <UniControlButton onClick={onZoomOutHandler}>
+            <UniControlButton tooltips="Zoom out" onClick={onZoomOutHandler}>
                 <ZoomReduceSingle />
             </UniControlButton>
             <UniDiv />
-            <UniControlButton onClick={() => {}} style={{ background: '#274FEE' }}>
+            <UniControlButton tooltips="AI" onClick={() => {}} style={{ background: '#274FEE' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M5.09091 19C4.63904 19 4.27273 18.6337 4.27273 18.1818C4.27273 17.7299 4.63904 17.3636 5.09091 17.3636C5.54278 17.3636 5.90909 17.7299 5.90909 18.1818C5.90909 18.6337 5.54278 19 5.09091 19Z" fill="white" />
                     <path d="M14.9091 2.63636C14.4572 2.63636 14.0909 2.27005 14.0909 1.81818C14.0909 1.36631 14.4572 1 14.9091 1C15.361 1 15.7273 1.36631 15.7273 1.81818C15.7273 2.27005 15.361 2.63636 14.9091 2.63636Z" fill="white" />

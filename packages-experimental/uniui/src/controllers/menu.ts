@@ -47,6 +47,7 @@ export const FAKE_FONT_SIZE_MENU_ID = 'FAKE_FONT_SIZE_MENU_ID';
 export const FAKE_FONT_COLOR_MENU_ID = 'FAKE_FONT_COLOR_MENU_ID';
 export const FAKE_BG_COLOR_MENU_ID = 'FAKE_BG_COLOR_MENU_ID';
 export const FAKE_IMAGE_MENU_ID = 'FAKE_IMAGE_MENU_ID';
+export const FAKE_FONT_GROUP_MENU_ID = 'FAKE_FONT_GROUP_MENU_ID';
 
 export enum UNI_MENU_POSITIONS {
     TOOLBAR_MAIN = 'toolbar_main',
@@ -129,10 +130,21 @@ export function FontGroupMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     return {
         id: FONT_GROUP_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        title: '',
+        tooltip: 'Font group',
         icon: 'BoldSingle',
         positions: [MenuPosition.TOOLBAR_START],
-        disabled$: univerInstanceService.focused$.pipe(map((focused) => !focused)),
+        hidden$: univerInstanceService.focused$.pipe(map((focused) => !focused)),
+    };
+}
+
+export function FakeFontGroupMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: FAKE_FONT_GROUP_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        tooltip: 'Font group',
+        icon: 'BoldSingle',
+        positions: [MenuPosition.TOOLBAR_START],
+        disabled$: new Observable((subscriber) => { subscriber.next(true); }),
     };
 }
 
@@ -534,6 +546,7 @@ export function DownloadMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_OTHERS,
         title: '',
+        tooltip: 'Download',
         icon: 'DownloadSingle',
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
@@ -548,6 +561,7 @@ export function ShareMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_OTHERS,
         title: '',
+        tooltip: 'Share',
         icon: 'ShareSingle',
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
@@ -562,6 +576,7 @@ export function LockMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_OTHERS,
         title: '',
+        tooltip: 'Lock',
         icon: 'LockSingle',
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
@@ -575,6 +590,7 @@ export function PrintMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_OTHERS,
         title: '',
+        tooltip: 'Print',
         icon: 'PrintSingle',
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
@@ -589,6 +605,7 @@ export function ZenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         title: '',
         icon: 'ZenSingle',
+        tooltip: 'Full screen',
         group: MenuGroup.TOOLBAR_OTHERS,
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
@@ -601,6 +618,7 @@ export function DeleteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         id: DELETE_MENU_ID,
         type: MenuItemType.BUTTON,
         title: 'Delete',
+        tooltip: 'Delete',
         icon: 'DeleteSingle',
         group: MenuGroup.TOOLBAR_OTHERS,
         positions: [

@@ -370,8 +370,12 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
-            this._selectionHooks.selectionMoveEnd?.();
+            // selectionScaled$  -->  disableLockedSelectionChange
             this._control.selectionMoved$.next(this._targetSelection);
+            // this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+            // this function should placed after this._control.selectionMoved$,
+            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
+            this._selectionHooks.selectionMoveEnd?.();
         });
     }
 
@@ -594,8 +598,13 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
-            this._selectionHooks.selectionMoveEnd?.();
             this._control.selectionScaled$.next(this._targetSelection);
+            // selectionMoveEnd$ update selection model
+            // _selectionHooks.selectionMoveEnd --> SelectionRenderService._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+
+            // this function should placed after this._control.selectionMoved$,
+            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
+            this._selectionHooks.selectionMoveEnd?.();
         });
     }
 

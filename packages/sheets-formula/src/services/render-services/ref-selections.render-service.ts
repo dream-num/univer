@@ -173,8 +173,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         // selectionMoveEnd$ beforeSelectionMoveEnd$ was triggered when pointerup after dragging to change selection area.
         // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
 
-        // beforeSelectionMoveEnd$ would triggered when change skeleton(change sheet).
-        // but
+        // beforeSelectionMoveEnd$ & selectionMoveEnd$ would triggered when change skeleton(change sheet).
         this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((selectionsWithStyles) => {
             this._reset();
 
@@ -212,7 +211,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             return selectionData;
         });
 
-        this._reset();
+        // this._reset();
         this.updateControlForCurrentByRangeData(selections);
     }
 

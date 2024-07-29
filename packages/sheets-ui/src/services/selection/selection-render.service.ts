@@ -176,6 +176,12 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             }));
     }
 
+    /**
+     * set new selection range in seletion model
+     * selectionMoveEnd$ ---> _updateSelections --> selectionOperation@selectionManagerService.setSelections
+     * @param selectionDataWithStyleList
+     * @param type
+     */
     private _updateSelections(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
         const workbook = this._context.unit;
         const unitId = workbook.getUnitId();
@@ -213,6 +219,9 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             // Dont do that above! Ref selection also need syncExecCmd to reset selection.
             // TODO @lumixraku why use such weird a way to clear existing selection? subscribe to currentSkeleton$ is much better?
 
+            if (this._normalSelectionDisabled()) return;
+
+            // SetSelectionsOperation would clear all exists selections
             // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
             this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                 unitId,

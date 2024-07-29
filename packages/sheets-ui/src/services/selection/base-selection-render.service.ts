@@ -144,6 +144,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // #endregion
 
     protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
+
+    /**
+     * trigger when selection move end(pointerup)
+     * and then update selection model in selectionManagerService
+     * selectionMoveEnd$ ---> _updateSelections --> selectionOperation@selectionManagerService.setSelections
+     */
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
     protected readonly _selectionMoving$ = new Subject<ISelectionWithCoordAndStyle[]>();
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
@@ -222,7 +228,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * columnHeader pointerup$ --> selectionMoveEnd$ --> selectionManagerService@setSelections -->
      * selectionManagerService@_emitOnEnd -->
      * _workbookSelections.selectionMoveEnd$ --> _addSelectionControlBySelectionData
-     *
      *
      * @param selectionData
      */

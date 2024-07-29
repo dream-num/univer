@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Disposable, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { CustomRangeType, Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DocCustomRangeService } from '@univerjs/docs';
-import { DocHyperLinkModel } from '../models/hyper-link.model';
+import type { IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
+import { AddDocHyperLinkMutation, DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkCustomRangeController)
 export class DocHyperLinkCustomRangeController extends Disposable {
     constructor(
         @Inject(DocCustomRangeService) private readonly _docCustomRangeService: DocCustomRangeService,
-        @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel
+        @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -37,10 +39,16 @@ export class DocHyperLinkCustomRangeController extends Disposable {
                     if (rangeType === CustomRangeType.HYPERLINK) {
                         if (data) {
                             const id = Tools.generateRandomId();
-                            this._docHyperLinkModel.addLink(unitId, {
-                                id,
-                                payload: data,
-                            });
+                            this._commandService.executeCommand(
+                                AddDocHyperLinkMutation.id,
+                                {
+                                    unitId,
+                                    link: {
+                                        id,
+                                        payload: data,
+                                    },
+                                } as IAddDocHyperLinkMutationParams
+                            );
                             return {
                                 ...range,
                                 rangeId: id,
@@ -51,10 +59,16 @@ export class DocHyperLinkCustomRangeController extends Disposable {
                             return range;
                         }
                         const newId = Tools.generateRandomId();
-                        this._docHyperLinkModel.addLink(unitId, {
-                            id: newId,
-                            payload: link.payload,
-                        });
+                        this._commandService.executeCommand(
+                            AddDocHyperLinkMutation.id,
+                            {
+                                unitId,
+                                link: {
+                                    id: newId,
+                                    payload: link.payload,
+                                },
+                            } as IAddDocHyperLinkMutationParams
+                        );
 
                         return {
                             ...ext,

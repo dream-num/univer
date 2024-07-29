@@ -58,7 +58,6 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/docs": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {

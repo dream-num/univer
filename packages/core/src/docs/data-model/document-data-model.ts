@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type { Nullable } from '../../shared';
 import { Tools } from '../../shared/tools';
 import type {
@@ -205,6 +206,9 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
     footerModelMap: Map<string, DocumentDataModel> = new Map();
 
+    private _name$ = new BehaviorSubject('');
+    readonly name$ = this._name$.asObservable();
+
     constructor(snapshot: Partial<IDocumentData>) {
         super(Tools.isEmptyObject(snapshot) ? getEmptySnapshot() : snapshot);
 
@@ -213,9 +217,16 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this._unitId = this.snapshot.id ?? Tools.generateRandomId(UNIT_ID_LENGTH);
 
         this._initializeHeaderFooterModel();
+        this._name$.next(this.snapshot.title ?? '');
+    }
+
+    setName(name: string) {
+        this.snapshot.title = name;
+        this._name$.next(name);
     }
 
     override dispose() {
+        super.dispose();
         this.headerModelMap.forEach((header) => {
             header.dispose();
         });
@@ -223,6 +234,8 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this.footerModelMap.forEach((footer) => {
             footer.dispose();
         });
+
+        this._name$.complete();
     }
 
     getDrawings() {

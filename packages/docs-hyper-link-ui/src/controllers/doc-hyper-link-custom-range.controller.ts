@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Disposable, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { CustomRangeType, Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DocCustomRangeService } from '@univerjs/docs';
-import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
+import { AddDocHyperLinkMutation, DocHyperLinkModel, IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkCustomRangeController)
 export class DocHyperLinkCustomRangeController extends Disposable {
     constructor(
         @Inject(DocCustomRangeService) private readonly _docCustomRangeService: DocCustomRangeService,
-        @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel
+        @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -55,6 +56,16 @@ export class DocHyperLinkCustomRangeController extends Disposable {
                             id: newId,
                             payload: link.payload,
                         });
+                        this._commandService.executeCommand(
+                            AddDocHyperLinkMutation.id,
+                            {
+                                unitId,
+                                link: {
+                                    id: newId,
+                                    payload: link.payload,
+                                }
+                            } as IAddDocHyperLinkMutationParams
+                        )
 
                         return {
                             ...ext,

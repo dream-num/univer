@@ -50,7 +50,6 @@ export class DocMentionModel extends Disposable {
 
         const newId = Tools.generateRandomId();
         const newMention = { ...mention, id: newId };
-        this.addMention(unitId, newMention);
         return newMention;
     }
 

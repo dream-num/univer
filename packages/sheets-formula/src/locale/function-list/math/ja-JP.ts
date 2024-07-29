@@ -1145,8 +1145,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '小数部を切り捨てる数値を指定します。' },
+            numDigits: { name: '桁数', detail: '切り捨てを行った後の桁数を指定します。桁数の既定値は 0 (ゼロ) です。' },
         },
     },
 };

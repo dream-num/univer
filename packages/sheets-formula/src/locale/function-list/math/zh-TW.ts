@@ -1167,8 +1167,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要取至整數的數字。' },
+            numDigits: { name: '位數', detail: '這是指定要捨去之精確位數的數字。其預設值為 0 (零)。' },
         },
     },
 };

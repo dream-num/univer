@@ -1154,8 +1154,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number you want to truncate.' },
+            numDigits: { name: 'num_digits', detail: 'A number specifying the precision of the truncation. The default value for num_digits is 0 (zero).' },
         },
     },
 };

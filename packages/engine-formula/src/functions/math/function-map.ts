@@ -75,6 +75,7 @@ import { Sumxmy2 } from './sumxmy2';
 import { Sumproduct } from './sumproduct';
 import { Tan } from './tan';
 import { Tanh } from './tanh';
+import { Trunc } from './trunc';
 
 export const functionMath = [
     [Abs, FUNCTION_NAMES_MATH.ABS],
@@ -137,4 +138,5 @@ export const functionMath = [
     [Sumproduct, FUNCTION_NAMES_MATH.SUMPRODUCT],
     [Tan, FUNCTION_NAMES_MATH.TAN],
     [Tanh, FUNCTION_NAMES_MATH.TANH],
+    [Trunc, FUNCTION_NAMES_MATH.TRUNC],
 ];

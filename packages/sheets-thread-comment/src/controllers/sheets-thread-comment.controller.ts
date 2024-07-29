@@ -89,7 +89,7 @@ export class SheetsThreadCommentController extends Disposable {
                 }
                 const params = commandInfo.params as ISetSelectionsOperationParams;
                 const { unitId, subUnitId, selections, type } = params;
-                if ((type === SelectionMoveType.MOVE_END || type === undefined) && selections[0].primary) {
+                if ((type === SelectionMoveType.MOVE_END || type === undefined) && selections[0]?.primary) {
                     const range = selections[0].range;
                     if (range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) {
                         return;

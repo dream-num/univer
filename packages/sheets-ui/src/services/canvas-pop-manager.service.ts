@@ -27,6 +27,7 @@ import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
+import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 
 export interface ICanvasPopup extends Pick<IPopup,
     'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside'
@@ -156,8 +157,9 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @param viewport target viewport
      * @returns disposable
      */
-    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport): Nullable<IDisposable> {
+    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport, showOnSelectionMoving = false): Nullable<IDisposable> {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             return null;
@@ -165,13 +167,18 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        const skeleton = currentRender?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
             sheetId: subUnitId,
         });
+        const sheetSelectionRenderService = currentRender?.with(ISheetSelectionRenderService);
 
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-        if (!currentRender || !skeleton) {
+        if (!currentRender || !skeleton || !sheetSelectionRenderService) {
             return null;
+        }
+
+        if (sheetSelectionRenderService.selectionMoving && !showOnSelectionMoving) {
+            return;
         }
 
         const activeViewport = viewport ?? getViewportByCell(row, col, currentRender.scene, worksheet);

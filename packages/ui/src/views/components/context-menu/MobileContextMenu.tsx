@@ -15,7 +15,7 @@
  */
 
 import { ICommandService, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Popup } from '@univerjs/design';
 import type { IMouseEvent } from '@univerjs/engine-render';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
@@ -25,13 +25,20 @@ export function MobileContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
     const [offset, setOffset] = useState<[number, number]>([0, 0]);
-
+    const visibleRef = useRef(visible);
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
+    visibleRef.current = visible;
 
     useEffect(() => {
         const disposables = contextMenuService.registerContextMenuHandler({
             handleContextMenu,
+            hideContextMenu() {
+                setVisible(false);
+            },
+            get visible() {
+                return visibleRef.current;
+            },
         });
 
         document.addEventListener('pointerdown', handleClose);

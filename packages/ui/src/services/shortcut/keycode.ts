@@ -91,10 +91,13 @@ export enum KeyCode {
     NUM_LOCK = 144,
     SCROLL_LOCK = 145,
 
-    MINUS = 189,
     EQUAL = 187,
+    COMMA = 188,
+    MINUS = 189,
+    PERIOD = 190,
 
     BACK_SLASH = 220,
+
 }
 
 export const KeyCodeToChar: { [key: number]: string } = {
@@ -162,6 +165,8 @@ export const KeyCodeToChar: { [key: number]: string } = {
 
     [KeyCode.MINUS]: '-',
     [KeyCode.EQUAL]: '=',
+    [KeyCode.PERIOD]: '.',
+    [KeyCode.COMMA]: ',',
 
     [KeyCode.BACK_SLASH]: '\\',
 };

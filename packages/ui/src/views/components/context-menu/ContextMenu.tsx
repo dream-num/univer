@@ -28,14 +28,21 @@ export function DesktopContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
     const [offset, setOffset] = useState<[number, number]>([0, 0]);
-
+    const visibleRef = useRef(visible);
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
     const injector = useInjector();
+    visibleRef.current = visible;
 
     useEffect(() => {
         const disposables = contextMenuService.registerContextMenuHandler({
             handleContextMenu,
+            hideContextMenu() {
+                setVisible(false);
+            },
+            get visible() {
+                return visibleRef.current;
+            },
         });
 
         function handleClickOutside(event: MouseEvent) {

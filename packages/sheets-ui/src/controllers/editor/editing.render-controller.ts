@@ -182,7 +182,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this.disposeWithMe(this._editorBridgeService.visible$
             .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
             .subscribe((param) => {
-                if (param.unitId === this._context.unitId && param.visible) {
+                if ((param.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY || param.unitId === this._context.unitId) && param.visible) {
                     this._isUnitEditing = true;
                     this._handleEditorVisible(param);
                 } else if (this._isUnitEditing) {
@@ -477,15 +477,16 @@ export class EditingRenderController extends Disposable implements IRenderModule
         documentComponent.resize(editorWidth * scaleAdjust / scaleX, editorHeight * scaleAdjust / scaleY);
 
         /**
+         * sometimes requestIdleCallback is invalid, so use setTimeout to ensure the successful execution of the resizeBySize method.
          * resize canvas
          * When modifying the selection area for a formula, it is necessary to add a setTimeout to ensure successful updating.
          */
-        requestIdleCallback(() => {
+        setTimeout(() => {
             docEngine.resizeBySize(
                 fixLineWidthByScale(editorWidth, precisionScaleX),
                 fixLineWidthByScale(physicHeight, precisionScaleY)
             );
-        });
+        }, 0);
 
         const contentBoundingRect = this._layoutService.getContentElement().getBoundingClientRect();
         const canvasBoundingRect = canvasElement.getBoundingClientRect();

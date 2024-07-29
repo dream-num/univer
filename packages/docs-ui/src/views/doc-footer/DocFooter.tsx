@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import React from 'react';
+import { CountBar } from '../count-bar';
+import styles from './index.module.less';
 
-@OnLifecycle(LifecycleStages.Starting, ThreadCommentUIController)
-export class ThreadCommentUIController extends Disposable {
-    constructor(
-        @Inject(LocaleService) private readonly _localeService: LocaleService
-    ) {
-        super();
-    }
-}
+export const DocFooter = () => {
+    return (
+        <div className={styles.docFooterContainer}>
+            <div />
+            <CountBar />
+        </div>
+    );
+};

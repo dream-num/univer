@@ -29,6 +29,18 @@ const givingBackFocusElements = [
     'univer-button',
     'univer-sheet-bar-btn',
     'univer-render-canvas',
+    'univer-workbench-layout',
+];
+
+/**
+ * Not these elements will be considered as editor blur.
+ */
+const editorFocusInElements = [
+    'univer-editor',
+    'univer-range-selector',
+    'univer-range-selector-editor',
+    'univer-render-canvas',
+    'univer-text-editor-container-placeholder',
 ];
 
 export interface ILayoutService {
@@ -165,8 +177,10 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         this.disposeWithMe(
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
+
+                this._blurSheetEditor(target);
+
                 if (givingBackFocusElements.some((item) => target.classList.contains(item))) {
-                    this._blurSheetEditor();
                     queueMicrotask(() => this.focus());
                     return;
                 }
@@ -187,7 +201,11 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR, getFocusingUniverEditorStatus());
     }
 
-    private _blurSheetEditor() {
+    private _blurSheetEditor(target: HTMLElement) {
+        if (editorFocusInElements.some((item) => target.classList.contains(item))) {
+            return;
+        }
+
         // NOTE: Note that the focus editor will not be docs' editor but calling `this._editorService.blur()` will blur doc's editor.
         const focusEditor = this._editorService.getFocusEditor();
         if (focusEditor && focusEditor.isSheetEditor() !== true) {

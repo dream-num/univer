@@ -133,12 +133,14 @@ export class Canvas {
         const canvasElement = this.getCanvasEle();
 
         if (canvasElement && width !== undefined) {
+            // canvasElement.width does not allow decimals, so alignment is required. If not done, it will cause the canvas rendering to appear blurry.
             canvasElement.width = width * this._pixelRatio;
             this._width = canvasElement.width / this._pixelRatio;
             canvasElement.style.width = `${this._width}px`;
         }
 
         if (canvasElement && height !== undefined) {
+            // canvasElement.width does not allow decimals, so alignment is required. If not done, it will cause the canvas rendering to appear blurry.
             canvasElement.height = height * this._pixelRatio;
             this._height = canvasElement.height / this._pixelRatio;
             canvasElement.style.height = `${this._height}px`;

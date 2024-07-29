@@ -37,7 +37,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
 
     private _initHoverListener() {
         this.disposeWithMe(
-            this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((currentCell) => {
+            this._hoverManagerService.currentCell$.pipe(debounceTime(200)).subscribe((currentCell) => {
                 if (!currentCell) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;

@@ -115,7 +115,7 @@ export const RuleList = (props: IRuleListProps) => {
     const localeService = useDependency(LocaleService);
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
 
-    const workbook = useObservable(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET))!;
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
     const unitId = workbook.getUnitId();
     const worksheet = workbook.getActiveSheet();
     if (!worksheet) {

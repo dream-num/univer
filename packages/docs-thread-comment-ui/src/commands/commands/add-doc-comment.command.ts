@@ -18,7 +18,7 @@ import type { ICommand, ITextRange } from '@univerjs/core';
 import { CommandType, CustomDecorationType, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
 import { addCustomDecorationBySelectionFactory } from '@univerjs/docs';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+import { AddCommentCommand, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 
@@ -48,8 +48,8 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
             }
         );
         if (doMutation) {
-            const commentMutation = {
-                id: AddCommentMutation.id,
+            const addComment = {
+                id: AddCommentCommand.id,
                 params: {
                     unitId,
                     subUnitId: DEFAULT_DOC_SUBUNIT_ID,
@@ -66,7 +66,7 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
                 },
             };
 
-            return (await sequenceExecuteAsync([commentMutation, doMutation, activeOperation], commandService)).result;
+            return (await sequenceExecuteAsync([addComment, doMutation, activeOperation], commandService)).result;
         }
 
         return false;

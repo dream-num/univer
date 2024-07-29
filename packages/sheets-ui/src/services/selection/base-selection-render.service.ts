@@ -266,6 +266,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         return control;
     }
 
+    /**
+     * Update the corresponding selectionControl based on selectionsData.
+     * selectionData[i] ---- selectionControls[i]
+     * @param selections
+     */
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
         const selectionControls = this.getSelectionControls();
         if (!selectionControls) {
@@ -280,6 +285,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
+        // TODO @lumixraku This is awful!
+        // selectionControls should create & remove base on selections.
         for (let i = 0, len = selections.length; i < len; i++) {
             const { rangeWithCoord, primaryWithCoord, style } = selections[i];
 
@@ -994,8 +1001,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._updateSelectionControlRange(activeControl, newSelectionRange, currentCell);
     }
 
-    protected _refreshSelectionControl(params: readonly ISelectionWithStyle[]) {
-        const selections = params.map((selectionWithStyle) => {
+    protected _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]) {
+        const selections = selectionsData.map((selectionWithStyle) => {
             const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
             selectionData.style = getNormalSelectionStyle(this._themeService);
             return selectionData;

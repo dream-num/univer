@@ -186,7 +186,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initSkeletonChangeListener(): void {
-        // not only change sheet would cause currentSkeleton$, a lot of cmds will emit currentSkeleton$
+        // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
         // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
         // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
@@ -197,6 +197,10 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const { skeleton } = param;
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+
+            if (this._skeleton && this._skeleton.worksheet.getSheetId() !== skeleton.worksheet.getSheetId()) {
+                this._reset();
+            }
             this._changeRuntime(skeleton, scene, viewportMain);
 
             // for col width & row height resize
@@ -205,13 +209,11 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         }));
     }
 
-    protected override _refreshSelectionControl(params: readonly ISelectionWithStyle[]) {
-        const selections = params.map((selectionWithStyle) => {
+    protected override _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]) {
+        const selections = selectionsData.map((selectionWithStyle) => {
             const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
             return selectionData;
         });
-
-        // this._reset();
         this.updateControlForCurrentByRangeData(selections);
     }
 

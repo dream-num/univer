@@ -510,13 +510,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._anchorNodePosition = position;
 
         if (evt.shiftKey && this._getActiveRangeInstance()) {
-            // TODO: handle shift key.
             this._updateActiveRangePosition(position);
         } else if (!evt.ctrlKey && !this._isEmpty()) {
             this._removeAllRanges();
         }
-
-        // this._activeSelectionRefresh();
 
         scene.disableEvent();
 
@@ -921,13 +918,13 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const endNode = this._findNodeByCoord(moveOffsetX, moveOffsetY, {
+        const focusNode = this._findNodeByCoord(moveOffsetX, moveOffsetY, {
             strict: true,
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
         });
 
-        const focusNodePosition = this._getNodePosition(endNode);
+        const focusNodePosition = this._getNodePosition(focusNode);
 
         if (!focusNodePosition) {
             return;

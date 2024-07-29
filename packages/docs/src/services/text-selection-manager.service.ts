@@ -23,6 +23,7 @@ import type {
     ITextSelectionInnerParam,
     ITextSelectionStyle,
     RANGE_DIRECTION,
+    RectRange,
     TextRange,
 } from '@univerjs/engine-render';
 import { ITextSelectionRenderManager, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
@@ -118,8 +119,12 @@ export class TextSelectionManagerService extends RxDisposable {
         this._currentSelection = param;
     }
 
-    getCurrentSelections(): Readonly<Nullable<TextRange[]>> {
+    getCurrentTextRanges(): Readonly<Nullable<TextRange[]>> {
         return this._getTextRanges(this._currentSelection)?.textRanges;
+    }
+
+    getCurrentRectRanges(): Readonly<Nullable<RectRange[]>> {
+        return this._getTextRanges(this._currentSelection)?.rectRanges;
     }
 
     getActiveTextRange(): Nullable<TextRange> {

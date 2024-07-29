@@ -51,6 +51,17 @@ const locale: typeof zhCN = {
         alignJustify: 'Выровнять по ширине',
         headerFooter: 'Header & Footer',
     },
+    table: {
+        insert: 'Insert',
+        insertRowAbove: 'Insert row above',
+        insertRowBelow: 'Insert row below',
+        insertColumnLeft: 'Insert column left',
+        insertColumnRight: 'Insert column right',
+        delete: 'Table delete',
+        deleteRows: 'Delete row',
+        deleteColumns: 'Delete column',
+        deleteTable: 'Delete table',
+    },
     headerFooter: {
         header: 'Header',
         footer: 'Footer',

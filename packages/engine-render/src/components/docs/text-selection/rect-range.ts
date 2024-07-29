@@ -53,6 +53,16 @@ export class RectRange implements IDocRange {
     private _rangeShape: Nullable<RegularPolygon>;
     // Identifies whether the range is the current one, most of which is the last range.
     private _current = false;
+    // Rect Range start row.
+    private _startRow: number;
+    // Rect Range start column.
+    private _startCol: number;
+    // Rect Range end row.
+    private _endRow: number;
+    // Rect Range end column.
+    private _endCol: number;
+    // table id in view model.
+    private _tableId: string;
 
     constructor(
         private _scene: ThinScene,
@@ -67,13 +77,15 @@ export class RectRange implements IDocRange {
     }
 
     get startOffset(): Nullable<number> {
-        // TODO: Implement this.
-        return null;
+        const { startNodePosition } = this;
+
+        return this._docSkeleton.findCharIndexByPosition(startNodePosition);
     }
 
     get endOffset(): Nullable<number> {
-        // TODO: Implement this.
-        return null;
+        const { endNodePosition } = this;
+
+        return this._docSkeleton.findCharIndexByPosition(endNodePosition);
     }
 
     get collapsed(): boolean {
@@ -81,13 +93,29 @@ export class RectRange implements IDocRange {
     }
 
     get spanEntireRow(): boolean {
-        // TODO: Implement this.
-        return true;
+        const viewModel = this._docSkeleton.getViewModel();
+        const table = viewModel.getSnapshot().tableSource?.[this._tableId];
+        const { _startCol, _endCol } = this;
+        if (table == null) {
+            throw new Error('Table is not found.');
+        }
+
+        const { tableColumns } = table;
+
+        return _startCol === 0 && _endCol === tableColumns.length - 1;
     }
 
     get spanEntireColumn(): boolean {
-        // TODO: Implement this.
-        return true;
+        const viewModel = this._docSkeleton.getViewModel();
+        const table = viewModel.getSnapshot().tableSource?.[this._tableId];
+        const { _startRow, _endRow } = this;
+        if (table == null) {
+            throw new Error('Table is not found.');
+        }
+
+        const { tableRows } = table;
+
+        return _startRow === 0 && _endRow === tableRows.length - 1;
     }
 
     get startNodePosition(): INodePosition {
@@ -139,11 +167,27 @@ export class RectRange implements IDocRange {
 
         const convertor = new NodePositionConvertToRectRange(documentOffsetConfig, _docSkeleton);
 
-        const { pointGroup = [] } = convertor.getRangePointData(startNodePosition, endNodePosition) ?? {};
+        const rectInfo = convertor.getRangePointData(startNodePosition, endNodePosition);
+
+        if (rectInfo == null) {
+            return;
+        }
+
+        const { pointGroup = [], startRow, endRow, startColumn, endColumn, tableId } = rectInfo;
 
         if (pointGroup?.length > 0) {
             this._createOrUpdateRange(pointGroup, docsLeft, docsTop);
         }
+
+        this._updateTableInfo(startRow, endRow, startColumn, endColumn, tableId);
+    }
+
+    private _updateTableInfo(startRow: number, endRow: number, startCol: number, endCol: number, tableId: string) {
+        this._startRow = startRow;
+        this._endRow = endRow;
+        this._startCol = startCol;
+        this._endCol = endCol;
+        this._tableId = tableId;
     }
 
     private _createOrUpdateRange(pointsGroup: IPoint[][], left: number, top: number) {

@@ -200,6 +200,11 @@ export class NodePositionConvertToRectRange {
 
         return {
             pointGroup,
+            startRow,
+            startColumn,
+            endRow,
+            endColumn,
+            tableId,
         };
     }
 

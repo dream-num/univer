@@ -57,7 +57,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = textSelectionManagerService.getCurrentSelections();
+        const selections = textSelectionManagerService.getCurrentTextRanges();
         if (!Array.isArray(selections) || selections.length === 0) {
             return false;
         }
@@ -143,7 +143,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = params.selections ?? textSelectionManagerService.getCurrentSelections();
+        const selections = params.selections ?? textSelectionManagerService.getCurrentTextRanges();
 
         if (!Array.isArray(selections) || selections.length === 0) {
             return false;

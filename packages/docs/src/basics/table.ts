@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '@univerjs/engine-render';
-import { getLastLine } from '@univerjs/engine-render';
+import type { Nullable } from '@univerjs/core';
+import type { IDocumentSkeletonCached, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getLastLine, lineIterator } from '@univerjs/engine-render';
 
 export function firstLineInTable(table: IDocumentSkeletonTable) {
     const firstRow = table.rows[0];
@@ -47,6 +48,36 @@ export function findTableAfterLine(line: IDocumentSkeletonLine, page: IDocumentS
     }
 
     return table;
+}
+
+export function findLineBeforeAndAfterTable(table: Nullable<IDocumentSkeletonTable>) {
+    const tablePage = table?.parent as IDocumentSkeletonPage;
+    let lineBeforeTable = null;
+    let lineAfterTable = null;
+
+    if (table == null || tablePage == null) {
+        return {
+            lineBeforeTable,
+            lineAfterTable,
+        };
+    }
+
+    const { st, ed } = table;
+
+    const pages = tablePage.type === DocumentSkeletonPageType.CELL ? [tablePage] : (tablePage.parent as IDocumentSkeletonCached).pages;
+
+    lineIterator(pages, (l) => {
+        if (l.st === ed + 1) {
+            lineAfterTable = l;
+        } else if (l.ed === st - 1) {
+            lineBeforeTable = l;
+        }
+    });
+
+    return {
+        lineBeforeTable,
+        lineAfterTable,
+    };
 }
 
 export function findBellowCell(cell: IDocumentSkeletonPage) {

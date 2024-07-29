@@ -49,6 +49,17 @@ const locale = {
         alignJustify: '两端对齐',
         headerFooter: '页眉页脚',
     },
+    table: {
+        insert: '插入',
+        insertRowAbove: '上方插入行',
+        insertRowBelow: '下方插入行',
+        insertColumnLeft: '左方插入列',
+        insertColumnRight: '右方插入列',
+        delete: '表格删除',
+        deleteRows: '删除行',
+        deleteColumns: '删除列',
+        deleteTable: '删除表格',
+    },
     headerFooter: {
         header: '页眉',
         footer: '页脚',

@@ -266,7 +266,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = textSelectionManagerService.getCurrentSelections();
+        const selections = textSelectionManagerService.getCurrentTextRanges();
 
         if (!Array.isArray(selections) || selections.length === 0) {
             return false;

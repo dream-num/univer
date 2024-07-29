@@ -62,7 +62,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const { segmentId } = activeRange;
 
-        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
+        const selections = textSelectionManagerService.getCurrentTextRanges() ?? [];
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
         const serializedSelections = selections.map(serializeTextRange);
 

@@ -51,6 +51,17 @@ const locale: typeof zhCN = {
         alignJustify: 'Căn đều hai bên',
         headerFooter: 'Đầu trang và chân trang',
     },
+    table: {
+        insert: 'Insert',
+        insertRowAbove: 'Insert row above',
+        insertRowBelow: 'Insert row below',
+        insertColumnLeft: 'Insert column left',
+        insertColumnRight: 'Insert column right',
+        delete: 'Table delete',
+        deleteRows: 'Delete row',
+        deleteColumns: 'Delete column',
+        deleteTable: 'Delete table',
+    },
     headerFooter: {
         header: 'Đầu trang',
         footer: 'Chân trang',

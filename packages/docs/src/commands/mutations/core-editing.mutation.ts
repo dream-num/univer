@@ -72,7 +72,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
+        const selections = textSelectionManagerService.getCurrentTextRanges() ?? [];
 
         const serializedSelections = selections.map(serializeTextRange);
 

@@ -67,7 +67,7 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu/menu';
-import { CopyMenuFactory, CutMenuFactory, DeleteMenuFactory, ParagraphSettingMenuFactory, PasteMenuFactory } from './menu/context-menu';
+import { CopyMenuFactory, CutMenuFactory, DeleteColumnsMenuItemFactory, DeleteMenuFactory, DeleteRowsMenuItemFactory, DeleteTableMenuItemFactory, InsertColumnLeftMenuItemFactory, InsertColumnRightMenuItemFactory, InsertRowAfterMenuItemFactory, InsertRowBeforeMenuItemFactory, ParagraphSettingMenuFactory, PasteMenuFactory, TableDeleteMenuItemFactory, TableInsertMenuItemFactory } from './menu/context-menu';
 
 // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
@@ -135,13 +135,22 @@ export class DocUIController extends Disposable {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
 
-        [
+        ([
             CopyMenuFactory,
             CutMenuFactory,
             PasteMenuFactory,
             DeleteMenuFactory,
             ParagraphSettingMenuFactory,
-        ].forEach((factory) => {
+            TableInsertMenuItemFactory,
+            InsertRowBeforeMenuItemFactory,
+            InsertRowAfterMenuItemFactory,
+            InsertColumnLeftMenuItemFactory,
+            InsertColumnRightMenuItemFactory,
+            TableDeleteMenuItemFactory,
+            DeleteRowsMenuItemFactory,
+            DeleteColumnsMenuItemFactory,
+            DeleteTableMenuItemFactory,
+        ] as IMenuItemFactory[]).forEach((factory) => {
             try {
                 this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
             } catch (error) {

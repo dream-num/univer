@@ -51,6 +51,17 @@ const locale: typeof zhCN = {
         alignJustify: '兩端對齊',
         headerFooter: '頁眉頁腳',
     },
+    table: {
+        insert: 'Insert',
+        insertRowAbove: 'Insert row above',
+        insertRowBelow: 'Insert row below',
+        insertColumnLeft: 'Insert column left',
+        insertColumnRight: 'Insert column right',
+        delete: 'Table delete',
+        deleteRows: 'Delete row',
+        deleteColumns: 'Delete column',
+        deleteTable: 'Delete table',
+    },
     headerFooter: {
         header: '頁眉',
         footer: '頁腳',

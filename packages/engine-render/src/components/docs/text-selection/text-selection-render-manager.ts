@@ -480,19 +480,24 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const position = this._getNodePosition(startNode);
 
-        const textSelection = this._textSelectionInner$.value;
-        if (startNode && evt.button === 2 && textSelection) {
-            const index = this._getNodeIndex(startNode);
-            if (textSelection.textRanges.some((textRange) => textRange.startOffset! <= index && textRange.endOffset! > index)) {
-                return;
-            }
-        }
-
         if (position == null || startNode == null) {
             this._removeAllRanges();
 
             return;
         }
+
+        const textSelection = this._textSelectionInner$.value;
+        if (startNode && evt.button === 2 && textSelection) {
+            const nodeCharIndex = this._docSkeleton?.findCharIndexByPosition(position);
+            if (typeof nodeCharIndex === 'number' && textSelection.textRanges.some((textRange) => textRange.startOffset! <= nodeCharIndex && textRange.endOffset! > nodeCharIndex)) {
+                return;
+            }
+
+            if (typeof nodeCharIndex === 'number' && textSelection.rectRanges.some((rectRange) => rectRange.startOffset! <= nodeCharIndex && rectRange.endOffset! > nodeCharIndex)) {
+                return;
+            }
+        }
+
         const { segmentId, segmentPage } = startNode;
 
         if (segmentId && this._currentSegmentId && segmentId !== this._currentSegmentId) {

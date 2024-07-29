@@ -34,6 +34,7 @@ export * from './viewport';
 
 export { DocumentViewModel } from './components/docs/view-model/document-view-model';
 export { getAnchorBounding, TEXT_RANGE_LAYER_INDEX, TextRange, getLineBounding } from './components/docs/text-selection/text-range';
+export { RectRange, convertPositionsToRectRanges } from './components/docs/text-selection/rect-range';
 export { NodePositionConvertToCursor } from './components/docs/text-selection/convert-cursor';
 export { Liquid } from './components/docs/liquid';
 export { getCanvasOffsetByEngine } from './components/docs/text-selection/selection-utils';

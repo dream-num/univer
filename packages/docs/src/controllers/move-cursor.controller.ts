@@ -30,6 +30,7 @@ import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
+    IDocumentSkeletonTable,
     INodePosition,
     INodeSearch,
 } from '@univerjs/engine-render';
@@ -41,7 +42,7 @@ import type { IMoveCursorOperationParams } from '../commands/operations/cursor.o
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/cursor.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
-import { findAboveCell, findBellowCell, findTableAfterLine, findTableBeforeLine, firstLineInCell, firstLineInTable, lastLineInCell, lastLineInTable } from '../basics/table';
+import { findAboveCell, findBellowCell, findLineBeforeAndAfterTable, findTableAfterLine, findTableBeforeLine, firstLineInCell, firstLineInTable, lastLineInCell, lastLineInTable } from '../basics/table';
 
 @OnLifecycle(LifecycleStages.Rendered, MoveCursorController)
 export class MoveCursorController extends Disposable {
@@ -95,7 +96,7 @@ export class MoveCursorController extends Disposable {
     // eslint-disable-next-line max-lines-per-function, complexity
     private _handleShiftMoveSelection(direction: Direction) {
         const activeRange = this._textSelectionManagerService.getActiveRange();
-        const allRanges = this._textSelectionManagerService.getCurrentSelections()!;
+        const allRanges = this._textSelectionManagerService.getCurrentTextRanges()!;
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         if (!docDataModel) {
             return;
@@ -204,7 +205,7 @@ export class MoveCursorController extends Disposable {
     // eslint-disable-next-line max-lines-per-function, complexity
     private _handleMoveCursor(direction: Direction) {
         const activeRange = this._textSelectionManagerService.getActiveRange();
-        const allRanges = this._textSelectionManagerService.getCurrentSelections();
+        const allRanges = this._textSelectionManagerService.getCurrentTextRanges();
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         if (docDataModel == null) {
             return false;
@@ -505,11 +506,25 @@ export class MoveCursorController extends Disposable {
                 const bellowCell = findBellowCell(page);
                 if (bellowCell) {
                     newLine = firstLineInCell(bellowCell);
+                } else {
+                    const table = page.parent?.parent as IDocumentSkeletonTable;
+                    const { lineAfterTable } = findLineBeforeAndAfterTable(table);
+
+                    if (lineAfterTable) {
+                        newLine = lineAfterTable;
+                    }
                 }
             } else {
                 const aboveCell = findAboveCell(page);
                 if (aboveCell) {
                     newLine = lastLineInCell(aboveCell)!;
+                } else {
+                    const table = page.parent?.parent as IDocumentSkeletonTable;
+                    const { lineBeforeTable } = findLineBeforeAndAfterTable(table);
+
+                    if (lineBeforeTable) {
+                        newLine = lineBeforeTable;
+                    }
                 }
             }
 

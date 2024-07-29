@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
-import type { IMenuButtonItem } from '@univerjs/ui';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { DeleteLeftCommand, TextSelectionManagerService } from '@univerjs/docs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
@@ -26,13 +26,48 @@ import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     return new Observable<boolean>((subscriber) => {
-        const observable = textSelectionManagerService.textSelection$.subscribe((selections) => {
+        const observable = textSelectionManagerService.textSelection$.subscribe(() => {
             const range = textSelectionManagerService.getActiveRange();
             if (range && !range.collapsed) {
                 subscriber.next(false);
             } else {
                 subscriber.next(true);
             }
+        });
+
+        return () => observable.unsubscribe();
+    });
+};
+
+const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
+    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    return new Observable<boolean>((subscriber) => {
+        const observable = textSelectionManagerService.textSelection$.subscribe(() => {
+            const rectRanges = textSelectionManagerService.getCurrentRectRanges();
+            const activeRange = textSelectionManagerService.getActiveRange();
+            if (rectRanges && rectRanges.length) {
+                subscriber.next(false);
+                return;
+            }
+            if (activeRange) {
+                const { segmentId, startOffset, endOffset } = activeRange;
+                const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+                const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
+
+                if (tables && tables.length) {
+                    if (tables.some((table) => {
+                        const { startIndex, endIndex } = table;
+                        return (startOffset >= startIndex && startOffset <= endIndex) || (endOffset >= startIndex && endOffset <= endIndex);
+                    })) {
+                        subscriber.next(false);
+                        return;
+                    }
+                }
+            }
+
+            subscriber.next(true);
         });
 
         return () => observable.unsubscribe();
@@ -101,3 +136,117 @@ export const DeleteMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };
+
+const TABLE_INSERT_MENU_ID = 'doc.menu.table-insert';
+export function TableInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    return {
+        id: TABLE_INSERT_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.SUBITEMS,
+        title: 'table.insert',
+        icon: 'Insert',
+        positions: [MenuPosition.CONTEXT_MENU],
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getDisableWhenSelectionNotInTableObservable(accessor), (one, two) => {
+            return one || two;
+        }),
+    };
+}
+
+export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'InsertRowBeforeCommand.id',
+        type: MenuItemType.BUTTON,
+        title: 'table.insertRowAbove',
+        icon: 'InsertRowAbove',
+        positions: [TABLE_INSERT_MENU_ID],
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'InsertRowAfterCommand.id',
+        type: MenuItemType.BUTTON,
+        positions: [TABLE_INSERT_MENU_ID],
+        title: 'table.insertRowBelow',
+        icon: 'InsertRowBelow',
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function InsertColumnLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'InsertColumnLeftMenuItemFactory.id',
+        type: MenuItemType.BUTTON,
+        title: 'table.insertColumnLeft',
+        icon: 'LeftInsertColumn',
+        positions: [TABLE_INSERT_MENU_ID],
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function InsertColumnRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'InsertColumnRightMenuItemFactory.id',
+        type: MenuItemType.BUTTON,
+        positions: [TABLE_INSERT_MENU_ID],
+        title: 'table.insertColumnRight',
+        icon: 'RightInsertColumn',
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+const TABLE_DELETE_MENU_ID = 'doc.menu.table-delete';
+export function TableDeleteMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    return {
+        id: TABLE_DELETE_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.SUBITEMS,
+        title: 'table.delete',
+        icon: 'Reduce',
+        positions: [MenuPosition.CONTEXT_MENU],
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getDisableWhenSelectionNotInTableObservable(accessor), (one, two) => {
+            return one || two;
+        }),
+    };
+}
+
+export function DeleteRowsMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'DeleteRowsMenuItemFactory.id',
+        type: MenuItemType.BUTTON,
+        title: 'table.deleteRows',
+        icon: 'DeleteRow',
+        positions: [TABLE_DELETE_MENU_ID],
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function DeleteColumnsMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'DeleteColumnsMenuItemFactory.id',
+        type: MenuItemType.BUTTON,
+        positions: [TABLE_DELETE_MENU_ID],
+        title: 'table.deleteColumns',
+        icon: 'DeleteColumn',
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
+export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'DeleteTableMenuItemFactory.id',
+        type: MenuItemType.BUTTON,
+        positions: [TABLE_DELETE_MENU_ID],
+        title: 'table.deleteTable',
+        icon: 'GridSingle',
+        disabled$: getDisableWhenSelectionNotInTableObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}

@@ -17,9 +17,10 @@
 import {
     useReactFlow,
 } from '@xyflow/react';
-import React, { useEffect, useState } from 'react';
-import { FullscreenSingle, IncreaseSingle, ViewModeSingle, ZoomReduceSingle } from '@univerjs/icons';
-import { Tooltip } from '@univerjs/design';
+import React, { useCallback, useLayoutEffect } from 'react';
+import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
+import { Dropdown, Tooltip } from '@univerjs/design';
+import clsx from 'clsx';
 import { UniDiv } from '../uni-toolbar/UniFloatToolbar';
 import styles from './index.module.less';
 
@@ -35,8 +36,17 @@ export const UniControlButton = (props: { tooltips: string; children?: React.Rea
     );
 };
 
-export const UniControls = () => {
-    const { zoomIn, zoomOut, setViewport, fitView } = useReactFlow();
+export const MAX_ZOOM = 2;
+export const MIN_ZOOM = 0.5;
+export const DEFAULT_ZOOM = 1;
+
+// 0 means fit view
+const shortcuts = [50, 75, 100, 125, 150, 175, 200, 0];
+
+export const UniControls = (props: { zoom: number }) => {
+    const { zoom } = props;
+    const zoomPercent = Math.floor(zoom * 100);
+    const { zoomIn, zoomOut, fitView, getNodes, setCenter } = useReactFlow();
     const onZoomInHandler = () => {
         zoomIn();
     };
@@ -44,22 +54,34 @@ export const UniControls = () => {
         zoomOut();
     };
 
-    const onFitViewHandler = () => {
-        fitView();
-    };
-
     const onFullscreenHandler = () => {
         document.body.requestFullscreen();
     };
-    const [zoomLevel, setZoomLevel] = useState(1);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
+    const setZoomAtCenter = useCallback((zoom: number) => {
+        const nodes = getNodes();
+        const xLeftPositions = nodes.map((node) => node.position.x);
+        const xRightPositions = nodes.map((node) => node.position.x + (node.measured?.width ?? 0));
+        const yTopPositions = nodes.map((node) => node.position.y);
+        const yDownPositions = nodes.map((node) => node.position.y + (node.measured?.height ?? 0));
+        const centerX = (Math.min(...xLeftPositions) + Math.max(...xRightPositions)) / 2;
+        const centerY = (Math.min(...yTopPositions) + Math.max(...yDownPositions)) / 2;
+        setCenter(centerX, centerY, { zoom });
+    }, [getNodes, setCenter]);
+
+    const onZoomMenuChange = useCallback((value: number) => {
+        if (value === 0) {
             fitView();
-        }, 1000);
+        } else {
+            setZoomAtCenter(value / 100);
+        }
+    }, [setZoomAtCenter, fitView]);
 
-        return () => clearTimeout(timer);
-    }, [fitView]);
+    useLayoutEffect(() => {
+        setTimeout(() => {
+            setZoomAtCenter(1);
+        }, 1000);
+    }, [setZoomAtCenter]);
 
     return (
         <div className={styles.uniControls}>
@@ -69,9 +91,37 @@ export const UniControls = () => {
             <UniControlButton tooltips="Zoom in" onClick={onZoomInHandler}>
                 <IncreaseSingle />
             </UniControlButton>
-            <UniControlButton tooltips="Fit view" onClick={onFitViewHandler}>
-                <ViewModeSingle />
-            </UniControlButton>
+            <Dropdown
+                placement="topLeft"
+                overlay={(
+                    <div className={styles.sliderShortcuts}>
+                        {shortcuts?.map((item) => (
+                            <a
+                                key={item}
+                                className={clsx(
+                                    styles.sliderShortcut,
+                                    item === zoomPercent ? styles.sliderShortcutActive : ''
+                                )}
+                                onClick={() => onZoomMenuChange(item)}
+                            >
+                                {item === zoomPercent && (
+                                    <span className={styles.sliderShortcutIcon}>
+                                        <CheckMarkSingle />
+                                    </span>
+                                )}
+                                <span>
+                                    {item === 0 ? 'Fit View' : `${item}%`}
+                                </span>
+                            </a>
+                        ))}
+                    </div>
+                )}
+            >
+                <a className={styles.sliderValue}>
+                    {zoomPercent}
+                    %
+                </a>
+            </Dropdown>
             <UniControlButton tooltips="Zoom out" onClick={onZoomOutHandler}>
                 <ZoomReduceSingle />
             </UniControlButton>

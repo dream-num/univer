@@ -35,6 +35,7 @@ import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import type {
     NodeTypes,
+    Viewport,
 } from '@xyflow/react';
 import {
     Background,
@@ -51,7 +52,7 @@ import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
 import { useUnitFocused, useUnitTitle } from '../hooks/title';
 import { type FloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
-import { UniControls } from '../uni-controls/UniControls';
+import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControls } from '../uni-controls/UniControls';
 import { UniToolbar } from '../uni-toolbar/UniToolbar';
 import styles from './workbench.module.less';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
@@ -80,6 +81,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const contentRef = useRef<HTMLDivElement>(null);
     const selectedNodeRef = useRef<HTMLElement | null>(null);
     const floatingToolbarRef = useRef<FloatingToolbarRef>(null);
+    const reactFlowInstance = useRef<HTMLDivElement | null>(null);
 
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
@@ -105,6 +107,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     }, [onRendered]);
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
+    const [zoom, setZoom] = useState<number>(DEFAULT_ZOOM);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const resizeUnits = useCallback(debounce(() => {
@@ -162,9 +165,11 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         setNodes(gridNodes);
     }, [gridNodes]);
 
-    const onMove = useCallback(() => {
+    const onMove = useCallback((event: MouseEvent | TouchEvent | null, viewport: Viewport) => {
         floatingToolbarRef.current?.update();
-    }, [floatingToolbarRef, selectedNodeRef]);
+        const { zoom } = viewport;
+        setZoom(zoom);
+    }, [floatingToolbarRef, selectedNodeRef, setZoom]);
 
     useEffect(() => {
         selectedNodeRef.current = document.querySelector(`[data-id="${focusedUnit}"]`);
@@ -190,8 +195,9 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                             onContextMenu={(e) => e.preventDefault()}
                         >
                             <ReactFlow
-                                maxZoom={2}
-                                minZoom={0.5}
+                                ref={reactFlowInstance}
+                                maxZoom={MAX_ZOOM}
+                                minZoom={MIN_ZOOM}
                                 zoomOnDoubleClick={!disableReactFlowBehavior}
                                 zoomOnPinch={!disableReactFlowBehavior}
                                 zoomOnScroll={!disableReactFlowBehavior}
@@ -211,7 +217,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                     onNodesChange(nodes);
                                 }}
                                 onResize={resizeUnits}
-                                fitView={true}
+                                fitView
+                                defaultViewport={{ zoom: MIN_ZOOM, x: 0, y: 0 }}
                                 onPointerDown={(event) => {
                                     if (event.target instanceof HTMLElement
                                         && (
@@ -248,7 +255,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                         <RightSidebar />
 
                         {/* uni mode controller buttons */}
-                        <UniControls />
+                        <UniControls zoom={zoom} />
                     </div>
                 </div>
                 <ComponentContainer key="global" components={globalComponents} />

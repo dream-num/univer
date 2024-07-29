@@ -25,14 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            x: { name: 'X', detail: 'Giá trị để đánh giá hàm.' },
+            n: { name: 'N', detail: 'Bậc của hàm Bessel. Nếu n không phải là số nguyên thì nó bị cắt cụt.' },
         },
     },
     BESSELJ: {
@@ -45,14 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            x: { name: 'X', detail: 'Giá trị để đánh giá hàm.' },
+            n: { name: 'N', detail: 'Bậc của hàm Bessel. Nếu n không phải là số nguyên thì nó bị cắt cụt.' },
         },
     },
     BESSELK: {
@@ -65,14 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            x: { name: 'X', detail: 'Giá trị để đánh giá hàm.' },
+            n: { name: 'N', detail: 'Bậc của hàm Bessel. Nếu n không phải là số nguyên thì nó bị cắt cụt.' },
         },
     },
     BESSELY: {
@@ -85,14 +67,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            x: { name: 'X', detail: 'Giá trị để đánh giá hàm.' },
+            n: { name: 'N', detail: 'Bậc của hàm Bessel. Nếu n không phải là số nguyên thì nó bị cắt cụt.' },
         },
     },
     BIN2DEC: {
@@ -105,14 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'Số nhị phân', detail: 'Số nhị phân mà bạn muốn chuyển đổi.' },
         },
     },
     BIN2HEX: {
@@ -125,14 +94,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'Số nhị phân', detail: 'Số nhị phân mà bạn muốn chuyển đổi.' },
+            places: { name: 'Số ký tự', detail: 'Số ký tự sử dụng.' },
         },
     },
     BIN2OCT: {
@@ -145,14 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'Số nhị phân', detail: 'Số nhị phân mà bạn muốn chuyển đổi.' },
+            places: { name: 'Số ký tự', detail: 'Số ký tự sử dụng.' },
         },
     },
     BITAND: {
@@ -306,14 +263,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'Số thập phân', detail: 'Số nguyên thập phân mà bạn muốn chuyển đổi.' },
+            places: { name: 'Số ký tự', detail: 'Số ký tự sử dụng.' },
         },
     },
     DEC2HEX: {
@@ -326,14 +277,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'Số thập phân', detail: 'Số nguyên thập phân mà bạn muốn chuyển đổi.' },
+            places: { name: 'Số ký tự', detail: 'Số ký tự sử dụng.' },
         },
     },
     DEC2OCT: {
@@ -346,14 +291,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'Số thập phân', detail: 'Số nguyên thập phân mà bạn muốn chuyển đổi.' },
+            places: { name: 'Số ký tự', detail: 'Số ký tự sử dụng.' },
         },
     },
     DELTA: {

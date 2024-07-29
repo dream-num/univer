@@ -411,3 +411,7 @@ export namespace BESSEL {
         return _bessel_wrap(bessel0, bessel1, 2, 1);
     })();
 }
+
+export function isValidBinaryNumber(number: string): boolean {
+    return /^[01]{1,10}$/.test(number);
+}

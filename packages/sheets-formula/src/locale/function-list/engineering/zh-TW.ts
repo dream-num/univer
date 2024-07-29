@@ -81,8 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '二進制數', detail: '您要轉換的二進制數。' },
         },
     },
     BIN2HEX: {
@@ -95,8 +94,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '二進制數', detail: '您要轉換的二進制數。' },
+            places: { name: '字元數', detail: '這是要使用的字元數。' },
         },
     },
     BIN2OCT: {
@@ -109,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '二進制數', detail: '您要轉換的二進制數。' },
+            places: { name: '字元數', detail: '這是要使用的字元數。' },
         },
     },
     BITAND: {
@@ -221,8 +220,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十進制數', detail: '您要轉換的十進制數。' },
+            places: { name: '字元數', detail: '這是要使用的字元數。' },
         },
     },
     DEC2HEX: {
@@ -235,8 +234,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十進制數', detail: '您要轉換的十進制數。' },
+            places: { name: '字元數', detail: '這是要使用的字元數。' },
         },
     },
     DEC2OCT: {
@@ -249,8 +248,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十進制數', detail: '您要轉換的十進制數。' },
+            places: { name: '字元數', detail: '這是要使用的字元數。' },
         },
     },
     DELTA: {

@@ -19,10 +19,22 @@ import { Besseli } from './besseli';
 import { Besselj } from './besselj';
 import { Besselk } from './besselk';
 import { Bessely } from './bessely';
+import { Bin2dec } from './bin2dec';
+import { Bin2hex } from './bin2hex';
+import { Bin2oct } from './bin2oct';
+import { Dec2bin } from './dec2bin';
+import { Dec2hex } from './dec2hex';
+import { Dec2oct } from './dec2oct';
 
 export const functionEngineering = [
     [Besseli, FUNCTION_NAMES_ENGINEERING.BESSELI],
     [Besselj, FUNCTION_NAMES_ENGINEERING.BESSELJ],
     [Besselk, FUNCTION_NAMES_ENGINEERING.BESSELK],
     [Bessely, FUNCTION_NAMES_ENGINEERING.BESSELY],
+    [Bin2dec, FUNCTION_NAMES_ENGINEERING.BIN2DEC],
+    [Bin2hex, FUNCTION_NAMES_ENGINEERING.BIN2HEX],
+    [Bin2oct, FUNCTION_NAMES_ENGINEERING.BIN2OCT],
+    [Dec2bin, FUNCTION_NAMES_ENGINEERING.DEC2BIN],
+    [Dec2hex, FUNCTION_NAMES_ENGINEERING.DEC2HEX],
+    [Dec2oct, FUNCTION_NAMES_ENGINEERING.DEC2OCT],
 ];

@@ -18,7 +18,6 @@ import { BESSEL, checkVariantsErrorIsArrayOrBoolean } from '../../../basics/engi
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
-
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 
 export class Besselk extends BaseFunction {
@@ -33,11 +32,10 @@ export class Besselk extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        x = (variants as BaseValueObject[])[0];
-        n = (variants as BaseValueObject[])[1];
+        const [xObject, nObject] = variants as BaseValueObject[];
 
-        const xValue = +x.getValue();
-        const nValue = Math.floor(+n.getValue());
+        const xValue = +xObject.getValue();
+        const nValue = Math.floor(+nObject.getValue());
 
         if (Number.isNaN(xValue) || Number.isNaN(nValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);

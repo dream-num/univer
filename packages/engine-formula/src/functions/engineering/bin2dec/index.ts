@@ -14,41 +14,39 @@
  * limitations under the License.
  */
 
-import { BESSEL, checkVariantsErrorIsArrayOrBoolean } from '../../../basics/engineering';
+import { checkVariantsErrorIsArrayOrBoolean, isValidBinaryNumber } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 
-export class Besseli extends BaseFunction {
-    override minParams = 2;
+export class Bin2dec extends BaseFunction {
+    override minParams = 1;
 
-    override maxParams = 2;
+    override maxParams = 1;
 
-    override calculate(x: BaseValueObject, n: BaseValueObject) {
-        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(x, n);
+    override calculate(number: BaseValueObject) {
+        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(number);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        const [xObject, nObject] = variants as BaseValueObject[];
+        const [numberObject] = variants as BaseValueObject[];
 
-        const xValue = +xObject.getValue();
-        const nValue = Math.floor(+nObject.getValue());
+        const numberValue = `${numberObject.getValue()}`;
 
-        if (Number.isNaN(xValue) || Number.isNaN(nValue)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        if (nValue < 0) {
+        // Return error if number is not binary or contains more than 10 characters (10 digits)
+        if (!isValidBinaryNumber(numberValue)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = BESSEL.besseli(xValue, nValue);
+        let result;
 
-        if (Number.isNaN(result) || !Number.isFinite(result)) {
-            return ErrorValueObject.create(ErrorType.NUM);
+        if (numberValue.length === 10 && numberValue.substring(0, 1) === '1') {
+            result = Number.parseInt(numberValue.substring(1), 2) - 512;
+        } else {
+            result = Number.parseInt(numberValue, 2);
         }
 
         return NumberValueObject.create(result);

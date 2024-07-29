@@ -81,8 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '2 進数', detail: '変換する 2 進数を指定します。' },
         },
     },
     BIN2HEX: {
@@ -95,8 +94,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '2 進数', detail: '変換する 2 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     BIN2OCT: {
@@ -109,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '2 進数', detail: '変換する 2 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     BITAND: {
@@ -221,8 +220,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '10 進数', detail: '変換する 10 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     DEC2HEX: {
@@ -235,8 +234,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '10 進数', detail: '変換する 10 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     DEC2OCT: {
@@ -249,8 +248,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '10 進数', detail: '変換する 10 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     DELTA: {

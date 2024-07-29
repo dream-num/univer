@@ -81,8 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The binary number you want to convert.' },
         },
     },
     BIN2HEX: {
@@ -95,8 +94,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The binary number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     BIN2OCT: {
@@ -109,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The binary number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     BITAND: {
@@ -221,8 +220,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The decimal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     DEC2HEX: {
@@ -235,8 +234,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The decimal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     DEC2OCT: {
@@ -249,8 +248,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The decimal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     DELTA: {

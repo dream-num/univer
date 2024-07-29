@@ -81,8 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '二进制数', detail: '要转换的二进制数。' },
         },
     },
     BIN2HEX: {
@@ -95,8 +94,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '二进制数', detail: '要转换的二进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     BIN2OCT: {
@@ -109,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '二进制数', detail: '要转换的二进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     BITAND: {
@@ -221,8 +220,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十进制数', detail: '要转换的十进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     DEC2HEX: {
@@ -235,8 +234,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十进制数', detail: '要转换的十进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     DEC2OCT: {
@@ -249,8 +248,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十进制数', detail: '要转换的十进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     DELTA: {

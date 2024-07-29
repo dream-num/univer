@@ -17,6 +17,7 @@
 import type { ICommand, Nullable, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, PageElementType, UniverInstanceType } from '@univerjs/core';
 import { getImageSize, IImageIoService } from '@univerjs/drawing';
+import { CanvasView } from '@univerjs/slides';
 
 export interface IInsertImageOperationParams {
     files: Nullable<File[]>;
@@ -37,7 +38,7 @@ export const InsertSlideFloatImageOperation: ICommand<IInsertImageOperationParam
 
         const data = {
             id: imageId,
-            zIndex: 0,
+            zIndex: 20,
             left: 0,
             top: 0,
             width,
@@ -67,6 +68,11 @@ export const InsertSlideFloatImageOperation: ICommand<IInsertImageOperationParam
 
         slideData.updatePage(activePage.id, activePage);
 
+        const canvasview = accessor.get(CanvasView);
+        const sceneObject = canvasview.createObjectToPage(data, activePage.id);
+        if (sceneObject) {
+            canvasview.setObjectActiveByPage(sceneObject, activePage.id);
+        }
         // console.log(slideData);
 
         // {

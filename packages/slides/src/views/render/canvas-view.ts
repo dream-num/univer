@@ -237,10 +237,6 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         currentRender.components.set(SLIDE_KEY.COMPONENT, slideComponent);
 
         this._createSlidePages(slideDataModel, slideComponent);
-        window.x = (w) => {
-            this._createSlidePages(w, slideComponent);
-        };
-        window.y = this;
 
         engine.runRenderLoop(() => {
             scene.render();

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, Nullable, SlideDataModel } from '@univerjs/core';
+import type { ICommand, SlideDataModel } from '@univerjs/core';
 import { BasicShapes, CommandType, generateRandomId, IUniverInstanceService, PageElementType, UniverInstanceType } from '@univerjs/core';
-import { getImageSize, IImageIoService } from '@univerjs/drawing';
+import { CanvasView } from '@univerjs/slides';
 
 export interface IInsertShapeOperationParams {
 };
@@ -37,7 +37,7 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
         const id = generateRandomId(6);
         const data = {
             id,
-            zIndex: 10,
+            zIndex: 20,
             left: 378,
             top: 0,
             width: 204,
@@ -68,6 +68,12 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
         // console.log(activePage.id);
 
         slideData.updatePage(activePage.id, activePage);
+
+        const canvasview = accessor.get(CanvasView);
+        const sceneObject = canvasview.createObjectToPage(data, activePage.id);
+        if (sceneObject) {
+            canvasview.setObjectActiveByPage(sceneObject, activePage.id);
+        }
 
         // console.log(slideData);
 

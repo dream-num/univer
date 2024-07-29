@@ -16,7 +16,8 @@
 
 import { CustomRangeType, Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DocCustomRangeService } from '@univerjs/docs';
-import { AddDocMentionMutation, DocMentionModel, IAddDocMentionMutationParams } from '@univerjs/docs-mention';
+import type { IAddDocMentionMutationParams } from '@univerjs/docs-mention';
+import { AddDocMentionMutation, DocMentionModel } from '@univerjs/docs-mention';
 
 @OnLifecycle(LifecycleStages.Ready, DocMentionCustomRangeController)
 export class DocMentionCustomRangeController extends Disposable {
@@ -52,9 +53,9 @@ export class DocMentionCustomRangeController extends Disposable {
                             AddDocMentionMutation.id,
                             {
                                 unitId,
-                                mention
+                                mention,
                             } as IAddDocMentionMutationParams
-                        )
+                        );
                         if (!mention) {
                             return range;
                         }

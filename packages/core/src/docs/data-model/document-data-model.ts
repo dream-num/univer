@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type { Nullable } from '../../shared';
 import { Tools } from '../../shared/tools';
 import type {
@@ -29,7 +30,6 @@ import { getBodySlice, SliceBodyType } from './text-x/utils';
 import { getEmptySnapshot } from './empty-snapshot';
 import type { JSONXActions } from './json-x/json-x';
 import { JSONX } from './json-x/json-x';
-import { BehaviorSubject } from 'rxjs';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -220,7 +220,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this._name$.next(this.snapshot.title ?? '');
     }
 
-    setName(name: string){
+    setName(name: string) {
         this.snapshot.title = name;
         this._name$.next(name);
     }

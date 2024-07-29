@@ -16,7 +16,8 @@
 
 import { CustomRangeType, Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DocCustomRangeService } from '@univerjs/docs';
-import { AddDocHyperLinkMutation, DocHyperLinkModel, IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
+import type { IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
+import { AddDocHyperLinkMutation, DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkCustomRangeController)
 export class DocHyperLinkCustomRangeController extends Disposable {
@@ -45,9 +46,9 @@ export class DocHyperLinkCustomRangeController extends Disposable {
                                     link: {
                                         id,
                                         payload: data,
-                                    }
+                                    },
                                 } as IAddDocHyperLinkMutationParams
-                            )
+                            );
                             return {
                                 ...range,
                                 rangeId: id,
@@ -65,9 +66,9 @@ export class DocHyperLinkCustomRangeController extends Disposable {
                                 link: {
                                     id: newId,
                                     payload: link.payload,
-                                }
+                                },
                             } as IAddDocHyperLinkMutationParams
-                        )
+                        );
 
                         return {
                             ...ext,

@@ -17,7 +17,8 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools, UniverInstanceType, updateAttributeByDelete } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
-import { AddDocHyperLinkMutation, DocHyperLinkModel, IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
+import type { IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
+import { AddDocHyperLinkMutation, DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { IDocClipboardService } from '@univerjs/docs-ui';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkClipboardController)
@@ -81,9 +82,9 @@ export class DocHyperLinkClipboardController extends Disposable {
                                             link: {
                                                 id: newId,
                                                 payload: link.payload,
-                                            }
+                                            },
                                         } as IAddDocHyperLinkMutationParams
-                                    )
+                                    );
 
                                     range.rangeId = newId;
                                 }
@@ -96,9 +97,9 @@ export class DocHyperLinkClipboardController extends Disposable {
                                         link: {
                                             id: range.rangeId,
                                             payload: url,
-                                        }
+                                        },
                                     } as IAddDocHyperLinkMutationParams
-                                )
+                                );
                             }
                         }
                     });

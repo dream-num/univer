@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '這是用於評估函數的值。' },
+            n: { name: 'N', detail: '這是Bessel函數的順序。如果n不是整數，則會取至整數。' },
         },
     },
     BESSELJ: {
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '這是用於評估函數的值。' },
+            n: { name: 'N', detail: '這是Bessel函數的順序。如果n不是整數，則會取至整數。' },
         },
     },
     BESSELK: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '這是用於評估函數的值。' },
+            n: { name: 'N', detail: '這是Bessel函數的順序。如果n不是整數，則會取至整數。' },
         },
     },
     BESSELY: {
@@ -67,8 +67,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '這是用於評估函數的值。' },
+            n: { name: 'N', detail: '這是Bessel函數的順序。如果n不是整數，則會取至整數。' },
         },
     },
     BIN2DEC: {

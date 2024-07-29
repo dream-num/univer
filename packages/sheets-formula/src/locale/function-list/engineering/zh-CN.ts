@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '用来计算函数的值。' },
+            n: { name: 'N', detail: '贝赛耳函数的阶数。如果n不是整数，将被截尾取整。' },
         },
     },
     BESSELJ: {
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '用来计算函数的值。' },
+            n: { name: 'N', detail: '贝赛耳函数的阶数。如果n不是整数，将被截尾取整。' },
         },
     },
     BESSELK: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '用来计算函数的值。' },
+            n: { name: 'N', detail: '贝赛耳函数的阶数。如果n不是整数，将被截尾取整。' },
         },
     },
     BESSELY: {
@@ -67,8 +67,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '用来计算函数的值。' },
+            n: { name: 'N', detail: '贝赛耳函数的阶数。如果n不是整数，将被截尾取整。' },
         },
     },
     BIN2DEC: {

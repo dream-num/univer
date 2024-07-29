@@ -14,4 +14,15 @@
  * limitations under the License.
  */
 
-export const functionEngineering = [];
+import { FUNCTION_NAMES_ENGINEERING } from './function-names';
+import { Besseli } from './besseli';
+import { Besselj } from './besselj';
+import { Besselk } from './besselk';
+import { Bessely } from './bessely';
+
+export const functionEngineering = [
+    [Besseli, FUNCTION_NAMES_ENGINEERING.BESSELI],
+    [Besselj, FUNCTION_NAMES_ENGINEERING.BESSELJ],
+    [Besselk, FUNCTION_NAMES_ENGINEERING.BESSELK],
+    [Bessely, FUNCTION_NAMES_ENGINEERING.BESSELY],
+];

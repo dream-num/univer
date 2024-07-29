@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '関数に代入する値を指定します。' },
+            n: { name: 'N', detail: 'ベッセル関数の次数を指定します。n に整数以外の値を指定すると、小数点以下が切り捨てられます。' },
         },
     },
     BESSELJ: {
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '関数に代入する値を指定します。' },
+            n: { name: 'N', detail: 'ベッセル関数の次数を指定します。n に整数以外の値を指定すると、小数点以下が切り捨てられます。' },
         },
     },
     BESSELK: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '関数に代入する値を指定します。' },
+            n: { name: 'N', detail: 'ベッセル関数の次数を指定します。n に整数以外の値を指定すると、小数点以下が切り捨てられます。' },
         },
     },
     BESSELY: {
@@ -67,8 +67,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '関数に代入する値を指定します。' },
+            n: { name: 'N', detail: 'ベッセル関数の次数を指定します。n に整数以外の値を指定すると、小数点以下が切り捨てられます。' },
         },
     },
     BIN2DEC: {

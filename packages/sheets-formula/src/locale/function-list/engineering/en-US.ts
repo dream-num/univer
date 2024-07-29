@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
+            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
         },
     },
     BESSELJ: {
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
+            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
         },
     },
     BESSELK: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
+            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
         },
     },
     BESSELY: {
@@ -67,8 +67,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
+            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
         },
     },
     BIN2DEC: {

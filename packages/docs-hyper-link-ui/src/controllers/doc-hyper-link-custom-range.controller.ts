@@ -38,10 +38,16 @@ export class DocHyperLinkCustomRangeController extends Disposable {
                     if (rangeType === CustomRangeType.HYPERLINK) {
                         if (data) {
                             const id = Tools.generateRandomId();
-                            this._docHyperLinkModel.addLink(unitId, {
-                                id,
-                                payload: data,
-                            });
+                            this._commandService.executeCommand(
+                                AddDocHyperLinkMutation.id,
+                                {
+                                    unitId,
+                                    link: {
+                                        id,
+                                        payload: data,
+                                    }
+                                } as IAddDocHyperLinkMutationParams
+                            )
                             return {
                                 ...range,
                                 rangeId: id,
@@ -52,10 +58,6 @@ export class DocHyperLinkCustomRangeController extends Disposable {
                             return range;
                         }
                         const newId = Tools.generateRandomId();
-                        this._docHyperLinkModel.addLink(unitId, {
-                            id: newId,
-                            payload: link.payload,
-                        });
                         this._commandService.executeCommand(
                             AddDocHyperLinkMutation.id,
                             {

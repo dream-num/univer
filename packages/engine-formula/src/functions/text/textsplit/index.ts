@@ -192,9 +192,9 @@ export class Textsplit extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            let padWithValue = padWith.getValue() as string;
+            let padWithValue = padWith!.getValue() as string;
 
-            if (padWith.isBoolean()) {
+            if (padWith!.isBoolean()) {
                 padWithValue = padWithValue ? 'TRUE' : 'FALSE';
             }
 

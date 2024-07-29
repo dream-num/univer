@@ -45,7 +45,7 @@ export class Sort extends BaseFunction {
             }
 
             return byCol.map((byColObject) => {
-                const result = this._handleSingleObject(array, sortIndex, sortOrder, byColObject);
+                const result = this._handleSingleObject(array, sortIndex!, sortOrder!, byColObject);
 
                 return result.isArray() ? (result as ArrayValueObject).get(0, 0) as BaseValueObject : result;
             });

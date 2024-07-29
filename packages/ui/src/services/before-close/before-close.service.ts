@@ -66,7 +66,8 @@ export class DesktopBeforeCloseService implements IBeforeCloseService {
     }
 
     private _init(): void {
-        window.addEventListener('beforeunload', (event: BeforeUnloadEvent) => {
+        window.addEventListener('beforeunload', (_event: BeforeUnloadEvent) => {
+            let event = _event;
             const message = this._beforeUnloadCallbacks
                 .map((callback) => callback())
                 .filter((m) => !!m)

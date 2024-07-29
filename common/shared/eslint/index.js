@@ -1,5 +1,6 @@
 exports.baseRules = {
     curly: ['error', 'multi-line'],
+    'no-param-reassign': ['warn'],
     'eol-last': ['error', 'always'],
     'import/no-self-import': 'error',
     'ts/no-explicit-any': 'warn',

@@ -18,10 +18,23 @@ import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
     slide: {
+        text: {
+            insert: {
+                title: 'Insert Text',
+            },
+        },
+
         shape: {
             insert: {
                 title: 'Insert Shape',
                 rectangle: 'Insert Rectangle',
+            },
+        },
+
+        image: {
+            insert: {
+                title: 'Insert Image',
+                float: 'Insert Float Image',
             },
         },
     },

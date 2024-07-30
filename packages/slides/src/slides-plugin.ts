@@ -72,12 +72,6 @@ export class UniverSlidesPlugin extends Plugin {
         return this._canvasEngine;
     }
 
-
-    // no one is using this! 
-    // getCanvasView() {
-    //     return this._canvasView;
-    // }
-
     private _initializeDependencies(slideInjector: Injector) {
         const dependencies: Dependency[] = [[CanvasView]];
 

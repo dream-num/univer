@@ -15,8 +15,8 @@
  */
 
 import type { EventState, IColorStyle, IPageElement, ISlidePage, Nullable, SlideDataModel } from '@univerjs/core';
-import { createIdentifier, debounce, getColorStyle, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { BaseObject, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import { debounce, getColorStyle, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { BaseObject, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Rect,
@@ -167,12 +167,6 @@ export class CanvasView extends RxDisposable implements IRenderModule {
                 this.createThumbs();
             }, 300);
         });
-
-        // const scene = new Scene(SLIDE_KEY.SCENE, engine, {
-        //     width: 2400,
-        //     height: 1800,
-        // });
-        scene.resize(2400, 1800);
 
         const viewMain = new Viewport(SLIDE_KEY.VIEW, scene, {
             left: 0,

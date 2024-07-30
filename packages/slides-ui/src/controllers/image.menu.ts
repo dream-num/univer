@@ -31,7 +31,7 @@ export function SlideImageMenuFactory(accessor: IAccessor): IMenuItem {
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         icon: IMAGE_UPLOAD_ICON,
-        tooltip: 'sheetImage.title',
+        tooltip: 'slide.image.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SLIDE),
         // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
@@ -40,7 +40,7 @@ export function SlideImageMenuFactory(accessor: IAccessor): IMenuItem {
 export function UploadSlideFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: InsertSlideFloatImageOperation.id,
-        title: 'sheetImage.upload.float',
+        title: 'slide.image.insert.float',
         type: MenuItemType.SELECTOR,
         label: {
             name: COMPONENT_UPLOAD_FILE_MENU,

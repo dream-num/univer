@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/slides",
     "version": "0.2.5",
-    "private": false,
+    "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -43,8 +43,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*",
-            "./locale/*": "./lib/locale/*.json"
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -86,7 +85,6 @@
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./lib/*": "./lib/*",
-        "./locale/*": "./lib/locale/*.json"
+        "./lib/*": "./lib/*"
     }
 }

@@ -27,9 +27,11 @@ import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.ope
 import { UploadFileMenu } from '../components/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
+import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
+import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
 import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
-import { AddTextMenuItemFactory, TEXT_ICON_ID } from './text.menu';
+import { SlideAddTextMenuItemFactory, TEXT_ICON_ID } from './text.menu';
 
 export interface IUniverSlidesDrawingConfig {
     menu?: MenuConfig;
@@ -64,11 +66,11 @@ export class SlideUIController extends Disposable {
         const { menu = {} } = this._config;
 
         [
+            SlideAddTextMenuItemFactory,
             SlideImageMenuFactory,
             UploadSlideFloatImageMenuFactory,
             SlideShapeMenuFactory,
             UploadSlideFloatShapeMenuFactory,
-            AddTextMenuItemFactory,
         ].forEach((menuFactory) => {
             this._menuService.addMenuItem(menuFactory(this._injector), menu);
         });
@@ -80,6 +82,7 @@ export class SlideUIController extends Disposable {
         this.disposeWithMe(componentManager.register(TEXT_ICON_ID, TextSingle));
         this.disposeWithMe(componentManager.register(GRAPH_SINGLE_ICON, GraphSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
+        this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_IMAGE_POPUP_MENU, SlideImagePopupMenu));
         // this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
     }
 

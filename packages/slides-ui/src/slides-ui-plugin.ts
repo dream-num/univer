@@ -22,6 +22,8 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SlideUIController } from './controllers/slide-ui.controller';
 import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
+import { SlidePopupMenuController } from './controllers/popup-menu.controller';
+import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
@@ -47,12 +49,14 @@ export class UniverSlidesUIPlugin extends Plugin {
                 },
             ],
             [IImageIoService, { useClass: ImageIoService }],
+            [SlideCanvasPopMangerService],
         ] as Dependency[]).forEach((d) => injector.add(d));
     }
 
     override onReady(): void {
         ([
             [SlideRenderController],
+            [SlidePopupMenuController],
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
         });

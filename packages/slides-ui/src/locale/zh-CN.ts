@@ -16,10 +16,23 @@
 
 const locale = {
     slide: {
+        text: {
+            insert: {
+                title: '插入文本',
+            },
+        },
+
         shape: {
             insert: {
                 title: '插入图形',
                 rectangle: '插入矩形',
+            },
+        },
+
+        image: {
+            insert: {
+                title: '插入图片',
+                float: '插入浮动图片',
             },
         },
     },

@@ -710,6 +710,14 @@ export class Tools {
     static clamp(value: number, min: number, max: number) {
         return Math.max(min, Math.min(max, value));
     }
+
+    static now(): number {
+        if (performance && performance.now) {
+            return performance.now();
+        }
+
+        return Date.now();
+    }
 }
 
 export function generateRandomId(n: number = 21, alphabet?: string): string {

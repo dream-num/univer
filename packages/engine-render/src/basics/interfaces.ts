@@ -163,3 +163,10 @@ export interface INodeSearch {
 export interface INodePosition extends INodeSearch {
     isBack: boolean;
 }
+
+export interface IAfterRender$Info {
+    frameTimeMetric: Record<string, number | number[]>;
+    tags: { scrolling: boolean } & Record<string, any>;
+}
+
+export type ITimeMetric = [string, number];

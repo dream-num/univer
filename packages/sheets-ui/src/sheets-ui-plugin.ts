@@ -15,7 +15,7 @@
  */
 
 import type { Dependency, Workbook } from '@univerjs/core';
-import { DependentOn, Inject, Injector, IUniverInstanceService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -100,7 +100,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
-        ([
+        const deps: Dependency[] = [
             // services
             [ShortcutExperienceService],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
@@ -146,7 +146,10 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorBaseController],
             [SheetPermissionInitController],
             // [MoveRangeController],
-        ] as Dependency[]).forEach((d) => injector.add(d));
+        ];
+
+        const mergedDeps = mergeOverrideWithDependencies(deps, this._config?.override);
+        mergedDeps.forEach((d) => injector.add(d));
 
         this._injector.add(
             [

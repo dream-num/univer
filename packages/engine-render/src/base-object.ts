@@ -27,6 +27,7 @@ import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Layer } from './layer';
 import type { ITransformerConfig } from './basics/transformer-config';
+import type { ThinScene } from './thin-scene';
 
 export const BASE_OBJECT_ARRAY = [
     'top',
@@ -775,8 +776,8 @@ export abstract class BaseObject extends Disposable {
         return props;
     }
 
-    getScene(): any {
-        let parent: any = this.parent;
+    getScene(): Nullable<ThinScene> {
+        let parent = this.parent;
 
         if (parent == null) {
             return;

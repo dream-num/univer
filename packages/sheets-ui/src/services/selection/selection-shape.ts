@@ -685,7 +685,6 @@ export class SelectionControl extends Disposable {
         this._selectionShapeGroup.zIndex = zIndex;
 
         const scene = this.getScene();
-
         scene.addObject(this._selectionShapeGroup, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
 
         this.disposeWithMe(

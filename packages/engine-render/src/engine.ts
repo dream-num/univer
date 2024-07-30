@@ -15,13 +15,15 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { toDisposable } from '@univerjs/core';
+import { toDisposable, Tools } from '@univerjs/core';
 
 import { Observable, shareReplay, Subject } from 'rxjs';
 import type { CURSOR_TYPE } from './basics/const';
 import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
 import { DeviceType, PointerInput } from './basics/i-events';
+import type { ITimeMetric } from './basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
+import type { IBasicFrameInfo } from './basics/performance-monitor';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
 import { Canvas, CanvasRenderMode } from './canvas';
@@ -32,13 +34,23 @@ import { observeClientRect } from './floating/util';
 export class Engine extends ThinEngine<Scene> {
     renderEvenInBackground = true;
 
-    private readonly _beginFrame$ = new Subject<void>();
+    private readonly _beginFrame$ = new Subject<number>();
     readonly beginFrame$ = this._beginFrame$.asObservable();
 
-    private readonly _endFrame$ = new Subject<void>();
+    private readonly _endFrame$ = new Subject<IBasicFrameInfo>();
     readonly endFrame$ = this._endFrame$.asObservable();
 
+    readonly renderFrameTimeMetric$ = new Subject<ITimeMetric>();
+
+    readonly renderFrameTags$ = new Subject<[string, any]>();
+
+    /**
+     * time when render start, for elapsedTime
+     */
+    private _renderStartTime: number = 0;
+
     private _rect$: Nullable<Observable<void>> = null;
+
     public get clientRect$(): Observable<void> {
         return this._rect$ || (this._rect$ = new Observable((subscriber) => {
             if (!this._container) {
@@ -60,12 +72,15 @@ export class Engine extends ThinEngine<Scene> {
 
     private _renderingQueueLaunched = false;
 
-    private _activeRenderLoops = new Array<() => void>();
+    private _renderFrameTasks = new Array<() => void>();
 
-    private _renderFunction = () => { /* empty */ };
+    private _renderFunction = (_timestamp: number) => { /* empty */ };
 
     private _requestNewFrameHandler: number = -1;
 
+    /**
+     * frameCount
+     */
     private _frameId: number = -1;
 
     private _usingSafari: boolean = IsSafari();
@@ -77,7 +92,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _deltaTime = 0;
 
-    private _performanceMonitor = new PerformanceMonitor();
+    private _performanceMonitor: PerformanceMonitor;
 
     private _pointerMoveEvent!: (evt: Event) => void;
 
@@ -126,7 +141,7 @@ export class Engine extends ThinEngine<Scene> {
             height: elemHeight,
             pixelRatio,
         });
-
+        this._init();
         this._handleKeyboardAction();
         this._handlePointerAction();
         this._handleDragAction();
@@ -134,6 +149,14 @@ export class Engine extends ThinEngine<Scene> {
         if (mode !== CanvasRenderMode.Printing) {
             this._matchMediaHandler();
         }
+    }
+
+    _init() {
+        this._performanceMonitor = new PerformanceMonitor();
+    }
+
+    get elapsedTime(): number {
+        return Tools.now() - this._renderStartTime;
     }
 
     override get width() {
@@ -274,12 +297,11 @@ export class Engine extends ThinEngine<Scene> {
         canvasEle.removeEventListener('drop', this._dropEvent);
         canvasEle.removeEventListener(this._getWheelEventName(), this._pointerWheelEvent);
 
-        this._activeRenderLoops = [];
+        this._renderFrameTasks = [];
+        this._performanceMonitor.dispose();
         this.getCanvas().dispose();
-        // this._canvas = null; // 不应该这么做, 上面已经调用了 _canvas 的 dispose 方法
-        // 并且 idleCallback --> resize 时需要 _canvas 对象
-        this.onTransformChange$.complete();
 
+        this.onTransformChange$.complete();
         this._beginFrame$.complete();
         this._endFrame$.complete();
 
@@ -287,22 +309,28 @@ export class Engine extends ThinEngine<Scene> {
         this._container = null;
     }
 
+    addFunction2RenderLoop(renderFunction: () => void): void {
+        if (this._renderFrameTasks.indexOf(renderFunction) === -1) {
+            this._renderFrameTasks.push(renderFunction);
+        }
+    }
+
+    startRenderLoop(): void {
+        if (!this._renderingQueueLaunched) {
+            this._renderStartTime = performance.now();
+            this._renderingQueueLaunched = true;
+            this._renderFunction = this._renderFunctionCore.bind(this);
+            this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
+        }
+    }
+
     /**
-     * Register and execute a render loop. The engine can have more than one render function
+     * Register and execute a render loop. The engine could manage more than one render function
      * @param renderFunction defines the function to continuously execute
      */
     runRenderLoop(renderFunction: () => void): void {
-        if (this._activeRenderLoops.indexOf(renderFunction) !== -1) {
-            return;
-        }
-
-        this._activeRenderLoops.push(renderFunction);
-
-        if (!this._renderingQueueLaunched) {
-            this._renderingQueueLaunched = true;
-            this._renderFunction = this._renderLoop.bind(this);
-            this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
-        }
+        this.addFunction2RenderLoop(renderFunction);
+        this.startRenderLoop();
     }
 
     /**
@@ -311,16 +339,16 @@ export class Engine extends ThinEngine<Scene> {
      */
     stopRenderLoop(renderFunction?: () => void): void {
         if (!renderFunction) {
-            this._activeRenderLoops.length = 0;
+            this._renderFrameTasks.length = 0;
             this._cancelFrame();
             return;
         }
 
-        const index = this._activeRenderLoops.indexOf(renderFunction);
+        const index = this._renderFrameTasks.indexOf(renderFunction);
 
         if (index >= 0) {
-            this._activeRenderLoops.splice(index, 1);
-            if (this._activeRenderLoops.length === 0) {
+            this._renderFrameTasks.splice(index, 1);
+            if (this._renderFrameTasks.length === 0) {
                 this._cancelFrame();
             }
         }
@@ -329,20 +357,24 @@ export class Engine extends ThinEngine<Scene> {
     /**
      * Begin a new frame
      */
-    beginFrame(): void {
-        this._measureFps();
-        this._beginFrame$.next();
+    _beginFrame(_timestamp: number): void {
+        this._frameId++;
+        this._beginFrame$.next(this._frameId);
     }
 
     /**
      * End the current frame
      */
-    endFrame(): void {
-        this._frameId++;
-        this._endFrame$.next();
+    _endFrame(timestamp: number): void {
+        this._performanceMonitor.endFrame(timestamp);
+        this._fps = this._performanceMonitor.averageFPS;
+        this._deltaTime = this._performanceMonitor.instantaneousFrameTime || 0;
+        this._endFrame$.next({
+            FPS: this.getFps(),
+            frameTime: this.getDeltaTime(),
+            elapsedTime: this.elapsedTime,
+        } as IBasicFrameInfo);
     }
-
-    // FPS
 
     /**
      * Gets the current framerate
@@ -360,10 +392,12 @@ export class Engine extends ThinEngine<Scene> {
         return this._deltaTime;
     }
 
-    _renderFrame() {
-        for (let index = 0; index < this._activeRenderLoops.length; index++) {
-            const renderFunction = this._activeRenderLoops[index];
-
+    /**
+     * Exec all function in _renderFrameTasks
+     */
+    private _renderFrame(_timestamp: number) {
+        for (let index = 0; index < this._renderFrameTasks.length; index++) {
+            const renderFunction = this._renderFrameTasks[index];
             renderFunction();
         }
     }
@@ -397,7 +431,11 @@ export class Engine extends ThinEngine<Scene> {
         return window;
     }
 
-    private _renderLoop(): void {
+    /**
+     * call itself by raf
+     * Exec all function in _renderFrameTasks in _renderFrame()
+     */
+    private _renderFunctionCore(timestamp: number): void {
         let shouldRender = true;
         if (!this.renderEvenInBackground) {
             shouldRender = false;
@@ -405,28 +443,21 @@ export class Engine extends ThinEngine<Scene> {
 
         if (shouldRender) {
             // Start new frame
-            this.beginFrame();
-            this._renderFrame();
-            // Present
-            this.endFrame();
+            this._beginFrame(timestamp);
+            this._renderFrame(timestamp);
+            this._endFrame(timestamp);
         }
 
-        if (this._activeRenderLoops.length > 0) {
+        if (this._renderFrameTasks.length > 0) {
             this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
         } else {
             this._renderingQueueLaunched = false;
         }
     }
 
-    private _measureFps(): void {
-        this._performanceMonitor.sampleFrame();
-        this._fps = this._performanceMonitor.averageFPS;
-        this._deltaTime = this._performanceMonitor.instantaneousFrameTime || 0;
-    }
-
     private _handleKeyboardAction() {
-        const keyboardDownEvent = (evt: any) => {
-            const deviceEvent = evt as IKeyboardEvent;
+        const keyboardDownEvent = (evt: KeyboardEvent) => {
+            const deviceEvent = evt as unknown as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
             deviceEvent.previousState = 0;
@@ -435,8 +466,8 @@ export class Engine extends ThinEngine<Scene> {
             this.onInputChanged$.emitEvent(deviceEvent);
         };
 
-        const keyboardUpEvent = (evt: any) => {
-            const deviceEvent = evt as IKeyboardEvent;
+        const keyboardUpEvent = (evt: KeyboardEvent) => {
+            const deviceEvent = evt as unknown as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
             deviceEvent.previousState = 1;

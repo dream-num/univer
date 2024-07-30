@@ -72,6 +72,7 @@ export class HeaderMenuResizeShape<
         let top = 0;
 
         const scene = this.getScene();
+        if (!scene) return;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 

@@ -37,10 +37,12 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
+import { SelectionLayer } from './selection-layer';
 
 export interface IControlFillConfig {
     oldRange: IRange;
@@ -168,7 +170,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         protected readonly _renderManagerService: IRenderManagerService
     ) {
         super();
-
         this._resetStyle();
         this._initMoving();
     }
@@ -289,6 +290,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._skeleton = skeleton;
         this._scene = scene;
         this._activeViewport = viewport || scene?.getViewports()[0];
+
+        if (!scene.findLayerByZIndex(SHEET_COMPONENT_SELECTION_LAYER_INDEX)) {
+            scene.addLayer(new SelectionLayer(scene, [], SHEET_COMPONENT_SELECTION_LAYER_INDEX));
+        }
     }
 
     getSkeleton() {

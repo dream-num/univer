@@ -23,8 +23,8 @@ import {
     JSONX, MemoryCursor,
     TextX, TextXActionType,
 } from '@univerjs/core';
-import type { TextRange } from '@univerjs/engine-render';
-import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import type { IDocRange } from '@univerjs/engine-render';
+import { serializeDocRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getRichTextEditPath } from '../util';
@@ -259,18 +259,21 @@ const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
 export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
     id: 'doc.command.set-inline-format',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor, params: ISetInlineFormatCommandParams) => {
         const { segmentId, value, preCommandId } = params;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = textSelectionManagerService.getCurrentTextRanges();
+        const textRanges = textSelectionManagerService.getCurrentTextRanges() ?? [];
+        const rectRanges = textSelectionManagerService.getCurrentRectRanges() ?? [];
 
-        if (!Array.isArray(selections) || selections.length === 0) {
+        if (textRanges.length === 0 && rectRanges.length === 0) {
             return false;
         }
+
+        const docRanges = [...textRanges, ...rectRanges];
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (docDataModel == null) {
@@ -291,7 +294,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 formatValue = getReverseFormatValueInSelection(
                     docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.textRuns!,
                     preCommandId,
-                    selections
+                    docRanges
                 );
 
                 break;
@@ -328,7 +331,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             params: {
                 unitId,
                 actions: [],
-                textRanges: selections.map(serializeTextRange),
+                textRanges: docRanges.map(serializeDocRange),
             },
         };
 
@@ -338,8 +341,12 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const memoryCursor = new MemoryCursor();
         memoryCursor.reset();
 
-        for (const selection of selections) {
-            const { startOffset, endOffset } = selection;
+        for (const range of docRanges) {
+            const { startOffset, endOffset } = range;
+
+            if (startOffset == null || endOffset == null) {
+                continue;
+            }
 
             const body: IDocumentBody = {
                 dataStream: '',
@@ -399,14 +406,14 @@ function isTextDecoration(value: unknown | ITextDecoration): value is ITextDecor
 function getReverseFormatValueInSelection(
     textRuns: ITextRun[],
     preCommandId: string,
-    selections: TextRange[]
+    docRanges: IDocRange[]
 ): BooleanNumber | ITextDecoration | BaselineOffset {
     let ti = 0;
     let si = 0;
     const key: keyof IStyleBase = COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId];
 
-    while (ti !== textRuns.length && si !== selections.length) {
-        const { startOffset, endOffset } = selections[si];
+    while (ti !== textRuns.length && si !== docRanges.length) {
+        const { startOffset, endOffset } = docRanges[si];
 
         // TODO: @jocs handle sid in textRun
         const { st, ed, ts } = textRuns[ti];

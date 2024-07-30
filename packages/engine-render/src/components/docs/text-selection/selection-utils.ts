@@ -31,6 +31,35 @@ interface IDocRangeList {
     rectRanges: RectRange[];
 }
 
+export function getRangeListFromCharIndex(
+    startOffset: number,
+    endOffset: number,
+    scene: Scene,
+    document: Documents,
+    skeleton: DocumentSkeleton,
+    style: ITextSelectionStyle,
+    segmentId: string,
+    segmentPage: number
+): Nullable<IDocRangeList> {
+    const startNodePosition = skeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
+    const endNodePosition = skeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage);
+
+    if (startNodePosition == null || endNodePosition == null) {
+        return;
+    }
+
+    return getRangeListFromSelection(
+        startNodePosition,
+        endNodePosition,
+        scene,
+        document,
+        skeleton,
+        style,
+        segmentId,
+        segmentPage
+    );
+}
+
 export function getRangeListFromSelection(
     anchorPosition: INodePosition,
     focusPosition: INodePosition,

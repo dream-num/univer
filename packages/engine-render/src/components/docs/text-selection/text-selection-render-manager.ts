@@ -24,7 +24,7 @@ import { PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import type { IMouseEvent, IPointerEvent } from '../../../basics/i-events';
 import type { INodeInfo, INodePosition } from '../../../basics/interfaces';
 import type {
-    ISuccinctTextRangeParam,
+    ISuccinctDocRangeParam,
     ITextRangeWithStyle,
     ITextSelectionStyle,
     RANGE_DIRECTION,
@@ -38,9 +38,9 @@ import type { IScrollObserverParam, Viewport } from '../../../viewport';
 import type { DocumentSkeleton, IFindNodeRestrictions } from '../layout/doc-skeleton';
 import type { Documents } from '../document';
 import { getSystemHighlightColor } from '../../../basics/tools';
-import { cursorConvertToTextRange, TextRange } from './text-range';
+import { TextRange } from './text-range';
 import type { RectRange } from './rect-range';
-import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromSelection } from './selection-utils';
+import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection } from './selection-utils';
 
 export interface ITextSelectionInnerParam {
     textRanges: TextRange[];
@@ -90,7 +90,7 @@ export interface ITextSelectionRenderManager {
     resetStyle(): void;
 
     removeAllRanges(): void;
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean, options?: { [key: string]: boolean }): void;
+    addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing?: boolean, options?: { [key: string]: boolean }): void;
 
     sync(): void;
 
@@ -235,7 +235,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._isSelectionEnabled = false;
     }
 
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
+    addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         const {
             _scene: scene, _docSkeleton: docSkeleton, _document: document,
             _currentSegmentId: segmentId, _currentSegmentPage: segmentPage,
@@ -243,16 +243,23 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         } = this;
 
         for (const range of ranges) {
-            const textRange = cursorConvertToTextRange(scene!, {
-                style: this._selectionStyle,
-                ...range,
-                segmentId,
-                segmentPage,
-            }, docSkeleton!, document!);
+            const { startOffset, endOffset } = range;
 
-            if (textRange) {
+            const rangeList = getRangeListFromCharIndex(
+                startOffset, endOffset, scene!, document!, docSkeleton!, style, segmentId, segmentPage
+            );
+
+            if (rangeList == null) {
+                continue;
+            }
+
+            const { textRanges, rectRanges } = rangeList;
+
+            for (const textRange of textRanges) {
                 this._addTextRange(textRange);
             }
+
+            this._addRectRanges(rectRanges);
         }
 
         this._textSelectionInner$.next({
@@ -422,7 +429,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 },
             ];
 
-            this.addTextRanges(textRanges, false);
+            this.addDocRanges(textRanges, false);
         }
     }
 
@@ -459,7 +466,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             },
         ];
 
-        this.addTextRanges(textRanges, false);
+        this.addDocRanges(textRanges, false);
     }
 
     // Handle pointer down.

@@ -17,7 +17,7 @@
 import type { ITextRange, Nullable } from '@univerjs/core';
 import { BooleanNumber, COLORS, Tools } from '@univerjs/core';
 import type { INodePosition } from '../../../basics/interfaces';
-import type { ISuccinctTextRangeParam, ITextSelectionStyle } from '../../../basics/range';
+import type { ISuccinctDocRangeParam, ITextSelectionStyle } from '../../../basics/range';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RANGE_DIRECTION } from '../../../basics/range';
 import { getColor } from '../../../basics/tools';
 import type { IPoint } from '../../../basics/vector2';
@@ -49,7 +49,7 @@ export const TEXT_RANGE_LAYER_INDEX = 3;
 
 export function cursorConvertToTextRange(
     scene: Scene,
-    range: ISuccinctTextRangeParam,
+    range: ISuccinctDocRangeParam,
     docSkeleton: DocumentSkeleton,
     document: Documents
 ): Nullable<TextRange> {

@@ -41,6 +41,8 @@ export interface IDocRange {
     get endNodePosition(): Nullable<INodePosition>;
     get direction(): RANGE_DIRECTION;
 
+    isActive(): boolean;
+
     dispose(): void;
     // Refresh the selection shape.
     refresh(): void;

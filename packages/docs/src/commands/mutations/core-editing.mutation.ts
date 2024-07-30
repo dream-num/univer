@@ -17,7 +17,7 @@
 import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
 import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { serializeDocRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IDocStateChangeParams } from '../../services/doc-state-change-manager.service';
 import { DocStateChangeManagerService } from '../../services/doc-state-change-manager.service';
 import { IMEInputManagerService } from '../../services/ime-input-manager.service';
@@ -74,7 +74,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const selections = textSelectionManagerService.getCurrentTextRanges() ?? [];
 
-        const serializedSelections = selections.map(serializeTextRange);
+        const serializedSelections = selections.map(serializeDocRange);
 
         const docStateChangeManagerService = accessor.get(DocStateChangeManagerService);
 

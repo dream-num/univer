@@ -26,7 +26,7 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
-import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { serializeDocRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getRichTextEditPath } from '../util';
@@ -57,7 +57,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         const { segmentId } = activeRange;
         const selections = textSelectionManagerService.getCurrentTextRanges() ?? [];
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
-        const serializedSelections = selections.map(serializeTextRange);
+        const serializedSelections = selections.map(serializeDocRange);
 
         if (paragraphs == null) {
             return false;

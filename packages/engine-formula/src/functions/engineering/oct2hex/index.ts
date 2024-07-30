@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean, isValidHexadecimalNumber } from '../../../basics/engineering';
+import { checkVariantsErrorIsArrayOrBoolean, isValidOctalNumber } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 
-export class Hex2oct extends BaseFunction {
+export class Oct2hex extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 2;
@@ -59,25 +59,20 @@ export class Hex2oct extends BaseFunction {
 
         const numberValue = `${numberObject.getValue()}`;
 
-        // Return error if number is not hexadecimal or contains more than ten characters (10 digits)
-        if (!isValidHexadecimalNumber(numberValue)) {
+        // Return error if number is not octal or contains more than ten characters (10 digits)
+        if (!isValidOctalNumber(numberValue)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        // Convert hexadecimal number to decimal
-        const decimal = Number.parseInt(numberValue, 16);
-
-        // Return error if number is positive and greater than 0x1fffffff (536870911)
-        if (decimal > 536870911 && decimal < 1098974756864) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
+        // Convert octal number to decimal
+        const decimal = Number.parseInt(numberValue, 8);
 
         let result;
 
-        if (decimal >= 1098974756864) {
-            result = (decimal - 1098437885952).toString(8);
+        if (decimal >= 536870912) {
+            result = `ff${(decimal + 3221225472).toString(16)}`;
         } else {
-            result = decimal.toString(8);
+            result = decimal.toString(16);
 
             if (places) {
                 if (placesValue < result.length) {
@@ -88,6 +83,6 @@ export class Hex2oct extends BaseFunction {
             }
         }
 
-        return StringValueObject.create(result);
+        return StringValueObject.create(result.toLocaleUpperCase());
     }
 }

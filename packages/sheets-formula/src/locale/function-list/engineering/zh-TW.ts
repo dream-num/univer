@@ -737,8 +737,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '八進制數', detail: '您要轉換的八進制數。' },
+            places: { name: '字元數', detail: '這是要使用的字元數。' },
         },
     },
     OCT2DEC: {
@@ -751,8 +751,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '八進制數', detail: '您要轉換的八進制數。' },
         },
     },
     OCT2HEX: {
@@ -765,8 +764,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '八進制數', detail: '您要轉換的八進制數。' },
+            places: { name: '字元數', detail: '這是要使用的字元數。' },
         },
     },
 };

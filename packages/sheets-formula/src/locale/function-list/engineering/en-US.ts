@@ -737,8 +737,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The octal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     OCT2DEC: {
@@ -751,8 +751,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The octal number you want to convert.' },
         },
     },
     OCT2HEX: {
@@ -765,8 +764,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The octal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
 };

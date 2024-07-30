@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean, isValidHexadecimalNumber } from '../../../basics/engineering';
+import { checkVariantsErrorIsArrayOrBoolean, isValidOctalNumber } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 
-export class Hex2dec extends BaseFunction {
+export class Oct2dec extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -36,15 +36,15 @@ export class Hex2dec extends BaseFunction {
 
         const numberValue = `${numberObject.getValue()}`;
 
-        // Return error if number is not hexadecimal or contains more than ten characters (10 digits)
-        if (!isValidHexadecimalNumber(numberValue)) {
+        // Return error if number is not octal or contains more than ten characters (10 digits)
+        if (!isValidOctalNumber(numberValue)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        let result = Number.parseInt(numberValue, 16);
+        let result = Number.parseInt(numberValue, 8);
 
-        if (result >= 549755813888) {
-            result -= 1099511627776;
+        if (result >= 536870912) {
+            result -= 1073741824;
         }
 
         return NumberValueObject.create(result);

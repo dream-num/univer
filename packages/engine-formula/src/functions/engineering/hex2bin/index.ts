@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/engineering';
+import { checkVariantsErrorIsArrayOrBoolean, isValidHexadecimalNumber } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -60,7 +60,7 @@ export class Hex2bin extends BaseFunction {
         const numberValue = `${numberObject.getValue()}`;
 
         // Return error if number is not hexadecimal or contains more than ten characters (10 digits)
-        if (!/^[0-9A-Fa-f]{1,10}$/.test(numberValue)) {
+        if (!isValidHexadecimalNumber(numberValue)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

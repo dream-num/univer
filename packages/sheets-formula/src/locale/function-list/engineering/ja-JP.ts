@@ -737,8 +737,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '8 進数', detail: '変換する 8 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     OCT2DEC: {
@@ -751,8 +751,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '8 進数', detail: '変換する 8 進数を指定します。' },
         },
     },
     OCT2HEX: {
@@ -765,8 +764,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '8 進数', detail: '変換する 8 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
 };

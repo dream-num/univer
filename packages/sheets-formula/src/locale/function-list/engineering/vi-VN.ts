@@ -901,8 +901,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            number: { name: 'Số bát phân', detail: 'Số bát phân mà bạn muốn chuyển đổi.' },
+            places: { name: 'Số ký tự', detail: 'Số ký tự sử dụng.' },
         },
     },
     OCT2DEC: {
@@ -915,8 +915,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            number: { name: 'Số bát phân', detail: 'Số bát phân mà bạn muốn chuyển đổi.' },
         },
     },
     OCT2HEX: {
@@ -929,8 +928,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            number: { name: 'Số bát phân', detail: 'Số bát phân mà bạn muốn chuyển đổi.' },
+            places: { name: 'Số ký tự', detail: 'Số ký tự sử dụng.' },
         },
     },
 };

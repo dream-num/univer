@@ -415,3 +415,11 @@ export namespace BESSEL {
 export function isValidBinaryNumber(number: string): boolean {
     return /^[01]{1,10}$/.test(number);
 }
+
+export function isValidOctalNumber(number: string): boolean {
+    return /^[0-7]{1,10}$/.test(number);
+}
+
+export function isValidHexadecimalNumber(number: string): boolean {
+    return /^[0-9A-Fa-f]{1,10}$/.test(number);
+}

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean, isValidHexadecimalNumber } from '../../../basics/engineering';
+import { checkVariantsErrorIsArrayOrBoolean, isValidOctalNumber } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 
-export class Hex2oct extends BaseFunction {
+export class Oct2bin extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 2;
@@ -59,25 +59,30 @@ export class Hex2oct extends BaseFunction {
 
         const numberValue = `${numberObject.getValue()}`;
 
-        // Return error if number is not hexadecimal or contains more than ten characters (10 digits)
-        if (!isValidHexadecimalNumber(numberValue)) {
+        // Return error if number is not octal or contains more than ten characters (10 digits)
+        if (!isValidOctalNumber(numberValue)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        // Convert hexadecimal number to decimal
-        const decimal = Number.parseInt(numberValue, 16);
+        // Check if number is negative
+        const negative = !!(numberValue.length === 10 && numberValue.substring(0, 1) === '7');
 
-        // Return error if number is positive and greater than 0x1fffffff (536870911)
-        if (decimal > 536870911 && decimal < 1098974756864) {
+        // Convert octal number to decimal
+        const decimal = negative ? Number.parseInt(numberValue, 8) - 1073741824 : Number.parseInt(numberValue, 8);
+
+        // Return error if number is lower than -512 or greater than 511
+        if (decimal < -512 || decimal > 511) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
         let result;
 
-        if (decimal >= 1098974756864) {
-            result = (decimal - 1098437885952).toString(8);
+        if (negative) {
+            const toStr = (512 + decimal).toString(2);
+
+            result = `1${'0'.repeat(9 - toStr.length)}${toStr}`;
         } else {
-            result = decimal.toString(8);
+            result = decimal.toString(2);
 
             if (places) {
                 if (placesValue < result.length) {

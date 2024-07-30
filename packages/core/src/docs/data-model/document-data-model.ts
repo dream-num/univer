@@ -50,7 +50,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         throw new Error('Method not implemented.');
     }
 
-    private readonly _name$ = new BehaviorSubject<string>('');
+    protected readonly _name$ = new BehaviorSubject<string>('');
     override name$ = this._name$.asObservable();
 
     protected snapshot: IDocumentData;
@@ -209,9 +209,6 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     headerModelMap: Map<string, DocumentDataModel> = new Map();
 
     footerModelMap: Map<string, DocumentDataModel> = new Map();
-
-    private _name$ = new BehaviorSubject('');
-    readonly name$ = this._name$.asObservable();
 
     constructor(snapshot: Partial<IDocumentData>) {
         super(Tools.isEmptyObject(snapshot) ? getEmptySnapshot() : snapshot);

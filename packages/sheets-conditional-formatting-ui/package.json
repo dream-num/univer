@@ -79,7 +79,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.65",
+        "@univerjs/icons": "^0.1.70",
         "@univerjs/protocol": "0.1.38-alpha.23",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",
@@ -94,7 +94,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons-svg": "^0.1.58",
+        "@univerjs/icons-svg": "^0.1.70",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
@@ -104,9 +104,9 @@
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3"
+        "typescript": "^5.5.4",
+        "vite": "^5.3.5",
+        "vitest": "^2.0.4"
     },
     "univerSpace": {
         ".": {

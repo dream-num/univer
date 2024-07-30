@@ -122,8 +122,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '必須是十進位格式，且大於或等於 0。' },
+            number2: { name: '數值2', detail: '必須是十進位格式，且大於或等於 0。' },
         },
     },
     BITLSHIFT: {
@@ -136,8 +136,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '必須是大於或等於 0 的整數。' },
+            shiftAmount: { name: '移位量', detail: '必須是整數。' },
         },
     },
     BITOR: {
@@ -150,8 +150,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '必須是十進位格式，且大於或等於 0。' },
+            number2: { name: '數值2', detail: '必須是十進位格式，且大於或等於 0。' },
         },
     },
     BITRSHIFT: {
@@ -164,8 +164,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '必須是大於或等於 0 的整數。' },
+            shiftAmount: { name: '移位量', detail: '必須是整數。' },
         },
     },
     BITXOR: {
@@ -178,8 +178,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '必須是十進位格式，且大於或等於 0。' },
+            number2: { name: '數值2', detail: '必須是十進位格式，且大於或等於 0。' },
         },
     },
     COMPLEX: {

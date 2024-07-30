@@ -22,6 +22,11 @@ import { Bessely } from './bessely';
 import { Bin2dec } from './bin2dec';
 import { Bin2hex } from './bin2hex';
 import { Bin2oct } from './bin2oct';
+import { Bitand } from './bitand';
+import { Bitlshift } from './bitlshift';
+import { Bitor } from './bitor';
+import { Bitrshift } from './bitrshift';
+import { Bitxor } from './bitxor';
 import { Dec2bin } from './dec2bin';
 import { Dec2hex } from './dec2hex';
 import { Dec2oct } from './dec2oct';
@@ -40,6 +45,11 @@ export const functionEngineering = [
     [Bin2dec, FUNCTION_NAMES_ENGINEERING.BIN2DEC],
     [Bin2hex, FUNCTION_NAMES_ENGINEERING.BIN2HEX],
     [Bin2oct, FUNCTION_NAMES_ENGINEERING.BIN2OCT],
+    [Bitand, FUNCTION_NAMES_ENGINEERING.BITAND],
+    [Bitlshift, FUNCTION_NAMES_ENGINEERING.BITLSHIFT],
+    [Bitor, FUNCTION_NAMES_ENGINEERING.BITOR],
+    [Bitrshift, FUNCTION_NAMES_ENGINEERING.BITRSHIFT],
+    [Bitxor, FUNCTION_NAMES_ENGINEERING.BITXOR],
     [Dec2bin, FUNCTION_NAMES_ENGINEERING.DEC2BIN],
     [Dec2hex, FUNCTION_NAMES_ENGINEERING.DEC2HEX],
     [Dec2oct, FUNCTION_NAMES_ENGINEERING.DEC2OCT],

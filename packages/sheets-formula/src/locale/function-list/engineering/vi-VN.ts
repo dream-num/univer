@@ -122,14 +122,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number1: { name: 'Giá trị 1', detail: 'Phải là dạng thập phân và lớn hơn hoặc bằng 0.' },
+            number2: { name: 'Giá trị 2', detail: 'Phải là dạng thập phân và lớn hơn hoặc bằng 0.' },
         },
     },
 
@@ -143,14 +137,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'giá trị số', detail: 'phải là số nguyên lớn hơn hoặc bằng 0.' },
+            shiftAmount: { name: 'Số tiền ca', detail: 'phải là số nguyên.' },
         },
     },
     BITOR: {
@@ -163,14 +151,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number1: { name: 'Giá trị 1', detail: 'Phải là dạng thập phân và lớn hơn hoặc bằng 0.' },
+            number2: { name: 'Giá trị 2', detail: 'Phải là dạng thập phân và lớn hơn hoặc bằng 0.' },
         },
     },
     BITRSHIFT: {
@@ -183,14 +165,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'giá trị số', detail: 'phải là số nguyên lớn hơn hoặc bằng 0.' },
+            shiftAmount: { name: 'Số tiền ca', detail: 'phải là số nguyên.' },
         },
     },
     BITXOR: {
@@ -203,14 +179,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number1: { name: 'Giá trị 1', detail: 'Phải là dạng thập phân và lớn hơn hoặc bằng 0.' },
+            number2: { name: 'Giá trị 2', detail: 'Phải là dạng thập phân và lớn hơn hoặc bằng 0.' },
         },
     },
     COMPLEX: {

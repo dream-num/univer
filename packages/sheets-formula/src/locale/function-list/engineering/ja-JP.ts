@@ -122,8 +122,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
+            number2: { name: '数値2', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
         },
     },
     BITLSHIFT: {
@@ -136,8 +136,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値は、0 以上の整数である必要があります。' },
+            shiftAmount: { name: 'シフト量', detail: 'は整数である必要があります。' },
         },
     },
     BITOR: {
@@ -150,8 +150,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
+            number2: { name: '数値2', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
         },
     },
     BITRSHIFT: {
@@ -164,8 +164,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値は、0 以上の整数である必要があります。' },
+            shiftAmount: { name: 'シフト量', detail: 'は整数である必要があります。' },
         },
     },
     BITXOR: {
@@ -178,8 +178,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
+            number2: { name: '数値2', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
         },
     },
     COMPLEX: {

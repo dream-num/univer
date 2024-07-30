@@ -122,8 +122,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'Must be in decimal form and greater than or equal to 0.' },
+            number2: { name: 'number2', detail: 'Must be in decimal form and greater than or equal to 0.' },
         },
     },
     BITLSHIFT: {
@@ -136,8 +136,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number must be an integer greater than or equal to 0.' },
+            shiftAmount: { name: 'shift_amount', detail: 'Shift_amount must be an integer.' },
         },
     },
     BITOR: {
@@ -150,8 +150,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'Must be in decimal form and greater than or equal to 0.' },
+            number2: { name: 'number2', detail: 'Must be in decimal form and greater than or equal to 0.' },
         },
     },
     BITRSHIFT: {
@@ -164,8 +164,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number must be an integer greater than or equal to 0.' },
+            shiftAmount: { name: 'shift_amount', detail: 'Shift_amount must be an integer.' },
         },
     },
     BITXOR: {
@@ -178,8 +178,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'Must be in decimal form and greater than or equal to 0.' },
+            number2: { name: 'number2', detail: 'Must be in decimal form and greater than or equal to 0.' },
         },
     },
     COMPLEX: {

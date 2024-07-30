@@ -264,8 +264,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '第一个数值。' },
+            number2: { name: '数值2', detail: '第二个数值。如果省略，则假设数值2为零。' },
         },
     },
     ERF: {
@@ -278,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lowerLimit: { name: '下限', detail: 'ERF函数的积分下限。' },
+            upperLimit: { name: '上限', detail: 'ERF函数的积分上限。如果省略，ERF积分将在零到下限之间。' },
         },
     },
     ERF_PRECISE: {
@@ -292,8 +292,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: 'ERF.PRECISE函数的积分下限。' },
         },
     },
     ERFC: {
@@ -306,8 +305,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: 'ERFC函数的积分下限。' },
         },
     },
     ERFC_PRECISE: {
@@ -320,8 +318,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: 'ERFC.PRECISE函数的积分下限。' },
         },
     },
     GESTEP: {

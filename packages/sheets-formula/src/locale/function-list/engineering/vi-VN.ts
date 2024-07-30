@@ -265,14 +265,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number1: { name: 'giá trị số 1', detail: 'Số thứ nhất.' },
+            number2: { name: 'giá trị số 2', detail: 'Số thứ hai. Nếu bị bỏ qua, number2 được cho là bằng không.' },
         },
     },
     ERF: {
@@ -285,14 +279,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            lowerLimit: { name: 'Giơi hạn dươi', detail: 'Giới hạn dưới để lấy tích phân hàm ERF.' },
+            upperLimit: { name: 'giới hạn trên', detail: 'Giới hạn trên để lấy tích phân hàm ERF. Nếu bị bỏ qua, hàm ERF lấy tích phân giữa số không và lower_limit.' },
         },
     },
     ERF_PRECISE: {
@@ -305,14 +293,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            x: { name: 'Giơi hạn dươi', detail: 'Giới hạn dưới để lấy tích phân hàm ERF.PRECISE.' },
         },
     },
     ERFC: {
@@ -325,14 +306,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            x: { name: 'Giơi hạn dươi', detail: 'Giới hạn dưới để lấy tích phân hàm ERFC.' },
         },
     },
     ERFC_PRECISE: {
@@ -345,14 +319,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            x: { name: 'Giơi hạn dươi', detail: 'Giới hạn dưới để lấy tích phân hàm ERFC.PRECISE.' },
         },
     },
     GESTEP: {

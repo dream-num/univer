@@ -264,8 +264,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number.' },
+            number2: { name: 'number2', detail: 'The second number. If omitted, number2 is assumed to be zero.' },
         },
     },
     ERF: {
@@ -278,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lowerLimit: { name: 'lower_limit', detail: 'The lower bound for integrating ERF.' },
+            upperLimit: { name: 'upper_limit', detail: 'The upper bound for integrating ERF. If omitted, ERF integrates between zero and lower_limit.' },
         },
     },
     ERF_PRECISE: {
@@ -292,8 +292,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The lower bound for integrating ERF.PRECISE.' },
         },
     },
     ERFC: {
@@ -306,8 +305,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The lower bound for integrating ERFC.' },
         },
     },
     ERFC_PRECISE: {
@@ -320,8 +318,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The lower bound for integrating ERFC.PRECISE.' },
         },
     },
     GESTEP: {

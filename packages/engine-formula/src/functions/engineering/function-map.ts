@@ -32,6 +32,11 @@ import { Convert } from './convert';
 import { Dec2bin } from './dec2bin';
 import { Dec2hex } from './dec2hex';
 import { Dec2oct } from './dec2oct';
+import { Delta } from './delta';
+import { Erf } from './erf';
+import { ErfPrecise } from './erf-precise';
+import { Erfc } from './erfc';
+import { ErfcPrecise } from './erfc-precise';
 import { Hex2bin } from './hex2bin';
 import { Hex2dec } from './hex2dec';
 import { Hex2oct } from './hex2oct';
@@ -57,6 +62,11 @@ export const functionEngineering = [
     [Dec2bin, FUNCTION_NAMES_ENGINEERING.DEC2BIN],
     [Dec2hex, FUNCTION_NAMES_ENGINEERING.DEC2HEX],
     [Dec2oct, FUNCTION_NAMES_ENGINEERING.DEC2OCT],
+    [Delta, FUNCTION_NAMES_ENGINEERING.DELTA],
+    [Erf, FUNCTION_NAMES_ENGINEERING.ERF],
+    [ErfPrecise, FUNCTION_NAMES_ENGINEERING.ERF_PRECISE],
+    [Erfc, FUNCTION_NAMES_ENGINEERING.ERFC],
+    [ErfcPrecise, FUNCTION_NAMES_ENGINEERING.ERFC_PRECISE],
     [Hex2bin, FUNCTION_NAMES_ENGINEERING.HEX2BIN],
     [Hex2dec, FUNCTION_NAMES_ENGINEERING.HEX2DEC],
     [Hex2oct, FUNCTION_NAMES_ENGINEERING.HEX2OCT],

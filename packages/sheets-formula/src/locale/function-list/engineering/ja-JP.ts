@@ -264,8 +264,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '一方の数値を指定します。' },
+            number2: { name: '数値2', detail: 'もう一方の数値を指定します。数値 2 を省略すると、0 を指定したと見なされます。' },
         },
     },
     ERF: {
@@ -278,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lowerLimit: { name: '下限', detail: '誤差関数を積分するときの下限値を指定します。' },
+            upperLimit: { name: '上限', detail: '誤差関数を積分するときの上限値を指定します。上限を省略すると、0 ～下限の範囲で積分が行われます。' },
         },
     },
     ERF_PRECISE: {
@@ -292,8 +292,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: '誤差関数を積分するときの下限値を指定します。' },
         },
     },
     ERFC: {
@@ -306,8 +305,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: '相補誤差関数を積分するときの下限値を指定します。' },
         },
     },
     ERFC_PRECISE: {
@@ -320,8 +318,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: '相補誤差関数を積分するときの下限値を指定します。' },
         },
     },
     GESTEP: {

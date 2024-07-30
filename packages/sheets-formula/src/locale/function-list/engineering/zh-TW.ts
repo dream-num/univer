@@ -264,8 +264,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '這是第一個數值。' },
+            number2: { name: '數值2', detail: '這是第二個數值。如果省略，會將數值2假設為零。' },
         },
     },
     ERF: {
@@ -278,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lowerLimit: { name: '下限', detail: '這是整合ERF的下限。' },
+            upperLimit: { name: '上限', detail: '這是整合ERF的上限。如果省略，ERF會在零和下限之間整合。' },
         },
     },
     ERF_PRECISE: {
@@ -292,8 +292,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: '這是整合ERF.PRECISE的下限。' },
         },
     },
     ERFC: {
@@ -306,8 +305,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: '這是整合ERFC的下限。' },
         },
     },
     ERFC_PRECISE: {
@@ -320,8 +318,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: '這是整合ERFC.PRECISE的下限。' },
         },
     },
     GESTEP: {

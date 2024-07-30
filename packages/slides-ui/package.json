@@ -67,6 +67,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*",

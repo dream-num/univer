@@ -77,9 +77,9 @@
         "@univerjs/ui": "workspace:*",
         "@vitejs/plugin-vue": "^5.0.4",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3",
+        "typescript": "^5.5.4",
+        "vite": "^5.3.5",
+        "vitest": "^2.0.4",
         "vue": "^3.4.27"
     },
     "univerSpace": {

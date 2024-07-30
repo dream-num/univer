@@ -84,12 +84,14 @@ export namespace BESSEL {
         }
 
         const tdx = 2 / x;
+        let _f0 = f0;
+        let _f1 = f1;
         let f2 = f1;
 
         for (let o = 1; o < n; ++o) {
-            f2 = f1 * o * tdx + sign * f0;
-            f0 = f1;
-            f1 = f2;
+            f2 = _f1 * o * tdx + sign * _f0;
+            _f0 = _f1;
+            _f1 = f2;
         }
 
         return f2;
@@ -117,12 +119,12 @@ export namespace BESSEL {
                 return Number.NaN;
             }
 
-            n |= 0;
+            const _n = n | 0;
 
             const b0 = bessel0(x);
             const b1 = bessel1(x);
 
-            return _bessel_iter(x, n, b0, b1, sign);
+            return _bessel_iter(x, _n, b0, b1, sign);
         };
     }
 
@@ -184,25 +186,25 @@ export namespace BESSEL {
         }
 
         return function besselj(x: number, n: number): number {
-            n = Math.round(n);
+            const _n = Math.round(n);
 
             if (!Number.isFinite(x)) {
                 return Number.isNaN(x) ? x : 0;
             }
 
-            if (n < 0) {
-                return ((n % 2) ? -1 : 1) * besselj(x, -n);
+            if (_n < 0) {
+                return ((_n % 2) ? -1 : 1) * besselj(x, -_n);
             }
 
             if (x < 0) {
-                return ((n % 2) ? -1 : 1) * besselj(-x, n);
+                return ((_n % 2) ? -1 : 1) * besselj(-x, _n);
             }
 
-            if (n === 0) {
+            if (_n === 0) {
                 return bessel0(x);
             }
 
-            if (n === 1) {
+            if (_n === 1) {
                 return bessel1(x);
             }
 
@@ -212,10 +214,10 @@ export namespace BESSEL {
 
             let ret = 0.0;
 
-            if (x > n) {
-                ret = _bessel_iter(x, n, bessel0(x), bessel1(x), -1);
+            if (x > _n) {
+                ret = _bessel_iter(x, _n, bessel0(x), bessel1(x), -1);
             } else {
-                const m = 2 * Math.floor((n + Math.floor(Math.sqrt(40 * n))) / 2);
+                const m = 2 * Math.floor((_n + Math.floor(Math.sqrt(40 * _n))) / 2);
                 let jsum = false;
                 let bjp = 0.0;
                 let sum = 0.0;
@@ -241,7 +243,7 @@ export namespace BESSEL {
 
                     jsum = !jsum;
 
-                    if (j === n) {
+                    if (j === _n) {
                         ret = bjp;
                     }
                 }
@@ -334,17 +336,17 @@ export namespace BESSEL {
         }
 
         return function besseli(x: number, n: number): number {
-            n = Math.round(n);
+            const _n = Math.round(n);
 
-            if (n === 0) {
+            if (_n === 0) {
                 return bessel0(x);
             }
 
-            if (n === 1) {
+            if (_n === 1) {
                 return bessel1(x);
             }
 
-            if (n < 0) {
+            if (_n < 0) {
                 return Number.NaN;
             }
 
@@ -363,7 +365,7 @@ export namespace BESSEL {
             let bi = 1.0;
             let bim = 0.0;
 
-            const m = 2 * Math.round((n + Math.round(Math.sqrt(40 * n))) / 2);
+            const m = 2 * Math.round((_n + Math.round(Math.sqrt(40 * _n))) / 2);
 
             for (j = m; j > 0; j--) {
                 bim = j * tox * bi + bip;
@@ -376,12 +378,12 @@ export namespace BESSEL {
                     ret *= 1e-10;
                 }
 
-                if (j === n) ret = bip;
+                if (j === _n) ret = bip;
             }
 
             ret *= besseli(x, 0) / bi;
 
-            return x < 0 && (n % 2) ? -ret : ret;
+            return x < 0 && (_n % 2) ? -ret : ret;
         };
     })();
 

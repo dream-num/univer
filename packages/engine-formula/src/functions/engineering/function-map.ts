@@ -27,6 +27,8 @@ import { Bitlshift } from './bitlshift';
 import { Bitor } from './bitor';
 import { Bitrshift } from './bitrshift';
 import { Bitxor } from './bitxor';
+import { Complex } from './complex';
+import { Convert } from './convert';
 import { Dec2bin } from './dec2bin';
 import { Dec2hex } from './dec2hex';
 import { Dec2oct } from './dec2oct';
@@ -50,6 +52,8 @@ export const functionEngineering = [
     [Bitor, FUNCTION_NAMES_ENGINEERING.BITOR],
     [Bitrshift, FUNCTION_NAMES_ENGINEERING.BITRSHIFT],
     [Bitxor, FUNCTION_NAMES_ENGINEERING.BITXOR],
+    [Complex, FUNCTION_NAMES_ENGINEERING.COMPLEX],
+    [Convert, FUNCTION_NAMES_ENGINEERING.CONVERT],
     [Dec2bin, FUNCTION_NAMES_ENGINEERING.DEC2BIN],
     [Dec2hex, FUNCTION_NAMES_ENGINEERING.DEC2HEX],
     [Dec2oct, FUNCTION_NAMES_ENGINEERING.DEC2OCT],

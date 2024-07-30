@@ -193,14 +193,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            realNum: { name: 'hệ số thực', detail: 'Hệ số thực của số phức.' },
+            iNum: { name: 'hệ số ảo', detail: 'Hệ số ảo của số phức.' },
+            suffix: { name: 'hậu tố', detail: 'Hậu tố cho thành phần ảo của số phức. Nếu bị bỏ qua, hậu tố được giả định là "i".' },
         },
     },
     CONVERT: {
@@ -213,14 +208,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'giá trị số', detail: 'Giá trị cần chuyển đổi.' },
+            fromUnit: { name: 'Đơn vị trước khi chuyển đổi', detail: 'là đơn vị của giá trị số.' },
+            toUnit: { name: 'Đơn vị chuyển đổi', detail: 'là đơn vị của kết quả.' },
         },
     },
     DEC2BIN: {

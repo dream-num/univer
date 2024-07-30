@@ -192,8 +192,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            realNum: { name: '実数', detail: '複素数の実数係数を指定します。' },
+            iNum: { name: '虚数', detail: '複素数の虚数係数を指定します。' },
+            suffix: { name: '虚数単位', detail: '複素数の虚数部分の単位を指定します。省略すると、"i" を指定したと見なされます。' },
         },
     },
     CONVERT: {
@@ -206,8 +207,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '変換する値を指定します。' },
+            fromUnit: { name: '変換前単位', detail: '数値の単位を指定します。' },
+            toUnit: { name: '変換後単位', detail: '結果の単位を指定します。' },
         },
     },
     DEC2BIN: {

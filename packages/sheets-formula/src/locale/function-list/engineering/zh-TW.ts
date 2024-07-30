@@ -192,8 +192,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            realNum: { name: '實係數', detail: '這是複數的實係數。' },
+            iNum: { name: '虛係數', detail: '這是複數的虛係數。' },
+            suffix: { name: '字尾', detail: '這是複數虛數元件的字尾。如果省略，會將字尾假設為 "i"。' },
         },
     },
     CONVERT: {
@@ -206,8 +207,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '要轉換的值。' },
+            fromUnit: { name: '轉換前單位', detail: '這是數值的單位。' },
+            toUnit: { name: '轉換后單位', detail: '這是結果的單位。' },
         },
     },
     DEC2BIN: {

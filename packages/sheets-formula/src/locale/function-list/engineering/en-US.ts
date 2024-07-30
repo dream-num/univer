@@ -192,8 +192,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            realNum: { name: 'real_num', detail: 'The real coefficient of the complex number.' },
+            iNum: { name: 'i_num', detail: 'The imaginary coefficient of the complex number.' },
+            suffix: { name: 'suffix', detail: 'The suffix for the imaginary component of the complex number. If omitted, suffix is assumed to be "i".' },
         },
     },
     CONVERT: {
@@ -206,8 +207,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'is the value in from_units to convert.' },
+            fromUnit: { name: 'from_unit', detail: 'is the units for number.' },
+            toUnit: { name: 'to_unit', detail: 'is the units for the result.' },
         },
     },
     DEC2BIN: {

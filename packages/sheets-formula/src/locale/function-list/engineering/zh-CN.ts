@@ -192,8 +192,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            realNum: { name: '实系数', detail: '复数的实系数。' },
+            iNum: { name: '虚系数', detail: '复数的虚系数。' },
+            suffix: { name: '后缀', detail: '复数中虚系数的后缀。如果省略，则认为它是“i”。' },
         },
     },
     CONVERT: {
@@ -206,8 +207,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要进行转换的数值。' },
+            fromUnit: { name: '转换前单位', detail: '是数值的单位。' },
+            toUnit: { name: '转换后单位', detail: '是结果的单位。' },
         },
     },
     DEC2BIN: {

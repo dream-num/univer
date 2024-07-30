@@ -22,7 +22,7 @@ import { FullscreenSingle, IncreaseSingle, ViewModeSingle, ZoomReduceSingle } fr
 import { Tooltip } from '@univerjs/design';
 import { useDependency } from '@univerjs/core';
 import { UniDiv } from '../uni-toolbar/UniFloatToolbar';
-import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
+import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
 import styles from './index.module.less';
 
 export const UniControlButton = (props: { tooltips: string; children?: React.ReactElement; onClick: () => void; style?: React.CSSProperties }) => {
@@ -76,7 +76,7 @@ const moveViewportTo = (viewport: Viewport, targetX: number, targetY: number): v
 
 export const UniControls = ({ reactFlowWrapper }: { reactFlowWrapper: React.RefObject<HTMLDivElement> }) => {
     const { zoomIn, zoomOut, setViewport, fitView, getZoom } = useReactFlow();
-    const unitGridService = useDependency(UnitGridService);
+    const unitGridService = useDependency(IUnitGridService);
 
     const onZoomInHandler = () => {
         zoomIn();

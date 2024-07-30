@@ -404,3 +404,197 @@ export function getColumnWidths(pageWidth: number, tableColumns: ITableColumn[],
         newColWidth,
     };
 }
+
+export function getDeleteRowsActionsParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
+    const { startOffset, endOffset, segmentId } = rangeInfo;
+    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
+    const tableId = viewModel.getBody()?.tables?.find((t) => startOffset >= t.startIndex && endOffset <= t.endIndex)?.tableId;
+    const rowIndexes: number[] = [];
+    let offset = -1;
+    let len = 0;
+    let cursor = -1;
+
+    for (const section of vm.children) {
+        for (const paragraph of section.children) {
+            const { children } = paragraph;
+            const table = children[0];
+
+            if (table) {
+                if (startOffset < table.startIndex || endOffset > table.endIndex) {
+                    continue;
+                }
+
+                cursor = table.startIndex + 3;
+
+                for (const row of table.children) {
+                    const rowIndex = table.children.indexOf(row);
+                    const { startIndex, endIndex } = row;
+
+                    if (startOffset >= startIndex && startOffset <= endIndex) {
+                        offset = startIndex;
+                        rowIndexes.push(rowIndex);
+                        len += endIndex - startIndex + 1;
+                    } else if (startIndex > startOffset && endIndex < endOffset) {
+                        rowIndexes.push(rowIndex);
+                        len += endIndex - startIndex + 1;
+                    } else if (endOffset >= startIndex && endOffset <= endIndex) {
+                        rowIndexes.push(rowIndex);
+                        len += endIndex - startIndex + 1;
+                    }
+                }
+            }
+
+            if (rowIndexes.length) {
+                break;
+            }
+        }
+
+        if (rowIndexes.length) {
+            break;
+        }
+    }
+
+    if (tableId == null || rowIndexes.length === 0) {
+        return null;
+    }
+
+    return {
+        tableId,
+        rowIndexes,
+        offset,
+        len,
+        cursor,
+    };
+}
+
+interface IDeleteColumnsOffset {
+    retain: number;
+    delete: number;
+}
+
+export function getDeleteColumnsActionParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
+    const { startOffset, endOffset, segmentId } = rangeInfo;
+    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
+
+    const tableId = viewModel.getBody()?.tables?.find((t) => startOffset >= t.startIndex && endOffset <= t.endIndex)?.tableId;
+    const offsets: IDeleteColumnsOffset[] = [];
+    let table: Nullable<DataStreamTreeNode> = null;
+    const columnIndexes: number[] = [];
+    let cursor = -1;
+    let startColumnIndex = -1;
+    let endColumnIndex = -1;
+
+    for (const section of vm.children) {
+        for (const paragraph of section.children) {
+            const { children } = paragraph;
+            const tableNode = children[0];
+
+            if (tableNode) {
+                if (startOffset < tableNode.startIndex || endOffset > tableNode.endIndex) {
+                    continue;
+                }
+
+                table = tableNode;
+
+                for (const row of tableNode.children) {
+                    for (const cell of row.children) {
+                        const cellIndex = row.children.indexOf(cell);
+
+                        if (startOffset >= cell.startIndex && startOffset <= cell.endIndex) {
+                            startColumnIndex = cellIndex;
+                        }
+
+                        if (endOffset >= cell.startIndex && endOffset <= cell.endIndex) {
+                            endColumnIndex = cellIndex;
+                        }
+                    }
+                }
+            }
+
+            if (table) {
+                break;
+            }
+        }
+
+        if (table) {
+            break;
+        }
+    }
+
+    if (table == null || tableId == null) {
+        return null;
+    }
+
+    for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+        columnIndexes.push(i);
+    }
+
+    let delta = 0;
+    for (const row of table.children) {
+        const startCell = row.children[startColumnIndex];
+        const endCell = row.children[endColumnIndex];
+
+        offsets.push({
+            retain: startCell.startIndex - delta,
+            delete: endCell.endIndex - startCell.startIndex + 1,
+        });
+
+        delta = endCell.endIndex + 1;
+    }
+
+    cursor = table.startIndex + 3;
+
+    return {
+        offsets,
+        tableId,
+        columnIndexes,
+        cursor,
+        rowCount: table.children.length,
+    };
+}
+
+export function getDeleteTableActionParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
+    const { startOffset, endOffset, segmentId } = rangeInfo;
+    const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
+
+    const tableId = viewModel.getBody()?.tables?.find((t) => startOffset >= t.startIndex && endOffset <= t.endIndex)?.tableId;
+    let offset = -1;
+    let len = 0;
+    let cursor = -1;
+
+    for (const section of vm.children) {
+        for (const paragraph of section.children) {
+            const { children } = paragraph;
+            const table = children[0];
+
+            if (table) {
+                if (startOffset < table.startIndex || endOffset > table.endIndex) {
+                    continue;
+                }
+
+                offset = table.startIndex;
+                len = table.endIndex - table.startIndex + 1;
+                cursor = table.startIndex;
+            }
+
+            if (table) {
+                break;
+            }
+        }
+
+        if (len > 0) {
+            break;
+        }
+    }
+
+    if (tableId == null) {
+        return null;
+    }
+
+    return {
+        tableId,
+        offset,
+        len,
+        cursor,
+    };
+}

@@ -14,3 +14,321 @@
  * limitations under the License.
  */
 
+import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { getCommandSkeleton, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { getDeleteColumnsActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams, getRangeInfoFromRanges } from './table';
+
+export interface IDocTableDeleteRowsCommandParams {}
+
+export const DocTableDeleteRowsCommand: ICommand<IDocTableDeleteRowsCommandParams> = {
+    id: 'doc.table.delete-rows',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: async (accessor) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const activeRectRanges = textSelectionManagerService.getCurrentRectRanges();
+        const activeTextRange = textSelectionManagerService.getActiveTextRange();
+
+        const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);
+
+        if (rangeInfo == null) {
+            return false;
+        }
+
+        const { segmentId } = rangeInfo;
+
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (docDataModel == null || body == null) {
+            return false;
+        }
+        const docSkeletonManagerService = getCommandSkeleton(accessor, docDataModel.getUnitId());
+
+        if (docSkeletonManagerService == null) {
+            return false;
+        }
+
+        const viewModel = docSkeletonManagerService.getViewModel();
+        const unitId = docDataModel?.getUnitId();
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        const actionParams = getDeleteRowsActionsParams(rangeInfo, viewModel);
+
+        if (actionParams == null) {
+            return false;
+        }
+
+        const { offset, rowIndexes, len, tableId, cursor } = actionParams;
+
+        const rawActions: JSONXActions = [];
+
+        const textRanges: ITextRangeWithStyle[] = [{
+            startOffset: cursor,
+            endOffset: cursor,
+            collapsed: true,
+        }];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+            },
+        };
+
+        if (offset > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: offset,
+                segmentId,
+            });
+        }
+
+        textX.push({
+            t: TextXActionType.DELETE,
+            len,
+            line: 0,
+            segmentId,
+        });
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+
+        // Step 3: delete table rows;
+        for (const index of rowIndexes) {
+            const action = jsonX.removeOp(['tableSource', tableId, 'tableRows', index]);
+            rawActions.push(action!);
+        }
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
+export interface IDocTableDeleteColumnsCommandParams {}
+
+export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsCommandParams> = {
+    id: 'doc.table.delete-columns',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: async (accessor) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const activeRectRanges = textSelectionManagerService.getCurrentRectRanges();
+        const activeTextRange = textSelectionManagerService.getActiveTextRange();
+
+        const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);
+
+        if (rangeInfo == null) {
+            return false;
+        }
+
+        const { segmentId } = rangeInfo;
+
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (docDataModel == null || body == null) {
+            return false;
+        }
+        const docSkeletonManagerService = getCommandSkeleton(accessor, docDataModel.getUnitId());
+
+        if (docSkeletonManagerService == null) {
+            return false;
+        }
+
+        const viewModel = docSkeletonManagerService.getViewModel();
+        const unitId = docDataModel?.getUnitId();
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        const actionParams = getDeleteColumnsActionParams(rangeInfo, viewModel);
+
+        if (actionParams == null) {
+            return false;
+        }
+
+        const { offsets, columnIndexes, tableId, cursor, rowCount } = actionParams;
+
+        const rawActions: JSONXActions = [];
+
+        const textRanges: ITextRangeWithStyle[] = [{
+            startOffset: cursor,
+            endOffset: cursor,
+            collapsed: true,
+        }];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+            },
+        };
+
+        for (const offset of offsets) {
+            const { retain, delete: deleteLen } = offset;
+            if (retain > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: retain,
+                    segmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len: deleteLen,
+                line: 0,
+                segmentId,
+            });
+        }
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+
+        // Step 3: delete table columns;
+        for (let i = 0; i < rowCount; i++) {
+            for (const index of columnIndexes) {
+                const action = jsonX.removeOp(['tableSource', tableId, 'tableRows', i, 'tableCells', index]);
+                rawActions.push(action!);
+            }
+        }
+
+        for (const index of columnIndexes) {
+            const action = jsonX.removeOp(['tableSource', tableId, 'tableColumns', index]);
+            rawActions.push(action!);
+        }
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
+export interface IDocTableDeleteTableCommandParams {}
+
+export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandParams> = {
+    id: 'doc.table.delete-table',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: async (accessor) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const activeRectRanges = textSelectionManagerService.getCurrentRectRanges();
+        const activeTextRange = textSelectionManagerService.getActiveTextRange();
+
+        const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);
+
+        if (rangeInfo == null) {
+            return false;
+        }
+
+        const { segmentId } = rangeInfo;
+
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (docDataModel == null || body == null) {
+            return false;
+        }
+        const docSkeletonManagerService = getCommandSkeleton(accessor, docDataModel.getUnitId());
+
+        if (docSkeletonManagerService == null) {
+            return false;
+        }
+
+        const viewModel = docSkeletonManagerService.getViewModel();
+        const unitId = docDataModel?.getUnitId();
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        const actionParams = getDeleteTableActionParams(rangeInfo, viewModel);
+
+        if (actionParams == null) {
+            return false;
+        }
+
+        const { offset, len, tableId, cursor } = actionParams;
+
+        const rawActions: JSONXActions = [];
+
+        const textRanges: ITextRangeWithStyle[] = [{
+            startOffset: cursor,
+            endOffset: cursor,
+            collapsed: true,
+        }];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+            },
+        };
+
+        if (offset > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: offset,
+                segmentId,
+            });
+        }
+
+        textX.push({
+            t: TextXActionType.DELETE,
+            len,
+            line: 0,
+            segmentId,
+        });
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+
+        // Step 3: delete table;
+
+        const action = jsonX.removeOp(['tableSource', tableId]);
+        rawActions.push(action!);
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};

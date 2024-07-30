@@ -22,6 +22,7 @@ import { DocCreateTableConfirm } from '../views/table/create/TableCreate';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../views/table/create/component-name';
 import { CreateDocTableCommand } from '../commands/commands/table/doc-table-create.command';
 import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from '../commands/commands/table/doc-table-insert.command';
+import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 
 @OnLifecycle(LifecycleStages.Rendered, DocTableController)
 export class DocTableController extends Disposable {
@@ -49,6 +50,9 @@ export class DocTableController extends Disposable {
             DocTableInsertColumnCommand,
             DocTableInsertColumnLeftCommand,
             DocTableInsertColumnRightCommand,
+            DocTableDeleteRowsCommand,
+            DocTableDeleteColumnsCommand,
+            DocTableDeleteTableCommand,
             DocCreateTableOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }

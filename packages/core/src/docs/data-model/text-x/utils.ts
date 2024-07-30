@@ -27,7 +27,7 @@ export enum SliceBodyType {
 }
 
 // TODO: Support other properties like custom ranges, tables, etc.
-// eslint-disable-next-line max-lines-per-function
+// eslint-disable-next-line max-lines-per-function, complexity
 export function getBodySlice(
     body: IDocumentBody,
     startOffset: number,
@@ -35,7 +35,7 @@ export function getBodySlice(
     returnEmptyTextRun = false,
     type = SliceBodyType.cut
 ): IDocumentBody {
-    const { dataStream, textRuns = [], paragraphs = [], customBlocks = [] } = body;
+    const { dataStream, textRuns = [], paragraphs = [], customBlocks = [], tables = [] } = body;
 
     const docBody: IDocumentBody = {
         dataStream: dataStream.slice(startOffset, endOffset),
@@ -83,6 +83,25 @@ export function getBodySlice(
             ed: endOffset - startOffset,
             ts: {},
         }];
+    }
+
+    const newTables = [];
+
+    for (const table of tables) {
+        const clonedTable = Tools.deepClone(table);
+        const { startIndex, endIndex } = clonedTable;
+
+        if (Tools.hasIntersectionBetweenTwoRanges(startIndex, endIndex, startOffset, endOffset)) {
+            newTables.push({
+                ...clonedTable,
+                startIndex: startIndex - startOffset,
+                endIndex: endIndex - startOffset,
+            });
+        }
+    }
+
+    if (newTables.length) {
+        docBody.tables = newTables;
     }
 
     const newParagraphs: IParagraph[] = [];

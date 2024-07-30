@@ -20,9 +20,11 @@ import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
 import { DeleteLeftCommand, TextSelectionManagerService } from '@univerjs/docs';
+import type { RectRange } from '@univerjs/engine-render';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
 import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../../commands/commands/table/doc-table-insert.command';
+import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../../commands/commands/table/doc-table-delete.command';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -40,6 +42,15 @@ const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     });
 };
 
+function inSameTable(rectRanges: Readonly<RectRange[]>) {
+    if (rectRanges.length < 2) {
+        return true;
+    }
+
+    const tableIds = rectRanges.map((rectRange) => rectRange.tableId);
+    return tableIds.every((tableId) => tableId === tableIds[0]);
+}
+
 const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -48,11 +59,12 @@ const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
         const observable = textSelectionManagerService.textSelection$.subscribe(() => {
             const rectRanges = textSelectionManagerService.getCurrentRectRanges();
             const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
-            if (rectRanges && rectRanges.length) {
+            if (rectRanges && rectRanges.length && inSameTable(rectRanges)) {
                 subscriber.next(false);
                 return;
             }
-            if (activeRange) {
+
+            if (activeRange && (rectRanges == null || rectRanges.length === 0)) {
                 const { segmentId, startOffset, endOffset } = activeRange;
                 const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
                 const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
@@ -218,7 +230,7 @@ export function TableDeleteMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
 
 export function DeleteRowsMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'DeleteRowsMenuItemFactory.id',
+        id: DocTableDeleteRowsCommand.id,
         type: MenuItemType.BUTTON,
         title: 'table.deleteRows',
         icon: 'DeleteRow',
@@ -230,7 +242,7 @@ export function DeleteRowsMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
 
 export function DeleteColumnsMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'DeleteColumnsMenuItemFactory.id',
+        id: DocTableDeleteColumnsCommand.id,
         type: MenuItemType.BUTTON,
         positions: [TABLE_DELETE_MENU_ID],
         title: 'table.deleteColumns',
@@ -242,7 +254,7 @@ export function DeleteColumnsMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 
 export function DeleteTableMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'DeleteTableMenuItemFactory.id',
+        id: DocTableDeleteTableCommand.id,
         type: MenuItemType.BUTTON,
         positions: [TABLE_DELETE_MENU_ID],
         title: 'table.deleteTable',

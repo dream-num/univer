@@ -26,7 +26,7 @@ import { useIsEllipsis } from './hooks';
 export interface ITooltipProps {
     visible?: boolean;
 
-    placement?: 'top' | 'bottom';
+    placement?: 'top' | 'bottom' | 'left' | 'right';
 
     title: (() => React.ReactNode) | React.ReactNode;
 

@@ -46,6 +46,7 @@ export interface IProjectNode {
 export interface IUnitGridService {
     readonly unitGrid: IProjectNode[];
     readonly unitGrid$: Observable<IProjectNode[]>;
+    readonly newNode: IProjectNode | null;
     readonly newNode$: Observable<IProjectNode | null>;
 
     setContainerForRender(unitId: string, element: HTMLElement): void;
@@ -71,11 +72,13 @@ export class UnitGridService extends Disposable implements IUnitGridService {
     private readonly _unitGrid$ = new BehaviorSubject<IUnitGrid>(this._unitGrid);
     readonly unitGrid$ = this._unitGrid$.asObservable();
 
+    protected _newNode: IProjectNode | null = null;
     private readonly _newNode$ = new BehaviorSubject<IProjectNode | null>(null);
     readonly newNode$ = this._newNode$.asObservable();
 
     get unitGrid() { return this._unitGrid; }
     get cachedGrid() { return this._cachedGrid; }
+    get newNode() { return this._newNode; }
 
     private _nodeIndex = 0;
 
@@ -94,6 +97,10 @@ export class UnitGridService extends Disposable implements IUnitGridService {
 
         this._unitGrid$.complete();
         this._newNode$.complete();
+    }
+
+    setNewNodeObserver() {
+        this._newNode$.next(this._newNode);
     }
 
     setContainerForRender(unitId: string, element: HTMLElement) {
@@ -122,7 +129,7 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         await this._initData();
 
         this._renderSrv.getRenderAll().forEach((renderer) => this._onRendererCreated(renderer));
-        this.disposeWithMe(this._univerInstanceService.unitAdded$.subscribe((unitModel) => this._onUnitCreated(unitModel)));
+        this.disposeWithMe(this._renderSrv.created$.subscribe((render) => this._onRendererCreated(render)));
         // When hot reload in development mode, render dispose will be triggered, causing data to be cleared. Replace it with unitDispose
         this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unitModel) => this._onUnitDisposed(unitModel)));
     }
@@ -144,17 +151,6 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         if (isInternalEditorID(unitId)) {
             return;
         }
-
-        this._insertNewNode(unitId, type);
-    }
-
-    protected _onUnitCreated(unitModel: UnitModel): void {
-        const unitId = unitModel.getUnitId();
-        if (isInternalEditorID(unitId)) {
-            return;
-        }
-
-        const type = unitModel.type;
 
         this._insertNewNode(unitId, type);
     }
@@ -182,7 +178,7 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         };
 
         this._unitGrid.push(newNode);
-        this._newNode$.next(newNode);
+        this._newNode = newNode; // set new node, for viewport to scroll to
         this._emitLayoutChange();
     }
 

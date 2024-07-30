@@ -51,7 +51,6 @@ const locale: typeof zhCN = {
             subtractDecimal: 'Уменьшить количество десятичных знаков',
             customFormat: 'Custom Format',
             customFormatDes: 'Generate custom number formats based on existing formats.',
-
         },
     },
 };

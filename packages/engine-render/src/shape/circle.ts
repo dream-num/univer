@@ -18,6 +18,7 @@ import type { IKeyValue } from '@univerjs/core';
 
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { UniverRenderingContext } from '../context';
+import { ObjectType } from '../base-object';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -29,6 +30,8 @@ export const CIRCLE_OBJECT_ARRAY = ['radius'];
 
 export class Circle extends Shape<ICircleProps> {
     private _radius: number;
+
+    override objectType = ObjectType.CIRCLE;
 
     constructor(key?: string, props?: ICircleProps) {
         super(key, props);

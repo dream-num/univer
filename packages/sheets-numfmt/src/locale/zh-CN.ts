@@ -49,7 +49,6 @@ const locale = {
             subtractDecimal: '减少小数位',
             customFormat: '自定义格式',
             customFormatDes: '根据现有格式生成自定义数字格式。',
-
         },
     },
 };

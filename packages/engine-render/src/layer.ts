@@ -102,7 +102,7 @@ export class Layer extends Disposable {
      * insert o to _objects[]
      * if o is a group, insert all its children and group itself to _objects[]
      * @param o
-     * @returns
+     * @returns this
      */
     addObject(o: BaseObject) {
         if (o.classType === RENDER_CLASS_TYPE.GROUP) {

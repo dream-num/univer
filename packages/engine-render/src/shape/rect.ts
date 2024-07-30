@@ -18,6 +18,7 @@ import { type IKeyValue, Rectangle } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../context';
 import type { IViewportInfo } from '../basics/vector2';
+import { ObjectType } from '../base-object';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -29,6 +30,8 @@ export const RECT_OBJECT_ARRAY = ['radius'];
 
 export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     private _radius: number = 0;
+
+    override objectType = ObjectType.RECT;
 
     constructor(key?: string, props?: T) {
         super(key, props);

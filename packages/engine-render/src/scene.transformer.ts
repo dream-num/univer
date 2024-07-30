@@ -1609,6 +1609,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
         return currentScene.getEngine()?.activeScene as Nullable<Scene>;
     }
 
+    activeAnObject(applyObject: BaseObject) {
+        this._updateActiveObjectList(applyObject, {} as IPointerEvent);
+    }
+
     private _updateActiveObjectList(applyObject: BaseObject, evt: IPointerEvent | IMouseEvent) {
         const { isCropper } = this._getConfig(applyObject);
 

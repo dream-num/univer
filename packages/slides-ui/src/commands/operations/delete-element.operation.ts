@@ -14,31 +14,34 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IOperation, SlideDataModel } from '@univerjs/core';
+import type { ICommand, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
 
-export interface IActiveSlidePageOperationParams {
+export interface IDeleteElementOperationParams {
     id: string;
-}
-export const ActivateSlidePageOperation: IOperation<IActiveSlidePageOperationParams> = {
-    id: 'slide.operation.activate-slide',
+};
+
+export const DeleteSlideElementOperation: ICommand<IDeleteElementOperationParams> = {
+    id: 'slide.operation.delete-element',
     type: CommandType.OPERATION,
-    handler: (accessor: IAccessor, params: IActiveSlidePageOperationParams) => {
-        const canvasView = accessor.get(CanvasView);
+    handler: (accessor, params) => {
+        if (!params?.id) return false;
+
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const model = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-        const id = model?.getActivePage()?.id;
+        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
 
-        if (!id) return false;
+        if (!slideData) return false;
 
-        const page = canvasView.getRenderUnitByPageId(id);
-        const transformer = page.scene?.getTransformer();
+        const activePage = slideData.getActivePage()!;
 
-        if (!transformer) return false;
-        transformer.clearControls();
+        delete activePage.pageElements[params.id];
 
-        canvasView.activePage(params.id);
+        slideData.updatePage(activePage.id, activePage);
+
+        const canvasview = accessor.get(CanvasView);
+        canvasview.removeObjectById(params.id, activePage.id);
+
         return true;
     },
 };

@@ -55,3 +55,4 @@ export { DocumentEditArea } from './components/docs/view-model/document-view-mod
 export { lineIterator, glyphIterator } from './components/docs/layout/tools';
 export { getOneTextSelectionRange } from './components/docs/text-selection/convert-cursor';
 export { getLastLine } from './components/docs/layout/tools';
+export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tree-node';

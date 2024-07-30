@@ -19,7 +19,7 @@ import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, Tex
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getCommandSkeleton, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getActionsParams, getEmptyTableRow, getInsertRowBody, getRangeInfoFromRanges, INSERT_COLUMN_POSITION, INSERT_ROW_POSITION } from './table';
+import { getColumnWidths, getEmptyTableCell, getEmptyTableRow, getInsertColumnActionsParams, getInsertColumnBody, getInsertRowActionsParams, getInsertRowBody, getRangeInfoFromRanges, getTableColumn, INSERT_COLUMN_POSITION, INSERT_ROW_POSITION } from './table';
 
 // Insert rows and columns are in this file.
 
@@ -128,7 +128,7 @@ export const DocTableInsertRowCommand: ICommand<IDocTableInsertRowCommandParams>
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        const actionParams = getActionsParams(rangeInfo, position, viewModel);
+        const actionParams = getInsertRowActionsParams(rangeInfo, position, viewModel);
 
         if (actionParams == null) {
             return false;
@@ -198,23 +198,134 @@ export interface IDocTableInsertColumnCommandParams {
     position: INSERT_COLUMN_POSITION;
 }
 /**
- * The command to insert table row.
+ * The command to insert table column.
  */
 export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandParams> = {
     id: DocTableInsertColumnCommandId,
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IDocTableInsertColumnCommandParams) => {
         const { position } = params;
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRectRange = textSelectionManagerService.getActiveRectRange();
-        const activeTextRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const activeRectRanges = textSelectionManagerService.getCurrentRectRanges();
+        const activeTextRange = textSelectionManagerService.getActiveTextRange();
+
+        const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);
+
+        if (rangeInfo == null) {
+            return false;
+        }
+
+        const { segmentId } = rangeInfo;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
 
-        return false;
+        if (docDataModel == null || body == null) {
+            return false;
+        }
+        const docSkeletonManagerService = getCommandSkeleton(accessor, docDataModel.getUnitId());
+
+        if (docSkeletonManagerService == null) {
+            return false;
+        }
+
+        const viewModel = docSkeletonManagerService.getViewModel();
+        const unitId = docDataModel?.getUnitId();
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        const actionParams = getInsertColumnActionsParams(rangeInfo, position, viewModel);
+
+        if (actionParams == null) {
+            return false;
+        }
+
+        const { offsets, columnIndex, tableId, rowCount } = actionParams;
+
+        const rawActions: JSONXActions = [];
+
+        const cursor = offsets[0] + 1;
+
+        const textRanges: ITextRangeWithStyle[] = [{
+            startOffset: cursor,
+            endOffset: cursor,
+            collapsed: true,
+        }];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+            },
+        };
+
+        for (const offset of offsets) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: offset,
+                segmentId,
+            });
+
+            const insertBody = getInsertColumnBody();
+
+            textX.push({
+                t: TextXActionType.INSERT,
+                body: insertBody,
+                len: insertBody.dataStream.length,
+                line: 0,
+                segmentId,
+            });
+        }
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+
+        // Step 3: Insert table cell;
+        for (let i = 0; i < rowCount; i++) {
+            const insertCell = getEmptyTableCell();
+            const insertTableSource = jsonX.insertOp(['tableSource', tableId, 'tableRows', i, 'tableCells', columnIndex], insertCell);
+            rawActions.push(insertTableSource!);
+        }
+
+        const snapshot = docDataModel.getSnapshot();
+
+        const documentStyle = snapshot.documentStyle;
+
+        const { marginLeft = 0, marginRight = 0 } = documentStyle;
+
+        const pageWidth = (documentStyle.pageSize?.width ?? 800) - marginLeft - marginRight;
+
+        // eslint-disable-next-line ts/no-non-null-asserted-optional-chain
+        const tableColumns = snapshot?.tableSource?.[tableId].tableColumns!;
+
+        const { newColWidth, widths } = getColumnWidths(pageWidth, tableColumns, columnIndex);
+
+        // Update pre columns width.
+        for (let i = 0; i < widths.length; i++) {
+            const action = jsonX.replaceOp(['tableSource', tableId, 'tableColumns', i, 'size', 'width', 'v'], tableColumns[i].size.width.v, widths[i]);
+            rawActions.push(action!);
+        }
+
+        const insertCol = getTableColumn(newColWidth);
+        const insertTableColumn = jsonX.insertOp(['tableSource', tableId, 'tableColumns', columnIndex], insertCol);
+        rawActions.push(insertTableColumn!);
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
     },
 };

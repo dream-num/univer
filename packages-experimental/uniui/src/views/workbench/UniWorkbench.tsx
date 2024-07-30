@@ -248,7 +248,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                         <RightSidebar />
 
                         {/* uni mode controller buttons */}
-                        <UniControls />
+                        <UniControls reactFlowWrapper={contentRef} />
                     </div>
                 </div>
                 <ComponentContainer key="global" components={globalComponents} />

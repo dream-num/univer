@@ -52,7 +52,10 @@ export const createUniqueKey = (initValue = 0) => {
     };
 };
 
-function cellHasValue(cell: ICellData): boolean {
+function cellHasValue(cell: ICellData | undefined): boolean {
+    if (cell === undefined || cell === null) {
+        return false;
+    }
     return (cell.v !== undefined && cell.v !== null && cell.v !== '') || cell.p !== undefined;
 }
 

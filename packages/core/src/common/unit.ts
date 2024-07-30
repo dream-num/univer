@@ -27,4 +27,5 @@ export abstract class UnitModel<_D = object, T extends UnitType = UnitType> exte
     abstract getUnitId(): string;
 
     abstract name$: Observable<string>;
+    abstract setName(name: string): void;
 }

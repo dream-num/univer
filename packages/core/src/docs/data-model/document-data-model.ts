@@ -62,6 +62,11 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         this._name$.next(this.snapshot.title ?? 'No Title');
     }
 
+    setName(name: string) {
+        this.snapshot.title = name;
+        this._name$.next(name);
+    }
+
     get drawings() {
         return this.snapshot.drawings;
     }
@@ -219,11 +224,6 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
         this._initializeHeaderFooterModel();
         this._name$.next(this.snapshot.title ?? '');
-    }
-
-    setName(name: string) {
-        this.snapshot.title = name;
-        this._name$.next(name);
     }
 
     override dispose() {

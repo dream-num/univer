@@ -41,6 +41,11 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         this.name$ = this._name$.asObservable();
     }
 
+    override setName(name: string): void {
+        this._snapshot.title = name;
+        this._name$.next(name);
+    }
+
     getContainer() {
         return this._snapshot.container;
     }

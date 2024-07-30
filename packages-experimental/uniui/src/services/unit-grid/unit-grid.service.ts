@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier, Disposable, ILocalStorageService, isInternalEditorID } from '@univerjs/core';
+import type { Nullable, UnitModel, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, ILocalStorageService, isInternalEditorID, IUniverInstanceService } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
@@ -46,6 +46,7 @@ export interface IProjectNode {
 export interface IUnitGridService {
     readonly unitGrid: IProjectNode[];
     readonly unitGrid$: Observable<IProjectNode[]>;
+    readonly newNode$: Observable<IProjectNode | null>;
 
     setContainerForRender(unitId: string, element: HTMLElement): void;
 
@@ -69,6 +70,10 @@ export class UnitGridService extends Disposable implements IUnitGridService {
     protected _unitGrid: IUnitGrid = [];
     private readonly _unitGrid$ = new BehaviorSubject<IUnitGrid>(this._unitGrid);
     readonly unitGrid$ = this._unitGrid$.asObservable();
+
+    private readonly _newNode$ = new BehaviorSubject<IProjectNode | null>(null);
+    readonly newNode$ = this._newNode$.asObservable();
+
     get unitGrid() { return this._unitGrid; }
     get cachedGrid() { return this._cachedGrid; }
 
@@ -76,7 +81,8 @@ export class UnitGridService extends Disposable implements IUnitGridService {
 
     constructor(
         @IRenderManagerService protected readonly _renderSrv: IRenderManagerService,
-        @ILocalStorageService protected readonly _localStorageService: ILocalStorageService
+        @ILocalStorageService protected readonly _localStorageService: ILocalStorageService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -87,6 +93,7 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         super.dispose();
 
         this._unitGrid$.complete();
+        this._newNode$.complete();
     }
 
     setContainerForRender(unitId: string, element: HTMLElement) {
@@ -115,8 +122,9 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         await this._initData();
 
         this._renderSrv.getRenderAll().forEach((renderer) => this._onRendererCreated(renderer));
-        this.disposeWithMe(this._renderSrv.created$.subscribe((renderer) => this._onRendererCreated(renderer)));
-        this.disposeWithMe(this._renderSrv.disposed$.subscribe((unitId) => this._onRenderedDisposed(unitId)));
+        this.disposeWithMe(this._univerInstanceService.unitAdded$.subscribe((unitModel) => this._onUnitCreated(unitModel)));
+        // When hot reload in development mode, render dispose will be triggered, causing data to be cleared. Replace it with unitDispose
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unitModel) => this._onUnitDisposed(unitModel)));
     }
 
     protected _cachedGrid: Nullable<IUnitGrid> = null;
@@ -136,6 +144,17 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         if (isInternalEditorID(unitId)) {
             return;
         }
+
+        this._insertNewNode(unitId, type);
+    }
+
+    protected _onUnitCreated(unitModel: UnitModel): void {
+        const unitId = unitModel.getUnitId();
+        if (isInternalEditorID(unitId)) {
+            return;
+        }
+
+        const type = unitModel.type;
 
         this._insertNewNode(unitId, type);
     }
@@ -163,10 +182,12 @@ export class UnitGridService extends Disposable implements IUnitGridService {
         };
 
         this._unitGrid.push(newNode);
+        this._newNode$.next(newNode);
         this._emitLayoutChange();
     }
 
-    protected _onRenderedDisposed(unitId: string): void {
+    protected _onUnitDisposed(unitModel: UnitModel): void {
+        const unitId = unitModel.getUnitId();
         const idx = this._unitGrid.findIndex((item) => item.id === unitId);
         if (idx !== -1) {
             this._unitGrid.splice(idx, 1);

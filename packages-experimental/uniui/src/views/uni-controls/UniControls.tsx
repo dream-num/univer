@@ -17,11 +17,13 @@
 import {
     useReactFlow,
 } from '@xyflow/react';
-import React, { useCallback, useLayoutEffect } from 'react';
-import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ViewModeSingle, ZoomReduceSingle } from '@univerjs/icons';
 import { Dropdown, Tooltip } from '@univerjs/design';
 import clsx from 'clsx';
+import { useDependency } from '@univerjs/core';
 import { UniDiv } from '../uni-toolbar/UniFloatToolbar';
+import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
 import styles from './index.module.less';
 
 export const UniControlButton = (props: { tooltips: string; children?: React.ReactElement; onClick: () => void; style?: React.CSSProperties }) => {
@@ -43,10 +45,48 @@ export const DEFAULT_ZOOM = 1;
 // 0 means fit view
 const shortcuts = [50, 75, 100, 125, 150, 175, 200, 0];
 
-export const UniControls = (props: { zoom: number }) => {
-    const { zoom } = props;
+// Define a Viewport interface to abstract viewport operations
+interface Viewport {
+    width(): number;
+    height(): number;
+    x(): number;
+    y(): number;
+    scrollTo(newX: number, newY: number): void;
+}
+
+  // How to get the viewport
+const getViewport = (reactFlowInstance: any): Viewport => {
+    return {
+        width: () => reactFlowInstance?.viewport?.width || 0,
+        height: () => reactFlowInstance?.viewport?.height || 0,
+        x: () => reactFlowInstance?.viewport?.x || 0,
+        y: () => reactFlowInstance?.viewport?.y || 0,
+        scrollTo: (newX: number, newY: number) => {
+            reactFlowInstance?.setViewport({
+                x: newX,
+                y: newY,
+                zoom: reactFlowInstance?.viewport?.zoom || 1,
+            });
+        },
+    };
+};
+
+  // How to move the viewport
+const moveViewportTo = (viewport: Viewport, targetX: number, targetY: number): void => {
+    const viewportWidth = viewport.width();
+    const viewportHeight = viewport.height();
+    const viewportCenterX = viewportWidth / 2;
+    const viewportCenterY = viewportHeight / 2;
+    const deltaX = targetX - viewportCenterX;
+    const deltaY = targetY - viewportCenterY;
+    viewport.scrollTo(viewport.x() + deltaX, viewport.y() + deltaY);
+};
+
+export const UniControls = ({ reactFlowWrapper, zoom }: { reactFlowWrapper: React.RefObject<HTMLDivElement>; zoom: number }) => {
     const zoomPercent = Math.floor(zoom * 100);
-    const { zoomIn, zoomOut, fitView, getNodes, setCenter } = useReactFlow();
+    const { zoomIn, zoomOut, fitView, setViewport, getNodes, setCenter, getZoom } = useReactFlow();
+    const unitGridService = useDependency(IUnitGridService);
+
     const onZoomInHandler = () => {
         zoomIn();
     };
@@ -82,6 +122,40 @@ export const UniControls = (props: { zoom: number }) => {
             setZoomAtCenter(1);
         }, 1000);
     }, [setZoomAtCenter]);
+    const handleMoveViewport = (targetX: number, targetY: number) => {
+        if (reactFlowWrapper.current) {
+            const reactFlowInstance = {
+                viewport: {
+                    width: reactFlowWrapper.current.clientWidth,
+                    height: reactFlowWrapper.current.clientHeight,
+                    x: reactFlowWrapper.current.scrollLeft,
+                    y: reactFlowWrapper.current.scrollTop,
+                    zoom: getZoom(),
+                },
+                setViewport,
+            };
+            const viewport = getViewport(reactFlowInstance);
+            moveViewportTo(viewport, targetX, targetY);
+        }
+    };
+
+    useEffect(() => {
+        let newNodeSubscribe = { unsubscribe: () => {} };
+        const timer = setTimeout(() => {
+            fitView();
+
+            newNodeSubscribe = unitGridService.newNode$.subscribe((node) => {
+                if (node) {
+                    handleMoveViewport(node.position.x, node.position.y);
+                }
+            });
+        }, 1000);
+
+        return () => {
+            clearTimeout(timer);
+            newNodeSubscribe.unsubscribe();
+        };
+    }, [fitView]);
 
     return (
         <div className={styles.uniControls}>

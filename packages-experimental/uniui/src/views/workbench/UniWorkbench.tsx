@@ -255,7 +255,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                         <RightSidebar />
 
                         {/* uni mode controller buttons */}
-                        <UniControls zoom={zoom} />
+                        <UniControls reactFlowWrapper={contentRef} zoom={zoom} />
                     </div>
                 </div>
                 <ComponentContainer key="global" components={globalComponents} />

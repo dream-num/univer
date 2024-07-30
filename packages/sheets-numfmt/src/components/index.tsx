@@ -33,6 +33,7 @@ import { CurrencyPanel, isCurrencyPanel } from './currency';
 import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
 import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
+import { CustomFormat } from './custom-format';
 
 export interface ISheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string; row: number; col: number };
@@ -52,6 +53,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
                 { label: 'sheet.numfmt.currency', component: CurrencyPanel },
                 { label: 'sheet.numfmt.date', component: DatePanel },
                 { label: 'sheet.numfmt.thousandthPercentile', component: ThousandthPercentilePanel },
+                { label: 'sheet.numfmt.customFormat', component: CustomFormat },
             ].map((item) => ({ ...item, label: t(item.label) })),
         []
     );
@@ -113,7 +115,7 @@ export const SheetNumfmtPanel: FC<ISheetNumfmtPanelProps> = (props) => {
             <div>
                 <div className="label m-t-14">{t('sheet.numfmt.numfmtType')}</div>
                 <div className="m-t-8">
-                    <Select onChange={handleSelect} options={selectOptions} value={type} />
+                    <Select onChange={handleSelect} options={selectOptions} value={type} style={{ width: '100%' }} />
                 </div>
                 <div>
                     {BusinessComponent && (

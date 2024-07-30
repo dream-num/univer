@@ -1,0 +1,41 @@
+.custom-format {
+    &-title {
+        margin-top: 16px;
+    }
+
+    &-input {
+        margin-top: 8px;
+        width: 100%;
+    }
+
+    &-history-list {
+        margin-top: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid var(---Grey-200, #e5e5e5);
+        max-height: 400px;
+        overflow: scroll;
+        &-item {
+            padding: 6px 0px;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            cursor: pointer;
+            &-icon-wrap {
+                width: 16px;
+                display: flex;
+                align-items: center;
+                color: #274fee;
+            }
+        }
+    }
+
+    &-des {
+        margin-top: 8px;
+        color: var(---Grey-600, #7a7a7a);
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 16px;
+    }
+}

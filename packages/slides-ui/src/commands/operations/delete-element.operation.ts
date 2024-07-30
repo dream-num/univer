@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, SlideDataModel } from '@univerjs/core';
-import { BasicShapes, CommandType, generateRandomId, IUniverInstanceService, PageElementType, UniverInstanceType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
 
 export interface IDeleteElementOperationParams {

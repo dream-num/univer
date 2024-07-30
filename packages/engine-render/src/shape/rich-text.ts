@@ -27,7 +27,7 @@ import type {
 } from '@univerjs/core';
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '@univerjs/core';
 
-import { BaseObject } from '../base-object';
+import { BaseObject, ObjectType } from '../base-object';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { IViewportInfo } from '../basics/vector2';
 import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
@@ -76,6 +76,8 @@ export class RichText extends BaseObject {
     private _bd?: Nullable<IBorderData>;
 
     private _cl?: Nullable<IColorStyle>;
+
+    override objectType = ObjectType.RICH_TEXT;
 
     constructor(
         private _localeService: LocaleService,

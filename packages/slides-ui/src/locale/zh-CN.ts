@@ -35,6 +35,11 @@ const locale = {
                 float: '插入浮动图片',
             },
         },
+
+        popup: {
+            edit: '编辑',
+            delete: '删除',
+        },
     },
 };
 

@@ -17,11 +17,12 @@
 import type { IDisposable, Nullable, SlideDataModel } from '@univerjs/core';
 import { FOCUSING_COMMON_DRAWINGS, IContextService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, ObjectType } from '@univerjs/engine-render';
 import { IUIPartsService } from '@univerjs/ui';
 import { CanvasView } from '@univerjs/slides';
 import { SlideCanvasPopMangerService } from '../services/slide-popup-manager.service';
 import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
+import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 
 @OnLifecycle(LifecycleStages.Steady, SlidePopupMenuController)
 export class SlidePopupMenuController extends RxDisposable {
@@ -122,7 +123,7 @@ export class SlidePopupMenuController extends RxDisposable {
                             direction: 'horizontal',
                             offset: [2, 0],
                             extraProps: {
-                                menuItems: this._getImageMenuItems(unitId, 'subUnitId'),
+                                menuItems: this._getMenuItemsByObjectType(object.objectType, oKey, unitId),
                             },
                         }));
 
@@ -149,36 +150,76 @@ export class SlidePopupMenuController extends RxDisposable {
         });
     }
 
-    private _getImageMenuItems(unitId: string, subUnitId: string) {
-        return [
-            {
-                label: 'image-popup.edit',
+    private _getMenuItemsByObjectType(objectType: ObjectType, oKey: string, unitId: string) {
+        const menuItems = [];
+
+        if (objectType === ObjectType.RICH_TEXT) {
+            menuItems.push({
+                label: 'slide.popup.edit',
                 index: 0,
-                commandId: 'EditSheetDrawingOperation.id',
-                commandParams: { unitId, subUnitId },
+                commandId: 'xxxx',
+                commandParams: {},
                 disable: false,
-            },
-            {
-                label: 'image-popup.delete',
-                index: 1,
-                commandId: 'RemoveSheetDrawingCommand.id',
-                commandParams: { unitId, drawings: [{ unitId, subUnitId }] },
+            });
+        } else if (objectType === ObjectType.IMAGE) {
+            menuItems.push({
+                label: 'slide.popup.edit',
+                index: 0,
+                commandId: 'xxxx',
+                commandParams: {},
                 disable: false,
-            },
-            {
-                label: 'image-popup.crop',
-                index: 2,
-                commandId: 'OpenImageCropOperation.id',
-                commandParams: { unitId, subUnitId },
+            });
+        } else if (objectType === ObjectType.RECT) {
+            menuItems.push({
+                label: 'slide.popup.edit',
+                index: 0,
+                commandId: 'xxxx',
+                commandParams: {},
                 disable: false,
+            });
+        }
+
+        menuItems.push({
+            label: 'slide.popup.delete',
+            index: 5,
+            commandId: DeleteSlideElementOperation.id,
+            commandParams: {
+                id: oKey,
             },
-            {
-                label: 'image-popup.reset',
-                index: 3,
-                commandId: 'ImageResetSizeOperation.id',
-                commandParams: [{ unitId, subUnitId }],
-                disable: false,
-            },
-        ];
+            disable: false,
+        });
+
+        // return [
+        //     {
+        //         label: 'image-popup.edit',
+        //         index: 0,
+        //         commandId: 'EditSheetDrawingOperation.id',
+        //         commandParams: { unitId },
+        //         disable: false,
+        //     },
+        //     {
+        //         label: 'image-popup.delete',
+        //         index: 1,
+        //         commandId: 'RemoveSheetDrawingCommand.id',
+        //         commandParams: { unitId, drawings: [{ unitId }] },
+        //         disable: false,
+        //     },
+        //     {
+        //         label: 'image-popup.crop',
+        //         index: 2,
+        //         commandId: 'OpenImageCropOperation.id',
+        //         commandParams: { unitId },
+        //         disable: false,
+        //     },
+        //     {
+        //         label: 'image-popup.reset',
+        //         index: 3,
+        //         commandId: 'ImageResetSizeOperation.id',
+        //         commandParams: [{ unitId }],
+        //         disable: false,
+        //     },
+        // ];
+
+        return menuItems;
     }
 }

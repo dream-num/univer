@@ -37,6 +37,11 @@ const locale: typeof zhCN = {
                 float: 'Insert Float Image',
             },
         },
+
+        popup: {
+            edit: 'Edit',
+            delete: 'Delete',
+        },
     },
 };
 

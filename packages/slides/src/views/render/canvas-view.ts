@@ -483,4 +483,12 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         const transformer = scene.getTransformer();
         transformer?.activeAnObject(obj);
     }
+
+    removeObjectById(id: string, pageID: PageID) {
+        const { scene } = this.getRenderUnitByPageId(pageID);
+        if (!scene) return;
+        scene.removeObject(id);
+        const transformer = scene.getTransformer();
+        transformer?.clearControls();
+    }
 }

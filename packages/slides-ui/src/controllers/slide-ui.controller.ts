@@ -29,6 +29,7 @@ import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/compo
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
 import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
+import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
 import { SlideAddTextMenuItemFactory, TEXT_ICON_ID } from './text.menu';
@@ -93,6 +94,7 @@ export class SlideUIController extends Disposable {
             InsertSlideFloatImageOperation,
             SlideAddTextOperation,
             InsertSlideShapeRectangleOperation,
+            DeleteSlideElementOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

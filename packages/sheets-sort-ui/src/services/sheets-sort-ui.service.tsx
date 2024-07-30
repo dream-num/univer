@@ -29,9 +29,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { expandToContinuousRange, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
-import { expandToContinuousRange } from '@univerjs/sheets-ui';
 
 import type { ISortOption } from '@univerjs/sheets-sort';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';

@@ -49,6 +49,9 @@ const locale: typeof zhCN = {
             thousandthPercentileDes: '千分位符號格式用於一般數字的表示。貨幣和會計格式則提供貨幣值計算的專用格式。 ',
             addDecimal: '增加小數位',
             subtractDecimal: '減少小數位',
+            customFormat: '自定义格式',
+            customFormatDes: '根据现有格式生成自定义数字格式。',
+
         },
     },
 };

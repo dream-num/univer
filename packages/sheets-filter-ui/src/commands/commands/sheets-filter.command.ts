@@ -18,10 +18,9 @@ import type { IAccessor, ICommand, IMutationInfo, Nullable, Workbook } from '@un
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, Quantity, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-import { isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
+import { expandToContinuousRange, isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
 import type { FilterColumn, IAutoFilter, IFilterColumn, IReCalcSheetsFilterMutationParams, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
-import { expandToContinuousRange } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 
 /**

@@ -15,9 +15,10 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { CustomRangeType, Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools, UniverInstanceType, updateAttributeByDelete } from '@univerjs/core';
+import { CustomRangeType, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools, UniverInstanceType, updateAttributeByDelete } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
-import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
+import type { IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
+import { AddDocHyperLinkMutation, DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { IDocClipboardService } from '@univerjs/docs-ui';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkClipboardController)
@@ -26,7 +27,8 @@ export class DocHyperLinkClipboardController extends Disposable {
         @Inject(IDocClipboardService) private readonly _docClipboardService: IDocClipboardService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocHyperLinkModel) private readonly _hyperLinkModel: DocHyperLinkModel,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -65,25 +67,39 @@ export class DocHyperLinkClipboardController extends Disposable {
                     }
                     return bodyWithoutLink;
                 } else {
+                    const unitId = doc.getUnitId();
                     const customRangeIds = new Set(customRanges?.map((i) => i.rangeType === CustomRangeType.HYPERLINK && i.rangeId));
                     body.customRanges?.forEach((range) => {
                         if (range.rangeType === CustomRangeType.HYPERLINK) {
                             if (customRangeIds.has(range.rangeId)) {
-                                const link = this._hyperLinkModel.getLink(doc.getUnitId(), range.rangeId);
+                                const link = this._hyperLinkModel.getLink(unitId, range.rangeId);
                                 if (link) {
                                     const newId = Tools.generateRandomId();
-                                    this._hyperLinkModel.addLink(doc.getUnitId(), {
-                                        payload: link.payload,
-                                        id: newId,
-                                    });
+                                    this._commandService.executeCommand(
+                                        AddDocHyperLinkMutation.id,
+                                        {
+                                            unitId,
+                                            link: {
+                                                id: newId,
+                                                payload: link.payload,
+                                            },
+                                        } as IAddDocHyperLinkMutationParams
+                                    );
+
                                     range.rangeId = newId;
                                 }
                             } else if (body.payloads?.[range.rangeId]) {
                                 const url = body.payloads[range.rangeId];
-                                this._hyperLinkModel.addLink(doc.getUnitId(), {
-                                    payload: url,
-                                    id: range.rangeId,
-                                });
+                                this._commandService.executeCommand(
+                                    AddDocHyperLinkMutation.id,
+                                    {
+                                        unitId,
+                                        link: {
+                                            id: range.rangeId,
+                                            payload: url,
+                                        },
+                                    } as IAddDocHyperLinkMutationParams
+                                );
                             }
                         }
                     });

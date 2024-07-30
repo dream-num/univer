@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Disposable, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { CustomRangeType, Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DocCustomRangeService } from '@univerjs/docs';
-import { DocMentionModel } from '../models/doc-mention.model';
+import type { IAddDocMentionMutationParams } from '@univerjs/docs-mention';
+import { AddDocMentionMutation, DocMentionModel } from '@univerjs/docs-mention';
 
 @OnLifecycle(LifecycleStages.Ready, DocMentionCustomRangeController)
 export class DocMentionCustomRangeController extends Disposable {
     constructor(
         @Inject(DocCustomRangeService) private readonly _docCustomRangeService: DocCustomRangeService,
-        @Inject(DocMentionModel) private readonly _docMentionModel: DocMentionModel
+        @Inject(DocMentionModel) private readonly _docMentionModel: DocMentionModel,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -46,14 +48,21 @@ export class DocMentionCustomRangeController extends Disposable {
                                 rangeId: id,
                             };
                         }
-                        const link = this._docMentionModel.copyMention(unitId, rangeId);
-                        if (!link) {
+                        const mention = this._docMentionModel.copyMention(unitId, rangeId);
+                        this._commandService.executeCommand(
+                            AddDocMentionMutation.id,
+                            {
+                                unitId,
+                                mention,
+                            } as IAddDocMentionMutationParams
+                        );
+                        if (!mention) {
                             return range;
                         }
 
                         return {
                             ...ext,
-                            rangeId: link.id,
+                            rangeId: mention.id,
                             rangeType,
                         };
                     }

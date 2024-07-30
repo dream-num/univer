@@ -52,7 +52,10 @@ export const createUniqueKey = (initValue = 0) => {
     };
 };
 
-function cellHasValue(cell: ICellData): boolean {
+function cellHasValue(cell: ICellData | undefined): boolean {
+    if (cell === undefined || cell === null) {
+        return false;
+    }
     return (cell.v !== undefined && cell.v !== null && cell.v !== '') || cell.p !== undefined;
 }
 
@@ -65,6 +68,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
     let changed = true;
     const destRange: IRange = { ...startRange }; // startRange should not be used below
 
+    const allMatrix = worksheet.getMatrixWithMergedCells(0, 0, maxRow - 1, maxColumn - 1);
     while (changed) {
         changed = false;
 
@@ -72,86 +76,84 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
             // see if there are value in the upper row of contents
             // set `changed` to true if `startRow` really changes
             const destRow = destRange.startRow - 1; // it may decrease if there are merged cell
-            const matrixFromLastRow = worksheet.getMatrixWithMergedCells(
-                destRow,
-                destRange.startColumn,
-                destRow,
-                destRange.endColumn
-            );
 
-            // we should check if there are value in the upper row of contents, if it does
-            // we should update the `destRange` and set `changed` to true
-            matrixFromLastRow.forValue((row, col, value) => {
-                if (cellHasValue(value)) {
-                    destRange.startRow = Math.min(row, destRange.startRow);
+            const checkRange = {
+                startRow: destRow,
+                startColumn: destRange.startColumn,
+                endRow: destRow,
+                endColumn: destRange.endColumn,
+            };
+            for (let col = checkRange.startColumn; col <= checkRange.endColumn; col++) {
+                const cell = allMatrix.getValue(checkRange.startRow, col);
+                if (cellHasValue(cell)) {
+                    destRange.startRow = Math.min(checkRange.startRow, destRange.startRow);
                     destRange.startColumn = Math.min(col, destRange.startColumn);
                     destRange.endColumn = Math.max(col, destRange.endColumn);
                     changed = true;
                 }
-            });
+            }
         }
 
         if (down && destRange.endRow !== maxRow - 1) {
             const destRow = destRange.endRow + 1;
-            const matrixFromLastRow = worksheet.getMatrixWithMergedCells(
-                destRow,
-                destRange.startColumn,
-                destRow,
-                destRange.endColumn
-            );
-
-            matrixFromLastRow.forValue((row, col, value) => {
-                if (cellHasValue(value)) {
+            const checkRange = {
+                startRow: destRow,
+                startColumn: destRange.startColumn,
+                endRow: destRow,
+                endColumn: destRange.endColumn,
+            };
+            for (let col = checkRange.startColumn; col <= checkRange.endColumn; col++) {
+                const cellValue = allMatrix.getValue(checkRange.startRow, col);
+                if (cellHasValue(cellValue)) {
+                    destRange.endRow = Math.max(checkRange.endRow, destRange.endRow);
                     destRange.endRow = Math.max(
-                        row + (value.rowSpan !== undefined ? value.rowSpan - 1 : 0),
+                        checkRange.endRow + (cellValue.rowSpan !== undefined ? cellValue.rowSpan - 1 : 0),
                         destRange.endRow
                     );
                     destRange.startColumn = Math.min(col, destRange.startColumn);
                     destRange.endColumn = Math.max(col, destRange.endColumn);
                     changed = true;
                 }
-            });
+            }
         }
 
         if (left && destRange.startColumn !== 0) {
             const destCol = destRange.startColumn - 1;
-            const matrixFromLastCol = worksheet.getMatrixWithMergedCells(
-                destRange.startRow,
-                destCol,
-                destRange.endRow,
-                destCol
-            );
-
-            matrixFromLastCol.forValue((row, col, value) => {
-                if (cellHasValue(value)) {
-                    destRange.startColumn = Math.min(col, destRange.startColumn);
+            const checkRange = {
+                startRow: destRange.startRow,
+                startColumn: destCol,
+                endRow: destRange.endRow,
+                endColumn: destCol,
+            };
+            for (let row = checkRange.startRow; row <= checkRange.endRow; row++) {
+                const cell = allMatrix.getValue(row, checkRange.startColumn);
+                if (cellHasValue(cell)) {
+                    destRange.startColumn = Math.min(checkRange.startColumn, destRange.startColumn);
                     destRange.startRow = Math.min(row, destRange.startRow);
                     destRange.endRow = Math.max(row, destRange.endRow);
                     changed = true;
                 }
-            });
+            }
         }
 
         if (right && destRange.endColumn !== maxColumn - 1) {
             const destCol = destRange.endColumn + 1;
-            const matrixFromLastCol = worksheet.getMatrixWithMergedCells(
-                destRange.startRow,
-                destCol,
-                destRange.endRow,
-                destCol
-            );
-
-            matrixFromLastCol.forValue((row, col, value) => {
-                if (cellHasValue(value)) {
+            const checkRange = {
+                startRow: destRange.startRow,
+                startColumn: destCol,
+                endRow: destRange.endRow,
+                endColumn: destCol,
+            };
+            for (let row = checkRange.startRow; row <= checkRange.endRow; row++) {
+                const cellValue = allMatrix.getValue(row, checkRange.endColumn);
+                if (cellHasValue(cellValue)) {
                     destRange.endColumn = Math.max(
-                        col + (value.colSpan !== undefined ? value.colSpan - 1 : 0),
+                        checkRange.endColumn + (cellValue.colSpan !== undefined ? cellValue.colSpan - 1 : 0),
                         destRange.endColumn
                     );
-                    destRange.startRow = Math.min(row, destRange.startRow);
-                    destRange.endRow = Math.max(row, destRange.endRow);
                     changed = true;
                 }
-            });
+            }
         }
     }
 

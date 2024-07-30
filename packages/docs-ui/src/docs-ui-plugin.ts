@@ -79,12 +79,12 @@ export class UniverDocsUIPlugin extends Plugin {
 
     override onReady(): void {
         this._initRenderBasics();
+        this._markDocAsFocused();
     }
 
     override onRendered(): void {
         this._initUI();
         this._initRenderModules();
-        this._markDocAsFocused();
     }
 
     private _initializeCommands(): void {

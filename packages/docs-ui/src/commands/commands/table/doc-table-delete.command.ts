@@ -104,7 +104,7 @@ export const DocTableDeleteRowsCommand: ICommand<IDocTableDeleteRowsCommandParam
         rawActions.push(jsonX.editOp(textX.serialize(), path)!);
 
         // Step 3: delete table rows;
-        for (const index of rowIndexes) {
+        for (const index of rowIndexes.reverse()) {
             const action = jsonX.removeOp(['tableSource', tableId, 'tableRows', index]);
             rawActions.push(action!);
         }
@@ -208,6 +208,7 @@ export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsComman
         rawActions.push(jsonX.editOp(textX.serialize(), path)!);
 
         // Step 3: delete table columns;
+        columnIndexes.reverse();
         for (let i = 0; i < rowCount; i++) {
             for (const index of columnIndexes) {
                 const action = jsonX.removeOp(['tableSource', tableId, 'tableRows', i, 'tableCells', index]);

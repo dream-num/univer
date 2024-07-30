@@ -58,6 +58,7 @@ import { DocStateChangeManagerService } from './services/doc-state-change-manage
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
 import { DocCustomRangeService } from './services/doc-custom-range.service';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
+import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -121,6 +122,7 @@ export class UniverDocsPlugin extends Plugin {
                 AlignRightCommand,
                 AlignOperationCommand,
                 AlignJustifyCommand,
+                DocsRenameMutation,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);

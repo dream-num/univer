@@ -55,7 +55,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
     const cellData = worksheet.getCell(row, col);
     const rule = cellData?.dataValidation?.rule;
     const validator = cellData?.dataValidation?.validator as DateValidator | undefined;
-    const cellStr = getCellValueOrigin(cellData);
+    const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
     const originDate = transformDate(cellStr);
     const [localDate, setLocalDate] = useState<dayjs.Dayjs | undefined>(originDate);
     const showTime = Boolean(rule?.bizInfo?.showTime);

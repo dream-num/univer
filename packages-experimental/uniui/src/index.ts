@@ -17,3 +17,4 @@
 export { UniverUniUIPlugin } from './plugin';
 export { UniUIPart } from './views/outline/Outline';
 export { getGridUnitLocalCacheKey, UnitGridService, IUnitGridService, type IProjectNode, type IUnitGrid } from './services/unit-grid/unit-grid.service';
+export { UniFloatToolbarUIPart } from './views/uni-toolbar/UniFloatToolbar';

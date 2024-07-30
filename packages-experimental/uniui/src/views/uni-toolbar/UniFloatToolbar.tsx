@@ -16,8 +16,8 @@
 
 import { flip, offset, shift, useFloating } from '@floating-ui/react-dom';
 import React, { useEffect, useImperativeHandle } from 'react';
-import { IUniverInstanceService, LocaleService, type Nullable, useDependency, useObservable } from '@univerjs/core';
-import { ToolbarItem, useToolbarGroups } from '@univerjs/ui';
+import { IUniverInstanceService, type Nullable, useDependency, useObservable } from '@univerjs/core';
+import { ComponentContainer, ToolbarItem, useComponentsOfPart, useToolbarGroups } from '@univerjs/ui';
 import type { IUnitRendererProps } from '../workbench/UniWorkbench';
 import { DELETE_MENU_ID, DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
 import styles from './index.module.less';
@@ -44,12 +44,13 @@ export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: N
         placement: 'top',
         middleware: [offset(10), flip(), shift({ padding: 5 })],
     });
-    const localeService = useDependency(LocaleService);
 
     const { visibleItems } = useToolbarGroups(MENU_POSITIONS, UNI_MENU_POSITIONS.TOOLBAR_FLOAT);
     const uniVisibleItems = UNI_FLOATING_TOOLBAR_SCHEMA.map((id) => visibleItems.find((item) => item.id === id)).filter((item) => !!item);
 
     const { setReference, setFloating } = refs;
+
+    const toolbarNameComponents = useComponentsOfPart(UniFloatToolbarUIPart.NAME);
 
     useImperativeHandle(ref, () => ({
         update: () => update(),
@@ -59,6 +60,7 @@ export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: N
         if (anchorRef.current) {
             setReference(anchorRef.current);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [anchorRef.current, setReference]);
 
     if (!node || !anchorRef.current) {
@@ -72,7 +74,11 @@ export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: N
             style={{ position: strategy, top: y ?? 0, left: x ?? 0 }}
         >
             <div className={styles.uniToolbar}>
-                <UnitName unitId={node.unitId} />
+                <ComponentContainer
+                    key="name"
+                    components={toolbarNameComponents}
+                    fallback={<UnitName unitId={node.unitId} />}
+                />
                 <UniDiv />
                 <div className={styles.toolbarGroup}>
                     {uniVisibleItems.map(
@@ -99,3 +105,7 @@ export function UnitName({ unitId }: { unitId: string }) {
         </div>
     );
 };
+
+export enum UniFloatToolbarUIPart {
+    NAME = 'name',
+}

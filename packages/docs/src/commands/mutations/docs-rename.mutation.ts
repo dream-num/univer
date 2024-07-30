@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+
+export interface IDocsRenameMutationParams {
+    name: string;
+    unitId: string;
+}
 
 export const DocsRenameMutation: ICommand = {
     id: 'doc.mutation.rename-doc',
     type: CommandType.MUTATION,
-    handler: () => {
+    handler: (accessor, params: IDocsRenameMutationParams) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const doc = univerInstanceService.getUnit<DocumentDataModel>(params.unitId, UniverInstanceType.UNIVER_DOC);
+        if (!doc) {
+            return false;
+        }
+        doc.setName(params.name);
         return true;
     },
 };

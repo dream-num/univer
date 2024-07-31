@@ -279,8 +279,8 @@ export function transformSnapshotToWorkbookData(
     // Deal with workbook meta
     const otherMeta = decodeWorksheetOtherMetas(workbookMeta.originalMeta);
     const workbookData: IWorkbookData = {
-        id: snapshot.unitID,
-        rev: workbookMeta.rev,
+        id: snapshot.unitID || workbookMeta.unitID,
+        rev: snapshot.rev || workbookMeta.rev,
         name: workbookMeta.name,
         sheetOrder: workbookMeta.sheetOrder,
         appVersion: '',

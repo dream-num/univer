@@ -56,13 +56,14 @@ import {
     MenuItemType,
     MenuPosition,
 } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
+import type { IAccessor, PresetListType } from '@univerjs/core';
 import { combineLatest, Observable } from 'rxjs';
 
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
+import { ORDER_LIST_TYPE_COMPONENT } from '../../components/list-type-picker';
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
@@ -558,11 +559,19 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     };
 }
 
-export function OrderListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType> {
     return {
         id: OrderListCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
-        type: MenuItemType.BUTTON,
+        type: MenuItemType.BUTTON_SELECTOR,
+        selections: [
+            {
+                label: {
+                    name: ORDER_LIST_TYPE_COMPONENT,
+                    hoverable: false,
+                },
+            },
+        ],
         icon: 'OrderSingle',
         tooltip: 'toolbar.order',
         positions: [MenuPosition.TOOLBAR_START],
@@ -570,11 +579,19 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function BulletListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType> {
     return {
         id: BulletListCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
-        type: MenuItemType.BUTTON,
+        type: MenuItemType.BUTTON_SELECTOR,
+        selections: [
+            {
+                label: {
+                    name: ORDER_LIST_TYPE_COMPONENT,
+                    hoverable: false,
+                },
+            },
+        ],
         icon: 'UnorderSingle',
         tooltip: 'toolbar.unorder',
         positions: [MenuPosition.TOOLBAR_START],

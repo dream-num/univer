@@ -189,6 +189,127 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
     },
 };
 
+interface IChangeListTypeCommandParams {
+    listType: PresetListType;
+}
+
+export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
+    id: 'doc.command.change-list-type',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: (accessor, params: IChangeListTypeCommandParams) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const { listType } = params;
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const activeRange = textSelectionManagerService.getActiveRange();
+        if (docDataModel == null || activeRange == null) {
+            return false;
+        }
+
+        const { segmentId } = activeRange;
+
+        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
+        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+        const serializedSelections = selections.map(serializeTextRange);
+
+        if (paragraphs == null) {
+            return false;
+        }
+
+        const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
+        const currentParagraphs = getParagraphsRelative(activeRange, paragraphs);
+        const unitId = docDataModel.getUnitId();
+        const ID_LENGTH = 6;
+        const listId = Tools.generateRandomId(ID_LENGTH);
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges: serializedSelections,
+            },
+        };
+
+        const memoryCursor = new MemoryCursor();
+
+        memoryCursor.reset();
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        const customLists = docDataModel.getSnapshot().lists ?? {};
+
+        const lists = {
+            ...PRESET_LIST_TYPE,
+            ...customLists,
+        };
+
+        const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
+
+        for (const paragraph of currentParagraphs) {
+            const { startIndex, paragraphStyle = {} } = paragraph;
+            const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
+            const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
+            const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
+            const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
+
+            const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: startIndex - memoryCursor.cursor,
+                segmentId,
+            });
+
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: 1,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                ...paragraphStyle,
+                                indentFirstLine: undefined,
+                                hanging: listHanging,
+                                indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
+                            },
+                            bullet: {
+                                ...(paragraph.bullet ?? {
+                                    nestingLevel: 0,
+                                    textStyle: {
+                                        fs: 20,
+                                    },
+                                }),
+                                listType,
+                                listId,
+                            },
+                        },
+                    ],
+                },
+                segmentId,
+                coverType: UpdateDocsAttributeType.REPLACE,
+            });
+
+            memoryCursor.moveCursorTo(startIndex + 1);
+        }
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
 export enum ChangeListNestingLevelType {
     increase = 1,
     decrease = -1,
@@ -312,15 +433,23 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
     },
 };
 
-interface IBulletListCommandParams { }
+interface IBulletListCommandParams {
+    value?: PresetListType;
+}
 
 export const BulletListCommand: ICommand<IBulletListCommandParams> = {
     id: 'doc.command.bullet-list',
 
     type: CommandType.COMMAND,
 
-    handler: (accessor) => {
+    handler: (accessor, params) => {
         const commandService = accessor.get(ICommandService);
+
+        if (params?.value) {
+            return commandService.syncExecuteCommand(ChangeListTypeCommand.id, {
+                listType: params.value,
+            });
+        }
 
         return commandService.syncExecuteCommand(ListOperationCommand.id, {
             listType: PresetListType.BULLET_LIST,
@@ -328,18 +457,25 @@ export const BulletListCommand: ICommand<IBulletListCommandParams> = {
     },
 };
 
-interface IOrderListCommandParams { }
+interface IOrderListCommandParams {
+    value?: PresetListType;
+}
 
 export const OrderListCommand: ICommand<IOrderListCommandParams> = {
     id: 'doc.command.order-list',
 
     type: CommandType.COMMAND,
 
-    handler: (accessor) => {
+    handler: (accessor, params) => {
         const commandService = accessor.get(ICommandService);
+        if (params?.value) {
+            return commandService.syncExecuteCommand(ChangeListTypeCommand.id, {
+                listType: params.value,
+            });
+        }
 
         return commandService.syncExecuteCommand(ListOperationCommand.id, {
-            listType: PresetListType.ORDER_LIST,
+            listType: PresetListType.ORDER_LIST_1ai,
         });
     },
 };
@@ -363,6 +499,31 @@ export function getParagraphsInRange(activeRange: IActiveTextRange, paragraphs: 
     }
 
     return results;
+}
+
+export function getParagraphsRelative(activeRange: IActiveTextRange, paragraphs: IParagraph[]) {
+    const selectionParagraphs = getParagraphsInRange(activeRange, paragraphs);
+    let startIndex = paragraphs.indexOf(selectionParagraphs[0]);
+    let endIndex = paragraphs.indexOf(selectionParagraphs[selectionParagraphs.length - 1]);
+    if (selectionParagraphs[0].bullet) {
+        let prevParagraph = paragraphs[startIndex - 1];
+        while (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listId === selectionParagraphs[0].bullet.listId) {
+            selectionParagraphs.unshift(prevParagraph);
+            startIndex--;
+            prevParagraph = paragraphs[startIndex - 1];
+        }
+    }
+    const lastParagraph = selectionParagraphs[selectionParagraphs.length - 1];
+    if (lastParagraph.bullet) {
+        let nextParagraph = paragraphs[endIndex + 1];
+        while (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listId === lastParagraph.bullet.listId) {
+            selectionParagraphs.push(nextParagraph);
+            endIndex++;
+            nextParagraph = paragraphs[endIndex + 1];
+        }
+    }
+
+    return selectionParagraphs;
 }
 
 export function findNearestSectionBreak(currentIndex: number, sectionBreaks: ISectionBreak[]) {

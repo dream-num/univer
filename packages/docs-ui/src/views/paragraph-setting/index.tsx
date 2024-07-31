@@ -15,8 +15,8 @@
  */
 
 import type { ITextRange } from '@univerjs/core';
-import { debounce, generateRandomId, ICommandService, LocaleService, useDependency, useObservable } from '@univerjs/core';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { generateRandomId, ICommandService, LocaleService, useDependency, useObservable } from '@univerjs/core';
+import React, { useEffect, useRef, useState } from 'react';
 import type { IRichTextEditingMutationParams, ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocParagraphSettingCommand } from '../../commands/commands/doc-paragraph-setting.command';
@@ -49,17 +49,13 @@ export function ParagraphSettingIndex() {
 
     const [key, keySet] = useState('');
 
-    const debounceKeySet = useMemo(() => {
-        return debounce(keySet, 100);
-    }, []);
-
     const rangeRef = useRef<ITextRange[]>([]);
     useEffect(() => {
         const dispose = commandService.onCommandExecuted((info) => {
             if (SetTextSelectionsOperation.id === info.id) {
                 const ranges = (info.params as ISetTextSelectionsOperationParams).ranges;
                 if (!isRangesEqual(ranges, rangeRef.current)) {
-                    debounceKeySet(generateRandomId(4));
+                    keySet(generateRandomId(4));
                 }
                 rangeRef.current = ranges;
             }
@@ -68,7 +64,7 @@ export function ParagraphSettingIndex() {
                 const ranges = params.textRanges ?? [];
                 const trigger = params.trigger;
                 if (trigger !== DocParagraphSettingCommand.id && isRangesIntersection(ranges, rangeRef.current)) {
-                    debounceKeySet(generateRandomId(4));
+                    keySet(generateRandomId(4));
                 }
             }
         });

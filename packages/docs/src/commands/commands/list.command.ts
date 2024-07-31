@@ -290,6 +290,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
                     coverType: UpdateDocsAttributeType.REPLACE,
                 });
             } else {
+                // TODO: in this case, should set indent to paragraph
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: 1,

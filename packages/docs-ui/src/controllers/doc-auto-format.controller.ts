@@ -16,7 +16,7 @@
 
 import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { ITabCommandParams } from '@univerjs/docs';
-import { BreakLineCommand, ChangeListNestingLevelCommand, ChangeListNestingLevelType, DocAutoFormatService, EnterCommand, TabCommand } from '@univerjs/docs';
+import { BreakLineCommand, ChangeListNestingLevelCommand, ChangeListNestingLevelType, DocAutoFormatService, EnterCommand, ListOperationCommand, TabCommand } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 
 @OnLifecycle(LifecycleStages.Rendered, DocAutoFormatController)
@@ -27,7 +27,8 @@ export class DocAutoFormatController extends Disposable {
         super();
 
         this._initListAutoFormat();
-        this._initEnterFormat();
+        this._initDefaultEnterFormat();
+        this._initExitListAutoFormat();
     }
 
     private _initListAutoFormat() {
@@ -59,7 +60,45 @@ export class DocAutoFormatController extends Disposable {
         );
     }
 
-    private _initEnterFormat() {
+    private _initExitListAutoFormat() {
+        this.disposeWithMe(
+            this._docAutoFormatService.registerAutoFormat({
+                id: EnterCommand.id,
+                match: (context) => {
+                    const { paragraphs } = context;
+                    // selection at empty bullet paragraph
+                    if (paragraphs.length === 1 && paragraphs[0].bullet && paragraphs[0].paragraphStart === paragraphs[0].paragraphEnd) {
+                        return true;
+                    }
+                    return false;
+                },
+                getMutations: (context) => {
+                    const bullet = context.paragraphs[0].bullet;
+                    if (!bullet) {
+                        return [];
+                    }
+
+                    if (bullet.nestingLevel > 0) {
+                        return [{
+                            id: ChangeListNestingLevelCommand.id,
+                            params: {
+                                type: ChangeListNestingLevelType.decrease,
+                            },
+                        }];
+                    }
+
+                    return [{
+                        id: ListOperationCommand.id,
+                        params: {
+                            listType: context.paragraphs[0].bullet!.listType,
+                        },
+                    }];
+                },
+            })
+        );
+    }
+
+    private _initDefaultEnterFormat() {
         // enter default
         this.disposeWithMe(
             this._docAutoFormatService.registerAutoFormat({

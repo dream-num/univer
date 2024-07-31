@@ -1053,6 +1053,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this.disposeWithMe(
             fromEvent(this._input, 'input').subscribe((e) => {
+                // Prevent input when there is any rect ranges.
+                if (this._rectRangeList.length > 0) {
+                    e.stopPropagation();
+                    return e.preventDefault();
+                }
+
                 if (this._isIMEInputApply) {
                     return;
                 }
@@ -1066,6 +1072,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this.disposeWithMe(
             fromEvent(this._input, 'compositionstart').subscribe((e) => {
+                // Prevent input when there is any rect ranges.
+                if (this._rectRangeList.length > 0) {
+                    e.stopPropagation();
+                    return e.preventDefault();
+                }
+
                 this._isIMEInputApply = true;
 
                 this._eventHandle(e, (config) => {

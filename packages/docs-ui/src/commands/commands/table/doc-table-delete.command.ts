@@ -66,7 +66,12 @@ export const DocTableDeleteRowsCommand: ICommand<IDocTableDeleteRowsCommandParam
             return false;
         }
 
-        const { offset, rowIndexes, len, tableId, cursor } = actionParams;
+        const { offset, rowIndexes, len, tableId, cursor, selectWholeTable } = actionParams;
+
+        if (selectWholeTable) {
+            // eslint-disable-next-line ts/no-use-before-define
+            return commandService.executeCommand(DocTableDeleteTableCommand.id);
+        }
 
         const rawActions: JSONXActions = [];
 
@@ -167,7 +172,12 @@ export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsComman
             return false;
         }
 
-        const { offsets, columnIndexes, tableId, cursor, rowCount } = actionParams;
+        const { offsets, columnIndexes, tableId, cursor, rowCount, selectWholeTable } = actionParams;
+
+        if (selectWholeTable) {
+            // eslint-disable-next-line ts/no-use-before-define
+            return commandService.executeCommand(DocTableDeleteTableCommand.id);
+        }
 
         const rawActions: JSONXActions = [];
 

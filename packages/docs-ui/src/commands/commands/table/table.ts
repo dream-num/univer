@@ -413,6 +413,7 @@ export function getDeleteRowsActionsParams(rangeInfo: IRangeInfo, viewModel: Doc
     let offset = -1;
     let len = 0;
     let cursor = -1;
+    let selectWholeTable = false;
 
     for (const section of vm.children) {
         for (const paragraph of section.children) {
@@ -441,6 +442,10 @@ export function getDeleteRowsActionsParams(rangeInfo: IRangeInfo, viewModel: Doc
                         rowIndexes.push(rowIndex);
                         len += endIndex - startIndex + 1;
                     }
+
+                    if (rowIndexes.length === table.children.length) {
+                        selectWholeTable = true;
+                    }
                 }
             }
 
@@ -464,6 +469,7 @@ export function getDeleteRowsActionsParams(rangeInfo: IRangeInfo, viewModel: Doc
         offset,
         len,
         cursor,
+        selectWholeTable,
     };
 }
 
@@ -472,6 +478,7 @@ interface IDeleteColumnsOffset {
     delete: number;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getDeleteColumnsActionParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
     const { startOffset, endOffset, segmentId } = rangeInfo;
     const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
@@ -549,6 +556,7 @@ export function getDeleteColumnsActionParams(rangeInfo: IRangeInfo, viewModel: D
         tableId,
         columnIndexes,
         cursor,
+        selectWholeTable: columnIndexes.length === table.children[0].children.length,
         rowCount: table.children.length,
     };
 }

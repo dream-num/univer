@@ -298,6 +298,10 @@ async function renderVue3Component(VueComponent: ReturnType<typeof defineCompone
 
         document.body.appendChild(container);
         render(vnode, element);
+
+        return () => {
+            document.body.removeChild(container);
+        };
     } catch (error) {
     }
 }
@@ -309,7 +313,11 @@ export function VueComponentWrapper(options: { component: ReturnType<typeof defi
     useEffect(() => {
         if (!domRef.current) return;
 
-        renderVue3Component(component, domRef.current, props);
+        const render = renderVue3Component(component, domRef.current, props);
+
+        return () => {
+            render.then((d) => d?.());
+        };
     }, [props]);
 
     return createElement('div', { ref: domRef });

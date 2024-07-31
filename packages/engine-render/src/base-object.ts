@@ -43,9 +43,20 @@ export const BASE_OBJECT_ARRAY = [
     'strokeWidth',
 ];
 
+export enum ObjectType {
+    UNKNOWN,
+    RICH_TEXT,
+    SHAPE,
+    IMAGE,
+    RECT,
+    CIRCLE,
+}
+
 export abstract class BaseObject extends Disposable {
     groupKey?: string;
     isInGroup: boolean = false;
+
+    objectType: ObjectType = ObjectType.UNKNOWN;
 
     onTransformChange$ = new EventSubject<ITransformChangeState>();
 

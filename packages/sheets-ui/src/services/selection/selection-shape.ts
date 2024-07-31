@@ -555,7 +555,7 @@ export class SelectionControl extends Disposable {
             stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
         });
 
-        if (strokeDash == null) {
+        if (strokeDash === null || strokeDash === undefined) {
             this.dashRect.hide();
             this._stopAntLineAnimation();
         } else {

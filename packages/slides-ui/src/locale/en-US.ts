@@ -17,9 +17,31 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
-    toolbar: {
-        undo: 'Undo',
-        redo: 'Redo',
+    slide: {
+        text: {
+            insert: {
+                title: 'Insert Text',
+            },
+        },
+
+        shape: {
+            insert: {
+                title: 'Insert Shape',
+                rectangle: 'Insert Rectangle',
+            },
+        },
+
+        image: {
+            insert: {
+                title: 'Insert Image',
+                float: 'Insert Float Image',
+            },
+        },
+
+        popup: {
+            edit: 'Edit',
+            delete: 'Delete',
+        },
     },
 };
 

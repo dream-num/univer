@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-export class InfoBarModel {
-    constructor(private _name: string) {
-        // empty
+import { RxDisposable } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+
+export class SlideRenderController extends RxDisposable implements IRenderModule {
+    constructor(private readonly _context: IRenderContext<any>) {
+        super();
     }
 
-    get name(): string {
-        return this._name;
-    }
-
-    setName(name: string) {
-        this._name = name;
+    override dispose() {
+      //...
     }
 }

@@ -43,6 +43,10 @@ export class ObjectProvider {
         return objects;
     }
 
+    convertToRenderObject(pageElement: IPageElement, mainScene: Scene) {
+        return this._executor(pageElement, mainScene);
+    }
+
     private _executor(pageElement: IPageElement, mainScene: Scene) {
         const { id: pageElementId, type } = pageElement;
 

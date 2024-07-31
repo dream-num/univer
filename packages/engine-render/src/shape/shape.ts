@@ -16,7 +16,7 @@
 
 import type { IKeyValue, IOffset, IScale, ISize, Nullable } from '@univerjs/core';
 
-import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
+import { BASE_OBJECT_ARRAY, BaseObject, ObjectType } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
 import type { IObjectFullState } from '../basics/interfaces';
 import type { IViewportInfo, Vector2 } from '../basics/vector2';
@@ -132,6 +132,8 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
     private _strokeMiterLimit: number = 0;
 
     private _type: SHAPE_TYPE = SHAPE_TYPE.RECT;
+
+    override objectType = ObjectType.SHAPE;
 
     constructor(key?: string, props?: T) {
         super(key);

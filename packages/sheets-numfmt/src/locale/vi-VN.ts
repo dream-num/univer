@@ -51,7 +51,6 @@ const locale: typeof zhCN = {
             subtractDecimal: 'Giảm chữ số thập phân',
             customFormat: 'Custom Format',
             customFormatDes: 'Generate custom number formats based on existing formats.',
-
         },
     },
 };

@@ -74,7 +74,7 @@
         "@rc-component/color-picker": "^1.7.1",
         "@rc-component/trigger": "^2.2.0",
         "@types/react-mentions": "^4.1.13",
-        "@univerjs/icons": "^0.1.65",
+        "@univerjs/icons": "^0.1.70",
         "rc-dialog": "^9.5.2",
         "rc-dropdown": "^4.2.0",
         "rc-input": "^1.6.2",
@@ -99,13 +99,13 @@
         "@types/react-transition-group": "^4.4.10",
         "@univerjs/shared": "workspace:*",
         "clsx": "^2.1.1",
-        "dayjs": "^1.11.11",
+        "dayjs": "^1.11.12",
         "less": "^4.2.0",
         "react": "18.3.1",
         "react-dom": "18.3.1",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3"
+        "typescript": "^5.5.4",
+        "vite": "^5.3.5",
+        "vitest": "^2.0.4"
     },
     "univerSpace": {
         ".": {

@@ -46,7 +46,12 @@ const AutoFocusInputNumber = (props: {
             value={value}
             onChange={(v) => {
                 onChange(v ?? 0).finally(() => {
-                    ref.current?.focus();
+                    //  TODO@gggpound: Give up using setTimeout and explicitly get the hook after the selection is reset.
+                    // packages/engine-render/src/viewport.ts:1347, _emitScrollEnd$
+                    // To re-focus after the scroll ends, you need to ensure that the re-focusing takes place after the scrolling process.
+                    setTimeout(() => {
+                        ref.current?.focus();
+                    }, 2);
                 });
             }}
             className={className}

@@ -102,5 +102,9 @@ export class SlideUIController extends Disposable {
         this.disposeWithMe(
             this._uiPartsService.registerComponent(BuiltInUIPart.LEFT_SIDEBAR, () => connectInjector(SlideSideBar, this._injector))
         );
+
+        this.disposeWithMe(
+            this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(EditorContainer, this._injector))
+        );
     }
 }

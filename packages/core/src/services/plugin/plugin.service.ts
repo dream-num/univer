@@ -308,7 +308,7 @@ export class PluginHolder extends Disposable {
                     break;
             }
         });
-
+        console.log('_runStage____________', stage);
         // Plugins run first, and then we should run the modules.
         this._lifecycleInitializerService.initModulesOnStage(stage);
     }

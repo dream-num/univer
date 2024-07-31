@@ -15,12 +15,13 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { DISABLE_AUTO_FOCUS_KEY, IEditorService, TextEditor, useObservable } from '@univerjs/ui';
-import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
+// import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
+import { ISlideEditorManagerService } from '../../services/slide-editor-manager.service';
 import styles from './index.module.less';
 
 interface ICellIEditorProps { }
@@ -44,7 +45,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         ...EDITOR_DEFAULT_POSITION,
     });
 
-    const cellEditorManagerService = useDependency(ICellEditorManagerService);
+    const slideEditorManagerService = useDependency(ISlideEditorManagerService);
     const editorService = useDependency(IEditorService);
     const contextService = useDependency(IContextService);
 
@@ -72,7 +73,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     };
 
     useEffect(() => {
-        cellEditorManagerService.state$.subscribe((param) => {
+        slideEditorManagerService.state$.subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -105,16 +106,15 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
                 const { left, top, width, height } = editor.getBoundingClientRect();
 
-                cellEditorManagerService.setRect({ left, top, width, height });
+                slideEditorManagerService.setRect({ left, top, width, height });
             }
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
-    console.log('disableAutoFocus', disableAutoFocus, state);
     useEffect(() => {
         if (!disableAutoFocus) {
-            cellEditorManagerService.setFocus(true);
+            slideEditorManagerService.setFocus(true);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [disableAutoFocus, state]);
@@ -129,12 +129,23 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 height: state.height,
             }}
         >
+
+            {/* <TextEditor
+                id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                isSheetEditor
+                // resizeCallBack={resizeCallBack}
+                cancelDefaultResizeListener
+                onContextMenu={(e) => e.preventDefault()}
+                className={styles.formulaContent}
+                // snapshot={INITIAL_SNAPSHOT}
+                isSingle={false}
+            /> */}
             <TextEditor
                 id={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
                 className={styles.editorInput}
                 snapshot={snapshot}
-                cancelDefaultResizeListener={true}
-                isSheetEditor={true}
+                cancelDefaultResizeListener={false}
+                isSheetEditor={false}
                 isSingle={false}
             />
         </div>

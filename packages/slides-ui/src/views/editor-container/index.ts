@@ -14,31 +14,4 @@
  * limitations under the License.
  */
 
-export interface ISize {
-    width?: number;
-    height?: number;
-}
-
-export interface IScale {
-    scaleX?: number;
-    scaleY?: number;
-}
-
-export interface IOffset {
-    left?: number;
-    top?: number;
-}
-
-export interface ISrcRect extends IOffset {
-    right?: number;
-    bottom?: number;
-}
-
-export interface IAbsoluteTransform extends ISize, IOffset, IScale {}
-
-export interface IRectXYWH {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
+export * from './EditorContainer';

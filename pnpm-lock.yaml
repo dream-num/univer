@@ -2384,6 +2384,10 @@ importers:
         version: 2.0.5(@types/node@22.1.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/slides:
+    dependencies:
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2409,6 +2413,9 @@ importers:
 
   packages/slides-ui:
     dependencies:
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/icons':
         specifier: ^0.1.70
         version: 0.1.70(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2422,6 +2429,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing

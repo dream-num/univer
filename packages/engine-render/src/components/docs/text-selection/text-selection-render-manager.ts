@@ -352,6 +352,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     activate(x: number, y: number) {
+        console.log('text selection render manager activate', x, y);
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';

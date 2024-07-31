@@ -19,11 +19,15 @@ import { Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } 
 
 import { IImageIoService, ImageIoService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SlideUIController } from './controllers/slide-ui.controller';
 import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
+import { SlideUIController } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
 import { SlidePopupMenuController } from './controllers/popup-menu.controller';
 import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
+import { ISlideEditorBridgeService, SlideEditorBridgeService } from './services/slide-editor-bridge.service';
+import { SlideEditorBridgeRenderController } from './controllers/slide-editor-bridge.render-controller';
+import { ISlideEditorManagerService, SlideEditorManagerService } from './services/slide-editor-manager.service';
+import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
@@ -42,6 +46,8 @@ export class UniverSlidesUIPlugin extends Plugin {
 
     override onStarting(): void {
         ([
+            [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
+            [ISlideEditorManagerService, { useClass: SlideEditorManagerService }],
             [
                 SlideUIController,
                 {
@@ -63,6 +69,14 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     override onRendered(): void {
+        ([
+            [SlideEditorBridgeRenderController],
+            [SlideEditingRenderController],
+
+        ] as Dependency[]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
+        });
+
         this._markSlideAsFocused();
     }
 

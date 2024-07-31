@@ -155,9 +155,13 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                     (render as RenderUnit).addRenderDependencies([ctor]);
                 }
             } else {
-                const renderType = this._univerInstanceService.getUnitType(renderUnitId);
-                if (renderType === type) {
-                    (render as RenderUnit).addRenderDependencies([ctor]);
+                try {
+                    const renderType = this._univerInstanceService.getUnitType(renderUnitId);
+                    if (renderType === type) {
+                        (render as RenderUnit).addRenderDependencies([ctor]);
+                    }
+                } catch (e) {
+                    console.log('error', e);
                 }
             }
         }

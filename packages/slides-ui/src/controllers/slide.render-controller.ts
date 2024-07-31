@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import { RxDisposable } from '@univerjs/core';
+import type { UnitModel } from '@univerjs/core';
+import { Inject, RxDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 
 export class SlideRenderController extends RxDisposable implements IRenderModule {
-    constructor(private readonly _context: IRenderContext<any>) {
+    constructor(
+        private readonly _context: IRenderContext<UnitModel<object, number>>,
+        @Inject(ISlideEditorBridgeService) private _editorBridgeService: ISlideEditorBridgeService
+    ) {
         super();
+        console.log('_context', this._context);
+        console.log('_editorBridgeService', this._editorBridgeService);
     }
 
     override dispose() {

@@ -166,6 +166,9 @@ const table: ITable = {
 
 export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     id: 'default-document-id',
+    tableSource: {
+        'table-id': table,
+    },
     headers: {},
     footers: {},
     drawings: {},
@@ -236,9 +239,6 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                 startIndex: dataStream.length - 1,
             },
         ],
-    },
-    tableSource: {
-        'table-id': table,
     },
     documentStyle: {
         pageSize: {

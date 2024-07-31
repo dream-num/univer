@@ -30,6 +30,7 @@ import {
     AlignOperationCommand,
     AlignRightCommand,
     BulletListCommand,
+    DocSkeletonManagerService,
     getParagraphsInRange,
     OrderListCommand,
     ResetInlineFormatTextBackgroundColorCommand,
@@ -60,12 +61,49 @@ import type { IAccessor, PresetListType } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
 import { combineLatest, map, Observable } from 'rxjs';
 
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../components/list-type-picker';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
+
+function getInsertTableHiddenObservable(
+    accessor: IAccessor
+): Observable<boolean> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const renderManagerService = accessor.get(IRenderManagerService);
+
+    return new Observable((subscriber) => {
+        const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            if (unitId == null) {
+                return subscriber.next(true);
+            }
+            const currentRender = renderManagerService.getRenderById(unitId);
+            if (currentRender == null) {
+                return subscriber.next(true);
+            }
+
+            const viewModel = currentRender.with(DocSkeletonManagerService).getViewModel();
+
+            viewModel.editAreaChange$.subscribe((editArea) => {
+                subscriber.next(editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER);
+            });
+        });
+
+        const currentRender = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC);
+        if (currentRender == null) {
+            return subscriber.next(true);
+        }
+
+        const viewModel = currentRender.with(DocSkeletonManagerService).getViewModel();
+
+        subscriber.next(viewModel.getEditArea() !== DocumentEditArea.BODY);
+
+        return () => subscription.unsubscribe();
+    });
+}
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
@@ -432,7 +470,9 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
         group: MenuGroup.TOOLBAR_LAYOUT,
         icon: TableIcon,
         tooltip: 'toolbar.table.main',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), (one, two) => {
+            return one || two;
+        }),
     };
 }
 
@@ -603,7 +643,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
             }
 
             textSubscription = textSelectionManagerService.textSelection$.subscribe(() => {
-                const range = textSelectionManagerService.getActiveRange();
+                const range = textSelectionManagerService.getActiveTextRangeWithStyle();
                 if (range) {
                     const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
                     const paragraphs = getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);

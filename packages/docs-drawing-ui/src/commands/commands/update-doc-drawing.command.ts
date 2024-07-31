@@ -652,6 +652,7 @@ export interface IMoveInlineDrawingParams {
     offset: number;
     segmentId: string;
     segmentPage: number;
+    needRefreshDrawings?: boolean;
 }
 
 /**
@@ -662,7 +663,7 @@ export const IMoveInlineDrawingCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
-    handler: (accessor: IAccessor, params?: IMoveInlineDrawingParams) => {
+    handler: (accessor: IAccessor, params: IMoveInlineDrawingParams) => {
         if (params == null) {
             return false;
         }
@@ -686,7 +687,14 @@ export const IMoveInlineDrawingCommand: ICommand = {
             return false;
         }
 
-        const { drawing, unitId, offset, segmentId: newSegmentId, segmentPage } = params;
+        const { drawing, unitId, offset, segmentId: newSegmentId, segmentPage, needRefreshDrawings } = params;
+
+        // Need to refresh drawings if not find the anchor position.
+        if (needRefreshDrawings) {
+            docRefreshDrawingsService.refreshDrawings(skeleton);
+            transformer.refreshControls();
+            return true;
+        }
 
         const rawActions: JSONXActions = [];
 

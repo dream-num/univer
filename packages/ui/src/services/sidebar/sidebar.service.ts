@@ -28,4 +28,6 @@ export interface ISidebarService {
 
     open(params: ISidebarMethodOptions): IDisposable;
     close(id?: string): void;
+
+    get visible(): boolean;
 }

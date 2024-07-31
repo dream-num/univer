@@ -16,6 +16,8 @@
 
 const locale = {
     slide: {
+        append: '新增幻灯片',
+
         text: {
             insert: {
                 title: '插入文本',
@@ -39,6 +41,12 @@ const locale = {
         popup: {
             edit: '编辑',
             delete: '删除',
+        },
+
+        sidebar: {
+            text: '编辑文本',
+            shape: '编辑图形',
+            image: '编辑图片',
         },
     },
 };

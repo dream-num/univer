@@ -189,6 +189,128 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
     },
 };
 
+export enum ChangeListNestingLevelType {
+    increase = 1,
+    decrease = -1,
+}
+
+interface IChangeListNestingLevelCommandParams {
+    type: ChangeListNestingLevelType;
+}
+
+export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelCommandParams> = {
+    id: 'doc.command.change-list-nesting-level',
+
+    type: CommandType.COMMAND,
+
+    // eslint-disable-next-line max-lines-per-function
+    handler: (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+        const { type } = params;
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const activeRange = textSelectionManagerService.getActiveRange();
+        if (docDataModel == null || activeRange == null) {
+            return false;
+        }
+
+        const { segmentId } = activeRange;
+
+        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
+        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
+        const serializedSelections = selections.map(serializeTextRange);
+
+        if (paragraphs == null) {
+            return false;
+        }
+
+        const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
+
+        const unitId = docDataModel.getUnitId();
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges: serializedSelections,
+            },
+        };
+
+        const memoryCursor = new MemoryCursor();
+
+        memoryCursor.reset();
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        const customLists = docDataModel.getSnapshot().lists ?? {};
+
+        const lists = {
+            ...PRESET_LIST_TYPE,
+            ...customLists,
+        };
+
+        for (const paragraph of currentParagraphs) {
+            const { startIndex, paragraphStyle = {}, bullet } = paragraph;
+
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: startIndex - memoryCursor.cursor,
+                segmentId,
+            });
+
+            if (bullet) {
+                const listType = bullet.listType as keyof typeof lists;
+                const maxLevel = lists[listType].nestingLevel.length - 1;
+
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: 1,
+                    body: {
+                        dataStream: '',
+                        paragraphs: [
+                            {
+                                startIndex: 0,
+                                paragraphStyle: {
+                                    ...paragraphStyle,
+                                },
+                                bullet: {
+                                    ...bullet,
+                                    nestingLevel: Math.max(Math.min(bullet.nestingLevel + type, maxLevel), 0),
+                                },
+                            },
+                        ],
+                    },
+                    segmentId,
+                    coverType: UpdateDocsAttributeType.REPLACE,
+                });
+            } else {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: 1,
+                });
+            }
+
+            memoryCursor.moveCursorTo(startIndex + 1);
+        }
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
 interface IBulletListCommandParams { }
 
 export const BulletListCommand: ICommand<IBulletListCommandParams> = {

@@ -59,6 +59,8 @@ import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocHoverManagerService } from './services/doc-hover-manager.service';
 import { DocHoverRenderController } from './controllers/render-controllers/doc-hover.render-controller';
+import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
+import { ShiftTabShortCut } from './shortcuts/format.shortcut';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -101,6 +103,7 @@ export class UniverDocsUIPlugin extends Plugin {
             DeleteLeftShortcut,
             DeleteRightShortcut,
             BreakLineShortcut,
+            ShiftTabShortCut,
         ].forEach((shortcut) => {
             this._injector.get(IShortcutService).registerShortcut(shortcut);
         });
@@ -111,6 +114,8 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocUIController, { useFactory: () => this._injector.createInstance(DocUIController, this._config) }],
             [DocClipboardController],
             [DocEditorBridgeController],
+            [DocAutoFormatController],
+
             [DocsRenderService],
             [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             [IDocClipboardService, { useClass: DocClipboardService }],

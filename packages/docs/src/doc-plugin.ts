@@ -41,7 +41,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
-import { BulletListCommand, ListOperationCommand, OrderListCommand } from './commands/commands/list.command';
+import { BulletListCommand, ChangeListNestingLevelCommand, ListOperationCommand, OrderListCommand } from './commands/commands/list.command';
 import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
@@ -59,6 +59,8 @@ import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperati
 import { DocCustomRangeService } from './services/doc-custom-range.service';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
+import { DocAutoFormatService } from './services/doc-auto-format.service';
+import { EnterCommand, SpaceCommand, TabCommand } from './commands/commands/auto-format.command';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -123,6 +125,10 @@ export class UniverDocsPlugin extends Plugin {
                 AlignOperationCommand,
                 AlignJustifyCommand,
                 DocsRenameMutation,
+                TabCommand,
+                SpaceCommand,
+                EnterCommand,
+                ChangeListNestingLevelCommand,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -143,6 +149,8 @@ export class UniverDocsPlugin extends Plugin {
                 ],
                 [TextSelectionManagerService],
                 [DocCustomRangeService],
+                [DocAutoFormatService],
+
                 // controllers
                 [NormalInputController],
                 [IMEInputController],

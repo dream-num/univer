@@ -17,7 +17,7 @@
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand, BulletListCommand, OrderListCommand, SetInlineFormatBoldCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-import { whenDocAndEditorFocused } from '../../shortcuts/utils';
+import { whenDocAndEditorFocused } from './utils';
 
 export const BoldShortCut: IShortcutItem = {
     id: SetInlineFormatBoldCommand.id,

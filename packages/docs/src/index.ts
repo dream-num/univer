@@ -57,7 +57,7 @@ export {
     ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatCommand,
 } from './commands/commands/inline-format.command';
-export { ListOperationCommand, BulletListCommand, OrderListCommand } from './commands/commands/list.command';
+export { ListOperationCommand, BulletListCommand, OrderListCommand, ChangeListNestingLevelCommand } from './commands/commands/list.command';
 export {
     AlignOperationCommand,
     AlignLeftCommand,
@@ -67,16 +67,11 @@ export {
 } from './commands/commands/paragraph-align.command';
 export { ReplaceContentCommand, CoverContentCommand } from './commands/commands/replace-content.command';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
-export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRangeFactory } from './basics/custom-range-factory';
-export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
-export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
-export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
-
+export { SpaceCommand, TabCommand, EnterCommand, type ITabCommandParams } from './commands/commands/auto-format.command';
 export {
     RichTextEditingMutation,
     type IRichTextEditingMutationParams,
 } from './commands/mutations/core-editing.mutation';
-
 export { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
 export { SelectAllOperation } from './commands/operations/select-all.operation';
 export { SetDocZoomRatioOperation, type ISetDocZoomRatioOperationParams } from './commands/operations/set-doc-zoom-ratio.operation';
@@ -90,3 +85,9 @@ export {
 export { getRetainAndDeleteFromReplace } from './basics/retain-delete-params';
 export { getRichTextEditPath } from './commands/util';
 export { getPlainTextFormDocument } from './basics/plain-text';
+export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRangeFactory } from './basics/custom-range-factory';
+export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
+export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
+export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
+export { DocAutoFormatService } from './services/doc-auto-format.service';
+export { ChangeListNestingLevelType } from './commands/commands/list.command';

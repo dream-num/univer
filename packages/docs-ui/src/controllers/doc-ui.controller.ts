@@ -30,6 +30,21 @@ import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import type { IUniverDocsUIConfig } from '../basics';
 import { DocFooter } from '../views/doc-footer';
 import {
+    AlignCenterShortCut,
+    AlignJustifyShortCut,
+    AlignLeftShortCut,
+    AlignRightShortCut,
+    BoldShortCut,
+    BulletListShortCut,
+    ItalicShortCut,
+    OrderListShortCut,
+    StrikeThroughShortCut,
+    SubscriptShortCut,
+    SuperscriptShortCut,
+    UnderlineShortCut,
+} from '../shortcuts/toolbar.shortcut';
+import { TabShortCut } from '../shortcuts/format.shortcut';
+import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
     AlignLeftMenuItemFactory,
@@ -50,7 +65,6 @@ import {
     UnderlineMenuItemFactory,
 } from './menu/menu';
 import { CopyMenuFactory, CutMenuFactory, DeleteMenuFactory, PasteMenuFactory } from './menu/context-menu';
-import { AlignCenterShortCut, AlignJustifyShortCut, AlignLeftShortCut, AlignRightShortCut, BoldShortCut, BulletListShortCut, ItalicShortCut, OrderListShortCut, StrikeThroughShortCut, SubscriptShortCut, SuperscriptShortCut, UnderlineShortCut } from './shortcut/toolbar.shortcut';
 
 // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
@@ -142,6 +156,7 @@ export class DocUIController extends Disposable {
             AlignLeftShortCut,
             OrderListShortCut,
             BulletListShortCut,
+            TabShortCut,
         ].forEach((shortcut) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(shortcut));
         });

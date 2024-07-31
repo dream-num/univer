@@ -23,7 +23,7 @@ export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
     id: 'doc.table.tab-in-table',
     type: CommandType.COMMAND,
 
-    handler: async (accessor) => {
+    handler: async () => {
         // TODO: implement tab in table
         return true;
     },
@@ -35,7 +35,7 @@ export const DocTableShiftTabCommand: ICommand<IDocTableShiftTabCommandParams> =
     id: 'doc.table.shift-tab-in-table',
     type: CommandType.COMMAND,
 
-    handler: async (accessor) => {
+    handler: async () => {
         // TODO: implement tab in table
         return true;
     },

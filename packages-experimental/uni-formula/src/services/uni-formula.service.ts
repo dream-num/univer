@@ -25,7 +25,6 @@ import {
     Inject,
     IResourceManagerService,
     IUniverInstanceService,
-    LifecycleService,
     LifecycleStages,
     makeCustomRangeStream,
     OnLifecycle,
@@ -121,7 +120,6 @@ export class UniFormulaService extends Disposable {
 
     constructor(
     @IResourceManagerService resourceManagerService: IResourceManagerService,
-        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         // TODO: wzhudev We may need to register the doc formulas to formula service in later lifecycle stages.
         @ICommandService private readonly _commandSrv: ICommandService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
@@ -133,7 +131,6 @@ export class UniFormulaService extends Disposable {
         this._initCommands();
         this._initDocFormulaResources(resourceManagerService);
         this._initDocDisposingListener();
-        this._debugInitFormula();
     }
 
     override dispose(): void {
@@ -277,10 +274,6 @@ export class UniFormulaService extends Disposable {
             this._resultSubscription.dispose();
             this._resultSubscription = null;
         }
-    }
-
-    private _debugInitFormula(): void {
-        this.registerDocFormula('test_doc', 'test_formula_id', '=\'[workbook-01]工作表11\'!A13');
     }
 
     private _initDocFormulaResources(resourceManagerService: IResourceManagerService): void {

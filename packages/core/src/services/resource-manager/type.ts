@@ -42,4 +42,4 @@ export interface IResourceManagerService {
     unloadResources(unitId: string): void;
 }
 
-export const IResourceManagerService = createIdentifier<IResourceManagerService>('resource-manager-service');
+export const IResourceManagerService = createIdentifier<IResourceManagerService>('core.resource-manager.service');

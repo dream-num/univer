@@ -18,7 +18,7 @@ import type { DependencyOverride } from '@univerjs/core';
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
 import type { MenuConfig } from '@univerjs/ui';
-import { BuiltInUIPart, ComponentManager, IMenuService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSlideShapeRectangleOperation } from '../commands/operations/insert-shape.operation';
@@ -27,12 +27,15 @@ import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.ope
 import { UploadFileMenu } from '../components/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
+import { EditorContainer } from '../views/editor-container';
 import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
 import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
+import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
 import { SlideAddTextMenuItemFactory, TEXT_ICON_ID } from './text.menu';
+import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
 
 export interface IUniverSlidesDrawingConfig {
     menu?: MenuConfig;
@@ -45,7 +48,7 @@ export const DefaultSlidesDrawingConfig: IUniverSlidesDrawingConfig = {
 /**
  * This controller registers UI parts of slide workbench to the base-ui workbench.
  */
-@OnLifecycle(LifecycleStages.Ready, SlideUIController)
+// @OnLifecycle(LifecycleStages.Ready, SlideUIController)
 export class SlideUIController extends Disposable {
     constructor(
         private readonly _config: Partial<IUniverSlidesDrawingConfig>,
@@ -53,7 +56,9 @@ export class SlideUIController extends Disposable {
         @IMenuService private readonly _menuService: IMenuService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IShortcutService private readonly _shortcutService: IShortcutService
+
     ) {
         super();
 
@@ -61,10 +66,11 @@ export class SlideUIController extends Disposable {
         this._initCustomComponents();
         this._initUIComponents();
         this._initMenus();
+        this._initShortcuts();
     }
 
     private _initMenus(): void {
-        const { menu = {} } = this._config;
+        const { menu = {} } = this._config || {};
 
         [
             SlideAddTextMenuItemFactory,
@@ -95,6 +101,10 @@ export class SlideUIController extends Disposable {
             SlideAddTextOperation,
             InsertSlideShapeRectangleOperation,
             DeleteSlideElementOperation,
+
+            //cmds for editor
+            SetTextEditArrowOperation,
+
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
@@ -106,5 +116,14 @@ export class SlideUIController extends Disposable {
         this.disposeWithMe(
             this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(EditorContainer, this._injector))
         );
+    }
+
+    private _initShortcuts(): void {
+        [
+            EditorDeleteLeftShortcut,
+            ...generateArrowSelectionShortCutItem(),
+        ].forEach((item) => {
+            this.disposeWithMe(this._shortcutService.registerShortcut(item));
+        });
     }
 }

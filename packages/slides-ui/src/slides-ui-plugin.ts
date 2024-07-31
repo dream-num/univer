@@ -47,37 +47,50 @@ export class UniverSlidesUIPlugin extends Plugin {
     override onStarting(): void {
         ([
             [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
+            // used by SlideUIController --> EditorContainer
             [ISlideEditorManagerService, { useClass: SlideEditorManagerService }],
-            [
-                SlideUIController,
-                {
-                    useFactory: () => this._injector.createInstance(SlideUIController, this._config),
-                },
-            ],
             [IImageIoService, { useClass: ImageIoService }],
             [SlideCanvasPopMangerService],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 
     override onReady(): void {
+        console.log('onReady>>>>>>>>>>>>>>>>>>>>');
         ([
+
+            // [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
+            // // used by SlideUIController --> EditorContainer
+            // [ISlideEditorManagerService, { useClass: SlideEditorManagerService }],
+
+            // This controller should be registered in Ready stage.
+            // this controller would add a new RenderUnit
+            // so this new RenderUnit did not have ISlideEditorBridgeService & ISlideEditorManagerService
+            [
+                SlideUIController,
+            ],
             [SlideRenderController],
             [SlidePopupMenuController],
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
         });
+        console.log('onReady <<<<<<<<<<<<<<<<<<<');
     }
 
     override onRendered(): void {
+        console.log('onRendered >>>>>>>>>>>>>>>>>>>>');
         ([
+            // need slideEditorBridgeService
+            // need TextSelectionRenderService which init by EditorContainer
             [SlideEditorBridgeRenderController],
             [SlideEditingRenderController],
 
         ] as Dependency[]).forEach((m) => {
+            // find all renderMap and register module to each item in renderMap
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
         });
 
         this._markSlideAsFocused();
+        console.log('onRendered <<<<<<<<<<<<<<<<<<<');
     }
 
     private _markSlideAsFocused() {

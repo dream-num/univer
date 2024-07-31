@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, SlideDataModel } from '@univerjs/core';
+import type { ICommand, IPageElement, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, PageElementType, Tools, UniverInstanceType } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -35,7 +35,7 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         const left = 230;
         const top = 142;
         const textContent = params?.text || 'A New Text';
-        const elmentData = {
+        const elementData: IPageElement = {
             id: elementId,
             zIndex: 2,
             left,
@@ -60,35 +60,14 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         if (!slideData) return false;
 
         const activePage = slideData.getActivePage()!;
-        activePage.pageElements[elementId] = elmentData;
+        activePage.pageElements[elementId] = elementData;
         slideData.updatePage(activePage.id, activePage);
 
         const canvasview = accessor.get(CanvasView);
-        const sceneObject = canvasview.createObjectToPage(elmentData, activePage.id);
+        const sceneObject = canvasview.createObjectToPage(elementData, activePage.id);
         // make object active: a control rect wrap the object.
         if (sceneObject) {
             canvasview.setObjectActiveByPage(sceneObject, activePage.id);
-        }
-
-        // copycat from sheet
-        {
-            // const editorBridgeRenderController = accessor.get(SlideEditorBridgeRenderController);
-            const renderManagerService = accessor.get(IRenderManagerService);
-            const render = renderManagerService.getCurrent();
-            const slideEditorBridgeRenderController = render?.with(SlideEditorBridgeRenderController);
-
-            const rect = {
-                x: left,
-                y: top,
-                width: defaultWidth,
-                height: defaultheight,
-            };
-            slideEditorBridgeRenderController?.setTextRectXYWH(rect);
-
-            // see cell-edit.operation.ts, sheet.operation.set-cell-edit-visible
-            const slideEditorBridgeService = accessor.get(ISlideEditorBridgeService);
-            const unitId = 'slide-test';
-            slideEditorBridgeService.changeVisible({ visible: true, eventType: 3, unitId });
         }
 
         return true;

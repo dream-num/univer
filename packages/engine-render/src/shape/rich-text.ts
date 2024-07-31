@@ -27,6 +27,7 @@ import type {
 } from '@univerjs/core';
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '@univerjs/core';
 
+import type { BASE_OBJECT_ARRAY } from '../base-object';
 import { BaseObject, ObjectType } from '../base-object';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { IViewportInfo } from '../basics/vector2';
@@ -42,7 +43,14 @@ export interface IRichTextProps extends ITransformState, IStyleBase {
     forceRender?: boolean;
 }
 
-export const RICHTEXT_OBJECT_ARRAY = ['text', 'richText'];
+export type RichtextObjectJSONType = {
+    [key in typeof BASE_OBJECT_ARRAY[number]]: number;
+} & {
+    text: string;
+    fs: number;
+    richText?: unknown;
+};
+export const RICHTEXT_OBJECT_ARRAY = ['text', 'richText', 'fs'];
 
 export class RichText extends BaseObject {
     private _documentData!: IDocumentData;
@@ -79,6 +87,8 @@ export class RichText extends BaseObject {
 
     override objectType = ObjectType.RICH_TEXT;
 
+    private _text: string;
+
     constructor(
         private _localeService: LocaleService,
         key?: string,
@@ -98,6 +108,7 @@ export class RichText extends BaseObject {
             this._bg = props.bg;
             this._bd = props.bd;
             this._cl = props.cl;
+            this._text = props.text || '';
 
             this._documentData = this._convertToDocumentData(props.text || '');
         }
@@ -125,6 +136,14 @@ export class RichText extends BaseObject {
                 this._setTransForm();
             }
         });
+    }
+
+    get fs(): number {
+        return this._fs!;
+    }
+
+    get text(): string {
+        return this._text;
     }
 
     get documentData() {
@@ -198,7 +217,7 @@ export class RichText extends BaseObject {
         return this;
     }
 
-    override toJson() {
+    override toJson(): RichtextObjectJSONType {
         const props: IKeyValue = {};
         RICHTEXT_OBJECT_ARRAY.forEach((key) => {
             // @ts-ignore
@@ -210,7 +229,7 @@ export class RichText extends BaseObject {
         return {
             ...super.toJson(),
             ...props,
-        };
+        } as RichtextObjectJSONType;
     }
 
     protected _draw(ctx: UniverRenderingContext) {

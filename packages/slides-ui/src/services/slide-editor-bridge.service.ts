@@ -14,22 +14,30 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, IRectXYWH, Nullable } from '@univerjs/core';
+import type { IDisposable, IDocumentBody, IDocumentData, IDocumentSettings, IDocumentStyle, IParagraph, IParagraphStyle, IPosition, IRectXYWH, ISelectionCell, Nullable, UnitModel } from '@univerjs/core';
 import {
     createIdentifier,
     Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentDataModel,
+    EDITOR_ACTIVATED,
+    FOCUSING_DOC,
+    FOCUSING_EDITOR_STANDALONE,
+    FOCUSING_UNIVER_EDITOR,
+    FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
+    HorizontalAlign,
     IContextService,
     Inject,
     IUniverInstanceService,
     ThemeService,
+    VerticalAlign,
 } from '@univerjs/core';
-import type { IDocumentLayoutObject } from '@univerjs/engine-render';
+import type { Engine, IDocumentLayoutObject, IRenderContext, RichText, Scene } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import type { KeyCode } from '@univerjs/ui';
 import { IEditorService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import type { ISlideRichTextProps } from '../type';
 
 export const ISlideEditorBridgeService = createIdentifier<SlideEditorBridgeService>('univer.slide-editor-bridge.service');
 
@@ -49,6 +57,15 @@ export interface IEditorBridgeServiceVisibleParam {
     unitId: string;
     keycode?: KeyCode;
 }
+
+export interface ISetEditorInfo {
+    scene: Scene;
+    engine: Engine;
+    unitId: string;
+    pageId: string;
+    startEditingText: RichText;
+}
+
 export interface ISlideEditorBridgeService {
     currentEditRectState$: Observable<Nullable<IEditorBridgeServiceParam>>;
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
@@ -59,8 +76,8 @@ export interface ISlideEditorBridgeService {
     // }>;
     dispose(): void;
     // refreshEditCellState(): void;
-    // setEditCell(param: ICurrentEditCellParam): void;
-    setEditorRect(rect: IRectXYWH): void;
+
+    setEditorRect(param: ISetEditorInfo): void;
     getEditRectState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     // // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
     // getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
@@ -95,8 +112,10 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
     readonly visible$ = this._visible$.asObservable();
     private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
     readonly afterVisible$ = this._afterVisible$.asObservable();
+    private _currentEditRectInfo: ISetEditorInfo;
 
     constructor(
+        private readonly _renderContext: IRenderContext<UnitModel>,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -104,15 +123,36 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         @IContextService private readonly _contextService: IContextService
     ) {
         super();
-        console.log('SlideEditorBridgeService _editorService', this._editorService);
+        console.log('SlideEditorBridgeService', this._renderContext);
     }
 
     override dispose() {
         super.dispose();
     }
 
-    setEditorRect(rect: IRectXYWH) {
+    /**
+     * editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
+     * @editorInfo editorInfo
+     */
+    setEditorRect(editorInfo: ISetEditorInfo) {
+        this._currentEditRectInfo = editorInfo;
 
+        /**
+         * If there is no editor currently focused, then default to selecting the sheet editor to prevent the editorService from using the previously selected editor object.
+         * todo: wzhudev: In boundless mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
+         */
+        if (!this._editorService.getFocusEditor()) {
+            this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            this._contextService.setContextValue(EDITOR_ACTIVATED, false);
+            this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
+            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
+        }
+
+        const editCellState = this.getEditRectState();
+        this._currentEditRectState = editCellState;
+
+        // editing render controller @_subscribeToCurrentCell
+        this._currentEditRectState$.next(editCellState);
     }
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
@@ -137,34 +177,53 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         this._afterVisible$.next(this._visible);
     }
 
+    /**
+     * get info from _currentEditRectInfo
+     */
+
     getEditRectState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
         const editorUnitId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
-        const unitId = 'slide_test';
-        const docData: IDocumentData = {
-            id: unitId,
-            body: {
-                dataStream: 'A Text !!!!',
-            } as IDocumentBody,
-            documentStyle: {} as IDocumentStyle,
+
+        //editorBridgeRenderController.slideTextEditor$ ---> editorBridgeRenderController@_updateEditor --> this._currentEditRectInfo = xxx
+        const editorRectInfo = this._currentEditRectInfo;
+        const unitId = editorRectInfo.unitId;
+
+        // TODO @lumixraku should get documentData from editorRectInfo, but now this would cause input area height 0
+        // let docData: IDocumentData = this.genDocData(editorRectInfo.startEditingText);
+
+        const docData = editorRectInfo.startEditingText.documentData;
+        docData.id = editorUnitId;
+        docData.documentStyle = {
+            ...docData.documentStyle,
+            ...{
+                pageSize: { width: Infinity, height: Infinity },
+            },
         };
+
         const docDataModel = new DocumentDataModel(docData);
         const documentLayoutObject: IDocumentLayoutObject = {
             documentModel: docDataModel,
             fontString: 'document',
             textRotation: { a: 0, v: 0 },
             wrapStrategy: 0,
-            verticalAlign: 0,
+            verticalAlign: VerticalAlign.MIDDLE,
             horizontalAlign: 0,
             paddingData: { t: 0, b: 1, l: 2, r: 2 },
         };
 
         // see insert-text.operation
-        const defaultWidth = 220;
-        const defaultheight = 40;
-        const left = 230;
-        const top = 142;
+        // TODO: @lumixraku need to plus scrolling and offset of PPT card.
+        const editorWidth = editorRectInfo.startEditingText.width;
+        const editorHeight = editorRectInfo.startEditingText.height;
+        const left = editorRectInfo.startEditingText.left;
+        const top = editorRectInfo.startEditingText.top;
         return {
-            position: { startX: left, startY: top, endX: left + defaultWidth, endY: top + defaultheight },
+            position: {
+                startX: left,
+                startY: top,
+                endX: left + editorWidth,
+                endY: top + editorHeight,
+            },
             scaleX: 1,
             scaleY: 1,
             canvasOffset: { left: 0, top: 0 },
@@ -188,5 +247,48 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
 
     getCurrentEditorId() {
         return this._editorUnitId;
+    }
+
+    genDocData(target: RichText) {
+        const editorUnitId = this.getCurrentEditorId();
+        const content = target.text;
+        const fontSize = target.fs;
+        const docData: IDocumentData = {
+            id: editorUnitId,
+            body: {
+                dataStream: `${content}\r\n`,
+                textRuns: [{ st: 0, ed: content.length }],
+                paragraphs: [{
+                    paragraphStyle: {
+                        // no use
+                        // textStyle: { fs: 30 },
+                        // horizontalAlign: HorizontalAlign.CENTER,
+                        // verticalAlign: VerticalAlign.MIDDLE,
+                    } as IParagraphStyle,
+                    startIndex: content.length + 1,
+                }] as IParagraph[],
+                sectionBreaks: [{ startIndex: content.length + 2 }],
+            } as IDocumentBody,
+            documentStyle: {
+                marginBottom: 0,
+                marginLeft: 0,
+                marginRight: 0,
+                marginTop: 0,
+                pageSize: { width: Infinity, height: Infinity },
+                textStyle: { fs: fontSize },
+                renderConfig: {
+                    // horizontalAlign: HorizontalAlign.CENTER,
+                    verticalAlign: VerticalAlign.MIDDLE,
+                    centerAngle: 0,
+                    vertexAngle: 0,
+                    wrapStrategy: 0,
+                },
+            } as IDocumentStyle,
+            drawings: {},
+            drawingsOrder: [],
+            settings: { zoomRatio: 1 } as IDocumentSettings,
+        };
+
+        return docData;
     }
 }

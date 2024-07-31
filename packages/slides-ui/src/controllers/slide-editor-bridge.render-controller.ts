@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IRectXYWH, Workbook } from '@univerjs/core';
-import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentDataModel, FOCUSING_EDITOR_BUT_HIDDEN, ICommandService, IContextService, Inject, IUniverInstanceService, Nullable, RxDisposable } from '@univerjs/core';
-import { type IDocumentLayoutObject, type IRenderContext, type IRenderModule, ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { IRangeSelectorService } from '@univerjs/ui';
-import { Subject } from 'rxjs';
+import type { IDisposable, IPageElement, IRectXYWH, SlideDataModel, UnitModel } from '@univerjs/core';
+import { DisposableCollection, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import {
-    VIEWPORT_KEY as DOC_VIEWPORT_KEY,
-    DOCS_COMPONENT_MAIN_LAYER_INDEX,
-    DocSkeletonManagerService,
-    MoveCursorOperation,
-    MoveSelectionOperation,
-    RichTextEditingMutation,
     TextSelectionManagerService,
 } from '@univerjs/docs';
+import type { IChangeObserverConfig, IRenderContext, IRenderModule, RichText } from '@univerjs/engine-render';
+import { ITextSelectionRenderManager, ObjectType } from '@univerjs/engine-render';
+import { CanvasView } from '@univerjs/slides';
+import { Subject } from 'rxjs';
+import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
+import type { ISlideRichTextProps } from '../type';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -52,15 +49,16 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
     /** If the corresponding unit is active and prepared for editing. */
     private _isUnitEditing = false;
 
-    textRect$: Subject<IRectXYWH> = new Subject();
+    setSlideTextEditor$: Subject<ISlideRichTextProps> = new Subject();
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
+        private readonly _renderContext: IRenderContext<UnitModel>,
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ISlideEditorBridgeService private readonly _editorBridgeService: ISlideEditorBridgeService,
+        @Inject(ISlideEditorBridgeService) private readonly _editorBridgeService: ISlideEditorBridgeService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @Inject(CanvasView) private readonly _canvasView: CanvasView
     ) {
         super();
         this._init();
@@ -69,66 +67,83 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
     private _init(): IDisposable {
         const d = new DisposableCollection();
         this._initSubjectListener(d);
-
+        this._initEventListener(d);
         return d;
     }
 
     private _initSubjectListener(d: DisposableCollection) {
-        d.add(this.textRect$.subscribe((rect: IRectXYWH) => {
-            this._updateEditorPosition(rect);
-        }));
+        // d.add(this.setSlideTextEditor$.subscribe((param: ISlideTextEditorParam) => {
+        //     this._updateEditor(param);
+        // }));
     }
 
-    private _updateEditorPosition(rect: IRectXYWH) {
-      // editor bridge set pos
-        // this._editorBridgeService.setEditorRect(rect);
-        const editorUnitId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
-        const unitId = 'slide_test';
+    private _updateEditor(targetObject: RichText, startEditingParam: ISlideRichTextProps) {
+        const { scene, engine } = this._renderContext;
+        const unitId = this._renderContext.unitId;
 
-        const docData: IDocumentData = {
-            id: unitId,
-            body: {
-                dataStream: 'A Text !!!!',
-            } as IDocumentBody,
-            documentStyle: {} as IDocumentStyle,
-        };
-        const docDataModel = new DocumentDataModel(docData);
-        const documentLayoutObject: IDocumentLayoutObject = {
-            documentModel: docDataModel,
-            fontString: 'document',
-            textRotation: { a: 0, v: 0 },
-            wrapStrategy: 0,
-            verticalAlign: 0,
-            horizontalAlign: 0,
-            paddingData: { t: 0, b: 1, l: 2, r: 2 },
-        };
-
-        // same concept as editCellState in sheets-ui/src/controllers/editor/editing.render-controller.ts
-        const _editRectState = {
-            position: rect,
-            scaleX: 1,
-            scaleY: 1,
-            canvasOffset: {
-                left: 0,
-                top: 0,
-            },
+        const setEditorRect: ISetEditorInfo = {
+            scene,
+            engine,
             unitId,
-            editorUnitId,
-            documentLayoutObject,
+            pageId: '',
+            startEditingText: targetObject,
         };
 
-        const { documentModel } = documentLayoutObject;
-        documentModel!.updateDocumentId(editorUnitId);
-        this._instanceSrv.changeDoc(editorUnitId, documentModel!);
-        this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true); // ???
-        this._textSelectionManagerService.replaceTextRanges([{
-            startOffset: 0,
-            endOffset: 0,
-        }]);
-        this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+        // editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
+        this._editorBridgeService.setEditorRect(setEditorRect);
     }
 
-    setTextRectXYWH(rect: IRectXYWH) {
-        this.textRect$.next(rect);
+    private _initEventListener(d: DisposableCollection) {
+        const model = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        const pagesMap = model?.getPages() ?? {};
+        const pages = Object.values(pagesMap);
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i];
+            const { scene } = this._canvasView.getRenderUnitByPageId(page.id);
+            const transformer = scene?.getTransformer();
+
+            if (!transformer) return;
+
+            // calling twice when add an object.
+            transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
+                // console.log('activeObject', page.id, transformer == window.trans, param);
+                const target = param.target;
+                if (!target) return;
+                if (target.objectType !== ObjectType.RICH_TEXT) {
+                    // rm other text editor
+                    this.changeVisible(false);
+                } else {
+                    const elementData = (target as RichText).toJson();
+                    this.startEditing(target as RichText, {
+                        top: elementData.top,
+                        left: elementData.left,
+                        width: elementData.width,
+                        height: elementData.height,
+                        scaleX: elementData.scaleX,
+                        scaleY: elementData.scaleY,
+                        text: elementData.text,
+                        fs: elementData.fs,
+                    });
+                }
+            });
+        }
+    }
+
+    /**
+     * TODO calling twice ？？？？
+     * editingParam derives from RichText object.
+     *
+     * TODO @lumixraku need scale param
+     * @param editingParam
+     */
+    startEditing(target: RichText, editingParam: ISlideRichTextProps) {
+        // this.setSlideTextEditor$.next({ content, rect });
+        this._updateEditor(target, editingParam);
+        this.changeVisible(true);
+    }
+
+    changeVisible(visible: boolean) {
+        const { unitId } = this._renderContext;
+        this._editorBridgeService.changeVisible({ visible, eventType: 3, unitId });
     }
 }

@@ -175,6 +175,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     drawingsOrder: [],
     body: {
         dataStream,
+        customBlocks: [],
         textRuns: [
             {
                 st: 0,

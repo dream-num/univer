@@ -37,3 +37,15 @@ export const DeleteRightShortcut: IShortcutItem = {
     preconditions: whenDocAndEditorFocused,
     binding: KeyCode.DELETE,
 };
+
+// export const TabShortcut: IShortcutItem = {
+//     id: DocTabCommand.id,
+//     preconditions: whenDocAndEditorFocused,
+//     binding: KeyCode.TAB,
+// };
+
+// export const ShiftTabShortcut: IShortcutItem = {
+//     id: DocShiftTabCommand.id,
+//     preconditions: whenDocAndEditorFocused,
+//     binding: KeyCode.TAB | MetaKeys.SHIFT,
+// };

@@ -29,7 +29,7 @@ export interface IFeatureCalculationManagerParam {
     unitId: string;
     subUnitId: string;
     dependencyRanges: IUnitRange[];
-    getDirtyData: (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
+    getDirtyData: (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData, dirtyTrees: FormulaDependencyTree[]) => {
         runtimeCellData: IRuntimeUnitDataType;
         dirtyRanges: IFeatureDirtyRangeType;
     };

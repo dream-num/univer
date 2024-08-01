@@ -95,13 +95,22 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList, dependencyTreeCache);
 
-        const isCycleDependency = this._checkIsCycleDependency(updateTreeList);
+        let finalTreeList = this._calculateRunList(updateTreeList);
+
+        const hasFeatureCalculation = this._dependencyFeatureCalculation(finalTreeList);
+
+        if (hasFeatureCalculation) {
+            finalTreeList.forEach((tree) => {
+                tree.resetState();
+            });
+            finalTreeList = this._calculateRunList(finalTreeList);
+        }
+
+        const isCycleDependency = this._checkIsCycleDependency(finalTreeList);
 
         if (isCycleDependency) {
             this._runtimeService.enableCycleDependency();
         }
-
-        const finalTreeList = this._calculateRunList(updateTreeList);
 
         return Promise.resolve(finalTreeList);
     }
@@ -602,8 +611,6 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
-        this._dependencyFeatureCalculation(newTreeList);
-
         dependencyTreeCache.dispose();
 
         return newTreeList;
@@ -618,12 +625,14 @@ export class FormulaDependencyGenerator extends Disposable {
          */
         this._clearFeatureCalculationNode(newTreeList);
 
+        let hasFeatureCalculation = false;
+
         const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
         featureMap.forEach((subUnitMap, _) => {
             subUnitMap.forEach((featureMap, _) => {
                 featureMap.forEach((params, featureId) => {
                     const { unitId, subUnitId, getDirtyData } = params;
-                    const allDependency = getDirtyData({} as IFormulaDirtyData, {} as IAllRuntimeData);
+                    const allDependency = getDirtyData(this._currentConfigService.getDirtyData() as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData, newTreeList);
                     const dirtyRanges = allDependency.dirtyRanges;
                     const dirtyRangesToMap = this._convertDirtyRangesToMap(dirtyRanges);
                     const intersectTrees = this._intersectFeatureCalculation(dirtyRangesToMap, newTreeList, { unitId, subUnitId, featureId });
@@ -640,10 +649,14 @@ export class FormulaDependencyGenerator extends Disposable {
                             }
                             tree.pushChildren(featureTree!);
                         });
+
+                        hasFeatureCalculation = true;
                     }
                 });
             });
         });
+
+        return hasFeatureCalculation;
     }
 
     private _clearFeatureCalculationNode(newTreeList: FormulaDependencyTree[]) {

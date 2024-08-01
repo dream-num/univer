@@ -142,6 +142,10 @@ export class RectRange implements IDocRange {
         return _startRow === 0 && _endRow === tableRows.length - 1;
     }
 
+    get spanEntireTable(): boolean {
+        return this.spanEntireRow && this.spanEntireColumn;
+    }
+
     get startNodePosition(): INodePosition {
         const { anchorNodePosition, focusNodePosition } = this;
         const compare = compareNodePositionInTable(anchorNodePosition, focusNodePosition);

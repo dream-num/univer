@@ -17,6 +17,7 @@
 import type {
     ICommand,
     IDocumentBody,
+    IMultiCommand,
     IMutationInfo,
     ITextRange,
     JSONXActions,
@@ -131,11 +132,15 @@ export interface IInnerCutCommandParams {
     selections?: ITextRange[];
 }
 
-export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
-    id: 'doc.command.inner-cut',
+// FIXIME: @JOCS The zero-hour solution needs to be refactored after the registration mechanism is in place.
+export const INNER_CUT_COMMAND_ID = 'doc.command.inner-cut';
 
+export const CutContentCommand: IMultiCommand<IInnerCutCommandParams> = {
+    id: INNER_CUT_COMMAND_ID,
+    name: 'doc.command.cut.fallback',
     type: CommandType.COMMAND,
-
+    multi: true,
+    priority: 999,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInnerCutCommandParams) => {
         const { segmentId, textRanges } = params;
@@ -144,8 +149,9 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = params.selections ?? textSelectionManagerService.getCurrentTextRanges();
+        const rectRanges = textSelectionManagerService.getCurrentRectRanges();
 
-        if (!Array.isArray(selections) || selections.length === 0) {
+        if (!Array.isArray(selections) || selections.length === 0 || (Array.isArray(rectRanges) && rectRanges.length > 0)) {
             return false;
         }
 

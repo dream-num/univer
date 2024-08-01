@@ -24,6 +24,7 @@ import { CreateDocTableCommand } from '../commands/commands/table/doc-table-crea
 import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from '../commands/commands/table/doc-table-insert.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocTableShiftTabCommand, DocTableTabCommand } from '../commands/commands/table/doc-table-tab.command';
+import { CutContentWithTableCommand } from '../commands/commands/table/doc-table-cut.command';
 
 @OnLifecycle(LifecycleStages.Rendered, DocTableController)
 export class DocTableController extends Disposable {
@@ -58,6 +59,8 @@ export class DocTableController extends Disposable {
             DocTableShiftTabCommand,
             DocCreateTableOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+
+        [CutContentWithTableCommand].forEach((command) => this.disposeWithMe(this._commandService.registerMultipleCommand(command)));
     }
 
     private _initCustomComponents(): void {

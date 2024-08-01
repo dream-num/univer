@@ -260,13 +260,30 @@ export const DeleteLeftCommand: ICommand = {
         const unitId = docDataModel.getUnitId();
         const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
         const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const rectRanges = textSelectionManagerService.getCurrentRectRanges();
         const ranges = textSelectionManagerService.getCurrentTextRanges();
         const skeleton = docSkeletonManagerService?.getSkeleton();
-        if (activeRange == null || skeleton == null || ranges == null) {
+        if (activeRange == null || skeleton == null || ranges == null || rectRanges == null) {
             return false;
         }
 
         const { segmentId, style, segmentPage } = activeRange;
+
+        if (rectRanges.length) {
+            // TODO: @Jocs find THE CURSOR.
+            const cursor = 0;
+            const textRanges = [
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                },
+            ];
+            return commandService.executeCommand(CutContentCommand.id, {
+                segmentId,
+                textRanges,
+            });
+        }
+
         const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
         if (body == null) {

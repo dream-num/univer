@@ -94,3 +94,5 @@ export { DocAutoFormatService } from './services/doc-auto-format.service';
 export { ChangeListNestingLevelType } from './commands/commands/list.command';
 export { getCommandSkeleton } from './commands/util';
 export { generateParagraphs } from './commands/commands/break-line.command';
+export { INNER_CUT_COMMAND_ID } from './commands/commands/clipboard.inner.command';
+export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';

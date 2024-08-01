@@ -121,4 +121,14 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
 
         this._snapshot.body.pages[pageId] = page;
     }
+
+    appendPage(page: ISlidePage) {
+        if (!this._snapshot.body) return;
+
+        this._snapshot.body.pages[page.id] = page;
+
+        const activePage = this._activePage;
+        const index = this._snapshot.body.pageOrder.indexOf(activePage?.id ?? '');
+        this._snapshot.body.pageOrder.splice(index + 1, 0, page.id);
+    }
 }

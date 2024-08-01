@@ -27,6 +27,7 @@ export const AppendSlideOperation: ICommand = {
         const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
 
         if (!slideData) return false;
+        canvasView.appendPage();
 
         return true;
     },

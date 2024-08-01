@@ -99,9 +99,9 @@ export function SlideSideBar() {
         <aside className={styles.slideBar} ref={slideBarRef}>
             <Scrollbar>
                 <div className={styles.slideBarContent}>
-                    {/* <header className={styles.slideBarContentHeader}>
+                    <header className={styles.slideBarContentHeader}>
                         <a onClick={handleAppendSlide}>{localeService.t('slide.append')}</a>
-                    </header> */}
+                    </header>
 
                     {slideList.map((item, index) => (
                         <div

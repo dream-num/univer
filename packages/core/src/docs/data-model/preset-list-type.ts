@@ -29,7 +29,7 @@ export enum PresetListType {
     ORDER_LIST_1ai = 'ORDER_LIST_1ai',
     ORDER_LIST_1ai_qutoa = 'ORDER_LIST_1ai_qutoa',
     ORDER_LIST_Aai = 'ORDER_LIST_Aai',
-    ORDER_LIST_IA1 = 'ORDER_LIST_IA1',
+    ORDER_LIST_A1i = 'ORDER_LIST_A1i',
     ORDER_LIST_01ai = 'ORDER_LIST_01ai',
 }
 
@@ -134,13 +134,13 @@ export const PRESET_LIST_TYPE = {
         listType: PresetListType.ORDER_LIST,
         nestingLevel:
         [
-            { glyphFormat: '%01.', glyphType: GlyphType.DECIMAL },
+            { glyphFormat: '%01.', glyphType: GlyphType.DECIMAL_ZERO },
             { glyphFormat: '%2.', glyphType: GlyphType.LOWER_LETTER },
             { glyphFormat: '%3.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%04.', glyphType: GlyphType.DECIMAL },
+            { glyphFormat: '%04.', glyphType: GlyphType.DECIMAL_ZERO },
             { glyphFormat: '%5.', glyphType: GlyphType.LOWER_LETTER },
             { glyphFormat: '%6.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: '%07.', glyphType: GlyphType.DECIMAL },
+            { glyphFormat: '%07.', glyphType: GlyphType.DECIMAL_ZERO },
             { glyphFormat: '%8.', glyphType: GlyphType.LOWER_LETTER },
             { glyphFormat: '%9.', glyphType: GlyphType.LOWER_ROMAN },
         ].map((format, i) => ({
@@ -208,19 +208,19 @@ export const PRESET_LIST_TYPE = {
             },
         })) as INestingLevel[],
     } as IListData,
-    [PresetListType.ORDER_LIST_IA1]: {
+    [PresetListType.ORDER_LIST_A1i]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel:
         [
-            { glyphFormat: '%1.', glyphType: GlyphType.UPPER_ROMAN },
-            { glyphFormat: '%2.', glyphType: GlyphType.UPPER_LETTER },
-            { glyphFormat: '%3.', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%4.', glyphType: GlyphType.UPPER_ROMAN },
-            { glyphFormat: '%5.', glyphType: GlyphType.UPPER_LETTER },
-            { glyphFormat: '%6.', glyphType: GlyphType.DECIMAL },
-            { glyphFormat: '%7.', glyphType: GlyphType.UPPER_ROMAN },
-            { glyphFormat: '%8.', glyphType: GlyphType.UPPER_LETTER },
-            { glyphFormat: '%9.', glyphType: GlyphType.DECIMAL },
+            { glyphFormat: '%1.', glyphType: GlyphType.UPPER_LETTER },
+            { glyphFormat: '%2.', glyphType: GlyphType.DECIMAL },
+            { glyphFormat: '%3.', glyphType: GlyphType.LOWER_ROMAN },
+            { glyphFormat: '%4.', glyphType: GlyphType.UPPER_LETTER },
+            { glyphFormat: '%5.', glyphType: GlyphType.DECIMAL },
+            { glyphFormat: '%6.', glyphType: GlyphType.LOWER_ROMAN },
+            { glyphFormat: '%7.', glyphType: GlyphType.UPPER_LETTER },
+            { glyphFormat: '%8.', glyphType: GlyphType.DECIMAL },
+            { glyphFormat: '%9.', glyphType: GlyphType.LOWER_ROMAN },
         ].map((format, i) => ({
             ...format,
             bulletAlignment: BulletAlignment.START,

@@ -44,8 +44,8 @@ export class DocClipboardController extends RxDisposable {
     }
 
     private _init() {
-        [DocCopyCommand, DocCutCommand, DocPasteCommand, CutContentCommand].forEach((command) => this.disposeWithMe(this._commandService.registerMultipleCommand(command)));
-        [InnerPasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerMultipleCommand(command)));
+        [InnerPasteCommand, CutContentCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._initLegacyPasteCommand();
     }

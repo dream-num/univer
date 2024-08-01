@@ -19,12 +19,10 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
-import { DeleteLeftCommand, TextSelectionManagerService } from '@univerjs/docs';
+import { DeleteLeftCommand, DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, TextSelectionManagerService } from '@univerjs/docs';
 import type { RectRange } from '@univerjs/engine-render';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
-import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../../commands/commands/table/doc-table-insert.command';
-import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../../commands/commands/table/doc-table-delete.command';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);

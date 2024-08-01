@@ -15,9 +15,8 @@
  */
 
 import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { DocTableShiftTabCommand, DocTableTabCommand, TextSelectionManagerService } from '@univerjs/docs';
 import { isInSameTableCell } from '@univerjs/engine-render';
-import { DocTableShiftTabCommand, DocTableTabCommand } from './table/doc-table-tab.command';
 
 export interface IDocTabCommandParams { }
 

@@ -21,7 +21,6 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
 import type { IRemoveFeatureCalculationMutationParam } from '../commands/mutations/set-feature-calculation.mutation';
-import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
 import type { IAllRuntimeData } from './runtime.service';
 import type { IFormulaDirtyData } from './current-data.service';
 
@@ -29,7 +28,7 @@ export interface IFeatureCalculationManagerParam {
     unitId: string;
     subUnitId: string;
     dependencyRanges: IUnitRange[];
-    getDirtyData: (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData, dirtyTrees: FormulaDependencyTree[]) => {
+    getDirtyData: (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
         runtimeCellData: IRuntimeUnitDataType;
         dirtyRanges: IFeatureDirtyRangeType;
     };

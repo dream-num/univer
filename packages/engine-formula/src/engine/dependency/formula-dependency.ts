@@ -632,7 +632,7 @@ export class FormulaDependencyGenerator extends Disposable {
             subUnitMap.forEach((featureMap, _) => {
                 featureMap.forEach((params, featureId) => {
                     const { unitId, subUnitId, getDirtyData } = params;
-                    const allDependency = getDirtyData(this._currentConfigService.getDirtyData() as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData, newTreeList);
+                    const allDependency = getDirtyData(this._currentConfigService.getDirtyData() as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);
                     const dirtyRanges = allDependency.dirtyRanges;
                     const dirtyRangesToMap = this._convertDirtyRangesToMap(dirtyRanges);
                     const intersectTrees = this._intersectFeatureCalculation(dirtyRangesToMap, newTreeList, { unitId, subUnitId, featureId });

@@ -964,10 +964,6 @@ export class PromptController extends Disposable {
             const gridRange = deserializeRangeWithSheet(token);
             const { unitId: refUnitId, sheetName, range: rawRange } = gridRange;
 
-            if (!isSelf && (!refUnitId || !sheetName)) {
-                continue;
-            }
-
             /**
              * pro/issues/436
              * When the range is an entire row or column, NaN values need to be corrected.
@@ -978,6 +974,7 @@ export class PromptController extends Disposable {
                 continue;
             }
 
+            // sheet name is designed to be unique.
             const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
 
             if (sheetName.length !== 0 && refSheetId !== sheetId) {
@@ -1527,6 +1524,8 @@ export class PromptController extends Disposable {
             }
         }
 
+        const unitId = skeleton?.worksheet.getUnitId();
+        const sheetId = skeleton?.worksheet.getSheetId();
         const refString = this._generateRefString({
             range: {
                 startRow: Math.min(startRow, endRow),
@@ -1534,6 +1533,8 @@ export class PromptController extends Disposable {
                 startColumn: Math.min(startColumn, endColumn),
                 endColumn: Math.max(startColumn, endColumn),
                 ...refType,
+                sheetId,
+                unitId,
             },
             primary,
             style: null,

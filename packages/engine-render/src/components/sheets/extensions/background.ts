@@ -106,6 +106,10 @@ export class Background extends SheetExtension {
                     // we need to use the background color of the top-left cell.
                     if (isMerged) {
                         return true;
+                    } else {
+                        const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(rowIndex);
+                        const visibleCol = spreadsheetSkeleton.worksheet.getRowVisible(columnIndex);
+                        if (!visibleRow || !visibleCol) return true;
                     }
 
                     // For merged cells, and the current cell is the top-left cell in the merged region.

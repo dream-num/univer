@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/slides",
     "version": "0.2.5",
-    "private": false,
+    "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -22,8 +22,7 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./*": "./src/*"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -43,8 +42,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*",
-            "./locale/*": "./lib/locale/*.json"
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -71,9 +69,9 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3"
+        "typescript": "^5.5.4",
+        "vite": "^5.3.5",
+        "vitest": "^2.0.4"
     },
     "univerSpace": {
         ".": {
@@ -86,7 +84,6 @@
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./lib/*": "./lib/*",
-        "./locale/*": "./lib/locale/*.json"
+        "./lib/*": "./lib/*"
     }
 }

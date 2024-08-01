@@ -22,7 +22,6 @@ import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useObservable } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CanvasView } from '@univerjs/slides';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
 import { SetSlidePageThumbOperation } from '../../commands/operations/set-thumb.operation';
 import styles from './index.module.less';
@@ -35,7 +34,6 @@ export function SlideSideBar() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const canvasView = useDependency(CanvasView);
 
     const slideBarRef = useRef<HTMLDivElement>(null);
     const currentSlide = useObservable(
@@ -61,8 +59,8 @@ export function SlideSideBar() {
     }, [slideList.length]);
 
     useEffect(() => {
-        canvasView.activePageId$.subscribe((id) => {
-            setActivatePageId(id);
+        currentSlide?.activePage$.subscribe((page) => {
+            setActivatePageId(page?.id ?? null);
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

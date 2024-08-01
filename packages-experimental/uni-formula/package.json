@@ -66,7 +66,7 @@
         "@univerjs/sheets-formula": "workspace:*"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.65"
+        "@univerjs/icons": "^0.1.70"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -79,9 +79,9 @@
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3"
+        "typescript": "^5.5.4",
+        "vite": "^5.3.5",
+        "vitest": "^2.0.4"
     },
     "univerSpace": {
         ".": {

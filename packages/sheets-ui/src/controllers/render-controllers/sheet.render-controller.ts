@@ -59,7 +59,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _addNewRender() {
         const { scene, engine, unit: workbook } = this._context;
-
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
         this._addComponent(workbook);

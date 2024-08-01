@@ -89,16 +89,15 @@ export class Border extends SheetExtension {
             const { startY: cellStartY, endY: cellEndY, startX: cellStartX, endX: cellEndX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
+            if (!isMerged) {
+                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(rowIndex);
+                const visibleCol = spreadsheetSkeleton.worksheet.getRowVisible(columnIndex);
+                if (!visibleRow || !visibleCol) return true;
+            }
+
             if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                 return true;
             }
-
-            // if (
-            //     !this.isRenderDiffRangesByColumn(mergeInfo.startColumn - 1, diffRanges) &&
-            //     !this.isRenderDiffRangesByColumn(mergeInfo.endColumn + 1, diffRanges)
-            // ) {
-            //     return true;
-            // }
 
             for (const key in borderCaches) {
                 const { type, style, color } = borderCaches[key] as BorderCacheItem;

@@ -54,11 +54,10 @@ export function createMenuTestBed() {
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        protected override _injector: Injector;
 
         static override type = UniverInstanceType.UNIVER_SHEET;
 
-        constructor(_config: unknown, @Inject(Injector) _injector: Injector) {
+        constructor(_config: unknown, @Inject(Injector) override readonly _injector: Injector) {
             super();
         }
 

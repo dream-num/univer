@@ -39,12 +39,12 @@ export class UniverThreadCommentUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         (mergeOverrideWithDependencies([
             [ThreadCommentPanelService],
             [IThreadCommentMentionDataService, { useClass: ThreadCommentMentionDataService }],
         ], this._config?.overrides) as Dependency[]).forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
 
         [ToggleSheetCommentPanelOperation, SetActiveCommentOperation].forEach((command) => {

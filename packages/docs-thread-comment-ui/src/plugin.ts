@@ -38,7 +38,7 @@ export class UniverDocsThreadCommentUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [
                 DocThreadCommentUIController,
@@ -50,7 +50,7 @@ export class UniverDocsThreadCommentUIPlugin extends Plugin {
 
             [DocThreadCommentService],
         ] as Dependency[]).forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
     }
 

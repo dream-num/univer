@@ -28,10 +28,10 @@ export class UniverSheetsFilterPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [SheetsFilterService],
             [SheetsFilterController],
-        ] as Dependency[]).forEach((d) => injector.add(d));
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 }

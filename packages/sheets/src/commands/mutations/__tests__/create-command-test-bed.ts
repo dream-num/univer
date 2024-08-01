@@ -117,12 +117,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
-
-            this._injector = _injector;
         }
 
-        override onStarting(injector: Injector): void {
-            dependencies?.forEach((d) => injector.add(d));
+        override onStarting(): void {
+            dependencies?.forEach((d) => this._injector.add(d));
         }
     }
 

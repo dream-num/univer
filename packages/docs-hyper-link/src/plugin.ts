@@ -32,7 +32,7 @@ export class UniverDocsHyperLinkPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         const deps: Dependency[] = [
             [DocHyperLinkModel],
             [DocHyperLinkController],
@@ -40,7 +40,7 @@ export class UniverDocsHyperLinkPlugin extends Plugin {
         ];
 
         deps.forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
     }
 }

@@ -64,7 +64,7 @@ export interface IUniverDocsConfig {
     hasScroll?: boolean;
 }
 
-const PLUGIN_NAME = 'docs';
+const PLUGIN_NAME = 'DOCS_PLUGIN';
 
 export class UniverDocsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

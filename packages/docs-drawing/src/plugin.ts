@@ -30,7 +30,7 @@ export class UniverDocsDrawingPlugin extends Plugin {
         super();
     }
 
-    override onStarting(_injector: Injector): void {
+    override onStarting(): void {
         ([
             [DocDrawingLoadController],
             [DocDrawingController],
@@ -38,6 +38,6 @@ export class UniverDocsDrawingPlugin extends Plugin {
             [IDocDrawingService, { useClass: DocDrawingService }],
         ] as Dependency[
 
-        ]).forEach((dependency) => _injector.add(dependency));
+        ]).forEach((dependency) => this._injector.add(dependency));
     }
 }

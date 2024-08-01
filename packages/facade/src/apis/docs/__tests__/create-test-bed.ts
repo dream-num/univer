@@ -72,11 +72,10 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
             @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
-
-            this._injector = _injector;
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([TextSelectionManagerService]);
             injector.add([DocStateChangeManagerService]);

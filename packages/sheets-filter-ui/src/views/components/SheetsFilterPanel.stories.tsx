@@ -58,7 +58,8 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IMenuService, { useClass: MenuService }]);

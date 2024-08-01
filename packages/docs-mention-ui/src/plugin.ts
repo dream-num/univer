@@ -35,7 +35,7 @@ export class UniverDocsMentionUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         const deps: Dependency[] = [
             [DocMentionPopupService],
             [DocMentionUIController],
@@ -44,7 +44,7 @@ export class UniverDocsMentionUIPlugin extends Plugin {
         ];
 
         deps.forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
     }
 }

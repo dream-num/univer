@@ -96,7 +96,8 @@ function createMobileMenuStorybookBed() {
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([IPlatformService, { useClass: PlatformService }]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IMenuService, { useClass: MenuService }]);

@@ -72,13 +72,13 @@ function createFilterOperationTestBed() {
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
             ([
                 [SheetInterceptorService],
                 [SheetsFilterPanelService],
                 [RefRangeService],
                 [SheetsSelectionsService],
-            ] as Dependency[]).forEach((d) => injector.add(d));
+            ] as Dependency[]).forEach((d) => this._injector.add(d));
         }
     }
 

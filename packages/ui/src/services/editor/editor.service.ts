@@ -18,7 +18,7 @@ import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IDoc
 import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
-import type { IRender, ISuccinctTextRangeParam, Scene } from '@univerjs/engine-render';
+import type { IRender, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 
@@ -273,7 +273,7 @@ export interface IEditorService {
     blur$: Observable<unknown>;
     blur(): void;
 
-    focus$: Observable<ISuccinctTextRangeParam>;
+    focus$: Observable<ISuccinctDocRangeParam>;
     focus(editorUnitId?: string): void;
 
     setValue$: Observable<IEditorSetValueParam>;
@@ -337,7 +337,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private readonly _blur$ = new Subject();
     readonly blur$ = this._blur$.asObservable();
 
-    private readonly _focus$ = new Subject<ISuccinctTextRangeParam>();
+    private readonly _focus$ = new Subject<ISuccinctDocRangeParam>();
     readonly focus$ = this._focus$.asObservable();
 
     private readonly _setValue$ = new Subject<IEditorSetValueParam>();

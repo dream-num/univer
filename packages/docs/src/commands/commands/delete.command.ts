@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions } from '@univerjs/core';
+import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 import {
     CommandType,
     DataStreamTreeTokenType,
@@ -28,7 +28,7 @@ import {
     TextXActionType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IActiveTextRange, ITextRangeWithStyle, RectRange, TextRange } from '@univerjs/engine-render';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 
 import type { ITextActiveRange } from '../../services/text-selection-manager.service';
@@ -240,6 +240,39 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
     },
 };
 
+function getCursorWhenDelete(textRanges: Readonly<Nullable<TextRange[]>>, rectRanges: readonly RectRange[]): number {
+    let cursor = 0;
+
+    if (textRanges == null || textRanges.length === 0) {
+        if (typeof rectRanges[0].startOffset === 'number') {
+            // Put the cursor at the first text range start.
+            cursor = rectRanges[0].startOffset;
+        }
+    } else if (textRanges.length > 0 && rectRanges.length > 0) {
+        const textRange = textRanges[0]!;
+        const rectRange = rectRanges[0]!;
+
+        if (textRange.startOffset != null && rectRange.startOffset != null) {
+            if (textRange.startOffset < rectRange.startOffset) {
+                // Put the cursor at the first text range start.
+                cursor = textRange.startOffset;
+            } else if (textRange.startOffset >= rectRange.startOffset) {
+                const { spanEntireRow, spanEntireTable } = rectRange;
+
+                if (spanEntireTable) {
+                    // Put the cursor at the first line of deleted table paragraph.
+                    cursor = rectRange.startOffset - 3; // 3 is TABLE START, ROW START, CELL START.
+                } else if (spanEntireRow) {
+                    // Put the cursor at the last row's end cell before deleted rows.
+                    cursor = rectRange.startOffset - 6; // 6 is ROW START, CELL START, CELL END, ROW END, \r, \n.
+                }
+            }
+        }
+    }
+
+    return cursor;
+}
+
 // Handle BACKSPACE key.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
@@ -269,8 +302,7 @@ export const DeleteLeftCommand: ICommand = {
         }
 
         if (rectRanges?.length) {
-            // TODO: @Jocs find THE CURSOR.
-            const cursor = 0;
+            const cursor = getCursorWhenDelete(ranges, rectRanges);
             const segmentId = rectRanges[0].segmentId;
             const textRanges = [
                 {

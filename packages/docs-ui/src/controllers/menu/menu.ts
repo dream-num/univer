@@ -30,6 +30,7 @@ import {
     AlignOperationCommand,
     AlignRightCommand,
     BulletListCommand,
+    getParagraphsInRange,
     OrderListCommand,
     ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatBoldCommand,
@@ -44,8 +45,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
     SetTextSelectionsOperation,
-    TextSelectionManagerService,
-} from '@univerjs/docs';
+    TextSelectionManagerService } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     FONT_FAMILY_LIST,
@@ -57,13 +57,14 @@ import {
     MenuPosition,
 } from '@univerjs/ui';
 import type { IAccessor, PresetListType } from '@univerjs/core';
-import { combineLatest, Observable } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
-import { ORDER_LIST_TYPE_COMPONENT } from '../../components/list-type-picker';
+import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../components/list-type-picker';
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
@@ -559,7 +560,51 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     };
 }
 
-export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType> {
+const listValueFactory$ = (accessor: IAccessor) => {
+    return new Observable<PresetListType>((subscriber) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        let textSubscription: Subscription | undefined;
+        const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            textSubscription?.unsubscribe();
+            if (unitId == null) {
+                return;
+            }
+
+            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            if (docDataModel == null) {
+                return;
+            }
+
+            textSubscription = textSelectionManagerService.textSelection$.subscribe(() => {
+                const range = textSelectionManagerService.getActiveRange();
+                if (range) {
+                    const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
+                    const paragraphs = getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
+                    let listType: string | undefined;
+                    if (paragraphs.every((p) => {
+                        if (!listType) {
+                            listType = p.bullet?.listType;
+                        }
+                        return p.bullet && p.bullet.listType === listType;
+                    })) {
+                        subscriber.next(listType as PresetListType);
+                        return;
+                    }
+                }
+
+                subscriber.next(undefined);
+            });
+        });
+
+        return () => {
+            subscription.unsubscribe();
+            textSubscription?.unsubscribe();
+        };
+    });
+};
+
+export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType> {
     return {
         id: OrderListCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
@@ -570,16 +615,19 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
                     name: ORDER_LIST_TYPE_COMPONENT,
                     hoverable: false,
                 },
+                value$: listValueFactory$(accessor),
             },
         ],
         icon: 'OrderSingle',
         tooltip: 'toolbar.order',
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+
+        activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('ORDER_LIST') === 0)),
     };
 }
 
-export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType> {
+export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType> {
     return {
         id: BulletListCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
@@ -587,15 +635,17 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         selections: [
             {
                 label: {
-                    name: ORDER_LIST_TYPE_COMPONENT,
+                    name: BULLET_LIST_TYPE_COMPONENT,
                     hoverable: false,
                 },
+                value$: listValueFactory$(accessor),
             },
         ],
         icon: 'UnorderSingle',
         tooltip: 'toolbar.unorder',
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('BULLET_LIST') === 0)),
     };
 }
 

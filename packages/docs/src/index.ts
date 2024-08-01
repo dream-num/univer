@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { getParagraphsInRange } from './commands/commands/list.command';
 export { replaceSelectionFactory } from './basics/replace';
 export { getSelectionText, getDeleteSelection, getInsertSelection, isSegmentIntersects } from './basics/selection';
 export type { IDocObjectParam } from './basics/component-tools';

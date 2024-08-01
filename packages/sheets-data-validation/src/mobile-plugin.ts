@@ -55,7 +55,7 @@ export class UniverSheetsDataValidationMobilePlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultSheetsDataValidation, this._config);
     }
 
-    override onStarting(injector: Injector) {
+    override onStarting() {
         ([
             [DataValidationPanelService],
             [SheetDataValidationService],
@@ -80,7 +80,7 @@ export class UniverSheetsDataValidationMobilePlugin extends Plugin {
             [DataValidationCopyPasteController],
             [DataValidationFormulaController],
         ] as Dependency[]).forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
 
         [

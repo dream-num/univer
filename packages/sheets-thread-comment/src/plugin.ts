@@ -45,7 +45,7 @@ export class UniverSheetsThreadCommentPlugin extends Plugin {
         this._pluginConfig = Tools.deepMerge({}, DefaultSheetsThreadCommentConfig, config);
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [
                 SheetsThreadCommentController,
@@ -59,7 +59,7 @@ export class UniverSheetsThreadCommentPlugin extends Plugin {
             [ThreadCommentRemoveSheetsController],
             [SheetsThreadCommentPopupService],
         ] as Dependency[]).forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
 
         [ShowAddSheetCommentModalOperation].forEach((command) => {

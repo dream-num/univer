@@ -33,7 +33,7 @@ export class UniverDocsMentionPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         const deps: Dependency[] = [
             [DocMentionModel],
             [DocMentionService],
@@ -42,7 +42,7 @@ export class UniverDocsMentionPlugin extends Plugin {
         ];
 
         deps.forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
     }
 }

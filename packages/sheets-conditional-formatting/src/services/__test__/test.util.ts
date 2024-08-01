@@ -72,9 +72,9 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             super();
         }
 
-        override onStarting(injector: Injector): void {
-            injector.add([SheetInterceptorService]);
-            dependencies?.forEach((d) => injector.add(d));
+        override onStarting(): void {
+            this._injector.add([SheetInterceptorService]);
+            dependencies?.forEach((d) => this._injector.add(d));
         }
 
         override onReady(): void {

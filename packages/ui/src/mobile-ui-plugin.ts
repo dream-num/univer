@@ -70,7 +70,7 @@ export class UniverMobileUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         const dependencies: Dependency[] = mergeOverrideWithDependencies([
             [ComponentManager],
             [ZIndexManager],
@@ -115,6 +115,6 @@ export class UniverMobileUIPlugin extends Plugin {
             [ErrorController],
         ], this._config.override);
 
-        dependencies.forEach((dependency) => injector.add(dependency));
+        dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 }

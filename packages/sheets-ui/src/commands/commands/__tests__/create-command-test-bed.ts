@@ -105,11 +105,10 @@ export function createCommandTestBed(
             @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
-
-            this._injector = _injector;
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);

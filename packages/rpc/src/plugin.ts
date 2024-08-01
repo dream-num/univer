@@ -49,7 +49,7 @@ export class UniverRPCMainThreadPlugin extends Plugin {
         super();
     }
 
-    override async onStarting(injector: Injector): Promise<void> {
+    override onStarting(): void {
         const { workerURL } = this._config;
         const worker = workerURL instanceof Worker ? workerURL : new Worker(workerURL);
         const messageProtocol = createWebWorkerMessagePortOnMain(worker);
@@ -64,10 +64,10 @@ export class UniverRPCMainThreadPlugin extends Plugin {
             [IRemoteSyncService, { useClass: RemoteSyncPrimaryService }],
         ];
 
-        dependencies.forEach((dependency) => injector.add(dependency));
+        dependencies.forEach((dependency) => this._injector.add(dependency));
 
         // let DataSyncPrimaryController to be initialized and registering other modules
-        injector.get(DataSyncPrimaryController);
+        this._injector.get(DataSyncPrimaryController);
     }
 }
 
@@ -86,7 +86,7 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         (
             [
                 [DataSyncReplicaController],
@@ -98,8 +98,8 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
                 ],
                 [IRemoteInstanceService, { useClass: WebWorkerRemoteInstanceService }],
             ] as Dependency[]
-        ).forEach((dependency) => injector.add(dependency));
+        ).forEach((dependency) => this._injector.add(dependency));
 
-        injector.get(DataSyncReplicaController);
+        this._injector.get(DataSyncReplicaController);
     }
 }

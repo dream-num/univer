@@ -15,16 +15,17 @@
  */
 
 import type { ICommandInfo, IDrawingSearch, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import type { WorkbookSelections } from '@univerjs/sheets';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IRenderContext } from '@univerjs/engine-render';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
@@ -36,50 +37,30 @@ import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawi
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetDrawingUpdateController)
 export class SheetDrawingUpdateController extends Disposable {
-    // TODO@wzhudev: selection render service would be a render unit, we we cannot
-    // easily access it here.
-    private get _selectionRenderService(): ISheetSelectionRenderService {
-        return this._renderManagerService.getRenderById(
-            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
-        )!.with(ISheetSelectionRenderService);
-    }
-
-    private get _skeletonManagerService(): SheetSkeletonManagerService {
-        return this._renderManagerService.getRenderById(
-            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
-        )!.with(SheetSkeletonManagerService);
-    }
-
+    private readonly _workbookSelections: WorkbookSelections;
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
+        @Inject(SheetSkeletonManagerService) private readonly _skeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService
     ) {
         super();
 
-        this._init();
-    }
+        this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
 
-    private _init(): void {
         this._initCommandListeners();
-
         this._updateImageListener();
-
         this._updateOrderListener();
-
         this._groupDrawingListener();
-
         this._focusDrawingListener();
-
         this._drawingAddListener();
     }
 
@@ -121,7 +102,7 @@ export class SheetDrawingUpdateController extends Disposable {
     }
 
     private async _insertCellImage(file: File) {
-
+        // TODO: empty
     }
 
     private async _insertFloatImage(file: File) {
@@ -161,13 +142,7 @@ export class SheetDrawingUpdateController extends Disposable {
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
         const { width, height, image } = await getImageSize(base64Cache || '');
 
-        const renderObject = this._renderManagerService.getRenderById(unitId);
-
-        if (renderObject == null) {
-            return;
-        }
-
-        const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
+        const { width: sceneWidth, height: sceneHeight } = this._context.scene;
 
         this._imageIoService.addImageSourceCache(source, imageSourceType, image);
 
@@ -202,17 +177,9 @@ export class SheetDrawingUpdateController extends Disposable {
     }
 
     private _getUnitInfo() {
-        const universheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (universheet == null) {
-            return;
-        }
-
-        const worksheet = universheet.getActiveSheet();
-        if (worksheet == null) {
-            return;
-        }
-
-        const unitId = universheet.getUnitId();
+        const workbook = this._context.unit;
+        const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
 
         return {
@@ -222,7 +189,7 @@ export class SheetDrawingUpdateController extends Disposable {
     }
 
     private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<ISheetDrawingPosition> {
-        const selections = this._selectionManagerService.getCurrentSelections();
+        const selections = this._workbookSelections.getCurrentSelections();
         let range: IRange = {
             startRow: 0,
             endRow: 0,

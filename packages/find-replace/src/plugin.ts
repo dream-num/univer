@@ -36,7 +36,7 @@ export class UniverFindReplacePlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultFindReplaceConfig, this._config);
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [
                 FindReplaceController,
@@ -47,7 +47,7 @@ export class UniverFindReplacePlugin extends Plugin {
             [IFindReplaceService, { useClass: FindReplaceService }],
         ] as Dependency[]).forEach(
             (d) => {
-                injector.add(d);
+                this._injector.add(d);
             }
         );
     }

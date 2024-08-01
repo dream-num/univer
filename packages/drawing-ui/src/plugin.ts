@@ -35,11 +35,11 @@ export class UniverDrawingUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(_injector: Injector): void {
-        this._initDependencies(_injector);
+    override onStarting(): void {
+        this._initDependencies();
     }
 
-    private _initDependencies(injector: Injector): void {
+    private _initDependencies(): void {
         const dependencies: Dependency[] = [
 
             // services
@@ -51,6 +51,6 @@ export class UniverDrawingUIPlugin extends Plugin {
             [ImageUpdateController],
         ];
 
-        dependencies.forEach((dependency) => injector.add(dependency));
+        dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 }

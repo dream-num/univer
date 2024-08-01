@@ -50,13 +50,13 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
             ([
                 [RefRangeService],
                 [SheetsSelectionsService],
                 [SheetInterceptorService],
                 [SheetsFilterPanelService],
-            ] as Dependency[]).forEach((d) => injector.add(d));
+            ] as Dependency[]).forEach((d) => this._injector.add(d));
         }
     }
 

@@ -750,6 +750,21 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._rangeList = newTextRanges;
     }
 
+    private _interactRectRanges(rectRanges: RectRange[]) {
+        const newRanges: RectRange[] = [];
+
+        for (const range of this._rectRangeList) {
+            if (rectRanges.some((rectRange) => rectRange.isIntersection(range))) {
+                range.dispose();
+                continue;
+            }
+
+            newRanges.push(range);
+        }
+
+        this._rectRangeList = newRanges;
+    }
+
     private _removeAllRanges() {
         this._removeAllTextRanges();
         this._removeAllRectRanges();
@@ -971,6 +986,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         if (this._rangeList.length > 0 && textRanges.length > 0) {
             this._interactTextRanges(textRanges);
+        }
+
+        if (this._rectRangeList.length > 0 && rectRanges.length > 0) {
+            this._interactRectRanges(rectRanges);
         }
 
         this._addTextRangesToCache(textRanges);

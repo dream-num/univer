@@ -73,8 +73,9 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const selections = textSelectionManagerService.getCurrentTextRanges() ?? [];
+        const rectRanges = textSelectionManagerService.getCurrentRectRanges() ?? [];
 
-        const serializedSelections = selections.map(serializeDocRange);
+        const serializedSelections = [...selections, ...rectRanges].map(serializeDocRange);
 
         const docStateChangeManagerService = accessor.get(DocStateChangeManagerService);
 
@@ -95,10 +96,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         // Step 1: Update Doc Data Model.
         const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
-        // console.log('undoActions', undoActions);
         documentDataModel.apply(actions);
-        // console.log('===redoActions', { actions, undoActions, noHistory });
-        // console.log('===body', documentDataModel);
 
         // Step 2: Update Doc View Model.
         documentViewModel.reset(documentDataModel);

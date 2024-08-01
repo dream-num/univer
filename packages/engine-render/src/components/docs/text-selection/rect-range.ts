@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { COLORS, type Nullable, Tools } from '@univerjs/core';
+import { COLORS, type Nullable, Rectangle, Tools } from '@univerjs/core';
 import type { INodePosition, IPoint, ITextSelectionStyle } from '../../../basics';
 import { getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RANGE_DIRECTION } from '../../../basics';
 import type { ThinScene } from '../../../thin-scene';
@@ -182,6 +182,25 @@ export class RectRange implements IDocRange {
     dispose(): void {
         this._rangeShape?.dispose();
         this._rangeShape = null;
+    }
+
+    isIntersection(compareRange: RectRange) {
+        const { startRow, startColumn, endRow, endColumn } = this;
+        const { startRow: cStartRow, startColumn: cStartColumn, endRow: cEndRow, endColumn: cEndColumn } = compareRange;
+        const rect1 = {
+            left: startColumn,
+            top: startRow,
+            right: endColumn,
+            bottom: endRow,
+        };
+        const rect2 = {
+            left: cStartColumn,
+            top: cStartRow,
+            right: cEndColumn,
+            bottom: cEndRow,
+        };
+
+        return Rectangle.hasIntersectionBetweenTwoRect(rect1, rect2);
     }
 
     refresh(): void {

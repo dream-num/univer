@@ -263,15 +263,15 @@ export const DeleteLeftCommand: ICommand = {
         const rectRanges = textSelectionManagerService.getCurrentRectRanges();
         const ranges = textSelectionManagerService.getCurrentTextRanges();
         const skeleton = docSkeletonManagerService?.getSkeleton();
-        if (activeRange == null || skeleton == null || ranges == null || rectRanges == null) {
+
+        if (skeleton == null) {
             return false;
         }
 
-        const { segmentId, style, segmentPage } = activeRange;
-
-        if (rectRanges.length) {
+        if (rectRanges?.length) {
             // TODO: @Jocs find THE CURSOR.
             const cursor = 0;
+            const segmentId = rectRanges[0].segmentId;
             const textRanges = [
                 {
                     startOffset: cursor,
@@ -283,6 +283,12 @@ export const DeleteLeftCommand: ICommand = {
                 textRanges,
             });
         }
+
+        if (activeRange == null || ranges == null) {
+            return false;
+        }
+
+        const { segmentId, style, segmentPage } = activeRange;
 
         const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 

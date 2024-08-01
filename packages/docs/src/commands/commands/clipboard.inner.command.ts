@@ -15,6 +15,7 @@
  */
 
 import type {
+    DocumentDataModel,
     ICommand,
     IDocumentBody,
     IMutationInfo,
@@ -23,7 +24,6 @@ import type {
 } from '@univerjs/core';
 import {
     CommandType,
-    getDocsUpdateBody,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -31,14 +31,16 @@ import {
     TextX,
     TextXActionType,
 } from '@univerjs/core';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { DocumentViewModel, ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getRichTextEditPath } from '../util';
+import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
+import type { RectRange } from '../../../../engine-render/lib/types';
+import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
@@ -125,6 +127,207 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     },
 };
 
+function getCutActionsFromTextRanges(
+    selections: ITextRange[],
+    docDataModel: DocumentDataModel,
+    segmentId: string
+) {
+    const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+    const textX = new TextX();
+    const jsonX = JSONX.getInstance();
+    const rawActions: JSONXActions = [];
+
+    if (originBody == null) {
+        return rawActions;
+    }
+
+    const memoryCursor = new MemoryCursor();
+    memoryCursor.reset();
+
+    for (const selection of selections) {
+        const { startOffset, endOffset, collapsed } = selection;
+
+        if (startOffset == null || endOffset == null) {
+            continue;
+        }
+
+        const len = startOffset - memoryCursor.cursor;
+
+        if (collapsed) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len,
+                segmentId,
+            });
+        } else {
+            textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor));
+        }
+
+        memoryCursor.reset();
+        memoryCursor.moveCursor(endOffset);
+    }
+
+    const path = getRichTextEditPath(docDataModel, segmentId);
+    rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+
+    const removedCustomBlockIds = getCustomBlockIdsInSelections(originBody, selections);
+    const drawings = docDataModel.getDrawings() ?? {};
+    const drawingOrder = docDataModel.getDrawingsOrder() ?? [];
+    const sortedRemovedCustomBlockIds = removedCustomBlockIds.sort((a, b) => {
+        if (drawingOrder.indexOf(a) > drawingOrder.indexOf(b)) {
+            return -1;
+        } else if (drawingOrder.indexOf(a) < drawingOrder.indexOf(b)) {
+            return 1;
+        }
+
+        return 0;
+    });
+
+    if (sortedRemovedCustomBlockIds.length > 0) {
+        for (const blockId of sortedRemovedCustomBlockIds) {
+            const drawing = drawings[blockId];
+            const drawingIndex = drawingOrder.indexOf(blockId);
+            if (drawing == null || drawingIndex < 0) {
+                continue;
+            }
+
+            const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
+            const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
+
+            rawActions.push(removeDrawingAction!);
+            rawActions.push(removeDrawingOrderAction!);
+        }
+    }
+
+    return rawActions.reduce((acc, cur) => {
+        return JSONX.compose(acc, cur as JSONXActions);
+    }, null as JSONXActions);
+}
+
+// eslint-disable-next-line max-lines-per-function
+function getCutActionsFromRectRanges(
+    ranges: RectRange[],
+    docDataModel: DocumentDataModel,
+    viewModel: DocumentViewModel,
+    segmentId: string
+): JSONXActions {
+    const rawActions: JSONXActions = [];
+    const segmentBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+    if (segmentBody == null) {
+        return rawActions;
+    }
+
+    const textX = new TextX();
+    const jsonX = JSONX.getInstance();
+    const memoryCursor = new MemoryCursor();
+    memoryCursor.reset();
+
+    for (const range of ranges) {
+        const { startOffset, endOffset, spanEntireRow, spanEntireTable } = range;
+
+        if (startOffset == null || endOffset == null) {
+            continue;
+        }
+
+        if (spanEntireTable) {
+            // Remove entire table.
+            const actionParams = getDeleteTableActionParams({ startOffset, endOffset, segmentId }, viewModel);
+            if (actionParams == null) {
+                continue;
+            }
+
+            const { offset, len, tableId } = actionParams;
+            if (offset - memoryCursor.cursor > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: offset - memoryCursor.cursor,
+                    segmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len,
+                line: 0,
+                segmentId,
+            });
+
+            const action = jsonX.removeOp(['tableSource', tableId]);
+            rawActions.push(action!);
+
+            memoryCursor.moveCursorTo(offset + len);
+        } else if (spanEntireRow) {
+            // Remove selected rows.
+            const actionParams = getDeleteRowsActionsParams({ startOffset, endOffset, segmentId }, viewModel);
+            if (actionParams == null) {
+                continue;
+            }
+
+            const { offset, rowIndexes, len, tableId } = actionParams;
+
+            if (offset - memoryCursor.cursor > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: offset - memoryCursor.cursor,
+                    segmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len,
+                line: 0,
+                segmentId,
+            });
+
+            // Step 3: delete table rows;
+            for (const index of rowIndexes.reverse()) {
+                const action = jsonX.removeOp(['tableSource', tableId, 'tableRows', index]);
+                rawActions.push(action!);
+            }
+
+            memoryCursor.moveCursorTo(offset + len);
+        } else {
+            // Only delete content in rect range.
+            const actionParams = getDeleteRowContentActionParams({ startOffset, endOffset, segmentId }, viewModel);
+            if (actionParams == null) {
+                continue;
+            }
+
+            const { offsets } = actionParams;
+
+            for (const offset of offsets) {
+                const { retain, delete: delLen } = offset;
+                if (retain - memoryCursor.cursor > 0) {
+                    textX.push({
+                        t: TextXActionType.RETAIN,
+                        len: retain - memoryCursor.cursor,
+                        segmentId,
+                    });
+                }
+
+                textX.push({
+                    t: TextXActionType.DELETE,
+                    len: delLen,
+                    line: 0,
+                    segmentId,
+                });
+
+                memoryCursor.moveCursorTo(retain + delLen);
+            }
+        }
+    }
+
+    const path = getRichTextEditPath(docDataModel, segmentId);
+    rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+
+    return rawActions.reduce((acc, cur) => {
+        return JSONX.compose(acc, cur as JSONXActions);
+    }, null as JSONXActions);
+}
+
 export interface IInnerCutCommandParams {
     segmentId: string;
     textRanges: ITextRangeWithStyle[];
@@ -136,7 +339,7 @@ const INNER_CUT_COMMAND_ID = 'doc.command.inner-cut';
 export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
     id: INNER_CUT_COMMAND_ID,
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor, params: IInnerCutCommandParams) => {
         const { segmentId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
@@ -146,7 +349,10 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const selections = params.selections ?? textSelectionManagerService.getCurrentTextRanges();
         const rectRanges = textSelectionManagerService.getCurrentRectRanges();
 
-        if (!Array.isArray(selections) || selections.length === 0 || (Array.isArray(rectRanges) && rectRanges.length > 0)) {
+        if (
+            (!Array.isArray(selections) || selections.length === 0)
+            && (!Array.isArray(rectRanges) || rectRanges.length === 0)
+        ) {
             return false;
         }
 
@@ -156,10 +362,17 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         }
 
         const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
-        const originBody = getDocsUpdateBody(docDataModel!.getSnapshot(), segmentId);
-        if (docDataModel == null || originBody == null) {
+        if (docDataModel == null) {
             return false;
         }
+
+        const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
+
+        if (docSkeletonManagerService == null) {
+            return false;
+        }
+
+        const viewModel = docSkeletonManagerService.getViewModel();
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -170,72 +383,21 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             },
         };
 
-        const memoryCursor = new MemoryCursor();
+        if (Array.isArray(selections) && selections?.length !== 0) {
+            doMutation.params.actions = getCutActionsFromTextRanges(selections, docDataModel, segmentId);
+        }
 
-        memoryCursor.reset();
-
-        const textX = new TextX();
-        const jsonX = JSONX.getInstance();
-        const rawActions: JSONXActions = [];
-
-        for (const selection of selections) {
-            const { startOffset, endOffset, collapsed } = selection;
-
-            if (startOffset == null || endOffset == null) {
-                continue;
-            }
-
-            const len = startOffset - memoryCursor.cursor;
-
-            if (collapsed) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len,
-                    segmentId,
-                });
+        if (Array.isArray(rectRanges) && rectRanges?.length !== 0) {
+            const actions = getCutActionsFromRectRanges(rectRanges, docDataModel, viewModel, segmentId);
+            if (doMutation.params.actions?.length === 0 || doMutation.params.actions == null) {
+                doMutation.params.actions = actions;
             } else {
-                textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor));
-            }
-
-            memoryCursor.reset();
-            memoryCursor.moveCursor(endOffset);
-        }
-
-        const path = getRichTextEditPath(docDataModel, segmentId);
-        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
-
-        const removedCustomBlockIds = getCustomBlockIdsInSelections(originBody, selections);
-        const drawings = docDataModel.getDrawings() ?? {};
-        const drawingOrder = docDataModel.getDrawingsOrder() ?? [];
-        const sortedRemovedCustomBlockIds = removedCustomBlockIds.sort((a, b) => {
-            if (drawingOrder.indexOf(a) > drawingOrder.indexOf(b)) {
-                return -1;
-            } else if (drawingOrder.indexOf(a) < drawingOrder.indexOf(b)) {
-                return 1;
-            }
-
-            return 0;
-        });
-
-        if (sortedRemovedCustomBlockIds.length > 0) {
-            for (const blockId of sortedRemovedCustomBlockIds) {
-                const drawing = drawings[blockId];
-                const drawingIndex = drawingOrder.indexOf(blockId);
-                if (drawing == null || drawingIndex < 0) {
-                    continue;
-                }
-
-                const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
-                const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
-
-                rawActions.push(removeDrawingAction!);
-                rawActions.push(removeDrawingOrderAction!);
+                doMutation.params.actions = JSONX.compose(
+                    doMutation.params.actions,
+                    JSONX.transform(actions, doMutation.params.actions, 'right')!
+                ) as JSONXActions;
             }
         }
-
-        doMutation.params.actions = rawActions.reduce((acc, cur) => {
-            return JSONX.compose(acc, cur as JSONXActions);
-        }, null as JSONXActions);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

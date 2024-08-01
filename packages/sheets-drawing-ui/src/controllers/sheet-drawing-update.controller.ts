@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IDrawingSearch, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
@@ -37,7 +37,6 @@ import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawi
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetDrawingUpdateController)
 export class SheetDrawingUpdateController extends Disposable {
     private readonly _workbookSelections: WorkbookSelections;
     constructor(

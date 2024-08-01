@@ -69,18 +69,13 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPermissionController],
         ];
         dependencies.forEach((dependency) => this._injector.add(dependency));
-
-        const renderModules = [
-            [SheetDrawingUpdateController],
-            [SheetDrawingTransformAffectedController],
-        ];
-        renderModules.forEach((controller) => this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller as Dependency));
     }
 
     private _registerRenderModules(): void {
         ([
+            [SheetDrawingUpdateController],
+            [SheetDrawingTransformAffectedController],
             [SheetsDrawingCopyPasteController],
-
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

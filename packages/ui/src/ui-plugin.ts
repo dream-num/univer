@@ -80,7 +80,7 @@ export class UniverUIPlugin extends Plugin {
         }
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         const dependencies: Dependency[] = mergeOverrideWithDependencies([
             [ComponentManager],
             [ZIndexManager],
@@ -120,6 +120,6 @@ export class UniverUIPlugin extends Plugin {
                 useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
             }],
         ], this._config.override);
-        dependencies.forEach((dependency) => injector.add(dependency));
+        dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 }

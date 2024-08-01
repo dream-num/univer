@@ -196,7 +196,9 @@ function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWor
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
+
             dependencies?.forEach((d) => injector.add(d));
 
             injector.add([SheetInterceptorService]);

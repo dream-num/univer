@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     CellValueType,
@@ -147,6 +149,7 @@ const getTestWorkbookData = (): IWorkbookData => {
         styles: {},
     };
 };
+
 export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -168,7 +171,8 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([CalculateFormulaService]);
             injector.add([Lexer]);
             injector.add([LexerTreeBuilder]);

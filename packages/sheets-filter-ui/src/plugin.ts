@@ -40,7 +40,7 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultSheetFilterUiConfig, this._config);
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [SheetsFilterPanelService],
             [SheetsFilterPermissionController],
@@ -50,6 +50,6 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
                     useFactory: () => this._injector.createInstance(SheetsFilterUIController, this._config),
                 },
             ],
-        ] as Dependency[]).forEach((d) => injector.add(d));
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 }

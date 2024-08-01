@@ -244,9 +244,9 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             super();
         }
 
-        override onStarting(injector: Injector): void {
-            registerFormulaDependencies(injector);
-            dependencies?.forEach((d) => injector.add(d));
+        override onStarting(): void {
+            registerFormulaDependencies(this._injector);
+            dependencies?.forEach((d) => this._injector.add(d));
         }
 
         override onReady(): void {

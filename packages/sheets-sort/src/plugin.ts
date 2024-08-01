@@ -33,10 +33,10 @@ export class UniverSheetsSortPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [SheetsSortController],
             [SheetsSortService],
-        ] as Dependency[]).forEach((d) => injector.add(d));
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 }

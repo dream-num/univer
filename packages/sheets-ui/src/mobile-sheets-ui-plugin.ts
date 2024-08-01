@@ -89,7 +89,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultSheetUiConfig, this._config);
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         (
             [
                 // services
@@ -133,7 +133,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [SheetPermissionInterceptorBaseController],
                 [SheetPermissionInitController],
             ] as Dependency[]
-        ).forEach((d) => injector.add(d));
+        ).forEach((d) => this._injector.add(d));
 
         this._injector.add(
             [

@@ -24,12 +24,9 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
     static override type: UniverInstanceType = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        config: unknown,
+        _config: unknown,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
-    }
-
-    override onStarting(injector: Injector): void {
     }
 }

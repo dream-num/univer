@@ -59,7 +59,8 @@ function createSheetsFilterMenuTestBed() {
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([IPlatformService, { useClass: PlatformService }]);
             injector.add([RefRangeService]);
             injector.add([SheetsSelectionsService]);

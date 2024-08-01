@@ -60,12 +60,10 @@ export function createMenuTestBed() {
 
         constructor(_config: unknown, @Inject(Injector) _injector: Injector) {
             super();
-
-            this._injector = _injector;
-            // get = this._injector.get.bind(this._injector);
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([IPlatformService, { useClass: PlatformService }]);
             injector.add([SheetsSelectionsService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);

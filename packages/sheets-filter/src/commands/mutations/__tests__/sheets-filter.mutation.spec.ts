@@ -104,8 +104,8 @@ function createFilterMutationTestBed(workbookData?: IWorkbookData) {
             super();
         }
 
-        override onStarting(injector: Injector): void {
-            injector.add([SheetsFilterService]);
+        override onStarting(): void {
+            this._injector.add([SheetsFilterService]);
         }
     }
 

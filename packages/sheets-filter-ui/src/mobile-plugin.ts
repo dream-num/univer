@@ -39,10 +39,10 @@ export class UniverSheetsFilterMobileUIPlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultSheetFilterUiConfig, this._config);
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [SheetsFilterPermissionController],
             [SheetsFilterMobileUIController],
-        ] as Dependency[]).forEach((d) => injector.add(d));
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 }

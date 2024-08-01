@@ -110,7 +110,8 @@ export function createCommandTestBed(workbookData?: IDocumentData, dependencies?
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([TextSelectionManagerService]);
             injector.add([DocStateChangeManagerService]);
             injector.add([IMEInputManagerService]);

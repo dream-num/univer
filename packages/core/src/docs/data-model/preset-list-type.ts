@@ -57,27 +57,27 @@ const bulletListFactory = (symbols: BulletSymbols): INestingLevel[] => {
 export const PRESET_LIST_TYPE = {
     [PresetListType.BULLET_LIST]: {
         listType: PresetListType.BULLET_LIST,
-        nestingLevel: bulletListFactory(['\u25CF', '\u25E6', '\u25FC']),
+        nestingLevel: bulletListFactory(['\u25CF', '\u25CB', '\u25A0']),
     } as IListData,
     [PresetListType.BULLET_LIST_1]: {
         listType: PresetListType.BULLET_LIST,
-        nestingLevel: bulletListFactory(['\u2756', '\u25A0', '\u25C6']),
+        nestingLevel: bulletListFactory(['\u2756', '\u27A2', '\u25A0']),
     } as IListData,
     [PresetListType.BULLET_LIST_2]: {
         listType: PresetListType.BULLET_LIST,
-        nestingLevel: bulletListFactory(['\u25CF', '\u25A0', '\u25C6']),
+        nestingLevel: bulletListFactory(['\u2714', '\u25CF', '\u25C6']),
     } as IListData,
     [PresetListType.BULLET_LIST_3]: {
         listType: PresetListType.BULLET_LIST,
-        nestingLevel: bulletListFactory(['\u25CF', '\u25C6', '\u25E6']),
+        nestingLevel: bulletListFactory(['\u25A0', '\u25C6', '\u25CB']),
     } as IListData,
     [PresetListType.BULLET_LIST_4]: {
         listType: PresetListType.BULLET_LIST,
-        nestingLevel: bulletListFactory(['\u25CF', '\u25A0', '\u25C6']),
+        nestingLevel: bulletListFactory(['\u2727', '\u25CB', '\u25A0']),
     } as IListData,
     [PresetListType.BULLET_LIST_5]: {
         listType: PresetListType.BULLET_LIST,
-        nestingLevel: bulletListFactory(['\u25CF', '\u25A0', '\u25C6']),
+        nestingLevel: bulletListFactory(['\u27A2', '\u25CB', '\u25C6']),
     } as IListData,
     [PresetListType.ORDER_LIST]: {
         listType: PresetListType.ORDER_LIST,

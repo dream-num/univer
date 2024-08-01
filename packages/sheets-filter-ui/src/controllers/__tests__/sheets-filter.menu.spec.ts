@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandService, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandService, Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionRuleModel, RefRangeService, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
@@ -55,7 +55,10 @@ function createSheetsFilterMenuTestBed() {
         static override type = UniverInstanceType.UNIVER_SHEET;
         static override pluginName = 'test-plugin';
 
-        constructor(_config: unknown, override readonly _injector: Injector) {
+        constructor(
+            _config: unknown,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
             super();
         }
 

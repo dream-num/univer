@@ -27,38 +27,40 @@ export class Log extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, base?: BaseValueObject) {
+        const _base = base ?? NumberValueObject.create(10);
+
         if (number.isError()) {
             return number;
         }
 
-        if (base?.isError()) {
-            return base;
+        if (_base.isError()) {
+            return _base;
         }
 
-        // get max row length
         const maxRowLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getRowCount() : 1,
-            base?.isArray() ? (base as ArrayValueObject).getRowCount() : 1
+            _base.isArray() ? (_base as ArrayValueObject).getRowCount() : 1
         );
 
-        // get max column length
         const maxColumnLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getColumnCount() : 1,
-            base?.isArray() ? (base as ArrayValueObject).getColumnCount() : 1
+            _base.isArray() ? (_base as ArrayValueObject).getColumnCount() : 1
         );
 
         const numberArray = expandArrayValueObject(maxRowLength, maxColumnLength, number, ErrorValueObject.create(ErrorType.NA));
-        const baseArray = base ? expandArrayValueObject(maxRowLength, maxColumnLength, base, ErrorValueObject.create(ErrorType.NA)) : [];
+        const baseArray = expandArrayValueObject(maxRowLength, maxColumnLength, _base, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = numberArray.map((numberObject, rowIndex, columnIndex) => {
-            let baseObject = base ? (baseArray as ArrayValueObject).get(rowIndex, columnIndex) as BaseValueObject : NumberValueObject.create(10);
+            let baseObject = baseArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (numberObject.isString()) {
-                numberObject = numberObject.convertToNumberObjectValue();
+            let _numberObject = numberObject;
+
+            if (_numberObject.isString()) {
+                _numberObject = _numberObject.convertToNumberObjectValue();
             }
 
-            if (numberObject.isError()) {
-                return numberObject;
+            if (_numberObject.isError()) {
+                return _numberObject;
             }
 
             if (baseObject.isString()) {
@@ -69,7 +71,7 @@ export class Log extends BaseFunction {
                 return baseObject;
             }
 
-            const numberValue = +numberObject.getValue();
+            const numberValue = +_numberObject.getValue();
             const baseValue = +baseObject.getValue();
 
             if (numberValue <= 0 || baseValue <= 0) {
@@ -87,8 +89,8 @@ export class Log extends BaseFunction {
             return NumberValueObject.create(result);
         });
 
-        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
-            return resultArray.getArrayValue()[0][0] as NumberValueObject;
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         return resultArray;

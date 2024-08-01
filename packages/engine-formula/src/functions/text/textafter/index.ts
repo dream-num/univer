@@ -18,7 +18,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Textafter extends BaseFunction {
@@ -27,138 +27,91 @@ export class Textafter extends BaseFunction {
     override maxParams = 6;
 
     override calculate(text: BaseValueObject, delimiter: BaseValueObject, instanceNum?: BaseValueObject, matchMode?: BaseValueObject, matchEnd?: BaseValueObject, ifNotFound?: BaseValueObject) {
+        let _delimiter = delimiter;
+
+        if (_delimiter.isArray()) {
+            _delimiter = (_delimiter as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
         let instanceNumIsNull = false; // special handle
-        const onlyThreeVariant = !matchMode;
+        let _instanceNum = instanceNum ?? NumberValueObject.create(1);
 
-        instanceNum = instanceNum ?? NumberValueObject.create(1);
-        matchMode = matchMode ?? NumberValueObject.create(0);
-        matchEnd = matchEnd ?? NumberValueObject.create(0);
-        ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
-
-        if (instanceNum.isNull()) {
+        if (_instanceNum.isNull()) {
             instanceNumIsNull = true;
-            instanceNum = NumberValueObject.create(1);
+            _instanceNum = NumberValueObject.create(1);
         }
 
-        if (delimiter.isArray()) {
-            delimiter = (delimiter as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
+        const onlyThreeVariant = !matchMode;
+        const _matchMode = matchMode ?? NumberValueObject.create(0);
+        const _matchEnd = matchEnd ?? NumberValueObject.create(0);
+        const _ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
 
-        // get max row length
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,
-            instanceNum.isArray() ? (instanceNum as ArrayValueObject).getRowCount() : 1,
-            matchMode.isArray() ? (matchMode as ArrayValueObject).getRowCount() : 1,
-            matchEnd.isArray() ? (matchEnd as ArrayValueObject).getRowCount() : 1,
-            ifNotFound.isArray() ? (ifNotFound as ArrayValueObject).getRowCount() : 1
+            _instanceNum.isArray() ? (_instanceNum as ArrayValueObject).getRowCount() : 1,
+            _matchMode.isArray() ? (_matchMode as ArrayValueObject).getRowCount() : 1,
+            _matchEnd.isArray() ? (_matchEnd as ArrayValueObject).getRowCount() : 1,
+            _ifNotFound.isArray() ? (_ifNotFound as ArrayValueObject).getRowCount() : 1
         );
 
-        // get max column length
         const maxColumnLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getColumnCount() : 1,
-            instanceNum.isArray() ? (instanceNum as ArrayValueObject).getColumnCount() : 1,
-            matchMode.isArray() ? (matchMode as ArrayValueObject).getColumnCount() : 1,
-            matchEnd.isArray() ? (matchEnd as ArrayValueObject).getColumnCount() : 1,
-            ifNotFound.isArray() ? (ifNotFound as ArrayValueObject).getColumnCount() : 1
+            _instanceNum.isArray() ? (_instanceNum as ArrayValueObject).getColumnCount() : 1,
+            _matchMode.isArray() ? (_matchMode as ArrayValueObject).getColumnCount() : 1,
+            _matchEnd.isArray() ? (_matchEnd as ArrayValueObject).getColumnCount() : 1,
+            _ifNotFound.isArray() ? (_ifNotFound as ArrayValueObject).getColumnCount() : 1
         );
 
         const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, ErrorValueObject.create(ErrorType.NA));
-        const instanceNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, instanceNum, ErrorValueObject.create(ErrorType.NA));
-        const matchModeArray = expandArrayValueObject(maxRowLength, maxColumnLength, matchMode, ErrorValueObject.create(ErrorType.NA));
-        const matchEndArray = expandArrayValueObject(maxRowLength, maxColumnLength, matchEnd, ErrorValueObject.create(ErrorType.NA));
-        const ifNotFoundArray = expandArrayValueObject(maxRowLength, maxColumnLength, ifNotFound, ErrorValueObject.create(ErrorType.NA));
+        const instanceNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, _instanceNum, ErrorValueObject.create(ErrorType.NA));
+        const matchModeArray = expandArrayValueObject(maxRowLength, maxColumnLength, _matchMode, ErrorValueObject.create(ErrorType.NA));
+        const matchEndArray = expandArrayValueObject(maxRowLength, maxColumnLength, _matchEnd, ErrorValueObject.create(ErrorType.NA));
+        const ifNotFoundArray = expandArrayValueObject(maxRowLength, maxColumnLength, _ifNotFound, ErrorValueObject.create(ErrorType.NA));
 
+        const resultArray = this._getResultArray(textArray, _delimiter, instanceNumArray, matchModeArray, matchEndArray, ifNotFoundArray, instanceNumIsNull, onlyThreeVariant);
+
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as StringValueObject;
+        }
+
+        return resultArray;
+    }
+
+    private _getResultArray(
+        textArray: ArrayValueObject,
+        delimiterObject: BaseValueObject,
+        instanceNumArray: ArrayValueObject,
+        matchModeArray: ArrayValueObject,
+        matchEndArray: ArrayValueObject,
+        ifNotFoundArray: ArrayValueObject,
+        instanceNumIsNull: boolean,
+        onlyThreeVariant: boolean
+    ): ArrayValueObject {
         const resultArray = textArray.map((textObject, rowIndex, columnIndex) => {
-            let instanceNumObject = instanceNumArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let matchModeObject = matchModeArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let matchEndObject = matchEndArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const instanceNumObject = instanceNumArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const matchModeObject = matchModeArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const matchEndObject = matchEndArray.get(rowIndex, columnIndex) as BaseValueObject;
             const ifNotFoundObject = ifNotFoundArray.get(rowIndex, columnIndex) as BaseValueObject;
 
             // variant error order (text > instanceNum > matchMode > matchEnd > delimiter)
-            if (textObject.isError()) {
-                return textObject;
+            const _variantsError = this._checkVariantsError(textObject, instanceNumObject, matchModeObject, matchEndObject, delimiterObject);
+
+            if (_variantsError.isError()) {
+                return _variantsError;
             }
 
-            if (instanceNumObject.isError()) {
-                return instanceNumObject;
+            const textValue = this._getStringValue(textObject);
+            const delimiterValue = this._getStringValue(delimiterObject);
+
+            const _variantsNumberFloorValue = this._getVariantsNumberFloorValue(instanceNumObject, matchModeObject, matchEndObject);
+
+            if (_variantsNumberFloorValue instanceof ErrorValueObject) {
+                return _variantsNumberFloorValue;
             }
 
-            if (matchModeObject.isError()) {
-                return matchModeObject;
-            }
+            const [instanceNumValue, matchModeValue, matchEndValue] = _variantsNumberFloorValue as number[];
 
-            if (matchEndObject.isError()) {
-                return matchEndObject;
-            }
-
-            if (delimiter.isError()) {
-                return delimiter;
-            }
-
-            let textValue = textObject.getValue() as string;
-
-            if (textObject.isNull()) {
-                textValue = '';
-            }
-
-            if (textObject.isBoolean()) {
-                textValue = textValue ? 'TRUE' : 'FALSE';
-            }
-
-            textValue += '';
-
-            let delimiterValue = delimiter.getValue() as string;
-
-            if (delimiter.isNull()) {
-                delimiterValue = '';
-            }
-
-            if (delimiter.isBoolean()) {
-                delimiterValue = delimiterValue ? 'TRUE' : 'FALSE';
-            }
-
-            delimiterValue += '';
-
-            if (instanceNumObject.isString()) {
-                instanceNumObject = instanceNumObject.convertToNumberObjectValue();
-
-                if (instanceNumObject.isError()) {
-                    return instanceNumObject;
-                }
-            }
-
-            const instanceNumValue = Math.floor(+instanceNumObject.getValue());
-
-            // if instance_num = 0 returns a #VALUE! error
-            if (instanceNumValue === 0) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (matchModeObject.isString()) {
-                matchModeObject = matchModeObject.convertToNumberObjectValue();
-
-                if (matchModeObject.isError()) {
-                    return matchModeObject;
-                }
-            }
-
-            const matchModeValue = Math.floor(+matchModeObject.getValue());
-
-            if (matchModeValue < 0 || matchModeValue > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (matchEndObject.isString()) {
-                matchEndObject = matchEndObject.convertToNumberObjectValue();
-
-                if (matchEndObject.isError()) {
-                    return matchEndObject;
-                }
-            }
-
-            const matchEndValue = Math.floor(+matchEndObject.getValue());
-
-            if (matchEndValue < 0 || matchEndValue > 1) {
+            if (instanceNumValue === 0 || matchModeValue < 0 || matchModeValue > 1 || matchEndValue < 0 || matchEndValue > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
@@ -181,51 +134,107 @@ export class Textafter extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NA);
             }
 
-            const matchNum = textValue.match(new RegExp(delimiterValue, `g${!matchModeValue ? '' : 'i'}`));
-
-            // only three variant and if instance_num is greater than the number of occurrences of delimiter. returns a #N/A error
-            if (matchNum && matchNum.length < Math.abs(instanceNumValue) && onlyThreeVariant) {
-                return ErrorValueObject.create(ErrorType.NA);
-            }
-
-            if (!matchNum || matchNum.length < Math.abs(instanceNumValue)) {
-                if (matchEndValue) {
-                    if (instanceNumValue > 0) {
-                        return StringValueObject.create('');
-                    } else {
-                        return StringValueObject.create(textValue);
-                    }
-                }
-
-                return ifNotFoundObject;
-            }
-
-            let substrText = !matchModeValue ? textValue : textValue.toLocaleLowerCase();
-            delimiterValue = !matchModeValue ? delimiterValue : delimiterValue.toLocaleLowerCase();
-
-            let resultIndex = 0;
-
-            for (let i = 0; i < Math.abs(instanceNumValue); i++) {
-                if (instanceNumValue < 0) {
-                    const index = substrText.lastIndexOf(delimiterValue);
-                    resultIndex = index;
-                    substrText = substrText.substr(0, index);
-                } else {
-                    const index = substrText.indexOf(delimiterValue);
-                    resultIndex += (index + i * delimiterValue.length);
-                    substrText = substrText.substr(index + delimiterValue.length);
-                }
-            }
-
-            const result = textValue.substr(resultIndex + delimiterValue.length);
-
-            return StringValueObject.create(result);
+            return this._getResult(textValue, delimiterValue, instanceNumValue, matchModeValue, matchEndValue, ifNotFoundObject, onlyThreeVariant);
         });
 
-        if (maxRowLength === 1 && maxColumnLength === 1) {
-            return (resultArray as ArrayValueObject).get(0, 0) as StringValueObject;
+        return resultArray as ArrayValueObject;
+    }
+
+    private _checkVariantsError(...variantas: BaseValueObject[]) {
+        for (let i = 0; i < variantas.length; i++) {
+            const variant = variantas[i];
+
+            if (variant.isError()) {
+                return variant;
+            }
         }
 
-        return resultArray;
+        return BooleanValueObject.create(true);
+    }
+
+    private _getStringValue(variant: BaseValueObject): string {
+        let value = `${variant.getValue()}`;
+
+        if (variant.isNull()) {
+            value = '';
+        }
+
+        if (variant.isBoolean()) {
+            value = value.toLocaleUpperCase();
+        }
+
+        return value;
+    }
+
+    private _getVariantsNumberFloorValue(...variants: BaseValueObject[]) {
+        const values: number[] = [];
+
+        for (let i = 0; i < variants.length; i++) {
+            let variant = variants[i];
+
+            if (variant.isString()) {
+                variant = variant.convertToNumberObjectValue();
+            }
+
+            if (variant.isError()) {
+                return variant;
+            }
+
+            const value = Math.floor(+variant.getValue());
+
+            values.push(value);
+        }
+
+        return values;
+    }
+
+    private _getResult(
+        textValue: string,
+        delimiterValue: string,
+        instanceNumValue: number,
+        matchModeValue: number,
+        matchEndValue: number,
+        ifNotFoundObject: BaseValueObject,
+        onlyThreeVariant: boolean
+    ): BaseValueObject {
+        const matchNum = textValue.match(new RegExp(delimiterValue, `g${!matchModeValue ? '' : 'i'}`));
+
+        // only three variant and if instance_num is greater than the number of occurrences of delimiter. returns a #N/A error
+        if (matchNum && matchNum.length < Math.abs(instanceNumValue) && onlyThreeVariant) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        if (!matchNum || matchNum.length < Math.abs(instanceNumValue)) {
+            if (matchEndValue) {
+                if (instanceNumValue > 0) {
+                    return StringValueObject.create('');
+                } else {
+                    return StringValueObject.create(textValue);
+                }
+            }
+
+            return ifNotFoundObject;
+        }
+
+        let substrText = !matchModeValue ? textValue : textValue.toLocaleLowerCase();
+        const _delimiterValue = !matchModeValue ? delimiterValue : delimiterValue.toLocaleLowerCase();
+
+        let resultIndex = 0;
+
+        for (let i = 0; i < Math.abs(instanceNumValue); i++) {
+            if (instanceNumValue < 0) {
+                const index = substrText.lastIndexOf(_delimiterValue);
+                resultIndex = index;
+                substrText = substrText.substr(0, index);
+            } else {
+                const index = substrText.indexOf(_delimiterValue);
+                resultIndex += (index + i * _delimiterValue.length);
+                substrText = substrText.substr(index + _delimiterValue.length);
+            }
+        }
+
+        const result = textValue.substr(resultIndex + _delimiterValue.length);
+
+        return StringValueObject.create(result);
     }
 }

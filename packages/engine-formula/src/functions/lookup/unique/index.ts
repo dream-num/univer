@@ -24,7 +24,7 @@ import { BooleanValueObject } from '../../../engine/value-object/primitive-objec
 import { BaseFunction } from '../../base-function';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 
-interface ObjectMapType {
+interface IObjectMapType {
     r: number;
     valueObject: BaseValueObject;
 }
@@ -35,38 +35,39 @@ export class Unique extends BaseFunction {
     override maxParams = 3;
 
     override calculate(array: BaseValueObject, byCol?: BaseValueObject, exactlyOnce?: BaseValueObject) {
-        byCol = byCol ?? BooleanValueObject.create(false);
-        exactlyOnce = exactlyOnce ?? BooleanValueObject.create(false);
+        const _byCol = byCol ?? BooleanValueObject.create(false);
+        const _exactlyOnce = exactlyOnce ?? BooleanValueObject.create(false);
 
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
 
         const maxRowLength = Math.max(
-            byCol.isArray() ? (byCol as ArrayValueObject).getRowCount() : 1,
-            exactlyOnce.isArray() ? (exactlyOnce as ArrayValueObject).getRowCount() : 1
+            _byCol.isArray() ? (_byCol as ArrayValueObject).getRowCount() : 1,
+            _exactlyOnce.isArray() ? (_exactlyOnce as ArrayValueObject).getRowCount() : 1
         );
 
         const maxColumnLength = Math.max(
-            byCol.isArray() ? (byCol as ArrayValueObject).getColumnCount() : 1,
-            exactlyOnce.isArray() ? (exactlyOnce as ArrayValueObject).getColumnCount() : 1
+            _byCol.isArray() ? (_byCol as ArrayValueObject).getColumnCount() : 1,
+            _exactlyOnce.isArray() ? (_exactlyOnce as ArrayValueObject).getColumnCount() : 1
         );
 
-        const byColArray = expandArrayValueObject(maxRowLength, maxColumnLength, byCol, ErrorValueObject.create(ErrorType.NA));
-        const exactlyOnceArray = expandArrayValueObject(maxRowLength, maxColumnLength, exactlyOnce, ErrorValueObject.create(ErrorType.NA));
+        const byColArray = expandArrayValueObject(maxRowLength, maxColumnLength, _byCol, ErrorValueObject.create(ErrorType.NA));
+        const exactlyOnceArray = expandArrayValueObject(maxRowLength, maxColumnLength, _exactlyOnce, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = byColArray.map((byColObject, rowIndex, columnIndex) => {
+            let _byColObject = byColObject;
             let exactlyOnceObject = exactlyOnceArray.get(rowIndex, columnIndex) as BaseValueObject;
 
             if (array.isError()) {
                 return array;
             }
 
-            if (byColObject.isString()) {
-                byColObject = byColObject.convertToNumberObjectValue();
+            if (_byColObject.isString()) {
+                _byColObject = _byColObject.convertToNumberObjectValue();
             }
 
-            if (byColObject.isError()) {
-                return byColObject;
+            if (_byColObject.isError()) {
+                return _byColObject;
             }
 
             if (exactlyOnceObject.isString()) {
@@ -77,7 +78,7 @@ export class Unique extends BaseFunction {
                 return exactlyOnceObject;
             }
 
-            const byColValue = +byColObject.getValue();
+            const byColValue = +_byColObject.getValue();
             const exactlyOnceValue = +exactlyOnceObject.getValue();
 
             let result: Nullable<BaseValueObject>;
@@ -85,83 +86,7 @@ export class Unique extends BaseFunction {
             if ((!byColValue && arrayRowCount === 1) || (byColValue && arrayColumnCount === 1)) {
                 result = array;
             } else {
-                let arrayValue = array.getArrayValue();
-                let arrayRows = arrayRowCount;
-                let arrayColumns = arrayColumnCount;
-
-                if (byColValue) {
-                    arrayValue = this._transposeArray(arrayValue);
-                    arrayRows = arrayColumnCount;
-                    arrayColumns = arrayRowCount;
-                }
-
-                let repeatRows: Array<Array<number>> = [];
-
-                for (let c = 0; c < arrayColumns; c++) {
-                    if (c === 0) {
-                        const objects: Array<ObjectMapType> = new Array(arrayRows).fill(null).map((item, index) => {
-                            return {
-                                r: index,
-                                valueObject: arrayValue[index][c] as BaseValueObject,
-                            };
-                        });
-
-                        repeatRows = this._getRepeatRows(objects);
-                    } else {
-                        if (repeatRows.length === 0) {
-                            break;
-                        }
-
-                        let newRepeatRows: Array<Array<number>> = [];
-
-                        repeatRows.forEach((item) => {
-                            const objects = item.map((r) => {
-                                return {
-                                    r,
-                                    valueObject: arrayValue[r][c] as BaseValueObject,
-                                };
-                            });
-
-                            const _repeatRows = this._getRepeatRows(objects);
-
-                            newRepeatRows = newRepeatRows.concat(_repeatRows);
-                        });
-
-                        repeatRows = newRepeatRows;
-                    }
-                }
-
-                if (repeatRows.length > 0) {
-                    const spliceRows: number[] = [];
-
-                    repeatRows.forEach((rows) => {
-                        rows.forEach((r, index) => {
-                            if (index !== 0 || exactlyOnceValue) {
-                                spliceRows.push(r);
-                            }
-                        });
-                    });
-
-                    arrayValue = arrayValue.filter((row, rowIndex) => !spliceRows.includes(rowIndex));
-                }
-
-                if (arrayValue.length === 0) {
-                    return ErrorValueObject.create(ErrorType.CALC);
-                }
-
-                if (byColValue) {
-                    arrayValue = this._transposeArray(arrayValue);
-                }
-
-                result = ArrayValueObject.create({
-                    calculateValueList: arrayValue,
-                    rowCount: arrayValue.length,
-                    columnCount: arrayValue[0].length || 0,
-                    unitId: this.unitId as string,
-                    sheetId: this.subUnitId as string,
-                    row: this.row,
-                    column: this.column,
-                });
+                result = this._getResult(array, byColValue, exactlyOnceValue);
             }
 
             if ((maxRowLength > 1 || maxColumnLength > 1) && result?.isArray()) {
@@ -178,7 +103,96 @@ export class Unique extends BaseFunction {
         return resultArray;
     }
 
-    private _getRepeatRows(objects: Array<ObjectMapType>): Array<Array<number>> {
+    private _getResult(array: BaseValueObject, byColValue: number, exactlyOnceValue: number) {
+        const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
+        const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
+
+        let arrayValue = array.getArrayValue();
+        let arrayRows = arrayRowCount;
+        let arrayColumns = arrayColumnCount;
+
+        if (byColValue) {
+            arrayValue = this._transposeArray(arrayValue);
+            arrayRows = arrayColumnCount;
+            arrayColumns = arrayRowCount;
+        }
+
+        const repeatRows = this._getRepeatRows(arrayValue as Array<Array<BaseValueObject>>, arrayRows, arrayColumns);
+
+        if (repeatRows.length > 0) {
+            const spliceRows: number[] = [];
+
+            repeatRows.forEach((rows) => {
+                rows.forEach((r, index) => {
+                    if (index !== 0 || exactlyOnceValue) {
+                        spliceRows.push(r);
+                    }
+                });
+            });
+
+            arrayValue = arrayValue.filter((row, rowIndex) => !spliceRows.includes(rowIndex));
+        }
+
+        if (arrayValue.length === 0) {
+            return ErrorValueObject.create(ErrorType.CALC);
+        }
+
+        if (byColValue) {
+            arrayValue = this._transposeArray(arrayValue);
+        }
+
+        return ArrayValueObject.create({
+            calculateValueList: arrayValue,
+            rowCount: arrayValue.length,
+            columnCount: arrayValue[0].length || 0,
+            unitId: this.unitId as string,
+            sheetId: this.subUnitId as string,
+            row: this.row,
+            column: this.column,
+        });
+    }
+
+    private _getRepeatRows(arrayValue: Array<Array<BaseValueObject>>, arrayRows: number, arrayColumns: number): Array<Array<number>> {
+        let repeatRows: Array<Array<number>> = [];
+
+        for (let c = 0; c < arrayColumns; c++) {
+            if (c === 0) {
+                const objects: Array<IObjectMapType> = new Array(arrayRows).fill(null).map((item, index) => {
+                    return {
+                        r: index,
+                        valueObject: arrayValue[index][c] as BaseValueObject,
+                    };
+                });
+
+                repeatRows = this._getRepeatRowsByObjects(objects);
+            } else {
+                if (repeatRows.length === 0) {
+                    break;
+                }
+
+                let newRepeatRows: Array<Array<number>> = [];
+
+                repeatRows.forEach((item) => {
+                    const objects = item.map((r) => {
+                        return {
+                            r,
+                            valueObject: arrayValue[r][c] as BaseValueObject,
+                        };
+                    });
+
+                    const _repeatRows = this._getRepeatRowsByObjects(objects);
+
+                    newRepeatRows = newRepeatRows.concat(_repeatRows);
+                });
+
+                repeatRows = newRepeatRows;
+            }
+        }
+
+        return repeatRows;
+    }
+
+    private _getRepeatRowsByObjects(objects: Array<IObjectMapType>): Array<Array<number>> {
         const valueMap = new Map();
 
         objects.forEach((item) => {

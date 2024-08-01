@@ -32,21 +32,21 @@ export class Type extends BaseFunction {
             const columnCount = (value as BaseReferenceObject).getColumnCount();
 
             if (rowCount === 1 && columnCount === 1) {
-                value = (value as BaseReferenceObject).getFirstCell();
+                const _value = (value as BaseReferenceObject).getFirstCell();
 
-                if (value.isError()) {
+                if (_value.isError()) {
                     return NumberValueObject.create(16);
                 }
 
-                if ((value as BaseValueObject).isBoolean()) {
+                if ((_value as BaseValueObject).isBoolean()) {
                     return NumberValueObject.create(4);
                 }
 
-                if ((value as BaseValueObject).isString()) {
+                if ((_value as BaseValueObject).isString()) {
                     return NumberValueObject.create(2);
                 }
 
-                if ((value as BaseValueObject).isNumber() || (value as BaseValueObject).isNull()) {
+                if ((_value as BaseValueObject).isNumber() || (_value as BaseValueObject).isNull()) {
                     return NumberValueObject.create(1);
                 }
             } else {

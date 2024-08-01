@@ -25,38 +25,30 @@ export class Sec extends BaseFunction {
     override maxParams = 1;
 
     override calculate(number: BaseValueObject) {
-        if (number.isString()) {
-            number = number.convertToNumberObjectValue();
-        }
-
-        if (number.isError()) {
-            return number;
-        }
-
         if (number.isArray()) {
-            return number.map((numberObject) => {
-                if (numberObject.isString()) {
-                    numberObject = numberObject.convertToNumberObjectValue();
-                }
-
-                if (numberObject.isError()) {
-                    return numberObject;
-                }
-
-                return this._handleSingleObject(numberObject);
-            });
+            return number.map((numberObject) => this._handleSingleObject(numberObject));
         }
 
         return this._handleSingleObject(number);
     }
 
     private _handleSingleObject(number: BaseValueObject) {
-        const numberValue = +number.getValue();
+        let numberObject = number;
+
+        if (numberObject.isString()) {
+            numberObject = numberObject.convertToNumberObjectValue();
+        }
+
+        if (numberObject.isError()) {
+            return numberObject;
+        }
+
+        const numberValue = +numberObject.getValue();
 
         if (Math.abs(numberValue) >= 2 ** 27) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return number.cos().getReciprocal();
+        return numberObject.cos().getReciprocal();
     }
 }

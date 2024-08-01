@@ -78,18 +78,16 @@ export class Edate extends BaseFunction {
 
             const monthsValue = Math.floor(+monthsValueObject.getValue());
 
-            const startDate = excelSerialToDate(startDateSerial);
+            const _startDate = excelSerialToDate(startDateSerial);
 
-            const year = startDate.getUTCFullYear();
-            const month = startDate.getUTCMonth() + monthsValue;
-            const day = startDate.getUTCDate();
+            const year = _startDate.getUTCFullYear();
+            const month = _startDate.getUTCMonth() + monthsValue;
+            const day = _startDate.getUTCDate();
 
             const resultDate = new Date(Date.UTC(year, month, day));
             const currentSerial = excelDateSerial(resultDate);
 
-            const valueObject = NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);
-
-            return valueObject;
+            return NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);
         });
     }
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -27,61 +26,48 @@ export class Randbetween extends BaseFunction {
     override maxParams = 2;
 
     override calculate(bottom: BaseValueObject, top: BaseValueObject) {
-        if (bottom.isError()) {
-            return bottom;
-        }
+        let _bottom = bottom;
 
-        if (top.isError()) {
-            return top;
-        }
-
-        if (bottom.isArray()) {
-            const rowCount = (bottom as ArrayValueObject).getRowCount();
-            const columnCount = (bottom as ArrayValueObject).getColumnCount();
+        if (_bottom.isArray()) {
+            const rowCount = (_bottom as ArrayValueObject).getRowCount();
+            const columnCount = (_bottom as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            bottom = (bottom as ArrayValueObject).get(0, 0) as BaseValueObject;
-
-            if (bottom.isError()) {
-                return bottom;
-            }
+            _bottom = (_bottom as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (top.isArray()) {
-            const rowCount = (top as ArrayValueObject).getRowCount();
-            const columnCount = (top as ArrayValueObject).getColumnCount();
+        if (_bottom.isError()) {
+            return _bottom;
+        }
+
+        let _top = top;
+
+        if (_top.isArray()) {
+            const rowCount = (_top as ArrayValueObject).getRowCount();
+            const columnCount = (_top as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            top = (top as ArrayValueObject).get(0, 0) as BaseValueObject;
-
-            if (top.isError()) {
-                return top;
-            }
+            _top = (_top as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        let bottomValue = bottom.getValue();
-
-        if (bottom.isNull()) {
-            bottomValue = 0;
+        if (_top.isError()) {
+            return _top;
         }
 
-        if (!isRealNum(bottomValue)) {
+        if (_bottom.isBoolean() || _top.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        let topValue = top.getValue();
+        let bottomValue = +_bottom.getValue();
+        let topValue = +_top.getValue();
 
-        if (top.isNull()) {
-            topValue = 0;
-        }
-
-        if (!isRealNum(topValue)) {
+        if (Number.isNaN(bottomValue) || Number.isNaN(topValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 

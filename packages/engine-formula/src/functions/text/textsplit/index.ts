@@ -18,7 +18,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Textsplit extends BaseFunction {
@@ -27,146 +27,133 @@ export class Textsplit extends BaseFunction {
     override maxParams = 6;
 
     override calculate(text: BaseValueObject, colDelimiter: BaseValueObject, rowDelimiter?: BaseValueObject, ignoreEmpty?: BaseValueObject, matchMode?: BaseValueObject, padWith?: BaseValueObject) {
-        rowDelimiter = rowDelimiter ?? StringValueObject.create('\\s');
-        ignoreEmpty = ignoreEmpty ?? NumberValueObject.create(0);
-        matchMode = matchMode ?? NumberValueObject.create(0);
-        padWith = padWith ?? StringValueObject.create(ErrorType.NA);
+        let _rowDelimiter = rowDelimiter ?? StringValueObject.create('\\s');
+        const _ignoreEmpty = ignoreEmpty ?? NumberValueObject.create(0);
+        const _matchMode = matchMode ?? NumberValueObject.create(0);
+        const _padWith = padWith ?? StringValueObject.create(ErrorType.NA);
 
-        const colDelimiterValue: string[] = [];
+        const { _variant: _colDelimiter, values: colDelimiterValue } = this._getStringValues(colDelimiter);
 
-        if (colDelimiter.isArray()) {
-            (colDelimiter as ArrayValueObject).iterator((colDelimiterObject) => {
-                if (colDelimiterObject?.isError()) {
-                    colDelimiter = colDelimiterObject;
-                    return false;
-                }
+        const { _variant, values: rowDelimiterValue } = this._getStringValues(_rowDelimiter);
+        _rowDelimiter = _variant;
 
-                if (colDelimiterObject?.isNull()) {
-                    colDelimiter = ErrorValueObject.create(ErrorType.VALUE);
-                    return false;
-                }
-
-                const delimiterValue = this._getRegExpStringValue(colDelimiterObject as BaseValueObject);
-
-                if (delimiterValue === '') {
-                    colDelimiter = ErrorValueObject.create(ErrorType.VALUE);
-                    return false;
-                }
-
-                colDelimiterValue.push(delimiterValue);
-            });
-        } else {
-            const delimiterValue = this._getRegExpStringValue(colDelimiter);
-
-            if (delimiterValue === '') {
-                colDelimiter = ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            colDelimiterValue.push(delimiterValue);
-        }
-
-        const rowDelimiterValue: string[] = [];
-
-        if (rowDelimiter.isArray()) {
-            (rowDelimiter as ArrayValueObject).iterator((rowDelimiterObject) => {
-                if (rowDelimiterObject?.isError()) {
-                    rowDelimiter = rowDelimiterObject;
-                    return false;
-                }
-
-                if (rowDelimiterObject?.isNull()) {
-                    rowDelimiter = ErrorValueObject.create(ErrorType.VALUE);
-                    return false;
-                }
-
-                const delimiterValue = this._getRegExpStringValue(rowDelimiterObject as BaseValueObject);
-
-                if (delimiterValue === '') {
-                    rowDelimiter = ErrorValueObject.create(ErrorType.VALUE);
-                    return false;
-                }
-
-                rowDelimiterValue.push(delimiterValue);
-            });
-        } else {
-            const delimiterValue = this._getRegExpStringValue(rowDelimiter);
-
-            if (delimiterValue === '') {
-                rowDelimiter = ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            rowDelimiterValue.push(delimiterValue);
-        }
-
-        let padWithRowCount = 1;
-        let padWithColumnCount = 1;
-
-        if (padWith.isArray()) {
-            padWithRowCount = (padWith as ArrayValueObject).getRowCount();
-            padWithColumnCount = (padWith as ArrayValueObject).getColumnCount();
-
-            if (padWithRowCount === 1 && padWithColumnCount === 1) {
-                padWith = (padWith as ArrayValueObject).get(0, 0) as BaseValueObject;
-            }
-        }
-
-        // get max row length
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,
-            ignoreEmpty.isArray() ? (ignoreEmpty as ArrayValueObject).getRowCount() : 1,
-            matchMode.isArray() ? (matchMode as ArrayValueObject).getRowCount() : 1
+            _ignoreEmpty.isArray() ? (_ignoreEmpty as ArrayValueObject).getRowCount() : 1,
+            _matchMode.isArray() ? (_matchMode as ArrayValueObject).getRowCount() : 1
         );
 
-        // get max column length
         const maxColumnLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getColumnCount() : 1,
-            ignoreEmpty.isArray() ? (ignoreEmpty as ArrayValueObject).getColumnCount() : 1,
-            matchMode.isArray() ? (matchMode as ArrayValueObject).getColumnCount() : 1
+            _ignoreEmpty.isArray() ? (_ignoreEmpty as ArrayValueObject).getColumnCount() : 1,
+            _matchMode.isArray() ? (_matchMode as ArrayValueObject).getColumnCount() : 1
         );
 
         const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, ErrorValueObject.create(ErrorType.NA));
-        const ignoreEmptyArray = expandArrayValueObject(maxRowLength, maxColumnLength, ignoreEmpty, ErrorValueObject.create(ErrorType.NA));
-        const matchModeArray = expandArrayValueObject(maxRowLength, maxColumnLength, matchMode, ErrorValueObject.create(ErrorType.NA));
+        const ignoreEmptyArray = expandArrayValueObject(maxRowLength, maxColumnLength, _ignoreEmpty, ErrorValueObject.create(ErrorType.NA));
+        const matchModeArray = expandArrayValueObject(maxRowLength, maxColumnLength, _matchMode, ErrorValueObject.create(ErrorType.NA));
 
+        const resultArray = this._getResultArray(
+            textArray,
+            _colDelimiter,
+            _rowDelimiter,
+            ignoreEmptyArray,
+            matchModeArray,
+            _padWith,
+            colDelimiterValue,
+            rowDelimiterValue
+        );
+
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as ArrayValueObject;
+        } else {
+            return resultArray.map((item) => (item as ArrayValueObject).get(0, 0) as BaseValueObject);
+        }
+    }
+
+    private _getStringValues(variant: BaseValueObject) {
+        let _variant = variant;
+        const values: string[] = [];
+
+        if (_variant.isArray()) {
+            (_variant as ArrayValueObject).iterator((variantObject) => {
+                if (variantObject?.isError()) {
+                    _variant = variantObject;
+                    return false;
+                }
+
+                if (variantObject?.isNull()) {
+                    _variant = ErrorValueObject.create(ErrorType.VALUE);
+                    return false;
+                }
+
+                const value = this._getRegExpStringValue(variantObject as BaseValueObject);
+
+                if (value === '') {
+                    _variant = ErrorValueObject.create(ErrorType.VALUE);
+                    return false;
+                }
+
+                values.push(value);
+            });
+        } else {
+            const value = this._getRegExpStringValue(_variant);
+
+            if (value === '') {
+                _variant = ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            values.push(value);
+        }
+
+        return {
+            _variant,
+            values,
+        };
+    }
+
+    private _getResultArray(
+        textArray: ArrayValueObject,
+        colDelimiter: BaseValueObject,
+        rowDelimiter: BaseValueObject,
+        ignoreEmptyArray: ArrayValueObject,
+        matchModeArray: ArrayValueObject,
+        padWith: BaseValueObject,
+        colDelimiterValue: string[],
+        rowDelimiterValue: string[]
+    ) {
         const resultArray = textArray.map((textObject, rowIndex, columnIndex) => {
             let ignoreEmptyObject = ignoreEmptyArray.get(rowIndex, columnIndex) as BaseValueObject;
             let matchModeObject = matchModeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (textObject.isError()) {
-                return textObject;
-            }
+            const _variantsError = this._checkVariantsError(textObject, colDelimiter, rowDelimiter, ignoreEmptyObject, matchModeObject);
 
-            if (colDelimiter.isError()) {
-                return colDelimiter;
-            }
-
-            if ((rowDelimiter as BaseValueObject).isError()) {
-                return rowDelimiter as ErrorValueObject;
-            }
-
-            if (ignoreEmptyObject.isError()) {
-                return ignoreEmptyObject;
-            }
-
-            if (matchModeObject.isError()) {
-                return matchModeObject;
+            if (_variantsError.isError()) {
+                return _variantsError;
             }
 
             if (textObject.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            if (padWithRowCount > 1 || padWithColumnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
+            let _padWith = padWith;
+
+            if (_padWith.isArray()) {
+                const padWithRowCount = (_padWith as ArrayValueObject).getRowCount();
+                const padWithColumnCount = (_padWith as ArrayValueObject).getColumnCount();
+
+                if (padWithRowCount > 1 || padWithColumnCount > 1) {
+                    return ErrorValueObject.create(ErrorType.VALUE);
+                }
+
+                _padWith = (_padWith as ArrayValueObject).get(0, 0) as BaseValueObject;
             }
 
-            let textValue = textObject.getValue() as string;
+            let textValue = `${textObject.getValue()}`;
 
             if (textObject.isBoolean()) {
-                textValue = textValue ? 'TRUE' : 'FALSE';
+                textValue = textValue.toLocaleUpperCase();
             }
-
-            textValue += '';
 
             if (ignoreEmptyObject.isString()) {
                 ignoreEmptyObject = ignoreEmptyObject.convertToNumberObjectValue();
@@ -192,49 +179,68 @@ export class Textsplit extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            let padWithValue = padWith!.getValue() as string;
+            let padWithValue = `${_padWith.getValue()}`;
 
-            if (padWith!.isBoolean()) {
-                padWithValue = padWithValue ? 'TRUE' : 'FALSE';
+            if (_padWith.isBoolean()) {
+                padWithValue = padWithValue.toLocaleUpperCase();
             }
 
-            padWithValue += '';
-
-            const rowDelimiterRegExp = new RegExp(rowDelimiterValue.join('|'), `g${!matchModeValue ? '' : 'i'}`);
-            const colDelimiterRegExp = new RegExp(colDelimiterValue.join('|'), `g${!matchModeValue ? '' : 'i'}`);
-
-            const resultRows = textValue.split(rowDelimiterRegExp);
-
-            let resultColsMaxCount = 1;
-
-            let result = resultRows.map((row) => {
-                let cols = row.split(colDelimiterRegExp);
-
-                if (ignoreEmptyValue) {
-                    cols = cols.filter((col) => col !== '');
-                }
-
-                resultColsMaxCount = Math.max(resultColsMaxCount, cols.length);
-
-                return cols;
-            });
-
-            result = result.map((row) => {
-                if (row.length < resultColsMaxCount) {
-                    row = row.concat(new Array(resultColsMaxCount - row.length).fill(padWithValue));
-                }
-
-                return row;
-            });
-
-            return ArrayValueObject.createByArray(result);
+            return this._getResult(textValue, colDelimiterValue, rowDelimiterValue, ignoreEmptyValue, matchModeValue, padWithValue);
         });
 
-        if (maxRowLength === 1 && maxColumnLength === 1) {
-            return (resultArray as ArrayValueObject).get(0, 0) as ArrayValueObject;
-        } else {
-            return resultArray.map((item) => (item as ArrayValueObject).get(0, 0) as BaseValueObject);
+        return resultArray;
+    }
+
+    private _getResult(
+        textValue: string,
+        colDelimiterValue: string[],
+        rowDelimiterValue: string[],
+        ignoreEmptyValue: number,
+        matchModeValue: number,
+        padWithValue: string
+    ) {
+        const rowDelimiterRegExp = new RegExp(rowDelimiterValue.join('|'), `g${!matchModeValue ? '' : 'i'}`);
+        const colDelimiterRegExp = new RegExp(colDelimiterValue.join('|'), `g${!matchModeValue ? '' : 'i'}`);
+
+        const resultRows = textValue.split(rowDelimiterRegExp);
+
+        let resultColsMaxCount = 1;
+
+        let result = resultRows.map((row) => {
+            let cols = row.split(colDelimiterRegExp);
+
+            if (ignoreEmptyValue) {
+                cols = cols.filter((col) => col !== '');
+            }
+
+            resultColsMaxCount = Math.max(resultColsMaxCount, cols.length);
+
+            return cols;
+        });
+
+        result = result.map((row) => {
+            let _row = row;
+
+            if (_row.length < resultColsMaxCount) {
+                _row = _row.concat(new Array(resultColsMaxCount - _row.length).fill(padWithValue));
+            }
+
+            return _row;
+        });
+
+        return ArrayValueObject.createByArray(result);
+    }
+
+    private _checkVariantsError(...variantas: BaseValueObject[]) {
+        for (let i = 0; i < variantas.length; i++) {
+            const variant = variantas[i];
+
+            if (variant.isError()) {
+                return variant;
+            }
         }
+
+        return BooleanValueObject.create(true);
     }
 
     private _getRegExpStringValue(valueObject: BaseValueObject): string {

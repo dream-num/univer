@@ -23,14 +23,16 @@ export class Cosh extends BaseFunction {
     override maxParams = 1;
 
     override calculate(number: BaseValueObject) {
-        if (number.isString()) {
-            number = number.convertToNumberObjectValue();
+        let _number = number;
+
+        if (_number.isString()) {
+            _number = _number.convertToNumberObjectValue();
         }
 
-        if (number.isError()) {
-            return number;
+        if (_number.isError()) {
+            return _number;
         }
 
-        return number.cosh();
+        return _number.cosh();
     }
 }

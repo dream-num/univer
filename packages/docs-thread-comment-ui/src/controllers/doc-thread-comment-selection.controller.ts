@@ -81,6 +81,10 @@ export class DocThreadCommentSelectionController extends Disposable {
                         }
                     }
 
+                    if (!this._threadCommentPanelService.activeCommentId) {
+                        return;
+                    }
+
                     this._commandService.executeCommand(SetActiveCommentOperation.id);
                 }
             })

@@ -100,6 +100,17 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
             ranges.push(totalRange);
         }
 
+        const performCheckInfo = await sheetInterceptorService.beforeCommandExecute({
+            id: RemoveRowCommand.id,
+            params: { range: totalRange } as IRemoveRowColCommandParams,
+        });
+
+        const { perform = true } = performCheckInfo;
+
+        if (!perform) {
+            return false;
+        }
+
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
 
@@ -204,6 +215,18 @@ export const RemoveColCommand: ICommand = {
             subUnitId,
             cellValue: removedCols.getMatrix(),
         };
+
+        const performCheckInfo = await sheetInterceptorService.beforeCommandExecute({
+            id: RemoveColCommand.id,
+            params: { range } as IRemoveRowColCommandParams,
+        });
+
+        const { perform = true } = performCheckInfo;
+
+        if (!perform) {
+            return false;
+        }
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommand.id,
             params: { range } as IRemoveRowColCommandParams,

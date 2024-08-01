@@ -187,7 +187,7 @@ export class DocEditorBridgeController extends Disposable {
         this.disposeWithMe(
             this._editorService.focus$.subscribe((textRange) => {
                 this._textSelectionRenderManager.removeAllRanges();
-                this._textSelectionRenderManager.addTextRanges([textRange]);
+                this._textSelectionRenderManager.addDocRanges([textRange]);
             })
         );
 

@@ -93,7 +93,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 onFocus={() => {
                     const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
                     if (activeRange && activeRange.collapsed) {
-                        textSelectionRenderManager.removeAllTextRanges();
+                        textSelectionRenderManager.removeAllRanges();
                     }
                     textSelectionRenderManager.blur();
                     setEditing(true);

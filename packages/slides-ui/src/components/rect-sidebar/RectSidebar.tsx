@@ -16,10 +16,12 @@
 
 import type { Nullable, SlideDataModel } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { InputNumber } from '@univerjs/design';
 import type { BaseObject } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
 import React from 'react';
+import ArrangePanel from '../panels/ArrangePanel';
+import TransformPanel from '../panels/TransformPanel';
+import styles from './index.module.less';
 
 export const COMPONENT_SLIDE_RECT_SIDEBAR = 'COMPONENT_SLIDE_RECT_SIDEBAR';
 
@@ -47,8 +49,9 @@ export default function RectSidebar() {
     const oKey = object.oKey;
 
     return (
-        <section>
-            <InputNumber />
+        <section className={styles.imageCommonPanel}>
+            <ArrangePanel />
+            <TransformPanel unitId={pageId} />
         </section>
     );
 }

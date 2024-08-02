@@ -30,6 +30,7 @@ import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
     IDocumentSkeletonTable,
     INodePosition,
     INodeSearch,
@@ -98,7 +99,7 @@ export class MoveCursorController extends Disposable {
         const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         const allRanges = this._textSelectionManagerService.getCurrentTextRanges()!;
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        if (docDataModel == null) {
             return;
         }
 
@@ -141,7 +142,11 @@ export class MoveCursorController extends Disposable {
                 ? startOffset
                 : endOffset;
 
-        let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
+        let focusOffset = collapsed
+            ? endOffset
+            : rangeDirection === RANGE_DIRECTION.FORWARD
+                ? endOffset
+                : startOffset;
         const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
@@ -165,7 +170,7 @@ export class MoveCursorController extends Disposable {
             const documentOffsetConfig = docObject.document.getOffsetConfig();
             const focusNodePosition = collapsed ? startNodePosition : rangeDirection === RANGE_DIRECTION.FORWARD ? endNodePosition : startNodePosition;
 
-            const newPos = this._getTopOrBottomPosition(skeleton, focusGlyph, focusNodePosition, direction === Direction.DOWN);
+            const newPos = this._getTopOrBottomPosition(skeleton, focusGlyph, focusNodePosition, direction === Direction.DOWN, true);
 
             if (newPos == null) {
                 // move selection
@@ -345,7 +350,8 @@ export class MoveCursorController extends Disposable {
         docSkeleton: DocumentSkeleton,
         glyph: Nullable<IDocumentSkeletonGlyph>,
         nodePosition: Nullable<INodePosition>,
-        direction: boolean
+        direction: boolean,
+        skipCellContent = false
     ): Nullable<INodePosition> {
         if (glyph == null || nodePosition == null) {
             return;
@@ -353,7 +359,7 @@ export class MoveCursorController extends Disposable {
 
         const offsetLeft = this._getGlyphLeftOffsetInLine(glyph);
 
-        const line = this._getNextOrPrevLine(glyph, direction);
+        const line = this._getNextOrPrevLine(glyph, direction, skipCellContent);
 
         if (line == null) {
             return;
@@ -420,7 +426,7 @@ export class MoveCursorController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _getNextOrPrevLine(glyph: IDocumentSkeletonGlyph, direction: boolean) {
+    private _getNextOrPrevLine(glyph: IDocumentSkeletonGlyph, direction: boolean, skipCellContent = false) {
         const divide = glyph.parent;
         const line = divide?.parent;
         const column = line?.parent;
@@ -438,6 +444,14 @@ export class MoveCursorController extends Disposable {
         }
 
         let newLine: IDocumentSkeletonLine;
+
+        if (page.type === DocumentSkeletonPageType.CELL && skipCellContent) {
+            const nLine = findAboveOrBellowCellLine(page, direction);
+
+            if (nLine) {
+                return nLine;
+            }
+        }
 
         if (direction === true) {
             newLine = column.lines[currentLineIndex + 1];
@@ -502,37 +516,7 @@ export class MoveCursorController extends Disposable {
         }
 
         if (page.type === DocumentSkeletonPageType.CELL) {
-            if (direction === true) {
-                const bellowCell = findBellowCell(page);
-                if (bellowCell) {
-                    newLine = firstLineInCell(bellowCell);
-                } else {
-                    const table = page.parent?.parent as IDocumentSkeletonTable;
-                    const { lineAfterTable } = findLineBeforeAndAfterTable(table);
-
-                    if (lineAfterTable) {
-                        newLine = lineAfterTable;
-                    }
-                }
-            } else {
-                const aboveCell = findAboveCell(page);
-                if (aboveCell) {
-                    newLine = lastLineInCell(aboveCell)!;
-                } else {
-                    const table = page.parent?.parent as IDocumentSkeletonTable;
-                    const { lineBeforeTable } = findLineBeforeAndAfterTable(table);
-
-                    if (lineBeforeTable) {
-                        newLine = lineBeforeTable;
-                    }
-                }
-            }
-
-            if (newLine != null) {
-                return newLine;
-            }
-
-            return;
+            return findAboveOrBellowCellLine(page, direction);
         }
 
         const skeleton: Nullable<IDocumentSkeletonCached> = page.parent as IDocumentSkeletonCached;
@@ -568,4 +552,42 @@ export class MoveCursorController extends Disposable {
     private _getDocObject() {
         return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
+}
+
+function findAboveOrBellowCellLine(
+    page: IDocumentSkeletonPage,
+    direction: boolean
+) {
+    let newLine = null;
+    if (direction === true) {
+        const bellowCell = findBellowCell(page);
+        if (bellowCell) {
+            newLine = firstLineInCell(bellowCell);
+        } else {
+            const table = page.parent?.parent as IDocumentSkeletonTable;
+            const { lineAfterTable } = findLineBeforeAndAfterTable(table);
+
+            if (lineAfterTable) {
+                newLine = lineAfterTable;
+            }
+        }
+    } else {
+        const aboveCell = findAboveCell(page);
+        if (aboveCell) {
+            newLine = lastLineInCell(aboveCell)!;
+        } else {
+            const table = page.parent?.parent as IDocumentSkeletonTable;
+            const { lineBeforeTable } = findLineBeforeAndAfterTable(table);
+
+            if (lineBeforeTable) {
+                newLine = lineBeforeTable;
+            }
+        }
+    }
+
+    if (newLine != null) {
+        return newLine;
+    }
+
+    return newLine;
 }

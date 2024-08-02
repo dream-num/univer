@@ -18,6 +18,7 @@ import type {
     DocumentDataModel,
     ICommand,
     IDocumentBody,
+    IDocumentData,
     IMutationInfo,
     ITextRange,
     JSONXActions,
@@ -30,6 +31,7 @@ import {
     MemoryCursor,
     TextX,
     TextXActionType,
+    Tools,
 } from '@univerjs/core';
 import type { DocumentViewModel, ITextRangeWithStyle, RectRange } from '@univerjs/engine-render';
 
@@ -43,7 +45,7 @@ import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteT
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
-    body: IDocumentBody;
+    doc: Partial<IDocumentData>;
     textRanges: ITextRangeWithStyle[];
 }
 
@@ -52,14 +54,15 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInnerPasteCommandParams) => {
-        const { segmentId, textRanges, body } = params;
+        const { segmentId, textRanges, doc } = params;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-
         const selections = textSelectionManagerService.getCurrentTextRanges();
-        if (!Array.isArray(selections) || selections.length === 0) {
+        const { body, tableSource } = doc;
+        if (!Array.isArray(selections) || selections.length === 0 || body == null) {
             return false;
         }
 
@@ -85,11 +88,32 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
+
+        const hasTable = !!body.tables?.length;
 
         for (const selection of selections) {
             const { startOffset, endOffset, collapsed } = selection;
 
             const len = startOffset - memoryCursor.cursor;
+
+            const cloneBody = Tools.deepClone(body);
+
+            if (hasTable) {
+                for (const t of cloneBody.tables!) {
+                    const { tableId: oldTableId } = t;
+                    const tableId = Tools.generateRandomId(6);
+
+                    t.tableId = tableId;
+
+                    const table = Tools.deepClone(tableSource![oldTableId]);
+
+                    table.tableId = tableId;
+
+                    const action = jsonX.insertOp(['tableSource', tableId], table);
+                    rawActions.push(action!);
+                }
+            }
 
             if (collapsed) {
                 textX.push({
@@ -104,7 +128,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
             textX.push({
                 t: TextXActionType.INSERT,
-                body,
+                body: cloneBody,
                 len: body.dataStream.length,
                 line: 0,
                 segmentId,
@@ -115,7 +139,12 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         }
 
         const path = getRichTextEditPath(docDataModel, segmentId);
-        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+
+        rawActions.push(jsonX.editOp(textX.serialize(), path)!);
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

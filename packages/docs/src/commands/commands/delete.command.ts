@@ -240,7 +240,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
     },
 };
 
-function getCursorWhenDelete(textRanges: Readonly<Nullable<TextRange[]>>, rectRanges: readonly RectRange[]): number {
+export function getCursorWhenDelete(textRanges: Readonly<Nullable<TextRange[]>>, rectRanges: readonly RectRange[]): number {
     let cursor = 0;
 
     if (textRanges == null || textRanges.length === 0) {

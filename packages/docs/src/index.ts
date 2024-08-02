@@ -102,3 +102,6 @@ export type { IDocTableInsertColumnCommandParams, IDocTableInsertRowCommandParam
 export { DocTableInsertColumnCommand, DocTableInsertRowCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertColumnLeftCommand } from './commands/commands/table/doc-table-insert.command';
 export type { IDocTableShiftTabCommandParams, IDocTableTabCommandParams } from './commands/commands/table/doc-table-tab.command';
 export { DocTableTabCommand, DocTableShiftTabCommand } from './commands/commands/table/doc-table-tab.command';
+
+export { genTableSource, getEmptyTableRow, getEmptyTableCell, getTableColumn } from './commands/commands/table/table';
+export { getCursorWhenDelete } from './commands/commands/delete.command';

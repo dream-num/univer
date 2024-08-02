@@ -18,6 +18,7 @@ import type { ITextStyle } from '@univerjs/core';
 import { BaselineOffset, BooleanNumber, ColorKit } from '@univerjs/core';
 import { pixelToPt } from '@univerjs/engine-render';
 
+// eslint-disable-next-line max-lines-per-function, complexity
 export function extractNodeStyle(node: HTMLElement): ITextStyle {
     const styles = node.style;
     const docStyles: ITextStyle = {};

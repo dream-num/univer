@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ITextRun } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, Tools } from '@univerjs/core';
+import type { IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, DataStreamTreeNodeType, Tools } from '@univerjs/core';
+import type { DataStreamTreeNode } from '@univerjs/engine-render';
+import { parseDataStreamToTree } from '@univerjs/engine-render';
 
 export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
     const { st: start, ed, ts = {} } = textRun;
@@ -113,13 +115,56 @@ export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endInd
     return spanList.join('');
 }
 
-export function convertBodyToHtml(body: IDocumentBody, withParagraphInfo: boolean = true): string {
-    if (withParagraphInfo && body.paragraphs?.length) {
-        const { dataStream, paragraphs = [] } = body;
-        let result = '';
-        let cursorIndex = -1;
-        for (const paragraph of paragraphs) {
-            const { startIndex, paragraphStyle = {} } = paragraph;
+interface IHtmlResult {
+    html: string;
+}
+
+export function convertBodyToHtml(body: IDocumentBody): string {
+    const { paragraphs = [], sectionBreaks = [] } = body;
+    let { dataStream } = body;
+
+    if (!dataStream.endsWith('\r\n')) {
+        dataStream += '\r\n';
+
+        paragraphs.push({
+            startIndex: dataStream.length - 2,
+        });
+
+        sectionBreaks.push({
+            startIndex: dataStream.length - 1,
+        });
+
+        body.dataStream = dataStream;
+        body.paragraphs = paragraphs;
+        body.sectionBreaks = sectionBreaks;
+    }
+
+    const result: IHtmlResult = { html: '' };
+
+    const nodeList = parseDataStreamToTree(dataStream);
+
+    for (const node of nodeList) {
+        processNode(node, body, result);
+    }
+
+    return result.html;
+}
+
+// eslint-disable-next-line max-lines-per-function
+function processNode(node: DataStreamTreeNode, body: IDocumentBody, result: IHtmlResult) {
+    switch (node.nodeType) {
+        case DataStreamTreeNodeType.SECTION_BREAK: {
+            for (const n of node.children) {
+                processNode(n, body, result);
+            }
+
+            break;
+        }
+
+        case DataStreamTreeNodeType.PARAGRAPH: {
+            const { children, startIndex, endIndex } = node;
+            const paragraph = body.paragraphs!.find((p) => p.startIndex === endIndex) ?? {} as IParagraph;
+            const { paragraphStyle = {} } = paragraph;
             const { spaceAbove, spaceBelow, lineSpacing } = paragraphStyle;
             const style = [];
 
@@ -143,26 +188,59 @@ export function convertBodyToHtml(body: IDocumentBody, withParagraphInfo: boolea
                 style.push(`line-height: ${lineSpacing}`);
             }
 
-            if (startIndex > cursorIndex + 1) {
-                result += `<p class="UniverNormal" ${
-                    style.length ? `style="${style.join('; ')};"` : ''
-                }>${getBodySliceHtml(body, cursorIndex + 1, startIndex)}</p>`;
-            } else {
-                result += `<p class="UniverNormal" ${
-                    style.length ? `style="${style.join('; ')};"` : ''
-                }></p>`;
+            result.html += `<p class="UniverNormal" ${style.length ? `style="${style.join('; ')};"` : ''}>`;
+
+            if (children.length) {
+                for (const table of children) {
+                    processNode(table, body, result);
+                }
             }
 
-            cursorIndex = startIndex;
+            result.html += `${getBodySliceHtml(body, startIndex, endIndex)}</p>`;
+
+            break;
         }
 
-        if (cursorIndex !== dataStream.length) {
-            result += getBodySliceHtml(body, cursorIndex, dataStream.length);
+        case DataStreamTreeNodeType.TABLE: {
+            const { children } = node;
+
+            result.html += '<table class="UniverTable" style="width: 100%; border-collapse: collapse;"><tbody>';
+
+            for (const row of children) {
+                processNode(row, body, result);
+            }
+
+            result.html += '</tbody></table>';
+
+            break;
         }
 
-        return result;
-    } else {
-        return getBodySliceHtml(body, 0, body.dataStream.length);
+        case DataStreamTreeNodeType.TABLE_ROW: {
+            const { children } = node;
+
+            result.html += '<tr class="UniverTableRow">';
+            for (const cell of children) {
+                processNode(cell, body, result);
+            }
+            result.html += '</tr>';
+
+            break;
+        }
+
+        case DataStreamTreeNodeType.TABLE_CELL: {
+            const { children } = node;
+
+            result.html += '<td class="UniverTableCell">';
+            for (const n of children) {
+                processNode(n, body, result);
+            }
+            result.html += '</td>';
+            break;
+        }
+
+        default: {
+            throw new Error(`Unknown node type: ${node.nodeType}`);
+        }
     }
 }
 
@@ -172,19 +250,10 @@ export class UDMToHtmlService {
             throw new Error('The bodyList length at least to be 1');
         }
 
-        // If only one selection range of content is copied, the paragraph information will be used,
-        // otherwise, the paragraph information will be discarded and a paragraph
-        // will be generated for each body
-        if (bodyList.length === 1) {
-            return convertBodyToHtml(bodyList[0]);
-        }
-
         let html = '';
 
         for (const body of bodyList) {
-            html += '<p className="UniverNormal">';
-            html += convertBodyToHtml(body, false);
-            html += '</p>';
+            html += convertBodyToHtml(body);
         }
 
         return html;

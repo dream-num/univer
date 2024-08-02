@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, IParagraph, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
+import type { IDocumentData, IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
 import { BooleanNumber, DocumentFlavor, HorizontalAlign, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
@@ -54,8 +54,9 @@ const dataStream = `这是一个表格的用例\r${createTableDataStream(example
 const startIndex = dataStream.indexOf(TABLE_START);
 const endIndex = dataStream.indexOf(TABLE_END);
 
-function createParagraphs(dataStream: string) {
+function createParagraphAndSectionBreaks(dataStream: string) {
     const paragraphs: IParagraph[] = [];
+    const sectionBreaks: ISectionBreak[] = [];
     for (let i = 0; i < dataStream.length; i++) {
         const char = dataStream[i];
         if (char === '\r') {
@@ -69,12 +70,18 @@ function createParagraphs(dataStream: string) {
                 },
             });
         }
+
+        if (char === '\n') {
+            sectionBreaks.push({
+                startIndex: i,
+            });
+        }
     }
 
-    return paragraphs;
+    return { paragraphs, sectionBreaks };
 }
 
-const paragraphs = createParagraphs(dataStream);
+const { paragraphs, sectionBreaks } = createParagraphAndSectionBreaks(dataStream);
 
 const tableCell: ITableCell = {
     rowSpan: 1,
@@ -235,11 +242,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
             endIndex,
             tableId: 'table-id',
         }],
-        sectionBreaks: [
-            {
-                startIndex: dataStream.length - 1,
-            },
-        ],
+        sectionBreaks,
     },
     documentStyle: {
         pageSize: {

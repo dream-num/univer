@@ -35,6 +35,128 @@ export enum DocumentEditArea {
     FOOTER = 'FOOTER',
 }
 
+function batchParent(
+    parent: DataStreamTreeNode,
+    children: DataStreamTreeNode[],
+    nodeType = DataStreamTreeNodeType.SECTION_BREAK
+) {
+    if (children.length === 0) {
+        throw new Error('Missing `paragraphs` or `sectionBreaks` fields, or doesn\'t correspond to the location in `dataStream`.');
+    }
+
+    for (const child of children) {
+        child.parent = parent;
+        parent.children.push(child);
+    }
+
+    const startOffset = nodeType === DataStreamTreeNodeType.SECTION_BREAK ? 0 : 1;
+    const allChildren = parent.children;
+
+    parent.setIndexRange(allChildren[0].startIndex - startOffset, allChildren[allChildren.length - 1].endIndex + 1);
+}
+
+export function parseDataStreamToTree(dataStream: string) {
+    let content = '';
+    const dataStreamLen = dataStream.length;
+    const sectionList: DataStreamTreeNode[] = [];
+    // Only use to cache the outer paragraphs.
+    const paragraphList: DataStreamTreeNode[] = [];
+    // Use to cache paragraphs in cell.
+    const cellParagraphList: DataStreamTreeNode[] = [];
+    const tableList: ITableCache[] = [];
+    const tableRowList: DataStreamTreeNode[] = [];
+    const tableCellList: DataStreamTreeNode[] = [];
+    const currentBlocks: number[] = [];
+
+    for (let i = 0; i < dataStreamLen; i++) {
+        const char = dataStream[i];
+
+        if (char === DataStreamTreeTokenType.PARAGRAPH) {
+            content += DataStreamTreeTokenType.PARAGRAPH;
+
+            const paragraphNode = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, content);
+
+            const lastTableCache = tableList[tableList.length - 1];
+            if (lastTableCache && lastTableCache.isFinished) {
+                // Paragraph Node will only has one table node.
+                batchParent(paragraphNode, [lastTableCache.table], DataStreamTreeNodeType.PARAGRAPH);
+
+                tableList.pop();
+            }
+
+            // Paragraph start and end index is from the first char of the paragraph to the last char of the paragraph. not include the Table content.
+            paragraphNode.setIndexRange(i - content.length + 1, i);
+            paragraphNode.addBlocks(currentBlocks);
+            currentBlocks.length = 0;
+            content = '';
+
+            if (tableCellList.length > 0) {
+                cellParagraphList.push(paragraphNode);
+            } else {
+                paragraphList.push(paragraphNode);
+            }
+        } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
+            const sectionNode = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
+            const tempParagraphList = tableCellList.length > 0 ? cellParagraphList : paragraphList;
+
+            batchParent(sectionNode, tempParagraphList);
+
+            const lastNode = tempParagraphList[tempParagraphList.length - 1];
+
+            if (lastNode && lastNode.content) {
+                lastNode.content += DataStreamTreeTokenType.SECTION_BREAK;
+            }
+
+            if (tableCellList.length > 0) {
+                const lastCell = tableCellList[tableCellList.length - 1];
+
+                batchParent(lastCell, [sectionNode], DataStreamTreeNodeType.TABLE_CELL);
+            } else {
+                sectionList.push(sectionNode);
+            }
+
+            tempParagraphList.length = 0;
+        } else if (char === DataStreamTreeTokenType.TABLE_START) {
+            const tableNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE);
+
+            tableList.push({
+                table: tableNode,
+                isFinished: false,
+            });
+        } else if (char === DataStreamTreeTokenType.TABLE_ROW_START) {
+            const rowNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_ROW);
+
+            tableRowList.push(rowNode);
+        } else if (char === DataStreamTreeTokenType.TABLE_CELL_START) {
+            const cellNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_CELL);
+
+            tableCellList.push(cellNode);
+        } else if (char === DataStreamTreeTokenType.TABLE_END) {
+            const lastTable = tableList[tableList.length - 1];
+            lastTable.isFinished = true;
+            content = '';
+        } else if (char === DataStreamTreeTokenType.TABLE_ROW_END) {
+            const rowNode = tableRowList.pop();
+            const lastTableCache = tableList[tableList.length - 1];
+
+            batchParent(lastTableCache.table, [rowNode!], DataStreamTreeNodeType.TABLE);
+        } else if (char === DataStreamTreeTokenType.TABLE_CELL_END) {
+            const cellNode = tableCellList.pop();
+
+            const lastRow = tableRowList[tableRowList.length - 1];
+
+            batchParent(lastRow, [cellNode!], DataStreamTreeNodeType.TABLE_ROW);
+        } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+            currentBlocks.push(i);
+            content += char;
+        } else {
+            content += char;
+        }
+    }
+
+    return sectionList;
+}
+
 export class DocumentViewModel implements IDisposable {
     private _interceptor: Nullable<ICustomRangeInterceptor> = null;
 
@@ -58,7 +180,7 @@ export class DocumentViewModel implements IDisposable {
             return;
         }
 
-        this.children = this._parseToViewTree(_documentDataModel.getBody()!.dataStream);
+        this.children = parseDataStreamToTree(_documentDataModel.getBody()!.dataStream);
 
         this._buildHeaderFooterViewModel();
     }
@@ -128,7 +250,7 @@ export class DocumentViewModel implements IDisposable {
     reset(documentDataModel: DocumentDataModel) {
         this._documentDataModel = documentDataModel;
 
-        this.children = this._parseToViewTree(documentDataModel.getBody()!.dataStream);
+        this.children = parseDataStreamToTree(documentDataModel.getBody()!.dataStream);
 
         this._buildHeaderFooterViewModel();
     }
@@ -481,128 +603,6 @@ export class DocumentViewModel implements IDisposable {
         }
 
         return this.getCustomDecorationRaw(index);
-    }
-
-    protected _parseToViewTree(dataStream: string) {
-        let content = '';
-        const dataStreamLen = dataStream.length;
-        const sectionList: DataStreamTreeNode[] = [];
-        // Only use to cache the outer paragraphs.
-        const paragraphList: DataStreamTreeNode[] = [];
-        // Use to cache paragraphs in cell.
-        const cellParagraphList: DataStreamTreeNode[] = [];
-        const tableList: ITableCache[] = [];
-        const tableRowList: DataStreamTreeNode[] = [];
-        const tableCellList: DataStreamTreeNode[] = [];
-        const currentBlocks: number[] = [];
-
-        for (let i = 0; i < dataStreamLen; i++) {
-            const char = dataStream[i];
-
-            if (char === DataStreamTreeTokenType.PARAGRAPH) {
-                content += DataStreamTreeTokenType.PARAGRAPH;
-
-                const paragraphNode = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, content);
-
-                const lastTableCache = tableList[tableList.length - 1];
-                if (lastTableCache && lastTableCache.isFinished) {
-                    // Paragraph Node will only has one table node.
-                    this._batchParent(paragraphNode, [lastTableCache.table], DataStreamTreeNodeType.PARAGRAPH);
-
-                    tableList.pop();
-                }
-
-                // Paragraph start and end index is from the first char of the paragraph to the last char of the paragraph. not include the Table content.
-                paragraphNode.setIndexRange(i - content.length + 1, i);
-                paragraphNode.addBlocks(currentBlocks);
-                currentBlocks.length = 0;
-                content = '';
-
-                if (tableCellList.length > 0) {
-                    cellParagraphList.push(paragraphNode);
-                } else {
-                    paragraphList.push(paragraphNode);
-                }
-            } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
-                const sectionNode = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
-                const tempParagraphList = tableCellList.length > 0 ? cellParagraphList : paragraphList;
-
-                this._batchParent(sectionNode, tempParagraphList);
-
-                const lastNode = tempParagraphList[tempParagraphList.length - 1];
-
-                if (lastNode && lastNode.content) {
-                    lastNode.content += DataStreamTreeTokenType.SECTION_BREAK;
-                }
-
-                if (tableCellList.length > 0) {
-                    const lastCell = tableCellList[tableCellList.length - 1];
-
-                    this._batchParent(lastCell, [sectionNode], DataStreamTreeNodeType.TABLE_CELL);
-                } else {
-                    sectionList.push(sectionNode);
-                }
-
-                tempParagraphList.length = 0;
-            } else if (char === DataStreamTreeTokenType.TABLE_START) {
-                const tableNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE);
-
-                tableList.push({
-                    table: tableNode,
-                    isFinished: false,
-                });
-            } else if (char === DataStreamTreeTokenType.TABLE_ROW_START) {
-                const rowNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_ROW);
-
-                tableRowList.push(rowNode);
-            } else if (char === DataStreamTreeTokenType.TABLE_CELL_START) {
-                const cellNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_CELL);
-
-                tableCellList.push(cellNode);
-            } else if (char === DataStreamTreeTokenType.TABLE_END) {
-                const lastTable = tableList[tableList.length - 1];
-                lastTable.isFinished = true;
-                content = '';
-            } else if (char === DataStreamTreeTokenType.TABLE_ROW_END) {
-                const rowNode = tableRowList.pop();
-                const lastTableCache = tableList[tableList.length - 1];
-
-                this._batchParent(lastTableCache.table, [rowNode!], DataStreamTreeNodeType.TABLE);
-            } else if (char === DataStreamTreeTokenType.TABLE_CELL_END) {
-                const cellNode = tableCellList.pop();
-
-                const lastRow = tableRowList[tableRowList.length - 1];
-
-                this._batchParent(lastRow, [cellNode!], DataStreamTreeNodeType.TABLE_ROW);
-            } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-                currentBlocks.push(i);
-                content += char;
-            } else {
-                content += char;
-            }
-        }
-
-        return sectionList;
-    }
-
-    private _batchParent(
-        parent: DataStreamTreeNode,
-        children: DataStreamTreeNode[],
-        nodeType = DataStreamTreeNodeType.SECTION_BREAK
-    ) {
-        if (children.length === 0) {
-            throw new Error('Missing `paragraphs` or `sectionBreaks` fields, or doesn\'t correspond to the location in `dataStream`.');
-        }
-
-        for (const child of children) {
-            child.parent = parent;
-            parent.children.push(child);
-        }
-
-        const startOffset = nodeType === DataStreamTreeNodeType.SECTION_BREAK ? 0 : 1;
-        const allChildren = parent.children;
-
-        parent.setIndexRange(allChildren[0].startIndex - startOffset, allChildren[allChildren.length - 1].endIndex + 1);
     }
 
     private _buildHeaderFooterViewModel() {

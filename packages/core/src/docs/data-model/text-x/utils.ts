@@ -145,7 +145,7 @@ export function getBodySlice(
 }
 
 export function normalizeBody(body: IDocumentBody): IDocumentBody {
-    const { dataStream, textRuns, paragraphs, customRanges, customDecorations } = body;
+    const { dataStream, textRuns, paragraphs, customRanges, customDecorations, tables } = body;
     let leftOffset = 0;
     let rightOffset = 0;
 
@@ -189,6 +189,11 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         d.endIndex += rightOffset;
     });
 
+    tables?.forEach((table) => {
+        table.startIndex += leftOffset;
+        table.endIndex += rightOffset;
+    });
+
     return {
         ...body,
         dataStream: newData,
@@ -196,6 +201,7 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         paragraphs,
         customRanges,
         customDecorations,
+        tables,
     };
 }
 

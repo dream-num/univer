@@ -82,14 +82,14 @@ interface IHtmlToUSMServiceProps {
 }
 
 export class HtmlToUSMService {
-    private static pluginList: IPastePlugin[] = [];
+    private static _pluginList: IPastePlugin[] = [];
 
     static use(plugin: IPastePlugin) {
-        if (this.pluginList.includes(plugin)) {
+        if (this._pluginList.includes(plugin)) {
             throw new Error(`Univer paste plugin ${plugin.name} already added`);
         }
 
-        this.pluginList.push(plugin);
+        this._pluginList.push(plugin);
     }
 
     private _styleMap = new Map<string, CSSStyleDeclaration>();
@@ -110,7 +110,7 @@ export class HtmlToUSMService {
 
     // eslint-disable-next-line max-lines-per-function
     convert(html: string): IUniverSheetCopyDataModel {
-        const pastePlugin = HtmlToUSMService.pluginList.find((plugin) => plugin.checkPasteType(html));
+        const pastePlugin = HtmlToUSMService._pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
             this._styleRules = [...pastePlugin.stylesRules];
             this._afterProcessRules = [...pastePlugin.afterProcessRules];

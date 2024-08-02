@@ -116,7 +116,7 @@ describe('test case in html and udm convert', () => {
             const convertor = new HtmlToUDMService();
             const udm = await convertor.convert(html);
 
-            expect(udm.dataStream).toBe('hello\rworld');
+            expect(udm.body!.dataStream).toBe('hello\rworld');
         });
     });
 

@@ -26,11 +26,13 @@ export interface ISetFlowViewportParams {
     };
 }
 
+// This operation will not trigger viewport change locally but for live-share collaboration.
+
 export const SetFlowViewportOperation: ICommand = {
     id: 'uniui.operation.set-flow-viewport',
     type: CommandType.OPERATION,
-    handler: async (accessor: IAccessor, params: ISetFlowViewportParams, options: IExecutionOptions) => {
-        const { fromCollab } = options;
+    handler: async (accessor: IAccessor, params: ISetFlowViewportParams, options?: IExecutionOptions) => {
+        const { fromCollab } = options || {};
         if (!fromCollab) {
             return true;
         }

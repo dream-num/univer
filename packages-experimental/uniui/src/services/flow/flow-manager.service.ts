@@ -19,8 +19,19 @@ import type {
     ReactFlowInstance,
 } from '@xyflow/react';
 
+import { BehaviorSubject } from 'rxjs';
+
+export interface IFlowViewport {
+    zoom: number;
+    x: number;
+    y: number;
+}
+
 @OnLifecycle(LifecycleStages.Ready, FlowManagerService)
 export class FlowManagerService extends Disposable {
+    private readonly _viewportChanged$ = new BehaviorSubject<IFlowViewport | null>(null);
+    readonly viewportChanged$ = this._viewportChanged$.asObservable();
+
     private _flowInstance: ReactFlowInstance<any>;
 
     constructor() {
@@ -55,6 +66,10 @@ export class FlowManagerService extends Disposable {
         if (this._flowInstance) {
             this._flowInstance.zoomOut();
         }
+    }
+
+    setViewportChanged(viewport: IFlowViewport) {
+        this._viewportChanged$.next(viewport);
     }
 }
 

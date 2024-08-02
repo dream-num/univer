@@ -172,7 +172,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         floatingToolbarRef.current?.update();
         const { zoom } = viewport;
         setZoom(zoom);
-    }, [floatingToolbarRef, selectedNodeRef, setZoom]);
+        flowManagerService.setViewportChanged(viewport);
+    }, [floatingToolbarRef, selectedNodeRef, setZoom, flowManagerService]);
 
     const onFlowInit = useCallback((instance: ReactFlowInstance<any>) => {
         flowManagerService.setReactFlowInstance(instance);

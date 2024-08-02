@@ -25,44 +25,36 @@ export class Cot extends BaseFunction {
     override maxParams = 1;
 
     override calculate(variant: BaseValueObject) {
-        if (variant.isString()) {
-            variant = variant.convertToNumberObjectValue();
+        if (variant.isArray()) {
+            return variant.map((numberObject) => this._handleSingleObject(numberObject));
         }
 
-        if (variant.isError()) {
-            return variant;
+        return this._handleSingleObject(variant);
+    }
+
+    private _handleSingleObject(number: BaseValueObject) {
+        let numberObject = number;
+
+        if (numberObject.isString()) {
+            numberObject = numberObject.convertToNumberObjectValue();
         }
 
-        if ((variant as BaseValueObject).isArray()) {
-            return (variant as BaseValueObject).map((currentValue) => {
-                if (currentValue.isString()) {
-                    currentValue = currentValue.convertToNumberObjectValue();
-                }
-                if (currentValue.isError()) {
-                    return currentValue;
-                }
-                return cot(currentValue as BaseValueObject);
-            });
+        if (numberObject.isError()) {
+            return numberObject;
         }
 
-        return cot(variant as BaseValueObject);
+        const numberValue = +numberObject.getValue();
+
+        // The absolute value of Number must be less than 2^27. If Number is outside its constraints, COT returns the #NUM! error value.
+        if (Math.abs(numberValue) >= 2 ** 27) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        // COT(0) returns the #DIV/0! error value.
+        if (numberValue === 0) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        }
+
+        return numberObject.tan().getReciprocal();
     }
-}
-
-function cot(num: BaseValueObject) {
-    let currentValue = num.getValue();
-
-    currentValue = Number(currentValue);
-
-    // The absolute value of Number must be less than 2^27. If Number is outside its constraints, COT returns the #NUM! error value.
-    if (Math.abs(currentValue) >= 2 ** 27) {
-        return ErrorValueObject.create(ErrorType.NUM);
-    }
-
-    // COT(0) returns the #DIV/0! error value.
-    if (currentValue === 0) {
-        return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-    }
-
-    return num.tan().getReciprocal();
 }

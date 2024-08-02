@@ -27,37 +27,41 @@ export class Datedif extends BaseFunction {
     override maxParams = 3;
 
     override calculate(startDate: BaseValueObject, endDate: BaseValueObject, unit: BaseValueObject) {
-        if (startDate.isArray()) {
-            startDate = (startDate as ArrayValueObject).get(0, 0) as BaseValueObject;
+        let _startDate = startDate;
+        let _endDate = endDate;
+        let _unit = unit;
+
+        if (_startDate.isArray()) {
+            _startDate = (_startDate as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (endDate.isArray()) {
-            endDate = (endDate as ArrayValueObject).get(0, 0) as BaseValueObject;
+        if (_endDate.isArray()) {
+            _endDate = (_endDate as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (unit.isArray()) {
-            unit = (unit as ArrayValueObject).get(0, 0) as BaseValueObject;
+        if (_unit.isArray()) {
+            _unit = (_unit as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (startDate.isError()) {
-            return startDate;
+        if (_startDate.isError()) {
+            return _startDate;
         }
 
-        if (endDate.isError()) {
-            return endDate;
+        if (_endDate.isError()) {
+            return _endDate;
         }
 
-        if (unit.isError()) {
-            return unit;
+        if (_unit.isError()) {
+            return _unit;
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(_startDate);
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
         }
 
-        let endDateSerialNumber = getDateSerialNumberByObject(endDate);
+        const endDateSerialNumber = getDateSerialNumberByObject(_endDate);
 
         if (typeof endDateSerialNumber !== 'number') {
             return endDateSerialNumber;
@@ -67,10 +71,14 @@ export class Datedif extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        if (!unit.isString()) {
+        if (!_unit.isString()) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        return this._getResultByUnit(startDateSerialNumber, endDateSerialNumber, _unit);
+    }
+
+    private _getResultByUnit(startDateSerialNumber: number, endDateSerialNumber: number, unit: BaseValueObject): BaseValueObject {
         const startDateDate = excelSerialToDate(startDateSerialNumber);
         const startYear = startDateDate.getUTCFullYear();
         const startMonth = startDateDate.getUTCMonth() + 1;
@@ -81,41 +89,33 @@ export class Datedif extends BaseFunction {
         const endMonth = endDateDate.getUTCMonth() + 1;
         const endDay = endDateDate.getUTCDate();
 
-        const unitValue = String(unit.getValue()).toLocaleUpperCase();
+        const unitValue = `${unit.getValue()}`.toLocaleUpperCase();
 
-        let result: number;
+        let _endDateSerialNumber;
 
         switch (unitValue) {
             case 'Y':
                 // The number of complete years in the period.
-                result = endYear - startYear;
-                break;
+                return NumberValueObject.create(endYear - startYear);
             case 'M':
                 // The number of complete months in the period.
-                result = (endYear - startYear) * 12 + endMonth - startMonth;
-                break;
+                return NumberValueObject.create((endYear - startYear) * 12 + endMonth - startMonth);
             case 'D':
                 // The number of days in the period.
-                result = Math.floor(endDateSerialNumber) - Math.floor(startDateSerialNumber);
-                break;
+                return NumberValueObject.create(Math.floor(endDateSerialNumber) - Math.floor(startDateSerialNumber));
             case 'MD':
                 // The difference between the days in start_date and end_date. The months and years of the dates are ignored.
-                result = endDay - startDay;
-                break;
+                return NumberValueObject.create(endDay - startDay);
             case 'YM':
                 // The difference between the months in start_date and end_date. The days and years of the dates are ignored.
-                result = endMonth - startMonth;
-                break;
+                return NumberValueObject.create(endMonth - startMonth);
             case 'YD':
                 // The difference between the days of start_date and end_date. The years of the dates are ignored.
                 // The year is the year of the start date
-                endDateSerialNumber = excelDateSerial(new Date(Date.UTC(startYear, endMonth - 1, endDay)));
-                result = Math.floor(endDateSerialNumber) - Math.floor(startDateSerialNumber);
-                break;
+                _endDateSerialNumber = excelDateSerial(new Date(Date.UTC(startYear, endMonth - 1, endDay)));
+                return NumberValueObject.create(Math.floor(_endDateSerialNumber) - Math.floor(startDateSerialNumber));
             default:
                 return ErrorValueObject.create(ErrorType.NUM);
         }
-
-        return NumberValueObject.create(result);
     }
 }

@@ -38,8 +38,10 @@ export class Indirect extends BaseFunction {
     }
 
     override calculate(refText: BaseValueObject, a1?: BaseValueObject) {
-        if (refText.isError()) {
-            return refText;
+        let _refText = refText;
+
+        if (_refText.isError()) {
+            return _refText;
         }
 
         let a1Value = this.getZeroOrOneByOneDefault(a1);
@@ -48,10 +50,10 @@ export class Indirect extends BaseFunction {
             a1Value = 1;
         }
 
-        if (refText.isArray()) {
-            const refTextArray = refText as ArrayValueObject;
+        if (_refText.isArray()) {
+            const refTextArray = _refText as ArrayValueObject;
             if (refTextArray.getRowCount() === 1 && refTextArray.getColumnCount() === 1) {
-                refText = refTextArray.getFirstCell();
+                _refText = refTextArray.getFirstCell();
             } else {
                 return refTextArray.map(() => {
                     return ErrorValueObject.create(ErrorType.VALUE);
@@ -59,11 +61,11 @@ export class Indirect extends BaseFunction {
             }
         }
 
-        if (!refText.isString()) {
+        if (!_refText.isString()) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
-        const refTextV = this._convertToDefinedName(refText.getValue() as string);
+        const refTextV = this._convertToDefinedName(_refText.getValue() as string);
 
         if (a1Value === 0) {
             const gridRange = deserializeRangeForR1C1(refTextV);

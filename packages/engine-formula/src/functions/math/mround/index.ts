@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -28,67 +27,50 @@ export class Mround extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, multiple: BaseValueObject) {
-        if (number.isError()) {
-            return number;
-        }
+        let _number = number;
 
-        if (multiple.isError()) {
-            return multiple;
-        }
-
-        if (number.isArray()) {
-            const rowCount = (number as ArrayValueObject).getRowCount();
-            const columnCount = (number as ArrayValueObject).getColumnCount();
+        if (_number.isArray()) {
+            const rowCount = (_number as ArrayValueObject).getRowCount();
+            const columnCount = (_number as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            number = (number as ArrayValueObject).get(0, 0) as BaseValueObject;
-
-            if (number.isError()) {
-                return number;
-            }
+            _number = (_number as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (multiple.isArray()) {
-            const rowCount = (multiple as ArrayValueObject).getRowCount();
-            const columnCount = (multiple as ArrayValueObject).getColumnCount();
+        if (_number.isError()) {
+            return _number;
+        }
+
+        let _multiple = multiple;
+
+        if (_multiple.isArray()) {
+            const rowCount = (_multiple as ArrayValueObject).getRowCount();
+            const columnCount = (_multiple as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            multiple = (multiple as ArrayValueObject).get(0, 0) as BaseValueObject;
-
-            if (multiple.isError()) {
-                return multiple;
-            }
+            _multiple = (_multiple as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        let numberValue = number.getValue();
-
-        if (number.isNull()) {
-            numberValue = 0;
+        if (_multiple.isError()) {
+            return _multiple;
         }
 
-        if (!isRealNum(numberValue)) {
+        if (_number.isBoolean() || _multiple.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        numberValue = +numberValue;
+        const numberValue = +_number.getValue();
+        const multipleValue = +_multiple.getValue();
 
-        let multipleValue = multiple.getValue();
-
-        if (multiple.isNull()) {
-            multipleValue = 0;
-        }
-
-        if (!isRealNum(multipleValue)) {
+        if (Number.isNaN(numberValue) || Number.isNaN(multipleValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        multipleValue = +multipleValue;
 
         if (multipleValue === 0) {
             return NumberValueObject.create(0);

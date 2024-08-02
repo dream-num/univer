@@ -26,44 +26,36 @@ export class Csch extends BaseFunction {
     override maxParams = 1;
 
     override calculate(variant: BaseValueObject) {
-        if (variant.isString()) {
-            variant = variant.convertToNumberObjectValue();
+        if (variant.isArray()) {
+            return variant.map((numberObject) => this._handleSingleObject(numberObject));
         }
 
-        if (variant.isError()) {
-            return variant;
+        return this._handleSingleObject(variant);
+    }
+
+    private _handleSingleObject(number: BaseValueObject) {
+        let numberObject = number;
+
+        if (numberObject.isString()) {
+            numberObject = numberObject.convertToNumberObjectValue();
         }
 
-        if ((variant as BaseValueObject).isArray()) {
-            return (variant as BaseValueObject).map((currentValue) => {
-                if (currentValue.isString()) {
-                    currentValue = currentValue.convertToNumberObjectValue();
-                }
-                if (currentValue.isError()) {
-                    return currentValue;
-                }
-                return csch(currentValue as BaseValueObject);
-            });
+        if (numberObject.isError()) {
+            return numberObject;
         }
 
-        return csch(variant as BaseValueObject);
+        const numberValue = +numberObject.getValue();
+
+        // CSCH(0) returns the #DIV/0! error value.
+        if (numberValue === 0) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        }
+
+        // sinh(number) = Infinity  return 0
+        if (!Number.isNaN(numberValue) && !Number.isFinite(Math.sinh(numberValue))) {
+            return NumberValueObject.create(0);
+        }
+
+        return numberObject.sinh().getReciprocal();
     }
-}
-
-function csch(num: BaseValueObject) {
-    let currentValue = num.getValue();
-
-    currentValue = Number(currentValue);
-
-    // CSCH(0) returns the #DIV/0! error value.
-    if (currentValue === 0) {
-        return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-    }
-
-    // sinh(number) = Infinity  return 0
-    if (!Number.isNaN(currentValue) && !Number.isFinite(Math.sinh(currentValue))) {
-        return NumberValueObject.create(0);
-    }
-
-    return num.sinh().getReciprocal();
 }

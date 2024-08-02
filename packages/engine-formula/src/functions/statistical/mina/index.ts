@@ -43,21 +43,23 @@ export class Mina extends BaseFunction {
 
             if (variant.isArray()) {
                 (variant as ArrayValueObject).iterator((valueObject) => {
+                    let _valueObject = valueObject;
+
                     // Empty cells and text values in the array or reference are ignored.
-                    if (valueObject == null || valueObject.isNull() || valueObject.isString()) {
-                        valueObject = NumberValueObject.create(0);
+                    if (_valueObject == null || _valueObject.isNull() || _valueObject.isString()) {
+                        _valueObject = NumberValueObject.create(0);
                     }
 
-                    if (valueObject.isBoolean()) {
-                        valueObject = valueObject.convertToNumberObjectValue();
+                    if (_valueObject.isBoolean()) {
+                        _valueObject = _valueObject.convertToNumberObjectValue();
                     }
 
-                    if (valueObject.isError()) {
-                        accumulatorAll = valueObject;
+                    if (_valueObject.isError()) {
+                        accumulatorAll = _valueObject;
                         return false; // break
                     }
 
-                    accumulatorAll = this._validator(accumulatorAll, valueObject as BaseValueObject);
+                    accumulatorAll = this._validator(accumulatorAll, _valueObject as BaseValueObject);
                 });
             }
 
@@ -77,9 +79,13 @@ export class Mina extends BaseFunction {
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
         const validator = accumulatorAll.isGreaterThan(valueObject);
+
+        let _accumulatorAll = accumulatorAll;
+
         if (validator.getValue()) {
-            accumulatorAll = valueObject;
+            _accumulatorAll = valueObject;
         }
-        return accumulatorAll;
+
+        return _accumulatorAll;
     }
 }

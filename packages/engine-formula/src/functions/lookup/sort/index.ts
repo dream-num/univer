@@ -30,28 +30,28 @@ export class Sort extends BaseFunction {
     override maxParams = 4;
 
     override calculate(array: BaseValueObject, sortIndex?: BaseValueObject, sortOrder?: BaseValueObject, byCol?: BaseValueObject) {
-        sortIndex = sortIndex ?? NumberValueObject.create(1);
-        sortOrder = sortOrder ?? NumberValueObject.create(1);
-        byCol = byCol ?? BooleanValueObject.create(false);
+        const _sortIndex = sortIndex ?? NumberValueObject.create(1);
+        const _sortOrder = sortOrder ?? NumberValueObject.create(1);
+        const _byCol = byCol ?? BooleanValueObject.create(false);
 
-        if (byCol.isArray()) {
-            const byColRowCount = (byCol as ArrayValueObject).getRowCount();
-            const byColColumnCount = (byCol as ArrayValueObject).getColumnCount();
+        if (_byCol.isArray()) {
+            const byColRowCount = (_byCol as ArrayValueObject).getRowCount();
+            const byColColumnCount = (_byCol as ArrayValueObject).getColumnCount();
 
             if (byColRowCount === 1 && byColColumnCount === 1) {
-                const byColObject = (byCol as ArrayValueObject).get(0, 0) as BaseValueObject;
+                const byColObject = (_byCol as ArrayValueObject).get(0, 0) as BaseValueObject;
 
-                return this._handleSingleObject(array, sortIndex, sortOrder, byColObject);
+                return this._handleSingleObject(array, _sortIndex, _sortOrder, byColObject);
             }
 
-            return byCol.map((byColObject) => {
-                const result = this._handleSingleObject(array, sortIndex!, sortOrder!, byColObject);
+            return _byCol.map((byColObject) => {
+                const result = this._handleSingleObject(array, _sortIndex, _sortOrder, byColObject);
 
                 return result.isArray() ? (result as ArrayValueObject).get(0, 0) as BaseValueObject : result;
             });
         }
 
-        return this._handleSingleObject(array, sortIndex, sortOrder, byCol);
+        return this._handleSingleObject(array, _sortIndex, _sortOrder, _byCol);
     }
 
     private _handleSingleObject(array: BaseValueObject, sortIndex: BaseValueObject, sortOrder: BaseValueObject, byCol: BaseValueObject) {
@@ -62,70 +62,71 @@ export class Sort extends BaseFunction {
         const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
 
-        if (sortIndex.isArray()) {
-            const rowCount = (sortIndex as ArrayValueObject).getRowCount();
-            const columnCount = (sortIndex as ArrayValueObject).getColumnCount();
+        const _sortIndex = this._checkArrayError(sortIndex);
 
-            if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            sortIndex = (sortIndex as ArrayValueObject).get(0, 0) as BaseValueObject;
+        if (_sortIndex.isError()) {
+            return _sortIndex;
         }
 
-        if (sortIndex.isString()) {
-            sortIndex = sortIndex.convertToNumberObjectValue();
-        }
-
-        if (sortIndex.isError()) {
-            return sortIndex;
-        }
-
-        const sortIndexValue = Math.floor(+sortIndex.getValue());
+        const sortIndexValue = Math.floor(+_sortIndex.getValue());
 
         if (sortIndexValue < 1) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (sortOrder.isArray()) {
-            const rowCount = (sortOrder as ArrayValueObject).getRowCount();
-            const columnCount = (sortOrder as ArrayValueObject).getColumnCount();
+        const _sortOrder = this._checkArrayError(sortOrder);
 
-            if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            sortOrder = (sortOrder as ArrayValueObject).get(0, 0) as BaseValueObject;
+        if (_sortOrder.isError()) {
+            return _sortOrder;
         }
 
-        if (sortOrder.isString()) {
-            sortOrder = sortOrder.convertToNumberObjectValue();
-        }
-
-        if (sortOrder.isError()) {
-            return sortOrder;
-        }
-
-        const sortOrderValue = Math.floor(+sortOrder.getValue());
+        const sortOrderValue = Math.floor(+_sortOrder.getValue());
 
         if (sortOrderValue !== -1 && sortOrderValue !== 1) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (byCol.isString()) {
-            byCol = byCol.convertToNumberObjectValue();
+        let _byCol = byCol;
+
+        if (_byCol.isString()) {
+            _byCol = _byCol.convertToNumberObjectValue();
         }
 
-        if (byCol.isError()) {
-            return byCol;
+        if (_byCol.isError()) {
+            return _byCol;
         }
 
         if (!array.isArray() || (arrayRowCount === 1 && arrayColumnCount === 1)) {
             return array;
         }
 
-        const byColValue = +byCol.getValue();
+        const byColValue = +_byCol.getValue();
 
+        return this._getResult(array, sortIndexValue, sortOrderValue, byColValue, arrayRowCount, arrayColumnCount);
+    }
+
+    private _checkArrayError(variant: BaseValueObject): BaseValueObject {
+        let _variant = variant;
+
+        if (_variant.isArray()) {
+            const rowCount = (_variant as ArrayValueObject).getRowCount();
+            const columnCount = (_variant as ArrayValueObject).getColumnCount();
+
+            if (rowCount > 1 || columnCount > 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            _variant = (_variant as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_variant.isString()) {
+            _variant = _variant.convertToNumberObjectValue();
+        }
+
+        return _variant;
+    }
+
+    private _getResult(array: BaseValueObject, sortIndexValue: number, sortOrderValue: 1 | -1, byColValue: number, arrayRowCount: number, arrayColumnCount: number): BaseValueObject {
         if (!byColValue) {
             if (sortIndexValue > arrayColumnCount) {
                 return ErrorValueObject.create(ErrorType.VALUE);
@@ -169,111 +170,119 @@ export class Sort extends BaseFunction {
         const compare = getCompare();
 
         if (sortOrder === 1) {
-            return (a: Nullable<BaseValueObject>[], b: Nullable<BaseValueObject>[]) => {
-                const columnA = a[sortIndex];
-                const columnB = b[sortIndex];
-
-                if (columnA == null || columnA.isNull()) {
-                    return 1;
-                }
-
-                if (columnB == null || columnB.isNull()) {
-                    return -1;
-                }
-
-                if (columnA.isError() && columnB.isError()) {
-                    return 0;
-                }
-
-                if (columnA.isError()) {
-                    return 1;
-                }
-
-                if (columnB.isError()) {
-                    return -1;
-                }
-
-                const columnAValue = (columnA as BaseValueObject).getValue();
-                const columnBValue = (columnB as BaseValueObject).getValue();
-
-                if (columnA.isBoolean() && columnAValue === true) {
-                    return 1;
-                }
-
-                if (columnB.isBoolean() && columnBValue === true) {
-                    return -1;
-                }
-
-                if (columnA.isBoolean() && columnAValue === false) {
-                    return 1;
-                }
-
-                if (columnB.isBoolean() && columnBValue === false) {
-                    return -1;
-                }
-
-                if (columnA.isNumber() && columnB.isNumber()) {
-                    return (+columnAValue) - (+columnBValue);
-                }
-
-                return compare(
-                    columnAValue as string,
-                    columnBValue as string
-                );
-            };
+            return this._sortAsc(sortIndex, compare);
         } else {
-            return (a: Nullable<BaseValueObject>[], b: Nullable<BaseValueObject>[]) => {
-                const columnA = a[sortIndex];
-                const columnB = b[sortIndex];
-
-                if (columnA == null || columnA.isNull()) {
-                    return 1;
-                }
-
-                if (columnB == null || columnB.isNull()) {
-                    return -1;
-                }
-
-                if (columnA.isError() && columnB.isError()) {
-                    return 0;
-                }
-
-                if (columnA.isError()) {
-                    return -1;
-                }
-
-                if (columnB.isError()) {
-                    return 1;
-                }
-
-                const columnAValue = (columnA as BaseValueObject).getValue();
-                const columnBValue = (columnB as BaseValueObject).getValue();
-
-                if (columnA.isBoolean() && columnAValue === true) {
-                    return -1;
-                }
-
-                if (columnB.isBoolean() && columnBValue === true) {
-                    return 1;
-                }
-
-                if (columnA.isBoolean() && columnAValue === false) {
-                    return -1;
-                }
-
-                if (columnB.isBoolean() && columnBValue === false) {
-                    return 1;
-                }
-
-                if (columnA.isNumber() && columnB.isNumber()) {
-                    return (+columnBValue) - (+columnAValue);
-                }
-
-                return compare(
-                    columnBValue as string,
-                    columnAValue as string
-                );
-            };
+            return this._sortDesc(sortIndex, compare);
         }
+    }
+
+    private _sortAsc(sortIndex: number, compare: Function) {
+        return (a: Nullable<BaseValueObject>[], b: Nullable<BaseValueObject>[]) => {
+            const columnA = a[sortIndex];
+            const columnB = b[sortIndex];
+
+            if (columnA == null || columnA.isNull()) {
+                return 1;
+            }
+
+            if (columnB == null || columnB.isNull()) {
+                return -1;
+            }
+
+            if (columnA.isError() && columnB.isError()) {
+                return 0;
+            }
+
+            if (columnA.isError()) {
+                return 1;
+            }
+
+            if (columnB.isError()) {
+                return -1;
+            }
+
+            const columnAValue = (columnA as BaseValueObject).getValue();
+            const columnBValue = (columnB as BaseValueObject).getValue();
+
+            if (columnA.isBoolean() && columnAValue === true) {
+                return 1;
+            }
+
+            if (columnB.isBoolean() && columnBValue === true) {
+                return -1;
+            }
+
+            if (columnA.isBoolean() && columnAValue === false) {
+                return 1;
+            }
+
+            if (columnB.isBoolean() && columnBValue === false) {
+                return -1;
+            }
+
+            if (columnA.isNumber() && columnB.isNumber()) {
+                return (+columnAValue) - (+columnBValue);
+            }
+
+            return compare(
+                columnAValue as string,
+                columnBValue as string
+            );
+        };
+    }
+
+    private _sortDesc(sortIndex: number, compare: Function) {
+        return (a: Nullable<BaseValueObject>[], b: Nullable<BaseValueObject>[]) => {
+            const columnA = a[sortIndex];
+            const columnB = b[sortIndex];
+
+            if (columnA == null || columnA.isNull()) {
+                return 1;
+            }
+
+            if (columnB == null || columnB.isNull()) {
+                return -1;
+            }
+
+            if (columnA.isError() && columnB.isError()) {
+                return 0;
+            }
+
+            if (columnA.isError()) {
+                return -1;
+            }
+
+            if (columnB.isError()) {
+                return 1;
+            }
+
+            const columnAValue = (columnA as BaseValueObject).getValue();
+            const columnBValue = (columnB as BaseValueObject).getValue();
+
+            if (columnA.isBoolean() && columnAValue === true) {
+                return -1;
+            }
+
+            if (columnB.isBoolean() && columnBValue === true) {
+                return 1;
+            }
+
+            if (columnA.isBoolean() && columnAValue === false) {
+                return -1;
+            }
+
+            if (columnB.isBoolean() && columnBValue === false) {
+                return 1;
+            }
+
+            if (columnA.isNumber() && columnB.isNumber()) {
+                return (+columnBValue) - (+columnAValue);
+            }
+
+            return compare(
+                columnBValue as string,
+                columnAValue as string
+            );
+        };
     }
 }

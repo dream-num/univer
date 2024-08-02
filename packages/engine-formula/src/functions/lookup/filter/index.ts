@@ -27,7 +27,7 @@ export class Filter extends BaseFunction {
     override maxParams = 3;
 
     override calculate(array: BaseValueObject, include: BaseValueObject, ifEmpty?: BaseValueObject) {
-        ifEmpty = ifEmpty ?? ErrorValueObject.create(ErrorType.CALC);
+        const _ifEmpty = ifEmpty ?? ErrorValueObject.create(ErrorType.CALC);
 
         if (array.isError()) {
             return array;
@@ -51,110 +51,147 @@ export class Filter extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const resultArray: BaseValueObject[][] = [];
-
         if (arrayRowCount === 1 && arrayColumnCount === 1) {
-            if (array.isArray()) {
-                array = (array as ArrayValueObject).get(0, 0) as BaseValueObject;
-            }
+            return this._getResultArrayByR1C1(array, include, _ifEmpty);
+        }
 
-            if (include.isArray()) {
-                include = (include as ArrayValueObject).get(0, 0) as BaseValueObject;
-            }
-
-            if (include.isString()) {
-                include = include.convertToNumberObjectValue();
-            }
-
-            if (include.isError()) {
-                return include;
-            }
-
-            const includeValue = +include.getValue();
-
-            if (includeValue) {
-                return array;
-            }
-
-            return ifEmpty;
-        } else if (includeRowCount === 1) {
+        if (includeRowCount === 1) {
             if (includeColumnCount !== arrayColumnCount) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            for (let c = 0; c < arrayColumnCount; c++) {
-                let includeObject = (include as ArrayValueObject).get(0, c) as BaseValueObject;
+            return this._getResultArrayByR1(arrayRowCount, arrayColumnCount, array, include, _ifEmpty);
+        }
 
-                if (includeObject.isString()) {
-                    includeObject = includeObject.convertToNumberObjectValue();
-                }
-
-                if (includeObject.isError()) {
-                    return includeObject;
-                }
-
-                const includeValue = +includeObject.getValue();
-
-                if (!includeValue) {
-                    continue;
-                }
-
-                for (let r = 0; r < arrayRowCount; r++) {
-                    if (!resultArray[r]) {
-                        resultArray[r] = [];
-                    }
-
-                    const arrayObject = (array as ArrayValueObject).get(r, c) as BaseValueObject;
-
-                    resultArray[r].push(arrayObject);
-                }
-            }
-        } else if (includeColumnCount === 1) {
+        if (includeColumnCount === 1) {
             if (includeRowCount !== arrayRowCount) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
+            return this._getResultArrayByC1(arrayRowCount, arrayColumnCount, array, include, _ifEmpty);
+        }
+
+        return _ifEmpty;
+    }
+
+    private _getResultArrayByR1C1(array: BaseValueObject, include: BaseValueObject, ifEmpty: BaseValueObject): BaseValueObject {
+        let _array = array;
+        let _include = include;
+
+        if (_array.isArray()) {
+            _array = (_array as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_include.isArray()) {
+            _include = (_include as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_include.isString()) {
+            _include = _include.convertToNumberObjectValue();
+        }
+
+        if (_include.isError()) {
+            return _include;
+        }
+
+        const includeValue = +_include.getValue();
+
+        if (includeValue) {
+            return _array;
+        }
+
+        return ifEmpty;
+    }
+
+    private _getResultArrayByR1(arrayRowCount: number, arrayColumnCount: number, array: BaseValueObject, include: BaseValueObject, ifEmpty: BaseValueObject): BaseValueObject {
+        const resultArray: Array<Array<BaseValueObject>> = [];
+
+        for (let c = 0; c < arrayColumnCount; c++) {
+            let includeObject = (include as ArrayValueObject).get(0, c) as BaseValueObject;
+
+            if (includeObject.isString()) {
+                includeObject = includeObject.convertToNumberObjectValue();
+            }
+
+            if (includeObject.isError()) {
+                return includeObject as ErrorValueObject;
+            }
+
+            const includeValue = +includeObject.getValue();
+
+            if (!includeValue) {
+                continue;
+            }
+
             for (let r = 0; r < arrayRowCount; r++) {
-                let includeObject = (include as ArrayValueObject).get(r, 0) as BaseValueObject;
-
-                if (includeObject.isString()) {
-                    includeObject = includeObject.convertToNumberObjectValue();
+                if (!resultArray[r]) {
+                    resultArray[r] = [];
                 }
 
-                if (includeObject.isError()) {
-                    return includeObject;
-                }
+                const arrayObject = (array as ArrayValueObject).get(r, c) as BaseValueObject;
 
-                const includeValue = +includeObject.getValue();
-
-                if (!includeValue) {
-                    continue;
-                }
-
-                const row = [];
-
-                for (let c = 0; c < arrayColumnCount; c++) {
-                    const arrayObject = (array as ArrayValueObject).get(r, c) as BaseValueObject;
-
-                    row.push(arrayObject);
-                }
-
-                resultArray.push(row);
+                resultArray[r].push(arrayObject);
             }
         }
 
         if (resultArray.length === 0) {
             return ifEmpty;
-        } else {
-            return ArrayValueObject.create({
-                calculateValueList: resultArray,
-                rowCount: resultArray.length,
-                columnCount: resultArray[0].length || 0,
-                unitId: this.unitId as string,
-                sheetId: this.subUnitId as string,
-                row: this.row,
-                column: this.column,
-            });
         }
+
+        return ArrayValueObject.create({
+            calculateValueList: resultArray,
+            rowCount: resultArray.length,
+            columnCount: resultArray[0].length || 0,
+            unitId: this.unitId as string,
+            sheetId: this.subUnitId as string,
+            row: this.row,
+            column: this.column,
+        });
+    }
+
+    private _getResultArrayByC1(arrayRowCount: number, arrayColumnCount: number, array: BaseValueObject, include: BaseValueObject, ifEmpty: BaseValueObject): BaseValueObject {
+        const resultArray: Array<Array<BaseValueObject>> = [];
+
+        for (let r = 0; r < arrayRowCount; r++) {
+            let includeObject = (include as ArrayValueObject).get(r, 0) as BaseValueObject;
+
+            if (includeObject.isString()) {
+                includeObject = includeObject.convertToNumberObjectValue();
+            }
+
+            if (includeObject.isError()) {
+                return includeObject;
+            }
+
+            const includeValue = +includeObject.getValue();
+
+            if (!includeValue) {
+                continue;
+            }
+
+            const row = [];
+
+            for (let c = 0; c < arrayColumnCount; c++) {
+                const arrayObject = (array as ArrayValueObject).get(r, c) as BaseValueObject;
+
+                row.push(arrayObject);
+            }
+
+            resultArray.push(row);
+        }
+
+        if (resultArray.length === 0) {
+            return ifEmpty;
+        }
+
+        return ArrayValueObject.create({
+            calculateValueList: resultArray,
+            rowCount: resultArray.length,
+            columnCount: resultArray[0].length || 0,
+            unitId: this.unitId as string,
+            sheetId: this.subUnitId as string,
+            row: this.row,
+            column: this.column,
+        });
     }
 }

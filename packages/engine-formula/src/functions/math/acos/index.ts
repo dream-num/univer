@@ -23,14 +23,16 @@ export class Acos extends BaseFunction {
     override maxParams = 1;
 
     override calculate(variant: BaseValueObject) {
-        if (variant.isString()) {
-            variant = variant.convertToNumberObjectValue();
+        let _variant = variant;
+
+        if (_variant.isString()) {
+            _variant = _variant.convertToNumberObjectValue();
         }
 
-        if (variant.isError()) {
-            return variant;
+        if (_variant.isError()) {
+            return _variant;
         }
 
-        return variant.acos();
+        return _variant.acos();
     }
 }

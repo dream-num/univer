@@ -1370,15 +1370,18 @@ export class StringValueObject extends BaseValueObject {
         if (typeof value === 'string') {
             // Case sensitivity needs to be considered, most functions are case-insensitive, like VLOOKUP/HLOOKUP/XLOOKUP/MATCH/COUNTIF/COUNTIFS/SUMIF/SUMIFS/SEARCH/FIND(in SUBSTITUTE)
             // A few functions are case-sensitive, like EXACT/FIND/FINDB/REPLACE/REPLACEB/MIDB
+            let _value = value;
+
             if (!isCaseSensitive) {
                 currentValue = currentValue.toLocaleLowerCase();
-                value = value.toLocaleLowerCase();
+                _value = _value.toLocaleLowerCase();
             }
 
-            if (isWildcard(value)) {
-                return this._checkWildcard(value, operator);
+            if (isWildcard(_value)) {
+                return this._checkWildcard(_value, operator);
             }
-            result = this._compareString(currentValue, value, operator);
+
+            result = this._compareString(currentValue, _value, operator);
         } else if (typeof value === 'number') {
             result = this._compareNumber(operator);
         } else if (typeof value === 'boolean') {

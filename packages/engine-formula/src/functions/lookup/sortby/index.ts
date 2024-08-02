@@ -52,13 +52,7 @@ export class Sortby extends BaseFunction {
             return expandArray;
         }
 
-        const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
-        const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
-
-        const byArray1RowCount = variants[0].isArray() ? (variants[0] as ArrayValueObject).getRowCount() : 1;
-        const byArray1ColumnCount = variants[0].isArray() ? (variants[0] as ArrayValueObject).getColumnCount() : 1;
-
-        variants = variants.map((variant, index) => {
+        const _variants = variants.map((variant, index) => {
             if (index % 2 === 0) {
                 return variant;
             }
@@ -68,103 +62,7 @@ export class Sortby extends BaseFunction {
             return variantArray;
         });
 
-        const resultArray: BaseValueObject[][] = [];
-
-        for (let r = 0; r < maxRowLength; r++) {
-            resultArray[r] = [] as BaseValueObject[];
-
-            for (let c = 0; c < maxColumnLength; c++) {
-                const byArrays = [];
-                const sortOrders = [];
-
-                let isError: boolean = false;
-
-                for (let i = 0; i < variants.length; i++) {
-                    if (i % 2 === 1) {
-                        continue;
-                    }
-
-                    const byArray = variants[i];
-
-                    let sortOrder = (variants[i + 1] as ArrayValueObject).get(r, c) as BaseValueObject;
-
-                    if (sortOrder.isString()) {
-                        sortOrder = sortOrder.convertToNumberObjectValue();
-                    }
-
-                    if (sortOrder.isError()) {
-                        resultArray[r].push(sortOrder);
-                        isError = true;
-                        break;
-                    }
-
-                    const sortOrderValue = Math.floor(+sortOrder.getValue());
-
-                    if (sortOrderValue !== -1 && sortOrderValue !== 1) {
-                        resultArray[r].push(ErrorValueObject.create(ErrorType.VALUE));
-                        isError = true;
-                        break;
-                    }
-
-                    sortOrders.push(sortOrderValue);
-
-                    if (byArray.isArray()) {
-                        let byArrayValue = byArray.getArrayValue();
-
-                        if (byArray1ColumnCount === 1) {
-                            byArrayValue = this._transposeArray(byArrayValue);
-                        }
-
-                        byArrays.push(byArrayValue[0]);
-                    } else {
-                        byArrays.push([byArray]);
-                    }
-                }
-
-                if (isError) {
-                    continue;
-                }
-
-                if (!array.isArray() || (arrayRowCount === 1 && arrayColumnCount === 1)) {
-                    resultArray[r].push(array);
-                    continue;
-                }
-
-                let arrayValue = array.getArrayValue();
-
-                if (!(byArray1RowCount === 1 && byArray1ColumnCount === 1)) {
-                    if (byArray1RowCount === 1) {
-                        arrayValue = arrayValue.concat(byArrays);
-                        arrayValue = this._transposeArray(arrayValue);
-                        arrayValue.sort(this._sort(arrayRowCount, sortOrders as Array<1 | -1>));
-                        arrayValue = this._transposeArray(arrayValue).slice(0, arrayRowCount);
-                    } else if (byArray1ColumnCount === 1) {
-                        arrayValue = this._transposeArray(arrayValue);
-                        arrayValue = arrayValue.concat(byArrays);
-                        arrayValue = this._transposeArray(arrayValue);
-                        arrayValue.sort(this._sort(arrayColumnCount, sortOrders as Array<1 | -1>));
-                        arrayValue = arrayValue.map((row) => row.slice(0, arrayColumnCount));
-                    }
-                }
-
-                const result = ArrayValueObject.create({
-                    calculateValueList: arrayValue,
-                    rowCount: arrayValue.length,
-                    columnCount: arrayValue[0].length || 0,
-                    unitId: this.unitId as string,
-                    sheetId: this.subUnitId as string,
-                    row: this.row,
-                    column: this.column,
-                });
-
-                if (maxRowLength > 1 || maxColumnLength > 1) {
-                    resultArray[r].push(result.get(0, 0) as BaseValueObject);
-                    continue;
-                }
-
-                resultArray[r].push(result);
-            }
-        }
+        const resultArray = this._getResultArray(array, _variants, maxRowLength, maxColumnLength);
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
             return resultArray[0][0] as ArrayValueObject;
@@ -181,6 +79,7 @@ export class Sortby extends BaseFunction {
         });
     }
 
+    // eslint-disable-next-line complexity
     private _getVariantsError(array: BaseValueObject, ...variants: BaseValueObject[]): ErrorValueObject | BooleanValueObject {
         if (array.isError()) {
             return array as ErrorValueObject;
@@ -235,6 +134,127 @@ export class Sortby extends BaseFunction {
         return BooleanValueObject.create(true);
     }
 
+    private _getResultArray(array: BaseValueObject, variants: BaseValueObject[], maxRowLength: number, maxColumnLength: number): Array<Array<BaseValueObject>> {
+        const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
+        const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
+
+        const byArray1RowCount = variants[0].isArray() ? (variants[0] as ArrayValueObject).getRowCount() : 1;
+        const byArray1ColumnCount = variants[0].isArray() ? (variants[0] as ArrayValueObject).getColumnCount() : 1;
+
+        const resultArray: Array<Array<BaseValueObject>> = [];
+
+        for (let r = 0; r < maxRowLength; r++) {
+            resultArray[r] = [] as BaseValueObject[];
+
+            for (let c = 0; c < maxColumnLength; c++) {
+                const { isError, errorObject, byArrays, sortOrders } = this._getByArraysAndSortOrders(variants, r, c, byArray1ColumnCount);
+
+                if (isError) {
+                    resultArray[r].push(errorObject as ErrorValueObject);
+                    continue;
+                }
+
+                if (!array.isArray() || (arrayRowCount === 1 && arrayColumnCount === 1)) {
+                    resultArray[r].push(array);
+                    continue;
+                }
+
+                let arrayValue = array.getArrayValue();
+
+                if (!(byArray1RowCount === 1 && byArray1ColumnCount === 1)) {
+                    if (byArray1RowCount === 1) {
+                        arrayValue = arrayValue.concat(byArrays);
+                        arrayValue = this._transposeArray(arrayValue);
+                        arrayValue.sort(this._sort(arrayRowCount, sortOrders as Array<1 | -1>));
+                        arrayValue = this._transposeArray(arrayValue).slice(0, arrayRowCount);
+                    } else if (byArray1ColumnCount === 1) {
+                        arrayValue = this._transposeArray(arrayValue);
+                        arrayValue = arrayValue.concat(byArrays);
+                        arrayValue = this._transposeArray(arrayValue);
+                        arrayValue.sort(this._sort(arrayColumnCount, sortOrders as Array<1 | -1>));
+                        arrayValue = arrayValue.map((row) => row.slice(0, arrayColumnCount));
+                    }
+                }
+
+                const result = ArrayValueObject.create({
+                    calculateValueList: arrayValue,
+                    rowCount: arrayValue.length,
+                    columnCount: arrayValue[0].length || 0,
+                    unitId: this.unitId as string,
+                    sheetId: this.subUnitId as string,
+                    row: this.row,
+                    column: this.column,
+                });
+
+                if (maxRowLength > 1 || maxColumnLength > 1) {
+                    resultArray[r].push(result.get(0, 0) as BaseValueObject);
+                    continue;
+                }
+
+                resultArray[r].push(result);
+            }
+        }
+
+        return resultArray;
+    }
+
+    private _getByArraysAndSortOrders(variants: BaseValueObject[], r: number, c: number, byArray1ColumnCount: number) {
+        const byArrays = [];
+        const sortOrders = [];
+
+        let isError: boolean = false;
+        let errorObject: ErrorValueObject | null = null;
+
+        for (let i = 0; i < variants.length; i++) {
+            if (i % 2 === 1) {
+                continue;
+            }
+
+            const byArray = variants[i];
+
+            let sortOrder = (variants[i + 1] as ArrayValueObject).get(r, c) as BaseValueObject;
+
+            if (sortOrder.isString()) {
+                sortOrder = sortOrder.convertToNumberObjectValue();
+            }
+
+            if (sortOrder.isError()) {
+                isError = true;
+                errorObject = sortOrder as ErrorValueObject;
+                break;
+            }
+
+            const sortOrderValue = Math.floor(+sortOrder.getValue());
+
+            if (sortOrderValue !== -1 && sortOrderValue !== 1) {
+                isError = true;
+                errorObject = ErrorValueObject.create(ErrorType.VALUE);
+                break;
+            }
+
+            sortOrders.push(sortOrderValue);
+
+            if (byArray.isArray()) {
+                let byArrayValue = byArray.getArrayValue();
+
+                if (byArray1ColumnCount === 1) {
+                    byArrayValue = this._transposeArray(byArrayValue);
+                }
+
+                byArrays.push(byArrayValue[0]);
+            } else {
+                byArrays.push([byArray]);
+            }
+        }
+
+        return {
+            isError,
+            errorObject,
+            byArrays,
+            sortOrders,
+        };
+    }
+
     private _transposeArray(array: Nullable<BaseValueObject>[][]) {
         // Create a new 2D array as the transposed matrix
         const rows = array.length;
@@ -280,103 +300,111 @@ export class Sortby extends BaseFunction {
         };
     }
 
-    private _compare(columnA: BaseValueObject, columnB: BaseValueObject, sortOrder: 1 | -1, compare: Function) {
+    private _compare(columnA: BaseValueObject, columnB: BaseValueObject, sortOrder: 1 | -1, compare: Function): number {
         if (sortOrder === 1) {
-            if (columnA == null || columnA.isNull()) {
-                return 1;
-            }
-
-            if (columnB == null || columnB.isNull()) {
-                return -1;
-            }
-
-            if (columnA.isError() && columnB.isError()) {
-                return 0;
-            }
-
-            if (columnA.isError()) {
-                return 1;
-            }
-
-            if (columnB.isError()) {
-                return -1;
-            }
-
-            const columnAValue = (columnA as BaseValueObject).getValue();
-            const columnBValue = (columnB as BaseValueObject).getValue();
-
-            if (columnA.isBoolean() && columnAValue === true) {
-                return 1;
-            }
-
-            if (columnB.isBoolean() && columnBValue === true) {
-                return -1;
-            }
-
-            if (columnA.isBoolean() && columnAValue === false) {
-                return 1;
-            }
-
-            if (columnB.isBoolean() && columnBValue === false) {
-                return -1;
-            }
-
-            if (columnA.isNumber() && columnB.isNumber()) {
-                return (+columnAValue) - (+columnBValue);
-            }
-
-            return compare(
-                columnAValue as string,
-                columnBValue as string
-            );
+            return this._asc(columnA, columnB, compare);
         } else {
-            if (columnA == null || columnA.isNull()) {
-                return 1;
-            }
-
-            if (columnB == null || columnB.isNull()) {
-                return -1;
-            }
-
-            if (columnA.isError() && columnB.isError()) {
-                return 0;
-            }
-
-            if (columnA.isError()) {
-                return -1;
-            }
-
-            if (columnB.isError()) {
-                return 1;
-            }
-
-            const columnAValue = (columnA as BaseValueObject).getValue();
-            const columnBValue = (columnB as BaseValueObject).getValue();
-
-            if (columnA.isBoolean() && columnAValue === true) {
-                return -1;
-            }
-
-            if (columnB.isBoolean() && columnBValue === true) {
-                return 1;
-            }
-
-            if (columnA.isBoolean() && columnAValue === false) {
-                return -1;
-            }
-
-            if (columnB.isBoolean() && columnBValue === false) {
-                return 1;
-            }
-
-            if (columnA.isNumber() && columnB.isNumber()) {
-                return (+columnBValue) - (+columnAValue);
-            }
-
-            return compare(
-                columnBValue as string,
-                columnAValue as string
-            );
+            return this._desc(columnA, columnB, compare);
         }
+    }
+
+    private _asc(columnA: BaseValueObject, columnB: BaseValueObject, compare: Function): number {
+        if (columnA == null || columnA.isNull()) {
+            return 1;
+        }
+
+        if (columnB == null || columnB.isNull()) {
+            return -1;
+        }
+
+        if (columnA.isError() && columnB.isError()) {
+            return 0;
+        }
+
+        if (columnA.isError()) {
+            return 1;
+        }
+
+        if (columnB.isError()) {
+            return -1;
+        }
+
+        const columnAValue = (columnA as BaseValueObject).getValue();
+        const columnBValue = (columnB as BaseValueObject).getValue();
+
+        if (columnA.isBoolean() && columnAValue === true) {
+            return 1;
+        }
+
+        if (columnB.isBoolean() && columnBValue === true) {
+            return -1;
+        }
+
+        if (columnA.isBoolean() && columnAValue === false) {
+            return 1;
+        }
+
+        if (columnB.isBoolean() && columnBValue === false) {
+            return -1;
+        }
+
+        if (columnA.isNumber() && columnB.isNumber()) {
+            return (+columnAValue) - (+columnBValue);
+        }
+
+        return compare(
+            columnAValue as string,
+            columnBValue as string
+        );
+    }
+
+    private _desc(columnA: BaseValueObject, columnB: BaseValueObject, compare: Function): number {
+        if (columnA == null || columnA.isNull()) {
+            return 1;
+        }
+
+        if (columnB == null || columnB.isNull()) {
+            return -1;
+        }
+
+        if (columnA.isError() && columnB.isError()) {
+            return 0;
+        }
+
+        if (columnA.isError()) {
+            return -1;
+        }
+
+        if (columnB.isError()) {
+            return 1;
+        }
+
+        const columnAValue = (columnA as BaseValueObject).getValue();
+        const columnBValue = (columnB as BaseValueObject).getValue();
+
+        if (columnA.isBoolean() && columnAValue === true) {
+            return -1;
+        }
+
+        if (columnB.isBoolean() && columnBValue === true) {
+            return 1;
+        }
+
+        if (columnA.isBoolean() && columnAValue === false) {
+            return -1;
+        }
+
+        if (columnB.isBoolean() && columnBValue === false) {
+            return 1;
+        }
+
+        if (columnA.isNumber() && columnB.isNumber()) {
+            return (+columnBValue) - (+columnAValue);
+        }
+
+        return compare(
+            columnBValue as string,
+            columnAValue as string
+        );
     }
 }

@@ -507,7 +507,7 @@ export function getParagraphsRelative(activeRange: IActiveTextRange, paragraphs:
     const endIndex = paragraphs.indexOf(selectionParagraphs[selectionParagraphs.length - 1]);
     if (selectionParagraphs[0].bullet) {
         for (let i = startIndex - 1; i >= 0; i--) {
-            const prevParagraph = paragraphs[startIndex - 1];
+            const prevParagraph = paragraphs[i];
             if (prevParagraph.bullet && prevParagraph.bullet.listId === selectionParagraphs[0].bullet.listId) {
                 selectionParagraphs.unshift(prevParagraph);
             }
@@ -517,7 +517,7 @@ export function getParagraphsRelative(activeRange: IActiveTextRange, paragraphs:
     const lastParagraph = selectionParagraphs[selectionParagraphs.length - 1];
     if (lastParagraph.bullet) {
         for (let i = endIndex + 1; i < paragraphs.length; i++) {
-            const nextParagraph = paragraphs[endIndex + 1];
+            const nextParagraph = paragraphs[i];
             if (nextParagraph.bullet && nextParagraph.bullet.listId === lastParagraph.bullet.listId) {
                 selectionParagraphs.push(nextParagraph);
             }

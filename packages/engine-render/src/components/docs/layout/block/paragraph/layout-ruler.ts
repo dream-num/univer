@@ -31,6 +31,7 @@ import {
     collisionDetection,
     createAndUpdateBlockAnchor,
     createSkeletonLine,
+    setLineMarginBottom,
     updateDivideInfo,
 } from '../../model/line';
 import { createSkeletonPage } from '../../model/page';
@@ -866,34 +867,32 @@ function __getParagraphSpace(
     paragraphStart: boolean,
     preLine?: IDocumentSkeletonLine
 ) {
-    let marginTop = 0;
-    let spaceBelowApply = 0;
-    if (!paragraphStart) {
+    // Unable to read the paragraph information from the previous line,
+    // So add the spaceBelowApply information to each line when creating a new line.
+    // `SpaceBelowApply` will not participate in the current line height calculation.
+    const spaceBelowApply = getNumberUnitValue(spaceBelow, lineSpacing);
+
+    if (paragraphStart) {
+        let marginTop = getNumberUnitValue(spaceAbove, lineSpacing);
+        if (preLine) {
+            const { spaceBelowApply: preSpaceBelowApply } = preLine;
+            if (marginTop < preSpaceBelowApply) {
+                const maxValue = Math.max(preSpaceBelowApply, marginTop);
+                // spaceBelow and spaceAbove compare the size, the larger one takes effect
+                // 17.3.1.33 spacing (Spacing Between Lines and Above/Below Paragraph)
+                preLine.lineHeight += maxValue;
+                setLineMarginBottom(preLine, maxValue);
+                // Remove the marginTop of the current line.
+                marginTop = 0;
+            }
+        }
         return {
             marginTop,
             spaceBelowApply,
         };
     }
-
-    marginTop = getNumberUnitValue(spaceAbove, lineSpacing);
-    spaceBelowApply = getNumberUnitValue(spaceBelow, lineSpacing);
-
-    if (preLine) {
-        const { spaceBelowApply: PreSpaceBelowApply } = preLine;
-        if (PreSpaceBelowApply > marginTop) {
-            // spaceBelow and spaceAbove compare the size, the larger one takes effect
-            // 17.3.1.33 spacing (Spacing Between Lines and Above/Below Paragraph)
-            marginTop = 0;
-            preLine.lineHeight += PreSpaceBelowApply;
-            preLine.marginBottom = PreSpaceBelowApply;
-        }
-        // else {
-        //     marginTop -= PreSpaceBelowApply;
-        // }
-    }
-
     return {
-        marginTop,
+        marginTop: 0,
         spaceBelowApply,
     };
 }

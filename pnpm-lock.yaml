@@ -10,7 +10,11 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: 2.21.3
+<<<<<<< HEAD
         version: 2.21.3(@eslint-react/eslint-plugin@1.8.1(eslint@8.57.0)(typescript@5.5.4))(@vue/compiler-sfc@3.4.35)(eslint-plugin-format@0.1.2(eslint@8.57.0))(eslint-plugin-react-hooks@4.6.2(eslint@8.57.0))(eslint-plugin-react-refresh@0.4.9(eslint@8.57.0))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@22.1.0)(less@4.2.0)(sass@1.77.8)(terser@5.31.3))
+=======
+        version: 2.21.3(@eslint-react/eslint-plugin@1.7.0(eslint@8.57.0)(typescript@5.5.4))(@vue/compiler-sfc@3.4.27)(eslint-plugin-format@0.1.2(eslint@8.57.0))(eslint-plugin-react-hooks@4.6.2(eslint@8.57.0))(eslint-plugin-react-refresh@0.4.9(eslint@8.57.0))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
       '@commitlint/cli':
         specifier: ^19.3.0
         version: 19.3.0(@types/node@22.1.0)(typescript@5.5.4)
@@ -141,11 +145,15 @@ importers:
       '@storybook/addon-interactions':
         specifier: 8.1.11
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 8.1.11(vitest@2.0.4(@types/node@22.0.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
 =======
         version: 8.1.11(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
 >>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
 >>>>>>> 6f7e77cd5 (feat(docs): support paragrapph panel setting)
+=======
+        version: 8.1.11(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
       '@storybook/addon-links':
         specifier: 8.2.7
         version: 8.2.7(react@18.3.1)(storybook@8.2.7(@babel/preset-env@7.24.7(@babel/core@7.24.7)))
@@ -175,10 +183,10 @@ importers:
         version: 8.2.7(@swc/core@1.7.5)(esbuild@0.21.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.2.7(@babel/preset-env@7.24.7(@babel/core@7.24.7)))(typescript@5.5.4)
 =======
         specifier: 8.1.11
-<<<<<<< HEAD
-        version: 8.1.11(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
+        version: 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
       '@storybook/react-webpack5':
         specifier: 8.1.11
+<<<<<<< HEAD
         version: 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
 =======
         version: 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
@@ -187,6 +195,9 @@ importers:
         version: 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
 >>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
 >>>>>>> 6f7e77cd5 (feat(docs): support paragrapph panel setting)
+=======
+        version: 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
       '@storybook/types':
         specifier: 8.2.7
         version: 8.2.7(storybook@8.2.7(@babel/preset-env@7.24.7(@babel/core@7.24.7)))
@@ -1099,7 +1110,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.65
-        version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.1.70(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -10982,7 +10993,11 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.0
 
+<<<<<<< HEAD
   '@antfu/eslint-config@2.21.3(@eslint-react/eslint-plugin@1.8.1(eslint@8.57.0)(typescript@5.5.4))(@vue/compiler-sfc@3.4.35)(eslint-plugin-format@0.1.2(eslint@8.57.0))(eslint-plugin-react-hooks@4.6.2(eslint@8.57.0))(eslint-plugin-react-refresh@0.4.9(eslint@8.57.0))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@22.1.0)(less@4.2.0)(sass@1.77.8)(terser@5.31.3))':
+=======
+  '@antfu/eslint-config@2.21.3(@eslint-react/eslint-plugin@1.7.0(eslint@8.57.0)(typescript@5.5.4))(@vue/compiler-sfc@3.4.27)(eslint-plugin-format@0.1.2(eslint@8.57.0))(eslint-plugin-react-hooks@4.6.2(eslint@8.57.0))(eslint-plugin-react-refresh@0.4.9(eslint@8.57.0))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
     dependencies:
       '@antfu/install-pkg': 0.3.3
       '@clack/prompts': 0.7.0
@@ -11007,7 +11022,11 @@ snapshots:
       eslint-plugin-toml: 0.11.1(eslint@8.57.0)
       eslint-plugin-unicorn: 54.0.0(eslint@8.57.0)
       eslint-plugin-unused-imports: 3.2.0(@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)
+<<<<<<< HEAD
       eslint-plugin-vitest: 0.5.4(@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@22.1.0)(less@4.2.0)(sass@1.77.8)(terser@5.31.3))
+=======
+      eslint-plugin-vitest: 0.5.4(@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
       eslint-plugin-vue: 9.27.0(eslint@8.57.0)
       eslint-plugin-yml: 1.14.0(eslint@8.57.0)
       eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.35)(eslint@8.57.0)
@@ -13022,6 +13041,7 @@ snapshots:
       storybook: 8.2.7(@babel/preset-env@7.24.7(@babel/core@7.24.7))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@storybook/addon-interactions@8.2.7(storybook@8.2.7(@babel/preset-env@7.24.7(@babel/core@7.24.7)))(vitest@2.0.5(@types/node@22.1.0)(less@4.2.0)(sass@1.77.8)(terser@5.31.3))':
     dependencies:
       '@storybook/global': 5.0.0
@@ -13030,17 +13050,13 @@ snapshots:
 =======
 <<<<<<< HEAD
   '@storybook/addon-interactions@8.1.11(vitest@2.0.4(@types/node@22.0.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
-    dependencies:
-      '@storybook/global': 5.0.0
-      '@storybook/instrumenter': 8.1.11
-      '@storybook/test': 8.1.11(vitest@2.0.4(@types/node@22.0.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
 =======
-  '@storybook/addon-interactions@8.1.11(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
+  '@storybook/addon-interactions@8.1.11(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
     dependencies:
       '@storybook/global': 5.0.0
       '@storybook/instrumenter': 8.1.11
-      '@storybook/test': 8.1.11(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
->>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
+      '@storybook/test': 8.1.11(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
       '@storybook/types': 8.1.11
 >>>>>>> 6f7e77cd5 (feat(docs): support paragrapph panel setting)
       polished: 4.3.1
@@ -13155,11 +13171,7 @@ snapshots:
       - prettier
       - supports-color
 
-<<<<<<< HEAD
-  '@storybook/builder-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(typescript@5.5.4)':
-=======
-  '@storybook/builder-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(typescript@5.5.3)':
->>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
+  '@storybook/builder-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(typescript@5.5.4)':
     dependencies:
       '@storybook/channels': 8.1.11
       '@storybook/client-logger': 8.1.11
@@ -13509,6 +13521,7 @@ snapshots:
   '@storybook/node-logger@8.1.6': {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@storybook/preset-react-webpack@8.2.7(@swc/core@1.7.5)(esbuild@0.21.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.2.7(@babel/preset-env@7.24.7(@babel/core@7.24.7)))(typescript@5.5.4)':
     dependencies:
       '@storybook/core-webpack': 8.2.7(storybook@8.2.7(@babel/preset-env@7.24.7(@babel/core@7.24.7)))
@@ -13521,17 +13534,15 @@ snapshots:
 =======
   '@storybook/preset-react-webpack@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)':
 >>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
+=======
+  '@storybook/preset-react-webpack@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)':
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
     dependencies:
       '@storybook/core-webpack': 8.1.11(prettier@3.3.3)
       '@storybook/docs-tools': 8.1.11(prettier@3.3.3)
       '@storybook/node-logger': 8.1.11
-<<<<<<< HEAD
-      '@storybook/react': 8.1.11(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
+      '@storybook/react': 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
       '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.5.4)(webpack@5.92.0(@swc/core@1.5.7)(esbuild@0.20.2))
-=======
-      '@storybook/react': 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
-      '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.5.3)(webpack@5.92.0(@swc/core@1.5.7)(esbuild@0.20.2))
->>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
       '@types/node': 18.19.34
 >>>>>>> 6f7e77cd5 (feat(docs): support paragrapph panel setting)
       '@types/semver': 7.5.8
@@ -13596,22 +13607,19 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@storybook/react-dom-shim@8.2.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.2.7(@babel/preset-env@7.24.7(@babel/core@7.24.7)))':
     dependencies:
 =======
 <<<<<<< HEAD
   '@storybook/react-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)':
-    dependencies:
-      '@storybook/builder-webpack5': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(typescript@5.5.4)
-      '@storybook/preset-react-webpack': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
-      '@storybook/react': 8.1.11(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
 =======
-  '@storybook/react-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)':
+  '@storybook/react-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)':
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
     dependencies:
-      '@storybook/builder-webpack5': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(typescript@5.5.3)
-      '@storybook/preset-react-webpack': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
-      '@storybook/react': 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
->>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
+      '@storybook/builder-webpack5': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(typescript@5.5.4)
+      '@storybook/preset-react-webpack': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
+      '@storybook/react': 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
       '@storybook/types': 8.1.11
       '@types/node': 18.19.34
 >>>>>>> 6f7e77cd5 (feat(docs): support paragrapph panel setting)
@@ -13638,6 +13646,7 @@ snapshots:
       - uglify-js
       - webpack-cli
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
@@ -13674,10 +13683,9 @@ snapshots:
       - supports-color
 
 >>>>>>> 6f7e77cd5 (feat(docs): support paragrapph panel setting)
-  '@storybook/react@8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)':
 =======
-  '@storybook/react@8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)':
->>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
+  '@storybook/react@8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)':
     dependencies:
       '@storybook/client-logger': 8.1.11
       '@storybook/docs-tools': 8.1.11(prettier@3.3.3)
@@ -13761,11 +13769,7 @@ snapshots:
       - prettier
       - supports-color
 
-<<<<<<< HEAD
-  '@storybook/test@8.1.11(vitest@2.0.4(@types/node@22.0.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
-=======
-  '@storybook/test@8.1.11(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
->>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
+  '@storybook/test@8.1.11(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
     dependencies:
       '@storybook/client-logger': 8.1.11
       '@storybook/core-events': 8.1.11
@@ -13773,11 +13777,15 @@ snapshots:
       '@storybook/preview-api': 8.1.11
       '@testing-library/dom': 10.1.0
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@testing-library/jest-dom': 6.4.5(vitest@2.0.4(@types/node@22.0.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
 =======
       '@testing-library/jest-dom': 6.4.5(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
 >>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
 >>>>>>> 6f7e77cd5 (feat(docs): support paragrapph panel setting)
+=======
+      '@testing-library/jest-dom': 6.4.5(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.1.0)
       '@vitest/expect': 1.6.0
       '@vitest/spy': 1.6.0
@@ -13919,6 +13927,7 @@ snapshots:
       pretty-format: 27.5.1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.24.7
@@ -13938,6 +13947,9 @@ snapshots:
   '@testing-library/jest-dom@6.4.5(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
 >>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
 >>>>>>> 6f7e77cd5 (feat(docs): support paragrapph panel setting)
+=======
+  '@testing-library/jest-dom@6.4.5(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
     dependencies:
       '@adobe/css-tools': 4.4.0
       '@babel/runtime': 7.25.0
@@ -13949,6 +13961,7 @@ snapshots:
       redent: 3.0.0
     optionalDependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       vitest: 2.0.5(@types/node@22.1.0)(less@4.2.0)(sass@1.77.8)(terser@5.31.3)
 =======
 <<<<<<< HEAD
@@ -13957,6 +13970,9 @@ snapshots:
       vitest: 2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 >>>>>>> c5acfcb1c (feat(docs): support paragrapph panel setting)
 >>>>>>> 6f7e77cd5 (feat(docs): support paragrapph panel setting)
+=======
+      vitest: 2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
 
   '@testing-library/react-hooks@8.0.1(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -16404,7 +16420,11 @@ snapshots:
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 7.15.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
 
+<<<<<<< HEAD
   eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.5(@types/node@22.1.0)(less@4.2.0)(sass@1.77.8)(terser@5.31.3)):
+=======
+  eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.15.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)(vitest@2.0.4(@types/node@22.0.0)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)):
+>>>>>>> 581dc1cf7 (fix(paragraph): support spaceBelow)
     dependencies:
       '@typescript-eslint/utils': 7.15.0(eslint@8.57.0)(typescript@5.5.4)
       eslint: 8.57.0

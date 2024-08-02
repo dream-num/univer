@@ -5,7 +5,7 @@ export default ({ mode }) => createViteConfig({}, {
     mode,
     pkg,
     features: {
-        react: false,
+        react: true,
         css: true,
         dom: true,
     },

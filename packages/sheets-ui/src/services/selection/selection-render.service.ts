@@ -202,6 +202,9 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     }
 
     private _initSkeletonChangeListener() {
+        // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
+        // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
+        // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 this._logService.error('[SelectionRenderService]: should not receive null!');
@@ -212,6 +215,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const { sheetId, skeleton } = param;
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+            const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
 
             // If there is no initial selection, add one by default in the top left corner.
@@ -223,11 +227,16 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
             // SetSelectionsOperation would clear all exists selections
             // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
-            this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                unitId,
-                subUnitId: sheetId,
-                selections: [getTopLeftSelection(skeleton)],
-            } as ISetSelectionsOperationParams);
+            if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+                const firstSelection = this._workbookSelections.getCurrentLastSelection();
+                if (!firstSelection) {
+                    this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                        unitId,
+                        subUnitId: sheetId,
+                        selections: [getTopLeftSelection(skeleton)],
+                    } as ISetSelectionsOperationParams);
+                }
+            }
 
             const currentSelections = this._workbookSelections.getCurrentSelections();
             // for col width & row height resize

@@ -503,23 +503,24 @@ export function getParagraphsInRange(activeRange: IActiveTextRange, paragraphs: 
 
 export function getParagraphsRelative(activeRange: IActiveTextRange, paragraphs: IParagraph[]) {
     const selectionParagraphs = getParagraphsInRange(activeRange, paragraphs);
-    let startIndex = paragraphs.indexOf(selectionParagraphs[0]);
-    let endIndex = paragraphs.indexOf(selectionParagraphs[selectionParagraphs.length - 1]);
+    const startIndex = paragraphs.indexOf(selectionParagraphs[0]);
+    const endIndex = paragraphs.indexOf(selectionParagraphs[selectionParagraphs.length - 1]);
     if (selectionParagraphs[0].bullet) {
-        let prevParagraph = paragraphs[startIndex - 1];
-        while (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listId === selectionParagraphs[0].bullet.listId) {
-            selectionParagraphs.unshift(prevParagraph);
-            startIndex--;
-            prevParagraph = paragraphs[startIndex - 1];
+        for (let i = startIndex - 1; i >= 0; i--) {
+            const prevParagraph = paragraphs[startIndex - 1];
+            if (prevParagraph.bullet && prevParagraph.bullet.listId === selectionParagraphs[0].bullet.listId) {
+                selectionParagraphs.unshift(prevParagraph);
+            }
         }
     }
+
     const lastParagraph = selectionParagraphs[selectionParagraphs.length - 1];
     if (lastParagraph.bullet) {
-        let nextParagraph = paragraphs[endIndex + 1];
-        while (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listId === lastParagraph.bullet.listId) {
-            selectionParagraphs.push(nextParagraph);
-            endIndex++;
-            nextParagraph = paragraphs[endIndex + 1];
+        for (let i = endIndex + 1; i < paragraphs.length; i++) {
+            const nextParagraph = paragraphs[endIndex + 1];
+            if (nextParagraph.bullet && nextParagraph.bullet.listId === lastParagraph.bullet.listId) {
+                selectionParagraphs.push(nextParagraph);
+            }
         }
     }
 

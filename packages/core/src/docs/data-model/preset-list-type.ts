@@ -106,31 +106,6 @@ export const PRESET_LIST_TYPE = {
             },
         })) as INestingLevel[],
     } as IListData,
-    [PresetListType.ORDER_LIST_2]: {
-        listType: PresetListType.ORDER_LIST,
-        nestingLevel:
-        [
-            ' %1.',
-            ' %1.%2.',
-            ' %1.%2.%3.',
-            ' %1.%2.%3.%4.',
-            ' %1.%2.%3.%4.%5.',
-            ' %1.%2.%3.%4.%5.%6.',
-            ' %1.%2.%3.%4.%5.%6.%7.',
-        ].map((format, i) => ({
-            bulletAlignment: BulletAlignment.START,
-            glyphFormat: format,
-            textStyle: {
-                fs: 12,
-            },
-            startNumber: 0,
-            glyphType: GlyphType.DECIMAL,
-            paragraphProperties: {
-                hanging: { v: 21 },
-                indentStart: { v: 21 * (i + 1) },
-            },
-        })) as INestingLevel[],
-    } as IListData,
     [PresetListType.ORDER_LIST_1]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel:
@@ -151,6 +126,31 @@ export const PRESET_LIST_TYPE = {
                 fs: 12,
             },
             startNumber: 0,
+            paragraphProperties: {
+                hanging: { v: 21 },
+                indentStart: { v: 21 * (i + 1) },
+            },
+        })) as INestingLevel[],
+    } as IListData,
+    [PresetListType.ORDER_LIST_2]: {
+        listType: PresetListType.ORDER_LIST,
+        nestingLevel:
+        [
+            ' %1.',
+            ' %1.%2.',
+            ' %1.%2.%3.',
+            ' %1.%2.%3.%4.',
+            ' %1.%2.%3.%4.%5.',
+            ' %1.%2.%3.%4.%5.%6.',
+            ' %1.%2.%3.%4.%5.%6.%7.',
+        ].map((format, i) => ({
+            bulletAlignment: BulletAlignment.START,
+            glyphFormat: format,
+            textStyle: {
+                fs: 12,
+            },
+            startNumber: 0,
+            glyphType: GlyphType.DECIMAL,
             paragraphProperties: {
                 hanging: { v: 21 },
                 indentStart: { v: 21 * (i + 1) },

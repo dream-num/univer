@@ -26,11 +26,11 @@ export enum PresetListType {
     BULLET_LIST_5 = 'BULLET_LIST_5',
 
     ORDER_LIST = 'ORDER_LIST',
-    ORDER_LIST_1ai = 'ORDER_LIST_1ai',
-    ORDER_LIST_1ai_qutoa = 'ORDER_LIST_1ai_qutoa',
-    ORDER_LIST_Aai = 'ORDER_LIST_Aai',
-    ORDER_LIST_A1i = 'ORDER_LIST_A1i',
-    ORDER_LIST_01ai = 'ORDER_LIST_01ai',
+    ORDER_LIST_1 = 'ORDER_LIST_1',
+    ORDER_LIST_2 = 'ORDER_LIST_2',
+    ORDER_LIST_3 = 'ORDER_LIST_3',
+    ORDER_LIST_4 = 'ORDER_LIST_4',
+    ORDER_LIST_5 = 'ORDER_LIST_5',
 }
 
 type BulletSymbols = [string, string, string];
@@ -79,32 +79,8 @@ export const PRESET_LIST_TYPE = {
         listType: PresetListType.BULLET_LIST,
         nestingLevel: bulletListFactory(['\u27A2', '\u25CB', '\u25C6']),
     } as IListData,
+
     [PresetListType.ORDER_LIST]: {
-        listType: PresetListType.ORDER_LIST,
-        nestingLevel:
-        [
-            ' %1.',
-            ' %1.%2.',
-            ' %1.%2.%3.',
-            ' %1.%2.%3.%4.',
-            ' %1.%2.%3.%4.%5.',
-            ' %1.%2.%3.%4.%5.%6.',
-            ' %1.%2.%3.%4.%5.%6.%7.',
-        ].map((format, i) => ({
-            bulletAlignment: BulletAlignment.START,
-            glyphFormat: format,
-            textStyle: {
-                fs: 12,
-            },
-            startNumber: 0,
-            glyphType: GlyphType.DECIMAL,
-            paragraphProperties: {
-                hanging: { v: 21 },
-                indentStart: { v: 21 * (i + 1) },
-            },
-        })) as INestingLevel[],
-    } as IListData,
-    [PresetListType.ORDER_LIST_1ai]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel:
         [
@@ -130,33 +106,32 @@ export const PRESET_LIST_TYPE = {
             },
         })) as INestingLevel[],
     } as IListData,
-    [PresetListType.ORDER_LIST_01ai]: {
+    [PresetListType.ORDER_LIST_2]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel:
         [
-            { glyphFormat: ' %1.', glyphType: GlyphType.DECIMAL_ZERO },
-            { glyphFormat: ' %2.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: ' %3.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: ' %4.', glyphType: GlyphType.DECIMAL_ZERO },
-            { glyphFormat: ' %5.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: ' %6.', glyphType: GlyphType.LOWER_ROMAN },
-            { glyphFormat: ' %7.', glyphType: GlyphType.DECIMAL_ZERO },
-            { glyphFormat: ' %8.', glyphType: GlyphType.LOWER_LETTER },
-            { glyphFormat: ' %9.', glyphType: GlyphType.LOWER_ROMAN },
+            ' %1.',
+            ' %1.%2.',
+            ' %1.%2.%3.',
+            ' %1.%2.%3.%4.',
+            ' %1.%2.%3.%4.%5.',
+            ' %1.%2.%3.%4.%5.%6.',
+            ' %1.%2.%3.%4.%5.%6.%7.',
         ].map((format, i) => ({
-            ...format,
             bulletAlignment: BulletAlignment.START,
+            glyphFormat: format,
             textStyle: {
                 fs: 12,
             },
             startNumber: 0,
+            glyphType: GlyphType.DECIMAL,
             paragraphProperties: {
                 hanging: { v: 21 },
                 indentStart: { v: 21 * (i + 1) },
             },
         })) as INestingLevel[],
     } as IListData,
-    [PresetListType.ORDER_LIST_1ai_qutoa]: {
+    [PresetListType.ORDER_LIST_1]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel:
         [
@@ -182,7 +157,7 @@ export const PRESET_LIST_TYPE = {
             },
         })) as INestingLevel[],
     } as IListData,
-    [PresetListType.ORDER_LIST_Aai]: {
+    [PresetListType.ORDER_LIST_3]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel:
         [
@@ -208,7 +183,7 @@ export const PRESET_LIST_TYPE = {
             },
         })) as INestingLevel[],
     } as IListData,
-    [PresetListType.ORDER_LIST_A1i]: {
+    [PresetListType.ORDER_LIST_4]: {
         listType: PresetListType.ORDER_LIST,
         nestingLevel:
         [
@@ -220,6 +195,32 @@ export const PRESET_LIST_TYPE = {
             { glyphFormat: ' %6.', glyphType: GlyphType.LOWER_ROMAN },
             { glyphFormat: ' %7.', glyphType: GlyphType.UPPER_LETTER },
             { glyphFormat: ' %8.', glyphType: GlyphType.DECIMAL },
+            { glyphFormat: ' %9.', glyphType: GlyphType.LOWER_ROMAN },
+        ].map((format, i) => ({
+            ...format,
+            bulletAlignment: BulletAlignment.START,
+            textStyle: {
+                fs: 12,
+            },
+            startNumber: 0,
+            paragraphProperties: {
+                hanging: { v: 21 },
+                indentStart: { v: 21 * (i + 1) },
+            },
+        })) as INestingLevel[],
+    } as IListData,
+    [PresetListType.ORDER_LIST_5]: {
+        listType: PresetListType.ORDER_LIST,
+        nestingLevel:
+        [
+            { glyphFormat: ' %1.', glyphType: GlyphType.DECIMAL_ZERO },
+            { glyphFormat: ' %2.', glyphType: GlyphType.LOWER_LETTER },
+            { glyphFormat: ' %3.', glyphType: GlyphType.LOWER_ROMAN },
+            { glyphFormat: ' %4.', glyphType: GlyphType.DECIMAL_ZERO },
+            { glyphFormat: ' %5.', glyphType: GlyphType.LOWER_LETTER },
+            { glyphFormat: ' %6.', glyphType: GlyphType.LOWER_ROMAN },
+            { glyphFormat: ' %7.', glyphType: GlyphType.DECIMAL_ZERO },
+            { glyphFormat: ' %8.', glyphType: GlyphType.LOWER_LETTER },
             { glyphFormat: ' %9.', glyphType: GlyphType.LOWER_ROMAN },
         ].map((format, i) => ({
             ...format,

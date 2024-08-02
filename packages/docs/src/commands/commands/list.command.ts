@@ -475,7 +475,7 @@ export const OrderListCommand: ICommand<IOrderListCommandParams> = {
         }
 
         return commandService.syncExecuteCommand(ListOperationCommand.id, {
-            listType: PresetListType.ORDER_LIST_1ai,
+            listType: PresetListType.ORDER_LIST_1,
         });
     },
 };

@@ -35,6 +35,7 @@ import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import type {
     NodeTypes,
+    ReactFlowInstance,
     Viewport,
 } from '@xyflow/react';
 import {
@@ -54,6 +55,7 @@ import { useUnitFocused, useUnitTitle } from '../hooks/title';
 import { type FloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
 import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControls } from '../uni-controls/UniControls';
 import { UniToolbar } from '../uni-toolbar/UniToolbar';
+import { FlowManagerService } from '../../services/flow/flow-manager.service';
 import styles from './workbench.module.less';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
 
@@ -77,6 +79,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const unitGridService = useDependency(IUnitGridService);
     const instanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const flowManagerService = useDependency(FlowManagerService);
 
     const contentRef = useRef<HTMLDivElement>(null);
     const selectedNodeRef = useRef<HTMLElement | null>(null);
@@ -171,6 +174,10 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         setZoom(zoom);
     }, [floatingToolbarRef, selectedNodeRef, setZoom]);
 
+    const onFlowInit = useCallback((instance: ReactFlowInstance<any>) => {
+        flowManagerService.setReactFlowInstance(instance);
+    }, [flowManagerService]);
+
     useEffect(() => {
         selectedNodeRef.current = document.querySelector(`[data-id="${focusedUnit}"]`);
     }, [focusedUnit, selectedNodeRef]);
@@ -231,6 +238,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                     instanceService.focusUnit(null);
                                 }}
                                 onMove={onMove}
+                                onInit={onFlowInit}
                             >
                                 <Background bgColor="#f4f6f8" color="#d9d9d9"></Background>
                             </ReactFlow>

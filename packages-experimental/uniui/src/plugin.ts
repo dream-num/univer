@@ -70,10 +70,12 @@ import {
     UNIVER_UI_PLUGIN_NAME,
     ZIndexManager,
 } from '@univerjs/ui';
+import { FlowManagerService } from './services/flow/flow-manager.service';
 import { UniverUniUIController } from './controllers/uniui-desktop.controller';
 import { IUnitGridService, UnitGridService } from './services/unit-grid/unit-grid.service';
 import { UniuiLeftSidebarController } from './controllers/uniui-leftsidebar.controller';
 import { UniuiToolbarController } from './controllers/uniui-toolbar.controller';
+import { UniuiFlowController } from './controllers/uniui-flow.controller';
 
 const UI_BOOTSTRAP_DELAY = 16;
 
@@ -103,6 +105,7 @@ export class UniverUniUIPlugin extends Plugin {
             [ComponentManager],
             [ZIndexManager],
             [ShortcutPanelService],
+            [FlowManagerService],
             [IUnitGridService, { useClass: UnitGridService }],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
@@ -138,6 +141,7 @@ export class UniverUniUIPlugin extends Plugin {
             }],
             [UniuiLeftSidebarController],
             [UniuiToolbarController],
+            [UniuiFlowController],
         ], this._config.override);
         dependencies.forEach((dependency) => injector.add(dependency));
     }

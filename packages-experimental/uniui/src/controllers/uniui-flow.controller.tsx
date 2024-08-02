@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { throttleTime } from 'rxjs';
 import { SetFlowViewportOperation } from '../commands/operations/set-flow-viewport.operation';
+import type { IFlowViewport } from '../services/flow/flow-manager.service';
+import { FlowManagerService } from '../services/flow/flow-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, UniuiFlowController)
 export class UniuiFlowController extends Disposable {
     constructor(
-        @ICommandService protected readonly _commandService: ICommandService
+        @ICommandService protected readonly _commandService: ICommandService,
+        @Inject(FlowManagerService) protected readonly _flowManagerService: FlowManagerService
     ) {
         super();
         this._initCommands();
+        this._triggerCommands();
     }
 
     private _initCommands(): void {
@@ -31,6 +36,14 @@ export class UniuiFlowController extends Disposable {
             SetFlowViewportOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
+        });
+    }
+
+    private _triggerCommands() {
+        this._flowManagerService.viewportChanged$.pipe(throttleTime(100)).subscribe((viewport: IFlowViewport | null) => {
+            if (viewport) {
+                this._commandService.executeCommand(SetFlowViewportOperation.id, { viewport });
+            }
         });
     }
 }

@@ -17,9 +17,10 @@
 import React from 'react';
 import type { SlideDataModel } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
-import { SlideSideBar, SlidesUIController } from '@univerjs/slides-ui';
+import { SlidesUIController } from '@univerjs/slides-ui';
 import { IUIPartsService, useObservable } from '@univerjs/ui';
 import { UniUIPart } from '@univerjs/uniui';
+import { UniSlideSideBar } from '../views/UniSlideSideBar';
 
 @OnLifecycle(LifecycleStages.Ready, UniSlidesUIController)
 export class UniSlidesUIController extends SlidesUIController {
@@ -42,6 +43,6 @@ function RenderOutline() {
     if (!slide || focused !== slide.getUnitId()) return null;
 
     return (
-        <SlideSideBar />
+        <UniSlideSideBar />
     );
 }

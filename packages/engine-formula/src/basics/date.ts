@@ -265,13 +265,13 @@ export function countWorkingDays(startDateSerialNumber: number, endDateSerialNum
 export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, workingDays: number, weekend: number | string = 1, holidays?: number[]): (number | ErrorValueObject) {
     const weekendArray = getWeekendArray(weekend);
 
-    startDateSerialNumber = Math.floor(startDateSerialNumber);
-    let targetDateSerialNumber = startDateSerialNumber;
+    const _startDateSerialNumber = Math.floor(startDateSerialNumber);
+    let targetDateSerialNumber = _startDateSerialNumber;
 
     let days = Math.abs(workingDays);
 
     for (let i = 1; i <= days; i++) {
-        const currentDateSerialNumber = workingDays < 0 ? startDateSerialNumber - i : startDateSerialNumber + i;
+        const currentDateSerialNumber = workingDays < 0 ? _startDateSerialNumber - i : _startDateSerialNumber + i;
 
         if (currentDateSerialNumber < 0) {
             return ErrorValueObject.create(ErrorType.NUM);

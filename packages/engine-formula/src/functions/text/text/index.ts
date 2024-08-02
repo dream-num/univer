@@ -19,7 +19,7 @@ import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Text extends BaseFunction {
@@ -72,11 +72,11 @@ export class Text extends BaseFunction {
 
             const formatTextValueString = `${formatTextValue.getValue()}`;
 
-            if (textValue.isNull()) {
-                textValue = NumberValueObject.create(0);
-            }
+            let textValueNumber = textValue.getValue() as number;
 
-            const textValueNumber = textValue.getValue() as number;
+            if (textValue.isNull()) {
+                textValueNumber = 0;
+            }
 
             const previewText = getFormatPreview(formatTextValueString, textValueNumber);
 

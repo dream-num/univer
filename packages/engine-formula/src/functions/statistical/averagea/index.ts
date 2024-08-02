@@ -44,23 +44,26 @@ export class Averagea extends BaseFunction {
                         return true; // continue
                     }
 
-                    if (valueObject.isString()) {
-                        valueObject = valueObject.convertToNumberObjectValue();
-                        if (valueObject.isError()) {
-                            valueObject = NumberValueObject.create(0);
+                    let _valueObject = valueObject;
+
+                    if (_valueObject.isString()) {
+                        _valueObject = _valueObject.convertToNumberObjectValue();
+
+                        if (_valueObject.isError()) {
+                            _valueObject = NumberValueObject.create(0);
                         }
                     }
 
-                    if (valueObject.isBoolean()) {
-                        valueObject = valueObject.convertToNumberObjectValue();
+                    if (_valueObject.isBoolean()) {
+                        _valueObject = _valueObject.convertToNumberObjectValue();
                     }
 
-                    if (valueObject.isError()) {
-                        accumulatorSum = valueObject;
+                    if (_valueObject.isError()) {
+                        accumulatorSum = _valueObject;
                         return false; // break
                     }
 
-                    accumulatorSum = accumulatorSum.plus(valueObject);
+                    accumulatorSum = accumulatorSum.plus(_valueObject);
                     accumulatorCount = accumulatorCount.plus(NumberValueObject.create(1));
                 });
 

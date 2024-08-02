@@ -147,26 +147,28 @@ export class BaseFunction extends Disposable {
      * @param indexNum
      */
     getIndexNumValue(indexNum: BaseValueObject, defaultValue = 1) {
-        if (indexNum.isArray()) {
-            indexNum = (indexNum as ArrayValueObject).getFirstCell();
+        let _indexNum = indexNum;
+
+        if (_indexNum.isArray()) {
+            _indexNum = (_indexNum as ArrayValueObject).getFirstCell();
         }
 
-        if (indexNum.isBoolean()) {
-            const colIndexNumV = indexNum.getValue() as boolean;
+        if (_indexNum.isBoolean()) {
+            const colIndexNumV = _indexNum.getValue() as boolean;
             if (colIndexNumV === false) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             return defaultValue;
         }
-        if (indexNum.isString()) {
-            const colIndexNumV = Number(indexNum.getValue() as string);
+        if (_indexNum.isString()) {
+            const colIndexNumV = Number(_indexNum.getValue() as string);
             if (Number.isNaN(colIndexNumV)) {
                 return ErrorValueObject.create(ErrorType.REF);
             }
             return colIndexNumV;
-        } else if (indexNum.isNumber()) {
-            const colIndexNumV = indexNum.getValue() as number;
+        } else if (_indexNum.isNumber()) {
+            const colIndexNumV = _indexNum.getValue() as number;
             return colIndexNumV;
         }
 

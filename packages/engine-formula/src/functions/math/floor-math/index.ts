@@ -28,37 +28,38 @@ export class FloorMath extends BaseFunction {
     override maxParams = 3;
 
     override calculate(number: BaseValueObject, significance?: BaseValueObject, mode?: BaseValueObject) {
-        significance = significance ?? NumberValueObject.create(1);
-        mode = mode ?? NumberValueObject.create(0);
+        const _significance = significance ?? NumberValueObject.create(1);
+        const _mode = mode ?? NumberValueObject.create(0);
 
         // get max row length
         const maxRowLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getRowCount() : 1,
-            significance.isArray() ? (significance as ArrayValueObject).getRowCount() : 1,
-            mode.isArray() ? (mode as ArrayValueObject).getRowCount() : 1
+            _significance.isArray() ? (_significance as ArrayValueObject).getRowCount() : 1,
+            _mode.isArray() ? (_mode as ArrayValueObject).getRowCount() : 1
         );
 
         // get max column length
         const maxColumnLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getColumnCount() : 1,
-            significance.isArray() ? (significance as ArrayValueObject).getColumnCount() : 1,
-            mode.isArray() ? (mode as ArrayValueObject).getColumnCount() : 1
+            _significance.isArray() ? (_significance as ArrayValueObject).getColumnCount() : 1,
+            _mode.isArray() ? (_mode as ArrayValueObject).getColumnCount() : 1
         );
 
         const numberArray = expandArrayValueObject(maxRowLength, maxColumnLength, number, ErrorValueObject.create(ErrorType.NA));
-        const significanceArray = expandArrayValueObject(maxRowLength, maxColumnLength, significance, ErrorValueObject.create(ErrorType.NA));
-        const modeArray = expandArrayValueObject(maxRowLength, maxColumnLength, mode, ErrorValueObject.create(ErrorType.NA));
+        const significanceArray = expandArrayValueObject(maxRowLength, maxColumnLength, _significance, ErrorValueObject.create(ErrorType.NA));
+        const modeArray = expandArrayValueObject(maxRowLength, maxColumnLength, _mode, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = numberArray.map((numberObject, rowIndex, columnIndex) => {
+            let _numberObject = numberObject;
             let significanceObject = significanceArray.get(rowIndex, columnIndex) as BaseValueObject;
             let modeObject = modeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (numberObject.isString()) {
-                numberObject = numberObject.convertToNumberObjectValue();
+            if (_numberObject.isString()) {
+                _numberObject = _numberObject.convertToNumberObjectValue();
             }
 
-            if (numberObject.isError()) {
-                return numberObject;
+            if (_numberObject.isError()) {
+                return _numberObject;
             }
 
             if (significanceObject.isString()) {
@@ -77,7 +78,7 @@ export class FloorMath extends BaseFunction {
                 return modeObject;
             }
 
-            const numberValue = +numberObject.getValue();
+            const numberValue = +_numberObject.getValue();
             const significanceValue = +significanceObject.getValue();
             const modeValue = +modeObject.getValue();
 
@@ -96,8 +97,8 @@ export class FloorMath extends BaseFunction {
             return NumberValueObject.create(result);
         });
 
-        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
-            return resultArray.getArrayValue()[0][0] as NumberValueObject;
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         return resultArray;

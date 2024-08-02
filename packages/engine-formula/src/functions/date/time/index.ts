@@ -65,10 +65,12 @@ export class Time extends BaseFunction {
     }
 
     private _calculateTime(hourValueObject: BaseValueObject, minuteArray: ArrayValueObject, secondArray: ArrayValueObject, rowIndex: number, columnIndex: number) {
+        let _hourValueObject = hourValueObject;
         let minuteValueObject = minuteArray.get(rowIndex, columnIndex) || NullValueObject.create();
         let secondValueObject = secondArray.get(rowIndex, columnIndex) || NullValueObject.create();
-        if (hourValueObject.isString() || hourValueObject.isBoolean()) {
-            hourValueObject = hourValueObject.convertToNumberObjectValue();
+
+        if (_hourValueObject.isString() || _hourValueObject.isBoolean()) {
+            _hourValueObject = _hourValueObject.convertToNumberObjectValue();
         }
 
         if (minuteValueObject.isString() || minuteValueObject.isBoolean()) {
@@ -79,8 +81,8 @@ export class Time extends BaseFunction {
             secondValueObject = secondValueObject.convertToNumberObjectValue();
         }
 
-        if (hourValueObject.isError()) {
-            return hourValueObject;
+        if (_hourValueObject.isError()) {
+            return _hourValueObject;
         }
 
         if (minuteValueObject.isError()) {
@@ -91,7 +93,7 @@ export class Time extends BaseFunction {
             return secondValueObject;
         }
 
-        let hourValue = Math.floor(+hourValueObject.getValue());
+        let hourValue = Math.floor(+_hourValueObject.getValue());
         let minuteValue = Math.floor(+minuteValueObject.getValue());
         let secondValue = Math.floor(+secondValueObject.getValue());
 

@@ -26,26 +26,28 @@ export class Sqrtpi extends BaseFunction {
     override maxParams = 1;
 
     override calculate(number: BaseValueObject) {
-        if (number.isArray()) {
-            const rowCount = (number as ArrayValueObject).getRowCount();
-            const columnCount = (number as ArrayValueObject).getColumnCount();
+        let _number = number;
+
+        if (_number.isArray()) {
+            const rowCount = (_number as ArrayValueObject).getRowCount();
+            const columnCount = (_number as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            number = (number as ArrayValueObject).get(0, 0) as BaseValueObject;
+            _number = (_number as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (number.isString()) {
-            number = number.convertToNumberObjectValue();
+        if (_number.isString()) {
+            _number = _number.convertToNumberObjectValue();
         }
 
-        if (number.isError()) {
-            return number;
+        if (_number.isError()) {
+            return _number;
         }
 
-        const numberValue = +number.getValue();
+        const numberValue = +_number.getValue();
 
         if (numberValue < 0) {
             return ErrorValueObject.create(ErrorType.NUM);

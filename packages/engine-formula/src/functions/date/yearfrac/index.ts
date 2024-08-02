@@ -27,67 +27,90 @@ export class Yearfrac extends BaseFunction {
     override maxParams = 3;
 
     override calculate(startDate: BaseValueObject, endDate: BaseValueObject, basis?: BaseValueObject) {
-        if (startDate.isArray()) {
-            const rowCount = (startDate as ArrayValueObject).getRowCount();
-            const columnCount = (startDate as ArrayValueObject).getColumnCount();
+        let _basis = basis ?? NumberValueObject.create(0);
 
-            if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
+        const _startDate = this._checkArrayError(startDate);
 
-            startDate = (startDate as ArrayValueObject).get(0, 0) as BaseValueObject;
+        if (_startDate.isError()) {
+            return _startDate;
         }
 
-        if (endDate.isArray()) {
-            const rowCount = (endDate as ArrayValueObject).getRowCount();
-            const columnCount = (endDate as ArrayValueObject).getColumnCount();
+        const _endDate = this._checkArrayError(endDate);
 
-            if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            endDate = (endDate as ArrayValueObject).get(0, 0) as BaseValueObject;
+        if (_endDate.isError()) {
+            return _endDate;
         }
 
-        if (basis?.isArray()) {
-            const rowCount = (basis as ArrayValueObject).getRowCount();
-            const columnCount = (basis as ArrayValueObject).getColumnCount();
+        _basis = this._checkArrayError(_basis);
 
-            if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            basis = (basis as ArrayValueObject).get(0, 0) as BaseValueObject;
+        if (_basis.isError()) {
+            return _basis;
         }
 
-        if (startDate.isError()) {
-            return startDate;
-        }
-
-        if (endDate.isError()) {
-            return endDate;
-        }
-
-        if (basis?.isError()) {
-            return basis;
-        }
-
-        if (startDate.isBoolean() || endDate.isBoolean() || basis?.isBoolean()) {
+        if (_startDate.isBoolean() || _endDate.isBoolean() || _basis.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(_startDate);
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
         }
 
-        const endDateSerialNumber = getDateSerialNumberByObject(endDate);
+        const endDateSerialNumber = getDateSerialNumberByObject(_endDate);
 
         if (typeof endDateSerialNumber !== 'number') {
             return endDateSerialNumber;
         }
 
+        const basisValue = Math.floor(+_basis.getValue());
+
+        if (Number.isNaN(basisValue)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        if (basisValue < 0 || basisValue > 4) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        switch (basisValue) {
+            case 0:
+                return this._getResultByNASD(startDateSerialNumber, endDateSerialNumber);
+            case 1:
+                return this._getResultByActual(startDateSerialNumber, endDateSerialNumber);
+            case 2:
+                return NumberValueObject.create(Math.abs(endDateSerialNumber - startDateSerialNumber) / 360);
+            case 3:
+                return NumberValueObject.create(Math.abs(endDateSerialNumber - startDateSerialNumber) / 365);
+            case 4:
+                return this._getResultByEuropean(startDateSerialNumber, endDateSerialNumber);
+            default:
+                return NumberValueObject.create(0);
+        }
+    }
+
+    private _checkArrayError(variant: BaseValueObject): BaseValueObject {
+        let _variant = variant;
+
+        if (_variant.isArray()) {
+            const rowCount = (_variant as ArrayValueObject).getRowCount();
+            const columnCount = (_variant as ArrayValueObject).getColumnCount();
+
+            if (rowCount > 1 || columnCount > 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            _variant = (_variant as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_variant.isError()) {
+            return _variant;
+        }
+
+        return _variant;
+    }
+
+    private _getResultByNASD(startDateSerialNumber: number, endDateSerialNumber: number): BaseValueObject {
         const startDateDate = excelSerialToDate(startDateSerialNumber);
         const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
         const startMonth = startDateSerialNumber > 0 ? startDateDate.getUTCMonth() + 1 : 1;
@@ -98,101 +121,98 @@ export class Yearfrac extends BaseFunction {
         let endMonth = endDateSerialNumber > 0 ? endDateDate.getUTCMonth() + 1 : 1;
         let endDay = endDateSerialNumber > 0 ? endDateDate.getUTCDate() : 0;
 
-        let basisValue = 0;
-
-        if (basis) {
-            basisValue = Math.floor(+basis.getValue());
-
-            if (Number.isNaN(basisValue)) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (basisValue < 0 || basisValue > 4) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
+        if (startDay === 31) {
+            startDay = 30;
         }
 
-        let result = 0;
-
-        if (basisValue === 0) {
-            // US (NASD) 30/360
-            if (startDay === 31) {
-                startDay = 30;
-            }
-
-            if (endDay === 31) {
-                if (startDay < 30) {
-                    endDateDate = excelSerialToDate(endDateSerialNumber + 1);
-                    endYear = endDateDate.getUTCFullYear();
-                    endMonth = endDateDate.getUTCMonth() + 1;
-                    endDay = endDateDate.getUTCDate();
-                } else {
-                    endDay = 30;
-                }
-            }
-
-            const daysInYears = (endYear - startYear) * 360;
-            const daysInStartMonth = endDateSerialNumber >= startDateSerialNumber ? 30 - startDay : -startDay;
-            const daysInEndMonth = endDateSerialNumber >= startDateSerialNumber ? endDay : endDay - 30;
-            const daysInMidMonths = (endDateSerialNumber >= startDateSerialNumber ? (endMonth - startMonth - 1) : (endMonth - startMonth + 1)) * 30;
-            const totalDays = Math.abs(daysInYears + daysInStartMonth + daysInEndMonth + daysInMidMonths);
-            result = totalDays / 360;
-        } else if (basisValue === 1) {
-            // Actual/actual
-            const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
-            const totalYear = Math.abs(endYear - startYear) + 1;
-
-            let startYearFirstDaySerialNumber;
-            let endYearLastDaySerialNumber;
-
-            if (endYear < startYear) {
-                const startYearFirstDay = new Date(Date.UTC(endYear, 0, 1));
-                const endYearLastDay = new Date(Date.UTC(startYear, 11, 31));
-
-                startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
-                endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
-
-                if (endYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
-                    startYearFirstDaySerialNumber += 1;
-                }
+        if (endDay === 31) {
+            if (startDay < 30) {
+                endDateDate = excelSerialToDate(endDateSerialNumber + 1);
+                endYear = endDateDate.getUTCFullYear();
+                endMonth = endDateDate.getUTCMonth() + 1;
+                endDay = endDateDate.getUTCDate();
             } else {
-                const startYearFirstDay = new Date(Date.UTC(startYear, 0, 1));
-                const endYearLastDay = new Date(Date.UTC(endYear, 11, 31));
-
-                startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
-                endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
-
-                if (startYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
-                    startYearFirstDaySerialNumber += 1;
-                }
-            }
-
-            result = totalDays / ((endYearLastDaySerialNumber - startYearFirstDaySerialNumber + 1) / totalYear);
-        } else if (basisValue === 2) {
-            // Actual/360
-            const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
-            result = totalDays / 360;
-        } else if (basisValue === 3) {
-            // Actual/365
-            const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
-            result = totalDays / 365;
-        } else if (basisValue === 4) {
-            // European 30/360
-            if (startDay === 31) {
-                startDay = 30;
-            }
-
-            if (endDay === 31) {
                 endDay = 30;
             }
-
-            const daysInYears = (endYear - startYear) * 360;
-            const daysInStartMonth = endDateSerialNumber >= startDateSerialNumber ? 30 - startDay : -startDay;
-            const daysInEndMonth = endDateSerialNumber >= startDateSerialNumber ? endDay : endDay - 30;
-            const daysInMidMonths = (endDateSerialNumber >= startDateSerialNumber ? (endMonth - startMonth - 1) : (endMonth - startMonth + 1)) * 30;
-            const totalDays = Math.abs(daysInYears + daysInStartMonth + daysInEndMonth + daysInMidMonths);
-            result = totalDays / 360;
         }
+
+        const daysInYears = (endYear - startYear) * 360;
+        const daysInStartMonth = endDateSerialNumber >= startDateSerialNumber ? 30 - startDay : -startDay;
+        const daysInEndMonth = endDateSerialNumber >= startDateSerialNumber ? endDay : endDay - 30;
+        const daysInMidMonths = (endDateSerialNumber >= startDateSerialNumber ? (endMonth - startMonth - 1) : (endMonth - startMonth + 1)) * 30;
+        const totalDays = Math.abs(daysInYears + daysInStartMonth + daysInEndMonth + daysInMidMonths);
+
+        const result = totalDays / 360;
+
+        return NumberValueObject.create(result);
+    }
+
+    private _getResultByActual(startDateSerialNumber: number, endDateSerialNumber: number): BaseValueObject {
+        const startDateDate = excelSerialToDate(startDateSerialNumber);
+        const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
+
+        const endDateDate = excelSerialToDate(endDateSerialNumber);
+        const endYear = endDateSerialNumber > 0 ? endDateDate.getUTCFullYear() : 1900;
+
+        const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
+        const totalYear = Math.abs(endYear - startYear) + 1;
+
+        let startYearFirstDaySerialNumber;
+        let endYearLastDaySerialNumber;
+
+        if (endYear < startYear) {
+            const startYearFirstDay = new Date(Date.UTC(endYear, 0, 1));
+            const endYearLastDay = new Date(Date.UTC(startYear, 11, 31));
+
+            startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
+            endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
+
+            if (endYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
+                startYearFirstDaySerialNumber += 1;
+            }
+        } else {
+            const startYearFirstDay = new Date(Date.UTC(startYear, 0, 1));
+            const endYearLastDay = new Date(Date.UTC(endYear, 11, 31));
+
+            startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
+            endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
+
+            if (startYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
+                startYearFirstDaySerialNumber += 1;
+            }
+        }
+
+        const result = totalDays / ((endYearLastDaySerialNumber - startYearFirstDaySerialNumber + 1) / totalYear);
+
+        return NumberValueObject.create(result);
+    }
+
+    private _getResultByEuropean(startDateSerialNumber: number, endDateSerialNumber: number): BaseValueObject {
+        const startDateDate = excelSerialToDate(startDateSerialNumber);
+        const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
+        const startMonth = startDateSerialNumber > 0 ? startDateDate.getUTCMonth() + 1 : 1;
+        let startDay = startDateSerialNumber > 0 ? startDateDate.getUTCDate() : 0;
+
+        const endDateDate = excelSerialToDate(endDateSerialNumber);
+        const endYear = endDateSerialNumber > 0 ? endDateDate.getUTCFullYear() : 1900;
+        const endMonth = endDateSerialNumber > 0 ? endDateDate.getUTCMonth() + 1 : 1;
+        let endDay = endDateSerialNumber > 0 ? endDateDate.getUTCDate() : 0;
+
+        if (startDay === 31) {
+            startDay = 30;
+        }
+
+        if (endDay === 31) {
+            endDay = 30;
+        }
+
+        const daysInYears = (endYear - startYear) * 360;
+        const daysInStartMonth = endDateSerialNumber >= startDateSerialNumber ? 30 - startDay : -startDay;
+        const daysInEndMonth = endDateSerialNumber >= startDateSerialNumber ? endDay : endDay - 30;
+        const daysInMidMonths = (endDateSerialNumber >= startDateSerialNumber ? (endMonth - startMonth - 1) : (endMonth - startMonth + 1)) * 30;
+        const totalDays = Math.abs(daysInYears + daysInStartMonth + daysInEndMonth + daysInMidMonths);
+
+        const result = totalDays / 360;
 
         return NumberValueObject.create(result);
     }

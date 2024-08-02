@@ -52,14 +52,15 @@ export class Ceiling extends BaseFunction {
         const significanceArray = expandArrayValueObject(maxRowLength, maxColumnLength, significance, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = numberArray.map((numberObject, rowIndex, columnIndex) => {
+            let _numberObject = numberObject;
             let significanceObject = significanceArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (numberObject.isString()) {
-                numberObject = numberObject.convertToNumberObjectValue();
+            if (_numberObject.isString()) {
+                _numberObject = _numberObject.convertToNumberObjectValue();
             }
 
-            if (numberObject.isError()) {
-                return numberObject;
+            if (_numberObject.isError()) {
+                return _numberObject;
             }
 
             if (significanceObject.isString()) {
@@ -70,7 +71,7 @@ export class Ceiling extends BaseFunction {
                 return significanceObject;
             }
 
-            const numberValue = +numberObject.getValue();
+            const numberValue = +_numberObject.getValue();
             const significanceValue = +significanceObject.getValue();
 
             if (numberValue > 0 && significanceValue < 0) {

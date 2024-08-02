@@ -25,39 +25,31 @@ export class Coth extends BaseFunction {
     override maxParams = 1;
 
     override calculate(variant: BaseValueObject) {
-        if (variant.isString()) {
-            variant = variant.convertToNumberObjectValue();
+        if (variant.isArray()) {
+            return variant.map((numberObject) => this._handleSingleObject(numberObject));
         }
 
-        if (variant.isError()) {
-            return variant;
-        }
-
-        if ((variant as BaseValueObject).isArray()) {
-            return (variant as BaseValueObject).map((currentValue) => {
-                if (currentValue.isString()) {
-                    currentValue = currentValue.convertToNumberObjectValue();
-                }
-                if (currentValue.isError()) {
-                    return currentValue;
-                }
-                return coth(currentValue as BaseValueObject);
-            });
-        }
-
-        return coth(variant as BaseValueObject);
-    }
-}
-
-function coth(num: BaseValueObject) {
-    let currentValue = num.getValue();
-
-    currentValue = Number(currentValue);
-
-    // COTH(0) returns the #DIV/0! error value.
-    if (currentValue === 0) {
-        return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        return this._handleSingleObject(variant);
     }
 
-    return num.tanh().getReciprocal();
+    private _handleSingleObject(number: BaseValueObject) {
+        let numberObject = number;
+
+        if (numberObject.isString()) {
+            numberObject = numberObject.convertToNumberObjectValue();
+        }
+
+        if (numberObject.isError()) {
+            return numberObject;
+        }
+
+        const numberValue = +numberObject.getValue();
+
+        // COTH(0) returns the #DIV/0! error value.
+        if (numberValue === 0) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        }
+
+        return numberObject.tanh().getReciprocal();
+    }
 }

@@ -23,22 +23,26 @@ export class Power extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, power: BaseValueObject) {
-        if (number.isString()) {
-            number = number.convertToNumberObjectValue();
+        let _number = number;
+
+        if (_number.isString()) {
+            _number = _number.convertToNumberObjectValue();
         }
 
-        if (number.isError()) {
-            return number;
+        if (_number.isError()) {
+            return _number;
         }
 
-        if (power.isString()) {
-            power = power.convertToNumberObjectValue();
+        let _power = power;
+
+        if (_power.isString()) {
+            _power = _power.convertToNumberObjectValue();
         }
 
-        if (power.isError()) {
-            return power;
+        if (_power.isError()) {
+            return _power;
         }
 
-        return number.pow(power);
+        return _number.pow(_power);
     }
 }

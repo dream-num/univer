@@ -76,7 +76,7 @@ import styles from '../../views/sheet-container/index.module.less';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
-import { isCJKLocale, normalizeString } from '../utils/char-tools';
+import { normalizeString } from '../utils/char-tools';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -1042,9 +1042,7 @@ export function getCellDataByInput(
     let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
     const currentLocale = localeService.getCurrentLocale();
-    if (isCJKLocale(currentLocale)) {
-        newDataStream = normalizeString(newDataStream, lexerTreeBuilder, functionService);
-    }
+    newDataStream = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService);
 
     if (isFormulaString(newDataStream)) {
         if (cellData.f === newDataStream) {

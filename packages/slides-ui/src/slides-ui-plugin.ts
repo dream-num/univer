@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Dependency, SlideDataModel } from '@univerjs/core';
-import { Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, DependencyOverride, SlideDataModel } from '@univerjs/core';
+import { Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
-import { SlideUIController } from './controllers/slide-ui.controller';
+import { SlidesUIController } from './controllers/slide-ui.controller';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
@@ -26,7 +26,7 @@ export class UniverSlidesUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SLIDE;
 
     constructor(
-        _config: unknown,
+        private readonly _config: { override?: DependencyOverride },
         @Inject(Injector) override readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
@@ -34,7 +34,8 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
-        ([[SlideUIController]] as Dependency[]).forEach((d) => injector.add(d));
+        mergeOverrideWithDependencies([[SlidesUIController]] as Dependency[], this._config.override)
+            .forEach((d) => injector.add(d));
     }
 
     override onRendered(): void {

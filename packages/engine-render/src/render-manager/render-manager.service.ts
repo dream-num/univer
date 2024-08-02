@@ -234,6 +234,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         } else {
             // For slide pages
             renderUnit = {
+                isThumbNail: true,
                 unitId,
                 engine,
                 scene,

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { UniSheetUIController } from './controllers/uni-sheet-ui.controller';
+export { UniSheetsUIController } from './controllers/uni-sheets-ui.controller';

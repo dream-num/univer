@@ -23,12 +23,12 @@ import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.ope
 /**
  * This controller registers UI parts of slide workbench to the base-ui workbench.
  */
-@OnLifecycle(LifecycleStages.Ready, SlideUIController)
-export class SlideUIController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, SlidesUIController)
+export class SlidesUIController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @ICommandService private readonly _commandService: ICommandService
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @ICommandService protected readonly _commandService: ICommandService
     ) {
         super();
 
@@ -43,7 +43,7 @@ export class SlideUIController extends Disposable {
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
-    private _initUIComponents(): void {
+    protected _initUIComponents(): void {
         this.disposeWithMe(
             this._uiPartsService.registerComponent(BuiltInUIPart.LEFT_SIDEBAR, () => connectInjector(SlideSideBar, this._injector))
         );

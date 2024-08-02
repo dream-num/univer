@@ -147,8 +147,8 @@ export class UnitGridService extends Disposable implements IUnitGridService {
     }
 
     protected _onRendererCreated(renderer: IRender): void {
-        const { unitId, type } = renderer;
-        if (isInternalEditorID(unitId)) {
+        const { unitId, type, isThumbNail } = renderer;
+        if (isInternalEditorID(unitId) || isThumbNail) {
             return;
         }
 

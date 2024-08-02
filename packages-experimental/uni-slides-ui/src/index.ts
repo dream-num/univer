@@ -14,13 +14,4 @@
  * limitations under the License.
  */
 
-export { UniverSlidesUIPlugin } from './slides-ui-plugin';
-export { SlidesUIController } from './controllers/slide-ui.controller';
-export { SlideSideBar } from './views/slide-bar/SlideBar';
-
-// #region - all commands
-
-export { ActivateSlidePageOperation } from './commands/operations/activate.operation';
-export { SetSlidePageThumbOperation } from './commands/operations/set-thumb.operation';
-
-// #endregion
+export { UniSlidesUIController } from './controllers/uni-slides-ui.controller';

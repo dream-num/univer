@@ -23,7 +23,7 @@ import React from 'react';
 import { UniSheetBar } from '../views/uni-sheet-bar/UniSheetBar';
 
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
-export class UniSheetUIController extends SheetUIController {
+export class UniSheetsUIController extends SheetUIController {
     constructor(
         config: Partial<IUniverSheetsUIConfig>,
         @Inject(Injector) injector: Injector,
@@ -58,8 +58,9 @@ export class UniSheetUIController extends SheetUIController {
 
 function RenderOutline() {
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const focused = useObservable(univerInstanceService.focused$);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
-    if (!workbook) return null;
+    if (!workbook || focused !== workbook?.getUnitId()) return null;
 
     return (
         <UniSheetBar />

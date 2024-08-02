@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable } from '@univerjs/core';
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -127,8 +127,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         const dependencies = this._renderDependencies.get(type)!;
         dependencies.push(...deps);
 
-        for (const [renderUnitId, render] of this._renderMap) {
-            const renderType = this._univerInstanceService.getUnitType(renderUnitId);
+        for (const [_, render] of this._renderMap) {
+            const renderType = render.type;
             if (renderType === type) {
                 (render as RenderUnit).addRenderDependencies(deps);
             }
@@ -147,8 +147,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         const dependencies = this._renderDependencies.get(type)!;
         dependencies.push(ctor);
 
-        for (const [renderUnitId, render] of this._renderMap) {
-            const renderType = this._univerInstanceService.getUnitType(renderUnitId);
+        for (const [_, render] of this._renderMap) {
+            const renderType = render.type;
             if (renderType === type) {
                 (render as RenderUnit).addRenderDependencies([ctor]);
             }
@@ -235,6 +235,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             // For slide pages
             renderUnit = {
                 isThumbNail: true,
+                type: UniverInstanceType.UNIVER_SLIDE,
                 unitId,
                 engine,
                 scene,

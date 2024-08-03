@@ -15,6 +15,7 @@
  */
 
 import {
+    ICommandService,
     ILogService,
     Inject,
     Injector,
@@ -62,6 +63,10 @@ import { DocHoverRenderController } from './controllers/render-controllers/doc-h
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
+import { DocParagraphSettingController } from './controllers/doc-paragraph-setting.controller';
+
+import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
+import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -71,13 +76,15 @@ export class UniverDocsUIPlugin extends Plugin {
         private readonly _config: IUniverDocsUIConfig,
         @Inject(Injector) override _injector: Injector,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
+        @ICommandService private _commandService: ICommandService,
         @ILogService private _logService: ILogService
     ) {
         super();
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
         this._initDependencies(_injector);
-        this._initializeCommands();
+        this._initializeShortcut();
+        this._initCommand();
     }
 
     override onReady(): void {
@@ -90,7 +97,13 @@ export class UniverDocsUIPlugin extends Plugin {
         this._initRenderModules();
     }
 
-    private _initializeCommands(): void {
+    private _initCommand() {
+        [DocParagraphSettingCommand, DocParagraphSettingPanelOperation].forEach((e) => {
+            this._commandService.registerCommand(e);
+        });
+    }
+
+    private _initializeShortcut(): void {
         [
             MoveCursorUpShortcut,
             MoveCursorDownShortcut,
@@ -122,6 +135,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
             [DocHoverManagerService],
+            [DocParagraphSettingController],
         ];
 
         dependencies.forEach((d) => injector.add(d));

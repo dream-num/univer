@@ -147,6 +147,7 @@ export {
     WorkbookViewHistoryPermission,
     WorkbookRecoverHistoryPermission,
 } from './services/permission/permission-point';
+export { checkRangesEditablePermission } from './services/permission/util';
 
 // range-protection
 export { RangeProtectionRenderModel, type ICellPermission } from './model/range-protection-render.model';

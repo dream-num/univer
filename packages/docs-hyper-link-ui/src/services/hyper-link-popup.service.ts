@@ -23,6 +23,11 @@ import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { DocLinkPopup } from '../views/hyper-link-popup';
 
+/**
+ * A link will have a placeholder, and when it is a link at the beginning, the placeholder does not have a width or height, causing an evaluation error
+ */
+const SKIT_PLACEHOLDER = 2;
+
 export interface ILinkInfo {
     unitId: string; linkId: string; rangeIndex: number;
 }
@@ -83,6 +88,7 @@ export class DocHyperLinkPopupService extends Disposable {
         }
 
         if (activeRange) {
+            activeRange.startOffset += SKIT_PLACEHOLDER;
             this._editPopup = this._docCanvasPopupManagerService.attachPopupToRange(
                 activeRange,
                 {
@@ -128,7 +134,7 @@ export class DocHyperLinkPopupService extends Disposable {
         this._infoPopup = this._docCanvasPopupManagerService.attachPopupToRange(
             {
                 collapsed: false,
-                startOffset: range.startIndex,
+                startOffset: range.startIndex + SKIT_PLACEHOLDER,
                 endOffset: range.endIndex + 1,
             },
             {

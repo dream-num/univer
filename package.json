@@ -49,12 +49,12 @@
         "@antfu/eslint-config": "2.21.3",
         "@commitlint/cli": "^19.3.0",
         "@commitlint/config-conventional": "^19.2.2",
-        "@eslint-react/eslint-plugin": "^1.7.0",
+        "@eslint-react/eslint-plugin": "^1.8.1",
         "@playwright/test": "^1.45.3",
         "@release-it-plugins/workspaces": "^4.2.0",
         "@release-it/conventional-changelog": "^8.0.1",
         "@storybook/react": "8.1.11",
-        "@types/node": "^22.0.0",
+        "@types/node": "^22.1.0",
         "@types/react": "^18.3.3",
         "@univerjs/design": "workspace:*",
         "@univerjs/shared": "workspace:*",
@@ -73,7 +73,7 @@
         "react-dom": "18.3.1",
         "release-it": "^17.6.0",
         "serve": "^14.2.3",
-        "turbo": "^2.0.9",
+        "turbo": "^2.0.11",
         "typescript": "^5.5.4"
     },
     "lint-staged": {

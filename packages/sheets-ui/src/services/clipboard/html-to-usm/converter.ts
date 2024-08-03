@@ -18,7 +18,6 @@ import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } fro
 import { ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 
-import type { IPastePlugin } from '@univerjs/docs-ui';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
 import type {
@@ -28,7 +27,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import { extractNodeStyle } from './parse-node-style';
-import type { IAfterProcessRule } from './paste-plugins/type';
+import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
 import parseToDom, { generateParagraphs } from './utils';
 
 export interface IStyleRule {

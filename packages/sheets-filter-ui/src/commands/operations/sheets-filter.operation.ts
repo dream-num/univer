@@ -50,9 +50,7 @@ export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParam
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
         if (!filterModel) return false;
 
-        const result = sheetsFilterPanelService.setupCol(filterModel, col);
-        if (!result) return false;
-
+        sheetsFilterPanelService.setupCol(filterModel, col);
         if (!contextService.getContextValue(FILTER_PANEL_OPENED_KEY)) {
             contextService.setContextValue(FILTER_PANEL_OPENED_KEY, true);
         }

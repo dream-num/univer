@@ -16,7 +16,6 @@
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity } from '@univerjs/core';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { FilterColumn, FilterModel, IFilterColumn } from '@univerjs/sheets-filter';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
@@ -100,8 +99,6 @@ export class SheetsFilterPanelService extends Disposable {
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService
     ) {
         super();
@@ -113,13 +110,11 @@ export class SheetsFilterPanelService extends Disposable {
         this._hasCriteria$.complete();
     }
 
-    setupCol(filterModel: FilterModel, col: number): { result: Promise<boolean> } {
+    setupCol(filterModel: FilterModel, col: number): void {
         this.terminate();
 
         this._filterModel = filterModel;
         this._col$.next(col);
-
-        let result;
 
         // We use filter type that (if) has been set on the column as the default filter type.
         const filterColumn = filterModel.getFilterColumn(col);
@@ -127,24 +122,25 @@ export class SheetsFilterPanelService extends Disposable {
             const info = filterColumn.getColumnData();
             if (info.customFilters) {
                 this._hasCriteria$.next(true);
-                result = { result: this._setupByConditions(filterModel, col) };
+                this._setupByConditions(filterModel, col);
+                return;
             }
 
             if (info.filters) {
                 this._hasCriteria$.next(true);
-                result = { result: this._setupByValues(filterModel, col) };
+                this._setupByValues(filterModel, col);
+                return;
             }
 
             // Use value values by default.
             this._hasCriteria$.next(false);
-            result = { result: this._setupByValues(filterModel, col) };
+            this._setupByValues(filterModel, col);
+            return;
         }
 
         // By default we filter by values.
         this._hasCriteria$.next(false);
-        result = { result: this._setupByValues(filterModel, col) };
-
-        return result;
+        this._setupByValues(filterModel, col);
     };
 
     changeFilterBy(filterBy: FilterBy): boolean {
@@ -207,13 +203,13 @@ export class SheetsFilterPanelService extends Disposable {
         const range = filterModel.getRange();
         if (range.startRow === range.endRow) return false;
 
-        const model = await ByValuesModel.fromFilterColumn(
+        const filterByModel = await ByValuesModel.fromFilterColumn(
             this._injector,
             filterModel,
             col
         );
 
-        this.filterByModel = model;
+        this.filterByModel = filterByModel;
         this._filterBy$.next(FilterBy.VALUES);
 
         this._listenToFilterHeaderChange(filterModel, col);

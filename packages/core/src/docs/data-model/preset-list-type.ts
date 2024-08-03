@@ -31,6 +31,9 @@ export enum PresetListType {
     ORDER_LIST_3 = 'ORDER_LIST_3',
     ORDER_LIST_4 = 'ORDER_LIST_4',
     ORDER_LIST_5 = 'ORDER_LIST_5',
+
+    CHECK_LIST = 'CHECK_LIST',
+    CHECK_LIST_CHECKED = 'CHECK_LIST_CHECKED',
 }
 
 type BulletSymbols = [string, string, string];
@@ -57,6 +60,22 @@ const bulletListFactory = (symbols: BulletSymbols): INestingLevel[] => {
 const orderListFactory = (options: { glyphFormat: string; glyphType: GlyphType }[]): INestingLevel[] => {
     return options.map((format, i) => ({
         ...format,
+        bulletAlignment: BulletAlignment.START,
+        textStyle: {
+            fs: 12,
+        },
+        startNumber: 0,
+        paragraphProperties: {
+            hanging: { v: 21 },
+            indentStart: { v: 21 * (i + 1) },
+        },
+    }));
+};
+
+const checkListFactory = (symbol: string): INestingLevel[] => {
+    return Array(9).fill(0).map((_, i) => ({
+        glyphFormat: ` %${i + 1}`,
+        glyphSymbol: symbol,
         bulletAlignment: BulletAlignment.START,
         textStyle: {
             fs: 12,
@@ -176,5 +195,14 @@ export const PRESET_LIST_TYPE = {
             { glyphFormat: ' %8.', glyphType: GlyphType.LOWER_LETTER },
             { glyphFormat: ' %9.', glyphType: GlyphType.LOWER_ROMAN },
         ]),
+    } as IListData,
+
+    [PresetListType.CHECK_LIST]: {
+        listType: PresetListType.CHECK_LIST,
+        nestingLevel: checkListFactory('\u2610'),
+    } as IListData,
+    [PresetListType.CHECK_LIST_CHECKED]: {
+        listType: PresetListType.CHECK_LIST,
+        nestingLevel: checkListFactory('\u2611'),
     } as IListData,
 };

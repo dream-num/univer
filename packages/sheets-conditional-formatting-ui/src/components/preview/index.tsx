@@ -18,7 +18,7 @@ import React, { useMemo } from 'react';
 import { BooleanNumber, ColorKit } from '@univerjs/core';
 import { SlashSingle } from '@univerjs/icons';
 import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
-import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, getColorScaleFromValue, iconMap } from '@univerjs/sheets-conditional-formatting';
+import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, defaultDataBarNativeColor,defaultDataBarPositiveColor, getColorScaleFromValue, iconMap } from '@univerjs/sheets-conditional-formatting';
 import styles from './index.module.less';
 
 export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
@@ -48,17 +48,17 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
         {
             const { isGradient } = rule.config;
             const commonStyle = { width: '50%', height: '100%' };
-            const positiveColor = isGradient ? `linear-gradient(to right, ${rule.config.positiveColor}, rgb(255 255 255))` : rule.config.positiveColor;
-            const nativeColor = isGradient ? `linear-gradient(to right,  rgb(255 255 255),${rule.config.nativeColor})` : rule.config.nativeColor;
+            const positiveColor = isGradient ? `linear-gradient(to right, ${rule.config.positiveColor || defaultDataBarPositiveColor}, rgb(255 255 255))` : rule.config.positiveColor;
+            const nativeColor = isGradient ? `linear-gradient(to right,  rgb(255 255 255),${rule.config.nativeColor || defaultDataBarNativeColor})` : rule.config.nativeColor;
             return (
                 <div className={styles.cfPreview}>
-                    <div style={{ ...commonStyle, background: nativeColor, border: `1px solid ${rule.config.nativeColor}` }}></div>
-                    <div style={{ ...commonStyle, background: positiveColor, border: `1px solid ${rule.config.positiveColor}` }}></div>
+                    <div style={{ ...commonStyle, background: nativeColor, border: `1px solid ${rule.config.nativeColor || defaultDataBarNativeColor}` }}></div>
+                    <div style={{ ...commonStyle, background: positiveColor, border: `1px solid ${rule.config.positiveColor || defaultDataBarPositiveColor}` }}></div>
                 </div>
             );
         }
 
-        case CFRuleType.colorScale:{
+        case CFRuleType.colorScale: {
             return colorList && (
                 <div className={styles.cfPreview}>
                     {colorList.map((item, index) => (
@@ -68,14 +68,14 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
                 </div>
             );
         }
-        case CFRuleType.iconSet:{
+        case CFRuleType.iconSet: {
             return iconSet && (
                 <div className={styles.cfPreview}>
                     {iconSet.map((base64, index) => (base64 ? <img style={{ height: '100%' }} key={index} src={base64} /> : <SlashSingle key={index} />))}
                 </div>
             );
         }
-        case CFRuleType.highlightCell:{
+        case CFRuleType.highlightCell: {
             const { ul, st, it, bl, bg, cl } = rule.style;
             const isUnderline = ul?.s === BooleanNumber.TRUE;
             const isStrikethrough = st?.s === BooleanNumber.TRUE;
@@ -83,11 +83,12 @@ export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {
             const isBold = bl === BooleanNumber.TRUE;
             const bgColor = bg?.rgb ?? DEFAULT_BG_COLOR;
             const fontColor = cl?.rgb ?? DEFAULT_FONT_COLOR;
-            const style = { fontWeight: isBold ? 'bold' : undefined,
-                            fontStyle: isItalic ? 'italic' : undefined,
-                            textDecoration: `${isUnderline ? 'underline' : ''} ${isStrikethrough ? 'line-through' : ''}`.replace(/^ /, '') || undefined,
-                            backgroundColor: bgColor,
-                            color: fontColor,
+            const style = {
+                fontWeight: isBold ? 'bold' : undefined,
+                fontStyle: isItalic ? 'italic' : undefined,
+                textDecoration: `${isUnderline ? 'underline' : ''} ${isStrikethrough ? 'line-through' : ''}`.replace(/^ /, '') || undefined,
+                backgroundColor: bgColor,
+                color: fontColor,
             };
             return (
                 <div style={style} className={styles.cfPreview}>

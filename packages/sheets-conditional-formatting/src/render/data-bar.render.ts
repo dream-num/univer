@@ -21,6 +21,10 @@ import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry
 import type { IDataBarCellData } from './type';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
+export const defaultDataBarPositiveColor = '#ffbe38';
+export const defaultDataBarNativeColor = '#abd91a';
+
+
 const EXTENSION_Z_INDEX = 34;
 
 export class DataBar extends SheetExtension {

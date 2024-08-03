@@ -19,7 +19,7 @@ import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/desi
 import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
-import { CFRuleType, CFValueType, createDefaultValueByValueType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarPositiveColor, defaultDataBarNativeColor, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionalFormattingRuleConfig, IValueConfig } from '@univerjs/sheets-conditional-formatting';
 import { ColorPicker } from '../../color-picker';
 import stylesBase from '../index.module.less';
@@ -29,7 +29,7 @@ import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 
-const InputText = (props: { disabled?: boolean; id: string; className: string; type: CFValueType;value: string | number;onChange: (v: string | number) => void }) => {
+const InputText = (props: { disabled?: boolean; id: string; className: string; type: CFValueType; value: string | number; onChange: (v: string | number) => void }) => {
     const { onChange, className, value, type, id, disabled = false } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
@@ -89,18 +89,16 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         return rule.config?.isGradient ? '1' : '0';
     });
     const [positiveColor, positiveColorSet] = useState(() => {
-        const defaultV = '#abd91a';
         if (!rule) {
-            return defaultV;
+            return defaultDataBarPositiveColor;
         }
-        return rule.config?.positiveColor || defaultV;
+        return rule.config?.positiveColor || defaultDataBarPositiveColor;
     });
     const [nativeColor, nativeColorSet] = useState(() => {
-        const defaultV = '#ffbe38';
         if (!rule) {
-            return defaultV;
+            return defaultDataBarNativeColor;
         }
-        return rule.config?.nativeColor || defaultV;
+        return rule.config?.nativeColor || defaultDataBarNativeColor;
     });
     const commonOptions = [createOptionItem(CFValueType.num, localeService), createOptionItem(CFValueType.percent, localeService), createOptionItem(CFValueType.percentile, localeService), createOptionItem(CFValueType.formula, localeService)];
     const minOptions = [createOptionItem(CFValueType.min, localeService), ...commonOptions];
@@ -150,24 +148,28 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         return rule.isShowValue === undefined ? defaultV : !!rule.isShowValue;
     });
 
-    const getResult = (option: { minValueType: CFValueType ;
-                                 minValue: number | string;
-                                 maxValueType: CFValueType ;
-                                 maxValue: number | string;
-                                 isGradient: string;
-                                 positiveColor: string;
-                                 isShowValue: boolean;
-                                 nativeColor: string; }) => {
-        const config: { min: IValueConfig;
-                        max: IValueConfig;
-                        isGradient: boolean;
-                        positiveColor: string;
-                        nativeColor: string; } = {
+    const getResult = (option: {
+        minValueType: CFValueType;
+        minValue: number | string;
+        maxValueType: CFValueType;
+        maxValue: number | string;
+        isGradient: string;
+        positiveColor: string;
+        isShowValue: boolean;
+        nativeColor: string;
+    }) => {
+        const config: {
+            min: IValueConfig;
+            max: IValueConfig;
+            isGradient: boolean;
+            positiveColor: string;
+            nativeColor: string;
+        } = {
             min: { type: option.minValueType, value: option.minValue },
             max: { type: option.maxValueType, value: option.maxValue },
             isGradient: option.isGradient === '1',
-            positiveColor: option.positiveColor,
-            nativeColor: option.nativeColor,
+            positiveColor: option.positiveColor || defaultDataBarPositiveColor,
+            nativeColor: option.nativeColor || defaultDataBarNativeColor,
         };
         return { config, type: CFRuleType.dataBar, isShowValue: option.isShowValue };
     };
@@ -180,14 +182,16 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         return dispose as () => void;
     }, [isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, interceptorManager, isShowValue]);
 
-    const _handleChange = (option: { minValueType: CFValueType ;
-                                     minValue: number | string;
-                                     maxValueType: CFValueType ;
-                                     maxValue: number | string;
-                                     isGradient: string;
-                                     positiveColor: string;
-                                     isShowValue: boolean;
-                                     nativeColor: string; }) => {
+    const _handleChange = (option: {
+        minValueType: CFValueType;
+        minValue: number | string;
+        maxValueType: CFValueType;
+        maxValue: number | string;
+        isGradient: string;
+        positiveColor: string;
+        isShowValue: boolean;
+        nativeColor: string;
+    }) => {
         props.onChange(getResult(option));
     };
 

@@ -523,8 +523,25 @@ export const DeleteRightCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
 
         const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const rectRanges = textSelectionManagerService.getCurrentRectRanges();
         const ranges = textSelectionManagerService.getCurrentTextRanges();
         const skeleton = docSkeletonManagerService?.getSkeleton();
+
+        if (rectRanges?.length) {
+            const cursor = getCursorWhenDelete(ranges, rectRanges);
+            const segmentId = rectRanges[0].segmentId;
+            const textRanges = [
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                },
+            ];
+            return commandService.executeCommand(CutContentCommand.id, {
+                segmentId,
+                textRanges,
+            });
+        }
+
         if (activeRange == null || skeleton == null || ranges == null) {
             return false;
         }

@@ -26,7 +26,7 @@ export const useCurrentParagraph = () => {
     const textSelectionManagerService = useDependency(TextSelectionManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    const activeRange = textSelectionManagerService.getActiveRange();
+    const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
     if (!docDataModel || !activeRange) {
         return [];
     }

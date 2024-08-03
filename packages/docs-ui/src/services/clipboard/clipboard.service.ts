@@ -100,16 +100,17 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     async copy(sliceType: SliceBodyType = SliceBodyType.copy): Promise<boolean> {
-        const documentBodyList = this._getDocumentBodyInRanges(sliceType);
+        const { bodyList, needCache } = this._getDocumentBodyInRanges(sliceType);
 
-        if (documentBodyList.length === 0) {
+        if (bodyList.length === 0) {
             return false;
         }
 
         try {
             const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
             const isCopyInHeaderFooter = !!activeRange?.segmentId;
-            this._setClipboardData(documentBodyList, !isCopyInHeaderFooter);
+
+            this._setClipboardData(bodyList, !isCopyInHeaderFooter && needCache);
         } catch (e) {
             this._logService.error('[DocClipboardService] copy failed', e);
             return false;
@@ -286,7 +287,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _getDocumentBodyInRanges(sliceType: SliceBodyType): IDocumentBody[] {
+    private _getDocumentBodyInRanges(sliceType: SliceBodyType): {
+        bodyList: IDocumentBody[];
+        needCache: boolean;
+    } {
         const textRanges = this._textSelectionManagerService.getCurrentTextRanges() ?? [];
         const rectRanges = this._textSelectionManagerService.getCurrentRectRanges() ?? [];
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
@@ -303,9 +307,13 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 }
             });
         const results: IDocumentBody[] = [];
+        let needCache = true;
 
         if (docDataModel == null || allRanges.length === 0) {
-            return results;
+            return {
+                bodyList: results,
+                needCache,
+            };
         }
 
         const segmentId = allRanges[0].segmentId;
@@ -313,7 +321,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
         if (body == null) {
-            return results;
+            return {
+                bodyList: results,
+                needCache,
+            };
         }
 
         for (const range of allRanges) {
@@ -324,6 +335,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
 
             if (rangeType === DOC_RANGE_TYPE.RECT) {
+                needCache = false;
+
                 const { spanEntireRow } = range as unknown as RectRange;
                 let bodySlice: IDocumentBody;
                 if (!spanEntireRow) {
@@ -367,7 +380,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             results.push(docBody);
         }
 
-        return results;
+        return {
+            bodyList: results,
+            needCache,
+        };
     }
 
     private async _genDocDataFromClipboardItems(items: ClipboardItem[]): Promise<Partial<IDocumentData>> {

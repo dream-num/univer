@@ -96,7 +96,7 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
     injector.get(LocaleService).load({ enUS, zhCN, ruRU });
     injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
 
-    const sheet = univer.createUniverSheet(workbookData);
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData);
 
     return { univer, injector, sheet };
 }

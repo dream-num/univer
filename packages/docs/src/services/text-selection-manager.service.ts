@@ -128,6 +128,25 @@ export class TextSelectionManagerService extends RxDisposable {
         return this._getTextRanges(this._currentSelection)?.rectRanges;
     }
 
+    getDocRanges() {
+        const textRanges = this.getCurrentTextRanges() ?? [];
+        const rectRanges = this.getCurrentRectRanges() ?? [];
+        // Sort ranges by startOffset in ascending order.
+        const allRanges = [...textRanges, ...rectRanges]
+            .filter((range) => range.startOffset != null && range.endOffset != null)
+            .sort((a, b) => {
+                if (a.startOffset! > b.startOffset!) {
+                    return 1;
+                } else if (a.startOffset! < b.startOffset!) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+
+        return allRanges;
+    }
+
     getActiveTextRange(): Nullable<TextRange> {
         const selectionInfo = this._getTextRanges(this._currentSelection);
         if (selectionInfo == null) {

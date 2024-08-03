@@ -58,7 +58,7 @@ export {
     ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatCommand,
 } from './commands/commands/inline-format.command';
-export { ListOperationCommand, BulletListCommand, OrderListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand } from './commands/commands/list.command';
+export { ListOperationCommand, BulletListCommand, OrderListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, getParagraphsInRanges } from './commands/commands/list.command';
 export {
     AlignOperationCommand,
     AlignLeftCommand,

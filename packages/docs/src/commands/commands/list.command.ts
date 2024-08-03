@@ -30,7 +30,8 @@ import {
     Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { getCharSpaceApply, getNumberUnitValue, type IActiveTextRange } from '@univerjs/engine-render';
+import type { IActiveTextRange, IDocRange } from '@univerjs/engine-render';
+import { getCharSpaceApply, getNumberUnitValue } from '@univerjs/engine-render';
 
 import { serializeDocRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
@@ -503,6 +504,7 @@ export function getParagraphsInRange(activeRange: IActiveTextRange, paragraphs: 
     return results;
 }
 
+<<<<<<< HEAD
 export function getParagraphsRelative(activeRange: IActiveTextRange, paragraphs: IParagraph[]) {
     const selectionParagraphs = getParagraphsInRange(activeRange, paragraphs);
     const startIndex = paragraphs.indexOf(selectionParagraphs[0]);
@@ -527,6 +529,18 @@ export function getParagraphsRelative(activeRange: IActiveTextRange, paragraphs:
     }
 
     return selectionParagraphs;
+=======
+export function getParagraphsInRanges(ranges: IDocRange[], paragraphs: IParagraph[]) {
+    const results: IParagraph[] = [];
+
+    for (const range of ranges) {
+        const ps = getParagraphsInRange(range as unknown as IActiveTextRange, paragraphs);
+
+        results.push(...ps);
+    }
+
+    return results;
+>>>>>>> 797d3bb28 (fix: paragraph setting)
 }
 
 export function findNearestSectionBreak(currentIndex: number, sectionBreaks: ISectionBreak[]) {

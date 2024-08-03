@@ -291,21 +291,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         bodyList: IDocumentBody[];
         needCache: boolean;
     } {
-        const textRanges = this._textSelectionManagerService.getCurrentTextRanges() ?? [];
-        const rectRanges = this._textSelectionManagerService.getCurrentRectRanges() ?? [];
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
-        // Sort ranges by startOffset in ascending order.
-        const allRanges = [...textRanges, ...rectRanges]
-            .filter((range) => range.startOffset != null && range.endOffset != null)
-            .sort((a, b) => {
-                if (a.startOffset! > b.startOffset!) {
-                    return 1;
-                } else if (a.startOffset! < b.startOffset!) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            });
+        const allRanges = this._textSelectionManagerService.getDocRanges();
+
         const results: IDocumentBody[] = [];
         let needCache = true;
 

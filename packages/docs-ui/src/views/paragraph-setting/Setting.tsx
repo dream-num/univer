@@ -64,8 +64,8 @@ export function ParagraphSetting() {
 
     const alignmentOptions = useMemo(() => [
         { label: localeService.t('toolbar.alignLeft'), value: String(HorizontalAlign.LEFT), icon: <LeftJustifyingSingle /> },
-        { label: localeService.t('toolbar.alignRight'), value: String(HorizontalAlign.RIGHT), icon: <HorizontallySingle /> },
-        { label: localeService.t('toolbar.alignCenter'), value: String(HorizontalAlign.CENTER), icon: <RightJustifyingSingle /> },
+        { label: localeService.t('toolbar.alignCenter'), value: String(HorizontalAlign.CENTER), icon: <HorizontallySingle /> },
+        { label: localeService.t('toolbar.alignRight'), value: String(HorizontalAlign.RIGHT), icon: <RightJustifyingSingle /> },
         { label: localeService.t('toolbar.alignJustify'), value: String(HorizontalAlign.JUSTIFIED), icon: <AlignTextBothSingle /> }],
     []);
 

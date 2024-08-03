@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, JSONX, MemoryCursor, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { getParagraphsInRange, getRichTextEditPath, RichTextEditingMutation, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
+import { getParagraphsInRanges, getRichTextEditPath, RichTextEditingMutation, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
 
 export type IDocParagraphSettingCommandParams = Partial<Pick<IParagraphStyle, 'hanging' | 'horizontalAlign' | 'spaceBelow' | 'spaceAbove' | 'indentEnd' | 'indentStart' | 'lineSpacing' | 'indentFirstLine'>>;
 export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandParams> = {
@@ -30,20 +30,20 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
         const commandService = accessor.get(ICommandService);
 
         const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const docRanges = textSelectionManagerService.getDocRanges();
 
-        if (!docDataModel || !activeRange || !config) {
+        if (!docDataModel || docRanges.length === 0 || !config) {
             return false;
         }
 
-        const segmentId = activeRange.segmentId;
+        const segmentId = docRanges[0].segmentId;
+
         const unitId = docDataModel.getUnitId();
 
         const allParagraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
-        const paragraphs = getParagraphsInRange(activeRange, allParagraphs) ?? [];
+        const paragraphs = getParagraphsInRanges(docRanges, allParagraphs) ?? [];
 
-        const selections = textSelectionManagerService.getCurrentTextRanges() ?? [];
-        const serializedSelections = selections.map(serializeDocRange);
+        const serializedSelections = docRanges.map(serializeDocRange);
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -99,6 +99,7 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
+
         return !!result;
     },
 };

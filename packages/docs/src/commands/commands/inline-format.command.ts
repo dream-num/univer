@@ -235,10 +235,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const textRanges = textSelectionManagerService.getCurrentTextRanges() ?? [];
-        const rectRanges = textSelectionManagerService.getCurrentRectRanges() ?? [];
-
-        const docRanges = [...textRanges, ...rectRanges];
+        const docRanges = textSelectionManagerService.getDocRanges();
 
         if (docRanges.length === 0) {
             return false;

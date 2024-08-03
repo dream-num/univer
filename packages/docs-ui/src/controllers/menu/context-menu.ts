@@ -105,7 +105,6 @@ export const ParagraphSettingMenuFactory = (accessor: IAccessor): IMenuButtonIte
         icon: 'MenuSingle24',
         title: 'doc.menu.paragraphSetting',
         positions: [MenuPosition.CONTEXT_MENU],
-        disabled$: getDisableOnCollapsedObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 };

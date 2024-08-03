@@ -56,6 +56,26 @@ const locale: typeof zhCN = {
         closeHeaderFooter: 'Đóng đầu trang và chân trang',
         disableText: 'Cài đặt đầu trang và chân trang không khả dụng',
     },
+    doc: {
+        menu: {
+            paragraphSetting: 'Paragraph Setting',
+        },
+        slider: {
+            paragraphSetting: 'Paragraph Setting',
+        },
+        paragraphSetting: {
+            alignment: 'Alignment',
+            indentation: 'Indentation',
+            left: 'Left',
+            right: 'Right',
+            firstLine: 'First Line',
+            hanging: 'Hanging',
+            spacing: 'Spacing',
+            before: 'Before',
+            after: 'After',
+            lineSpace: 'Line Space',
+        },
+    },
 };
 
 export default locale;

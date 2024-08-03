@@ -21,6 +21,7 @@ import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '
 import { Observable } from 'rxjs';
 import { DeleteLeftCommand, TextSelectionManagerService } from '@univerjs/docs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
+import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -45,6 +46,18 @@ export const CopyMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
         type: MenuItemType.BUTTON,
         icon: 'Copy',
         title: 'rightClick.copy',
+        positions: [MenuPosition.CONTEXT_MENU],
+        disabled$: getDisableOnCollapsedObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+    };
+};
+
+export const ParagraphSettingMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
+    return {
+        id: DocParagraphSettingPanelOperation.id,
+        type: MenuItemType.BUTTON,
+        icon: 'MenuSingle24',
+        title: 'doc.menu.paragraphSetting',
         positions: [MenuPosition.CONTEXT_MENU],
         disabled$: getDisableOnCollapsedObservable(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),

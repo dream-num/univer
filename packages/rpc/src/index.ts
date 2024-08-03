@@ -16,7 +16,6 @@
 
 export {
     type IUniverRPCMainThreadConfig,
-    type IUniverRPCWorkerThreadPluginConfig,
     UniverRPCMainThreadPlugin,
     UniverRPCWorkerThreadPlugin,
 } from './plugin';

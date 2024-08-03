@@ -19,8 +19,8 @@ import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable,
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
 import { CutContentCommand, DocCustomRangeService, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
-import { DOC_RANGE_TYPE, type TextRange } from '@univerjs/engine-render';
-import type { RectRange } from '../../../../engine-render/lib/types';
+import type { RectRange, TextRange } from '@univerjs/engine-render';
+import { DOC_RANGE_TYPE } from '@univerjs/engine-render';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';

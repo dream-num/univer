@@ -245,8 +245,23 @@ export function getCursorWhenDelete(textRanges: Readonly<Nullable<TextRange[]>>,
 
     if (textRanges == null || textRanges.length === 0) {
         if (typeof rectRanges[0].startOffset === 'number') {
-            // Put the cursor at the first text range start.
-            cursor = rectRanges[0].startOffset;
+            // Put the cursor at the first rect range start.
+            const rectRange = rectRanges[0]!;
+            const { spanEntireRow, spanEntireTable } = rectRange;
+
+            if (spanEntireTable) {
+                // Put the cursor at the first line of deleted table paragraph.
+                cursor = rectRange.startOffset! - 3; // 3 is TABLE START, ROW START, CELL START.
+            } else if (spanEntireRow) {
+                // Put the cursor at the last row's end cell before deleted rows.
+                if (rectRange.startRow > 0) {
+                    cursor = rectRange.startOffset! - 6; // 6 is ROW START, CELL START, CELL END, ROW END, \r, \n.
+                } else {
+                    cursor = rectRange.startOffset!;
+                }
+            } else {
+                cursor = rectRanges[0].startOffset;
+            }
         }
     } else if (textRanges.length > 0 && rectRanges.length > 0) {
         const textRange = textRanges[0]!;

@@ -61,6 +61,7 @@ import { DocHoverManagerService } from './services/doc-hover-manager.service';
 import { DocHoverRenderController } from './controllers/render-controllers/doc-hover.render-controller';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
+import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -166,6 +167,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocResizeRenderController],
             [DocHoverRenderController],
             [DocContextMenuRenderController],
+            [DocChecklistRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });

@@ -41,7 +41,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
-import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, ListOperationCommand, OrderListCommand } from './commands/commands/list.command';
+import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, CheckListCommand, ListOperationCommand, OrderListCommand, ToggleCheckListCommand } from './commands/commands/list.command';
 import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
@@ -130,6 +130,8 @@ export class UniverDocsPlugin extends Plugin {
                 EnterCommand,
                 ChangeListNestingLevelCommand,
                 ChangeListTypeCommand,
+                CheckListCommand,
+                ToggleCheckListCommand,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);

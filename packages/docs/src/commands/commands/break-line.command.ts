@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IParagraph } from '@univerjs/core';
-import { CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, Tools, updateAttributeByInsert } from '@univerjs/core';
+import { BooleanNumber, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { getInsertSelection } from '../../basics/selection';
@@ -41,10 +41,20 @@ function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IPa
         for (const paragraph of paragraphs) {
             if (prevParagraph.bullet) {
                 paragraph.bullet = Tools.deepClone(prevParagraph.bullet);
+                if (paragraph.bullet.listType === PresetListType.CHECK_LIST_CHECKED) {
+                    paragraph.bullet.listType = PresetListType.CHECK_LIST;
+                }
             }
 
             if (prevParagraph.paragraphStyle) {
                 paragraph.paragraphStyle = Tools.deepClone(prevParagraph.paragraphStyle);
+                if (prevParagraph.bullet?.listType === PresetListType.CHECK_LIST_CHECKED) {
+                    if (paragraph.paragraphStyle?.textStyle) {
+                        paragraph.paragraphStyle.textStyle.st = {
+                            s: BooleanNumber.FALSE,
+                        };
+                    }
+                }
             }
         }
     }

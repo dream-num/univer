@@ -43,10 +43,8 @@ interface IListOperationCommandParams {
 
 export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
     id: 'doc.command.list-operation',
-
     type: CommandType.COMMAND,
-
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: (accessor, params: IListOperationCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -89,10 +87,14 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
             if (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listType.indexOf(listType) === 0) {
                 listId = prevParagraph.bullet.listId;
-                listType = prevParagraph.bullet.listType;
+                if (listType !== PresetListType.CHECK_LIST) {
+                    listType = prevParagraph.bullet.listType;
+                }
             } else if (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listType.indexOf(listType) === 0) {
                 listId = nextParagraph.bullet.listId;
-                listType = nextParagraph.bullet.listType;
+                if (listType !== PresetListType.CHECK_LIST) {
+                    listType = nextParagraph.bullet.listType;
+                }
             }
         }
 
@@ -126,8 +128,13 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
             const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
             const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
+            const bulletParagraphTextStyle = paragraphProperties.textStyle;
             const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
-
+            const bulletParagraphTextStyleEmpty = Object.keys(bulletParagraphTextStyle ?? {})
+                .reduce((acc: Record<string, any>, key) => {
+                    acc[key] = undefined;
+                    return acc;
+                }, {});
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             textX.push({
@@ -148,6 +155,10 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                     ...paragraphStyle,
                                     hanging: undefined,
                                     indentStart: indentStart ? { v: Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + getNumberUnitValue(listHanging, charSpaceApply) - getNumberUnitValue(listIndentStart, charSpaceApply)) } : undefined,
+                                    textStyle: {
+                                        ...paragraphStyle.textStyle,
+                                        ...bulletParagraphTextStyleEmpty,
+                                    },
                                 },
                                 startIndex: 0,
                             }
@@ -155,6 +166,10 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                 startIndex: 0,
                                 paragraphStyle: {
                                     ...paragraphStyle,
+                                    textStyle: {
+                                        ...paragraphStyle.textStyle,
+                                        ...bulletParagraphTextStyle,
+                                    },
                                     indentFirstLine: undefined,
                                     hanging: listHanging,
                                     indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
@@ -255,6 +270,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
             const { startIndex, paragraphStyle = {} } = paragraph;
             const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
             const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
+            const bulletParagraphTextStyle = paragraphProperties.textStyle;
             const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
             const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
 
@@ -276,6 +292,10 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
                             startIndex: 0,
                             paragraphStyle: {
                                 ...paragraphStyle,
+                                textStyle: {
+                                    ...paragraphStyle.textStyle,
+                                    ...bulletParagraphTextStyle,
+                                },
                                 indentFirstLine: undefined,
                                 hanging: listHanging,
                                 indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
@@ -456,6 +476,134 @@ export const BulletListCommand: ICommand<IBulletListCommandParams> = {
         return commandService.syncExecuteCommand(ListOperationCommand.id, {
             listType: PresetListType.BULLET_LIST,
         });
+    },
+};
+
+export const CheckListCommand: ICommand<IBulletListCommandParams> = {
+    id: 'doc.command.check-list',
+    type: CommandType.COMMAND,
+    handler: (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+
+        if (params?.value) {
+            return commandService.syncExecuteCommand(ChangeListTypeCommand.id, {
+                listType: params.value,
+            });
+        }
+
+        return commandService.syncExecuteCommand(ListOperationCommand.id, {
+            listType: PresetListType.CHECK_LIST,
+        });
+    },
+};
+
+export interface IToggleCheckListCommandParams {
+    index: number;
+}
+
+export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
+    id: 'doc.command.toggle-check-list',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const { index } = params;
+
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (docDataModel == null) {
+            return false;
+        }
+
+        // const { segmentId } = activeRange;
+
+        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
+        const paragraphs = docDataModel.getBody()?.paragraphs;
+        const serializedSelections = selections.map(serializeTextRange);
+        if (paragraphs == null) {
+            return false;
+        }
+
+        const currentParagraph = paragraphs.find((p) => p.startIndex === index);
+        const unitId = docDataModel.getUnitId();
+        if (!currentParagraph?.bullet || currentParagraph.bullet.listType.indexOf(PresetListType.CHECK_LIST) === -1) {
+            return false;
+        }
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges: serializedSelections,
+            },
+        };
+
+        const memoryCursor = new MemoryCursor();
+        memoryCursor.reset();
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
+        const customLists = docDataModel.getSnapshot().lists ?? {};
+
+        const lists: Record<string, IListData> = {
+            ...PRESET_LIST_TYPE,
+            ...customLists,
+        };
+
+        const { startIndex, paragraphStyle = {} } = currentParagraph;
+        const listType = currentParagraph.bullet.listType === PresetListType.CHECK_LIST ?
+            PresetListType.CHECK_LIST_CHECKED
+            : PresetListType.CHECK_LIST;
+        const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
+        const bulletParagraphTextStyle = paragraphProperties.textStyle;
+
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: startIndex - memoryCursor.cursor,
+        });
+
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: 1,
+            body: {
+                dataStream: '',
+                paragraphs: [
+                    {
+                        ...currentParagraph,
+                        paragraphStyle: {
+                            ...paragraphStyle,
+                            textStyle: {
+                                ...paragraphStyle.textStyle,
+                                ...bulletParagraphTextStyle,
+                            },
+                        },
+                        startIndex: 0,
+                        bullet: {
+                            ...currentParagraph.bullet,
+                            listType,
+                        },
+                    },
+                ],
+            },
+            coverType: UpdateDocsAttributeType.REPLACE,
+        });
+
+        memoryCursor.moveCursorTo(startIndex + 1);
+
+        const path = getRichTextEditPath(docDataModel);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
     },
 };
 

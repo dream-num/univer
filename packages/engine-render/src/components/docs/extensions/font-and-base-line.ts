@@ -24,6 +24,7 @@ import { Vector2 } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
+import { Checkbox } from '../../../shape';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
@@ -105,7 +106,19 @@ export class FontAndBaseLine extends docExtension {
             ctx.fillText(content, 0, 0);
             ctx.restore();
         } else {
-            ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
+            if (content === '\u2610' || content === '\u2611') {
+                ctx.save();
+                const size = glyph.ts?.fs ?? 16;
+                ctx.translate(spanStartPoint.x, spanStartPoint.y + centerPoint.y - size);
+                Checkbox.drawWith(ctx, {
+                    width: size,
+                    height: size,
+                    checked: content === '\u2611',
+                });
+                ctx.restore();
+            } else {
+                ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
+            }
         }
     }
 

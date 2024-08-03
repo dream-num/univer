@@ -30,6 +30,7 @@ import {
     AlignOperationCommand,
     AlignRightCommand,
     BulletListCommand,
+    CheckListCommand,
     getParagraphsInRange,
     OrderListCommand,
     ResetInlineFormatTextBackgroundColorCommand,
@@ -646,6 +647,19 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('BULLET_LIST') === 0)),
+    };
+}
+
+export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: CheckListCommand.id,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'UnorderSingle',
+        tooltip: 'toolbar.unorder',
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('CHECK_LIST') === 0)),
     };
 }
 

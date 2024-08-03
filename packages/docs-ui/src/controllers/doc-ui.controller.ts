@@ -53,6 +53,7 @@ import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
+    CheckListMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
     HeaderFooterMenuItemFactory,
@@ -124,6 +125,7 @@ export class DocUIController extends Disposable {
                 AlignJustifyMenuItemFactory,
                 OrderListMenuItemFactory,
                 BulletListMenuItemFactory,
+                CheckListMenuItemFactory,
                 ResetBackgroundColorMenuItemFactory,
                 BackgroundColorSelectorMenuItemFactory,
             ] as IMenuItemFactory[]

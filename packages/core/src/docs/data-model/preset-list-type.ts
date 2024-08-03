@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IListData, INestingLevel } from '../../types/interfaces/i-document-data';
+import { BooleanNumber } from '../../types/enum';
+import type { IListData, INestingLevel, ITextStyle } from '../../types/interfaces/i-document-data';
 import { BulletAlignment, GlyphType } from '../../types/interfaces/i-document-data';
 
 export enum PresetListType {
@@ -72,20 +73,21 @@ const orderListFactory = (options: { glyphFormat: string; glyphType: GlyphType }
     }));
 };
 
-const checkListFactory = (symbol: string): INestingLevel[] => {
+const checkListFactory = (symbol: string, textStyle: ITextStyle): INestingLevel[] => {
     return Array(9).fill(0).map((_, i) => ({
         glyphFormat: ` %${i + 1}`,
         glyphSymbol: symbol,
         bulletAlignment: BulletAlignment.START,
         textStyle: {
-            fs: 12,
+            fs: 16,
         },
         startNumber: 0,
         paragraphProperties: {
             hanging: { v: 21 },
             indentStart: { v: 21 * (i + 1) },
+            textStyle,
         },
-    }));
+    } as INestingLevel));
 };
 
 export const PRESET_LIST_TYPE = {
@@ -199,10 +201,24 @@ export const PRESET_LIST_TYPE = {
 
     [PresetListType.CHECK_LIST]: {
         listType: PresetListType.CHECK_LIST,
-        nestingLevel: checkListFactory('\u2610'),
+        nestingLevel: checkListFactory(
+            '\u2610',
+            {
+                st: {
+                    s: BooleanNumber.FALSE,
+                },
+            }
+        ),
     } as IListData,
     [PresetListType.CHECK_LIST_CHECKED]: {
-        listType: PresetListType.CHECK_LIST,
-        nestingLevel: checkListFactory('\u2611'),
+        listType: PresetListType.CHECK_LIST_CHECKED,
+        nestingLevel: checkListFactory(
+            '\u2611',
+            {
+                st: {
+                    s: BooleanNumber.TRUE,
+                },
+            }
+        ),
     } as IListData,
 };

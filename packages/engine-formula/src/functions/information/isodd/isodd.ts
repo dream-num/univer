@@ -40,6 +40,10 @@ export class Isodd extends BaseFunction {
             _value = (_value as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
+        if (_value.isError()) {
+            return _value;
+        }
+
         if (_value.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }

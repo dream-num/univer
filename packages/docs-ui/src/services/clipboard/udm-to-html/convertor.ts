@@ -252,7 +252,7 @@ export class UDMToHtmlService {
 
         let html = '';
 
-        for (const body of bodyList) {
+        for (const body of Tools.deepClone(bodyList)) {
             html += convertBodyToHtml(body);
         }
 

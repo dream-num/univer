@@ -15,6 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
@@ -28,19 +29,29 @@ export class Iseven extends BaseFunction {
     override calculate(value: BaseValueObject) {
         let _value = value;
 
-        if (_value.isArray() || _value.isBoolean()) {
+        if (_value.isArray()) {
+            const rowCount = (_value as ArrayValueObject).getRowCount();
+            const columnCount = (_value as ArrayValueObject).getColumnCount();
+
+            if (rowCount > 1 || columnCount > 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            _value = (_value as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_value.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (!_value.isNumber()) {
-            _value = _value.convertToNumberObjectValue();
-            if (!_value.isNumber()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
+        const val = Math.trunc(+_value.getValue());
+
+        if (Number.isNaN(val)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const val = _value.getValue() as number;
-        const floored = Math.floor(Math.abs(val));
-        return BooleanValueObject.create(floored % 2 === 0);
+        const result = val % 2 === 0;
+
+        return BooleanValueObject.create(result);
     }
 }

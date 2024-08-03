@@ -36,6 +36,8 @@ import { SheetsFilterMobileUIController } from './sheets-filter-mobile-ui.contro
 
 export interface IUniverSheetsFilterUIConfig {
     menu: MenuConfig;
+
+    useRemoteFilterValuesGenerator?: boolean;
 }
 
 export const DefaultSheetFilterUiConfig = {};

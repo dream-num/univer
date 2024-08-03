@@ -16,6 +16,7 @@
 
 export { UniverSheetsFilterUIPlugin } from './plugin';
 export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
+export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
 
 // #region - all commands
 

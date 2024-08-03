@@ -202,7 +202,15 @@ describe('test "SheetsFilterPanelService"', () => {
     });
 
     describe('test filter by values', () => {
-        it('should initialize by filters when the filter column holds "filters"', () => {
+        beforeEach(() => {
+            vitest.useFakeTimers();
+        });
+
+        afterEach(() => {
+            vitest.useRealTimers();
+        });
+
+        it('should initialize by filters when the filter column holds "filters"', async () => {
             prepare(WithValuesFilterModelFactory());
 
             expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
@@ -210,6 +218,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 subUnitId: 'sheet1',
                 col: 0,
             } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            await await tick();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -217,7 +226,7 @@ describe('test "SheetsFilterPanelService"', () => {
             expect(filterByModel.filterItems).toEqual(ITEMS);
         });
 
-        it('should initialize with blank content', () => {
+        it('should initialize with blank content', async () => {
             prepare(WithValuesAndEmptyFilterModelFactory());
 
             expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
@@ -225,6 +234,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 subUnitId: 'sheet1',
                 col: 0,
             } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            await tick();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -238,7 +248,7 @@ describe('test "SheetsFilterPanelService"', () => {
             }]);
         });
 
-        it('should count empty cells', () => {
+        it('should count empty cells', async () => {
             prepare(WithMultiEmptyCellsModelFactory());
 
             expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
@@ -246,6 +256,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 subUnitId: 'sheet1',
                 col: 0,
             } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            await tick();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -260,7 +271,7 @@ describe('test "SheetsFilterPanelService"', () => {
             });
         });
 
-        it('should filter out the items from the panel if its row is already filtered out by other column', () => {
+        it('should filter out the items from the panel if its row is already filtered out by other column', async () => {
             prepare(WithTwoFilterColumnsFactory());
 
             expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
@@ -268,6 +279,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 subUnitId: 'sheet1',
                 col: 1,
             } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            await tick();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -305,7 +317,7 @@ describe('test "SheetsFilterPanelService"', () => {
             ]);
         });
 
-        it('merged cell should use value of the top left corner', () => {
+        it('merged cell should use value of the top left corner', async () => {
             prepare(WithMergedCellFilterFactory());
 
             expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
@@ -313,6 +325,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 subUnitId: 'sheet1',
                 col: 1,
             } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            await tick();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -343,7 +356,7 @@ describe('test "SheetsFilterPanelService"', () => {
             ]);
         });
 
-        it('should update the filter items when toggle checked status', () => {
+        it('should update the filter items when toggle checked status', async () => {
             prepare(WithValuesFilterModelFactory());
 
             expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
@@ -351,6 +364,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 subUnitId: 'sheet1',
                 col: 0,
             } as IOpenFilterPanelOperationParams)).toBe(true);
+            await tick();
 
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
             filterByModel.onFilterCheckToggled(ITEMS[0], true);
@@ -376,6 +390,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 subUnitId: 'sheet1',
                 col: 0,
             } as IOpenFilterPanelOperationParams)).toBe(true);
+            await tick();
 
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
             filterByModel.onFilterCheckToggled(ITEMS[0], true);
@@ -388,7 +403,7 @@ describe('test "SheetsFilterPanelService"', () => {
             expect(filterModel!.filteredOutRows).toEqual(new Set([1, 2, 3, 4, 5, 7, 8, 9, 10]));
         });
 
-        describe('with searching', () => {
+        describe('with searching', async () => {
             // use fake timers
             // for performance reasons, search string are throttled to change the search results
             beforeEach(() => {
@@ -399,7 +414,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 vitest.useRealTimers();
             });
 
-            it('should update the filter items when searching', () => {
+            it('should update the filter items when searching', async () => {
                 prepare(WithValuesFilterModelFactory());
 
                 expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
@@ -407,6 +422,7 @@ describe('test "SheetsFilterPanelService"', () => {
                     subUnitId: 'sheet1',
                     col: 0,
                 } as IOpenFilterPanelOperationParams)).toBe(true);
+                await tick();
 
                 const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
 
@@ -415,7 +431,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 expect(filterByModel.filterItems).toEqual(E_ITEMS);
             });
 
-            it('should toggle all applied to searched results', () => {
+            it('should toggle all applied to searched results', async () => {
                 prepare(WithValuesFilterModelFactory());
 
                 expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
@@ -423,6 +439,7 @@ describe('test "SheetsFilterPanelService"', () => {
                     subUnitId: 'sheet1',
                     col: 0,
                 } as IOpenFilterPanelOperationParams)).toBe(true);
+                await tick();
 
                 const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
 
@@ -433,7 +450,7 @@ describe('test "SheetsFilterPanelService"', () => {
                 expect(filterByModel.rawFilterItems.filter((i) => i.checked).length).toBe(8); // the original "1" should be checked as well
             });
 
-            it('should filter only applied to searched results', () => {
+            it('should filter only applied to searched results', async () => {
                 prepare(WithValuesFilterModelFactory());
 
                 expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
@@ -441,6 +458,7 @@ describe('test "SheetsFilterPanelService"', () => {
                     subUnitId: 'sheet1',
                     col: 0,
                 } as IOpenFilterPanelOperationParams)).toBe(true);
+                await tick();
 
                 const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
 
@@ -463,3 +481,9 @@ describe('test "SheetsFilterPanelService"', () => {
         });
     });
 });
+
+function tick(milliseconds: number = 0): Promise<void> {
+    const result = new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
+    vitest.advanceTimersByTime(milliseconds + 1);
+    return result;
+}

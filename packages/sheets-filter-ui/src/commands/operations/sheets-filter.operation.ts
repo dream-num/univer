@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IContextService, type IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
+import { CommandType, ICommandService, IContextService, Quantity } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { ILayoutService } from '@univerjs/ui';
-import { Quantity } from '@univerjs/core';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import type { FilterBy } from '../../services/sheets-filter-panel.service';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
@@ -37,7 +37,7 @@ export interface IOpenFilterPanelOperationParams {
 export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParams> = {
     id: 'sheet.operation.open-filter-panel',
     type: CommandType.OPERATION,
-    handler: (accessor, params) => {
+    handler: (accessor, params: IOpenFilterPanelOperationParams) => {
         const contextService = accessor.get(IContextService);
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const sheetsFilterPanelService = accessor.get(SheetsFilterPanelService);
@@ -50,9 +50,7 @@ export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParam
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
         if (!filterModel) return false;
 
-        const result = sheetsFilterPanelService.setupCol(filterModel, col);
-        if (!result) return false;
-
+        sheetsFilterPanelService.setupCol(filterModel, col);
         if (!contextService.getContextValue(FILTER_PANEL_OPENED_KEY)) {
             contextService.setContextValue(FILTER_PANEL_OPENED_KEY, true);
         }

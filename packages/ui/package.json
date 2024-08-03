@@ -82,7 +82,7 @@
         "rc-util": "^5.43.0"
     },
     "optionalDependencies": {
-        "vue": ">=3.0.0"
+        "vue": "^3.4.35"
     },
     "devDependencies": {
         "@testing-library/react": "^16.0.0",
@@ -102,8 +102,8 @@
         "rxjs": "^7.8.1",
         "typescript": "^5.5.4",
         "vite": "^5.3.5",
-        "vitest": "^2.0.4",
-        "vue": "^3.4.29"
+        "vitest": "^2.0.5",
+        "vue": "^3.4.35"
     },
     "univerSpace": {
         ".": {

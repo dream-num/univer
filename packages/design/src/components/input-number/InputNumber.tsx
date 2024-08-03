@@ -15,7 +15,7 @@
  */
 
 import RcInputNumber from 'rc-input-number';
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 import styles from './index.module.less';
 
@@ -88,7 +88,7 @@ export interface IInputNumberProps {
     onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-export function InputNumber(props: IInputNumberProps) {
+export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>((props, ref) => {
     const {
         className,
         value,
@@ -125,6 +125,7 @@ export function InputNumber(props: IInputNumberProps) {
             onKeyDown={onKeyDown}
             onChange={handleChange}
             onPressEnter={onPressEnter}
+            ref={ref}
         />
     );
-}
+});

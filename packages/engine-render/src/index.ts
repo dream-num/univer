@@ -35,7 +35,7 @@ export * from './viewport';
 export { DocumentViewModel } from './components/docs/view-model/document-view-model';
 export { getAnchorBounding, TEXT_RANGE_LAYER_INDEX, TextRange, getLineBounding } from './components/docs/text-selection/text-range';
 export { RectRange, convertPositionsToRectRanges } from './components/docs/text-selection/rect-range';
-export { NodePositionConvertToCursor } from './components/docs/text-selection/convert-cursor';
+export { NodePositionConvertToCursor } from './components/docs/text-selection/convert-text-range';
 export { Liquid } from './components/docs/liquid';
 export { getCanvasOffsetByEngine } from './components/docs/text-selection/selection-utils';
 export {
@@ -53,7 +53,7 @@ export { type IChangeObserverConfig } from './scene.transformer';
 export { DEFAULT_PADDING_DATA } from './components/sheets/sheet-skeleton';
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
 export { lineIterator, glyphIterator } from './components/docs/layout/tools';
-export { getOneTextSelectionRange } from './components/docs/text-selection/convert-cursor';
+export { getOneTextSelectionRange } from './components/docs/text-selection/convert-text-range';
 export { getLastLine } from './components/docs/layout/tools';
 export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tree-node';
 export type { IDocRange } from './components/docs/text-selection/range-interface';

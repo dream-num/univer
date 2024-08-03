@@ -34,7 +34,7 @@ import {
     getOneTextSelectionRange,
     NodePositionConvertToCursor,
     NodePositionMap,
-} from './convert-cursor';
+} from './convert-text-range';
 import type { IDocRange } from './range-interface';
 import { DOC_RANGE_TYPE } from './range-interface';
 

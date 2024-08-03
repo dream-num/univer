@@ -29,7 +29,7 @@ import { Skeleton } from '../../skeleton';
 import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import { DocumentEditArea } from '../view-model/document-view-model';
-import { getPageFromPath } from '../text-selection/convert-cursor';
+import { getPageFromPath } from '../text-selection/convert-text-range';
 import type { ILayoutContext } from './tools';
 import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 import { createSkeletonSection } from './model/section';
@@ -719,141 +719,143 @@ export class DocumentSkeleton extends Skeleton {
             }
         }
 
-        for (const section of sections) {
-            const { columns } = section;
-
-            this._findLiquid.translateSave();
-            this._findLiquid.translateSection(section);
-
-            for (const column of columns) {
-                const { lines } = column;
+        if (pointInPage) {
+            for (const section of sections) {
+                const { columns } = section;
 
                 this._findLiquid.translateSave();
-                this._findLiquid.translateColumn(column);
+                this._findLiquid.translateSection(section);
 
-                const linesCount = lines.length;
+                for (const column of columns) {
+                    const { lines } = column;
 
-                for (let i = 0; i < linesCount; i++) {
-                    const line = lines[i];
-                    const { divides, type, lineHeight = 0 } = line;
+                    this._findLiquid.translateSave();
+                    this._findLiquid.translateColumn(column);
 
-                    if (type === LineType.BLOCK) {
-                        continue;
-                    } else {
-                        this._findLiquid.translateSave();
-                        this._findLiquid.translateLine(line);
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        const { divides, type, lineHeight = 0 } = line;
 
-                        const { y: startY } = this._findLiquid;
-
-                        const startY_fin = startY;
-
-                        const endY_fin = startY + lineHeight;
-
-                        const distanceY = Math.abs(y - endY_fin);
-
-                        const divideLength = divides.length;
-                        for (let i = 0; i < divideLength; i++) {
-                            const divide = divides[i];
-                            const { glyphGroup } = divide;
-
+                        if (type === LineType.BLOCK) {
+                            continue;
+                        } else {
                             this._findLiquid.translateSave();
-                            this._findLiquid.translateDivide(divide);
+                            this._findLiquid.translateLine(line);
 
-                            const { x: startX } = this._findLiquid;
+                            const { y: startY } = this._findLiquid;
 
-                            for (const glyph of glyphGroup) {
-                                if (!glyph.content || glyph.content.length === 0) {
-                                    continue;
-                                }
+                            const startY_fin = startY;
 
-                                const { width: glyphWidth, left: glyphLeft } = glyph;
+                            const endY_fin = startY + lineHeight;
 
-                                const startX_fin = startX + glyphLeft;
+                            const distanceY = Math.abs(y - endY_fin);
 
-                                const endX_fin = startX + glyphLeft + glyphWidth;
+                            const divideLength = divides.length;
+                            for (let i = 0; i < divideLength; i++) {
+                                const divide = divides[i];
+                                const { glyphGroup } = divide;
 
-                                const distanceX = Math.abs(x - endX_fin);
+                                this._findLiquid.translateSave();
+                                this._findLiquid.translateDivide(divide);
 
-                                if (y >= startY_fin && y <= endY_fin) {
-                                    if (x >= startX_fin && x <= endX_fin) {
-                                        return {
+                                const { x: startX } = this._findLiquid;
+
+                                for (const glyph of glyphGroup) {
+                                    if (!glyph.content || glyph.content.length === 0) {
+                                        continue;
+                                    }
+
+                                    const { width: glyphWidth, left: glyphLeft } = glyph;
+                                    const startX_fin = startX + glyphLeft;
+                                    const endX_fin = startX + glyphLeft + glyphWidth;
+                                    const distanceX = Math.abs(x - endX_fin);
+
+                                    // Handle pointer in the same line.
+                                    if (y >= startY_fin && y <= endY_fin) {
+                                        // Exact match glyph.
+                                        if (x >= startX_fin && x <= endX_fin) {
+                                            return {
+                                                node: glyph,
+                                                segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
+                                                segmentId,
+                                                ratioX: x / (startX_fin + endX_fin),
+                                                ratioY: y / (startY_fin + endY_fin),
+                                            };
+                                        }
+
+                                        if (cache.nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
+                                            cache.nearestNodeList = [];
+                                            cache.nearestNodeDistanceList = [];
+                                        }
+                                        cache.nearestNodeList.push({
                                             node: glyph,
                                             segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
                                             segmentId,
                                             ratioX: x / (startX_fin + endX_fin),
                                             ratioY: y / (startY_fin + endY_fin),
-                                        };
+                                        });
+
+                                        cache.nearestNodeDistanceList.push({
+                                            coordInPage: pointInPage,
+                                            distance: distanceX,
+                                            nestLevel,
+                                        });
+
+                                        cache.nearestNodeDistanceY = Number.NEGATIVE_INFINITY;
+                                        continue;
                                     }
 
-                                    if (cache.nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
+                                    if (distanceY < cache.nearestNodeDistanceY) {
+                                        cache.nearestNodeDistanceY = distanceY;
                                         cache.nearestNodeList = [];
                                         cache.nearestNodeDistanceList = [];
                                     }
-                                    cache.nearestNodeList.push({
-                                        node: glyph,
-                                        segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
-                                        segmentId,
-                                        ratioX: x / (startX_fin + endX_fin),
-                                        ratioY: y / (startY_fin + endY_fin),
-                                    });
 
-                                    cache.nearestNodeDistanceList.push({
-                                        coordInPage: pointInPage,
-                                        distance: distanceX,
-                                        nestLevel,
-                                    });
+                                    if (distanceY === cache.nearestNodeDistanceY) {
+                                        cache.nearestNodeList.push({
+                                            node: glyph,
+                                            segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
+                                            segmentId,
+                                            ratioX: x / (startX_fin + endX_fin),
+                                            ratioY: y / (startY_fin + endY_fin),
+                                        });
 
-                                    cache.nearestNodeDistanceY = Number.NEGATIVE_INFINITY;
-                                    continue;
+                                        cache.nearestNodeDistanceList.push({
+                                            coordInPage: pointInPage,
+                                            distance: distanceX,
+                                            nestLevel,
+                                        });
+                                    }
                                 }
-
-                                if (distanceY < cache.nearestNodeDistanceY && pointInPage) {
-                                    cache.nearestNodeDistanceY = distanceY;
-                                    cache.nearestNodeList = [];
-                                    cache.nearestNodeDistanceList = [];
-                                }
-
-                                if (distanceY === cache.nearestNodeDistanceY || pointInPage) {
-                                    cache.nearestNodeList.push({
-                                        node: glyph,
-                                        segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,
-                                        segmentId,
-                                        ratioX: x / (startX_fin + endX_fin),
-                                        ratioY: y / (startY_fin + endY_fin),
-                                    });
-
-                                    cache.nearestNodeDistanceList.push({
-                                        coordInPage: pointInPage,
-                                        distance: distanceX,
-                                        nestLevel,
-                                    });
-                                }
+                                this._findLiquid.translateRestore();
                             }
                             this._findLiquid.translateRestore();
                         }
-                        this._findLiquid.translateRestore();
                     }
+                    this._findLiquid.translateRestore();
                 }
+
                 this._findLiquid.translateRestore();
             }
-
-            this._findLiquid.translateRestore();
         }
 
         let exactMatch = null;
         if (skeTables.size > 0) {
             for (const table of skeTables.values()) {
                 const { top: tableTop, left: tableLeft, rows } = table;
+
                 this._findLiquid?.translateSave();
                 this._findLiquid?.translate(tableLeft, tableTop);
 
                 for (const row of rows) {
                     const { top: rowTop, cells } = row;
+
                     this._findLiquid?.translateSave();
                     this._findLiquid?.translate(0, rowTop);
 
                     for (const cell of cells) {
                         const { left: cellLeft } = cell;
+
                         this._findLiquid?.translateSave();
                         this._findLiquid?.translate(cellLeft, 0);
 

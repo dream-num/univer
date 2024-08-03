@@ -43,7 +43,9 @@ export class FlowManagerService extends Disposable {
     }
 
     setViewport(viewport: { zoom: number; x: number; y: number }) {
-        this._flowInstance?.setViewport(viewport);
+        this._flowInstance?.setViewport(viewport, {
+            duration: 100,
+        });
     }
 
     setReactFlowInstance(instance: ReactFlowInstance<any>) {

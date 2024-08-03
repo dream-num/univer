@@ -19,3 +19,4 @@ export { UniUIPart } from './views/outline/Outline';
 export { getGridUnitLocalCacheKey, UnitGridService, IUnitGridService, type IProjectNode, type IUnitGrid } from './services/unit-grid/unit-grid.service';
 export { UniFloatToolbarUIPart } from './views/uni-toolbar/UniFloatToolbar';
 export { SetFlowViewportOperation } from './commands/operations/set-flow-viewport.operation';
+export { UniFocusUnitOperation } from './commands/operations/uni-focus-unit.operation';

@@ -16,7 +16,7 @@
 
 // Refer to packages/ui/src/views/App.tsx
 
-import { debounce, IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
+import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import type { ILocale } from '@univerjs/design';
 import {
@@ -56,6 +56,7 @@ import { type FloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniF
 import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControls } from '../uni-controls/UniControls';
 import { UniToolbar } from '../uni-toolbar/UniToolbar';
 import { FlowManagerService } from '../../services/flow/flow-manager.service';
+import { UniFocusUnitOperation } from '../../commands/operations/uni-focus-unit.operation';
 import styles from './workbench.module.less';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
 
@@ -80,6 +81,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const instanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const flowManagerService = useDependency(FlowManagerService);
+    const commandService = useDependency(ICommandService);
 
     const contentRef = useRef<HTMLDivElement>(null);
     const selectedNodeRef = useRef<HTMLElement | null>(null);
@@ -92,8 +94,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     const focusedUnit = useObservable(instanceService.focused$);
     const focusUnit = useCallback((unitId: string) => {
-        instanceService.focusUnit(unitId);
-        instanceService.setCurrentUnitForType(unitId);
+        commandService.executeCommand(UniFocusUnitOperation.id, { unitId });
     }, [instanceService]);
 
     useEffect(() => {

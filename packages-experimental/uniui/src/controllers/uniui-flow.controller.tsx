@@ -19,6 +19,7 @@ import { throttleTime } from 'rxjs';
 import { SetFlowViewportOperation } from '../commands/operations/set-flow-viewport.operation';
 import type { IFlowViewport } from '../services/flow/flow-manager.service';
 import { FlowManagerService } from '../services/flow/flow-manager.service';
+import { UniFocusUnitOperation } from '../commands/operations/uni-focus-unit.operation';
 
 @OnLifecycle(LifecycleStages.Ready, UniuiFlowController)
 export class UniuiFlowController extends Disposable {
@@ -34,6 +35,7 @@ export class UniuiFlowController extends Disposable {
     private _initCommands(): void {
         [
             SetFlowViewportOperation,
+            UniFocusUnitOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

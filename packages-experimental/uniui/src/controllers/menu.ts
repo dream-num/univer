@@ -551,7 +551,6 @@ export function DownloadMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [
             UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
         ],
-
     };
 }
 

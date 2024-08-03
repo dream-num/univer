@@ -52,7 +52,7 @@ import { MenuSingle } from '@univerjs/icons';
 import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
 import { useUnitFocused, useUnitTitle } from '../hooks/title';
-import { type FloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
+import { type IFloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
 import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControls } from '../uni-controls/UniControls';
 import { UniToolbar } from '../uni-toolbar/UniToolbar';
 import { FlowManagerService } from '../../services/flow/flow-manager.service';
@@ -85,7 +85,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     const contentRef = useRef<HTMLDivElement>(null);
     const selectedNodeRef = useRef<HTMLElement | null>(null);
-    const floatingToolbarRef = useRef<FloatingToolbarRef>(null);
+    const floatingToolbarRef = useRef<IFloatingToolbarRef>(null);
     const reactFlowInstance = useRef<HTMLDivElement | null>(null);
 
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);

@@ -22,8 +22,12 @@ import type { IUnitRendererProps } from '../workbench/UniWorkbench';
 import { DELETE_MENU_ID, DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
 import styles from './index.module.less';
 
-export interface FloatingToolbarRef {
+export interface IFloatingToolbarRef {
     update: () => void;
+}
+
+export enum UniFloatToolbarUIPart {
+    NAME = 'name',
 }
 
 const MENU_POSITIONS = [
@@ -39,7 +43,7 @@ const UNI_FLOATING_TOOLBAR_SCHEMA: string[] = [
     DELETE_MENU_ID,
 ];
 
-export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: Nullable<IUnitRendererProps>; anchorRef: React.MutableRefObject<HTMLElement | null> }>(({ node, anchorRef }, ref) => {
+export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: Nullable<IUnitRendererProps>; anchorRef: React.MutableRefObject<HTMLElement | null> }>(({ node, anchorRef }, ref) => {
     const { x, y, refs, strategy, update } = useFloating({
         placement: 'top',
         middleware: [offset(10), flip(), shift({ padding: 5 })],
@@ -81,10 +85,7 @@ export const UniFloatingToolbar = React.forwardRef<FloatingToolbarRef, { node: N
                 />
                 <UniDiv />
                 <div className={styles.toolbarGroup}>
-                    {uniVisibleItems.map(
-                        (subItem) =>
-                            <ToolbarItem key={subItem.id} {...subItem} />
-                    )}
+                    {uniVisibleItems.map((subItem) => <ToolbarItem key={subItem.id} {...subItem} />)}
                 </div>
             </div>
         </div>
@@ -106,6 +107,3 @@ export function UnitName({ unitId }: { unitId: string }) {
     );
 };
 
-export enum UniFloatToolbarUIPart {
-    NAME = 'name',
-}

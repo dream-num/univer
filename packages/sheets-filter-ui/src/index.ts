@@ -27,10 +27,10 @@ export {
     ReCalcSheetsFilterCommand,
 } from './commands/commands/sheets-filter.command';
 export {
-    OpenFilterPanelCommand,
+    OpenFilterPanelOperation,
     CloseFilterPanelOperation,
     ChangeFilterByOperation,
-    type IOpenFilterPanelCommandParams,
+    type IOpenFilterPanelOperationParams,
 } from './commands/operations/sheets-filter.operation';
 
 // #endregion

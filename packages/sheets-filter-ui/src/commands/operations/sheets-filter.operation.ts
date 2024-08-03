@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
 import { CommandType, ICommandService, IContextService, Quantity } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { ILayoutService } from '@univerjs/ui';
@@ -24,7 +24,7 @@ import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.ser
 
 export const FILTER_PANEL_OPENED_KEY = 'FILTER_PANEL_OPENED';
 
-export interface IOpenFilterPanelCommandParams {
+export interface IOpenFilterPanelOperationParams {
     unitId: string;
     subUnitId: string;
 
@@ -34,10 +34,10 @@ export interface IOpenFilterPanelCommandParams {
 /**
  * The operation to open the filter panel and prepare for changing the filter conditions on a given column.
  */
-export const OpenFilterPanelCommand: ICommand<IOpenFilterPanelCommandParams> = {
-    id: 'sheet.commadn.open-filter-panel',
-    type: CommandType.COMMAND,
-    handler: async (accessor, params: IOpenFilterPanelCommandParams) => {
+export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParams> = {
+    id: 'sheet.operation.open-filter-panel',
+    type: CommandType.OPERATION,
+    handler: (accessor, params: IOpenFilterPanelOperationParams) => {
         const contextService = accessor.get(IContextService);
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const sheetsFilterPanelService = accessor.get(SheetsFilterPanelService);
@@ -50,7 +50,7 @@ export const OpenFilterPanelCommand: ICommand<IOpenFilterPanelCommandParams> = {
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
         if (!filterModel) return false;
 
-        const result = await sheetsFilterPanelService.setupCol(filterModel, col);
+        const result = sheetsFilterPanelService.setupCol(filterModel, col);
         if (!result) return false;
 
         if (!contextService.getContextValue(FILTER_PANEL_OPENED_KEY)) {

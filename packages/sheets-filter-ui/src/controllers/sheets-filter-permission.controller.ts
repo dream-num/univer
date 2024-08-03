@@ -23,7 +23,7 @@ import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { RangeProtectionPermissionViewPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetFilterPermission } from '@univerjs/sheets';
 import { SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
-import { type IOpenFilterPanelCommandParams, OpenFilterPanelCommand } from '../commands/operations/sheets-filter.operation';
+import { type IOpenFilterPanelOperationParams, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 
 export interface IUniverSheetsFilterUIConfig {
     menu: MenuConfig;
@@ -63,8 +63,8 @@ export class SheetsFilterPermissionController extends Disposable {
                         this._sheetPermissionInterceptorBaseController.haveNotPermissionHandle(this._localeService.t('permission.dialog.filterErr'));
                     }
                 }
-                if (command.id === OpenFilterPanelCommand.id) {
-                    const params = command.params as IOpenFilterPanelCommandParams;
+                if (command.id === OpenFilterPanelOperation.id) {
+                    const params = command.params as IOpenFilterPanelOperationParams;
                     const { unitId, subUnitId } = params;
                     const filterRange = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
                     const colRange = Tools.deepClone(filterRange);

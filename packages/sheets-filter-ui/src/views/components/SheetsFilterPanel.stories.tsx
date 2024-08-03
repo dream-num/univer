@@ -24,8 +24,8 @@ import { IMenuService, IShortcutService, MenuService, ShortcutService } from '@u
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/commands/sheets-filter.command';
-import type { IOpenFilterPanelCommandParams } from '../../commands/operations/sheets-filter.operation';
-import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelCommand } from '../../commands/operations/sheets-filter.operation';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';
 import ruRU from '../../locale/ru-RU';
@@ -76,16 +76,16 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
                 SetSheetsFilterCriteriaCommand,
                 ClearSheetsFilterCriteriaCommand,
                 ReCalcSheetsFilterCommand,
-                OpenFilterPanelCommand,
+                OpenFilterPanelOperation,
                 CloseFilterPanelOperation,
                 ChangeFilterByOperation,
             ].forEach((command) => commandService.registerCommand(command));
 
-            commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
+            commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,
-            } as IOpenFilterPanelCommandParams);
+            } as IOpenFilterPanelOperationParams);
         }
     }
 

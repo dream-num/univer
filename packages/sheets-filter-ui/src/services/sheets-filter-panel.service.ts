@@ -113,11 +113,13 @@ export class SheetsFilterPanelService extends Disposable {
         this._hasCriteria$.complete();
     }
 
-    async setupCol(filterModel: FilterModel, col: number): Promise<boolean> {
+    setupCol(filterModel: FilterModel, col: number): { result: Promise<boolean> } {
         this.terminate();
 
         this._filterModel = filterModel;
         this._col$.next(col);
+
+        let result;
 
         // We use filter type that (if) has been set on the column as the default filter type.
         const filterColumn = filterModel.getFilterColumn(col);
@@ -125,22 +127,24 @@ export class SheetsFilterPanelService extends Disposable {
             const info = filterColumn.getColumnData();
             if (info.customFilters) {
                 this._hasCriteria$.next(true);
-                return this._setupByConditions(filterModel, col);
+                result = { result: this._setupByConditions(filterModel, col) };
             }
 
             if (info.filters) {
                 this._hasCriteria$.next(true);
-                return this._setupByValues(filterModel, col);
+                result = { result: this._setupByValues(filterModel, col) };
             }
 
             // Use value values by default.
             this._hasCriteria$.next(false);
-            return this._setupByValues(filterModel, col);
+            result = { result: this._setupByValues(filterModel, col) };
         }
 
         // By default we filter by values.
         this._hasCriteria$.next(false);
-        return this._setupByValues(filterModel, col);
+        result = { result: this._setupByValues(filterModel, col) };
+
+        return result;
     };
 
     changeFilterBy(filterBy: FilterBy): boolean {

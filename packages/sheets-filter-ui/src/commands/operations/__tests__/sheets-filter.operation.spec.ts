@@ -21,7 +21,7 @@ import { SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerj
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import { CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelCommand } from '../sheets-filter.operation';
+import { CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../sheets-filter.operation';
 import { SheetsFilterPanelService } from '../../../services/sheets-filter-panel.service';
 
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
@@ -92,7 +92,7 @@ function createFilterOperationTestBed() {
     const commandService = get(ICommandService);
 
     [
-        OpenFilterPanelCommand,
+        OpenFilterPanelOperation,
         CloseFilterPanelOperation,
         SetCellEditVisibleOperation,
     ].forEach((command) => commandService.registerCommand(command));
@@ -124,7 +124,7 @@ describe('test sheets filter ui operations', () => {
     describe('test "OpenFilerPanelOperation"', () => {
         it('should return false when the filter model is not found', () => {
             const spy = vi.spyOn(sheetsFilterPanelService, 'setupCol');
-            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,
@@ -139,7 +139,7 @@ describe('test sheets filter ui operations', () => {
                 subUnitId: 'sheet1',
                 range: { startRow: 0, startColumn: 0, endRow: 5, endColumn: 5 },
             } as ISetSheetsFilterRangeMutationParams)).toBeTruthy();
-            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,

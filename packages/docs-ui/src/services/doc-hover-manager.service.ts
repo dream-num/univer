@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICustomRange, IParagraph, Nullable } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, PresetListType, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { Documents, IMouseEvent, IPointerEvent, Viewport } from '@univerjs/engine-render';
 import { getParagraphByGlyph, IRenderManagerService, PageLayoutType, Vector2 } from '@univerjs/engine-render';

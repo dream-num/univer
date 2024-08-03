@@ -954,9 +954,11 @@ export class PromptController extends Disposable {
      * @param refSelections
      */
     private _refreshSelectionForReference(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]) {
-        const [unitId, sheetId] = refSelectionRenderService.getLocation();
+        // const [unitId, sheetId] = refSelectionRenderService.getLocation();
+        const { unitId, sheetId } = this._editorBridgeService.getEditCellState()!;
         const { unitId: selfUnitId, sheetId: selfSheetId } = this._getCurrentUnitIdAndSheetId();
-        const isSelf = unitId === selfUnitId && sheetId === selfSheetId;
+
+        const isSelfSheet = sheetId === selfSheetId;
 
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId)!;
         const worksheet = workbook.getSheetBySheetId(sheetId)!;
@@ -984,7 +986,11 @@ export class PromptController extends Disposable {
             // sheet name is designed to be unique.
             const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
 
-            if (sheetName.length !== 0 && refSheetId !== sheetId) {
+            if (!isSelfSheet && refSheetId !== selfSheetId) { // Cross sheet operation
+                continue;
+            }
+
+            if (isSelfSheet && sheetName.length !== 0 && refSheetId !== sheetId) { // Current sheet operation
                 continue;
             }
 

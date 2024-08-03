@@ -19,6 +19,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    mergeOverrideWithDependencies,
     Plugin,
     Tools,
     UniverInstanceType,
@@ -118,7 +119,9 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocHoverManagerService],
         ];
 
-        dependencies.forEach((d) => injector.add(d));
+        const dependency = mergeOverrideWithDependencies(dependencies, this._config.override);
+
+        dependency.forEach((d) => injector.add(d));
     }
 
     private _markDocAsFocused() {

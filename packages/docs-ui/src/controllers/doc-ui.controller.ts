@@ -58,15 +58,15 @@ import { AlignCenterShortCut, AlignJustifyShortCut, AlignLeftShortCut, AlignRigh
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
 export class DocUIController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverDocsUIConfig>,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @ICommandService private readonly _commandService: ICommandService,
-        @ILayoutService private readonly _layoutService: ILayoutService,
-        @IMenuService private readonly _menuService: IMenuService,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        protected readonly _config: Partial<IUniverDocsUIConfig>,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @ILayoutService protected readonly _layoutService: ILayoutService,
+        @IMenuService protected readonly _menuService: IMenuService,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @IShortcutService protected readonly _shortcutService: IShortcutService
     ) {
         super();
 

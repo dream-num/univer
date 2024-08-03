@@ -17,8 +17,8 @@
 import {
     useReactFlow,
 } from '@xyflow/react';
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ViewModeSingle, ZoomReduceSingle } from '@univerjs/icons';
+import React, { useCallback, useEffect, useLayoutEffect } from 'react';
+import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } from '@univerjs/icons';
 import { Dropdown, Tooltip } from '@univerjs/design';
 import clsx from 'clsx';
 import { useDependency } from '@univerjs/core';
@@ -85,7 +85,7 @@ export const UniControls = ({ zoom }: { zoom: number }) => {
                 zoom: getZoom(),
             });
         }
-    }
+    };
     const onZoomMenuChange = useCallback((value: number) => {
         if (value === 0) {
             fitView();

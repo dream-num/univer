@@ -18,11 +18,9 @@ import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifec
 import { DeleteSingle, DownloadSingle, LockSingle, PrintSingle, ShareSingle, ZenSingle } from '@univerjs/icons';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '@univerjs/sheets-ui';
-import { SetInlineFormatBoldCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
-import { generateCloneMutation } from '../controllers/utils';
 import { DisposeUnitOperation } from '../commands/operations/uni.operation';
-import { DeleteMenuItemFactory, DOC_BOLD_MUTATION_ID, DOC_ITALIC_MUTATION_ID, DOC_STRIKE_MUTATION_ID, DOC_UNDERLINE_MUTATION_ID, DocBoldMenuItemFactory, DocItalicMenuItemFactory, DocStrikeThroughMenuItemFactory, DocUnderlineMenuItemFactory, DownloadMenuItemFactory, FakeBackgroundColorSelectorMenuItemFactory, FakeFontFamilySelectorMenuItemFactory, FakeFontGroupMenuItemFactory, FakeFontSizeSelectorMenuItemFactory, FakeImageMenuFactory, FakeTextColorSelectorMenuItemFactory, FontGroupMenuItemFactory, LockMenuItemFactory, PrintMenuItemFactory, ShareMenuItemFactory, SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID, SheetBoldMenuItemFactory, SheetItalicMenuItemFactory, SheetStrikeThroughMenuItemFactory, SheetUnderlineMenuItemFactory, ZenMenuItemFactory } from './menu';
+import { UniToolbarService } from '../services/toolbar/uni-toolbar-service';
+import { DeleteMenuItemFactory, DownloadMenuItemFactory, FakeBackgroundColorSelectorMenuItemFactory, FakeFontFamilySelectorMenuItemFactory, FakeFontGroupMenuItemFactory, FakeFontSizeSelectorMenuItemFactory, FakeImageMenuFactory, FakeTextColorSelectorMenuItemFactory, FontGroupMenuItemFactory, LockMenuItemFactory, PrintMenuItemFactory, ShareMenuItemFactory, ZenMenuItemFactory } from './menu';
 
 export interface IUniuiToolbarConfig {
     menu: MenuConfig;
@@ -36,28 +34,13 @@ export class UniuiToolbarController extends Disposable {
         @IMenuService protected readonly _menuService: IMenuService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
-        @ICommandService protected readonly _commandService: ICommandService
+        @ICommandService protected readonly _commandService: ICommandService,
+        @Inject(UniToolbarService) protected readonly _toolbarService: UniToolbarService
     ) {
         super();
         this._initComponent();
         this._initMenus();
-        this._initMutations();
         this._initCommands();
-    }
-
-    private _initMutations() {
-        [
-            generateCloneMutation(SHEET_BOLD_MUTATION_ID, SetRangeBoldCommand),
-            generateCloneMutation(SHEET_ITALIC_MUTATION_ID, SetRangeItalicCommand),
-            generateCloneMutation(SHEET_UNDERLINE_MUTATION_ID, SetRangeUnderlineCommand),
-            generateCloneMutation(SHEET_STRIKE_MUTATION_ID, SetRangeStrickThroughCommand),
-            generateCloneMutation(DOC_BOLD_MUTATION_ID, SetInlineFormatBoldCommand),
-            generateCloneMutation(DOC_ITALIC_MUTATION_ID, SetInlineFormatItalicCommand),
-            generateCloneMutation(DOC_UNDERLINE_MUTATION_ID, SetInlineFormatUnderlineCommand),
-            generateCloneMutation(DOC_STRIKE_MUTATION_ID, SetInlineFormatStrikethroughCommand),
-        ].forEach((mutation) => {
-            this.disposeWithMe(this._commandService.registerCommand(mutation));
-        });
     }
 
     private _initComponent(): void {
@@ -76,6 +59,7 @@ export class UniuiToolbarController extends Disposable {
     }
 
     private _initMenus(): void {
+        // register menu factories
         (
             [
                 DownloadMenuItemFactory,
@@ -85,14 +69,6 @@ export class UniuiToolbarController extends Disposable {
                 ZenMenuItemFactory,
                 DeleteMenuItemFactory,
                 FontGroupMenuItemFactory,
-                SheetBoldMenuItemFactory,
-                SheetItalicMenuItemFactory,
-                SheetUnderlineMenuItemFactory,
-                SheetStrikeThroughMenuItemFactory,
-                DocBoldMenuItemFactory,
-                DocItalicMenuItemFactory,
-                DocUnderlineMenuItemFactory,
-                DocStrikeThroughMenuItemFactory,
                 FakeFontFamilySelectorMenuItemFactory,
                 FakeTextColorSelectorMenuItemFactory,
                 FakeFontSizeSelectorMenuItemFactory,

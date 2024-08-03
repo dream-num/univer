@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
-import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { DocUIController, UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -44,10 +44,10 @@ import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
 import { UniverSlidesPlugin } from '@univerjs/slides';
 import { SlidesUIController, UniverSlidesUIPlugin } from '@univerjs/slides-ui';
+import { UniDocsUIController } from '@univerjs/uni-docs-ui';
 import { DEFAULT_DOCUMENT_DATA_CN, DEFAULT_DOCUMENT_DATA_EN, DEFAULT_SLIDE_DATA, DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
 import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
@@ -141,7 +141,15 @@ function registerBasicPlugins(univer: Univer) {
         container: 'app',
     });
 
-    univer.registerPlugin(UniverDocsUIPlugin);
+    univer.registerPlugin(UniverDocsUIPlugin, {
+        override: [
+            [DocUIController, {
+                useFactory: (injector) => {
+                    injector.createInstance(UniDocsUIController, {});
+                }, deps: [Injector],
+            }],
+        ],
+    });
 
     univer.registerPlugin(UniverRPCMainThreadPlugin, {
         workerURL: './worker.js',

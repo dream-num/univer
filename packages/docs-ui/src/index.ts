@@ -25,7 +25,7 @@ export { DocsRenderService } from './services/docs-render.service';
 export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
 export { DocHoverManagerService } from './services/doc-hover-manager.service';
-
+export { DocUIController } from './controllers/doc-ui.controller';
 // #region - all commands
 
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';

@@ -133,10 +133,10 @@ importers:
         version: 1.6.0(react@18.3.1)
       '@storybook/addon-essentials':
         specifier: 8.1.11
-        version: 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/addon-interactions':
         specifier: 8.1.11
-        version: 8.1.11(vitest@2.0.3(@types/node@20.14.10)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
+        version: 8.1.11(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
       '@storybook/addon-links':
         specifier: 8.1.11
         version: 8.1.11(react@18.3.1)
@@ -148,16 +148,16 @@ importers:
         version: 1.0.3(webpack@5.92.0(@swc/core@1.5.7)(esbuild@0.20.2))
       '@storybook/blocks':
         specifier: 8.1.11
-        version: 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/icons':
         specifier: ^1.2.9
         version: 1.2.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/react':
         specifier: 8.1.11
-        version: 8.1.11(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
+        version: 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
       '@storybook/react-webpack5':
         specifier: 8.1.11
-        version: 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
+        version: 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
       '@storybook/types':
         specifier: 8.1.11
         version: 8.1.11
@@ -330,6 +330,9 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../packages/ui
+      '@univerjs/uni-docs-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-docs-ui
       '@univerjs/uni-formula':
         specifier: workspace:*
         version: link:../packages-experimental/uni-formula
@@ -400,6 +403,52 @@ importers:
       typescript:
         specifier: ^5.5.3
         version: 5.5.3
+
+  packages-experimental/uni-docs-ui:
+    dependencies:
+      '@univerjs/docs-drawing-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-drawing-ui
+      '@univerjs/icons':
+        specifier: ^0.1.65
+        version: 0.1.66(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@univerjs/uniui':
+        specifier: workspace:*
+        version: link:../uniui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.5.3
+        version: 5.5.3
+      vite:
+        specifier: ^5.3.4
+        version: 5.3.4(@types/node@20.14.11)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^2.0.3
+        version: 2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages-experimental/uni-formula:
     dependencies:
@@ -498,6 +547,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.65
         version: 0.1.65(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-drawing-ui
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -13521,9 +13573,9 @@ snapshots:
       memoizerific: 1.11.3
       ts-dedent: 2.2.0
 
-  '@storybook/addon-controls@8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@storybook/addon-controls@8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@storybook/blocks': 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/blocks': 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       dequal: 2.0.3
       lodash: 4.17.21
       ts-dedent: 2.2.0
@@ -13536,11 +13588,11 @@ snapshots:
       - react-dom
       - supports-color
 
-  '@storybook/addon-docs@8.1.11(@types/react-dom@18.3.0)(prettier@3.3.2)':
+  '@storybook/addon-docs@8.1.11(@types/react-dom@18.3.0)(prettier@3.3.3)':
     dependencies:
       '@babel/core': 7.24.7
       '@mdx-js/react': 3.0.1(@types/react@18.3.3)(react@18.3.1)
-      '@storybook/blocks': 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/blocks': 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/client-logger': 8.1.11
       '@storybook/components': 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/csf-plugin': 8.1.11
@@ -13564,18 +13616,18 @@ snapshots:
       - prettier
       - supports-color
 
-  '@storybook/addon-essentials@8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@storybook/addon-essentials@8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@storybook/addon-actions': 8.1.11
       '@storybook/addon-backgrounds': 8.1.11
-      '@storybook/addon-controls': 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@storybook/addon-docs': 8.1.11(@types/react-dom@18.3.0)(prettier@3.3.2)
+      '@storybook/addon-controls': 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/addon-docs': 8.1.11(@types/react-dom@18.3.0)(prettier@3.3.3)
       '@storybook/addon-highlight': 8.1.11
       '@storybook/addon-measure': 8.1.11
       '@storybook/addon-outline': 8.1.11
       '@storybook/addon-toolbars': 8.1.11
       '@storybook/addon-viewport': 8.1.11
-      '@storybook/core-common': 8.1.11(prettier@3.3.2)
+      '@storybook/core-common': 8.1.11(prettier@3.3.3)
       '@storybook/manager-api': 8.1.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/node-logger': 8.1.11
       '@storybook/preview-api': 8.1.11
@@ -13593,11 +13645,11 @@ snapshots:
     dependencies:
       '@storybook/global': 5.0.0
 
-  '@storybook/addon-interactions@8.1.11(vitest@2.0.3(@types/node@20.14.10)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
+  '@storybook/addon-interactions@8.1.11(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
     dependencies:
       '@storybook/global': 5.0.0
       '@storybook/instrumenter': 8.1.11
-      '@storybook/test': 8.1.11(vitest@2.0.3(@types/node@20.14.10)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
+      '@storybook/test': 8.1.11(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
       '@storybook/types': 8.1.11
       polished: 4.3.1
       ts-dedent: 2.2.0
@@ -13645,14 +13697,14 @@ snapshots:
       - '@swc/helpers'
       - webpack
 
-  '@storybook/blocks@8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@storybook/blocks@8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@storybook/channels': 8.1.11
       '@storybook/client-logger': 8.1.11
       '@storybook/components': 8.1.11(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/core-events': 8.1.11
       '@storybook/csf': 0.1.8
-      '@storybook/docs-tools': 8.1.11(prettier@3.3.2)
+      '@storybook/docs-tools': 8.1.11(prettier@3.3.3)
       '@storybook/global': 5.0.0
       '@storybook/icons': 1.2.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/manager-api': 8.1.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -13681,10 +13733,10 @@ snapshots:
       - prettier
       - supports-color
 
-  '@storybook/builder-manager@8.1.11(prettier@3.3.2)':
+  '@storybook/builder-manager@8.1.11(prettier@3.3.3)':
     dependencies:
       '@fal-works/esbuild-plugin-global-externals': 2.1.2
-      '@storybook/core-common': 8.1.11(prettier@3.3.2)
+      '@storybook/core-common': 8.1.11(prettier@3.3.3)
       '@storybook/manager': 8.1.11
       '@storybook/node-logger': 8.1.11
       '@types/ejs': 3.1.5
@@ -13702,13 +13754,13 @@ snapshots:
       - prettier
       - supports-color
 
-  '@storybook/builder-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(typescript@5.5.3)':
+  '@storybook/builder-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(typescript@5.5.3)':
     dependencies:
       '@storybook/channels': 8.1.11
       '@storybook/client-logger': 8.1.11
-      '@storybook/core-common': 8.1.11(prettier@3.3.2)
+      '@storybook/core-common': 8.1.11(prettier@3.3.3)
       '@storybook/core-events': 8.1.11
-      '@storybook/core-webpack': 8.1.11(prettier@3.3.2)
+      '@storybook/core-webpack': 8.1.11(prettier@3.3.3)
       '@storybook/node-logger': 8.1.11
       '@storybook/preview': 8.1.11
       '@storybook/preview-api': 8.1.11
@@ -13764,12 +13816,12 @@ snapshots:
       '@babel/types': 7.24.7
       '@ndelangen/get-tarball': 3.0.9
       '@storybook/codemod': 8.1.11
-      '@storybook/core-common': 8.1.11(prettier@3.3.2)
+      '@storybook/core-common': 8.1.11(prettier@3.3.3)
       '@storybook/core-events': 8.1.11
-      '@storybook/core-server': 8.1.11(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/core-server': 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/csf-tools': 8.1.11
       '@storybook/node-logger': 8.1.11
-      '@storybook/telemetry': 8.1.11(prettier@3.3.2)
+      '@storybook/telemetry': 8.1.11(prettier@3.3.3)
       '@storybook/types': 8.1.11
       '@types/semver': 7.5.8
       '@yarnpkg/fslib': 2.10.3
@@ -13847,43 +13899,6 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@storybook/core-common@8.1.11(prettier@3.3.2)':
-    dependencies:
-      '@storybook/core-events': 8.1.11
-      '@storybook/csf-tools': 8.1.11
-      '@storybook/node-logger': 8.1.11
-      '@storybook/types': 8.1.11
-      '@yarnpkg/fslib': 2.10.3
-      '@yarnpkg/libzip': 2.3.0
-      chalk: 4.1.2
-      cross-spawn: 7.0.3
-      esbuild: 0.20.2
-      esbuild-register: 3.5.0(esbuild@0.20.2)
-      execa: 5.1.1
-      file-system-cache: 2.3.0
-      find-cache-dir: 3.3.2
-      find-up: 5.0.0
-      fs-extra: 11.2.0
-      glob: 10.4.1
-      handlebars: 4.7.8
-      lazy-universal-dotenv: 4.0.0
-      node-fetch: 2.7.0
-      picomatch: 2.3.1
-      pkg-dir: 5.0.0
-      prettier-fallback: prettier@3.3.3
-      pretty-hrtime: 1.0.3
-      resolve-from: 5.0.0
-      semver: 7.6.2
-      tempy: 3.1.0
-      tiny-invariant: 1.3.3
-      ts-dedent: 2.2.0
-      util: 0.12.5
-    optionalDependencies:
-      prettier: 3.3.2
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-
   '@storybook/core-common@8.1.11(prettier@3.3.3)':
     dependencies:
       '@storybook/core-events': 8.1.11
@@ -13926,15 +13941,15 @@ snapshots:
       '@storybook/csf': 0.1.8
       ts-dedent: 2.2.0
 
-  '@storybook/core-server@8.1.11(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@storybook/core-server@8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@aw-web-design/x-default-browser': 1.4.126
       '@babel/core': 7.24.7
       '@babel/parser': 7.24.7
       '@discoveryjs/json-ext': 0.5.7
-      '@storybook/builder-manager': 8.1.11(prettier@3.3.2)
+      '@storybook/builder-manager': 8.1.11(prettier@3.3.3)
       '@storybook/channels': 8.1.11
-      '@storybook/core-common': 8.1.11(prettier@3.3.2)
+      '@storybook/core-common': 8.1.11(prettier@3.3.3)
       '@storybook/core-events': 8.1.11
       '@storybook/csf': 0.1.8
       '@storybook/csf-tools': 8.1.11
@@ -13944,7 +13959,7 @@ snapshots:
       '@storybook/manager-api': 8.1.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/node-logger': 8.1.11
       '@storybook/preview-api': 8.1.11
-      '@storybook/telemetry': 8.1.11(prettier@3.3.2)
+      '@storybook/telemetry': 8.1.11(prettier@3.3.3)
       '@storybook/types': 8.1.11
       '@types/detect-port': 1.3.5
       '@types/diff': 5.2.1
@@ -13982,9 +13997,9 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@storybook/core-webpack@8.1.11(prettier@3.3.2)':
+  '@storybook/core-webpack@8.1.11(prettier@3.3.3)':
     dependencies:
-      '@storybook/core-common': 8.1.11(prettier@3.3.2)
+      '@storybook/core-common': 8.1.11(prettier@3.3.3)
       '@storybook/node-logger': 8.1.11
       '@storybook/types': 8.1.11
       '@types/node': 18.19.34
@@ -14020,21 +14035,6 @@ snapshots:
       type-fest: 2.19.0
 
   '@storybook/docs-mdx@3.1.0-next.0': {}
-
-  '@storybook/docs-tools@8.1.11(prettier@3.3.2)':
-    dependencies:
-      '@storybook/core-common': 8.1.11(prettier@3.3.2)
-      '@storybook/core-events': 8.1.11
-      '@storybook/preview-api': 8.1.11
-      '@storybook/types': 8.1.11
-      '@types/doctrine': 0.0.3
-      assert: 2.1.0
-      doctrine: 3.0.0
-      lodash: 4.17.21
-    transitivePeerDependencies:
-      - encoding
-      - prettier
-      - supports-color
 
   '@storybook/docs-tools@8.1.11(prettier@3.3.3)':
     dependencies:
@@ -14095,12 +14095,12 @@ snapshots:
 
   '@storybook/node-logger@8.1.6': {}
 
-  '@storybook/preset-react-webpack@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)':
+  '@storybook/preset-react-webpack@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)':
     dependencies:
-      '@storybook/core-webpack': 8.1.11(prettier@3.3.2)
-      '@storybook/docs-tools': 8.1.11(prettier@3.3.2)
+      '@storybook/core-webpack': 8.1.11(prettier@3.3.3)
+      '@storybook/docs-tools': 8.1.11(prettier@3.3.3)
       '@storybook/node-logger': 8.1.11
-      '@storybook/react': 8.1.11(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
+      '@storybook/react': 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
       '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.5.3)(webpack@5.92.0(@swc/core@1.5.7)(esbuild@0.20.2))
       '@types/node': 18.19.34
       '@types/semver': 7.5.8
@@ -14163,11 +14163,11 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@storybook/react-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)':
+  '@storybook/react-webpack5@8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)':
     dependencies:
-      '@storybook/builder-webpack5': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(typescript@5.5.3)
-      '@storybook/preset-react-webpack': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
-      '@storybook/react': 8.1.11(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
+      '@storybook/builder-webpack5': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(typescript@5.5.3)
+      '@storybook/preset-react-webpack': 8.1.11(@swc/core@1.5.7)(esbuild@0.20.2)(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
+      '@storybook/react': 8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)
       '@storybook/types': 8.1.11
       '@types/node': 18.19.34
       react: 18.3.1
@@ -14183,38 +14183,6 @@ snapshots:
       - supports-color
       - uglify-js
       - webpack-cli
-
-  '@storybook/react@8.1.11(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)':
-    dependencies:
-      '@storybook/client-logger': 8.1.11
-      '@storybook/docs-tools': 8.1.11(prettier@3.3.2)
-      '@storybook/global': 5.0.0
-      '@storybook/preview-api': 8.1.11
-      '@storybook/react-dom-shim': 8.1.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@storybook/types': 8.1.11
-      '@types/escodegen': 0.0.6
-      '@types/estree': 0.0.51
-      '@types/node': 18.19.34
-      acorn: 7.4.1
-      acorn-jsx: 5.3.2(acorn@7.4.1)
-      acorn-walk: 7.2.0
-      escodegen: 2.1.0
-      html-tags: 3.3.1
-      lodash: 4.17.21
-      prop-types: 15.8.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      react-element-to-jsx-string: 15.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      semver: 7.6.2
-      ts-dedent: 2.2.0
-      type-fest: 2.19.0
-      util-deprecate: 1.0.2
-    optionalDependencies:
-      typescript: 5.5.3
-    transitivePeerDependencies:
-      - encoding
-      - prettier
-      - supports-color
 
   '@storybook/react@8.1.11(prettier@3.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)':
     dependencies:
@@ -14254,10 +14222,10 @@ snapshots:
       memoizerific: 1.11.3
       qs: 6.12.1
 
-  '@storybook/telemetry@8.1.11(prettier@3.3.2)':
+  '@storybook/telemetry@8.1.11(prettier@3.3.3)':
     dependencies:
       '@storybook/client-logger': 8.1.11
-      '@storybook/core-common': 8.1.11(prettier@3.3.2)
+      '@storybook/core-common': 8.1.11(prettier@3.3.3)
       '@storybook/csf-tools': 8.1.11
       chalk: 4.1.2
       detect-package-manager: 2.0.1
@@ -14269,14 +14237,14 @@ snapshots:
       - prettier
       - supports-color
 
-  '@storybook/test@8.1.11(vitest@2.0.3(@types/node@20.14.10)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
+  '@storybook/test@8.1.11(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
     dependencies:
       '@storybook/client-logger': 8.1.11
       '@storybook/core-events': 8.1.11
       '@storybook/instrumenter': 8.1.11
       '@storybook/preview-api': 8.1.11
       '@testing-library/dom': 10.1.0
-      '@testing-library/jest-dom': 6.4.5(vitest@2.0.3(@types/node@20.14.10)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
+      '@testing-library/jest-dom': 6.4.5(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.1.0)
       '@vitest/expect': 1.6.0
       '@vitest/spy': 1.6.0
@@ -14418,7 +14386,7 @@ snapshots:
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
-  '@testing-library/jest-dom@6.4.5(vitest@2.0.3(@types/node@20.14.10)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
+  '@testing-library/jest-dom@6.4.5(vitest@2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))':
     dependencies:
       '@adobe/css-tools': 4.4.0
       '@babel/runtime': 7.24.7
@@ -14429,7 +14397,7 @@ snapshots:
       lodash: 4.17.21
       redent: 3.0.0
     optionalDependencies:
-      vitest: 2.0.3(@types/node@20.14.10)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest: 2.0.3(@types/node@20.14.11)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   '@testing-library/react-hooks@8.0.1(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:

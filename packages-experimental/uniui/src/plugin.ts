@@ -76,6 +76,7 @@ import { IUnitGridService, UnitGridService } from './services/unit-grid/unit-gri
 import { UniuiLeftSidebarController } from './controllers/uniui-leftsidebar.controller';
 import { UniuiToolbarController } from './controllers/uniui-toolbar.controller';
 import { UniuiFlowController } from './controllers/uniui-flow.controller';
+import { UniToolbarService } from './services/toolbar/uni-toolbar-service';
 
 const UI_BOOTSTRAP_DELAY = 16;
 
@@ -106,6 +107,7 @@ export class UniverUniUIPlugin extends Plugin {
             [ZIndexManager],
             [ShortcutPanelService],
             [FlowManagerService],
+            [UniToolbarService],
             [IUnitGridService, { useClass: UnitGridService }],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],

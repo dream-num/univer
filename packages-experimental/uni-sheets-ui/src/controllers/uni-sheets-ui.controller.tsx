@@ -16,11 +16,15 @@
 
 import type { Workbook } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
-import { type IUniverSheetsUIConfig, RenderSheetContent, SheetUIController } from '@univerjs/sheets-ui';
+import { type IUniverSheetsUIConfig, RenderSheetContent, SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetUIController } from '@univerjs/sheets-ui';
+import type { IMenuItemFactory } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
-import { UniUIPart } from '@univerjs/uniui';
+import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import React from 'react';
+import { SetBackgroundColorCommand } from '@univerjs/sheets';
+import { IMAGE_MENU_ID as SheetsImageMenuId } from '@univerjs/sheets-drawing-ui';
 import { UniSheetBar } from '../views/uni-sheet-bar/UniSheetBar';
+import { SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID, SheetBoldMenuItemFactory, SheetItalicMenuItemFactory, SheetStrikeThroughMenuItemFactory, SheetUnderlineMenuItemFactory } from './menu';
 
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class UniSheetsUIController extends SheetUIController {
@@ -32,7 +36,8 @@ export class UniSheetsUIController extends SheetUIController {
         @ICommandService commandService: ICommandService,
         @IShortcutService shortcutService: IShortcutService,
         @IMenuService menuService: IMenuService,
-        @IUIPartsService uiPartsService: IUIPartsService
+        @IUIPartsService uiPartsService: IUIPartsService,
+        @Inject(UniToolbarService) private readonly _toolbarService: UniToolbarService
     ) {
         super(
             config,
@@ -44,6 +49,8 @@ export class UniSheetsUIController extends SheetUIController {
             menuService,
             uiPartsService
         );
+        this._initUniMenus();
+        this._initMutations();
     }
 
     protected override _initWorkbenchParts(): void {
@@ -53,6 +60,41 @@ export class UniSheetsUIController extends SheetUIController {
         // this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
         this.disposeWithMe(uiController.registerComponent(UniUIPart.OUTLINE, () => connectInjector(RenderOutline, injector)));
         this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
+    }
+
+    private _initUniMenus(): void {
+        console.error('init uni menus');
+        ([
+            [BuiltinUniToolbarItemId.FONT_FAMILY, SetRangeFontFamilyCommand.id],
+            [BuiltinUniToolbarItemId.FONT_SIZE, SetRangeFontSizeCommand.id],
+            [BuiltinUniToolbarItemId.COLOR, SetRangeTextColorCommand.id],
+            [BuiltinUniToolbarItemId.BACKGROUND, SetBackgroundColorCommand.id],
+            [BuiltinUniToolbarItemId.IMAGE, SheetsImageMenuId],
+        ]).forEach(([id, menuId]) => {
+            this._toolbarService.implementItem(id, { id: menuId, type: UniverInstanceType.UNIVER_SHEET });
+        });
+
+        (
+            [
+                SheetBoldMenuItemFactory,
+                SheetItalicMenuItemFactory,
+                SheetUnderlineMenuItemFactory,
+                SheetStrikeThroughMenuItemFactory,
+            ] as IMenuItemFactory[]
+        ).forEach((factory) => {
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
+        });
+    }
+
+    private _initMutations() {
+        [
+            generateCloneMutation(SHEET_BOLD_MUTATION_ID, SetRangeBoldCommand),
+            generateCloneMutation(SHEET_ITALIC_MUTATION_ID, SetRangeItalicCommand),
+            generateCloneMutation(SHEET_UNDERLINE_MUTATION_ID, SetRangeUnderlineCommand),
+            generateCloneMutation(SHEET_STRIKE_MUTATION_ID, SetRangeStrickThroughCommand),
+        ].forEach((mutation) => {
+            this.disposeWithMe(this._commandService.registerCommand(mutation));
+        });
     }
 }
 

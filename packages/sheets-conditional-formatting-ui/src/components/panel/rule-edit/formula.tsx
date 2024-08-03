@@ -66,15 +66,16 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     }, [style, formula, interceptorManager]);
 
     useEffect(() => {
-        interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
+        const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
             handler: (v, _c, next) => {
-                if (!formula || formula.length === 1 || !formulaError.startsWith('=')) {
+                if (!formula || formula.length === 1 || !formula.startsWith('=')) {
                     formulaErrorSet(localeService.t('sheet.cf.errorMessage.formulaError'));
                     return false;
                 }
                 return next(v);
             },
         });
+        return dispose as () => void;
     }, [formula]);
 
     const _onChange = (config: {

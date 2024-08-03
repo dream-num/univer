@@ -15,33 +15,21 @@
  */
 
 import type { IParagraph } from '@univerjs/core';
-import { BooleanNumber } from '@univerjs/core';
-
-import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 import { getParagraphStyle } from '../utils';
 import type { IPastePlugin } from './type';
 
-export const WordPastePlugin: IPastePlugin = {
-    name: 'univer-doc-paste-plugin-word',
+export const UniverPastePlugin: IPastePlugin = {
+    name: 'univer-doc-paste-plugin-univer',
     checkPasteType(html: string) {
-        return /word|mso/i.test(html);
+        return /UniverNormal/i.test(html);
     },
 
-    stylesRules: [
-        {
-            filter: ['b'],
-            getStyle(node) {
-                const inlineStyle = getInlineStyle(node);
-
-                return { bl: BooleanNumber.TRUE, ...inlineStyle };
-            },
-        },
-    ],
+    stylesRules: [],
 
     afterProcessRules: [
         {
             filter(el: HTMLElement) {
-                return el.tagName === 'P' && /mso/i.test(el.className);
+                return el.tagName === 'P' && /UniverNormal/i.test(el.className);
             },
             handler(doc, el) {
                 if (doc.paragraphs == null) {

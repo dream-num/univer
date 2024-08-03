@@ -32,25 +32,16 @@ import { getRichTextEditPath } from '../util';
 function handleInlineFormat(
     preCommandId: string,
     params: object | undefined,
-    textSelectionManagerService: TextSelectionManagerService,
     commandService: ICommandService
 ) {
-    const { segmentId } = textSelectionManagerService.getActiveTextRangeWithStyle() ?? {};
-
-    if (segmentId == null) {
-        return false;
-    }
-
     // eslint-disable-next-line ts/no-use-before-define
     return commandService.executeCommand(SetInlineFormatCommand.id, {
-        segmentId,
         preCommandId,
         ...(params ?? {}),
     });
 }
 
 export interface ISetInlineFormatCommandParams {
-    segmentId: string;
     preCommandId: string;
     value?: string;
 }
@@ -61,12 +52,10 @@ export const SetInlineFormatBoldCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatBoldCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -78,12 +67,10 @@ export const SetInlineFormatItalicCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatItalicCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -95,12 +82,10 @@ export const SetInlineFormatUnderlineCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatUnderlineCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -112,12 +97,10 @@ export const SetInlineFormatStrikethroughCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatStrikethroughCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -129,12 +112,10 @@ export const SetInlineFormatSubscriptCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatSubscriptCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -146,12 +127,10 @@ export const SetInlineFormatSuperscriptCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatSuperscriptCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -163,12 +142,10 @@ export const SetInlineFormatFontSizeCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatFontSizeCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -180,12 +157,10 @@ export const SetInlineFormatFontFamilyCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatFontFamilyCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -197,12 +172,10 @@ export const SetInlineFormatTextColorCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatTextColorCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -214,12 +187,10 @@ export const SetInlineFormatTextBackgroundColorCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             SetInlineFormatTextBackgroundColorCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -231,12 +202,10 @@ export const ResetInlineFormatTextBackgroundColorCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         return handleInlineFormat(
             ResetInlineFormatTextBackgroundColorCommandId,
             params,
-            textSelectionManagerService,
             commandService
         );
     },
@@ -259,9 +228,9 @@ const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
 export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
     id: 'doc.command.set-inline-format',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: ISetInlineFormatCommandParams) => {
-        const { segmentId, value, preCommandId } = params;
+        const { value, preCommandId } = params;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -269,11 +238,13 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const textRanges = textSelectionManagerService.getCurrentTextRanges() ?? [];
         const rectRanges = textSelectionManagerService.getCurrentRectRanges() ?? [];
 
-        if (textRanges.length === 0 && rectRanges.length === 0) {
+        const docRanges = [...textRanges, ...rectRanges];
+
+        if (docRanges.length === 0) {
             return false;
         }
 
-        const docRanges = [...textRanges, ...rectRanges];
+        const segmentId = docRanges[0].segmentId;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (docDataModel == null) {

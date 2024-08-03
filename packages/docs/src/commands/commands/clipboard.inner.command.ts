@@ -92,6 +92,12 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
         const hasTable = !!body.tables?.length;
 
+        // TODO: @JOCS A feature that has not yet been implemented,
+        // and it is currently not possible to paste tables in the header and footer.
+        if (hasTable && segmentId) {
+            return false;
+        }
+
         for (const selection of selections) {
             const { startOffset, endOffset, collapsed } = selection;
 

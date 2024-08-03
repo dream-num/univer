@@ -97,6 +97,17 @@ function firstGlyphInCellPage(cellPage: IDocumentSkeletonPage): Nullable<IDocume
     return cellPage.sections[0].columns[0].lines[0].divides[0].glyphGroup[0];
 }
 
+function lastGlyphInCellPage(cellPage: IDocumentSkeletonPage): Nullable<IDocumentSkeletonGlyph> {
+    const { sections } = cellPage;
+    const lastSection = sections[sections.length - 1];
+    const lastColumn = lastSection.columns[lastSection.columns.length - 1];
+    const lastLine = lastColumn.lines[lastColumn.lines.length - 1];
+    const lastDivide = lastLine.divides[lastLine.divides.length - 1];
+    const lastGlyphGroup = lastDivide.glyphGroup;
+
+    return lastGlyphGroup[lastGlyphGroup.length - 2];
+}
+
 interface IRectRangeNodePositions {
     anchor: INodePosition;
     focus: INodePosition;
@@ -286,7 +297,7 @@ export class NodePositionConvertToRectRange {
             const endCellInRow = row.cells[endColumnIndex];
 
             const startCellGlyph = firstGlyphInCellPage(startCellInRow);
-            const endCellGlyph = firstGlyphInCellPage(endCellInRow);
+            const endCellGlyph = lastGlyphInCellPage(endCellInRow);
 
             if (startCellGlyph == null || endCellGlyph == null) {
                 continue;

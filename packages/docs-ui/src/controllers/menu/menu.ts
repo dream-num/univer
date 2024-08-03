@@ -470,8 +470,9 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
         group: MenuGroup.TOOLBAR_LAYOUT,
         icon: TableIcon,
         tooltip: 'toolbar.table.main',
-        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), (one, two) => {
-            return one || two;
+        // Do not show header footer menu and insert table at zen mode.
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), getHeaderFooterMenuHiddenObservable(accessor), (one, two, three) => {
+            return one || two || three;
         }),
     };
 }

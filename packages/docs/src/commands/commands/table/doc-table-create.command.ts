@@ -61,6 +61,13 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         }
         const { startOffset } = getInsertSelection(activeRange, body);
 
+        const startNodePosition = skeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
+
+        // TODO: @JOCS Not support insert table in table cell.
+        if (startNodePosition && startNodePosition?.path?.indexOf('skeTables') > -1) {
+            return false;
+        }
+
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
         const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);

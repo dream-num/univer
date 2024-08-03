@@ -336,6 +336,7 @@ export class TextRange implements IDocRange {
         return activeStart <= compareEnd && activeEnd >= compareStart;
     }
 
+    // render cursor and selection.
     refresh() {
         const { _document, _docSkeleton } = this;
         const anchor = this.anchorNodePosition;

@@ -285,11 +285,23 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _getDocumentBodyInRanges(sliceType: SliceBodyType): IDocumentBody[] {
         const textRanges = this._textSelectionManagerService.getCurrentTextRanges() ?? [];
         const rectRanges = this._textSelectionManagerService.getCurrentRectRanges() ?? [];
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
-        const allRanges = [...textRanges, ...rectRanges];
+        // Sort ranges by startOffset in ascending order.
+        const allRanges = [...textRanges, ...rectRanges]
+            .filter((range) => range.startOffset != null && range.endOffset != null)
+            .sort((a, b) => {
+                if (a.startOffset! > b.startOffset!) {
+                    return 1;
+                } else if (a.startOffset! < b.startOffset!) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
         const results: IDocumentBody[] = [];
 
         if (docDataModel == null || allRanges.length === 0) {

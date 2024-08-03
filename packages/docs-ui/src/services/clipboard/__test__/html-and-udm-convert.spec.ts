@@ -125,7 +125,7 @@ describe('test case in html and udm convert', () => {
             const convertor = new UDMToHtmlService();
             const html = await convertor.convert([body!]);
 
-            expect(html).toBe('<strong>hello</strong><strong><i>world</i></strong>');
+            expect(html).toBe('<p class="UniverNormal" ><strong>hello</strong><strong><i>world</i></strong></p>');
         });
     });
 });

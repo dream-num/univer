@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IParagraph, ISectionBreak } from '@univerjs/core';
+import type { ICommand, IListData, IMutationInfo, IParagraph, ISectionBreak } from '@univerjs/core';
 import {
     CommandType,
     GridType,
@@ -52,7 +52,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const { listType } = params;
+        let listType: string = params.listType;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         const activeRange = textSelectionManagerService.getActiveRange();
@@ -76,7 +76,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const unitId = docDataModel.getUnitId();
 
-        const isAlreadyList = currentParagraphs.every((paragraph) => paragraph.bullet?.listType === listType);
+        const isAlreadyList = currentParagraphs.every((paragraph) => paragraph.bullet?.listType.indexOf(listType) === 0);
 
         const ID_LENGTH = 6;
 
@@ -87,10 +87,12 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             const prevParagraph = paragraphs[curIndex - 1];
             const nextParagraph = paragraphs[curIndex + 1];
 
-            if (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listType === listType) {
+            if (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listType.indexOf(listType) === 0) {
                 listId = prevParagraph.bullet.listId;
-            } else if (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listType === listType) {
+                listType = prevParagraph.bullet.listType;
+            } else if (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listType.indexOf(listType) === 0) {
                 listId = nextParagraph.bullet.listId;
+                listType = nextParagraph.bullet.listType;
             }
         }
 
@@ -112,7 +114,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const customLists = docDataModel.getSnapshot().lists ?? {};
 
-        const lists = {
+        const lists: Record<string, IListData> = {
             ...PRESET_LIST_TYPE,
             ...customLists,
         };

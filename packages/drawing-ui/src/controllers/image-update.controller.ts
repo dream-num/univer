@@ -23,6 +23,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Image, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
@@ -38,6 +39,8 @@ const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
 @OnLifecycle(LifecycleStages.Rendered, ImageUpdateController)
 export class ImageUpdateController extends Disposable {
+    private _imageInsertCache: Set<string> = new Set();
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -54,6 +57,8 @@ export class ImageUpdateController extends Disposable {
 
     override dispose(): void {
         super.dispose();
+
+        this._imageInsertCache.clear();
     }
 
     private _initialize() {
@@ -73,7 +78,11 @@ export class ImageUpdateController extends Disposable {
             return;
         }
 
-        const { unitId: currentUnitId, subUnitId: currentSubUnitId } = info;
+        const { unitId: currentUnitId, subUnitId: currentSubUnitId, current } = info;
+
+        if (current.type !== UniverInstanceType.UNIVER_SHEET) {
+            return;
+        }
 
         Object.keys(drawingList).forEach((unitId) => {
             Object.keys(drawingList[unitId]).forEach((subUnitId) => {
@@ -196,7 +205,7 @@ export class ImageUpdateController extends Disposable {
 
     private _insertImages(params: IDrawingSearch[]) {
         (params).forEach(async (param) => {
-            const { unitId, subUnitId } = param;
+            const { unitId, subUnitId, drawingId } = param;
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
             const currentSubUnitId = getCurrentUnitInfo(this._currentUniverService)?.subUnitId;
 
@@ -204,12 +213,21 @@ export class ImageUpdateController extends Disposable {
                 return;
             }
 
+            const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+
+            if (this._imageInsertCache.has(drawingShapeKey)) {
+                return;
+            }
+
+            this._imageInsertCache.add(drawingShapeKey);
+
             const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
             if (imageParam == null) {
                 return;
             }
 
             const images = await this._drawingRenderService.renderImages(imageParam, renderObject.scene);
+
             if (images == null || images.length === 0) {
                 return;
             }

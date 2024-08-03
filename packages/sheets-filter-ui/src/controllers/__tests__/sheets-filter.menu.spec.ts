@@ -22,7 +22,7 @@ import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsF
 import { IMenuService, IPlatformService, IShortcutService, MenuService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggleSheetsFilterCommand } from '../../commands/commands/sheets-filter.command';
-import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
+import { CloseFilterPanelOperation, OpenFilterPanelCommand } from '../../commands/operations/sheets-filter.operation';
 import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory, SmartToggleFilterMenuItemFactory } from '../sheets-filter.menu';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -82,7 +82,7 @@ function createSheetsFilterMenuTestBed() {
                 SmartToggleSheetsFilterCommand,
                 ClearSheetsFilterCriteriaCommand,
                 ReCalcSheetsFilterCommand,
-                OpenFilterPanelOperation,
+                OpenFilterPanelCommand,
                 CloseFilterPanelOperation,
             ].forEach((command) => commandService.registerCommand(command));
         }

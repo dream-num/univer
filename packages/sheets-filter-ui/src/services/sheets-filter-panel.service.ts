@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, extractPureTextFromCell, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { FilterColumn, FilterModel, IFilterColumn } from '@univerjs/sheets-filter';
 import type { Observable } from 'rxjs';
@@ -26,6 +26,7 @@ import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem }
 import { FilterConditionItems } from '../models/conditions';
 import { type ISetSheetsFilterCriteriaCommandParams, SetSheetsFilterCriteriaCommand } from '../commands/commands/sheets-filter.command';
 import { statisticFilterByValueItems } from '../models/utils';
+import { getFilterByValueItems, ISheetsGenerateFilterValuesService } from '../worker/generate-filter-values.service';
 
 export enum FilterBy {
     VALUES,
@@ -112,7 +113,7 @@ export class SheetsFilterPanelService extends Disposable {
         this._hasCriteria$.complete();
     }
 
-    setupCol(filterModel: FilterModel, col: number): boolean {
+    async setupCol(filterModel: FilterModel, col: number): Promise<boolean> {
         this.terminate();
 
         this._filterModel = filterModel;
@@ -196,13 +197,13 @@ export class SheetsFilterPanelService extends Disposable {
         });
     }
 
-    private _setupByValues(filterModel: FilterModel, col: number): boolean {
+    private async _setupByValues(filterModel: FilterModel, col: number): Promise<boolean> {
         this._disposePreviousModel();
 
         const range = filterModel.getRange();
         if (range.startRow === range.endRow) return false;
 
-        const model = ByValuesModel.fromFilterColumn(
+        const model = await ByValuesModel.fromFilterColumn(
             this._injector,
             filterModel,
             col
@@ -391,9 +392,10 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
      *
      * @returns the model to control the panel's state
      */
-    static fromFilterColumn(injector: Injector, filterModel: FilterModel, col: number): ByValuesModel {
+    static async fromFilterColumn(injector: Injector, filterModel: FilterModel, col: number): Promise<ByValuesModel> {
         const univerInstanceService = injector.get(IUniverInstanceService);
         const localeService = injector.get(LocaleService);
+        const generateFilterValuesService = injector.get(ISheetsGenerateFilterValuesService, Quantity.OPTIONAL);
 
         const { unitId, subUnitId } = filterModel;
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
@@ -405,67 +407,33 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         const range = filterModel.getRange();
         const column = col;
         const filters = filterModel.getFilterColumn(col)?.getColumnData().filters;
-        const blankChecked = !!(filters && filters.blank);
-
-        // the first row is filter header and should be added to options
-        const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
-        const items: IFilterByValueItem[] = [];
-        const itemsByKey: Record<string, IFilterByValueItem> = {};
         const alreadyChecked = new Set(filters?.filters);
+        const blankChecked = !!(filters && filters.blank);
         const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col);
+        const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
 
-        let index = 0;
-        let emptyCount = 0;
-        for (const cell of worksheet.iterateByColumn(iterateRange, false, false)) { // iterate and do not skip empty cells
-            const { row, rowSpan = 1 } = cell;
-
-            let rowIndex = 0;
-            while (rowIndex < rowSpan) {
-                const targetRow = row + rowIndex;
-
-                if (filteredOutRowsByOtherColumns.has(targetRow)) {
-                    rowIndex++;
-                    continue;
-                }
-
-                const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
-                if (!value) {
-                    emptyCount += 1;
-                    rowIndex += rowSpan;
-                    continue;
-                }
-
-                if (!itemsByKey[value]) {
-                    const item: IFilterByValueItem = {
-                        value,
-                        checked: alreadyChecked.size ? alreadyChecked.has(value) : !blankChecked,
-                        count: 1,
-                        index,
-                        isEmpty: false,
-                    };
-
-                    itemsByKey[value] = item;
-                    items.push(item);
-                } else {
-                    itemsByKey[value].count++;
-                }
-                rowIndex++;
-            }
-
-            index++;
-        }
-
-        const initialBlankChecked = filters ? blankChecked : true;
-        if (emptyCount > 0) {
-            const item: IFilterByValueItem = {
-                value: localeService.t('sheets-filter.panel.empty'),
-                checked: initialBlankChecked,
-                count: emptyCount,
-                index,
-                isEmpty: true,
-            };
-
-            items.push(item);
+        let items: IFilterByValueItem[];
+        if (generateFilterValuesService) {
+            items = await generateFilterValuesService.getFilterValues({
+                unitId,
+                subUnitId,
+                filteredOutRowsByOtherColumns: Array.from(filteredOutRowsByOtherColumns),
+                filters: !!filters,
+                blankChecked,
+                iterateRange,
+                alreadyChecked: Array.from(alreadyChecked),
+            });
+        } else {
+            // the first row is filter header and should be added to options
+            items = getFilterByValueItems(
+                !!filters,
+                blankChecked,
+                localeService,
+                iterateRange,
+                worksheet,
+                alreadyChecked,
+                filteredOutRowsByOtherColumns
+            );
         }
 
         return injector.createInstance(ByValuesModel, filterModel, col, items);

@@ -16,6 +16,7 @@
 
 export { UniverSheetsFilterUIPlugin } from './plugin';
 export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
+export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
 
 // #region - all commands
 
@@ -26,10 +27,10 @@ export {
     ReCalcSheetsFilterCommand,
 } from './commands/commands/sheets-filter.command';
 export {
-    OpenFilterPanelOperation,
+    OpenFilterPanelCommand,
     CloseFilterPanelOperation,
     ChangeFilterByOperation,
-    type IOpenFilterPanelOperationParams,
+    type IOpenFilterPanelCommandParams,
 } from './commands/operations/sheets-filter.operation';
 
 // #endregion

@@ -28,7 +28,7 @@ import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { MessageType } from '@univerjs/design';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
-import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
+import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelCommand } from '../commands/operations/sheets-filter.operation';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory, SmartToggleFilterMenuItemFactory } from './sheets-filter.menu';
@@ -36,6 +36,8 @@ import { SheetsFilterMobileUIController } from './sheets-filter-mobile-ui.contro
 
 export interface IUniverSheetsFilterUIConfig {
     menu: MenuConfig;
+
+    useRemoteFilterValuesGenerator?: boolean;
 }
 
 export const DefaultSheetFilterUiConfig = {};
@@ -91,7 +93,7 @@ export class SheetsFilterUIController extends SheetsFilterMobileUIController {
             ClearSheetsFilterCriteriaCommand,
             ReCalcSheetsFilterCommand,
             ChangeFilterByOperation,
-            OpenFilterPanelOperation,
+            OpenFilterPanelCommand,
             CloseFilterPanelOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));

@@ -21,8 +21,8 @@ import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { CustomFilterOperator, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import { ByConditionsModel, ByValuesModel, FilterBy, SheetsFilterPanelService } from '../sheets-filter-panel.service';
-import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
-import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
+import type { IOpenFilterPanelCommandParams } from '../../commands/operations/sheets-filter.operation';
+import { CloseFilterPanelOperation, OpenFilterPanelCommand } from '../../commands/operations/sheets-filter.operation';
 import { E_ITEMS, ITEMS, WithCustomFilterModelFactory, WithMergedCellFilterFactory, WithMultiEmptyCellsModelFactory, WithTwoFilterColumnsFactory, WithValuesAndEmptyFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import type { IFilterConditionFormParams } from '../../models/conditions';
 import { FilterConditionItems } from '../../models/conditions';
@@ -74,7 +74,7 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
     const commandService = get(ICommandService);
 
     [
-        OpenFilterPanelOperation,
+        OpenFilterPanelCommand,
         CloseFilterPanelOperation,
         SetSheetsFilterCriteriaCommand,
         SetCellEditVisibleOperation,
@@ -110,11 +110,11 @@ describe('test "SheetsFilterPanelService"', () => {
             it('should initialize by conditional model when the filter column is by custom filters', () => {
                 prepare(WithCustomFilterModelFactory());
 
-                expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+                expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                     unitId: 'test',
                     subUnitId: 'sheet1',
                     col: 0,
-                } as IOpenFilterPanelOperationParams)).toBe(true);
+                } as IOpenFilterPanelCommandParams)).toBe(true);
 
                 expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.CONDITIONS);
                 const filterByModel = sheetsFilterPanelService.filterByModel as ByConditionsModel;
@@ -128,11 +128,11 @@ describe('test "SheetsFilterPanelService"', () => {
             it('should update the filter condition item when the primary operator changes', () => {
                 prepare(WithCustomFilterModelFactory());
 
-                expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+                expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                     unitId: 'test',
                     subUnitId: 'sheet1',
                     col: 0,
-                } as IOpenFilterPanelOperationParams)).toBe(true);
+                } as IOpenFilterPanelCommandParams)).toBe(true);
 
                 const filterByModel = sheetsFilterPanelService.filterByModel as ByConditionsModel;
 
@@ -157,11 +157,11 @@ describe('test "SheetsFilterPanelService"', () => {
             it('should update primary operator when the secondary operator changes (in some conditions)', () => {
                 prepare(WithCustomFilterModelFactory());
 
-                expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+                expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                     unitId: 'test',
                     subUnitId: 'sheet1',
                     col: 0,
-                } as IOpenFilterPanelOperationParams)).toBe(true);
+                } as IOpenFilterPanelCommandParams)).toBe(true);
 
                 const filterByModel = sheetsFilterPanelService.filterByModel as ByConditionsModel;
 
@@ -186,11 +186,11 @@ describe('test "SheetsFilterPanelService"', () => {
         it('should execute command when "apply" is called', async () => {
             prepare(WithCustomFilterModelFactory());
 
-            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,
-            } as IOpenFilterPanelOperationParams)).toBe(true);
+            } as IOpenFilterPanelCommandParams)).toBe(true);
 
             const filterByModel = sheetsFilterPanelService.filterByModel as ByConditionsModel;
             filterByModel.onConditionFormChange({ val1: '5' });
@@ -205,11 +205,11 @@ describe('test "SheetsFilterPanelService"', () => {
         it('should initialize by filters when the filter column holds "filters"', () => {
             prepare(WithValuesFilterModelFactory());
 
-            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,
-            } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            } as IOpenFilterPanelCommandParams)).toBeTruthy();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -220,11 +220,11 @@ describe('test "SheetsFilterPanelService"', () => {
         it('should initialize with blank content', () => {
             prepare(WithValuesAndEmptyFilterModelFactory());
 
-            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,
-            } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            } as IOpenFilterPanelCommandParams)).toBeTruthy();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -241,11 +241,11 @@ describe('test "SheetsFilterPanelService"', () => {
         it('should count empty cells', () => {
             prepare(WithMultiEmptyCellsModelFactory());
 
-            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,
-            } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            } as IOpenFilterPanelCommandParams)).toBeTruthy();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -263,11 +263,11 @@ describe('test "SheetsFilterPanelService"', () => {
         it('should filter out the items from the panel if its row is already filtered out by other column', () => {
             prepare(WithTwoFilterColumnsFactory());
 
-            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 1,
-            } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            } as IOpenFilterPanelCommandParams)).toBeTruthy();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -308,11 +308,11 @@ describe('test "SheetsFilterPanelService"', () => {
         it('merged cell should use value of the top left corner', () => {
             prepare(WithMergedCellFilterFactory());
 
-            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 1,
-            } as IOpenFilterPanelOperationParams)).toBeTruthy();
+            } as IOpenFilterPanelCommandParams)).toBeTruthy();
 
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
@@ -346,11 +346,11 @@ describe('test "SheetsFilterPanelService"', () => {
         it('should update the filter items when toggle checked status', () => {
             prepare(WithValuesFilterModelFactory());
 
-            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,
-            } as IOpenFilterPanelOperationParams)).toBe(true);
+            } as IOpenFilterPanelCommandParams)).toBe(true);
 
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
             filterByModel.onFilterCheckToggled(ITEMS[0], true);
@@ -371,11 +371,11 @@ describe('test "SheetsFilterPanelService"', () => {
         it('should execute command when "apply" is called', async () => {
             prepare(WithValuesFilterModelFactory());
 
-            expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+            expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
                 col: 0,
-            } as IOpenFilterPanelOperationParams)).toBe(true);
+            } as IOpenFilterPanelCommandParams)).toBe(true);
 
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
             filterByModel.onFilterCheckToggled(ITEMS[0], true);
@@ -402,11 +402,11 @@ describe('test "SheetsFilterPanelService"', () => {
             it('should update the filter items when searching', () => {
                 prepare(WithValuesFilterModelFactory());
 
-                expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+                expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                     unitId: 'test',
                     subUnitId: 'sheet1',
                     col: 0,
-                } as IOpenFilterPanelOperationParams)).toBe(true);
+                } as IOpenFilterPanelCommandParams)).toBe(true);
 
                 const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
 
@@ -418,11 +418,11 @@ describe('test "SheetsFilterPanelService"', () => {
             it('should toggle all applied to searched results', () => {
                 prepare(WithValuesFilterModelFactory());
 
-                expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+                expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                     unitId: 'test',
                     subUnitId: 'sheet1',
                     col: 0,
-                } as IOpenFilterPanelOperationParams)).toBe(true);
+                } as IOpenFilterPanelCommandParams)).toBe(true);
 
                 const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
 
@@ -436,11 +436,11 @@ describe('test "SheetsFilterPanelService"', () => {
             it('should filter only applied to searched results', () => {
                 prepare(WithValuesFilterModelFactory());
 
-                expect(commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+                expect(commandService.syncExecuteCommand(OpenFilterPanelCommand.id, {
                     unitId: 'test',
                     subUnitId: 'sheet1',
                     col: 0,
-                } as IOpenFilterPanelOperationParams)).toBe(true);
+                } as IOpenFilterPanelCommandParams)).toBe(true);
 
                 const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
 

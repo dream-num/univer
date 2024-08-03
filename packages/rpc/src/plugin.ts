@@ -71,8 +71,6 @@ export class UniverRPCMainThreadPlugin extends Plugin {
     }
 }
 
-export interface IUniverRPCWorkerThreadPluginConfig {}
-
 /**
  * This plugin is used to register the RPC services on the worker thread.
  */
@@ -80,7 +78,7 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_WORKER_THREAD_PLUGIN';
 
     constructor(
-        private readonly _config: IUniverRPCWorkerThreadPluginConfig,
+        private readonly _config: unknown,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();

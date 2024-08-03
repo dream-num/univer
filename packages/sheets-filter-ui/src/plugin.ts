@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Inject, Injector, Optional, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-
+import { IRPCChannelService, toModule } from '@univerjs/rpc';
 import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui.controller';
 import { DefaultSheetFilterUiConfig, SheetsFilterUIController } from './controllers/sheets-filter-ui.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
+import { ISheetsGenerateFilterValuesService, SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME } from './worker/generate-filter-values.service';
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
@@ -33,7 +34,7 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSheetsFilterUIConfig> = {},
         @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Optional(IRPCChannelService) private readonly _rpcChannelService?: IRPCChannelService
     ) {
         super();
 
@@ -51,5 +52,15 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
                 },
             ],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
+
+        if (this._config.useRemoteFilterValuesGenerator && this._rpcChannelService) {
+            this._injector.add([
+                ISheetsGenerateFilterValuesService, {
+                    useFactory: () => toModule<ISheetsGenerateFilterValuesService>(
+                        this._rpcChannelService!.requestChannel(SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME)
+                    ),
+                },
+            ]);
+        }
     }
 }

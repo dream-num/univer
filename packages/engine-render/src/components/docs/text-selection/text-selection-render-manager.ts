@@ -493,6 +493,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
+        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+            position.isBack = true;
+        }
+
         const textSelection = this._textSelectionInner$.value;
         if (startNode && evt.button === 2 && textSelection) {
             const nodeCharIndex = this._docSkeleton?.findCharIndexByPosition(position);
@@ -500,7 +504,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 return;
             }
 
-            if (typeof nodeCharIndex === 'number' && textSelection.rectRanges.some((rectRange) => rectRange.startOffset! <= nodeCharIndex && rectRange.endOffset! > nodeCharIndex)) {
+            if (typeof nodeCharIndex === 'number' && textSelection.rectRanges.some((rectRange) => rectRange.startOffset! <= nodeCharIndex && rectRange.endOffset! >= nodeCharIndex)) {
                 return;
             }
         }
@@ -513,10 +517,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         if (segmentId && segmentPage !== this._currentSegmentPage) {
             this.setSegmentPage(segmentPage);
-        }
-
-        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
-            position.isBack = true;
         }
 
         this._anchorNodePosition = position;

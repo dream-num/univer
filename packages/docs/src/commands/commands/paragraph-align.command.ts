@@ -69,6 +69,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         }
 
         const currentParagraphs = getParagraphsInRanges(allRanges, paragraphs);
+
         const unitId = docDataModel.getUnitId();
         const isAlreadyAligned = currentParagraphs.every((paragraph) => paragraph.paragraphStyle?.horizontalAlign === alignType);
 

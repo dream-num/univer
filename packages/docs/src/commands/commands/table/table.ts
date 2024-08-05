@@ -39,7 +39,7 @@ export function genEmptyTable(rowCount: number, colCount: number) {
         for (let j = 0; j < colCount; j++) {
             dataStream += `${DataStreamTreeTokenType.TABLE_CELL_START}\r\n${DataStreamTreeTokenType.TABLE_CELL_END}`;
             paragraphs.push({
-                startIndex: dataStream.length - 2,
+                startIndex: dataStream.length - 3,
                 paragraphStyle: {
                     spaceAbove: { v: 3 },
                     lineSpacing: 2,
@@ -47,7 +47,7 @@ export function genEmptyTable(rowCount: number, colCount: number) {
                 },
             });
             sectionBreaks.push({
-                startIndex: dataStream.length - 1,
+                startIndex: dataStream.length - 2,
             });
         }
 

@@ -39,6 +39,7 @@ const locale: typeof zhCN = {
         resetColor: 'Reset',
         order: 'Ordered list',
         unorder: 'Unordered list',
+        checklist: 'Task list',
         alignLeft: 'Align Left',
         alignCenter: 'Align Center',
         alignRight: 'Align Right',

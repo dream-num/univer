@@ -44,6 +44,7 @@ const locale: typeof zhCN = {
         alignRight: 'Выровнять по правому краю',
         alignJustify: 'Выровнять по ширине',
         headerFooter: 'Header & Footer',
+        checklist: 'Task list',
     },
     headerFooter: {
         header: 'Header',

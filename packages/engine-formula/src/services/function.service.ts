@@ -54,6 +54,7 @@ export interface IFunctionService {
 
     unregisterDescriptions(...functionTokens: IFunctionNames[]): void;
 }
+export const IFunctionService = createIdentifier<FunctionService>('univer.formula-function.service');
 
 export class FunctionService extends Disposable implements IFunctionService {
     private _functionExecutors: Map<IFunctionNames, BaseFunction> = new Map();
@@ -124,5 +125,3 @@ export class FunctionService extends Disposable implements IFunctionService {
         }
     }
 }
-
-export const IFunctionService = createIdentifier<FunctionService>('univer.formula.function.service');

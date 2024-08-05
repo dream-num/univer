@@ -91,7 +91,7 @@ export function getBodySlice(
         const clonedTable = Tools.deepClone(table);
         const { startIndex, endIndex } = clonedTable;
 
-        if (Tools.hasIntersectionBetweenTwoRanges(startIndex, endIndex, startOffset, endOffset)) {
+        if (startIndex >= startOffset && endIndex <= endOffset) {
             newTables.push({
                 ...clonedTable,
                 startIndex: startIndex - startOffset,

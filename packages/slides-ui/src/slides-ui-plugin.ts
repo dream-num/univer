@@ -19,7 +19,7 @@ import { Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
-import { SlideUIController } from './controllers/slide-ui.controller';
+import { SlidesUIController } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
 import { SlidePopupMenuController } from './controllers/popup-menu.controller';
 import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
@@ -63,9 +63,9 @@ export class UniverSlidesUIPlugin extends Plugin {
             // this controller would add a new RenderUnit (__INTERNAL_EDITOR__DOCS_NORMAL)
             // so this new RenderUnit does not have ISlideEditorBridgeService & ISlideEditorManagerService if editorservice were create in renderManagerService
             [
-                SlideUIController,
+                SlidesUIController,
                 {
-                    useFactory: () => this._injector.createInstance(SlideUIController, this._config),
+                    useFactory: () => this._injector.createInstance(SlidesUIController, this._config),
                 },
             ],
             [SlideRenderController],

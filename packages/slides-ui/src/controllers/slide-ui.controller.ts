@@ -51,16 +51,15 @@ export const DefaultSlidesDrawingConfig: IUniverSlidesDrawingConfig = {
  * This controller registers UI parts of slide workbench to the base-ui workbench.
  */
 // @OnLifecycle(LifecycleStages.Ready, SlideUIController)
-export class SlideUIController extends Disposable {
+export class SlidesUIController extends Disposable {
     constructor(
         private readonly _config: Partial<IUniverSlidesDrawingConfig>,
-        @Inject(Injector) private readonly _injector: Injector,
-        @IMenuService private readonly _menuService: IMenuService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
-
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IMenuService protected readonly _menuService: IMenuService,
+        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @IShortcutService protected readonly _shortcutService: IShortcutService
     ) {
         super();
 
@@ -106,7 +105,7 @@ export class SlideUIController extends Disposable {
             ToggleSlideEditSidebarOperation,
             DeleteSlideElementOperation,
 
-            //cmds for editor
+            // commands for editor
             SetTextEditArrowOperation,
 
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));

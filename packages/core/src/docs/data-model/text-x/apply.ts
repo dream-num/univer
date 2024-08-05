@@ -67,11 +67,11 @@ export function textXApply(doc: IDocumentBody, actions: TextXAction[]): IDocumen
         // FIXME: @JOCS Since updateApply modifies the action(used in undo/redo),
         // so make a deep copy here, does updateApply need to
         // be modified to have no side effects in the future?
-        action = Tools.deepClone(action);
+        const clonedAction = Tools.deepClone(action);
 
-        switch (action.t) {
+        switch (clonedAction.t) {
             case TextXActionType.RETAIN: {
-                const { coverType, body, len } = action;
+                const { coverType, body, len } = clonedAction;
                 if (body != null) {
                     updateApply(doc, body, len, memoryCursor.cursor, coverType);
                 }
@@ -81,7 +81,7 @@ export function textXApply(doc: IDocumentBody, actions: TextXAction[]): IDocumen
             }
 
             case TextXActionType.INSERT: {
-                const { body, len } = action;
+                const { body, len } = clonedAction;
 
                 insertApply(doc, body!, len, memoryCursor.cursor);
                 memoryCursor.moveCursor(len);
@@ -89,12 +89,12 @@ export function textXApply(doc: IDocumentBody, actions: TextXAction[]): IDocumen
             }
 
             case TextXActionType.DELETE: {
-                const { len } = action;
+                const { len } = clonedAction;
                 deleteApply(doc, len, memoryCursor.cursor);
                 break;
             }
             default:
-                throw new Error(`Unknown action type for action: ${action}.`);
+                throw new Error(`Unknown action type for action: ${clonedAction}.`);
         }
     });
 

@@ -22,10 +22,15 @@ import styles from './index.module.less';
 
 interface IDocCreateTableConfirmProps {
     handleRowColChange: (rowCount: number, colCount: number) => void;
+    tableCreateParams: {
+        rowCount: number;
+        colCount: number;
+    };
 }
 
 export const DocCreateTableConfirm = ({
     handleRowColChange,
+    tableCreateParams,
 }: IDocCreateTableConfirmProps) => {
     const localeService = useDependency(LocaleService);
 
@@ -39,9 +44,9 @@ export const DocCreateTableConfirm = ({
     }
 
     useEffect(() => {
-        handleRowColChange(rowCount, colCount);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        setRowCount(tableCreateParams.rowCount);
+        setColCount(tableCreateParams.colCount);
+    }, [tableCreateParams]);
 
     return (
         <div className={styles.create}>

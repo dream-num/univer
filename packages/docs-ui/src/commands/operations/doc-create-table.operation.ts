@@ -47,6 +47,7 @@ export const DocCreateTableOperation: ICommand = {
                     name: COMPONENT_DOC_CREATE_TABLE_CONFIRM,
                     props: {
                         handleRowColChange,
+                        tableCreateParams,
                     },
                 },
             },

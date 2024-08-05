@@ -338,10 +338,11 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
     for (let i = 0, len = tables.length; i < len; i++) {
         const table = tables[i];
         const { startIndex, endIndex } = table;
+
         if (startIndex > currentIndex) {
             table.startIndex += textLength;
             table.endIndex += textLength;
-        } else if (endIndex >= currentIndex - 1) {
+        } else if (endIndex > currentIndex) {
             table.endIndex += textLength;
         }
     }

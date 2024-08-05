@@ -101,14 +101,12 @@ export const InsertRowCommand: ICommand = {
             insertRowParams
         );
 
-        const performCheckInfo = await sheetInterceptorService.beforeCommandExecute({
+        const canPerform = await sheetInterceptorService.beforeCommandExecute({
             id: InsertRowCommand.id,
             params: insertRowParams,
         });
 
-        const { perform = true } = performCheckInfo;
-
-        if (!perform) {
+        if (!canPerform) {
             return false;
         }
 
@@ -300,14 +298,12 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             accessor,
             insertColParams
         );
-        const performCheckInfo = await sheetInterceptorService.beforeCommandExecute({
+        const canPerform = await sheetInterceptorService.beforeCommandExecute({
             id: InsertColCommand.id,
             params: insertColParams,
         });
 
-        const { perform = true } = performCheckInfo;
-
-        if (!perform) {
+        if (!canPerform) {
             return false;
         }
 

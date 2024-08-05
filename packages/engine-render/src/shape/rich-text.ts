@@ -86,8 +86,7 @@ export class RichText extends BaseObject {
     private _cl?: Nullable<IColorStyle>;
 
     override objectType = ObjectType.RICH_TEXT;
-
-    private _text: string;
+    private _originProps: IRichTextProps;
 
     constructor(
         private _localeService: LocaleService,
@@ -108,7 +107,8 @@ export class RichText extends BaseObject {
             this._bg = props.bg;
             this._bd = props.bd;
             this._cl = props.cl;
-            this._text = props.text || '';
+
+            this._originProps = props;
 
             this._documentData = this._convertToDocumentData(props.text || '');
         }
@@ -143,7 +143,17 @@ export class RichText extends BaseObject {
     }
 
     get text(): string {
-        return this._text;
+        const textBody = this._documentData.body;
+        if (!textBody) return '';
+        const texts = [];
+        if (textBody.textRuns) {
+            for (const run of textBody.textRuns) {
+                const st = run.st || 0;
+                const ed = run.ed || 0;
+                texts.push(textBody.dataStream.slice(st, ed));
+            }
+        }
+        return texts.join('');
     }
 
     get documentData() {
@@ -293,5 +303,25 @@ export class RichText extends BaseObject {
         this.setProps(props);
 
         this.makeDirty(true);
+    }
+
+    updateDocumentByDocData() {
+        const docModel = new DocumentDataModel(this._documentData);
+        const docViewModel = new DocumentViewModel(docModel);
+
+        this._documentSkeleton = DocumentSkeleton.create(docViewModel, this._localeService);
+
+        this._documents = new Documents(`${this.oKey}_DOCUMENTS`, this._documentSkeleton, {
+            pageMarginLeft: 0,
+            pageMarginTop: 0,
+        });
+
+        const props = this._originProps;
+        this._documentSkeleton
+            .getViewModel()
+            .getDataModel()
+            .updateDocumentDataPageSize(props?.width, props?.height);
+
+        this._documentSkeleton.calculate();
     }
 }

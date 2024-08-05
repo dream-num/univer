@@ -50,6 +50,8 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
     private _isUnitEditing = false;
 
     setSlideTextEditor$: Subject<ISlideRichTextProps> = new Subject();
+
+    private _curRichText = null as RichText | null;
     constructor(
         private readonly _renderContext: IRenderContext<UnitModel>,
         @IContextService private readonly _contextService: IContextService,
@@ -77,7 +79,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         // }));
     }
 
-    private _updateEditor(targetObject: RichText, startEditingParam: ISlideRichTextProps) {
+    private _updateEditor(targetObject: RichText) {
         const { scene, engine } = this._renderContext;
         const unitId = this._renderContext.unitId;
 
@@ -86,7 +88,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             engine,
             unitId,
             pageId: '',
-            startEditingText: targetObject,
+            richTextObj: targetObject,
         };
 
         // editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
@@ -105,28 +107,33 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             if (!transformer) return;
 
             // calling twice when add an object.
-            transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
+            d.add(transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
                 // console.log('activeObject', page.id, transformer == window.trans, param);
                 const target = param.target;
                 if (!target) return;
                 if (target.objectType !== ObjectType.RICH_TEXT) {
+                    this.saveCurrEditingState();
+
                     // rm other text editor
                     this.changeVisible(false);
                 } else {
-                    const elementData = (target as RichText).toJson();
-                    this.startEditing(target as RichText, {
-                        top: elementData.top,
-                        left: elementData.left,
-                        width: elementData.width,
-                        height: elementData.height,
-                        scaleX: elementData.scaleX,
-                        scaleY: elementData.scaleY,
-                        text: elementData.text,
-                        fs: elementData.fs,
-                    });
+                    // const elementData = (target as RichText).toJson();
+                    this._curRichText = target as RichText;
+                    this.startEditing(target as RichText);
                 }
-            });
+            }));
         }
+    }
+
+    saveCurrEditingState() {
+        if (!this._curRichText) return;
+        const curRichText = this._curRichText;
+
+        const slideData = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        if (!slideData) return false;
+        // console.log('slide data', slideData);
+
+        curRichText.updateDocumentByDocData();
     }
 
     /**
@@ -136,9 +143,9 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
      * TODO @lumixraku need scale param
      * @param editingParam
      */
-    startEditing(target: RichText, editingParam: ISlideRichTextProps) {
+    startEditing(target: RichText) {
         // this.setSlideTextEditor$.next({ content, rect });
-        this._updateEditor(target, editingParam);
+        this._updateEditor(target);
         this.changeVisible(true);
     }
 

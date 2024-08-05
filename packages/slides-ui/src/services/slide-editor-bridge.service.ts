@@ -63,7 +63,7 @@ export interface ISetEditorInfo {
     engine: Engine;
     unitId: string;
     pageId: string;
-    startEditingText: RichText;
+    richTextObj: RichText;
 }
 
 export interface ISlideEditorBridgeService {
@@ -188,10 +188,9 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         const editorRectInfo = this._currentEditRectInfo;
         const unitId = editorRectInfo.unitId;
 
-        // TODO @lumixraku should get documentData from editorRectInfo, but now this would cause input area height 0
         // let docData: IDocumentData = this.genDocData(editorRectInfo.startEditingText);
 
-        const docData = editorRectInfo.startEditingText.documentData;
+        const docData = editorRectInfo.richTextObj.documentData;
         docData.id = editorUnitId;
         docData.documentStyle = {
             ...docData.documentStyle,
@@ -213,10 +212,10 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
 
         // see insert-text.operation
         // TODO: @lumixraku need to plus scrolling and offset of PPT card.
-        const editorWidth = editorRectInfo.startEditingText.width;
-        const editorHeight = editorRectInfo.startEditingText.height;
-        const left = editorRectInfo.startEditingText.left;
-        const top = editorRectInfo.startEditingText.top;
+        const editorWidth = editorRectInfo.richTextObj.width;
+        const editorHeight = editorRectInfo.richTextObj.height;
+        const left = editorRectInfo.richTextObj.left;
+        const top = editorRectInfo.richTextObj.top;
         return {
             position: {
                 startX: left,

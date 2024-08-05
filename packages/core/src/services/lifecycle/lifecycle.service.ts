@@ -102,9 +102,6 @@ export class LifecycleInitializerService extends Disposable {
     }
 
     initModulesOnStage(stage: LifecycleStages): void {
-        console.log('into initModulesOnStage !!!!!!!!!!', stage);
-        LifecycleToModules.get(stage)?.forEach((m) => console.log('initModulesOnStage', stage, m.name, this._injector.has(m), !this._seenTokens.has(m)));
-
         LifecycleToModules.get(stage)?.forEach((m) => {
             if (this._injector.has(m) && !this._seenTokens.has(m)) {
                 this._injector.get(m);

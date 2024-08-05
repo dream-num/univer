@@ -15,27 +15,27 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
 import type { MenuConfig } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
+import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSlideShapeRectangleOperation } from '../commands/operations/insert-shape.operation';
 import { SlideAddTextOperation } from '../commands/operations/insert-text.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
-import { UploadFileMenu } from '../components/upload-component/UploadFile';
-import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
-import { SlideSideBar } from '../views/slide-bar/SlideBar';
-import { EditorContainer } from '../views/editor-container';
+import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
 import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
-import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
-import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
+import { UploadFileMenu } from '../components/upload-component/UploadFile';
+import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
+import { EditorContainer } from '../views/editor-container';
+import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
-import { SlideAddTextMenuItemFactory, TEXT_ICON_ID } from './text.menu';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
+import { SlideAddTextMenuItemFactory, TEXT_ICON_ID } from './text.menu';
 
 export interface IUniverSlidesDrawingConfig {
     menu?: MenuConfig;

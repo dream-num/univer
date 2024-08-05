@@ -25,8 +25,6 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
         @Inject(ISlideEditorBridgeService) private _editorBridgeService: ISlideEditorBridgeService
     ) {
         super();
-        console.log('_context', this._context);
-        console.log('_editorBridgeService', this._editorBridgeService);
     }
 
     override dispose() {

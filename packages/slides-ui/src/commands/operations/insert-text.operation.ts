@@ -17,9 +17,6 @@
 import type { ICommand, IPageElement, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, PageElementType, Tools, UniverInstanceType } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { SlideEditorBridgeRenderController } from '../../controllers/slide-editor-bridge.render-controller';
-import { ISlideEditorBridgeService } from '../../services/slide-editor-bridge.service';
 
 export interface ISlideAddTextParam {
     text: string;

@@ -14,20 +14,76 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IDisposable, IDocumentBody, IPosition, Nullable, Workbook } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED, FOCUSING_EDITOR_BUT_HIDDEN, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_FORMULA_EDITOR, FOCUSING_SHEET, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, ICommandService, IContextService, Inject, IResourceLoaderService, IUndoRedoService, IUniverInstanceService, LocaleService, toDisposable, Tools, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import type { IDocObjectParam, IRichTextEditingMutationParams } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, MoveCursorOperation, MoveSelectionOperation, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import type {
+    ICommandInfo,
+    IDisposable,
+    IDocumentBody,
+    IPosition,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    Direction,
+    Disposable,
+    DisposableCollection,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    EDITOR_ACTIVATED,
+    FOCUSING_EDITOR_BUT_HIDDEN,
+    FOCUSING_EDITOR_INPUT_FORMULA,
+    FOCUSING_EDITOR_STANDALONE,
+    FOCUSING_FORMULA_EDITOR,
+    FOCUSING_SHEET,
+    FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
+    HorizontalAlign,
+    ICommandService,
+    IContextService,
+    Inject,
+    IResourceLoaderService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    LocaleService,
+    toDisposable,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import type { IDocObjectParam } from '@univerjs/docs';
+import {
+    VIEWPORT_KEY as DOC_VIEWPORT_KEY,
+    DOCS_COMPONENT_MAIN_LAYER_INDEX,
+    DOCS_VIEW_KEY,
+    DocSkeletonManagerService,
+    MoveCursorOperation,
+    MoveSelectionOperation,
+    TextSelectionManagerService,
+} from '@univerjs/docs';
 // import { IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
-import type { DocBackground, Documents, DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
-import { convertTextRotation, DeviceInputEventType, FIX_ONE_PIXEL_BLUR_OFFSET, fixLineWidthByScale, IRenderManagerService, ITextSelectionRenderManager, Rect, ScrollBar } from '@univerjs/engine-render';
-import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+import type {
+    DocBackground,
+    Documents,
+    DocumentSkeleton,
+    IDocumentLayoutObject,
+    IEditorInputConfig,
+    IRenderContext,
+    IRenderModule,
+    Scene,
+} from '@univerjs/engine-render';
+import {
+    convertTextRotation,
+    DeviceInputEventType,
+    FIX_ONE_PIXEL_BLUR_OFFSET,
+    fixLineWidthByScale,
+    IRenderManagerService,
+    ITextSelectionRenderManager,
+    Rect,
+    ScrollBar,
+} from '@univerjs/engine-render';
+import { IEditorService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
 import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import { ISlideEditorManagerService } from '../services/slide-editor-manager.service';
 
-import styles from '../views/editor-container/index.module.less';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 
 const HIDDEN_EDITOR_POSITION = -1000;
@@ -635,8 +691,6 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
      */
     private _commandExecutedListener(d: DisposableCollection) {
         const moveCursorOP = [SetTextEditArrowOperation.id];
-
-        console.log('_commandExecutedListener@!@@@@@@@@@@@@@'); // twice!!! because controller is registered in renderUnit.
 
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (moveCursorOP.includes(command.id)) {

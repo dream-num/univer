@@ -66,10 +66,6 @@ export class Scene extends ThinScene {
         if (state) {
             this.transformByState(state);
         }
-        if (!window.sc) {
-            window.sc = {};
-        }
-        window.sc[sceneKey] = this;
 
         if (this._parent.classType === RENDER_CLASS_TYPE.ENGINE) {
             const parent = this._parent as ThinEngine<Scene>;
@@ -178,14 +174,13 @@ export class Scene extends ThinScene {
     }
 
     isDirty(): boolean {
-        let rs = false;
         for (let i = 0; i < this._layers.length; i++) {
             const layer = this._layers[i];
             if (layer.isDirty() === true) {
-                rs = true;
+                return true;
             }
         }
-        return rs;
+        return false;
     }
 
     getCursor() {

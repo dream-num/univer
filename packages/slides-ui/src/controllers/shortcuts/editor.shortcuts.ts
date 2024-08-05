@@ -18,15 +18,10 @@ import { DeleteLeftCommand } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-import { MoveDocDrawingsCommand } from '@univerjs/docs-drawing-ui';
-// import {
-//     SetCellEditVisibleOperation,
-// } from '../../commands/operations/cell-edit.operation';
 import { SetTextEditArrowOperation } from '../../commands/operations/text-edit.operation';
 import {
     whenEditorActivated,
     whenFormulaEditorFocused,
-    whenSheetEditorFocused,
 } from './utils';
 
 export const ARROW_SELECTION_KEYCODE_LIST = [

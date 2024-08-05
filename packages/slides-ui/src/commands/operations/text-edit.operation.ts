@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import { CanvasView } from '@univerjs/slides';
 
 export const SetTextEditArrowOperation: IOperation<any> = {
     id: 'slide.operation.edit-arrow',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IPageElement, IRectXYWH, SlideDataModel, UnitModel } from '@univerjs/core';
+import type { IDisposable, SlideDataModel, UnitModel } from '@univerjs/core';
 import { DisposableCollection, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import {
     TextSelectionManagerService,
@@ -26,8 +26,6 @@ import { Subject } from 'rxjs';
 import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import type { ISlideRichTextProps } from '../type';
-
-const HIDDEN_EDITOR_POSITION = -1000;
 
 // interface ICanvasOffset {
 //     left: number;
@@ -108,7 +106,6 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
 
             // calling twice when add an object.
             d.add(transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
-                // console.log('activeObject', page.id, transformer == window.trans, param);
                 const target = param.target;
                 if (!target) return;
                 if (target.objectType !== ObjectType.RICH_TEXT) {
@@ -131,8 +128,6 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
 
         const slideData = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         if (!slideData) return false;
-        // console.log('slide data', slideData);
-
         curRichText.updateDocumentByDocData();
     }
 

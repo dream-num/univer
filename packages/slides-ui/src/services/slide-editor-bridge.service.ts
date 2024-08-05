@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentBody, IDocumentData, IDocumentSettings, IDocumentStyle, IParagraph, IParagraphStyle, IPosition, IRectXYWH, ISelectionCell, Nullable, UnitModel } from '@univerjs/core';
+import type { IDisposable, IDocumentBody, IDocumentData, IDocumentSettings, IDocumentStyle, IParagraph, IParagraphStyle, IPosition, Nullable, UnitModel } from '@univerjs/core';
 import {
     createIdentifier,
     Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DocumentDataModel,
     EDITOR_ACTIVATED,
-    FOCUSING_DOC,
     FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_UNIVER_EDITOR,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
-    HorizontalAlign,
     IContextService,
     Inject,
     IUniverInstanceService,
@@ -37,7 +34,6 @@ import type { KeyCode } from '@univerjs/ui';
 import { IEditorService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { ISlideRichTextProps } from '../type';
 
 export const ISlideEditorBridgeService = createIdentifier<SlideEditorBridgeService>('univer.slide-editor-bridge.service');
 
@@ -123,7 +119,6 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         @IContextService private readonly _contextService: IContextService
     ) {
         super();
-        console.log('SlideEditorBridgeService', this._renderContext);
     }
 
     override dispose() {

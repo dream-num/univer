@@ -55,16 +55,15 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     override onReady(): void {
-        console.log('onReady>>>>>>>>>>>>>>>>>>>>');
         ([
-
+            // cannot register in _renderManagerService now.
             // [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
             // // used by SlideUIController --> EditorContainer
             // [ISlideEditorManagerService, { useClass: SlideEditorManagerService }],
 
             // This controller should be registered in Ready stage.
-            // this controller would add a new RenderUnit
-            // so this new RenderUnit did not have ISlideEditorBridgeService & ISlideEditorManagerService
+            // this controller would add a new RenderUnit (__INTERNAL_EDITOR__DOCS_NORMAL)
+            // so this new RenderUnit does not have ISlideEditorBridgeService & ISlideEditorManagerService if editorservice were create in renderManagerService
             [
                 SlideUIController,
             ],
@@ -73,11 +72,9 @@ export class UniverSlidesUIPlugin extends Plugin {
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
         });
-        console.log('onReady <<<<<<<<<<<<<<<<<<<');
     }
 
     override onRendered(): void {
-        console.log('onRendered >>>>>>>>>>>>>>>>>>>>');
         ([
             // need slideEditorBridgeService
             // need TextSelectionRenderService which init by EditorContainer
@@ -90,7 +87,6 @@ export class UniverSlidesUIPlugin extends Plugin {
         });
 
         this._markSlideAsFocused();
-        console.log('onRendered <<<<<<<<<<<<<<<<<<<');
     }
 
     private _markSlideAsFocused() {

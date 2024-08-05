@@ -5,6 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  * If you are running tests in CI, you can use the `CI` environment variable to adjust the configuration.
  */
 const isCI = !!process.env.CI;
+const HEADLESS = !!process.env.HEADLESS;
 
 /**
  * Read environment variables from file.
@@ -40,7 +41,7 @@ export default defineConfig({
     projects: [
         {
             name: 'chromium',
-            use: { ...devices['Desktop Chrome'], headless: isCI },
+            use: { ...devices['Desktop Chrome'], headless: isCI || HEADLESS },
         },
 
         // {

@@ -16,13 +16,12 @@
 
 import { expect, test } from '@playwright/test';
 
-test('diff default sheet content', async ({ page }) => {
-    await page.goto('http://localhost:3000/sheets/');
+test('diff default doc content', async ({ page }) => {
+    await page.goto('http://localhost:3000/docs/');
     await page.waitForTimeout(2000);
 
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
+    await page.evaluate(() => window.E2EControllerAPI.loadDefaultDoc());
     await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot();
 });
-

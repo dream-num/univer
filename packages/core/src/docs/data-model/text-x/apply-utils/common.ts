@@ -741,6 +741,7 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
         for (let i = 0, len = tables.length; i < len; i++) {
             const table = tables[i];
             const { startIndex: st, endIndex: ed } = table;
+
             if (startIndex <= st && endIndex >= ed) {
                 removeTables.push({
                     ...table,
@@ -753,6 +754,11 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
 
                 table.startIndex = segments[0];
                 table.endIndex = segments[1];
+
+                // FIXME: @JOCS, why startIndex will equal to endIndex here?
+                if (table.startIndex === table.endIndex) {
+                    continue;
+                }
             } else if (endIndex < st) {
                 table.startIndex -= textLength;
                 table.endIndex -= textLength;

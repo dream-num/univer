@@ -126,17 +126,7 @@ export class SheetInterceptorService extends Disposable {
         return this.disposeWithMe(toDisposable(() => remove(this._commandInterceptors, interceptor)));
     }
 
-    interceptRangesCommand(interceptor: ICommandInterceptorOnlyWithRanges): IDisposable {
-        if (this._commandRangesInterceptors.includes(interceptor)) {
-            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
-        }
-
-        this._commandRangesInterceptors.push(interceptor);
-        this._commandRangesInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-
-        return this.disposeWithMe(toDisposable(() => remove(this._commandRangesInterceptors, interceptor)));
-    }
-
+    // Add a listener function to the command, which will be run before the command is run to get some additional information
     interceptBeforeCommand(interceptor: IBeforeCommandInterceptor): IDisposable {
         if (this._beforeCommandInterceptor.includes(interceptor)) {
             throw new Error('[SheetInterceptorService]: Interceptor already exists!');
@@ -148,6 +138,11 @@ export class SheetInterceptorService extends Disposable {
         return this.disposeWithMe(toDisposable(() => remove(this._beforeCommandInterceptor, interceptor)));
     }
 
+    /**
+     * before command execute, call this method to get the flag of whether it can be executed and what additional mutations need to be executed to execute the command，
+     * @param info ICommandInfo
+     * @returns Promise<{ perform: boolean; mutations: Nullable<IUndoRedoCommandInfosByInterceptor> }>
+     */
     async beforeCommandExecute(info: ICommandInfo): Promise<{ perform: boolean; mutations: Nullable<IUndoRedoCommandInfosByInterceptor> }> {
         const allPerformCheckInfo = await Promise.all(this._beforeCommandInterceptor.map((i) => i.performCheck(info)));
 
@@ -178,8 +173,24 @@ export class SheetInterceptorService extends Disposable {
     }
 
     /**
+     * expand onCommandExecute capabilities to implement additional operations on the range, such as clearing other plugin contents in the range
+     * @param interceptor ICommandInterceptorOnlyWithRanges
+     * @returns IDisposable
+     */
+    interceptRangesCommand(interceptor: ICommandInterceptorOnlyWithRanges): IDisposable {
+        if (this._commandRangesInterceptors.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+
+        this._commandRangesInterceptors.push(interceptor);
+        this._commandRangesInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._commandRangesInterceptors, interceptor)));
+    }
+
+    /**
      * When command is executing, call this method to gether undo redo mutations from upper features.
-     * @param command
+     * @param command ICommandInfo | IRangesInfo
      * @returns
      */
 

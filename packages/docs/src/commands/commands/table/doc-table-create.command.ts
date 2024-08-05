@@ -61,29 +61,26 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         }
         const { startOffset } = getInsertSelection(activeRange, body);
 
-        const startNodePosition = skeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
-
-        // TODO: @JOCS Not support insert table in table cell.
-        if (startNodePosition && startNodePosition?.path?.indexOf('skeTables') > -1) {
-            return false;
-        }
-
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
         const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
+        const line = curGlyph?.parent?.parent;
         const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
         const isInParagraph = preGlyph && preGlyph.content !== '\r';
 
-        if (curGlyph == null) {
+        if (curGlyph == null || line == null) {
             return false;
         }
+
+        // Also need to create new paragraph when there is already a table in paragraph.
+        const needCreateParagraph = isInParagraph || line.isBehindTable;
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
 
         // 4 is cal by `\r + TableStart + RowStart + CellStart`, 3 is cal by `TableStart + RowStart + CellStart`.
-        const cursor = startOffset + (isInParagraph ? 4 : 3);
+        const cursor = startOffset + (needCreateParagraph ? 4 : 3);
         const textRanges: ITextRangeWithStyle[] = [{
             startOffset: cursor,
             endOffset: cursor,
@@ -108,7 +105,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
             });
         }
 
-        if (isInParagraph) {
+        if (needCreateParagraph) {
             textX.push({
                 t: TextXActionType.INSERT,
                 body: {

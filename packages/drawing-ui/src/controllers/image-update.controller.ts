@@ -23,6 +23,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Image, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
@@ -73,7 +74,11 @@ export class ImageUpdateController extends Disposable {
             return;
         }
 
-        const { unitId: currentUnitId, subUnitId: currentSubUnitId } = info;
+        const { unitId: currentUnitId, subUnitId: currentSubUnitId, current } = info;
+
+        if (current.type === UniverInstanceType.UNIVER_DOC) {
+            return;
+        }
 
         Object.keys(drawingList).forEach((unitId) => {
             Object.keys(drawingList[unitId]).forEach((subUnitId) => {
@@ -196,7 +201,7 @@ export class ImageUpdateController extends Disposable {
 
     private _insertImages(params: IDrawingSearch[]) {
         (params).forEach(async (param) => {
-            const { unitId, subUnitId } = param;
+            const { unitId, subUnitId, drawingId } = param;
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
             const currentSubUnitId = getCurrentUnitInfo(this._currentUniverService)?.subUnitId;
 
@@ -210,6 +215,7 @@ export class ImageUpdateController extends Disposable {
             }
 
             const images = await this._drawingRenderService.renderImages(imageParam, renderObject.scene);
+
             if (images == null || images.length === 0) {
                 return;
             }

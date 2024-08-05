@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-const PREFIX = '__INTERNAL_EDITOR__';
+import { expect, test } from '@playwright/test';
 
-export const DOCS_NORMAL_EDITOR_UNIT_ID_KEY = `${PREFIX}DOCS_NORMAL`;
+test('diff default doc content', async ({ page }) => {
+    await page.goto('http://localhost:3000/docs/');
+    await page.waitForTimeout(2000);
 
-export const DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY = `${PREFIX}DOCS_FORMULA_BAR`;
+    await page.evaluate(() => window.E2EControllerAPI.loadDefaultDoc());
+    await page.waitForTimeout(5000);
 
-export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = `${PREFIX}ZEN_EDITOR`;
-
-export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
-
-export function createInternalEditorID(id: string) {
-    return `${PREFIX}${id}`;
-}
-
-export function isInternalEditorID(id: string) {
-    return id.startsWith(PREFIX);
-}
+    await expect(page).toHaveScreenshot({ maxDiffPixels: 30 });
+});

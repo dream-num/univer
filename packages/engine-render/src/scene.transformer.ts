@@ -79,6 +79,7 @@ enum MoveObserverType {
 }
 
 export interface IChangeObserverConfig {
+    target?: BaseObject;
     objects: Map<string, BaseObject>;
     type: MoveObserverType;
     moveX?: number;
@@ -152,6 +153,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
     shouldOverdrawWholeArea: boolean = false;
 
     private readonly _changeStart$ = new Subject<IChangeObserverConfig>();
+
+    /**
+     * actually pointer down on a object,
+     * trigger when pick an object even object not change.
+     */
     readonly changeStart$ = this._changeStart$.asObservable();
 
     private readonly _changing$ = new Subject<IChangeObserverConfig>();
@@ -329,6 +335,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this.hoverLeaveFunc && applyObject.onPointerLeave$.subscribeEvent(this.hoverLeaveFunc);
         }
 
+        // eslint-disable-next-line max-lines-per-function
         const observer = applyObject.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             this._startOffsetX = evtOffsetX;
@@ -357,12 +364,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
             if (!isCropper) {
                 this._updateActiveObjectList(applyObject, evt);
                 this._changeStart$.next({
+                    target: applyObject,
                     objects: this._selectedObjectMap,
                     type: MoveObserverType.MOVE_START,
                 });
             } else {
                 this._copperSelectedObject = applyObject;
                 this._changeStart$.next({
+                    target: applyObject,
                     objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                     type: MoveObserverType.MOVE_START,
                 });
@@ -1611,6 +1620,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     activeAnObject(applyObject: BaseObject) {
         this._updateActiveObjectList(applyObject, {} as IPointerEvent);
+        this._changeStart$.next({
+            target: applyObject,
+            objects: this._selectedObjectMap,
+            type: MoveObserverType.MOVE_START,
+        });
     }
 
     private _updateActiveObjectList(applyObject: BaseObject, evt: IPointerEvent | IMouseEvent) {

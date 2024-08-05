@@ -73,5 +73,5 @@ export function getCurrentUnitInfo(currentUniverService: IUniverInstanceService)
         subUnitId = unitId;
     }
 
-    return { unitId, subUnitId };
+    return { unitId, subUnitId, current };
 }

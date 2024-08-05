@@ -5,6 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  * If you are running tests in CI, you can use the `CI` environment variable to adjust the configuration.
  */
 const isCI = !!process.env.CI;
+const HEADLESS = !!process.env.HEADLESS;
 
 /**
  * Read environment variables from file.
@@ -40,7 +41,7 @@ export default defineConfig({
     projects: [
         {
             name: 'chromium',
-            use: { ...devices['Desktop Chrome'], headless: isCI },
+            use: { ...devices['Desktop Chrome'], headless: isCI || HEADLESS },
         },
 
         // {
@@ -82,11 +83,4 @@ export default defineConfig({
         stdout: 'pipe',
         stderr: 'pipe',
     },
-
-    /* Run your local dev server before starting the tests */
-    // webServer: {
-    //   command: 'npm run start',
-    //   url: 'http://127.0.0.1:3000',
-    //   reuseExistingServer: !process.env.CI,
-    // },
 });

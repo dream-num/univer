@@ -7,8 +7,8 @@ on:
         branches: [main, dev]
 
 jobs:
-    test:
-        timeout-minutes: 60
+    e2e_test:
+        timeout-minutes: 10
         runs-on: ubuntu-latest
 
         env:
@@ -36,7 +36,7 @@ jobs:
               run: pnpm exec playwright test
 
             - uses: actions/upload-artifact@v3
-              if: always()
+              if: failure() # only upload artifact when failed
               with:
                   name: playwright-report
                   path: playwright-report/

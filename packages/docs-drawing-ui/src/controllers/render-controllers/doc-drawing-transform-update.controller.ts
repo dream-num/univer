@@ -20,7 +20,11 @@ import {
     Disposable,
     ICommandService,
     Inject,
+    IUniverInstanceService,
+    LifecycleService,
+    LifecycleStages,
     PositionedObjectLayoutType,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
@@ -28,6 +32,7 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
+import { filter, first } from 'rxjs';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 interface IDrawingParamsWithBehindText {
@@ -51,7 +56,9 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorService private readonly _editorService: IEditorService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService
+        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
+        @Inject(LifecycleService) private _lifecycleService: LifecycleService
     ) {
         super();
 
@@ -62,6 +69,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
     private _initialize() {
         this._initialRenderRefresh();
+        this._drawingInitializeListener();
     }
 
     private _initialRenderRefresh() {
@@ -257,5 +265,24 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             marginTop,
             marginLeft,
         } as IDocumentSkeletonPage);
+    }
+
+    private _drawingInitializeListener() {
+        this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Steady), first()).subscribe((stage) => {
+            const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+            if (!unitId) {
+                return;
+            }
+
+            const skeleton = this._docSkeletonManagerService.getSkeleton();
+
+            if (skeleton == null) {
+                return;
+            }
+
+            this._refreshDrawing(skeleton);
+
+            this._drawingManagerService.initializeNotification(unitId);
+        });
     }
 }

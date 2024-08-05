@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-const PREFIX = '__INTERNAL_EDITOR__';
-
-export const DOCS_NORMAL_EDITOR_UNIT_ID_KEY = `${PREFIX}DOCS_NORMAL`;
-
-export const DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY = `${PREFIX}DOCS_FORMULA_BAR`;
-
-export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = `${PREFIX}ZEN_EDITOR`;
-
-export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
-
-export function createInternalEditorID(id: string) {
-    return `${PREFIX}${id}`;
-}
-
-export function isInternalEditorID(id: string) {
-    return id.startsWith(PREFIX);
-}
+export interface ISlideRichTextProps {
+    /**
+     * top offset value of PPT card area(px).
+     */
+    top: number;
+    /**
+     * left offset value of PPT card area(px).
+     */
+    left: number;
+    width: number;
+    height: number;
+    scaleX: number;
+    scaleY: number;
+    text: string;
+    fs: number;
+  //... align margin...
+};

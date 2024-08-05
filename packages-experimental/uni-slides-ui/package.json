@@ -72,7 +72,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.46"
+        "@univerjs/icons": "^0.1.70"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

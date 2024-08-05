@@ -17,7 +17,6 @@
 import type { Dependency, SlideDataModel } from '@univerjs/core';
 import { Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
-import { IImageIoService, ImageIoService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SlidesUIController } from './controllers/slide-ui.controller';
 import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
@@ -48,7 +47,6 @@ export class UniverSlidesUIPlugin extends Plugin {
                     useFactory: () => this._injector.createInstance(SlidesUIController, this._config),
                 },
             ],
-            [IImageIoService, { useClass: ImageIoService }],
             [SlideCanvasPopMangerService],
         ] as Dependency[], this._config.override).forEach((d) => this._injector.add(d));
     }

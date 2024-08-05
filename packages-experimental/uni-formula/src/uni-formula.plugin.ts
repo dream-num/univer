@@ -34,7 +34,7 @@ export class UniverDocUniFormulaPlugin extends Plugin {
         super();
     }
 
-    override onSteady(): void {
+    override onStarting(): void {
         this._injector.add([UniFormulaService]);
     }
 }

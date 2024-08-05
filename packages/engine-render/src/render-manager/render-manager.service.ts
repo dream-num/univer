@@ -147,18 +147,10 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         const dependencies = this._renderDependencies.get(type)!;
         dependencies.push(ctor);
 
-        for (const [renderUnitId, render] of this._renderMap) {
-            if (type === UniverInstanceType.UNIVER_SLIDE) {
-                // const renderType = this._univerInstanceService.getUnitType(renderUnitId);
-                // renderUnitId  slide_test  cover_1 rect_1....
-                if (this._univerInstanceService.getUnit(renderUnitId)) {
-                    (render as RenderUnit).addRenderDependencies([ctor]);
-                }
-            } else {
-                const renderType = this._univerInstanceService.getUnitType(renderUnitId);
-                if (renderType === type) {
-                    (render as RenderUnit).addRenderDependencies([ctor]);
-                }
+        for (const [_, render] of this._renderMap) {
+            const renderType = render.type;
+            if (renderType === type) {
+                (render as RenderUnit).addRenderDependencies([ctor]);
             }
         }
 

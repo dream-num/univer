@@ -63,7 +63,6 @@ export class UniSheetsUIController extends SheetUIController {
     }
 
     private _initUniMenus(): void {
-        console.error('init uni menus');
         ([
             [BuiltinUniToolbarItemId.FONT_FAMILY, SetRangeFontFamilyCommand.id],
             [BuiltinUniToolbarItemId.FONT_SIZE, SetRangeFontSizeCommand.id],

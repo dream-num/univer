@@ -112,7 +112,7 @@ const UpdateDocUniFormulaCacheMutation: IMutation<IUpdateDocUniFormulaCacheMutat
  * This service provides methods for docs and slides to register a formula into
  * Univer's formula system.
  */
-@OnLifecycle(LifecycleStages.Starting, UniFormulaService)
+@OnLifecycle(LifecycleStages.Steady, UniFormulaService)
 export class UniFormulaService extends Disposable {
     /** This data maps doc formula key to the formula id in the formula system. */
     private readonly _docFormulas = new Map<string, IDocFormulaReference>();

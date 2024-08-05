@@ -48,7 +48,7 @@ export const DefaultSlidesDrawingConfig: IUniverSlidesDrawingConfig = {
 @OnLifecycle(LifecycleStages.Ready, SlidesUIController)
 export class SlidesUIController extends Disposable {
     constructor(
-        protected readonly _config: Partial<IUniverSlidesDrawingConfig>,
+        protected readonly _config: Partial<IUniverSlidesDrawingConfig> | undefined,
         @Inject(Injector) protected readonly _injector: Injector,
         @IMenuService protected readonly _menuService: IMenuService,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
@@ -64,7 +64,7 @@ export class SlidesUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        const { menu = {} } = this._config;
+        const menu = this._config?.menu ?? {};
 
         [
             SlideAddTextMenuItemFactory,

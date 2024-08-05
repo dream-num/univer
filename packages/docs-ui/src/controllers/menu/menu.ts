@@ -105,6 +105,48 @@ function getInsertTableHiddenObservable(
     });
 }
 
+function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
+    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+    return new Observable((subscriber) => {
+        const subscription = textSelectionManagerService.textSelection$.subscribe((selection) => {
+            if (selection == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            const { textRanges } = selection;
+
+            if (textRanges.length !== 1) {
+                subscriber.next(true);
+                return;
+            }
+
+            const textRange = textRanges[0];
+            const { collapsed, anchorNodePosition } = textRange;
+
+            if (!collapsed) {
+                subscriber.next(true);
+                return;
+            }
+
+            if (anchorNodePosition != null) {
+                const { path } = anchorNodePosition;
+
+                // TODO: Not support insert table in table cell now.
+                if (path.indexOf('cells') !== -1) {
+                    subscriber.next(true);
+                    return;
+                }
+            }
+
+            subscriber.next(false);
+        });
+
+        return () => subscription.unsubscribe();
+    });
+}
+
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
 
@@ -470,6 +512,7 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
         group: MenuGroup.TOOLBAR_LAYOUT,
         icon: TableIcon,
         tooltip: 'toolbar.table.main',
+        disabled$: getTableDisabledObservable(accessor),
         // Do not show header footer menu and insert table at zen mode.
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), getHeaderFooterMenuHiddenObservable(accessor), (one, two, three) => {
             return one || two || three;

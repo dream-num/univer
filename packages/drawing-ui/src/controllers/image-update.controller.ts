@@ -39,8 +39,6 @@ const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
 @OnLifecycle(LifecycleStages.Rendered, ImageUpdateController)
 export class ImageUpdateController extends Disposable {
-    private _imageInsertCache: Set<string> = new Set();
-
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -57,8 +55,6 @@ export class ImageUpdateController extends Disposable {
 
     override dispose(): void {
         super.dispose();
-
-        this._imageInsertCache.clear();
     }
 
     private _initialize() {
@@ -212,14 +208,6 @@ export class ImageUpdateController extends Disposable {
             if (renderObject == null || currentSubUnitId !== subUnitId) {
                 return;
             }
-
-            const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-
-            if (this._imageInsertCache.has(drawingShapeKey)) {
-                return;
-            }
-
-            this._imageInsertCache.add(drawingShapeKey);
 
             const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
             if (imageParam == null) {

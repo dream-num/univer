@@ -23,6 +23,6 @@ test('diff default sheet content', async ({ page }) => {
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
     await page.waitForTimeout(5000);
 
-    await expect(page).toHaveScreenshot();
+    await expect(page).toHaveScreenshot({ maxDiffPixels: 0 });
 });
 

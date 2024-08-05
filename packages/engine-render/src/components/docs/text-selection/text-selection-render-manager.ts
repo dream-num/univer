@@ -953,8 +953,19 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const focusNodePosition = this._getNodePosition(focusNode);
 
-        if (!focusNodePosition) {
+        if (!focusNodePosition || focusNode == null) {
             return;
+        }
+
+        const divide = focusNode?.node.parent;
+        const nextGlyph = divide?.glyphGroup[divide.glyphGroup.indexOf(focusNode.node) + 1];
+
+        // Should not select the last paragraph break.
+        if (
+            focusNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH &&
+            nextGlyph?.streamType === DataStreamTreeTokenType.SECTION_BREAK
+        ) {
+            focusNodePosition.isBack = true;
         }
 
         this._focusNodePosition = focusNodePosition;

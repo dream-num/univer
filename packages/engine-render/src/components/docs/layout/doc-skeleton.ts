@@ -15,7 +15,7 @@
  */
 
 import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
-import { DataStreamTreeTokenType, PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
+import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
@@ -761,16 +761,6 @@ export class DocumentSkeleton extends Skeleton {
                                 const { x: startX } = this._findLiquid;
 
                                 for (const glyph of glyphGroup) {
-                                    const gi = glyphGroup.indexOf(glyph);
-                                    const nextGlyph = glyphGroup[gi + 1];
-                                    // Should not select the last paragraph break.
-                                    if (
-                                        glyph.streamType === DataStreamTreeTokenType.PARAGRAPH &&
-                                        nextGlyph?.streamType === DataStreamTreeTokenType.SECTION_BREAK
-                                    ) {
-                                        continue;
-                                    }
-
                                     if (!glyph.content || glyph.content.length === 0) {
                                         continue;
                                     }

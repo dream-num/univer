@@ -23,6 +23,13 @@
                 padding: 0 var(--margin-xs);
                 border-radius: var(--border-radius-lg);
 
+                > span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    max-width: 142px;
+                }
+
                 &:hover {
                     background-color: rgb(var(--grey-100));
                     cursor: pointer;

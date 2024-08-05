@@ -238,7 +238,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         'sheet-0007',
         'sheet-0008',
         'sheet-0009',
-        'sheet-0010',
+        'sheet-00重复重复重复重复重复重复10',
     ],
     styles: {
         1: {
@@ -14330,9 +14330,9 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 },
             },
         },
-        'sheet-0010': {
-            name: 'sheet-0010',
-            id: 'sheet-0010',
+        'sheet-00重复重复重复重复重复重复10': {
+            name: 'sheet-00重复重复重复重复重复重复10',
+            id: 'sheet-00重复重复重复重复重复重复10',
             tabColor: '',
             hidden: 0,
             rowCount: 40,

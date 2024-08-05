@@ -21,6 +21,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { ICommandInfo } from '@univerjs/core';
 import { ICommandService, useDependency } from '@univerjs/core';
 import { InsertSheetCommand, InsertSheetMutation, RemoveSheetMutation, SetTabColorMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameMutation, SetWorksheetOrderMutation } from '@univerjs/sheets';
+import { Tooltip } from '@univerjs/design';
 import styles from './index.module.less';
 
 export function UniSheetBar() {
@@ -105,7 +106,13 @@ export function UniSheetBar() {
                 <div className={styles.sheetItems}>
                     {sheetList.map((item, index) => (
                         <div key={index} className={`${styles.sheetItem} ${activeKey === item.sheetId ? styles.active : ''}`} onClick={() => handleSheetActiveChange(item.sheetId)}>
-                            {item.label}
+                            <Tooltip showIfEllipsis title={item.label} placement="right">
+                                <span>
+                                    {' '}
+                                    {item.label}
+                                    {' '}
+                                </span>
+                            </Tooltip>
                         </div>
                     ))}
                 </div>

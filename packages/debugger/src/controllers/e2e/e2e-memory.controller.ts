@@ -66,8 +66,10 @@ export class E2EMemoryController extends Disposable {
 
     private async _releaseAndLoad(releaseId: number): Promise<void> {
         const unitId = `e2e${releaseId}`;
+        const snapshot = getDefaultWorkbookData();
+        snapshot.id = unitId;
 
-        this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, getDefaultWorkbookData());
+        this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, snapshot);
         await timer(AWAIT_LOADING_TIMEOUT);
 
         this._univerInstanceService.disposeUnit(unitId);

@@ -17,18 +17,23 @@
 import React from 'react';
 import type { SlideDataModel } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { IUniverSlidesDrawingConfig } from '@univerjs/slides-ui';
 import { SlidesUIController } from '@univerjs/slides-ui';
-import { IUIPartsService, useObservable } from '@univerjs/ui';
+import { ComponentManager, IMenuService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { UniUIPart } from '@univerjs/uniui';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';
 
 @OnLifecycle(LifecycleStages.Ready, UniSlidesUIController)
 export class UniSlidesUIController extends SlidesUIController {
-    constructor(@Inject(Injector) _injector: Injector,
+    constructor(
+        _config: Partial<IUniverSlidesDrawingConfig>,
+        @Inject(Injector) _injector: Injector,
+        @IMenuService _menuService: IMenuService,
+        @Inject(ComponentManager) _componentManager: ComponentManager,
         @IUIPartsService _uiPartsService: IUIPartsService,
         @ICommandService _commandService: ICommandService
     ) {
-        super(_injector, _uiPartsService, _commandService);
+        super(_config, _injector, _menuService, _componentManager, _uiPartsService, _commandService);
     }
 
     protected override _initUIComponents(): void {

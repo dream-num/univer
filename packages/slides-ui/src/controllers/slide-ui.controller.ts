@@ -48,12 +48,12 @@ export const DefaultSlidesDrawingConfig: IUniverSlidesDrawingConfig = {
 @OnLifecycle(LifecycleStages.Ready, SlidesUIController)
 export class SlidesUIController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverSlidesDrawingConfig>,
-        @Inject(Injector) private readonly _injector: Injector,
-        @IMenuService private readonly _menuService: IMenuService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @ICommandService private readonly _commandService: ICommandService
+        protected readonly _config: Partial<IUniverSlidesDrawingConfig>,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IMenuService protected readonly _menuService: IMenuService,
+        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @ICommandService protected readonly _commandService: ICommandService
     ) {
         super();
 

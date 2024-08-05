@@ -604,24 +604,25 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         let render = this._renderManagerService.getRenderById(editorUnitId);
         if (render == null) {
             this._renderManagerService.create(editorUnitId);
-            render = this._renderManagerService.getRenderById(editorUnitId)!;
+            render = this._renderManagerService.getRenderById(editorUnitId);
         }
 
-        render.engine.setContainer(container);
+        if (render) {
+            render.engine.setContainer(container);
 
-        const editor = new Editor({ ...config, render, documentDataModel, editorDom: container, canvasStyle });
+            const editor = new Editor({ ...config, render, documentDataModel, editorDom: container, canvasStyle });
 
-        this._editors.set(editorUnitId, editor);
+            this._editors.set(editorUnitId, editor);
 
         // Delete scroll bar
         // FIXME@Jocs: should add a configuration when creating a renderer, not delete it.
-        (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
+            (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
 
-        if (!editor.isSheetEditor()) {
-            editor.verticalAlign();
-            editor.updateCanvasStyle();
+            if (!editor.isSheetEditor()) {
+                editor.verticalAlign();
+                editor.updateCanvasStyle();
+            }
         }
-
         return toDisposable(() => {
             this._unRegister(editorUnitId);
         });

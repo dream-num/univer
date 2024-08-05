@@ -397,6 +397,7 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         }
 
         const { scene: mainScene, mainComponent } = render;
+
         const slide = mainComponent as Slide;
         const { width, height } = slide;
         const pageScene = new Scene(pageId, slide, {

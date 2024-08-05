@@ -14,31 +14,11 @@
  * limitations under the License.
  */
 
-export interface ISize {
-    width?: number;
-    height?: number;
-}
+import type { IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
-export interface IScale {
-    scaleX?: number;
-    scaleY?: number;
-}
-
-export interface IOffset {
-    left?: number;
-    top?: number;
-}
-
-export interface ISrcRect extends IOffset {
-    right?: number;
-    bottom?: number;
-}
-
-export interface IAbsoluteTransform extends ISize, IOffset, IScale {}
-
-export interface IRectXYWH {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
+export const SetTextEditArrowOperation: IOperation<any> = {
+    id: 'slide.operation.edit-arrow',
+    type: CommandType.OPERATION,
+    handler: () => true,
+};

@@ -206,16 +206,16 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const { listType } = params;
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (docDataModel == null || activeRange == null) {
             return false;
         }
 
         const { segmentId } = activeRange;
 
-        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
+        const selections = textSelectionManagerService.getDocRanges() ?? [];
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
-        const serializedSelections = selections.map(serializeTextRange);
+        const serializedSelections = selections.map(serializeDocRange);
 
         if (paragraphs == null) {
             return false;
@@ -337,16 +337,16 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (docDataModel == null || activeRange == null) {
             return false;
         }
 
         const { segmentId } = activeRange;
 
-        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
+        const selections = textSelectionManagerService.getDocRanges() ?? [];
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
-        const serializedSelections = selections.map(serializeTextRange);
+        const serializedSelections = selections.map(serializeDocRange);
 
         if (paragraphs == null) {
             return false;
@@ -504,7 +504,6 @@ export function getParagraphsInRange(activeRange: IActiveTextRange, paragraphs: 
     return results;
 }
 
-<<<<<<< HEAD
 export function getParagraphsRelative(activeRange: IActiveTextRange, paragraphs: IParagraph[]) {
     const selectionParagraphs = getParagraphsInRange(activeRange, paragraphs);
     const startIndex = paragraphs.indexOf(selectionParagraphs[0]);
@@ -529,7 +528,8 @@ export function getParagraphsRelative(activeRange: IActiveTextRange, paragraphs:
     }
 
     return selectionParagraphs;
-=======
+}
+
 export function getParagraphsInRanges(ranges: IDocRange[], paragraphs: IParagraph[]) {
     const results: IParagraph[] = [];
 
@@ -540,7 +540,6 @@ export function getParagraphsInRanges(ranges: IDocRange[], paragraphs: IParagrap
     }
 
     return results;
->>>>>>> 797d3bb28 (fix: paragraph setting)
 }
 
 export function findNearestSectionBreak(currentIndex: number, sectionBreaks: ISectionBreak[]) {

@@ -56,12 +56,7 @@ export const MoveRangeCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
-        const performInfo = await sheetInterceptorService.beforeCommandExecute({
-            id: MoveRangeCommand.id,
-            params,
-        });
-
-        const { perform = true, mutations: externalMutations } = performInfo;
+        const perform = await sheetInterceptorService.beforeCommandExecute({ id: MoveRangeCommand.id, params });
 
         if (!perform) {
             return false;
@@ -85,10 +80,8 @@ export const MoveRangeCommand: ICommand = {
 
         const redos = [
             ...(interceptorCommands.preRedos ?? []),
-            ...(externalMutations?.preRedos ?? []),
             ...moveRangeMutations.redos,
             ...interceptorCommands.redos,
-            ...(externalMutations?.redos ?? []),
             {
                 id: SetSelectionsOperation.id,
                 params: {
@@ -101,10 +94,8 @@ export const MoveRangeCommand: ICommand = {
         ];
         const undos = [
             ...(interceptorCommands.preUndos ?? []),
-            ...(externalMutations?.preUndos ?? []),
             ...moveRangeMutations.undos,
             ...interceptorCommands.undos,
-            ...(externalMutations?.undos ?? []),
             {
                 id: SetSelectionsOperation.id,
                 params: {

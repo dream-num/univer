@@ -189,7 +189,7 @@ export class MergeCellController extends Disposable {
             },
         });
 
-        this._sheetInterceptorService.interceptRangesCommand({
+        this._sheetInterceptorService.interceptRanges({
             getMutations: ({ unitId, subUnitId, ranges }) => {
                 const redos: IMutationInfo[] = [];
                 const undos: IMutationInfo[] = [];
@@ -203,14 +203,14 @@ export class MergeCellController extends Disposable {
                 }
                 const { worksheet } = target;
                 const mergeData = worksheet.getMergeData();
-                const lapRanges = mergeData.filter((item) => ranges.some((range) => Rectangle.intersects(item, range)));
-                if (lapRanges.length) {
+                const overlapRanges = mergeData.filter((item) => ranges.some((range) => Rectangle.intersects(item, range)));
+                if (overlapRanges.length) {
                     redos.push({
                         id: RemoveWorksheetMergeMutation.id,
                         params: {
                             unitId,
                             subUnitId,
-                            ranges: lapRanges,
+                            ranges: overlapRanges,
                         },
                     });
                     undos.push({
@@ -218,7 +218,7 @@ export class MergeCellController extends Disposable {
                         params: {
                             unitId,
                             subUnitId,
-                            ranges: lapRanges,
+                            ranges: overlapRanges,
                         },
                     });
                     return { undos, redos };

@@ -66,7 +66,7 @@ export class ConditionalFormattingClearController extends Disposable {
             },
         }));
 
-        this.disposeWithMe(this._sheetInterceptorService.interceptRangesCommand({
+        this.disposeWithMe(this._sheetInterceptorService.interceptRanges({
             getMutations: ({ unitId, subUnitId, ranges }) => {
                 const redos: IMutationInfo[] = [];
                 const undos: IMutationInfo[] = [];

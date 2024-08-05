@@ -127,10 +127,10 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         const dependencies = this._renderDependencies.get(type)!;
         dependencies.push(...deps);
 
-        for (const [renderUnitId, render] of this._renderMap) {
-            const renderType = this._univerInstanceService.getUnitType(renderUnitId);
+        for (const [_, render] of this._renderMap) {
+            const renderType = render.type;
             if (renderType === type) {
-                (render as RenderUnit).addRenderDependencies(deps);
+                this._tryAddRenderDependencies(render, deps);
             }
         }
 
@@ -147,23 +147,10 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         const dependencies = this._renderDependencies.get(type)!;
         dependencies.push(ctor);
 
-        for (const [renderUnitId, render] of this._renderMap) {
-            if (type === UniverInstanceType.UNIVER_SLIDE) {
-                // const renderType = this._univerInstanceService.getUnitType(renderUnitId);
-                // renderUnitId  slide_test  cover_1 rect_1....
-                const unit = this._univerInstanceService.getUnit(renderUnitId);
-                if (unit && unit.type === type) {
-                    (render as RenderUnit).addRenderDependencies([ctor]);
-                }
-            } else {
-                try {
-                    const renderType = this._univerInstanceService.getUnitType(renderUnitId);
-                    if (renderType === type) {
-                        (render as RenderUnit).addRenderDependencies([ctor]);
-                    }
-                } catch (e) {
-                    console.error('error', e);
-                }
+        for (const [_, render] of this._renderMap) {
+            const renderType = render.type;
+            if (renderType === type) {
+                this._tryAddRenderDependencies(render, [ctor]);
             }
         }
 
@@ -210,6 +197,12 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this.getRenderById(current.getUnitId())?.with(id);
     }
 
+    private _tryAddRenderDependencies(renderer: IRender, deps: Dependency[]): void {
+        if (renderer instanceof RenderUnit) {
+            renderer.addRenderDependencies(deps);
+        }
+    }
+
     private _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
         const existItem = this.getRenderById(unitId);
         let shouldDestroyEngine = true;
@@ -243,11 +236,12 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 isMainScene,
             });
 
-            (renderUnit as RenderUnit).addRenderDependencies(ctors);
+            this._tryAddRenderDependencies(renderUnit, ctors);
         } else {
             // For slide pages
             renderUnit = {
                 unitId,
+                type: UniverInstanceType.UNIVER_SLIDE,
                 engine,
                 scene,
                 mainComponent: null,

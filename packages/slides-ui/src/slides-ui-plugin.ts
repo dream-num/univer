@@ -61,14 +61,13 @@ export class UniverSlidesUIPlugin extends Plugin {
 
             // This controller should be registered in Ready stage.
             // this controller would add a new RenderUnit (__INTERNAL_EDITOR__DOCS_NORMAL)
-            // so this new RenderUnit does not have ISlideEditorBridgeService & ISlideEditorManagerService if editorservice were create in renderManagerService
-            [
-                SlideUIController,
-            ],
+            // so this new RenderUnit does not have ISlideEditorBridgeService & ISlideEditorManagerService if
+            // editorservice were create in renderManagerService
+            [SlideUIController],
             [SlideRenderController],
             [SlidePopupMenuController],
         ] as Dependency[]).forEach((m) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
+            this._injector.add(m);
         });
     }
 

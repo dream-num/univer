@@ -15,7 +15,7 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import { connectInjector, Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
 import type { MenuConfig } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
@@ -51,6 +51,7 @@ export const DefaultSlidesDrawingConfig: IUniverSlidesDrawingConfig = {
  * This controller registers UI parts of slide workbench to the base-ui workbench.
  */
 // @OnLifecycle(LifecycleStages.Ready, SlideUIController)
+@OnLifecycle(LifecycleStages.Ready, SlideUIController)
 export class SlideUIController extends Disposable {
     constructor(
         private readonly _config: Partial<IUniverSlidesDrawingConfig>,

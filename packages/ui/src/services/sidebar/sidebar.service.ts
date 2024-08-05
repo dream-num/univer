@@ -27,5 +27,5 @@ export interface ISidebarService {
     readonly scrollEvent$: Subject<Event>;
 
     open(params: ISidebarMethodOptions): IDisposable;
-    close(): void;
+    close(id?: string): void;
 }

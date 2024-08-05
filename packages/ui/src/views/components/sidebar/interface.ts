@@ -17,6 +17,7 @@
 import type { ICustomLabelProps } from '../../../components/custom-label/CustomLabel';
 
 export interface ISidebarMethodOptions {
+    id?: string;
     header?: ICustomLabelProps;
     children?: ICustomLabelProps;
     footer?: ICustomLabelProps;

@@ -18,6 +18,7 @@ import { IUniverInstanceService, UniverInstanceType, useDependency, useObservabl
 import { MenuPosition, ToolbarItem, useToolbarGroups } from '@univerjs/ui';
 import type { ComponentType } from 'react';
 import React from 'react';
+import { useWorkbooks } from '@univerjs/sheets-ui';
 import { UNI_MENU_POSITIONS } from '../../controllers/menu';
 import { UniToolbarService } from '../../services/toolbar/uni-toolbar-service';
 import styles from './index.module.less';
@@ -56,9 +57,11 @@ export function UniToolbar() {
         return null;
     }).filter((item) => !!item);
 
+    const hasWorkbooks = useWorkbooks().length > 0;
+
     return (
         <div className={styles.uniToolbar}>
-            <UniFormulaBar />
+            { hasWorkbooks && <UniFormulaBar /> }
             <div className={styles.toolbarGroup}>
                 {uniVisibleItems.map((subItem) => <ToolbarItem key={subItem.id} {...subItem} />)}
             </div>

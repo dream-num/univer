@@ -407,8 +407,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/docs-drawing-ui
       '@univerjs/icons':
-        specifier: ^0.1.65
-        version: 0.1.66(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.70
+        version: 0.1.70(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -496,8 +496,8 @@ importers:
   packages-experimental/uni-formula-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.66
-        version: 0.1.66(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.70
+        version: 0.1.70(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -542,7 +542,7 @@ importers:
   packages-experimental/uni-sheets-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.65
+        specifier: ^0.1.70
         version: 0.1.70(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets-drawing-ui':
         specifier: workspace:*
@@ -594,8 +594,8 @@ importers:
   packages-experimental/uni-slides-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.46
-        version: 0.1.66(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.70
+        version: 0.1.70(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -685,6 +685,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../../packages/design
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
@@ -1277,7 +1280,7 @@ importers:
   packages/docs-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.65
+        specifier: ^0.1.70
         version: 0.1.70(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@types/react':
@@ -5620,12 +5623,6 @@ packages:
 
   '@univerjs/icons-svg@0.1.70':
     resolution: {integrity: sha512-cy/Op8BQ8C4+K1kZdeHx+yfCAZ2qqYT6cMPy6Gosz1s6uBwDPsQa3HzZreOQh48Ew80I8XvrSMg61wL4K+6Ckg==}
-
-  '@univerjs/icons@0.1.66':
-    resolution: {integrity: sha512-kI7AIcyIjuhcIQYSeuSqTQZkkJwBVoQF+/6ajROtp5hDfZXpHa3jWWqI2NGWObigW/bNbJxdICUKVqO5Nh8coQ==}
-    peerDependencies:
-      react: '*'
-      react-dom: '*'
 
   '@univerjs/icons@0.1.70':
     resolution: {integrity: sha512-HcJ8T4n3jbdy6h2igIo+Y6nqVxGzM5pXyC9N47VlLIKHvp0abx9xgLxTqxizRZ+Lqns4OxsMuPtiJvBrBfjhuQ==}
@@ -14195,11 +14192,6 @@ snapshots:
   '@ungap/structured-clone@1.2.0': {}
 
   '@univerjs/icons-svg@0.1.70': {}
-
-  '@univerjs/icons@0.1.66(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
 
   '@univerjs/icons@0.1.70(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:

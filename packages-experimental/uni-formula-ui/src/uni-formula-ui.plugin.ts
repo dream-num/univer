@@ -24,7 +24,7 @@ import { DocUniFormulaController } from './controllers/formula-input.controller'
 @DependentOn(UniverDocUniFormulaPlugin)
 export class UniverDocUniFormulaUIPlugin extends Plugin {
     static override pluginName: string = DOC_FORMULA_UI_PLUGIN_NAME;
-    static override type: UniverInstanceType = UniverInstanceType.UNIVER_DOC;
+    static override type: UniverInstanceType = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         _config: unknown,

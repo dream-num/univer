@@ -45,9 +45,8 @@ import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
 import { UniverSlidesPlugin } from '@univerjs/slides';
 import { SlidesUIController, UniverSlidesUIPlugin } from '@univerjs/slides-ui';
 import { UniDocsUIController } from '@univerjs/uni-docs-ui';
-import { DEFAULT_DOCUMENT_DATA_CN, DEFAULT_DOCUMENT_DATA_EN, DEFAULT_SLIDE_DATA, DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
+import { DEFAULT_DOCUMENT_DATA_EN } from '../data';
 import { enUS } from '../locales';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
@@ -100,9 +99,9 @@ class CustomMentionDataService implements IThreadCommentMentionDataService {
 
 // create univer instances
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    // univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
     univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_EN);
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
+    // univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
 }
 
 // debugger plugin
@@ -121,8 +120,8 @@ setTimeout(() => {
         const plugins = lazy.default();
         plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
 
-        univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
-        univer.createUnit(UniverInstanceType.UNIVER_SLIDE, DEFAULT_SLIDE_DATA);
+        // univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
+        // univer.createUnit(UniverInstanceType.UNIVER_SLIDE, DEFAULT_SLIDE_DATA);
     });
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 

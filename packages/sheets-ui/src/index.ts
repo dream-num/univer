@@ -33,7 +33,7 @@ export {
     getTransformCoord,
 } from './controllers/utils/component-tools';
 export { checkInHeaderRanges } from './controllers/utils/selections-tools';
-export { useActiveWorkbook, useActiveWorksheet } from './components/hook';
+export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './components/hook';
 export { whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';

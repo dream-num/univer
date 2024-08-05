@@ -16,7 +16,6 @@
 
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, type IAccessor, IUniverInstanceService } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
-import { FONT_FAMILY_COMPONENT, FONT_SIZE_COMPONENT } from '@univerjs/sheets-ui';
 import { type IMenuButtonItem, type IMenuItem, type IMenuSelectorItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { map, Observable } from 'rxjs';
 import { DisposeUnitOperation } from '../commands/operations/uni.operation';
@@ -50,7 +49,7 @@ export function FakeFontFamilySelectorMenuItemFactory(accessor: IAccessor): IMen
         tooltip: 'toolbar.font',
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
-        label: FONT_FAMILY_COMPONENT,
+        label: 'UI_PLUGIN_DOCS_FONT_FAMILY_COMPONENT',
         positions: [MenuPosition.TOOLBAR_START],
         selections: [],
         disabled$: new Observable((subscriber) => { subscriber.next(true); }),
@@ -64,7 +63,7 @@ export function FakeFontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuS
         type: MenuItemType.SELECTOR,
         tooltip: 'toolbar.fontSize',
         label: {
-            name: FONT_SIZE_COMPONENT,
+            name: 'UI_PLUGIN_DOCS_FONT_SIZE_COMPONENT',
             props: {
                 min: 1,
                 max: 400,

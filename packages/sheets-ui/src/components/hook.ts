@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, UniverInstanceType, type Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
-import { useDependency } from '@univerjs/core';
-import { of } from 'rxjs';
+import { map, merge, of, startWith } from 'rxjs';
 
 export function useActiveWorkbook(): Workbook | null {
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -28,4 +28,17 @@ export function useActiveWorkbook(): Workbook | null {
 export function useActiveWorksheet(workbook?: Workbook | null) {
     const worksheet = useObservable(() => workbook?.activeSheet$ ?? of(null), undefined, undefined, [workbook]);
     return worksheet;
+}
+
+export function useWorkbooks(): Workbook[] {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    return useObservable(() => {
+        return merge([
+            univerInstanceService.getTypeOfUnitAdded$(UniverInstanceType.UNIVER_SHEET),
+            univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET),
+        ]).pipe(
+            map(() => univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)),
+            startWith(univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET))
+        );
+    }, [], undefined, [univerInstanceService]);
 }

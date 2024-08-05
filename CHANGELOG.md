@@ -1,5 +1,38 @@
 
 
+## [0.2.6](https://github.com/dream-num/univer/compare/v0.2.5...v0.2.6) (2024-08-02)
+
+
+### Bug Fixes
+
+* **doc:** list update ([#2862](https://github.com/dream-num/univer/issues/2862)) ([b045042](https://github.com/dream-num/univer/commit/b045042001c931d37410bab54acffbde7459237e))
+* **docs-drawing:** formula ts error & docs-drawing load error ([#2879](https://github.com/dream-num/univer/issues/2879)) ([1182bee](https://github.com/dream-num/univer/commit/1182bee68dc5005eb18e116f38fa021548544a46))
+* **drawing:** update ([#2871](https://github.com/dream-num/univer/issues/2871)) ([1880552](https://github.com/dream-num/univer/commit/1880552c0054d3eff14d7a41966ea0f3f195a2fe))
+* **formula:** fix formula parameter assignment ([#2905](https://github.com/dream-num/univer/issues/2905)) ([8fb9655](https://github.com/dream-num/univer/commit/8fb965587023748d35f073d470bcc0b262ff61c1))
+* ref selection should call updateSelection after skelenton change ([#2839](https://github.com/dream-num/univer/issues/2839)) ([d37f669](https://github.com/dream-num/univer/commit/d37f6692dbe745426eb77888565ffde3df4e539f))
+* **sheet:** fix expand range performance ([#2882](https://github.com/dream-num/univer/issues/2882)) ([0de3488](https://github.com/dream-num/univer/commit/0de3488677144bfbdc4160bea2f38e617a87ed1c))
+* **sheet:** parse snapshot string ([#2897](https://github.com/dream-num/univer/issues/2897)) ([f4fe38d](https://github.com/dream-num/univer/commit/f4fe38df536d551064c7b4703c52a2e43e4ee952))
+* **ui:** ensure container DOM is removed when destroying Vue 3 components ([#2892](https://github.com/dream-num/univer/issues/2892)) ([5c38528](https://github.com/dream-num/univer/commit/5c385287b20b87720ac4c4761a8c044f80417cbb))
+* unitId type error in handle editor invisible ([#2907](https://github.com/dream-num/univer/issues/2907)) ([5e09017](https://github.com/dream-num/univer/commit/5e09017670dc7502ee3687a3b97238318c1ce69c))
+* use new selectionData not workbook._worksheetSelections ([#2909](https://github.com/dream-num/univer/issues/2909)) ([b597194](https://github.com/dream-num/univer/commit/b597194250d1615ad9b3052d911af3c2e04397b1))
+
+
+### Features
+
+* deprecated float-dom.props ([#2864](https://github.com/dream-num/univer/issues/2864)) ([43220a1](https://github.com/dream-num/univer/commit/43220a12aca5dc08f99aedc20fefc7efafe52f20))
+* **docs-ui:** debounce doc-hover event ([#2865](https://github.com/dream-num/univer/issues/2865)) ([ce949fd](https://github.com/dream-num/univer/commit/ce949fde72476196ee563ac4b0ed5dd1b9bd598e))
+* **docs-ui:** doc daily optimization ([#2869](https://github.com/dream-num/univer/issues/2869)) ([f0b6410](https://github.com/dream-num/univer/commit/f0b6410362e84b3a881204241a9b277c4bb0709c))
+* **docs:** doc-rename ([#2891](https://github.com/dream-num/univer/issues/2891)) ([307d1de](https://github.com/dream-num/univer/commit/307d1debbc0dcd661bc529a3b529d0aa38099d34))
+* **formula:** add some Text/Math/Lookup formulas ([#2842](https://github.com/dream-num/univer/issues/2842)) ([778e371](https://github.com/dream-num/univer/commit/778e371c53f41c0dbc1b4775e9256267ed275a42))
+* **numfmt:** support custom format ([#2888](https://github.com/dream-num/univer/issues/2888)) ([95314eb](https://github.com/dream-num/univer/commit/95314ebe593b5c33f56044d8ccefdd6de6c08bae))
+* **sheet-data-valiation:** using cell-raw on data-validation ([#2878](https://github.com/dream-num/univer/issues/2878)) ([935bdba](https://github.com/dream-num/univer/commit/935bdba18926b1905b934cfa790cde92dcd6fd0e))
+* **slides:** support partial slides function ([#2890](https://github.com/dream-num/univer/issues/2890)) ([3a90918](https://github.com/dream-num/univer/commit/3a90918b370fc5954e0ce38df4de6df20acc0089))
+
+
+### Performance Improvements
+
+* skip hidden row & col in sheet's extension drawing process ([#2899](https://github.com/dream-num/univer/issues/2899)) ([5dcfaa3](https://github.com/dream-num/univer/commit/5dcfaa3fa839a0944481113936c1669a721d39ec))
+
 ## [0.2.5](https://github.com/dream-num/univer/compare/v0.2.4...v0.2.5) (2024-07-26)
 
 

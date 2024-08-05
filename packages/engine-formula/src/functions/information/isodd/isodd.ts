@@ -26,18 +26,20 @@ export class Isodd extends BaseFunction {
     override maxParams = 1;
 
     override calculate(value: BaseValueObject) {
-        if (value.isArray() || value.isBoolean()) {
+        let _value = value;
+
+        if (_value.isArray() || _value.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (!value.isNumber()) {
-            value = value.convertToNumberObjectValue();
-            if (!value.isNumber()) {
+        if (!_value.isNumber()) {
+            _value = _value.convertToNumberObjectValue();
+            if (!_value.isNumber()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
         }
 
-        const val = value.getValue() as number;
+        const val = _value.getValue() as number;
         const floored = Math.floor(Math.abs(val));
         return BooleanValueObject.create(floored % 2 !== 0);
     }

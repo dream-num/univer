@@ -38,12 +38,10 @@ export class UniverUniscriptPlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultUniscriptConfig, this._config);
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
+        const injector = this._injector;
         const dependencies: Dependency[] = [
-            // controllers
             [UniscriptController, { useFactory: () => injector.createInstance(UniscriptController, this._config) }],
-
-            // services
             [ScriptEditorService, { useFactory: () => injector.createInstance(ScriptEditorService, this._config) }],
             [ScriptPanelService],
         ];

@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import { RxDisposable } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 
-const locale: typeof zhCN = {
-};
+export class SlideRenderController extends RxDisposable implements IRenderModule {
+    constructor(private readonly _context: IRenderContext<any>) {
+        super();
+    }
 
-export default locale;
+    override dispose() {
+      //...
+    }
+}

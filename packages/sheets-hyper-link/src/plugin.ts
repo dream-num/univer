@@ -35,14 +35,14 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
         super();
     }
 
-    override onStarting(_injector: Injector): void {
+    override onStarting(): void {
         ([
             [SheetsHyperLinkResourceController],
             [SheetsHyperLinkController],
             [SheetsHyperLinkRefRangeController],
             [HyperLinkModel],
         ] as Dependency[]).forEach((dep) => {
-            _injector.add(dep);
+            this._injector.add(dep);
         });
     }
 }

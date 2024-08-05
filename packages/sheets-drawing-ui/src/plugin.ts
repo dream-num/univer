@@ -50,45 +50,32 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         this._pluginConfig = Tools.deepMerge({}, DefaultSheetsDrawingConfig, config);
     }
 
-    override onStarting(_injector: Injector): void {
-        super.onStarting(_injector);
-        this._initDependencies(_injector);
+    override onStarting(): void {
+        this._initDependencies();
     }
 
     override onRendered(): void {
         this._registerRenderModules();
     }
 
-    private _initDependencies(injector: Injector): void {
+    private _initDependencies(): void {
         const dependencies: Dependency[] = [
-
-            // services
             [SheetCanvasFloatDomManagerService],
-            // controllers
-            [
-                SheetDrawingUIController,
-                {
-                    useFactory: () => this._injector.createInstance(SheetDrawingUIController, this._pluginConfig),
-                },
-            ],
+            [SheetDrawingUIController, {
+                useFactory: () => this._injector.createInstance(SheetDrawingUIController, this._pluginConfig),
+            }],
             [DrawingPopupMenuController],
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
         ];
-
-        const renderModules = [
-            SheetDrawingUpdateController,
-            SheetDrawingTransformAffectedController,
-        ];
-
-        dependencies.forEach((dependency) => injector.add(dependency));
-        renderModules.forEach((controller) => this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller as unknown as Dependency));
+        dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 
     private _registerRenderModules(): void {
         ([
+            [SheetDrawingUpdateController],
+            [SheetDrawingTransformAffectedController],
             [SheetsDrawingCopyPasteController],
-
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

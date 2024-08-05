@@ -43,7 +43,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         const dependencies: Dependency[] = [
             [DocDrawingUIController],
             [DocDrawingPopupMenuController],
@@ -52,7 +52,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             [DocRefreshDrawingsService],
         ];
 
-        dependencies.forEach((dependency) => injector.add(dependency));
+        dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 
     override onReady(): void {

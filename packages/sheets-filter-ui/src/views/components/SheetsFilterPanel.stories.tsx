@@ -58,7 +58,8 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IMenuService, { useClass: MenuService }]);
@@ -95,7 +96,7 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
     injector.get(LocaleService).load({ enUS, zhCN, ruRU });
     injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
 
-    const sheet = univer.createUniverSheet(workbookData);
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData);
 
     return { univer, injector, sheet };
 }

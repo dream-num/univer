@@ -36,8 +36,7 @@ export abstract class Plugin extends Disposable {
 
     protected abstract _injector: Injector;
 
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    onStarting(injector: Injector): void {
+    onStarting(_injector?: Injector): void {
         // empty
     }
 

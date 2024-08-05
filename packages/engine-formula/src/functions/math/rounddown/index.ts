@@ -23,23 +23,27 @@ export class Rounddown extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, numDigits: BaseValueObject) {
-        if (number.isString()) {
-            number = number.convertToNumberObjectValue();
+        let _number = number;
+
+        if (_number.isString()) {
+            _number = _number.convertToNumberObjectValue();
         }
 
-        if (number.isError()) {
-            return number;
+        if (_number.isError()) {
+            return _number;
         }
 
-        if (numDigits.isString()) {
-            numDigits = numDigits.convertToNumberObjectValue();
+        let _numDigits = numDigits;
+
+        if (_numDigits.isString()) {
+            _numDigits = _numDigits.convertToNumberObjectValue();
         }
 
-        if (numDigits.isError()) {
-            return numDigits;
+        if (_numDigits.isError()) {
+            return _numDigits;
         }
 
         // Note that the order of parameters is different from JavaScript
-        return number.floor(numDigits);
+        return _number.floor(_numDigits);
     }
 }

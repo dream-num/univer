@@ -35,23 +35,13 @@ export class Sumxmy2 extends BaseFunction {
             return arrayY;
         }
 
-        let arrayXRowCount = 1;
-        let arrayXColumnCount = 1;
-
-        if (arrayX.isArray()) {
-            arrayXRowCount = (arrayX as ArrayValueObject).getRowCount();
-            arrayXColumnCount = (arrayX as ArrayValueObject).getColumnCount();
-        }
+        const arrayXRowCount = arrayX.isArray() ? (arrayX as ArrayValueObject).getRowCount() : 1;
+        const arrayXColumnCount = arrayX.isArray() ? (arrayX as ArrayValueObject).getColumnCount() : 1;
 
         const arrayXCount = arrayXRowCount * arrayXColumnCount;
 
-        let arrayYRowCount = 1;
-        let arrayYColumnCount = 1;
-
-        if (arrayY.isArray()) {
-            arrayYRowCount = (arrayY as ArrayValueObject).getRowCount();
-            arrayYColumnCount = (arrayY as ArrayValueObject).getColumnCount();
-        }
+        const arrayYRowCount = arrayY.isArray() ? (arrayY as ArrayValueObject).getRowCount() : 1;
+        const arrayYColumnCount = arrayY.isArray() ? (arrayY as ArrayValueObject).getColumnCount() : 1;
 
         const arrayYCount = arrayYRowCount * arrayYColumnCount;
 
@@ -60,36 +50,7 @@ export class Sumxmy2 extends BaseFunction {
         }
 
         if (arrayXCount === 1) {
-            if (arrayX.isArray()) {
-                arrayX = (arrayX as ArrayValueObject).get(0, 0) as BaseValueObject;
-            }
-
-            if (arrayY.isArray()) {
-                arrayY = (arrayY as ArrayValueObject).get(0, 0) as BaseValueObject;
-            }
-
-            if (arrayX.isError()) {
-                return arrayX;
-            }
-
-            if (arrayY.isError()) {
-                return arrayY;
-            }
-
-            if (arrayX.isNull() || arrayY.isNull()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            const arrayXValue = +arrayX.getValue();
-            const arrayYValue = +arrayY.getValue();
-
-            if ((arrayX.isString() && !isRealNum(arrayXValue)) || arrayX.isBoolean() || (arrayY.isString() && !isRealNum(arrayYValue)) || arrayY.isBoolean()) {
-                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-            }
-
-            const result = (arrayXValue - arrayYValue) ** 2;
-
-            return NumberValueObject.create(result);
+            return this._calculateSingleCell(arrayX, arrayY);
         } else {
             const arrayXFlatten = (arrayX as ArrayValueObject).flatten();
             const arrayYFlatten = (arrayY as ArrayValueObject).flatten();
@@ -139,5 +100,42 @@ export class Sumxmy2 extends BaseFunction {
 
             return NumberValueObject.create(result);
         }
+    }
+
+    private _calculateSingleCell(arrayX: BaseValueObject, arrayY: BaseValueObject) {
+        let _arrayX = arrayX;
+
+        if (_arrayX.isArray()) {
+            _arrayX = (_arrayX as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_arrayX.isError()) {
+            return _arrayX;
+        }
+
+        let _arrayY = arrayY;
+
+        if (_arrayY.isArray()) {
+            _arrayY = (_arrayY as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_arrayY.isError()) {
+            return _arrayY;
+        }
+
+        if (_arrayX.isNull() || _arrayY.isNull()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        const arrayXValue = +_arrayX.getValue();
+        const arrayYValue = +_arrayY.getValue();
+
+        if ((_arrayX.isString() && !isRealNum(arrayXValue)) || _arrayX.isBoolean() || (_arrayY.isString() && !isRealNum(arrayYValue)) || _arrayY.isBoolean()) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        }
+
+        const result = (arrayXValue - arrayYValue) ** 2;
+
+        return NumberValueObject.create(result);
     }
 }

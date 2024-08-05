@@ -22,58 +22,61 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
+interface IReturnTypeMap {
+    [index: number]: number[];
+}
+
 export class Weekday extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 2;
 
     override calculate(serialNumber: BaseValueObject, returnType?: BaseValueObject) {
+        const _returnType = returnType ?? NumberValueObject.create(1);
+
         if (serialNumber.isError()) {
             return serialNumber;
         }
 
-        if (returnType?.isError()) {
-            return returnType;
+        if (_returnType.isError()) {
+            return _returnType;
         }
 
-        // get max row length
         const maxRowLength = Math.max(
             serialNumber.isArray() ? (serialNumber as ArrayValueObject).getRowCount() : 1,
-            returnType?.isArray() ? (returnType as ArrayValueObject).getRowCount() : 1
+            _returnType.isArray() ? (_returnType as ArrayValueObject).getRowCount() : 1
         );
 
-        // get max column length
         const maxColumnLength = Math.max(
             serialNumber.isArray() ? (serialNumber as ArrayValueObject).getColumnCount() : 1,
-            returnType?.isArray() ? (returnType as ArrayValueObject).getColumnCount() : 1
+            _returnType.isArray() ? (_returnType as ArrayValueObject).getColumnCount() : 1
         );
 
         const serialNumberArray = expandArrayValueObject(maxRowLength, maxColumnLength, serialNumber, ErrorValueObject.create(ErrorType.NA));
-        const returnTypeArray = returnType ? expandArrayValueObject(maxRowLength, maxColumnLength, returnType, ErrorValueObject.create(ErrorType.NA)) : [];
+        const returnTypeArray = expandArrayValueObject(maxRowLength, maxColumnLength, _returnType, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = serialNumberArray.map((serialNumberObject, rowIndex, columnIndex) => {
-            if (returnType) {
-                const returnTypeObject = (returnTypeArray as ArrayValueObject).get(rowIndex, columnIndex) as BaseValueObject;
-                return this._handleSingleObject(serialNumberObject, returnTypeObject);
-            } else {
-                return this._handleSingleObject(serialNumberObject);
-            }
+            const returnTypeObject = returnTypeArray.get(rowIndex, columnIndex) as BaseValueObject;
+
+            return this._handleSingleObject(serialNumberObject, returnTypeObject);
         });
 
-        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
-            return resultArray.getArrayValue()[0][0] as NumberValueObject;
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         return resultArray;
     }
 
-    private _handleSingleObject(serialNumberObject: BaseValueObject, returnTypeObject?: BaseValueObject) {
+    private _handleSingleObject(serialNumberObject: BaseValueObject, returnTypeObject: BaseValueObject) {
+        let _returnTypeObject = returnTypeObject;
+
         if (serialNumberObject.isError()) {
             return serialNumberObject;
         }
 
-        if (returnTypeObject?.isError()) {
-            return returnTypeObject;
+        if (_returnTypeObject.isError()) {
+            return _returnTypeObject;
         }
 
         const dateSerialNumber = getDateSerialNumberByObject(serialNumberObject);
@@ -82,43 +85,37 @@ export class Weekday extends BaseFunction {
             return dateSerialNumber;
         }
 
-        const returnTypeMap: {
-            [index: number]: number[];
-        } = {
-            1: [1, 2, 3, 4, 5, 6, 7], // Sunday = 1 ~ Saturday = 7
-            2: [7, 1, 2, 3, 4, 5, 6], // Monday = 1 ~ Sunday = 7
-            3: [6, 0, 1, 2, 3, 4, 5], // Monday = 0 ~ Sunday = 6
-            11: [7, 1, 2, 3, 4, 5, 6], // Monday = 1 ~ Sunday = 7
-            12: [6, 7, 1, 2, 3, 4, 5], // Tuesday = 1 ~ Monday = 7
-            13: [5, 6, 7, 1, 2, 3, 4], // Wednesday = 1 ~ Tuesday = 7
-            14: [4, 5, 6, 7, 1, 2, 3], // Thursday = 1 ~ Wednesday = 7
-            15: [3, 4, 5, 6, 7, 1, 2], // Friday = 1 ~ Thursday = 7
-            16: [2, 3, 4, 5, 6, 7, 1], // Saturday = 1 ~ Friday = 7
-            17: [1, 2, 3, 4, 5, 6, 7], // Sunday = 1 ~ Saturday = 7
-        };
+        if (_returnTypeObject.isString()) {
+            _returnTypeObject = _returnTypeObject.convertToNumberObjectValue();
 
-        let returnType = 1;
-
-        if (returnTypeObject) {
-            if (returnTypeObject.isString()) {
-                returnTypeObject = returnTypeObject.convertToNumberObjectValue();
+            if (_returnTypeObject.isError()) {
+                return _returnTypeObject;
             }
+        }
 
-            if (returnTypeObject.isError()) {
-                return returnTypeObject;
-            }
+        const returnTypeValue = Math.floor(+_returnTypeObject.getValue());
 
-            returnType = Math.floor(+returnTypeObject.getValue());
-
-            if (!returnTypeMap[returnType]) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
+        if (!this._returnTypeMap[returnTypeValue]) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const weekDay = getWeekDayByDateSerialNumber(dateSerialNumber);
 
-        const result = returnTypeMap[returnType][weekDay];
+        const result = this._returnTypeMap[returnTypeValue][weekDay];
 
         return NumberValueObject.create(result);
     }
+
+    private _returnTypeMap: IReturnTypeMap = {
+        1: [1, 2, 3, 4, 5, 6, 7], // Sunday = 1 ~ Saturday = 7
+        2: [7, 1, 2, 3, 4, 5, 6], // Monday = 1 ~ Sunday = 7
+        3: [6, 0, 1, 2, 3, 4, 5], // Monday = 0 ~ Sunday = 6
+        11: [7, 1, 2, 3, 4, 5, 6], // Monday = 1 ~ Sunday = 7
+        12: [6, 7, 1, 2, 3, 4, 5], // Tuesday = 1 ~ Monday = 7
+        13: [5, 6, 7, 1, 2, 3, 4], // Wednesday = 1 ~ Tuesday = 7
+        14: [4, 5, 6, 7, 1, 2, 3], // Thursday = 1 ~ Wednesday = 7
+        15: [3, 4, 5, 6, 7, 1, 2], // Friday = 1 ~ Thursday = 7
+        16: [2, 3, 4, 5, 6, 7, 1], // Saturday = 1 ~ Friday = 7
+        17: [1, 2, 3, 4, 5, 6, 7], // Sunday = 1 ~ Saturday = 7
+    };
 }

@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyOverride, SlideDataModel } from '@univerjs/core';
+import type { Dependency, SlideDataModel } from '@univerjs/core';
 import { Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
+import { IImageIoService, ImageIoService } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SlidesUIController } from './controllers/slide-ui.controller';
+import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
+import { SlideRenderController } from './controllers/slide.render-controller';
+import { SlidePopupMenuController } from './controllers/popup-menu.controller';
+import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
@@ -26,16 +32,34 @@ export class UniverSlidesUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SLIDE;
 
     constructor(
-        private readonly _config: { override?: DependencyOverride },
+        private readonly _config: Partial<IUniverSlidesDrawingConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
     }
 
-    override onStarting(injector: Injector): void {
-        mergeOverrideWithDependencies([[SlidesUIController]] as Dependency[], this._config.override)
-            .forEach((d) => injector.add(d));
+    override onStarting(): void {
+        mergeOverrideWithDependencies([
+            [
+                SlidesUIController,
+                {
+                    useFactory: () => this._injector.createInstance(SlidesUIController, this._config),
+                },
+            ],
+            [IImageIoService, { useClass: ImageIoService }],
+            [SlideCanvasPopMangerService],
+        ] as Dependency[], this._config.override).forEach((d) => this._injector.add(d));
+    }
+
+    override onReady(): void {
+        ([
+            [SlideRenderController],
+            [SlidePopupMenuController],
+        ] as Dependency[]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
+        });
     }
 
     override onRendered(): void {

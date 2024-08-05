@@ -36,27 +36,27 @@ export class If extends BaseFunction {
         }
 
         // get single value object
-        logicalTest = this._getSingleValueObject(logicalTest);
+        const _logicalTest = this._getSingleValueObject(logicalTest);
 
-        if (!logicalTest.isArray()) {
-            return logicalTest.getValue() ? valueIfTrue : valueIfFalse;
+        if (!_logicalTest.isArray()) {
+            return _logicalTest.getValue() ? valueIfTrue : valueIfFalse;
         }
 
         // get max row length
         const maxRowLength = Math.max(
-            logicalTest.isArray() ? (logicalTest as ArrayValueObject).getRowCount() : 1,
+            _logicalTest.isArray() ? (_logicalTest as ArrayValueObject).getRowCount() : 1,
             valueIfTrue.isArray() ? (valueIfTrue as ArrayValueObject).getRowCount() : 1,
             valueIfFalse.isArray() ? (valueIfFalse as ArrayValueObject).getRowCount() : 1
         );
 
         // get max column length
         const maxColumnLength = Math.max(
-            logicalTest.isArray() ? (logicalTest as ArrayValueObject).getColumnCount() : 1,
+            _logicalTest.isArray() ? (_logicalTest as ArrayValueObject).getColumnCount() : 1,
             valueIfTrue.isArray() ? (valueIfTrue as ArrayValueObject).getColumnCount() : 1,
             valueIfFalse.isArray() ? (valueIfFalse as ArrayValueObject).getColumnCount() : 1
         );
 
-        const logicalTestArray = expandArrayValueObject(maxRowLength, maxColumnLength, logicalTest);
+        const logicalTestArray = expandArrayValueObject(maxRowLength, maxColumnLength, _logicalTest);
         const valueIfTrueArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfTrue, ErrorValueObject.create(ErrorType.NA));
         const valueIfFalseArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfFalse, ErrorValueObject.create(ErrorType.NA));
 

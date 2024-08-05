@@ -86,7 +86,8 @@ export class SelectionShapeExtension {
 
         /** @deprecated injection in extensions should be strictly limited. */
         // TODO@ybzky: remove injector here, permission control should be update from the outside.
-        private readonly _injector: Injector
+        private readonly _injector: Injector,
+        private _selectionHooks: Record<string, () => void>
     ) {
         this._initialControl();
 
@@ -369,7 +370,12 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
+            // selectionScaled$  -->  disableLockedSelectionChange
             this._control.selectionMoved$.next(this._targetSelection);
+            // this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+            // this function should placed after this._control.selectionMoved$,
+            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
+            this._selectionHooks.selectionMoveEnd?.();
         });
     }
 
@@ -516,6 +522,11 @@ export class SelectionShapeExtension {
         this._control.selectionScaling$.next(this._targetSelection);
     }
 
+    /**
+     * Events for 8 control point
+     * @param evt
+     * @param cursor
+     */
     private _widgetEvent(evt: IMouseEvent | IPointerEvent, cursor: CURSOR_TYPE) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
@@ -588,6 +599,12 @@ export class SelectionShapeExtension {
             scene.enableEvent();
             this._scrollTimer?.dispose();
             this._control.selectionScaled$.next(this._targetSelection);
+            // selectionMoveEnd$ update selection model
+            // _selectionHooks.selectionMoveEnd --> SelectionRenderService._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+
+            // this function should placed after this._control.selectionMoved$,
+            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
+            this._selectionHooks.selectionMoveEnd?.();
         });
     }
 

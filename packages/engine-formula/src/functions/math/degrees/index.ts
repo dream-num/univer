@@ -26,37 +26,25 @@ export class Degrees extends BaseFunction {
     override maxParams = 1;
 
     override calculate(angle: BaseValueObject) {
-        if (angle.isString()) {
-            angle = angle.convertToNumberObjectValue();
-        }
-
-        if (angle.isError()) {
-            return angle;
-        }
-
         if (angle.isArray()) {
-            return angle.map((angleObject) => {
-                if (angleObject.isError()) {
-                    return angleObject;
-                }
-
-                return this._handleSingleObject(angleObject);
-            });
+            return angle.map((angleObject) => this._handleSingleObject(angleObject));
         }
 
         return this._handleSingleObject(angle);
     }
 
     private _handleSingleObject(angle: BaseValueObject) {
-        if (angle.isString()) {
-            angle = angle.convertToNumberObjectValue();
+        let angleObject = angle;
+
+        if (angleObject.isString()) {
+            angleObject = angleObject.convertToNumberObjectValue();
         }
 
-        if (angle.isError()) {
-            return angle;
+        if (angleObject.isError()) {
+            return angleObject;
         }
 
-        const angleValue = +angle.getValue();
+        const angleValue = +angleObject.getValue();
 
         if (!Number.isFinite(angleValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);

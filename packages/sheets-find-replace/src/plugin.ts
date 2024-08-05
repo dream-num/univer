@@ -34,7 +34,7 @@ export class UniverSheetsFindReplacePlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
-        ([[SheetsFindReplaceController]] as Dependency[]).forEach((d) => injector.add(d));
+    override onStarting(): void {
+        ([[SheetsFindReplaceController]] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 }

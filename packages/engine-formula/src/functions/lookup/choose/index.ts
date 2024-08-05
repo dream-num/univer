@@ -35,18 +35,18 @@ export class Choose extends BaseFunction {
     }
 
     override calculate(indexNum: FunctionVariantType, ...variants: FunctionVariantType[]) {
-        if (indexNum.isError()) {
-            return indexNum;
+        let _indexNum = indexNum;
+
+        if (_indexNum.isError()) {
+            return _indexNum;
         }
 
-        if (indexNum.isReferenceObject()) {
-            indexNum = (indexNum as BaseReferenceObject).toArrayValueObject();
+        if (_indexNum.isReferenceObject()) {
+            _indexNum = (_indexNum as BaseReferenceObject).toArrayValueObject();
         }
 
-        indexNum = indexNum as BaseValueObject;
-
-        if (!indexNum.isArray()) {
-            const index = indexNum.convertToNumberObjectValue();
+        if (!_indexNum.isArray()) {
+            const index = (_indexNum as BaseValueObject).convertToNumberObjectValue();
 
             if (index.isError()) {
                 return index;
@@ -60,8 +60,8 @@ export class Choose extends BaseFunction {
         }
 
         // The size of the extended range is determined by the maximum width and height of the criteria range.
-        let maxRowLength = indexNum.isArray() ? (indexNum as ArrayValueObject).getRowCount() : 1;
-        let maxColumnLength = indexNum.isArray() ? (indexNum as ArrayValueObject).getColumnCount() : 1;
+        let maxRowLength = _indexNum.isArray() ? (_indexNum as ArrayValueObject).getRowCount() : 1;
+        let maxColumnLength = _indexNum.isArray() ? (_indexNum as ArrayValueObject).getColumnCount() : 1;
 
         variants.forEach((variant, i) => {
             if (variant.isArray()) {
@@ -74,12 +74,15 @@ export class Choose extends BaseFunction {
             }
         });
 
-        const indexNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, indexNum, ErrorValueObject.create(ErrorType.NA));
+        const indexNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, _indexNum as BaseValueObject, ErrorValueObject.create(ErrorType.NA));
         const arrayValueObjectList = variants.map((variant) => {
-            if (variant.isReferenceObject()) {
-                variant = (variant as BaseReferenceObject).toArrayValueObject();
+            let _variant = variant;
+
+            if (_variant.isReferenceObject()) {
+                _variant = (_variant as BaseReferenceObject).toArrayValueObject();
             }
-            return expandArrayValueObject(maxRowLength, maxColumnLength, variant as BaseValueObject, ErrorValueObject.create(ErrorType.NA));
+
+            return expandArrayValueObject(maxRowLength, maxColumnLength, _variant as BaseValueObject, ErrorValueObject.create(ErrorType.NA));
         });
 
         return indexNumArray.map((indexNumValue, row, column) => {

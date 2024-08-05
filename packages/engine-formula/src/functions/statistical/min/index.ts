@@ -56,9 +56,13 @@ export class Min extends BaseFunction {
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
         const validator = accumulatorAll.isGreaterThan(valueObject);
+
+        let _accumulatorAll = accumulatorAll;
+
         if (validator.getValue()) {
-            accumulatorAll = valueObject;
+            _accumulatorAll = valueObject;
         }
-        return accumulatorAll;
+
+        return _accumulatorAll;
     }
 }

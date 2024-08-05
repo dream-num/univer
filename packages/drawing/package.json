@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/drawing",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -62,7 +62,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.66",
+        "@univerjs/icons": "^0.1.70",
         "ot-json1": "^1.0.2"
     },
     "devDependencies": {
@@ -70,9 +70,9 @@
         "@univerjs/shared": "workspace:*",
         "less": "^4.2.0",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3"
+        "typescript": "^5.5.4",
+        "vite": "^5.3.5",
+        "vitest": "^2.0.5"
     },
     "univerSpace": {
         ".": {

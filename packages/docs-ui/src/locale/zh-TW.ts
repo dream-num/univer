@@ -56,6 +56,26 @@ const locale: typeof zhCN = {
         closeHeaderFooter: '關閉頁眉頁腳',
         disableText: '頁眉頁腳設置不可用',
     },
+    doc: {
+        menu: {
+            paragraphSetting: 'Paragraph Setting',
+        },
+        slider: {
+            paragraphSetting: 'Paragraph Setting',
+        },
+        paragraphSetting: {
+            alignment: 'Alignment',
+            indentation: 'Indentation',
+            left: 'Left',
+            right: 'Right',
+            firstLine: 'First Line',
+            hanging: 'Hanging',
+            spacing: 'Spacing',
+            before: 'Before',
+            after: 'After',
+            lineSpace: 'Line Space',
+        },
+    },
 };
 
 export default locale;

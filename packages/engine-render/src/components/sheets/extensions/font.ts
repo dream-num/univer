@@ -91,8 +91,12 @@ export class Font extends SheetExtension {
                 // viewrange and a single merged area when calculating.
 
                 // Early exit from font condition
-                // If it's not an overflow and not within the field of view, we can exit early
+                // if row is not visible
+
+                // If the current cell's style is not set to overflow, and the cell is not within the visible field of view, then exit early.
                 // (the field of view needs to consider the impact of merged cells).
+
+                // If the diffRanges do not intersect with the startRow and endRow on the row, then exit early.
 
                 // eslint-disable-next-line complexity
                 fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
@@ -113,6 +117,10 @@ export class Font extends SheetExtension {
 
                     if (isMerged) {
                         return true;
+                    } else {
+                        const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(rowIndex);
+                        const visibleCol = spreadsheetSkeleton.worksheet.getRowVisible(columnIndex);
+                        if (!visibleRow || !visibleCol) return true;
                     }
 
                     // If the merged cell area intersects with the current viewRange,
@@ -135,8 +143,9 @@ export class Font extends SheetExtension {
                     }
                     /**
                      * Incremental content rendering for texture mapping
-                     * startRow endRow 和 diffRanges 在 row 上不相交, 那么返回不渲染
-                     * PS 如果这个单元格并不在 merge 区域内, mergeInfo start 和 end 就是单元格本身
+                     * If the diffRanges do not intersect with the startRow and endRow on the row, then exit early.
+                     *
+                     * If this cell is not within a merged region, the mergeInfo start and end values are just the cell itself.
                      */
                     if (diffRanges) {
                         if (!this.isRowInRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {

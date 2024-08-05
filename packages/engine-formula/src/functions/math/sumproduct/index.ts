@@ -32,45 +32,18 @@ export class Sumproduct extends BaseFunction {
             return array1;
         }
 
-        if (!array1.isArray()) {
-            array1 = ArrayValueObject.create({
-                calculateValueList: [[array1]],
-                rowCount: 1,
-                columnCount: 1,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-        }
+        const _array1 = this._initArray1(array1);
 
         if (variants.length > 0) {
-            const rowCount = (array1 as ArrayValueObject).getRowCount();
-            const columnCount = (array1 as ArrayValueObject).getColumnCount();
+            const rowCount = _array1.getRowCount();
+            const columnCount = _array1.getColumnCount();
 
-            const resultArray: number[][] = [];
+            let resultArray = this._getResultArrayByArray1(rowCount, columnCount, _array1);
 
-            for (let r = 0; r < rowCount; r++) {
-                const row: number[] = [];
-
-                for (let c = 0; c < columnCount; c++) {
-                    const array1ValueObject = (array1 as ArrayValueObject).get(r, c) as BaseValueObject;
-
-                    if (array1ValueObject.isError()) {
-                        return array1ValueObject;
-                    }
-
-                    const array1Value = array1ValueObject.getValue();
-
-                    if (!array1Value || !isRealNum(array1Value)) {
-                        row.push(0);
-                    } else {
-                        row.push(+array1Value);
-                    }
-                }
-
-                resultArray.push(row);
+            if (resultArray instanceof ErrorValueObject) {
+                return resultArray;
             }
+            resultArray = resultArray as number[][];
 
             for (let i = 0; i < variants.length; i++) {
                 if (variants[i].isError()) {
@@ -120,7 +93,53 @@ export class Sumproduct extends BaseFunction {
 
             return NumberValueObject.create(result);
         } else {
-            return array1.sum();
+            return _array1.sum();
         }
+    }
+
+    private _initArray1(array1: BaseValueObject): ArrayValueObject {
+        let _array1 = array1;
+
+        if (!_array1.isArray()) {
+            _array1 = ArrayValueObject.create({
+                calculateValueList: [[_array1]],
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+        }
+
+        return _array1 as ArrayValueObject;
+    }
+
+    private _getResultArrayByArray1(rowCount: number, columnCount: number, array1: ArrayValueObject) {
+        const resultArray: number[][] = [];
+
+        for (let r = 0; r < rowCount; r++) {
+            const row: number[] = [];
+
+            for (let c = 0; c < columnCount; c++) {
+                const array1ValueObject = array1.get(r, c) as BaseValueObject;
+
+                if (array1ValueObject.isError()) {
+                    return array1ValueObject;
+                }
+
+                const array1Value = array1ValueObject.getValue();
+
+                if (!array1Value || !isRealNum(array1Value)) {
+                    row.push(0);
+                } else {
+                    row.push(+array1Value);
+                }
+            }
+
+            resultArray.push(row);
+        }
+
+        return resultArray;
     }
 }

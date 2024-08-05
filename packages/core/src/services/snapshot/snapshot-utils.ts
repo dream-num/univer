@@ -72,11 +72,17 @@ export function encodeDocOriginalMeta(document: IDocumentData): Uint8Array {
     return meta;
 }
 
-export function decodeWorksheetOtherMetas(buffer: Uint8Array): Partial<IWorksheetData> {
+export function decodeWorksheetOtherMetas(buffer: Uint8Array | string): Partial<IWorksheetData> {
+    if (typeof buffer === 'string') {
+        return JSON.parse(b64DecodeUnicode(buffer));
+    }
     return JSON.parse(textDecoder.decode(buffer));
 }
 
-export function decodeWorkbookOtherMetas(buffer: Uint8Array): Partial<IWorkbookData> {
+export function decodeWorkbookOtherMetas(buffer: Uint8Array | string): Partial<IWorkbookData> {
+    if (typeof buffer === 'string') {
+        return JSON.parse(b64DecodeUnicode(buffer));
+    }
     return JSON.parse(textDecoder.decode(buffer));
 }
 

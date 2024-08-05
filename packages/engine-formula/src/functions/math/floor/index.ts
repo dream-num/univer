@@ -54,12 +54,14 @@ export class Floor extends BaseFunction {
         const resultArray = numberArray.map((numberObject, rowIndex, columnIndex) => {
             let significanceObject = significanceArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (numberObject.isString()) {
-                numberObject = numberObject.convertToNumberObjectValue();
+            let _numberObject = numberObject;
+
+            if (_numberObject.isString()) {
+                _numberObject = _numberObject.convertToNumberObjectValue();
             }
 
-            if (numberObject.isError()) {
-                return numberObject;
+            if (_numberObject.isError()) {
+                return _numberObject;
             }
 
             if (significanceObject.isString()) {
@@ -70,7 +72,7 @@ export class Floor extends BaseFunction {
                 return significanceObject;
             }
 
-            const numberValue = +numberObject.getValue();
+            const numberValue = +_numberObject.getValue();
             const significanceValue = +significanceObject.getValue();
 
             if (numberValue > 0 && significanceValue < 0) {
@@ -90,8 +92,8 @@ export class Floor extends BaseFunction {
             return NumberValueObject.create(result);
         });
 
-        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
-            return resultArray.getArrayValue()[0][0] as NumberValueObject;
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         return resultArray;

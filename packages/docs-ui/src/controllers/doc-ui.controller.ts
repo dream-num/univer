@@ -32,6 +32,22 @@ import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../comman
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { DocFooter } from '../views/doc-footer';
 import {
+    AlignCenterShortCut,
+    AlignJustifyShortCut,
+    AlignLeftShortCut,
+    AlignRightShortCut,
+    BoldShortCut,
+    BulletListShortCut,
+    ItalicShortCut,
+    OrderListShortCut,
+    StrikeThroughShortCut,
+    SubscriptShortCut,
+    SuperscriptShortCut,
+    UnderlineShortCut,
+} from '../shortcuts/toolbar.shortcut';
+import { TabShortCut } from '../shortcuts/format.shortcut';
+import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
+import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
     AlignLeftMenuItemFactory,
@@ -51,8 +67,7 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu/menu';
-import { CopyMenuFactory, CutMenuFactory, DeleteMenuFactory, PasteMenuFactory } from './menu/context-menu';
-import { AlignCenterShortCut, AlignJustifyShortCut, AlignLeftShortCut, AlignRightShortCut, BoldShortCut, BulletListShortCut, ItalicShortCut, OrderListShortCut, StrikeThroughShortCut, SubscriptShortCut, SuperscriptShortCut, UnderlineShortCut } from './shortcut/toolbar.shortcut';
+import { CopyMenuFactory, CutMenuFactory, DeleteMenuFactory, ParagraphSettingMenuFactory, PasteMenuFactory } from './menu/context-menu';
 
 // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
@@ -79,6 +94,8 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
         this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
+        this.disposeWithMe(componentManager.register(BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker));
+        this.disposeWithMe(componentManager.register(ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker));
     }
 
     private _initUiParts() {
@@ -122,6 +139,7 @@ export class DocUIController extends Disposable {
             CutMenuFactory,
             PasteMenuFactory,
             DeleteMenuFactory,
+            ParagraphSettingMenuFactory,
         ].forEach((factory) => {
             try {
                 this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
@@ -145,6 +163,7 @@ export class DocUIController extends Disposable {
             AlignLeftShortCut,
             OrderListShortCut,
             BulletListShortCut,
+            TabShortCut,
         ].forEach((shortcut) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(shortcut));
         });

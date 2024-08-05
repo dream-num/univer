@@ -49,6 +49,8 @@ const locale: typeof zhCN = {
             thousandthPercentileDes: 'Формат процента используется для представления обычных чисел. Монетарные и бухгалтерские форматы предоставляют специальный формат для вычислений монетарных значений.',
             addDecimal: 'Увеличить количество десятичных знаков',
             subtractDecimal: 'Уменьшить количество десятичных знаков',
+            customFormat: 'Custom Format',
+            customFormatDes: 'Generate custom number formats based on existing formats.',
         },
     },
 };

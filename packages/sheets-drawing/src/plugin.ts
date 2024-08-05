@@ -30,11 +30,11 @@ export class UniverSheetsDrawingPlugin extends Plugin {
         super();
     }
 
-    override onStarting(_injector: Injector): void {
+    override onStarting(): void {
         ([
             [SheetsDrawingLoadController],
             [SheetsDrawingController],
             [ISheetDrawingService, { useClass: SheetDrawingService }],
-        ] as Dependency[]).forEach((dependency) => _injector.add(dependency));
+        ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
     }
 }

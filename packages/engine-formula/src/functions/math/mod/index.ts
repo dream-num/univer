@@ -23,22 +23,26 @@ export class Mod extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, divisor: BaseValueObject) {
-        if (number.isString()) {
-            number = number.convertToNumberObjectValue();
+        let _number = number;
+
+        if (_number.isString()) {
+            _number = _number.convertToNumberObjectValue();
         }
 
-        if (number.isError()) {
-            return number;
+        if (_number.isError()) {
+            return _number;
         }
 
-        if (divisor.isString()) {
-            divisor = divisor.convertToNumberObjectValue();
+        let _divisor = divisor;
+
+        if (_divisor.isString()) {
+            _divisor = _divisor.convertToNumberObjectValue();
         }
 
-        if (divisor.isError()) {
-            return divisor;
+        if (_divisor.isError()) {
+            return _divisor;
         }
 
-        return number.mod(divisor);
+        return _number.mod(_divisor);
     }
 }

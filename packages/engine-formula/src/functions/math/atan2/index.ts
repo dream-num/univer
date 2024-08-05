@@ -23,23 +23,26 @@ export class Atan2 extends BaseFunction {
     override maxParams = 2;
 
     override calculate(xNum: BaseValueObject, yNum: BaseValueObject) {
-        if (xNum.isString()) {
-            xNum = xNum.convertToNumberObjectValue();
+        let _xNum = xNum;
+        let _yNum = yNum;
+
+        if (_xNum.isString()) {
+            _xNum = _xNum.convertToNumberObjectValue();
         }
 
-        if (xNum.isError()) {
-            return xNum;
+        if (_xNum.isError()) {
+            return _xNum;
         }
 
-        if (yNum.isString()) {
-            yNum = yNum.convertToNumberObjectValue();
+        if (_yNum.isString()) {
+            _yNum = _yNum.convertToNumberObjectValue();
         }
 
-        if (yNum.isError()) {
-            return yNum;
+        if (_yNum.isError()) {
+            return _yNum;
         }
 
         // Note that the order of parameters is different from JavaScript
-        return yNum.atan2(xNum);
+        return _yNum.atan2(_xNum);
     }
 }

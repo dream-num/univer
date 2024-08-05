@@ -15,12 +15,8 @@
  */
 
 import type zhCN from './zh-CN';
+import enUS from './en-US.ts';
 
-const locale: typeof zhCN = {
-    toolbar: {
-        undo: 'Отменить',
-        redo: 'Повторить',
-    },
-};
+const locale: typeof zhCN = enUS;
 
 export default locale;

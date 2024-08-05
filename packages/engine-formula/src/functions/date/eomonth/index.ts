@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -28,57 +27,58 @@ export class Eomonth extends BaseFunction {
     override maxParams = 2;
 
     override calculate(startDate: BaseValueObject, months: BaseValueObject) {
-        if (startDate.isArray()) {
-            const rowCount = (startDate as ArrayValueObject).getRowCount();
-            const columnCount = (startDate as ArrayValueObject).getColumnCount();
+        let _startDate = startDate;
+        let _months = months;
+
+        if (_startDate.isArray()) {
+            const rowCount = (_startDate as ArrayValueObject).getRowCount();
+            const columnCount = (_startDate as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            startDate = (startDate as ArrayValueObject).get(0, 0) as BaseValueObject;
+            _startDate = (_startDate as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (months.isArray()) {
-            const rowCount = (months as ArrayValueObject).getRowCount();
-            const columnCount = (months as ArrayValueObject).getColumnCount();
+        if (_months.isArray()) {
+            const rowCount = (_months as ArrayValueObject).getRowCount();
+            const columnCount = (_months as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            months = (months as ArrayValueObject).get(0, 0) as BaseValueObject;
+            _months = (_months as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (startDate.isError()) {
-            return startDate;
+        if (_startDate.isError()) {
+            return _startDate;
         }
 
-        if (months.isError()) {
-            return months;
+        if (_months.isError()) {
+            return _months;
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(_startDate);
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
+        }
+
+        if (_months.isBoolean()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const startDateDate = excelSerialToDate(startDateSerialNumber);
         const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
         const startMonth = startDateSerialNumber > 0 ? startDateDate.getUTCMonth() : 0;
 
-        let monthsValue = months.getValue();
+        const monthsValue = Math.floor(+_months.getValue());
 
-        if (months.isBoolean()) {
+        if (Number.isNaN(monthsValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        if (months.isString() && !isRealNum(monthsValue)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        monthsValue = Math.floor(+monthsValue);
 
         const targetDate = new Date(Date.UTC(startYear, startMonth + monthsValue + 1, 0));
         const result = excelDateSerial(targetDate);

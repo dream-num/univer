@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/rpc",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -63,9 +63,9 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3"
+        "typescript": "^5.5.4",
+        "vite": "^5.3.5",
+        "vitest": "^2.0.5"
     },
     "univerSpace": {
         ".": {

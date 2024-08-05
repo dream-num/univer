@@ -55,11 +55,11 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
-        injector.add([RemoteRegisterFunctionService]);
-        injector.get(IRPCChannelService).registerChannel(
+    override onStarting(): void {
+        this._injector.add([RemoteRegisterFunctionService]);
+        this._injector.get(IRPCChannelService).registerChannel(
             RemoteRegisterFunctionServiceName,
-            fromModule(injector.get(RemoteRegisterFunctionService))
+            fromModule(this._injector.get(RemoteRegisterFunctionService))
         );
     }
 }

@@ -43,29 +43,33 @@ export class Averageif extends BaseFunction {
             return averageRange;
         }
 
-        if (range.isReferenceObject()) {
-            range = (range as BaseReferenceObject).toArrayValueObject();
+        let _range = range;
+
+        if (_range.isReferenceObject()) {
+            _range = (_range as BaseReferenceObject).toArrayValueObject();
         }
 
-        if (!range.isArray()) {
-            range = createNewArray([[range as BaseValueObject]], 1, 1);
+        if (!_range.isArray()) {
+            _range = createNewArray([[_range as BaseValueObject]], 1, 1);
         }
 
-        if (criteria.isReferenceObject()) {
-            criteria = (criteria as BaseReferenceObject).toArrayValueObject();
+        let _criteria = criteria;
+
+        if (_criteria.isReferenceObject()) {
+            _criteria = (_criteria as BaseReferenceObject).toArrayValueObject();
         }
 
         if (averageRange && !averageRange?.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        criteria = criteria as BaseValueObject;
+        _criteria = _criteria as BaseValueObject;
 
-        if (criteria.isArray()) {
-            return (criteria as ArrayValueObject).map((criteriaItem) => this._handleSingleObject(range as BaseValueObject, criteriaItem, averageRange as BaseReferenceObject));
+        if (_criteria.isArray()) {
+            return (_criteria as ArrayValueObject).map((criteriaItem) => this._handleSingleObject(_range as BaseValueObject, criteriaItem, averageRange as BaseReferenceObject));
         }
 
-        return this._handleSingleObject(range as BaseValueObject, criteria, averageRange as BaseReferenceObject);
+        return this._handleSingleObject(_range as BaseValueObject, _criteria, averageRange as BaseReferenceObject);
     }
 
     private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseReferenceObject) {

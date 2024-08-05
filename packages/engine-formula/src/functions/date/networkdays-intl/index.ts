@@ -52,6 +52,39 @@ export class NetworkdaysIntl extends BaseFunction {
     }
 
     private _handleSingleObject(startDate: BaseValueObject, endDate: BaseValueObject, weekend?: BaseValueObject, holidays?: BaseValueObject) {
+        let _startDate = startDate;
+        let _endDate = endDate;
+
+        if (_startDate.isArray()) {
+            const rowCount = (_startDate as ArrayValueObject).getRowCount();
+            const columnCount = (_startDate as ArrayValueObject).getColumnCount();
+
+            if (rowCount > 1 || columnCount > 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            _startDate = (_startDate as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_startDate.isError()) {
+            return _startDate;
+        }
+
+        if (_endDate.isArray()) {
+            const rowCount = (_endDate as ArrayValueObject).getRowCount();
+            const columnCount = (_endDate as ArrayValueObject).getColumnCount();
+
+            if (rowCount > 1 || columnCount > 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            _endDate = (_endDate as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_endDate.isError()) {
+            return _endDate;
+        }
+
         let weekendValue: number | string = 1;
 
         if (weekend) {
@@ -70,90 +103,70 @@ export class NetworkdaysIntl extends BaseFunction {
             }
         }
 
-        if (startDate.isArray()) {
-            if ((startDate as ArrayValueObject).getRowCount() > 1 || (startDate as ArrayValueObject).getColumnCount() > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            startDate = (startDate as ArrayValueObject).get(0, 0) as BaseValueObject;
-
-            if (startDate.isError()) {
-                return startDate;
-            }
-        }
-
-        if (endDate.isArray()) {
-            if ((endDate as ArrayValueObject).getRowCount() > 1 || (endDate as ArrayValueObject).getColumnCount() > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            endDate = (endDate as ArrayValueObject).get(0, 0) as BaseValueObject;
-
-            if (endDate.isError()) {
-                return endDate;
-            }
-        }
-
-        if (startDate.isBoolean() || endDate.isBoolean()) {
+        if (_startDate.isBoolean() || _endDate.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const startDateSerialNumber = getDateSerialNumberByObject(startDate);
+        const startDateSerialNumber = getDateSerialNumberByObject(_startDate);
 
         if (typeof startDateSerialNumber !== 'number') {
             return startDateSerialNumber;
         }
 
-        const endDateSerialNumber = getDateSerialNumberByObject(endDate);
+        const endDateSerialNumber = getDateSerialNumberByObject(_endDate);
 
         if (typeof endDateSerialNumber !== 'number') {
             return endDateSerialNumber;
         }
 
-        let result: number;
-
         if (holidays) {
-            const holidaysValueArray = [];
+            return this._getResultByHolidays(startDateSerialNumber, endDateSerialNumber, weekendValue, holidays);
+        }
 
-            if (holidays?.isArray()) {
-                const rowCount = (holidays as ArrayValueObject).getRowCount();
-                const columnCount = (holidays as ArrayValueObject).getColumnCount();
+        const result = countWorkingDays(startDateSerialNumber, endDateSerialNumber, weekendValue);
 
-                for (let r = 0; r < rowCount; r++) {
-                    for (let c = 0; c < columnCount; c++) {
-                        const cell = (holidays as ArrayValueObject).get(r, c) as BaseValueObject;
+        return NumberValueObject.create(result);
+    }
 
-                        if (cell.isBoolean()) {
-                            return ErrorValueObject.create(ErrorType.VALUE);
-                        }
+    private _getResultByHolidays(startDateSerialNumber: number, endDateSerialNumber: number, weekendValue: number | string, holidays: BaseValueObject): BaseValueObject {
+        const holidaysValueArray = [];
 
-                        const holidaySerialNumber = getDateSerialNumberByObject(cell);
+        if (holidays?.isArray()) {
+            const rowCount = (holidays as ArrayValueObject).getRowCount();
+            const columnCount = (holidays as ArrayValueObject).getColumnCount();
 
-                        if (typeof holidaySerialNumber !== 'number') {
-                            return holidaySerialNumber;
-                        }
+            for (let r = 0; r < rowCount; r++) {
+                for (let c = 0; c < columnCount; c++) {
+                    const cell = (holidays as ArrayValueObject).get(r, c) as BaseValueObject;
 
-                        holidaysValueArray.push(holidaySerialNumber);
+                    if (cell.isBoolean()) {
+                        return ErrorValueObject.create(ErrorType.VALUE);
                     }
-                }
-            } else {
-                if (holidays.isBoolean()) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
 
-                const holidaySerialNumber = getDateSerialNumberByObject(holidays);
+                    const holidaySerialNumber = getDateSerialNumberByObject(cell);
 
-                if (typeof holidaySerialNumber !== 'number') {
-                    return holidaySerialNumber;
+                    if (typeof holidaySerialNumber !== 'number') {
+                        return holidaySerialNumber;
+                    }
+
+                    holidaysValueArray.push(holidaySerialNumber);
                 }
-
-                holidaysValueArray.push(holidaySerialNumber);
+            }
+        } else {
+            if (holidays.isBoolean()) {
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            result = countWorkingDays(startDateSerialNumber, endDateSerialNumber, weekendValue, holidaysValueArray);
-        } else {
-            result = countWorkingDays(startDateSerialNumber, endDateSerialNumber, weekendValue);
+            const holidaySerialNumber = getDateSerialNumberByObject(holidays);
+
+            if (typeof holidaySerialNumber !== 'number') {
+                return holidaySerialNumber;
+            }
+
+            holidaysValueArray.push(holidaySerialNumber);
         }
+
+        const result = countWorkingDays(startDateSerialNumber, endDateSerialNumber, weekendValue, holidaysValueArray);
 
         return NumberValueObject.create(result);
     }

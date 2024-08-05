@@ -538,7 +538,8 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
             injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);

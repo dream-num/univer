@@ -135,11 +135,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
-
-            this._injector = _injector;
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([SheetsSortService]);
             injector.add([SheetsSortController]);
             injector.add([SheetsSelectionsService, { useClass: mockSelectionManagerService as any }]);

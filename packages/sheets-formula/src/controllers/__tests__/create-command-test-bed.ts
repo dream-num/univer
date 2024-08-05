@@ -75,7 +75,8 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([CalculateFormulaService]);

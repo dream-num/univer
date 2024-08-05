@@ -23,7 +23,7 @@ import { type UnitType, UniverInstanceType } from '../../common/unit';
 import { LifecycleStages } from '../lifecycle/lifecycle';
 import { getLifecycleStagesAndBefore, LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
 import { ILogService } from '../log/log.service';
-import { DependentOnSymbol, type Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
+import { DependentOnSymbol, Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 4;
 
@@ -175,6 +175,8 @@ export class PluginHolder extends Disposable {
     protected _started: boolean = false;
     get started(): boolean { return this._started; }
 
+    private _warnedAboutOnStartingDeprecation = false;
+
     /** Plugin constructors waiting to be initialized. */
     protected readonly _pluginRegistry = new PluginRegistry();
     /** Stores initialized plugin instances. */
@@ -270,12 +272,12 @@ export class PluginHolder extends Disposable {
     }
 
     // Here we should be careful with the sequence of which plugin should run first. We should manually add a queue here.
-    // Because laterly registered plugins may get executed first.
+    // Because lately registered plugins may get executed first.
 
     protected _pluginsRunLifecycle(plugins: Plugin[]): void {
         // Let plugins go through already reached lifecycle stages.
         getLifecycleStagesAndBefore(this._lifecycleService.stage).subscribe((stage) => this._runStage(plugins, stage));
-        // Push to the queue for later lifecycles.
+        // Push to the queue for later lifecycle.
         this._awaitingPlugins.push(plugins);
     }
 
@@ -283,6 +285,16 @@ export class PluginHolder extends Disposable {
         plugins.forEach((p) => {
             switch (stage) {
                 case LifecycleStages.Starting:
+                    if (p.onStarting.length > 0 && p.onStarting !== Plugin.prototype.onStarting && !this._warnedAboutOnStartingDeprecation) {
+                        this._logService.warn(
+                            '[PluginService]',
+                            p.onStarting.length,
+                            `Plugin "${p.getPluginName()}" is using deprecated "onStarting" method with arguments. Please use "this._injector" instead.`
+                        );
+
+                        this._warnedAboutOnStartingDeprecation = true;
+                    }
+
                     p.onStarting(this._injector);
                     break;
                 case LifecycleStages.Ready:

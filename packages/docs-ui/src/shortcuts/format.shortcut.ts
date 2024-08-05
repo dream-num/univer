@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+import { TabCommand } from '@univerjs/docs';
+import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import { whenDocAndEditorFocused } from './utils';
 
-const locale: typeof zhCN = {
+export const TabShortCut: IShortcutItem = {
+    id: TabCommand.id,
+    binding: KeyCode.TAB,
+    preconditions: whenDocAndEditorFocused,
 };
 
-export default locale;
+export const ShiftTabShortCut: IShortcutItem = {
+    id: TabCommand.id,
+    binding: KeyCode.TAB | MetaKeys.SHIFT,
+    preconditions: whenDocAndEditorFocused,
+    staticParameters: {
+        shift: true,
+    },
+};

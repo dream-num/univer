@@ -92,6 +92,7 @@ exports.baseRules = {
     'style/multiline-ternary': 'warn',
     'unicorn/prefer-type-error': 'warn',
     'accessor-pairs': 'warn',
+    'react/no-create-ref': 'warn',
 };
 
 exports.typescriptPreset = function typescriptPreset() {

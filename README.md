@@ -82,6 +82,7 @@ Univer provides a wide range of features for spreadsheets, documents and present
 ### 📝 Univer Doc (Under Development)
 
 - **Core Features**: Univer supports core document features, including paragraphs, headings, lists, superscript, subscript, and more.
+- **Floating Images**: Allows inserting images into a document and supporting text and image layout.
 - **Headers & Footers**: Allows adding headers and footers to a document.
 - **Comments**: Enables adding comments to a document to provide additional information.
 - **Collaborative Editing**[^1]: Supports multiple users editing a document simultaneously.

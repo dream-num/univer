@@ -18,8 +18,8 @@ import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
-import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, getNormalSelectionStyle, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
+import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -45,7 +45,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
         @IRenderManagerService renderManagerService: IRenderManagerService,
-        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
@@ -58,7 +58,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             renderManagerService
         );
 
-        this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
+        this._workbookSelections = _selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
     }
 
@@ -138,18 +138,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const param = this._workbookSelections.getCurrentSelections();
             if (!param) return;
 
-            this._refreshSelection(param);
+            this._refreshSelectionControl(param);
         }));
-    }
-
-    private _refreshSelection(params: readonly ISelectionWithStyle[]) {
-        const selections = params.map((selectionWithStyle) => {
-            const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-            selectionData.style = getNormalSelectionStyle(this._themeService);
-            return selectionData;
-        });
-
-        this.updateControlForCurrentByRangeData(selections);
     }
 
     private _normalSelectionDisabled(): boolean {
@@ -186,6 +176,12 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             }));
     }
 
+    /**
+     * set new selection range in seletion model
+     * selectionMoveEnd$ ---> _updateSelections --> selectionOperation@selectionManagerService.setSelections
+     * @param selectionDataWithStyleList
+     * @param type
+     */
     private _updateSelections(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
         const workbook = this._context.unit;
         const unitId = workbook.getUnitId();
@@ -206,6 +202,9 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     }
 
     private _initSkeletonChangeListener() {
+        // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
+        // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
+        // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 this._logService.error('[SelectionRenderService]: should not receive null!');
@@ -216,22 +215,33 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const { sheetId, skeleton } = param;
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+            const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
 
             // If there is no initial selection, add one by default in the top left corner.
-            const firstSelection = this._workbookSelections.getCurrentLastSelection();
-            if (!firstSelection) {
-                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    unitId,
-                    subUnitId: sheetId,
-                    selections: [getTopLeftSelection(skeleton)],
-                } as ISetSelectionsOperationParams);
+            // const firstSelection = this._workbookSelections.getCurrentLastSelection();
+            // Dont do that above! Ref selection also need syncExecCmd to reset selection.
+            // TODO @lumixraku why use such weird a way to clear existing selection? subscribe to currentSkeleton$ is much better?
+
+            if (this._normalSelectionDisabled()) return;
+
+            // SetSelectionsOperation would clear all exists selections
+            // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
+            if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+                const firstSelection = this._workbookSelections.getCurrentLastSelection();
+                if (!firstSelection) {
+                    this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                        unitId,
+                        subUnitId: sheetId,
+                        selections: [getTopLeftSelection(skeleton)],
+                    } as ISetSelectionsOperationParams);
+                }
             }
 
-            // for col width & row height resize
             const currentSelections = this._workbookSelections.getCurrentSelections();
+            // for col width & row height resize
             if (currentSelections != null) {
-                this._refreshSelection(currentSelections);
+                this._refreshSelectionControl(currentSelections);
             }
         }));
     }

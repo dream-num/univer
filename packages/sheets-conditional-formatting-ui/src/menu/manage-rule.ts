@@ -16,21 +16,18 @@
 
 import { merge, Observable } from 'rxjs';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import type { IAccessor, ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
+import type { IAccessor, Workbook } from '@univerjs/core';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { RangeProtectionPermissionEditPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import { checkRangesEditablePermission, RangeProtectionPermissionEditPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 
 import { debounceTime } from 'rxjs/operators';
 import { ICommandService, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { AddConditionalRuleMutation, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
 
-import { UnitAction } from '@univerjs/protocol';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { CF_MENU_OPERATION, OpenConditionalFormattingOperator } from '../commands/operations/open-conditional-formatting-panel';
 
 const commandList = [SetWorksheetActiveOperation.id, AddConditionalRuleMutation.id, SetConditionalRuleMutation.id, DeleteConditionalRuleMutation.id, MoveConditionalRuleMutation.id];
-
-type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
 // eslint-disable-next-line max-lines-per-function
 export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMenuSelectorItem => {
@@ -128,22 +125,11 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
                 subscriber.next(false);
                 return false;
             }
-            const hasNotPermission = allRule.some((rule) => {
-                const ranges = rule.ranges;
-                return ranges.some((range) => {
-                    const { startRow, startColumn, endRow, endColumn } = range;
-                    for (let row = startRow; row <= endRow; row++) {
-                        for (let col = startColumn; col <= endColumn; col++) {
-                            const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                            if (permission?.[UnitAction.Edit] === false || permission?.[UnitAction.View] === false) {
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                });
+
+            const hasPermission = allRule.map((rule) => rule.ranges).every((ranges) => {
+                return checkRangesEditablePermission(accessor, workbook.getUnitId(), worksheet.getSheetId(), ranges);
             });
-            subscriber.next(!hasNotPermission);
+            subscriber.next(hasPermission);
         })
     );
     const selections$ = new Observable((subscriber) => {

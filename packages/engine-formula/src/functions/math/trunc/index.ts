@@ -28,30 +28,32 @@ export class Trunc extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, numDigits?: BaseValueObject) {
-        numDigits = numDigits ?? NumberValueObject.create(0);
+        const _numDigits = numDigits ?? NumberValueObject.create(0);
 
         const maxRowLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getRowCount() : 1,
-            numDigits.isArray() ? (numDigits as ArrayValueObject).getRowCount() : 1
+            _numDigits.isArray() ? (_numDigits as ArrayValueObject).getRowCount() : 1
         );
 
         const maxColumnLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getColumnCount() : 1,
-            numDigits.isArray() ? (numDigits as ArrayValueObject).getColumnCount() : 1
+            _numDigits.isArray() ? (_numDigits as ArrayValueObject).getColumnCount() : 1
         );
 
         const numberArray = expandArrayValueObject(maxRowLength, maxColumnLength, number, ErrorValueObject.create(ErrorType.NA));
-        const numDigitsArray = expandArrayValueObject(maxRowLength, maxColumnLength, numDigits, ErrorValueObject.create(ErrorType.NA));
+        const numDigitsArray = expandArrayValueObject(maxRowLength, maxColumnLength, _numDigits, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = numberArray.map((numberObject, rowIndex, columnIndex) => {
             let numDigitsObject = numDigitsArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (numberObject.isString()) {
-                numberObject = numberObject.convertToNumberObjectValue();
+            let _numberObject = numberObject;
+
+            if (_numberObject.isString()) {
+                _numberObject = _numberObject.convertToNumberObjectValue();
             }
 
-            if (numberObject.isError()) {
-                return numberObject;
+            if (_numberObject.isError()) {
+                return _numberObject;
             }
 
             if (numDigitsObject.isString()) {
@@ -62,7 +64,7 @@ export class Trunc extends BaseFunction {
                 return numDigitsObject;
             }
 
-            const numberValue = +numberObject.getValue();
+            const numberValue = +_numberObject.getValue();
             const numDigitsValue = +numDigitsObject.getValue();
 
             const factor = 10 ** Math.trunc(numDigitsValue);

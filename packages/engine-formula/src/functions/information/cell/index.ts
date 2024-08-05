@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IColumnData, IObjectArrayPrimitiveType } from '@univerjs/core';
 import { Tools } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
@@ -30,25 +31,27 @@ export class Cell extends BaseFunction {
     override maxParams = 2;
 
     override calculate(infoType: FunctionVariantType, reference: FunctionVariantType) {
-        if (infoType.isError()) {
-            return infoType;
+        let _infoType = infoType;
+
+        if (_infoType.isError()) {
+            return _infoType;
         }
 
-        if (infoType.isReferenceObject()) {
-            infoType = (infoType as BaseReferenceObject).toArrayValueObject();
+        if (_infoType.isReferenceObject()) {
+            _infoType = (_infoType as BaseReferenceObject).toArrayValueObject();
         }
 
-        if (infoType.isArray()) {
-            const rowCount = (infoType as ArrayValueObject).getRowCount();
-            const columnCount = (infoType as ArrayValueObject).getColumnCount();
+        if (_infoType.isArray()) {
+            const rowCount = (_infoType as ArrayValueObject).getRowCount();
+            const columnCount = (_infoType as ArrayValueObject).getColumnCount();
 
             if (rowCount === 1 && columnCount === 1) {
-                const infoTypeObject = (infoType as ArrayValueObject).get(0, 0) as BaseValueObject;
+                const infoTypeObject = (_infoType as ArrayValueObject).get(0, 0) as BaseValueObject;
 
                 return this._handleSingleObject(infoTypeObject, reference);
             }
 
-            return (infoType as ArrayValueObject).map((infoTypeObject) => {
+            return (_infoType as ArrayValueObject).map((infoTypeObject) => {
                 if (infoTypeObject.isError()) {
                     return infoTypeObject;
                 }
@@ -57,27 +60,29 @@ export class Cell extends BaseFunction {
             });
         }
 
-        return this._handleSingleObject(infoType as BaseValueObject, reference);
+        return this._handleSingleObject(_infoType as BaseValueObject, reference);
     }
 
     private _handleSingleObject(infoType: BaseValueObject, reference: FunctionVariantType, infoTypeIsArray: boolean = false) {
-        if (reference.isError()) {
-            return reference as ErrorValueObject;
+        let _reference = reference;
+
+        if (_reference.isError()) {
+            return _reference as ErrorValueObject;
         }
 
-        if (!reference.isReferenceObject()) {
+        if (!_reference.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        const currentActiveSheetData = (reference as BaseReferenceObject).getCurrentActiveSheetData();
+        const currentActiveSheetData = (_reference as BaseReferenceObject).getCurrentActiveSheetData();
         const { columnData, defaultColumnWidth } = currentActiveSheetData;
 
-        reference = (reference as BaseReferenceObject).toArrayValueObject();
+        _reference = (_reference as BaseReferenceObject).toArrayValueObject();
 
-        const _currentRow = (reference as ArrayValueObject).getCurrentRow();
-        const _currentColumn = (reference as ArrayValueObject).getCurrentColumn();
+        const _currentRow = (_reference as ArrayValueObject).getCurrentRow();
+        const _currentColumn = (_reference as ArrayValueObject).getCurrentColumn();
 
-        reference = (reference as ArrayValueObject).getFirstCell();
+        _reference = (_reference as ArrayValueObject).getFirstCell();
 
         const infoTypeValue = `${infoType.getValue()}`;
 
@@ -92,7 +97,7 @@ export class Cell extends BaseFunction {
                 // This value is not supported in Excel for the web. return 0.
                 return NumberValueObject.create(0);
             case 'contents':
-                return reference;
+                return _reference;
             case 'filename':
                 // This value is not supported in Excel for the web. google sheet return #VALUE!.
                 return ErrorValueObject.create(ErrorType.VALUE);
@@ -113,31 +118,35 @@ export class Cell extends BaseFunction {
             case 'type':
                 result = 'v';
 
-                if (reference.isNull()) {
+                if (_reference.isNull()) {
                     result = 'b';
                 }
 
-                if (reference.isString()) {
+                if (_reference.isString()) {
                     result = 'l';
                 }
 
                 return StringValueObject.create(result);
             case 'width':
-                result = columnData[_currentColumn]?.w;
-
-                if (!result && result !== 0) {
-                    result = defaultColumnWidth as number;
-                }
-
-                if (infoTypeIsArray) {
-                    return NumberValueObject.create(result);
-                }
-
-                result = [[result, result === defaultColumnWidth]];
-
-                return ArrayValueObject.createByArray(result);
+                return this._getWidthResult(columnData, defaultColumnWidth as number, _currentColumn, infoTypeIsArray);
             default:
                 return ErrorValueObject.create(ErrorType.VALUE);
         }
+    }
+
+    private _getWidthResult(columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>, defaultColumnWidth: number, _currentColumn: number, infoTypeIsArray: boolean): BaseValueObject {
+        let result = columnData[_currentColumn]?.w;
+
+        if (!result && result !== 0) {
+            result = defaultColumnWidth as number;
+        }
+
+        if (infoTypeIsArray) {
+            return NumberValueObject.create(result);
+        }
+
+        const resultArray = [[result, result === defaultColumnWidth]];
+
+        return ArrayValueObject.createByArray(resultArray);
     }
 }

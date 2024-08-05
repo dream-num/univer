@@ -28,7 +28,7 @@ export class UniverDocUniFormulaPlugin extends Plugin {
     static override type: UniverInstanceType = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        config: unknown,
+        _config: unknown,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();

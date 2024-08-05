@@ -18,6 +18,8 @@ export { UniverSlidesUIPlugin } from './slides-ui-plugin';
 export { SlidesUIController } from './controllers/slide-ui.controller';
 export { SlideSideBar } from './views/slide-bar/SlideBar';
 
+export { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
+
 // #region - all commands
 
 export { ActivateSlidePageOperation } from './commands/operations/activate.operation';

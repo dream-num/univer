@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-export class InfoBarModel {
-    constructor(private _name: string) {
-        // empty
-    }
+import type { IAccessor, ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import { DocParagraphSettingController } from '../../controllers/doc-paragraph-setting.controller';
 
-    get name(): string {
-        return this._name;
-    }
+export const DocParagraphSettingPanelOperation: ICommand = {
+    id: 'sidebar.operation.doc-paragraph-setting-panel',
+    type: CommandType.OPERATION,
+    handler: (accessor: IAccessor) => {
+        const docParagraphSettingController = accessor.get(DocParagraphSettingController);
+        docParagraphSettingController.openPanel();
+        return true;
+    },
+};
 
-    setName(name: string) {
-        this._name = name;
-    }
-}

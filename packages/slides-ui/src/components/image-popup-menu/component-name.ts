@@ -14,9 +14,5 @@
  * limitations under the License.
  */
 
-import type zhCN from './zh-CN';
+export const COMPONENT_SLIDE_IMAGE_POPUP_MENU = 'COMPONENT_SLIDE_IMAGE_POPUP_MENU';
 
-const locale: typeof zhCN = {
-};
-
-export default locale;

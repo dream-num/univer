@@ -87,7 +87,7 @@ function createFilterCommandTestBed() {
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
             ([
                 [RefRangeService],
                 [SheetInterceptorService],
@@ -99,7 +99,7 @@ function createFilterCommandTestBed() {
                 [WorksheetProtectionRuleModel],
                 [RangeProtectionRuleModel],
                 [IMessageService, { useClass: MockMessageService }],
-            ] as Dependency[]).forEach((d) => injector.add(d));
+            ] as Dependency[]).forEach((d) => this._injector.add(d));
         }
     }
 

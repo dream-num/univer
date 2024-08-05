@@ -20,6 +20,7 @@ import React, { useContext, useRef, useState } from 'react';
 import type { DraggableData, DraggableEvent, DraggableEventHandler } from 'react-draggable';
 import Draggable from 'react-draggable';
 
+import type { ModalStyles } from 'rc-dialog/lib/IDialogPropTypes';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
@@ -92,6 +93,16 @@ export interface IDialogProps {
      */
     mask?: boolean;
     className?: string;
+
+    /**
+     * The style of the customize.
+     */
+    dialogStyles?: ModalStyles;
+
+    /**
+     *
+     */
+    closable?: boolean;
 }
 
 export function Dialog(props: IDialogProps) {
@@ -110,6 +121,8 @@ export function Dialog(props: IDialogProps) {
         footer,
         onClose,
         mask,
+        dialogStyles,
+        closable,
     } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
     const [positionOffset, setPositionOffset] = useState<{ x: number; y: number } | null>(null);
@@ -123,6 +136,7 @@ export function Dialog(props: IDialogProps) {
                 style={{
                     width: '100%',
                     cursor: 'pointer',
+                    ...dialogStyles?.header,
                 }}
                 onMouseOver={() => {
                     if (dragDisabled) {
@@ -207,6 +221,8 @@ export function Dialog(props: IDialogProps) {
             mask={needMask}
             style={style}
             onClose={onClose}
+            styles={dialogStyles}
+            closable={closable}
         >
             {children}
         </RcDialog>

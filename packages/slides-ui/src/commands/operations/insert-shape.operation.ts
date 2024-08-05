@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommand, SlideDataModel } from '@univerjs/core';
-import { BasicShapes, CommandType, generateRandomId, IUniverInstanceService, PageElementType, UniverInstanceType } from '@univerjs/core';
+import type { IAccessor, ICommand, SlideDataModel } from '@univerjs/core';
+import { BasicShapes, CommandType, generateRandomId, IUniverInstanceService, LocaleService, PageElementType, UniverInstanceType } from '@univerjs/core';
+import { ObjectType } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
+import { ISidebarService } from '@univerjs/ui';
+import { COMPONENT_SLIDE_SIDEBAR } from '../../components/sidebar/Sidebar';
 
 export interface IInsertShapeOperationParams {
 };
@@ -25,15 +28,6 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
     id: 'slide.operation.insert-float-shape',
     type: CommandType.OPERATION,
     handler: async (accessor, params) => {
-        // const imageIoService = accessor.get(IImageIoService);
-        // if (!params?.files?.length) return false;
-
-        // const imageParam = await imageIoService.saveImage(params.files[0]);
-        // if (!imageParam) return false;
-
-        // const { imageId, imageSourceType, source, base64Cache } = imageParam;
-        // const { width, height, image } = await getImageSize(base64Cache || '');
-
         const id = generateRandomId(6);
         const data = {
             id,
@@ -65,8 +59,6 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
 
         activePage.pageElements[id] = data;
 
-        // console.log(activePage.id);
-
         slideData.updatePage(activePage.id, activePage);
 
         const canvasview = accessor.get(CanvasView);
@@ -75,24 +67,49 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
             canvasview.setObjectActiveByPage(sceneObject, activePage.id);
         }
 
-        // console.log(slideData);
+        return true;
+    },
+};
 
-        // {
-        //     "id": "background1",
-        //     "zIndex": 0,
-        //     "left": 0,
-        //     "top": 0,
-        //     "width": 960,
-        //     "height": 540,
-        //     "title": "background",
-        //     "description": "",
-        //     "type": 1,
-        //     "image": {
-        //         "imageProperties": {
-        //             "contentUrl": "https://minio.cnbabylon.com/univer/slide/Picture1.jpg"
-        //         }
-        //     }
-        // }
+export interface IToggleSlideEditSidebarOperation {
+    visible: string;
+    objectType: ObjectType;
+}
+
+export const ToggleSlideEditSidebarOperation: ICommand = {
+    id: 'sidebar.operation.slide-shape',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: IToggleSlideEditSidebarOperation) => {
+        const { visible, objectType } = params;
+
+        const sidebarService = accessor.get(ISidebarService);
+        const localeService = accessor.get(LocaleService);
+
+        let title = '';
+        let children = '';
+        if (objectType === ObjectType.RECT) {
+            title = 'slide.sidebar.shape';
+            children = COMPONENT_SLIDE_SIDEBAR;
+        } else if (objectType === ObjectType.IMAGE) {
+            title = 'slide.sidebar.image';
+            children = COMPONENT_SLIDE_SIDEBAR;
+        } else if (objectType === ObjectType.RICH_TEXT) {
+            title = 'slide.sidebar.text';
+            children = COMPONENT_SLIDE_SIDEBAR;
+        }
+
+        if (visible) {
+            sidebarService.open({
+                header: { title: localeService.t(title) },
+                children: { label: children },
+                onClose: () => {
+                        // drawingManagerService.focusDrawing(null);
+                },
+                width: 360,
+            });
+        } else {
+            sidebarService.close();
+        }
         return true;
     },
 };

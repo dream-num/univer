@@ -17,7 +17,7 @@
 import type { IAccessor, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { RangeProtectionRuleModel, SheetsSelectionsService } from '@univerjs/sheets';
+import { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController, RangeProtectionRuleModel, SheetsSelectionsService } from '@univerjs/sheets';
 import { combineLatest, map } from 'rxjs';
 
 export function getSheetSelectionsDisabled$(accessor: IAccessor) {
@@ -27,6 +27,8 @@ export function getSheetSelectionsDisabled$(accessor: IAccessor) {
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
 
+    const mergeCellController = accessor.get(MergeCellController);
+
     return combineLatest([
         selectionManagerService.selectionMoveEnd$,
         workbook.activeSheet$,
@@ -35,6 +37,14 @@ export function getSheetSelectionsDisabled$(accessor: IAccessor) {
             if (!sheet) return false;
             if (!selection || selection.length === 0) return false;
             const subUnitId = sheet.getSheetId();
+
+            const selectionRanges = selection.map((sel) => sel.range);
+            const withPivot = mergeCellController.interceptor.fetchThroughInterceptors(MERGE_CELL_INTERCEPTOR_CHECK)(false, selectionRanges);
+
+            if (withPivot) {
+                return true;
+            }
+
             const subUnitRuleRange = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId)
                 .map((rule) => rule.ranges).flat();
 

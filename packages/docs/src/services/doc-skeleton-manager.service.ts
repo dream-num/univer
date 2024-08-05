@@ -100,8 +100,13 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         const skeleton = this._skeleton;
         skeleton.calculate();
 
+        // sub: packages/docs-ui/src/controllers/render-controllers/doc.render-controller.ts
         this._currentSkeletonBefore$.next(skeleton);
+
+        // sub: packages/docs-ui/src/controllers/render-controllers/text-selection.render-controller.ts
         this._currentSkeleton$.next(skeleton);
+
+        // sub: packages/docs/src/services/doc-interceptor/doc-interceptor.service.ts
         this._currentViewModel$.next(this._docViewModel);
     }
 

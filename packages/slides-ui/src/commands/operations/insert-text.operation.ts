@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, SlideDataModel } from '@univerjs/core';
+import type { ICommand, IPageElement, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, PageElementType, Tools, UniverInstanceType } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
 
@@ -29,13 +29,14 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         const elementId = Tools.generateRandomId(6);
         const defaultWidth = 220;
         const defaultheight = 40;
-
+        const left = 230;
+        const top = 142;
         const textContent = params?.text || 'A New Text';
-        const elmentData = {
+        const elementData: IPageElement = {
             id: elementId,
             zIndex: 2,
-            left: 230,
-            top: 142,
+            left,
+            top,
             width: defaultWidth,
             height: defaultheight,
             title: 'text',
@@ -56,11 +57,12 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         if (!slideData) return false;
 
         const activePage = slideData.getActivePage()!;
-        activePage.pageElements[elementId] = elmentData;
+        activePage.pageElements[elementId] = elementData;
         slideData.updatePage(activePage.id, activePage);
 
         const canvasview = accessor.get(CanvasView);
-        const sceneObject = canvasview.createObjectToPage(elmentData, activePage.id);
+        const sceneObject = canvasview.createObjectToPage(elementData, activePage.id);
+        // make object active: a control rect wrap the object.
         if (sceneObject) {
             canvasview.setObjectActiveByPage(sceneObject, activePage.id);
         }

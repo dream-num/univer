@@ -56,4 +56,3 @@ export const SidebarSheetDrawingOperation: ICommand = {
         return true;
     },
 };
-

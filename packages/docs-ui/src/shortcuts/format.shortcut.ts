@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-import type { IShortcutItem } from '@univerjs/ui';
-import { KeyCode } from '@univerjs/ui';
+import { TabCommand } from '@univerjs/docs';
+import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import { whenDocAndEditorFocused } from './utils';
 
-import { DeleteLeftCommand, DeleteRightCommand, EnterCommand } from '@univerjs/docs';
-import { whenDocAndEditorFocused, whenDocAndEditorFocusedWithBreakLine } from './utils';
-
-export const BreakLineShortcut: IShortcutItem = {
-    id: EnterCommand.id,
-    preconditions: whenDocAndEditorFocusedWithBreakLine,
-    binding: KeyCode.ENTER,
+export const TabShortCut: IShortcutItem = {
+    id: TabCommand.id,
+    binding: KeyCode.TAB,
+    preconditions: whenDocAndEditorFocused,
 };
 
-export const DeleteLeftShortcut: IShortcutItem = {
-    id: DeleteLeftCommand.id,
+export const ShiftTabShortCut: IShortcutItem = {
+    id: TabCommand.id,
+    binding: KeyCode.TAB | MetaKeys.SHIFT,
     preconditions: whenDocAndEditorFocused,
-    binding: KeyCode.BACKSPACE,
-};
-
-export const DeleteRightShortcut: IShortcutItem = {
-    id: DeleteRightCommand.id,
-    preconditions: whenDocAndEditorFocused,
-    binding: KeyCode.DELETE,
+    staticParameters: {
+        shift: true,
+    },
 };

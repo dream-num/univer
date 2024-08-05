@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICustomDecoration, ICustomRange, IParagraph } from './i-document-data';
+import { COMPONENT_PREFIX } from '../const';
 
-export interface ICustomRangeForInterceptor extends ICustomRange {
-    active?: boolean;
-    show?: boolean;
-}
-
-export interface ICustomDecorationForInterceptor extends ICustomDecoration {
-    active?: boolean;
-    show?: boolean;
-}
-
-export interface IParagrapRange extends IParagraph {
-    paragraphStart: number;
-    paragraphEnd: number;
-}
+export { BulletListTypePicker, OrderListTypePicker } from './picker';
+export const ORDER_LIST_TYPE_COMPONENT = `${COMPONENT_PREFIX}_ORDER_LIST_TYPE_COMPONENT`;
+export const BULLET_LIST_TYPE_COMPONENT = `${COMPONENT_PREFIX}_BULLET_LIST_TYPE_COMPONENT`;

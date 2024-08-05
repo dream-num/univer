@@ -80,7 +80,7 @@ export class ImageUpdateController extends Disposable {
 
         const { unitId: currentUnitId, subUnitId: currentSubUnitId, current } = info;
 
-        if (current.type !== UniverInstanceType.UNIVER_SHEET) {
+        if (current.type === UniverInstanceType.UNIVER_DOC) {
             return;
         }
 

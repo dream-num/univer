@@ -186,6 +186,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     private _initEditorVisibilityListener(): void {
+        // startEditing --> slide-editor-bridge.render-controller.ts@changeVisible --> _editorBridgeService.changeVisible
         this.disposeWithMe(this._editorBridgeService.visible$
             // .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
             .subscribe((param) => {
@@ -242,7 +243,9 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
      * @param d DisposableCollection
      */
     private _subscribeToCurrentCell(d: DisposableCollection) {
-        // invoked by slide-editor-bridge.service.ts@setEditorRectn---> currentEditRectState$.next
+        // first part of editing.
+        // startEditing --> _updateEditor --> slide-editor-bridge.service.ts@setEditorRect---> currentEditRectState$.next(editCellState)
+        // startEditing --> changeVisible
         d.add(this._editorBridgeService.currentEditRectState$.subscribe((editCellState) => {
             if (editCellState == null) {
                 return;
@@ -272,11 +275,13 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
                 endOffset: 0,
             }]);
 
-            // hide the editor, but the editor is still exist.
             // the last active, calling stack trace:
             // EditorContainer.tsx cellEditorManagerService.state$.subscribe -->
             // EditorContainer.tsx cellEditorManagerService.setFocus(true) -->
             // _textSelectionRenderManager.sync() --> _updateInputPosition --> activate
+
+            // hide the editor, but the editor is still exist.
+            // the last and valid call activate is in _textSelectionRenderManager.sync() --> _updateInputPosition
             this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
         }));
     }
@@ -427,6 +432,9 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
 
         let { startX, startY } = actualRangeWithCoord;
 
+        startX += canvasOffset.left;
+        startY += canvasOffset.top;
+
         const { document: documentComponent, scene, engine: docEngine } = editorObject;
 
         const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
@@ -546,10 +554,14 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     /**
+     * show input area, resize input area and then place input to right place.
      * invoked when this._editorBridgeService.visible$ param.visible = true
+     *
+     * handleVisible is the 2nd part of editing.
+     * startEditing --> _updateEditor
+     * startEditing --> changeVisible --> slide-editor-bridge.render-controller.ts@changeVisible --> _editorBridgeService.changeVisible
      * @param param
      */
-
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
         const { eventType, keycode } = param;
 
@@ -567,7 +579,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         const {
             position,
             documentLayoutObject,
-            canvasOffset,
+            slideCardOffset: canvasOffset,
             scaleX,
             scaleY,
             editorUnitId,

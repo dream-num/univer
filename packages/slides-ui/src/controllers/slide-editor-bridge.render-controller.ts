@@ -104,31 +104,37 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
 
             if (!transformer) return;
 
-            // calling twice when add an object.
+            // This is the start of editing.
+            //TODO: @lumixraku calling twice when add an object.
             d.add(transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
                 const target = param.target;
                 if (!target) return;
                 if (target.objectType !== ObjectType.RICH_TEXT) {
-                    this.saveCurrEditingState();
+                    this.setEditorVisible(false);
+                    this.endEditing();
 
                     // rm other text editor
-                    this.changeVisible(false);
                 } else {
                     // const elementData = (target as RichText).toJson();
-                    this._curRichText = target as RichText;
                     this.startEditing(target as RichText);
                 }
             }));
         }
     }
 
-    saveCurrEditingState() {
+    /**
+     * invoked when picking other object.
+     *
+     * save editing state to curr richText.
+     */
+    endEditing() {
         if (!this._curRichText) return;
         const curRichText = this._curRichText;
 
         const slideData = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         if (!slideData) return false;
         curRichText.updateDocumentByDocData();
+        this._curRichText = null;
     }
 
     /**
@@ -140,11 +146,17 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
      */
     startEditing(target: RichText) {
         // this.setSlideTextEditor$.next({ content, rect });
+        this._curRichText = target as RichText;
         this._updateEditor(target);
-        this.changeVisible(true);
+        this.setEditorVisible(true);
     }
 
-    changeVisible(visible: boolean) {
+    setEditorVisible(visible: boolean) {
+        if (visible) {
+            this._curRichText?.hide();
+        } else {
+            this._curRichText?.show();
+        }
         const { unitId } = this._renderContext;
         this._editorBridgeService.changeVisible({ visible, eventType: 3, unitId });
     }

@@ -163,6 +163,7 @@ export {
     transformDocumentDataToSnapshot,
     transformSnapshotToDocumentData,
     generateTemporarySnap,
+    generateTempDocumentSnapshot,
 } from './services/snapshot/snapshot-transform';
 export { textEncoder, textDecoder } from './services/snapshot/snapshot-utils';
 export { type ILogContext } from './services/log/context';

@@ -33,7 +33,7 @@ import {
     TextXActionType,
     Tools,
 } from '@univerjs/core';
-import type { DocumentViewModel, ITextRangeWithStyle, RectRange } from '@univerjs/engine-render';
+import type { DocumentViewModel, ITextRangeWithStyle, RectRange, TextRange } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
@@ -42,6 +42,14 @@ import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
+
+function hasRangeInTable(ranges: TextRange[]) {
+    return ranges.some((range) => {
+        const { anchorNodePosition } = range;
+
+        return anchorNodePosition ? anchorNodePosition?.path.indexOf('cells') > -1 : false;
+    });
+}
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
@@ -95,6 +103,12 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         // TODO: @JOCS A feature that has not yet been implemented,
         // and it is currently not possible to paste tables in the header and footer.
         if (hasTable && segmentId) {
+            return false;
+        }
+
+        // TODO: @JOCS A feature that has not yet been implemented.
+        // Can not paste tables into table cell now.
+        if (hasTable && hasRangeInTable(selections)) {
             return false;
         }
 

@@ -19,7 +19,7 @@ import type { SlideDataModel } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IUniverSlidesDrawingConfig } from '@univerjs/slides-ui';
 import { SlidesUIController } from '@univerjs/slides-ui';
-import { ComponentManager, IMenuService, IUIPartsService, useObservable } from '@univerjs/ui';
+import { ComponentManager, IMenuService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { UniUIPart } from '@univerjs/uniui';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';
 
@@ -31,9 +31,10 @@ export class UniSlidesUIController extends SlidesUIController {
         @IMenuService _menuService: IMenuService,
         @Inject(ComponentManager) _componentManager: ComponentManager,
         @IUIPartsService _uiPartsService: IUIPartsService,
-        @ICommandService _commandService: ICommandService
+        @ICommandService _commandService: ICommandService,
+        @IShortcutService _shortcutService: IShortcutService
     ) {
-        super(_config, _injector, _menuService, _componentManager, _uiPartsService, _commandService);
+        super(_config, _injector, _menuService, _componentManager, _uiPartsService, _commandService, _shortcutService);
     }
 
     protected override _initUIComponents(): void {

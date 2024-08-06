@@ -130,7 +130,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         for (const [_, render] of this._renderMap) {
             const renderType = render.type;
             if (renderType === type) {
-                (render as RenderUnit).addRenderDependencies(deps);
+                this._tryAddRenderDependencies(render, deps);
             }
         }
 
@@ -150,7 +150,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         for (const [_, render] of this._renderMap) {
             const renderType = render.type;
             if (renderType === type) {
-                (render as RenderUnit).addRenderDependencies([ctor]);
+                this._tryAddRenderDependencies(render, [ctor]);
             }
         }
 
@@ -197,6 +197,12 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this.getRenderById(current.getUnitId())?.with(id);
     }
 
+    private _tryAddRenderDependencies(renderer: IRender, deps: Dependency[]): void {
+        if (renderer instanceof RenderUnit) {
+            renderer.addRenderDependencies(deps);
+        }
+    }
+
     private _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
         const existItem = this.getRenderById(unitId);
         let shouldDestroyEngine = true;
@@ -230,7 +236,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 isMainScene,
             });
 
-            (renderUnit as RenderUnit).addRenderDependencies(ctors);
+            this._tryAddRenderDependencies(renderUnit, ctors);
         } else {
             // For slide pages
             renderUnit = {

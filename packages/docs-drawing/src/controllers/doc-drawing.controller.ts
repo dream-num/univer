@@ -15,10 +15,9 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IDrawingMapItem, IDrawingMapItemData } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { filter, first } from 'rxjs/operators';
 import { type IDocDrawing, IDocDrawingService } from '../services/doc-drawing.service';
 
 export const DOCS_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
@@ -39,8 +38,7 @@ export class DocDrawingController extends Disposable {
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IResourceManagerService private _resourceManagerService: IResourceManagerService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @Inject(LifecycleService) private _lifecycleService: LifecycleService
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -49,7 +47,6 @@ export class DocDrawingController extends Disposable {
 
     private _init(): void {
         this._initSnapshot();
-        this._drawingInitializeListener();
     }
 
     private _initSnapshot() {
@@ -135,16 +132,5 @@ export class DocDrawingController extends Disposable {
         this._docDrawingService.registerDrawingData(unitId, subDrawings);
         this._drawingManagerService.registerDrawingData(unitId, subDrawings);
         return true;
-    }
-
-    private _drawingInitializeListener() {
-        this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered), first()).subscribe((stage) => {
-            const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
-            if (!unitId) {
-                return;
-            }
-            this._docDrawingService.initializeNotification(unitId);
-            this._drawingManagerService.initializeNotification(unitId);
-        });
     }
 }

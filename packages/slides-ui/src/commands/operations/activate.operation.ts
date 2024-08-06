@@ -34,9 +34,9 @@ export const ActivateSlidePageOperation: IOperation<IActiveSlidePageOperationPar
 
         const page = canvasView.getRenderUnitByPageId(id);
         const transformer = page.scene?.getTransformer();
-
-        if (!transformer) return false;
-        transformer.clearControls();
+        if (transformer) {
+            transformer.clearControls();
+        }
 
         canvasView.activePage(params.id);
         return true;

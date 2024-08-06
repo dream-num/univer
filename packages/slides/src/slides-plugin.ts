@@ -18,7 +18,7 @@ import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
 import { IRenderingEngine, IRenderManagerService } from '@univerjs/engine-render';
 import type { Dependency } from '@univerjs/core';
-
+// import { TextSelectionManagerService } from '@univerjs/docs';
 import { CanvasView } from './views/render';
 
 export interface IUniverSlidesConfig {}
@@ -73,7 +73,10 @@ export class UniverSlidesPlugin extends Plugin {
     }
 
     private _initializeDependencies(slideInjector: Injector) {
-        const dependencies: Dependency[] = [[CanvasView]];
+        const dependencies: Dependency[] = [
+            [CanvasView],
+            // [TextSelectionManagerService],
+        ];
 
         dependencies.forEach((d) => {
             slideInjector.add(d);

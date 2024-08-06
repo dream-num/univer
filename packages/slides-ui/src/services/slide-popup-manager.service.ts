@@ -17,7 +17,8 @@
 import type { IDisposable } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, pxToNum } from '@univerjs/engine-render';
-import type { BaseObject, IBoundRectNoAngle, IRender } from '@univerjs/engine-render';
+import type { BaseObject, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
+import { SLIDE_KEY } from '@univerjs/slides';
 import type { IPopup } from '@univerjs/ui';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
@@ -27,6 +28,40 @@ export interface ISlideCanvasPopup extends Pick<IPopup,
 > {
     mask?: boolean;
     extraProps?: Record<string, any>;
+}
+
+export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene: Scene): IBoundRectNoAngle {
+    const topLeft = transformPosition2Offset(originBound.left, originBound.top, scene);
+    const bottomRight = transformPosition2Offset(originBound.right, originBound.bottom, scene);
+
+    return {
+        left: topLeft.x,
+        top: topLeft.y,
+        right: bottomRight.x,
+        bottom: bottomRight.y,
+    };
+}
+
+export function transformPosition2Offset(x: number, y: number, scene: Scene) {
+    const { scaleX, scaleY } = scene.getAncestorScale();
+    const viewMain = scene.getViewport(SLIDE_KEY.VIEW);
+    if (!viewMain) {
+        return {
+            x,
+            y,
+        };
+    }
+
+    const { viewportScrollX: actualScrollX, viewportScrollY: actualScrollY } = viewMain;
+
+    const offsetX = (x - actualScrollX) * scaleX;
+
+    const offsetY = (y - actualScrollY) * scaleY;
+
+    return {
+        x: offsetX,
+        y: offsetY,
+    };
 }
 
 export class SlideCanvasPopMangerService extends Disposable {
@@ -47,6 +82,9 @@ export class SlideCanvasPopMangerService extends Disposable {
             const { scene, engine } = currentRender;
             const { left, top, width, height } = targetObject;
 
+            const horizontalOffset = (scene.width - (currentRender.mainComponent?.width ?? 0)) / 2;
+            const verticalOffset = (scene.height - (currentRender.mainComponent?.height ?? 0)) / 2;
+
             const bound: IBoundRectNoAngle = {
                 left,
                 right: left + width,
@@ -59,15 +97,15 @@ export class SlideCanvasPopMangerService extends Disposable {
 
             const { scaleX, scaleY } = scene.getAncestorScale();
 
-            // const offsetBound = transformBound2OffsetBound(bound, scene);
+            const offsetBound = transformBound2OffsetBound(bound, scene);
             const { top: topOffset, left: leftOffset, width: domWidth } = canvasClientRect;
             const scaleAdjust = domWidth / widthOfCanvas;
 
             const position = {
-                left: (bound.left * scaleAdjust * scaleX) + leftOffset,
-                right: (bound.right * scaleAdjust * scaleX) + leftOffset,
-                top: (bound.top * scaleAdjust * scaleY) + topOffset,
-                bottom: (bound.bottom * scaleAdjust * scaleY) + topOffset,
+                left: (offsetBound.left * scaleAdjust * scaleX) + leftOffset + horizontalOffset,
+                right: (offsetBound.right * scaleAdjust * scaleX) + leftOffset + horizontalOffset,
+                top: (offsetBound.top * scaleAdjust * scaleY) + topOffset + verticalOffset,
+                bottom: (offsetBound.bottom * scaleAdjust * scaleY) + topOffset + verticalOffset,
             };
             return position;
         };

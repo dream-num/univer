@@ -18,11 +18,15 @@ import type { Dependency, SlideDataModel } from '@univerjs/core';
 import { Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SlidesUIController } from './controllers/slide-ui.controller';
 import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
+import { SlidesUIController } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
 import { SlidePopupMenuController } from './controllers/popup-menu.controller';
 import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
+import { ISlideEditorBridgeService, SlideEditorBridgeService } from './services/slide-editor-bridge.service';
+import { SlideEditorBridgeRenderController } from './controllers/slide-editor-bridge.render-controller';
+import { ISlideEditorManagerService, SlideEditorManagerService } from './services/slide-editor-manager.service';
+import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
@@ -41,26 +45,45 @@ export class UniverSlidesUIPlugin extends Plugin {
 
     override onStarting(): void {
         mergeOverrideWithDependencies([
-            [
-                SlidesUIController,
-                {
-                    useFactory: () => this._injector.createInstance(SlidesUIController, this._config),
-                },
-            ],
+            [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
+            // used by SlideUIController --> EditorContainer
+            [ISlideEditorManagerService, { useClass: SlideEditorManagerService }],
             [SlideCanvasPopMangerService],
         ] as Dependency[], this._config.override).forEach((d) => this._injector.add(d));
     }
 
     override onReady(): void {
-        ([
+        mergeOverrideWithDependencies([
+            // cannot register in _renderManagerService now.
+            // [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
+            // // used by SlideUIController --> EditorContainer
+            // [ISlideEditorManagerService, { useClass: SlideEditorManagerService }],
+
+            // This controller should be registered in Ready stage.
+            // this controller would add a new RenderUnit (__INTERNAL_EDITOR__DOCS_NORMAL)
+            // so this new RenderUnit does not have ISlideEditorBridgeService & ISlideEditorManagerService if
+            [SlidesUIController, {
+                useFactory: () => this._injector.createInstance(SlidesUIController, this._config),
+            }], // editor service were create in renderManagerService
             [SlideRenderController],
             [SlidePopupMenuController],
-        ] as Dependency[]).forEach((m) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
+        ] as Dependency[], this._config.override).forEach((m) => {
+            this._injector.add(m);
         });
     }
 
     override onRendered(): void {
+        ([
+            // need slideEditorBridgeService
+            // need TextSelectionRenderService which init by EditorContainer
+            [SlideEditorBridgeRenderController],
+            [SlideEditingRenderController],
+
+        ] as Dependency[]).forEach((m) => {
+            // find all renderMap and register module to each item in renderMap
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
+        });
+
         this._markSlideAsFocused();
     }
 

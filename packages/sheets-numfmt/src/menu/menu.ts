@@ -124,7 +124,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
                 const row = range.startRow;
                 const col = range.startColumn;
 
-                const numfmtValue = numfmtService.getValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
+                const numfmtValue = workbook.getStyles().get(worksheet.getCell(row, col)?.s)?.n;
 
                 const pattern = numfmtValue?.pattern;
                 let value: string = localeService.t('sheet.numfmt.general');

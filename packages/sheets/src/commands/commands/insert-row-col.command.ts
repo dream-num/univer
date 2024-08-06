@@ -101,6 +101,15 @@ export const InsertRowCommand: ICommand = {
             insertRowParams
         );
 
+        const canPerform = await sheetInterceptorService.beforeCommandExecute({
+            id: InsertRowCommand.id,
+            params: insertRowParams,
+        });
+
+        if (!canPerform) {
+            return false;
+        }
+
         const redos: IMutationInfo[] = [{ id: InsertRowMutation.id, params: insertRowParams }];
         const undos: IMutationInfo[] = [{ id: RemoveRowMutation.id, params: undoRowInsertionParams }];
 
@@ -284,10 +293,19 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
                 hd: BooleanNumber.FALSE,
             })),
         };
+
         const undoColInsertionParams: IRemoveColMutationParams = InsertColMutationUndoFactory(
             accessor,
             insertColParams
         );
+        const canPerform = await sheetInterceptorService.beforeCommandExecute({
+            id: InsertColCommand.id,
+            params: insertColParams,
+        });
+
+        if (!canPerform) {
+            return false;
+        }
 
         const redos: IMutationInfo[] = [{ id: InsertColMutation.id, params: insertColParams }];
         const undos: IMutationInfo[] = [{ id: RemoveColMutation.id, params: undoColInsertionParams }];

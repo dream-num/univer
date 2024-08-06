@@ -27,9 +27,14 @@ export class DesktopSidebarService implements ISidebarService {
 
     readonly scrollEvent$ = new Subject<Event>();
 
+    get visible(): boolean {
+        return this._sidebarOptions.visible || false;
+    }
+
     open(params: ISidebarMethodOptions): IDisposable {
         this._sidebarOptions = {
             ...params,
+            id: params.id,
             visible: true,
         };
 
@@ -40,12 +45,14 @@ export class DesktopSidebarService implements ISidebarService {
         });
     }
 
-    close() {
+    close(id?: string) {
+        if (id && this._sidebarOptions.id !== id) {
+            return;
+        }
         this._sidebarOptions = {
             ...this._sidebarOptions,
             visible: false,
         };
-
         this.sidebarOptions$.next(this._sidebarOptions);
         this._sidebarOptions.onClose && this._sidebarOptions.onClose();
     }

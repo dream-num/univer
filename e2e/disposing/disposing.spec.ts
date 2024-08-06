@@ -16,21 +16,6 @@
 
 import { expect, test } from '@playwright/test';
 
-// The type definition is copied from:
-// examples/src/plugins/debugger/controllers/e2e/e2e-memory.controller.ts
-export interface IE2EControllerAPI {
-    loadAndRelease(id: number): Promise<void>;
-    loadDefaultSheet(): Promise<void>;
-    disposeUniver(): Promise<void>;
-}
-
-declare global {
-    // eslint-disable-next-line ts/naming-convention
-    interface Window {
-        E2EControllerAPI: IE2EControllerAPI;
-    }
-}
-
 test('no error on constructing and disposing', async ({ page }) => {
     let errored = false;
 

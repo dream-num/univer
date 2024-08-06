@@ -608,11 +608,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable {
         const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
-        const documentDataModel = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
-            UniverInstanceType.UNIVER_DOC,
-            initialSnapshot || this._getBlank(editorUnitId),
-            { makeCurrent: false }
-        );
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC)
+            ?? this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
+                UniverInstanceType.UNIVER_DOC,
+                initialSnapshot || this._getBlank(editorUnitId),
+                { makeCurrent: false }
+            );
 
         let render = this._renderManagerService.getRenderById(editorUnitId);
         if (render == null) {

@@ -256,7 +256,20 @@ export class TextSelectionManagerService extends RxDisposable {
         // Broadcast textSelection changes, this should be used within the application.
         this._textSelection$.next(params);
 
-        const { unitId, subUnitId, segmentId, style, textRanges, isEditing } = params;
+        const { unitId, subUnitId, segmentId, style, textRanges, rectRanges, isEditing } = params;
+
+        const ranges = [...textRanges, ...rectRanges]
+            .filter((range) => range.startOffset != null && range.endOffset != null)
+            .sort((a, b) => {
+                if (a.startOffset! > b.startOffset!) {
+                    return 1;
+                } else if (a.startOffset! < b.startOffset!) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            })
+            .map(serializeDocRange);
 
         // For menu status.
         this._commandService.executeCommand(SetTextSelectionsOperation.id, {
@@ -265,7 +278,7 @@ export class TextSelectionManagerService extends RxDisposable {
             segmentId,
             style,
             isEditing,
-            ranges: textRanges.map(serializeDocRange),
+            ranges,
         });
     }
 

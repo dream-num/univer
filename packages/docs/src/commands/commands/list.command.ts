@@ -522,9 +522,9 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
 
         // const { segmentId } = activeRange;
 
-        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
+        const selections = textSelectionManagerService.getCurrentTextRanges() ?? [];
         const paragraphs = docDataModel.getBody()?.paragraphs;
-        const serializedSelections = selections.map(serializeTextRange);
+        const serializedSelections = selections.map(serializeDocRange);
         if (paragraphs == null) {
             return false;
         }
@@ -647,10 +647,9 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const selections = textSelectionManagerService.getCurrentSelections();
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const activeRange = textSelectionManagerService.getActiveRange();
-        if (docDataModel == null || activeRange == null || !selections) {
+        const activeRange = textSelectionManagerService.getActiveTextRange();
+        if (docDataModel == null || activeRange == null) {
             return false;
         }
 

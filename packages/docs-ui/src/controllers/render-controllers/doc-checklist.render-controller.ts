@@ -49,7 +49,7 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
                 if (!coord) {
                     return;
                 }
-                const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documentComponent.getOffsetConfig();
+                const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop } = documentComponent.getOffsetConfig();
                 const skeleton = this._docSkeletonManagerService.getSkeleton();
                 const node = skeleton.findNodeByCoord(
                     coord,

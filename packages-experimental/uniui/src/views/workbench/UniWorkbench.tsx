@@ -55,7 +55,7 @@ import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
 import { useUnitFocused, useUnitTitle } from '../hooks/title';
 import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControlItem, UniControls } from '../uni-controls/UniControls';
 import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
-import { type FloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
+import { type IFloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
 import { UniToolbar } from '../uni-toolbar/UniToolbar';
 import styles from './workbench.module.less';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
@@ -84,7 +84,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const commandService = useDependency(ICommandService);
 
     const contentRef = useRef<HTMLDivElement>(null);
-    const floatingToolbarRef = useRef<FloatingToolbarRef>(null);
+    const floatingToolbarRef = useRef<IFloatingToolbarRef>(null);
     const reactFlowInstance = useRef<HTMLDivElement | null>(null);
 
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);

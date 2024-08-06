@@ -24,6 +24,7 @@ import type {
     ICustomTable,
     IDocumentBody,
     IParagraph,
+    IParagraphRange,
     ISectionBreak,
     ITextRun,
 } from '../../../../types/interfaces';
@@ -619,26 +620,29 @@ export function deleteParagraphs(body: IDocumentBody, textLength: number, curren
     const { paragraphs } = body;
 
     const startIndex = currentIndex;
-
     const endIndex = currentIndex + textLength;
+    const paragraphRanges: IParagraphRange[] = paragraphs?.map((p, i) => ({
+        ...p,
+        paragraphStart: paragraphs[i - 1] ? paragraphs[i - 1].startIndex + 1 : 0,
+        paragraphEnd: p.startIndex,
+    })) ?? [];
     const removeParagraphs: IParagraph[] = [];
     let removeAfterFirstNew: Nullable<IParagraph> = null;
     let isRemove = false;
 
     if (paragraphs) {
         const newParagraphs = [];
-        for (let i = 0, len = paragraphs.length; i < len; i++) {
-            const paragraph = paragraphs[i];
-            const { startIndex: index } = paragraph;
+        for (let i = 0, len = paragraphRanges.length; i < len; i++) {
+            const paragraph = paragraphRanges[i];
+            const { paragraphStart, paragraphEnd, startIndex: index } = paragraph;
 
-            if (index >= startIndex && index < endIndex) {
+            if (paragraphStart > startIndex && paragraphEnd <= endIndex) {
                 removeParagraphs.push({
                     ...paragraph,
                     startIndex: index - currentIndex,
                 });
 
                 isRemove = true;
-
                 continue;
             } else if (index >= endIndex) {
                 paragraph.startIndex -= textLength;

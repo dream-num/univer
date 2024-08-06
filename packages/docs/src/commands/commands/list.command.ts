@@ -510,7 +510,6 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         if (!params) {
             return false;
         }
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const { index } = params;
@@ -520,11 +519,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
             return false;
         }
 
-        // const { segmentId } = activeRange;
-
-        const selections = textSelectionManagerService.getCurrentTextRanges() ?? [];
         const paragraphs = docDataModel.getBody()?.paragraphs;
-        const serializedSelections = selections.map(serializeDocRange);
         if (paragraphs == null) {
             return false;
         }
@@ -534,13 +529,12 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         if (!currentParagraph?.bullet || currentParagraph.bullet.listType.indexOf(PresetListType.CHECK_LIST) === -1) {
             return false;
         }
-
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
-                textRanges: serializedSelections,
+                textRanges: [],
             },
         };
 

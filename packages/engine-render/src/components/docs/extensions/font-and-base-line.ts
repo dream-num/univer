@@ -106,19 +106,19 @@ export class FontAndBaseLine extends docExtension {
             ctx.fillText(content, 0, 0);
             ctx.restore();
         } else {
-            if (content === '\u2610' || content === '\u2611') {
-                ctx.save();
-                const size = glyph.ts?.fs ?? 16;
-                ctx.translate(spanStartPoint.x, spanStartPoint.y + centerPoint.y - size);
-                Checkbox.drawWith(ctx, {
-                    width: size,
-                    height: size,
-                    checked: content === '\u2611',
-                });
-                ctx.restore();
-            } else {
-                ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
-            }
+            // if (content === '\u2610' || content === '\u2611') {
+            //     ctx.save();
+            //     const size = glyph.ts?.fs ?? 16;
+            //     ctx.translate(spanStartPoint.x, spanStartPoint.y + centerPoint.y - size);
+            //     Checkbox.drawWith(ctx, {
+            //         width: size,
+            //         height: size,
+            //         checked: content === '\u2611',
+            //     });
+            //     ctx.restore();
+            // } else {
+            ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
+            // }
         }
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService, sequenceExecute } from '@univerjs/core';
+import { CommandType, type ICommand, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
 import { DocAutoFormatService } from '../../services/doc-auto-format.service';
 
 const TabCommandId = 'doc.command.tab';
@@ -26,10 +26,10 @@ export interface ITabCommandParams {
 export const TabCommand: ICommand<ITabCommandParams> = {
     id: TabCommandId,
     type: CommandType.COMMAND,
-    handler(accessor, params) {
+    async handler(accessor, params) {
         const autoFormatService = accessor.get(DocAutoFormatService);
         const mutations = autoFormatService.onAutoFormat(TabCommand.id, params);
-        return sequenceExecute(mutations, accessor.get(ICommandService)).result;
+        return (await sequenceExecuteAsync(mutations, accessor.get(ICommandService))).result;
     },
 };
 
@@ -38,19 +38,19 @@ const AfterSpaceCommandId = 'doc.command.after-space';
 export const AfterSpaceCommand: ICommand = {
     id: AfterSpaceCommandId,
     type: CommandType.COMMAND,
-    handler(accessor) {
+    async handler(accessor) {
         const autoFormatService = accessor.get(DocAutoFormatService);
         const mutations = autoFormatService.onAutoFormat(AfterSpaceCommand.id);
-        return sequenceExecute(mutations, accessor.get(ICommandService)).result;
+        return (await sequenceExecuteAsync(mutations, accessor.get(ICommandService))).result;
     },
 };
 
 export const EnterCommand: ICommand = {
     id: 'doc.command.enter',
     type: CommandType.COMMAND,
-    handler(accessor) {
+    async handler(accessor) {
         const autoFormatService = accessor.get(DocAutoFormatService);
         const mutations = autoFormatService.onAutoFormat(EnterCommand.id);
-        return sequenceExecute(mutations, accessor.get(ICommandService)).result;
+        return (await sequenceExecuteAsync(mutations, accessor.get(ICommandService))).result;
     },
 };

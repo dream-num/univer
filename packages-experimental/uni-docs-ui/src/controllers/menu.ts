@@ -175,7 +175,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const textSelectionService = accessor.get(TextSelectionManagerService);
 
     const editorDataModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-    const activeTextRange = textSelectionService.getActiveRange();
+    const activeTextRange = textSelectionService.getActiveTextRange();
 
     if (editorDataModel == null || activeTextRange == null) return null;
 
@@ -183,6 +183,6 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     if (textRuns == null) return;
 
     const { startOffset } = activeTextRange;
-    const textRun = textRuns.find(({ st, ed }) => startOffset >= st && startOffset <= ed);
+    const textRun = textRuns.find(({ st, ed }) => startOffset! >= st && startOffset! <= ed);
     return textRun;
 }

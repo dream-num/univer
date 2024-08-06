@@ -22,7 +22,7 @@ import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPar
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
-import { InsertSlideShapeRectangleOperation } from '../commands/operations/insert-shape.operation';
+import { InsertSlideShapeRectangleOperation, ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
 import { SlideAddTextOperation } from '../commands/operations/insert-text.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
@@ -31,7 +31,9 @@ import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu
 import { UploadFileMenu } from '../components/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
 import { EditorContainer } from '../views/editor-container';
-import { SlideSideBar } from '../views/slide-bar/SlideBar';
+import { SlideSideBar } from '../components/slide-bar/SlideBar';
+import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
+import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
 import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
@@ -90,16 +92,18 @@ export class SlideUIController extends Disposable {
         this.disposeWithMe(componentManager.register(GRAPH_SINGLE_ICON, GraphSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_IMAGE_POPUP_MENU, SlideImagePopupMenu));
-        // this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
+        this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_SIDEBAR, Sidebar));
     }
 
     private _initCommands(): void {
         [
+            AppendSlideOperation,
             ActivateSlidePageOperation,
             SetSlidePageThumbOperation,
             InsertSlideFloatImageOperation,
             SlideAddTextOperation,
             InsertSlideShapeRectangleOperation,
+            ToggleSlideEditSidebarOperation,
             DeleteSlideElementOperation,
 
             //cmds for editor

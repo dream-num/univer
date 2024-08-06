@@ -17,7 +17,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import type { Nullable } from '../shared';
-import { Tools } from '../shared';
+import { generateRandomId } from '../shared';
 import { DEFAULT_SLIDE } from '../types/const';
 import type { ISlideData, ISlidePage } from '../types/interfaces';
 import { PageType } from '../types/interfaces';
@@ -50,7 +50,7 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         super();
 
         this._snapshot = { ...DEFAULT_SLIDE, ...snapshot };
-        this._unitId = this._snapshot.id ?? Tools.generateRandomId(6);
+        this._unitId = this._snapshot.id ?? generateRandomId(6);
     }
 
     getContainer() {
@@ -90,18 +90,22 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         return this._snapshot.pageSize;
     }
 
-    addPage(): ISlidePage {
-        return {
-            id: 'cover_1',
+    getBlankPage() {
+        const id = generateRandomId(6);
+
+        const page = {
+            id,
             pageType: PageType.SLIDE,
             zIndex: 10,
-            title: 'cover',
-            description: 'this is first page, cover',
+            title: id,
+            description: '',
             pageBackgroundFill: {
                 rgb: 'rgb(255,255,255)',
             },
             pageElements: {},
         };
+
+        return page;
     }
 
     setActivePage(page: Nullable<ISlidePage>) {
@@ -116,5 +120,15 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         if (!this._snapshot.body) return;
 
         this._snapshot.body.pages[pageId] = page;
+    }
+
+    appendPage(page: ISlidePage) {
+        if (!this._snapshot.body) return;
+
+        this._snapshot.body.pages[page.id] = page;
+
+        const activePage = this._activePage;
+        const index = this._snapshot.body.pageOrder.indexOf(activePage?.id ?? '');
+        this._snapshot.body.pageOrder.splice(index + 1, 0, page.id);
     }
 }

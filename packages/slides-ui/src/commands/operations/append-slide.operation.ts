@@ -14,31 +14,21 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IOperation, SlideDataModel } from '@univerjs/core';
+import type { ICommand, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
 
-export interface IActiveSlidePageOperationParams {
-    id: string;
-}
-export const ActivateSlidePageOperation: IOperation<IActiveSlidePageOperationParams> = {
-    id: 'slide.operation.activate-slide',
+export const AppendSlideOperation: ICommand = {
+    id: 'slide.operation.append-slide',
     type: CommandType.OPERATION,
-    handler: (accessor: IAccessor, params: IActiveSlidePageOperationParams) => {
-        const canvasView = accessor.get(CanvasView);
+    handler: (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const model = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-        const id = model?.getActivePage()?.id;
+        const canvasView = accessor.get(CanvasView);
+        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
 
-        if (!id) return false;
+        if (!slideData) return false;
+        canvasView.appendPage();
 
-        const page = canvasView.getRenderUnitByPageId(id);
-        const transformer = page.scene?.getTransformer();
-        if (transformer) {
-            transformer.clearControls();
-        }
-
-        canvasView.activePage(params.id);
         return true;
     },
 };

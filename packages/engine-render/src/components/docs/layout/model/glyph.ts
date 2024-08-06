@@ -282,6 +282,9 @@ export function createSkeletonBulletGlyph(
         ts: {
             ...glyph.ts,
             ...textStyle,
+            st: {
+                s: BooleanNumber.FALSE,
+            },
         },
         fontStyle,
         width,

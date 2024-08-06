@@ -91,7 +91,7 @@ export const StartAddCommentOperation: ICommand = {
         const commandService = accessor.get(ICommandService);
         const sidebarService = accessor.get(ISidebarService);
 
-        const textRange = textSelectionManagerService.getActiveRange();
+        const textRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (!doc || !textRange) {
             return false;
         }

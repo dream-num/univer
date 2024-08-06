@@ -19,15 +19,16 @@ import { Subject } from 'rxjs';
 import type { IDataBarRenderParams } from '../render/type';
 import type { IConditionFormattingRule, IHighlightCell } from './type';
 
+interface ICacheItem { cfId: string; ruleCache?: IHighlightCell['style'] | IDataBarRenderParams; isDirty: boolean }
 interface ICellItem {
-    cfList: { cfId: string; ruleCache?: IHighlightCell['style'] | IDataBarRenderParams ;isDirty: boolean }[];
+    cfList: ICacheItem[];
 }
 
 export class ConditionalFormattingViewModel {
-   //  Map<unitID ,<sheetId ,ObjectMatrix>>
+    //  Map<unitID ,<sheetId ,ObjectMatrix>>
     private _model: Map<string, Map<string, ObjectMatrix<ICellItem>>> = new Map();
 
-    private _markDirty$ = new Subject<{ rule: IConditionFormattingRule;unitId: string;subUnitId: string }>();
+    private _markDirty$ = new Subject<{ rule: IConditionFormattingRule; unitId: string; subUnitId: string }>();
     public markDirty$ = this._markDirty$.asObservable();
 
     private _ensureMatrix(unitId: string, subUnitId: string) {
@@ -129,7 +130,7 @@ export class ConditionalFormattingViewModel {
             })
                 .filter((item) => !!item)
                 .sort((a, b) => a!.priority - b!.priority) as ICellItem['cfList'];
-                // The smaller the priority, the higher
+            // The smaller the priority, the higher
             cell.cfList = sortResult;
         }
     }

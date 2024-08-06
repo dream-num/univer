@@ -16,14 +16,14 @@
 
 import type { SlideDataModel } from '@univerjs/core';
 import clsx from 'clsx';
-import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Scrollbar } from '@univerjs/design';
 import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useObservable } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
 import { SetSlidePageThumbOperation } from '../../commands/operations/set-thumb.operation';
+import { AppendSlideOperation } from '../../commands/operations/append-slide.operation';
 import styles from './index.module.less';
 
 /**
@@ -34,14 +34,17 @@ export function SlideSideBar() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const localeService = useDependency(LocaleService);
 
     const slideBarRef = useRef<HTMLDivElement>(null);
-    const currentSlide = useObservable(
-        () => univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE),
-        undefined,
-        undefined,
-        []
-    );
+    const currentSlide = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+
+    // const currentSlide = useObservable(
+    //     () => univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE),
+    //     undefined,
+    //     undefined,
+    //     []
+    // );
     const pages = currentSlide?.getPages();
     const pageOrder = currentSlide?.getPageOrder();
 
@@ -52,16 +55,22 @@ export function SlideSideBar() {
     const slideList = pageOrder.map((id) => pages[id]);
 
     const [divRefs, setDivRefs] = useState<RefObject<HTMLDivElement>[]>([]);
-    const [activatePageId, setActivatePageId] = useState<string | null>(pageOrder[0]);
+    const [activatePageId, setActivatePageId] = useState<string | null>(currentSlide?.getActivePage()?.id ?? null);
 
     useEffect(() => {
         setDivRefs(slideList.map((_) => React.createRef()));
     }, [slideList.length]);
 
     useEffect(() => {
-        currentSlide?.activePage$.subscribe((page) => {
-            setActivatePageId(page?.id ?? null);
+        const subscriber = currentSlide?.activePage$.subscribe((page) => {
+            const id = page?.id ?? null;
+
+            id && setActivatePageId(id);
         });
+
+        return () => {
+            subscriber?.unsubscribe();
+        };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -82,10 +91,18 @@ export function SlideSideBar() {
         commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page });
     }, [commandService]);
 
+    const handleAppendSlide = useCallback(() => {
+        commandService.syncExecuteCommand(AppendSlideOperation.id);
+    }, [commandService]);
+
     return (
-        <div className={styles.slideBar} ref={slideBarRef}>
+        <aside className={styles.slideBar} ref={slideBarRef}>
             <Scrollbar>
                 <div className={styles.slideBarContent}>
+                    <header className={styles.slideBarContentHeader}>
+                        <a onClick={handleAppendSlide}>{localeService.t('slide.append')}</a>
+                    </header>
+
                     {slideList.map((item, index) => (
                         <div
                             key={item.id}
@@ -103,6 +120,6 @@ export function SlideSideBar() {
                     <Button onClick={addSlide}>+</Button>
                 </div> */}
             </Scrollbar>
-        </div>
+        </aside>
     );
 }

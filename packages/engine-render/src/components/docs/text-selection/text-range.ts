@@ -16,9 +16,8 @@
 
 import type { ITextRange, Nullable } from '@univerjs/core';
 import { BooleanNumber, COLORS, Tools } from '@univerjs/core';
-
 import type { INodePosition } from '../../../basics/interfaces';
-import type { ISuccinctTextRangeParam, ITextSelectionStyle } from '../../../basics/range';
+import type { ISuccinctDocRangeParam, ITextSelectionStyle } from '../../../basics/range';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RANGE_DIRECTION } from '../../../basics/range';
 import { getColor } from '../../../basics/tools';
 import type { IPoint } from '../../../basics/vector2';
@@ -35,7 +34,9 @@ import {
     getOneTextSelectionRange,
     NodePositionConvertToCursor,
     NodePositionMap,
-} from './convert-cursor';
+} from './convert-text-range';
+import type { IDocRange } from './range-interface';
+import { DOC_RANGE_TYPE } from './range-interface';
 
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
@@ -48,17 +49,18 @@ export const TEXT_RANGE_LAYER_INDEX = 3;
 
 export function cursorConvertToTextRange(
     scene: Scene,
-    range: ISuccinctTextRangeParam,
+    range: ISuccinctDocRangeParam,
     docSkeleton: DocumentSkeleton,
     document: Documents
 ): Nullable<TextRange> {
     const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE, segmentId = '', segmentPage } = range;
     const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
-    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage) : null;
-
-    const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style);
-
-    textRange.refresh();
+    const focusNodePosition = startOffset !== endOffset
+        ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage)
+        : null;
+    const textRange = new TextRange(
+        scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId
+    );
 
     return textRange;
 }
@@ -69,7 +71,6 @@ export function getAnchorBounding(pointsGroup: IPoint[][]) {
     const endPoint = points[2];
 
     const { x: startX, y: startY } = startPoint;
-
     const { x: endX, y: endY } = endPoint;
 
     return {
@@ -102,7 +103,8 @@ export function getLineBounding(pointsGroup: IPoint[][]) {
     });
 }
 
-export class TextRange {
+export class TextRange implements IDocRange {
+    public rangeType: DOC_RANGE_TYPE = DOC_RANGE_TYPE.TEXT;
     // Identifies whether the range is the current one, most of which is the last range.
     private _current = false;
     // The rendered range graphic when collapsed is false
@@ -120,9 +122,12 @@ export class TextRange {
         private _docSkeleton: DocumentSkeleton,
         public anchorNodePosition?: Nullable<INodePosition>,
         public focusNodePosition?: Nullable<INodePosition>,
-        public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
+        public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+        private _segmentId: string = ''
     ) {
         this._anchorBlink();
+
+        this.refresh();
     }
 
     private _anchorBlink() {
@@ -150,7 +155,11 @@ export class TextRange {
     // The start position of the range
     get startOffset() {
         const { startOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
-        const body = this._docSkeleton.getViewModel().getBody();
+        const body = this._docSkeleton
+            .getViewModel()
+            .getDataModel()
+            .getSelfOrHeaderFooterModel(this._segmentId)
+            .getBody();
 
         if (startOffset == null || body == null) {
             return startOffset;
@@ -164,7 +173,11 @@ export class TextRange {
     // The end position of the range
     get endOffset() {
         const { endOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
-        const body = this._docSkeleton.getViewModel().getBody();
+        const body = this._docSkeleton
+            .getViewModel()
+            .getDataModel()
+            .getSelfOrHeaderFooterModel(this._segmentId)
+            .getBody();
 
         if (endOffset == null || body == null) {
             return endOffset;
@@ -219,6 +232,10 @@ export class TextRange {
         const compare = compareNodePositionLogic(anchorNodePosition, focusNodePosition);
 
         return compare ? RANGE_DIRECTION.FORWARD : RANGE_DIRECTION.BACKWARD;
+    }
+
+    get segmentId() {
+        return this._segmentId;
     }
 
     getAbsolutePosition() {
@@ -319,6 +336,7 @@ export class TextRange {
         return activeStart <= compareEnd && activeEnd >= compareStart;
     }
 
+    // render cursor and selection.
     refresh() {
         const { _document, _docSkeleton } = this;
         const anchor = this.anchorNodePosition;

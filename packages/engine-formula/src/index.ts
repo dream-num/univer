@@ -145,5 +145,4 @@ export {
 export { SetFormulaDataMutation, type ISetFormulaDataMutationParams } from './commands/mutations/set-formula-data.mutation';
 export { SetOtherFormulaMutation, RemoveOtherFormulaMutation, type ISetOtherFormulaMutationParams, type IRemoveOtherFormulaMutationParams } from './commands/mutations/set-other-formula.mutation';
 export { SetSuperTableMutation, RemoveSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
-
 // #endregion

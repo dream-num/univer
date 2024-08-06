@@ -17,7 +17,7 @@
 import type { IBullet, IDocDrawingBase, IDrawings, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
-import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import type { ILayoutContext } from '../../tools';
@@ -121,7 +121,8 @@ export function lineBreaking(
     shapedTextList: IShapedText[],
     curPage: IDocumentSkeletonPage,
     paragraphNode: DataStreamTreeNode,
-    sectionBreakConfig: ISectionBreakConfig
+    sectionBreakConfig: ISectionBreakConfig,
+    tableSkeleton: Nullable<IDocumentSkeletonTable>
 ): IDocumentSkeletonPage[] {
     const { skeletonResourceReference } = ctx;
     const {
@@ -154,6 +155,7 @@ export function lineBreaking(
         paragraphStyle,
         paragraphAffectSkeDrawings,
         paragraphInlineSkeDrawings,
+        skeTablesInParagraph: tableSkeleton ? [{ tableId: tableSkeleton.tableId, table: tableSkeleton, hasPositioned: false }] : undefined,
         skeHeaders,
         skeFooters,
         pDrawingAnchor: segmentDrawingAnchorCache,

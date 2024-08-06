@@ -157,7 +157,7 @@ export class DocEditorBridgeController extends Disposable {
     private _initialBlur() {
         this.disposeWithMe(
             this._editorService.blur$.subscribe(() => {
-                this._textSelectionRenderManager.removeAllTextRanges();
+                this._textSelectionRenderManager.removeAllRanges();
 
                 this._textSelectionRenderManager.blur();
             })
@@ -186,8 +186,8 @@ export class DocEditorBridgeController extends Disposable {
     private _initialFocus() {
         this.disposeWithMe(
             this._editorService.focus$.subscribe((textRange) => {
-                this._textSelectionRenderManager.removeAllTextRanges();
-                this._textSelectionRenderManager.addTextRanges([textRange]);
+                this._textSelectionRenderManager.removeAllRanges();
+                this._textSelectionRenderManager.addDocRanges([textRange]);
             })
         );
 

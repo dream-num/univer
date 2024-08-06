@@ -22,7 +22,7 @@ import { getInsertSelection } from '../../basics/selection';
 import { DocCustomRangeService } from '../../services/doc-custom-range.service';
 import { InsertCommand } from './core-editing.command';
 
-function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
+export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
     const paragraphs: IParagraph[] = [];
 
     for (let i = 0, len = dataStream.length; i < len; i++) {
@@ -71,11 +71,24 @@ export const BreakLineCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const customRangeService = accessor.get(DocCustomRangeService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
-        if (activeRange == null) {
+        const activeTextRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const rectRanges = textSelectionManagerService.getCurrentRectRanges();
+        if (activeTextRange == null) {
             return false;
         }
-        const { segmentId } = activeRange;
+
+        // Just reset the cursor to the active text range start when select both text range and rect range.
+        if (rectRanges && rectRanges.length) {
+            const { startOffset } = activeTextRange;
+
+            textSelectionManagerService.replaceTextRanges([{
+                startOffset,
+                endOffset: startOffset,
+            }]);
+            return true;
+        }
+
+        const { segmentId } = activeTextRange;
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (!docDataModel || !body) {
@@ -83,7 +96,7 @@ export const BreakLineCommand: ICommand = {
         }
 
         const unitId = docDataModel.getUnitId();
-        const { startOffset, endOffset } = getInsertSelection(activeRange, body);
+        const { startOffset, endOffset } = getInsertSelection(activeTextRange, body);
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
@@ -124,7 +137,7 @@ export const BreakLineCommand: ICommand = {
                     dataStream: DataStreamTreeTokenType.PARAGRAPH,
                     paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
                 },
-                range: activeRange,
+                range: activeTextRange,
                 segmentId,
             });
 

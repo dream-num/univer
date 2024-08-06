@@ -17,11 +17,13 @@
 import type { IPosition, ITextRange, Nullable } from '@univerjs/core';
 
 import type {
+    IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonRow,
     IDocumentSkeletonSection,
 } from '../../../basics/i-document-skeleton-cached';
 import { DocumentSkeletonPageType, GlyphType } from '../../../basics/i-document-skeleton-cached';
@@ -179,6 +181,62 @@ function getOffsetInDivide(
     };
 }
 
+export function pushToPoints(position: IPosition) {
+    const { startX, startY, endX, endY } = position;
+    const points: Array<{ x: number; y: number }> = [];
+
+    points.push({
+        x: startX,
+        y: startY,
+    });
+
+    points.push({
+        x: endX,
+        y: startY,
+    });
+
+    points.push({
+        x: endX,
+        y: endY,
+    });
+
+    points.push({
+        x: startX,
+        y: endY,
+    });
+
+    points.push({
+        x: startX,
+        y: startY,
+    });
+
+    return points;
+}
+
+export function getPageFromPath(skeletonData: IDocumentSkeletonCached, path: (string | number)[]): Nullable<IDocumentSkeletonPage> {
+    const pathCopy = [...path];
+    let page: Nullable<IDocumentSkeletonPage> = null;
+
+    while (pathCopy.length > 0) {
+        const field = pathCopy.shift();
+
+        if (field === 'pages') {
+            const pageIndex = pathCopy.shift() as number;
+            page = skeletonData.pages[pageIndex];
+        } else if (field === 'skeTables') {
+            const tableId = pathCopy.shift() as string;
+            pathCopy.shift(); // rows
+            const rowIndex = pathCopy.shift() as number;
+            pathCopy.shift(); // cells
+            const cellIndex = pathCopy.shift() as number;
+
+            page = page!.skeTables?.get(tableId)?.rows[rowIndex]?.cells[cellIndex];
+        }
+    }
+
+    return page;
+}
+
 export class NodePositionConvertToCursor {
     private _liquid = new Liquid();
 
@@ -294,8 +352,8 @@ export class NodePositionConvertToCursor {
                 };
             }
 
-            borderBoxPointGroup.push(this._pushToPoints(borderBoxPosition));
-            contentBoxPointGroup.push(this._pushToPoints(contentBoxPosition));
+            borderBoxPointGroup.push(pushToPoints(borderBoxPosition));
+            contentBoxPointGroup.push(pushToPoints(contentBoxPosition));
 
             cursorList.push({
                 startOffset: isStartBack ? startOffset : startOffset + firstGlyph.count,
@@ -433,38 +491,6 @@ export class NodePositionConvertToCursor {
         };
     }
 
-    private _pushToPoints(position: IPosition) {
-        const { startX, startY, endX, endY } = position;
-        const points: Array<{ x: number; y: number }> = [];
-
-        points.push({
-            x: startX,
-            y: startY,
-        });
-
-        points.push({
-            x: endX,
-            y: startY,
-        });
-
-        points.push({
-            x: endX,
-            y: endY,
-        });
-
-        points.push({
-            x: startX,
-            y: endY,
-        });
-
-        points.push({
-            x: startX,
-            y: startY,
-        });
-
-        return points;
-    }
-
     private _selectionIterator(
         startPosition: INodePosition,
         endPosition: INodePosition,
@@ -485,7 +511,7 @@ export class NodePositionConvertToCursor {
             return [];
         }
 
-        const { pageType } = startPosition; // startPosition and endPosition must has the same pageType and in the same segment page.
+        const { pageType, path } = startPosition; // startPosition and endPosition must has the same pageType, path and in the same segment page.
 
         this._liquid.reset();
 
@@ -508,14 +534,13 @@ export class NodePositionConvertToCursor {
 
         const { pageLayoutType, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
 
-        const skipPageIndex = pageType === DocumentSkeletonPageType.BODY ? pageIndex : segmentPage;
-
+        const skipPageIndex = (pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL) ? pageIndex : segmentPage;
         for (let p = 0; p < skipPageIndex; p++) {
             const page = pages[p];
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        const endIndex = pageType === DocumentSkeletonPageType.BODY ? endPageIndex : endSegmentPage;
+        const endIndex = (pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL) ? endPageIndex : endSegmentPage;
 
         for (let p = skipPageIndex; p <= endIndex; p++) {
             const page = pages[p];
@@ -526,6 +551,8 @@ export class NodePositionConvertToCursor {
                 segmentPage = skeHeaders.get(headerId)?.get(pageWidth);
             } else if (pageType === DocumentSkeletonPageType.FOOTER) {
                 segmentPage = skeFooters.get(footerId)?.get(pageWidth);
+            } else if (pageType === DocumentSkeletonPageType.CELL) {
+                segmentPage = getPageFromPath(skeletonData, path);
             }
 
             if (segmentPage == null) {
@@ -540,7 +567,7 @@ export class NodePositionConvertToCursor {
                 startPosition,
                 endPosition,
                 sections.length - 1,
-                pageType === DocumentSkeletonPageType.BODY ? p : 0
+                pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL ? p : 0
             );
             this._liquid.translateSave();
 
@@ -554,6 +581,18 @@ export class NodePositionConvertToCursor {
                 case DocumentSkeletonPageType.FOOTER: {
                     const footerTop = page.pageHeight - segmentPage.height - segmentPage.marginBottom;
                     this._liquid.translate(page.marginLeft, footerTop);
+                    break;
+                }
+                case DocumentSkeletonPageType.CELL: {
+                    this._liquid.translatePagePadding(page);
+                    const rowSke = segmentPage.parent as IDocumentSkeletonRow;
+                    const tableSke = rowSke.parent!;
+                    const { left: cellLeft } = segmentPage;
+                    const { top: tableTop, left: tableLeft } = tableSke;
+                    const { top: rowTop } = rowSke;
+
+                    this._liquid.translate(tableLeft + cellLeft, tableTop + rowTop);
+                    this._liquid.translatePagePadding(segmentPage);
                     break;
                 }
                 default:

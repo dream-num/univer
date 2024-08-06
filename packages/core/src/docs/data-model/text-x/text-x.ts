@@ -21,6 +21,7 @@ import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXA
 import { ActionIterator } from './action-iterator';
 import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
 import { textXApply } from './apply';
+import { transformBody } from './transform-utils';
 
 function onlyHasDataStream(body: IDocumentBody) {
     return Object.keys(body).length === 1;
@@ -92,9 +93,108 @@ export class TextX {
         return textX.serialize();
     }
 
-    // `transform` is implemented in univer-pro in class TextXPro. do not use this method in TextX.
-    static transform(_thisActions: TextXAction[], _otherActions: TextXAction[], _priority: TPriority): TextXAction[] {
-        throw new Error('transform is not implemented in TextX');
+    /**
+     * |(this↓ \| other→) | **insert** | **retain** | **delete** |
+     * | ---------------- | ---------- | ---------- | ---------- |
+     * |    **insert**    |   Case 1   |   Case 2   |   Case 2   |
+     * |    **retain**    |   Case 1   |   Case 5   |   Case 4   |
+     * |    **delete**    |   Case 1   |   Case 3   |   Case 3   |
+     *
+     * Case 1: When the other action type is an insert operation,
+     *         the insert operation is retained regardless of the type of action this action
+     * Case 2: When this action type is an insert operation and the other action type is a
+     *         non-insert operation, you need to retain the length of this action insert
+     * Case 3: When this action is a delete operation, there are two scenarios:
+     *      1) When other is a delete operation, since it is a delete operation, this has
+     *         already been deleted, so the target does not need to be in delete, and it can
+     *         be continued directly
+     *      2) When other is the retain operation, although this action delete occurs first,
+     *         the delete priority is higher, so the delete operation is retained, and the origin
+     *         delete has been applied, so it is directly continued
+     * Case 4: other is the delete operation, this is the retain operation, and the target delete operation
+     *         is kept
+     * Case 5: When both other and this are retain operations
+     *      1) If the other body attribute does not exist, directly retain length
+     *      2) If the other body property exists, then execute the TransformBody logic to override it
+     */
+    // priority - if true, this actions takes priority over other, that is, this actions are considered to happen "first".
+    static transform(thisActions: TextXAction[], otherActions: TextXAction[], priority: TPriority = 'right'): TextXAction[] {
+        return this._transform(otherActions, thisActions, priority === 'left' ? 'right' : 'left');
+    }
+
+    static _transform(thisActions: TextXAction[], otherActions: TextXAction[], priority: TPriority = 'right'): TextXAction[] {
+        const thisIter = new ActionIterator(thisActions);
+
+        const otherIter = new ActionIterator(otherActions);
+
+        const textX = new TextX();
+
+        while (thisIter.hasNext() || otherIter.hasNext()) {
+            if (
+                thisIter.peekType() === TextXActionType.INSERT &&
+                (priority === 'left' || otherIter.peekType() !== TextXActionType.INSERT)
+            ) {
+                const thisAction = thisIter.next();
+                textX.retain(thisAction.len, thisAction.segmentId ?? '');
+            } else if (otherIter.peekType() === TextXActionType.INSERT) {
+                textX.push(otherIter.next());
+            } else {
+                const length = Math.min(thisIter.peekLength(), otherIter.peekLength());
+                const thisAction = thisIter.next(length);
+                const otherAction = otherIter.next(length);
+
+                // handle this-delete case.
+                if (thisAction.t === TextXActionType.DELETE) {
+                    continue;
+                }
+
+                // handle other-delete case.
+                if (otherAction.t === TextXActionType.DELETE) {
+                    textX.push(otherAction);
+                    continue;
+                }
+
+                // handle this-retain + other-retain case.
+                if (thisAction.body == null || otherAction.body == null) {
+                    textX.push(otherAction);
+                } else {
+                    textX.push({
+                        ...otherAction,
+                        body: transformBody(thisAction as IRetainAction, otherAction as IRetainAction, priority === 'left'),
+                    });
+                }
+            }
+        }
+
+        textX.trimEndUselessRetainAction();
+
+        return textX.serialize();
+    }
+
+    /**
+     * Used to transform selection. Why not named transformSelection?
+     * Because Univer Doc supports multiple Selections in one document, user need to encapsulate transformSelections at the application layer.
+     */
+    static transformPosition(thisActions: TextXAction[], index: number, priority = false): number {
+        const thisIter = new ActionIterator(thisActions);
+
+        let offset = 0;
+
+        while (thisIter.hasNext() && offset <= index) {
+            const length = thisIter.peekLength();
+            const nextType = thisIter.peekType();
+            thisIter.next();
+
+            if (nextType === TextXActionType.DELETE) {
+                index -= Math.min(length, index - offset);
+                continue;
+            } else if (nextType === TextXActionType.INSERT && (offset < index || !priority)) {
+                index += length;
+            }
+            offset += length;
+        }
+
+        return index;
     }
 
     static isNoop(actions: TextXAction[]) {

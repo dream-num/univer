@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import { DataStreamTreeNodeType } from '@univerjs/core';
 import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { ILayoutContext } from '../../tools';
 import { clearFontCreateConfigCache } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import { createTableSkeleton } from '../table';
 import { shaping } from './shaping';
 import { lineBreaking } from './linebreaking';
 import { lineAdjustment } from './line-adjustment';
@@ -32,9 +34,21 @@ export function dealWidthParagraph(
     sectionBreakConfig: ISectionBreakConfig
 ): IDocumentSkeletonPage[] {
     clearFontCreateConfigCache();
+    const { content = '', children } = paragraphNode;
+    let tableSkeleton = null;
+
+    // Need to create table before shaping....
+    if (children.length === 1 && children[0].nodeType === DataStreamTreeNodeType.TABLE) {
+        tableSkeleton = createTableSkeleton(
+            ctx,
+            curPage,
+            viewModel,
+            children[0],
+            sectionBreakConfig
+        );
+    }
 
     // Step 1: Text Shaping.
-    const { content = '' } = paragraphNode;
     const shapedTextList = shaping(
         ctx,
         content,
@@ -50,7 +64,8 @@ export function dealWidthParagraph(
         shapedTextList,
         curPage,
         paragraphNode,
-        sectionBreakConfig
+        sectionBreakConfig,
+        tableSkeleton
     );
 
     // Step 3: Line Adjustment.
@@ -65,26 +80,3 @@ export function dealWidthParagraph(
     return allPages;
 }
 
-function _checkAndPush(pages: IDocumentSkeletonPage[], currentPages: IDocumentSkeletonPage[]) {
-    const curLast = pages.slice(-1)[0];
-    const newFirst = currentPages[0];
-    if (curLast === newFirst) {
-        if (currentPages.length === 1) {
-            return curLast;
-        }
-        currentPages.shift();
-    }
-
-    pages.push(...currentPages);
-
-    return pages.slice(-1)[0];
-}
-
-// function _getAllSkeDrawings(curPage: IDocumentSkeletonPage, pageWidth: number, skeletonResourceReference: ISkeletonResourceReference, paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing>) {
-//     const { skeHeaders, skeFooters, skeListLevel } = skeletonResourceReference;
-//     const affectAllSkeDrawings = new Map([
-//         ...(skeHeaders?.get(curPage.headerId)?.get(pageWidth)?.skeDrawings || []),
-//         ...(skeFooters?.get(curPage.footerId)?.get(pageWidth)?.skeDrawings || []),
-//         ...paragraphAffectSkeDrawings,
-//     ]);
-// }

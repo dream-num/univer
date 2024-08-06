@@ -82,7 +82,7 @@ describe('Test inline format commands', () => {
 
         selectionManager.setCurrentSelection({
             unitId: 'test-doc',
-            subUnitId: '',
+            subUnitId: 'test-doc',
         });
 
         selectionManager.add([

@@ -47,14 +47,15 @@ const wordPastePlugin: IPastePlugin = {
                 return el.tagName === 'DIV' && /ace-line/i.test(el.className);
             },
             handler(doc) {
-                if (doc.paragraphs == null) {
-                    doc.paragraphs = [];
+                const body = doc.body!;
+                if (body.paragraphs == null) {
+                    body.paragraphs = [];
                 }
 
-                doc.paragraphs.push({
-                    startIndex: doc.dataStream.length,
+                body.paragraphs.push({
+                    startIndex: body.dataStream.length,
                 });
-                doc.dataStream += '\r';
+                body.dataStream += '\r';
             },
         },
     ],

@@ -61,6 +61,10 @@ import { DocCustomRangeController } from './controllers/custom-range.controller'
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
+import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
+import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
+import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from './commands/commands/table/doc-table-insert.command';
+import { DocTableShiftTabCommand, DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -123,6 +127,18 @@ export class UniverDocsPlugin extends Plugin {
                 AlignRightCommand,
                 AlignOperationCommand,
                 AlignJustifyCommand,
+                CreateDocTableCommand,
+                DocTableInsertRowCommand,
+                DocTableInsertRowAboveCommand,
+                DocTableInsertRowBellowCommand,
+                DocTableInsertColumnCommand,
+                DocTableInsertColumnLeftCommand,
+                DocTableInsertColumnRightCommand,
+                DocTableDeleteRowsCommand,
+                DocTableDeleteColumnsCommand,
+                DocTableDeleteTableCommand,
+                DocTableTabCommand,
+                DocTableShiftTabCommand,
                 DocsRenameMutation,
                 TabCommand,
                 AfterSpaceCommand,

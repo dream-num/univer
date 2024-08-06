@@ -16,6 +16,7 @@
 
 export { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 export { SheetsHyperLinkRenderManagerController, SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
+export { SheetsHyperLinkSidePanelService, type ICustomHyperLinkView } from './services/side-panel.service';
 export { SheetsHyperLinkPopupService } from './services/popup.service';
 export { SheetsHyperLinkResolverService } from './services/resolver.service';
 export { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';

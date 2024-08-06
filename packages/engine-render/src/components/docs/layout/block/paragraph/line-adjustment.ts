@@ -273,13 +273,14 @@ export function lineAdjustment(
     sectionBreakConfig: ISectionBreakConfig
 ) {
     const { endIndex } = paragraphNode;
-    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex, true) || { startIndex: 0 };
 
     lineIterator(pages, (line) => {
         // Only need to adjust the current paragraph.
         if (line.paragraphIndex !== paragraph.startIndex) {
             return;
         }
+
         const { paragraphStyle = {} } = paragraph;
         const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
         // If the last glyph is a CJK punctuation, we want to shrink it.

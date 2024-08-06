@@ -17,7 +17,6 @@
 import type { Dependency, SlideDataModel } from '@univerjs/core';
 import { Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
 
-import { IImageIoService, ImageIoService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
 import { SlideUIController } from './controllers/slide-ui.controller';
@@ -49,7 +48,6 @@ export class UniverSlidesUIPlugin extends Plugin {
             [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
             // used by SlideUIController --> EditorContainer
             [ISlideEditorManagerService, { useClass: SlideEditorManagerService }],
-            [IImageIoService, { useClass: ImageIoService }],
             [SlideCanvasPopMangerService],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
@@ -63,14 +61,13 @@ export class UniverSlidesUIPlugin extends Plugin {
 
             // This controller should be registered in Ready stage.
             // this controller would add a new RenderUnit (__INTERNAL_EDITOR__DOCS_NORMAL)
-            // so this new RenderUnit does not have ISlideEditorBridgeService & ISlideEditorManagerService if editorservice were create in renderManagerService
-            [
-                SlideUIController,
-            ],
+            // so this new RenderUnit does not have ISlideEditorBridgeService & ISlideEditorManagerService if
+            // editorservice were create in renderManagerService
+            [SlideUIController],
             [SlideRenderController],
             [SlidePopupMenuController],
         ] as Dependency[]).forEach((m) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
+            this._injector.add(m);
         });
     }
 

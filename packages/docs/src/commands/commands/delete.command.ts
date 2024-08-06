@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions } from '@univerjs/core';
+import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 import {
     CommandType,
+    DataStreamTreeTokenType,
     getCustomDecorationSlice,
     getCustomRangeSlice,
     ICommandService,
@@ -27,7 +28,7 @@ import {
     TextXActionType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IActiveTextRange, ITextRangeWithStyle, RectRange, TextRange } from '@univerjs/engine-render';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 
 import type { ITextActiveRange } from '../../services/text-selection-manager.service';
@@ -57,7 +58,7 @@ export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
         if (activeRange == null || documentDataModel == null) {
@@ -150,8 +151,8 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
 
         const { direction, range } = params;
 
-        const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getCurrentSelections();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const ranges = textSelectionManagerService.getCurrentTextRanges();
 
         if (activeRange == null || ranges == null) {
             return false;
@@ -239,6 +240,54 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
     },
 };
 
+export function getCursorWhenDelete(textRanges: Readonly<Nullable<TextRange[]>>, rectRanges: readonly RectRange[]): number {
+    let cursor = 0;
+
+    if (textRanges == null || textRanges.length === 0) {
+        if (typeof rectRanges[0].startOffset === 'number') {
+            // Put the cursor at the first rect range start.
+            const rectRange = rectRanges[0]!;
+            const { spanEntireRow, spanEntireTable } = rectRange;
+
+            if (spanEntireTable) {
+                // Put the cursor at the first line of deleted table paragraph.
+                cursor = rectRange.startOffset! - 3; // 3 is TABLE START, ROW START, CELL START.
+            } else if (spanEntireRow) {
+                // Put the cursor at the last row's end cell before deleted rows.
+                if (rectRange.startRow > 0) {
+                    cursor = rectRange.startOffset! - 6; // 6 is ROW START, CELL START, CELL END, ROW END, \r, \n.
+                } else {
+                    cursor = rectRange.startOffset!;
+                }
+            } else {
+                cursor = rectRanges[0].startOffset;
+            }
+        }
+    } else if (textRanges.length > 0 && rectRanges.length > 0) {
+        const textRange = textRanges[0]!;
+        const rectRange = rectRanges[0]!;
+
+        if (textRange.startOffset != null && rectRange.startOffset != null) {
+            if (textRange.startOffset < rectRange.startOffset) {
+                // Put the cursor at the first text range start.
+                cursor = textRange.startOffset;
+            } else if (textRange.startOffset >= rectRange.startOffset) {
+                const { spanEntireRow, spanEntireTable } = rectRange;
+
+                if (spanEntireTable) {
+                    // Put the cursor at the first line of deleted table paragraph.
+                    cursor = rectRange.startOffset - 3; // 3 is TABLE START, ROW START, CELL START.
+                } else if (spanEntireRow) {
+                    // Put the cursor at the last row's end cell before deleted rows.
+                    cursor = rectRange.startOffset - 6; // 6 is ROW START, CELL START, CELL END, ROW END, \r, \n.
+                }
+            }
+        }
+    }
+
+    return cursor;
+}
+
 // Handle BACKSPACE key.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
@@ -258,14 +307,36 @@ export const DeleteLeftCommand: ICommand = {
 
         const unitId = docDataModel.getUnitId();
         const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
-        const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getCurrentSelections();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const rectRanges = textSelectionManagerService.getCurrentRectRanges();
+        const ranges = textSelectionManagerService.getCurrentTextRanges();
         const skeleton = docSkeletonManagerService?.getSkeleton();
-        if (activeRange == null || skeleton == null || ranges == null) {
+
+        if (skeleton == null) {
+            return false;
+        }
+
+        if (rectRanges?.length) {
+            const cursor = getCursorWhenDelete(ranges, rectRanges);
+            const segmentId = rectRanges[0].segmentId;
+            const textRanges = [
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                },
+            ];
+            return commandService.executeCommand(CutContentCommand.id, {
+                segmentId,
+                textRanges,
+            });
+        }
+
+        if (activeRange == null || ranges == null) {
             return false;
         }
 
         const { segmentId, style, segmentPage } = activeRange;
+
         const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
         if (body == null) {
@@ -451,9 +522,26 @@ export const DeleteRightCommand: ICommand = {
         const docSkeletonManagerService = getCommandSkeleton(accessor, docDataModel.getUnitId());
         const commandService = accessor.get(ICommandService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getCurrentSelections();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const rectRanges = textSelectionManagerService.getCurrentRectRanges();
+        const ranges = textSelectionManagerService.getCurrentTextRanges();
         const skeleton = docSkeletonManagerService?.getSkeleton();
+
+        if (rectRanges?.length) {
+            const cursor = getCursorWhenDelete(ranges, rectRanges);
+            const segmentId = rectRanges[0].segmentId;
+            const textRanges = [
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                },
+            ];
+            return commandService.executeCommand(CutContentCommand.id, {
+                segmentId,
+                textRanges,
+            });
+        }
+
         if (activeRange == null || skeleton == null || ranges == null) {
             return false;
         }
@@ -476,6 +564,11 @@ export const DeleteRightCommand: ICommand = {
         if (collapsed === true) {
             const needDeleteGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
             const nextGlyph = skeleton.findNodeByCharIndex(startOffset + 1);
+
+            // Handle delete key at cell content end.
+            if (needDeleteGlyph.streamType === DataStreamTreeTokenType.PARAGRAPH && nextGlyph?.streamType === DataStreamTreeTokenType.SECTION_BREAK) {
+                return false;
+            }
 
             if (needDeleteGlyph.content === '\r') {
                 result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {

@@ -14,9 +14,32 @@
     .slide-bar-content {
         padding: 0 15px;
 
+        &-header {
+            padding-top: var(--padding-lg);
+            display: flex;
+            justify-content: center;
+
+            a {
+                width: 212px;
+                padding: var(--padding-xs) 0;
+                font-size: var(--font-size-sm);
+                background: rgb(var(--bg-color-secondary));
+                text-align: center;
+                border: 1px solid rgb(var(--border-color));
+                border-radius: var(--border-radius-base);
+                display: block;
+                transition: all 0.25s;
+                cursor: pointer;
+
+                &:hover {
+                    background: rgb(var(--bg-color-hover));
+                }
+            }
+        }
+
         .slide-bar-item {
             display: flex;
-            margin: 15px 0;
+            margin: var(--margin-base) 0;
 
             span {
                 width: 15px;

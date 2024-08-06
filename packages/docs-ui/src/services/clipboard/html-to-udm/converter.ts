@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, DataStreamTreeTokenType, type IDocumentBody, type ITextStyle, type Nullable, skipParseTagNames, Tools } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType, skipParseTagNames, Tools } from '@univerjs/core';
 
+import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '@univerjs/docs';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
 import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
@@ -34,6 +36,14 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
     return filter(node);
 }
 
+// TODO: get from page width.
+const DEFAULT_TABLE_WIDTH = 600;
+
+interface ITableCache {
+    table: ITable;
+    startIndex: number;
+}
+
 /**
  * Convert html strings into data structures in univer, IDocumentBody.
  * Support plug-in, add custom rules,
@@ -49,19 +59,26 @@ export class HtmlToUDMService {
         this._pluginList.push(plugin);
     }
 
+    private _tableCache: ITableCache[] = [];
+
     private _styleCache: Map<ChildNode, ITextStyle> = new Map();
 
     private _styleRules: IStyleRule[] = [];
 
     private _afterProcessRules: IAfterProcessRule[] = [];
 
-    convert(html: string): IDocumentBody {
+    convert(html: string): Partial<IDocumentData> {
         const pastePlugin = HtmlToUDMService._pluginList.find((plugin) => plugin.checkPasteType(html));
-        const dom = parseToDom(html);
+        const dom = parseToDom(html)!;
 
-        const newDocBody: IDocumentBody = {
+        const body: IDocumentBody = {
             dataStream: '',
             textRuns: [],
+        };
+
+        const docData: Partial<IDocumentData> = {
+            body,
+            tableSource: {},
         };
 
         if (pastePlugin) {
@@ -69,16 +86,19 @@ export class HtmlToUDMService {
             this._afterProcessRules = [...pastePlugin.afterProcessRules];
         }
 
+        this._tableCache = [];
         this._styleCache.clear();
-        this._process(null, dom?.childNodes!, newDocBody);
+        this._process(null, dom.childNodes, docData);
         this._styleCache.clear();
         this._styleRules = [];
         this._afterProcessRules = [];
 
-        return newDocBody;
+        return docData;
     }
 
-    private _process(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: IDocumentBody) {
+    private _process(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: Partial<IDocumentData>) {
+        const body = doc.body!;
+
         for (const node of nodes) {
             if (node.nodeType === Node.TEXT_NODE) {
                 if (node.nodeValue?.trim() === '') {
@@ -93,17 +113,17 @@ export class HtmlToUDMService {
                     if ((parent as Element).tagName.toUpperCase() === 'A') {
                         const id = Tools.generateRandomId();
                         text = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-                        doc.customRanges = [
-                            ...(doc.customRanges ?? []),
+                        body.customRanges = [
+                            ...(body.customRanges ?? []),
                             {
-                                startIndex: doc.dataStream.length,
-                                endIndex: doc.dataStream.length + text.length - 1,
+                                startIndex: body.dataStream.length,
+                                endIndex: body.dataStream.length + text.length - 1,
                                 rangeId: id,
                                 rangeType: CustomRangeType.HYPERLINK,
                             },
                         ];
-                        doc.payloads = {
-                            ...doc.payloads,
+                        body.payloads = {
+                            ...body.payloads,
                             [id]: (parent as HTMLAnchorElement).href,
                         };
                     }
@@ -113,12 +133,12 @@ export class HtmlToUDMService {
                     style = this._styleCache.get(parent);
                 }
 
-                doc.dataStream += text;
+                body.dataStream += text;
 
                 if (style && Object.getOwnPropertyNames(style).length) {
-                    doc.textRuns!.push({
-                        st: doc.dataStream.length - text!.length,
-                        ed: doc.dataStream.length,
+                    body.textRuns!.push({
+                        st: body.dataStream.length - text!.length,
+                        ed: body.dataStream.length,
                         ts: style,
                     });
                 }
@@ -135,7 +155,11 @@ export class HtmlToUDMService {
 
                 const { childNodes } = node;
 
+                this._processBeforeTable(node as HTMLElement, doc);
+
                 this._process(node, childNodes, doc);
+
+                this._processAfterTable(node as HTMLElement, doc);
 
                 const afterProcessRule = this._afterProcessRules.find(({ filter }) =>
                     matchFilter(node as HTMLElement, filter)
@@ -144,6 +168,116 @@ export class HtmlToUDMService {
                 if (afterProcessRule) {
                     afterProcessRule.handler(doc, node as HTMLElement);
                 }
+            }
+        }
+    }
+
+    private _processBeforeTable(node: HTMLElement, doc: Partial<IDocumentData>) {
+        const tagName = node.tagName.toUpperCase();
+        const body = doc.body!;
+
+        switch (tagName) {
+            case 'TABLE': {
+                if (body.dataStream[body.dataStream.length - 1] !== '\r') {
+                    body.dataStream += '\r';
+                    body.paragraphs?.push({
+                        startIndex: body.dataStream.length - 1,
+                    });
+                }
+
+                const table = genTableSource(0, 0, DEFAULT_TABLE_WIDTH);
+
+                this._tableCache.push({
+                    table,
+                    startIndex: body.dataStream.length,
+                });
+
+                body.dataStream += DataStreamTreeTokenType.TABLE_START;
+
+                break;
+            }
+
+            case 'TR': {
+                const row = getEmptyTableRow(0);
+                const lastTable = this._tableCache[this._tableCache.length - 1].table;
+
+                lastTable.tableRows.push(row);
+
+                body.dataStream += DataStreamTreeTokenType.TABLE_ROW_START;
+
+                break;
+            }
+
+            case 'TD': {
+                const cell = getEmptyTableCell();
+                const lastTable = this._tableCache[this._tableCache.length - 1].table;
+                const lastRow = lastTable.tableRows[lastTable.tableRows.length - 1];
+
+                lastRow.tableCells.push(cell);
+
+                body.dataStream += DataStreamTreeTokenType.TABLE_CELL_START;
+
+                break;
+            }
+        }
+    }
+
+    private _processAfterTable(node: HTMLElement, doc: Partial<IDocumentData>) {
+        const tagName = node.tagName.toUpperCase();
+        const body = doc.body!;
+
+        if (doc.tableSource == null) {
+            doc.tableSource = {};
+        }
+
+        if (body.tables == null) {
+            body.tables = [];
+        }
+
+        if (body.sectionBreaks == null) {
+            body.sectionBreaks = [];
+        }
+
+        const { tableSource } = doc;
+
+        switch (tagName) {
+            case 'TABLE': {
+                const tableCache = this._tableCache.pop()!;
+
+                const { startIndex, table } = tableCache;
+
+                const colCount = table.tableRows[0].tableCells.length!;
+                const tableColumn = getTableColumn(DEFAULT_TABLE_WIDTH / colCount);
+                const tableColumns = [...new Array(colCount).fill(null).map(() => Tools.deepClone(tableColumn))];
+
+                table.tableColumns = tableColumns;
+
+                tableSource[table.tableId] = table;
+
+                body.dataStream += DataStreamTreeTokenType.TABLE_END;
+
+                body.tables.push({
+                    startIndex,
+                    endIndex: body.dataStream.length - 1,
+                    tableId: table.tableId,
+                });
+
+                break;
+            }
+
+            case 'TR': {
+                body.dataStream += DataStreamTreeTokenType.TABLE_ROW_END;
+
+                break;
+            }
+
+            case 'TD': {
+                body.sectionBreaks?.push({
+                    startIndex: body.dataStream.length,
+                });
+                body.dataStream += `\n${DataStreamTreeTokenType.TABLE_CELL_END}`;
+
+                break;
             }
         }
     }

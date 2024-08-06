@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentBody, IDocumentData, IDocumentSettings, IDocumentStyle, IParagraph, IParagraphStyle, IPosition, Nullable, UnitModel } from '@univerjs/core';
+import type { IDisposable, IDocumentBody, IDocumentData, IDocumentSettings, IDocumentStyle, IParagraph, IParagraphStyle, IPosition, Nullable } from '@univerjs/core';
 import {
     createIdentifier,
     Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -23,13 +23,10 @@ import {
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     IContextService,
-    Inject,
-    IUniverInstanceService,
-    ThemeService,
     VerticalAlign,
 } from '@univerjs/core';
-import type { Engine, IDocumentLayoutObject, IRenderContext, RichText, Scene } from '@univerjs/engine-render';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import type { Engine, IDocumentLayoutObject, RichText, Scene } from '@univerjs/engine-render';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { KeyCode } from '@univerjs/ui';
 import { IEditorService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
@@ -111,10 +108,6 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
     private _currentEditRectInfo: ISetEditorInfo;
 
     constructor(
-        private readonly _renderContext: IRenderContext<UnitModel>,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService,
         @IContextService private readonly _contextService: IContextService
     ) {

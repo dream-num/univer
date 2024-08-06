@@ -258,7 +258,7 @@ export class CanvasView extends RxDisposable implements IRenderModule {
             zIndex: 10,
         });
 
-        slideComponent.enableNav();
+        // slideComponent.enableNav();
 
         slideComponent.enableSelectedClipElement();
 
@@ -280,8 +280,8 @@ export class CanvasView extends RxDisposable implements IRenderModule {
             width: pageWidth,
             height: pageHeight,
             strokeWidth: 1,
-            stroke: 'rgba(198,198,198, 1)',
-            fill: getColorStyle(fill) || 'rgba(255,255,255, 1)',
+            stroke: 'rgba(198,198,198,1)',
+            fill: getColorStyle(fill) || 'rgba(255,255,255,1)',
             zIndex: 0,
             evented: false,
         });
@@ -480,6 +480,7 @@ export class CanvasView extends RxDisposable implements IRenderModule {
 
     setObjectActiveByPage(obj: BaseObject, pageID: PageID) {
         const { scene } = this.getRenderUnitByPageId(pageID);
+        // console.log(obj);
         if (!scene) return;
         const transformer = scene.getTransformer();
         transformer?.activeAnObject(obj);
@@ -491,5 +492,27 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         scene.removeObject(id);
         const transformer = scene.getTransformer();
         transformer?.clearControls();
+    }
+
+    appendPage() {
+        const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
+        const page = model.getBlankPage();
+
+        const render = this._currentRender();
+
+        if (page == null || render == null || render.mainComponent == null) {
+            return;
+        }
+
+        const { id } = page;
+
+        const slide = render.mainComponent as Slide;
+
+        const scene = this._createScene(id, page);
+
+        scene && slide?.addPage(scene);
+
+        model.appendPage(page);
+        model.setActivePage(page);
     }
 }

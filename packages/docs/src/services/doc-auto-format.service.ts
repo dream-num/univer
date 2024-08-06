@@ -112,7 +112,7 @@ export class DocAutoFormatService extends Disposable {
     onAutoFormat(id: string, params: Nullable<object>): ICommandInfo[] {
         const autoForamts = this._matches.get(id) ?? [];
         const unit = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const selection = this._textSelectionManagerService.getActiveRange();
+        const selection = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
         if (unit && selection) {
             const doc = unit.getSelfOrHeaderFooterModel(selection.segmentId);

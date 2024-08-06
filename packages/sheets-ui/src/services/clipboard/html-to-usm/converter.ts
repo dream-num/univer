@@ -18,7 +18,6 @@ import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } fro
 import { ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 
-import type { IPastePlugin } from '@univerjs/docs-ui';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
 import type {
@@ -28,7 +27,7 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import { extractNodeStyle } from './parse-node-style';
-import type { IAfterProcessRule } from './paste-plugins/type';
+import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
 import parseToDom, { generateParagraphs } from './utils';
 
 export interface IStyleRule {
@@ -82,14 +81,14 @@ interface IHtmlToUSMServiceProps {
 }
 
 export class HtmlToUSMService {
-    private static pluginList: IPastePlugin[] = [];
+    private static _pluginList: IPastePlugin[] = [];
 
     static use(plugin: IPastePlugin) {
-        if (this.pluginList.includes(plugin)) {
+        if (this._pluginList.includes(plugin)) {
             throw new Error(`Univer paste plugin ${plugin.name} already added`);
         }
 
-        this.pluginList.push(plugin);
+        this._pluginList.push(plugin);
     }
 
     private _styleMap = new Map<string, CSSStyleDeclaration>();
@@ -110,7 +109,7 @@ export class HtmlToUSMService {
 
     // eslint-disable-next-line max-lines-per-function
     convert(html: string): IUniverSheetCopyDataModel {
-        const pastePlugin = HtmlToUSMService.pluginList.find((plugin) => plugin.checkPasteType(html));
+        const pastePlugin = HtmlToUSMService._pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
             this._styleRules = [...pastePlugin.stylesRules];
             this._afterProcessRules = [...pastePlugin.afterProcessRules];

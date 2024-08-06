@@ -1,0 +1,675 @@
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { TextXAction } from '@univerjs/core';
+import { BooleanNumber, TextXActionType } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
+
+import { TextX } from '../text-x';
+
+describe('transform()', () => {
+    it('insert + insert', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                line: 0,
+                body: {
+                    dataStream: 'h',
+                    customRanges: [],
+                    customDecorations: [],
+                },
+            },
+        ];
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                line: 0,
+                body: {
+                    dataStream: 'e',
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                segmentId: '',
+                len: 1,
+            },
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                line: 0,
+                body: {
+                    dataStream: 'e',
+                    customRanges: [],
+                    customDecorations: [],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityFalse: TextXAction[] = [
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                line: 0,
+                body: {
+                    dataStream: 'e',
+                    customRanges: [],
+                    customDecorations: [],
+                },
+            },
+        ];
+
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityFalse);
+    });
+
+    it('insert + retain', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                line: 0,
+                body: {
+                    dataStream: 'h',
+                },
+            },
+        ];
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
+                },
+                segmentId: '',
+            },
+        ];
+        const expectedActionsWithPriorityTrue = [
+            {
+                t: TextXActionType.RETAIN,
+                segmentId: '',
+                len: 1,
+            },
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                body: {
+                    dataStream: '',
+                    customRanges: [],
+                    customDecorations: [],
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
+                },
+                segmentId: '',
+            },
+        ];
+
+        const expectedActionsWithPriorityFalse: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                segmentId: '',
+                len: 1,
+            },
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                body: {
+                    dataStream: '',
+                    customRanges: [],
+                    customDecorations: [],
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
+                },
+                segmentId: '',
+            },
+        ];
+
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityFalse);
+    });
+
+    it('insert + delete', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                line: 0,
+                body: {
+                    dataStream: 'h',
+                },
+            },
+        ];
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            },
+        ];
+        const expectedActionsWithPriorityTrue = [
+            {
+                t: TextXActionType.RETAIN,
+                segmentId: '',
+                len: 1,
+            },
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            },
+        ];
+
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+    });
+
+    it('delete + insert', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+            },
+        ];
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: {
+                    dataStream: 'h',
+                },
+                line: 0,
+                segmentId: '',
+            },
+        ];
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: {
+                    dataStream: 'h',
+                    customRanges: [],
+                    customDecorations: [],
+                },
+                line: 0,
+                segmentId: '',
+            },
+        ];
+
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+    });
+
+    it('delete + retain', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+            },
+        ];
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+            },
+        ];
+        const expectedActionsWithPriorityTrue: TextXAction[] = [];
+
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+    });
+
+    it('delete + delete', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+            },
+        ];
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+            },
+        ];
+        const expectedActionsWithPriorityTrue: TextXAction[] = [];
+
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+    });
+
+    it('retain + insert', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+            },
+        ];
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.INSERT,
+                body: {
+                    dataStream: 'h',
+                },
+                len: 1,
+                line: 0,
+            },
+        ];
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
+            {
+                t: TextXActionType.INSERT,
+                body: {
+                    dataStream: 'h',
+                    customRanges: [],
+                    customDecorations: [],
+                },
+                len: 1,
+                line: 0,
+            },
+        ];
+
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+    });
+
+    it('retain + retain', () => {
+        const actionsA1: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'blue' },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsA2: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'blue' },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsB1: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'red' },
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+        const actionsB2: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'red' },
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+        const expectedActions1: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActions2: TextXAction[] = [];
+
+        expect(TextX._transform(actionsA1, actionsB1, 'left')).toEqual(expectedActions1);
+        expect(TextX._transform(actionsB2, actionsA2, 'left')).toEqual(expectedActions2);
+    });
+
+    it('retain + retain without priority', () => {
+        const actionsA1: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'blue' },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsA2: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'blue' },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsB1: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'red' },
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+        const actionsB2: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'red' },
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+        const expectedActions1: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                bl: BooleanNumber.TRUE,
+                                cl: { rgb: 'red' },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        // TODO: @jocs, fix this case after univer normalizeTextRuns are updated.
+        const expectedActions2: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'blue' },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        expect(TextX._transform(actionsA1, actionsB1, 'right')).toEqual(expectedActions1);
+        expect(TextX._transform(actionsB2, actionsA2, 'right')).toEqual(expectedActions2);
+    });
+
+    it('retain + delete', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                cl: { rgb: 'blue' },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            },
+        ];
+
+        const expectedActions: TextXAction[] = [
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            },
+        ];
+
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActions);
+    });
+
+    it('retain + retain with paragraph', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 5,
+                                spaceBelow: { v: 6 },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                spaceBelow: { v: 6 },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityFalse: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 5,
+                                spaceBelow: { v: 6 },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityFalse);
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+    });
+});

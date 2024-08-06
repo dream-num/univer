@@ -31,6 +31,7 @@ import type { Subscription } from 'rxjs';
 import { IMEInputCommand } from '../commands/commands/ime-input.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { IMEInputManagerService } from '../services/ime-input-manager.service';
+import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, IMEInputController)
 export class IMEInputController extends Disposable {
@@ -48,6 +49,7 @@ export class IMEInputController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(IMEInputManagerService) private readonly _imeInputManagerService: IMEInputManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {

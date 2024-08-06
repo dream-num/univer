@@ -22,6 +22,7 @@ import type {
     IDocumentRenderConfig,
     INestingLevel,
     IParagraphProperties,
+    ITable,
     ITextStyle,
     PageOrientType,
 } from '@univerjs/core';
@@ -33,6 +34,7 @@ export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     top: number;
     st: number; // startIndex 文本开始索引
     ed?: number; // endIndex 文本结束索引
+    parent?: unknown;
 }
 
 export interface ISkeletonResourceReference {
@@ -62,6 +64,7 @@ export enum DocumentSkeletonPageType {
     BODY,
     HEADER,
     FOOTER,
+    CELL,
 };
 
 export interface IDocumentSkeletonPage {
@@ -79,6 +82,8 @@ export interface IDocumentSkeletonPage {
     originMarginBottom: number; // The margin bottom in document style config, used to draw margin identifier.
     marginBottom: number;
 
+    left: number; // Only use for cell.
+
     pageNumber: number; // page页数
     pageNumberStart: number; // page开始页序号
     verticalAlign: boolean; // 垂直对齐，仅对一页生效
@@ -90,10 +95,11 @@ export interface IDocumentSkeletonPage {
     st: number; // startIndex 文本开始索引
     ed: number; // endIndex 文本结束索引
     skeDrawings: Map<string, IDocumentSkeletonDrawing>;
-    segmentId: string; // 如果是页眉、页脚，就是页眉页脚的id，如果是正文页面，为空字符串
-    type: DocumentSkeletonPageType; // 页面类型，页眉、页脚或正文
+    skeTables: Map<string, IDocumentSkeletonTable>; // 页面中表格的 skeletons
+    segmentId: string; // 如果是页眉、页脚，就是页眉页脚的 id，如果是正文页面，为空字符串
+    type: DocumentSkeletonPageType; // 页面类型，页眉、页脚或正文、单元格
     renderConfig?: IDocumentRenderConfig;
-    parent?: IDocumentSkeletonCached;
+    parent?: IDocumentSkeletonCached | IDocumentSkeletonRow;
 }
 
 export interface IDocumentSkeletonHeaderFooter extends IDocumentSkeletonPage {}
@@ -107,6 +113,29 @@ export interface IDocumentSkeletonSection {
     st: number; // startIndex 文本开始索引
     ed: number; // endIndex 文本结束索引
     parent?: IDocumentSkeletonPage;
+}
+
+export interface IDocumentSkeletonTable {
+    rows: IDocumentSkeletonRow[];
+    width: number; // 根据表格设置或者 columns 的宽度计算表格的宽度
+    height: number; // 根据行数及行高计算整个表格高度
+    top: number; // 根据表格所在段落，计算表格的 top
+    left: number; // 根据表格外围容器的宽度、align、及indent 计算 left 值
+    st: number; // startIndex 开始索引
+    ed: number; // endIndex 结束索引
+    tableId: string; // 表格的id
+    tableSource: ITable;
+    parent?: IDocumentSkeletonPage;
+}
+
+export interface IDocumentSkeletonRow {
+    cells: IDocumentSkeletonPage[];
+    index: number; // 行号
+    height: number; // 实际的高度
+    top: number; // top 相对于表格上沿
+    st: number; // startIndex 文本开始索引
+    ed: number; // endIndex 文本结束索引
+    parent?: IDocumentSkeletonTable;
 }
 
 export interface IDocumentSkeletonColumn {
@@ -148,6 +177,9 @@ export interface IDocumentSkeletonLine {
     lineIndex: number; // lineIndex 行号
     bullet?: IDocumentSkeletonBullet; // 无序和有序列表标题
     paragraphStart: boolean; // Paragraph start 默认 false
+
+    isBehindTable: boolean; // 在 DataStream 中，如果段落包含 table，那么段落第一行 isBehindTable 为 true, 并且 tableId 不为空，主要用来计算 st\ed.
+    tableId: string; // tableId 如果段落包含 table，那么 tableId 不为空，主要用来计算 st\ed.
 
     // dtId: string[]; // drawingTBIds 影响行的元素id集合，会切割divide，影响上下
     // bmt: number; // benchmarkTop， drawing的位置是根据paragraph的位置进行相对定位的，段落跨页后，需要一个校准

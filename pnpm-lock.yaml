@@ -516,6 +516,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: 'link:'
       '@univerjs/protocol':
         specifier: 0.1.38
         version: 0.1.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -592,7 +595,7 @@ importers:
         version: 18.3.1
     optionalDependencies:
       vue:
-        specifier: ^3.4.35
+        specifier: '>=3.0.0'
         version: 3.4.35(typescript@5.5.4)
     devDependencies:
       '@univerjs/core':
@@ -736,6 +739,10 @@ importers:
         version: 2.0.5(@types/node@22.1.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/docs:
+    dependencies:
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: 'link:'
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2269,9 +2276,6 @@ importers:
 
   packages/sheets-ui:
     dependencies:
-      '@univerjs/docs-ui':
-        specifier: workspace:*
-        version: link:../docs-ui
       '@univerjs/icons':
         specifier: ^0.1.72
         version: 0.1.72(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2413,9 +2417,6 @@ importers:
 
   packages/slides-ui:
     dependencies:
-      '@univerjs/docs-drawing-ui':
-        specifier: workspace:*
-        version: link:../docs-drawing-ui
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
@@ -2571,7 +2572,7 @@ importers:
         version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     optionalDependencies:
       vue:
-        specifier: ^3.4.35
+        specifier: '>=3.0.0'
         version: 3.4.35(typescript@5.5.4)
     devDependencies:
       '@testing-library/react':

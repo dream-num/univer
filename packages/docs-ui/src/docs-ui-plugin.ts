@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type {
+    Dependency } from '@univerjs/core';
 import {
     ICommandService,
     ILogService,
@@ -21,10 +23,7 @@ import {
     Injector,
     IUniverInstanceService,
     Plugin,
-    Tools,
-    UniverInstanceType,
-} from '@univerjs/core';
-import type { Dependency } from '@univerjs/core';
+    Tools, UniverInstanceType } from '@univerjs/core';
 import { IEditorService, IShortcutService } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
@@ -67,6 +66,8 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
+import { DocTableController } from './controllers/doc-table.controller';
+import { DocShiftTabCommand, DocTabCommand } from './commands/commands/doc-tab.command';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -85,6 +86,7 @@ export class UniverDocsUIPlugin extends Plugin {
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
+        this._registerCommands();
     }
 
     override onReady(): void {
@@ -118,9 +120,18 @@ export class UniverDocsUIPlugin extends Plugin {
             DeleteRightShortcut,
             BreakLineShortcut,
             ShiftTabShortCut,
+            // TabShortcut,
+            // ShiftTabShortcut,
         ].forEach((shortcut) => {
             this._injector.get(IShortcutService).registerShortcut(shortcut);
         });
+    }
+
+    private _registerCommands() {
+        [
+            DocTabCommand,
+            DocShiftTabCommand,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initDependencies(injector: Injector) {
@@ -130,6 +141,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocEditorBridgeController],
             [DocAutoFormatController],
 
+            [DocTableController],
             [DocsRenderService],
             [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             [IDocClipboardService, { useClass: DocClipboardService }],

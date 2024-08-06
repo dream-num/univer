@@ -14,25 +14,94 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Range } from '@univerjs/core';
-import { Subject } from 'rxjs';
+import { Inject, Injector, Tools } from '@univerjs/core';
+import { Observable, Subject } from 'rxjs';
+import { bufferTime, filter } from 'rxjs/operators';
 import { createCfId } from '../utils/create-cf-id';
-import { ConditionalFormattingService } from '../services/conditional-formatting.service';
 import type { IAnchor } from '../utils/anchor';
 import { findIndexByAnchor, moveByAnchor } from '../utils/anchor';
 
 import type { IConditionFormattingRule, IRuleModel } from './type';
-import { ConditionalFormattingViewModel } from './conditional-formatting-view-model';
 
 type RuleOperatorType = 'delete' | 'set' | 'add' | 'sort';
+
 export class ConditionalFormattingRuleModel {
     //  Map<unitID ,<sheetId ,IConditionFormattingRule[]>>
     private _model: IRuleModel = new Map();
-    private _ruleChange$ = new Subject<{ rule: IConditionFormattingRule; unitId: string; subUnitId: string; type: RuleOperatorType }>();
-    $ruleChange = this._ruleChange$.asObservable();
+    private _ruleChange$ = new Subject<{ rule: IConditionFormattingRule; oldRule?: IConditionFormattingRule; unitId: string; subUnitId: string; type: RuleOperatorType }>();
+    $ruleChange = this._ruleChange$.asObservable().pipe(
+        bufferTime(16),
+        filter((list) => !!list.length),
+        // Operations for aggregated conditional formatting
+        // Adding and then deleting the same conditional format for multiple times will not result in any changes being propagated externally
+        // When multiple settings are applied to the same conditional format, only the last setting will be propagated externally.
+        (source) => new Observable<{ rule: IConditionFormattingRule; oldRule?: IConditionFormattingRule; unitId: string; subUnitId: string; type: RuleOperatorType }>((observer) => {
+            source.subscribe({
+                next: (ruleList) => {
+                    type Item = (typeof ruleList)[0];
+                    const createKey = (item: Item) => `${item.unitId}_${item.subUnitId}_${item.rule.cfId}`;
+                    // Adding and then deleting the same conditional format for multiple times will not result in any changes being propagated externally
+                    const handleCreateAndDelete = (list: Item[]) => {
+                        //Between the operation can be nullified, do not have to carry out.
+                        const createIndex = list.findIndex((rule) => rule.type === 'add');
+                        const deleteIndex = list.findIndex((rule) => rule.type === 'delete');
+                        if (createIndex !== -1 && deleteIndex !== -1 && deleteIndex > createIndex) {
+                            list.splice(createIndex, deleteIndex - createIndex + 1);
+                        }
+                    };
+                    // When multiple settings are applied to the same conditional format, only the last setting will be propagated externally.
+                    const handleSetAndSet = (list: Item[]) => {
+                        const setList = list.filter((item) => item.type === 'set');
+                        if (setList.length < 2) {
+                            return;
+                        }
+                        const theLast = setList[setList.length - 1];
+                        let index = list.length - 1;
+                        while (index >= 0) {
+                            const item = list[index];
+                            if (item.type === 'set' && item !== theLast) {
+                                list.splice(index, 1);
+                            }
+                            index--;
+                        }
+                    };
+
+                    const result = ruleList.reduce((a, b, index) => {
+                        const key = createKey(b);
+                        if (!a[key]) {
+                            a[key] = [];
+                        }
+                        const list = a[key];
+                        list.push({ ...b, _index: index });
+                        return a;
+                    }, {} as Record<string, (Item & { _index: number })[]>);
+
+                    for (const key in result) {
+                        const list = result[key];
+                        if (list.length >= 2) {
+                            handleCreateAndDelete(list);
+                            // handleSetAndSet(list)
+                        }
+                    }
+
+                    const resultList = Object.keys(result).reduce((a, key) => {
+                        const list = result[key];
+                        a.push(...list);
+                        return a;
+                    }, [] as (Item & { _index: number })[]).sort((a, b) => a._index - b._index).map((item) => {
+                        return item;
+                    });
+
+                    resultList.forEach((item) => {
+                        observer.next(item);
+                    });
+                },
+                error: (err) => observer.error(err),
+                complete: () => observer.complete(),
+            });
+        }));
 
     constructor(
-        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @Inject(Injector) private _injector: Injector
     ) {
         // empty
@@ -77,11 +146,6 @@ export class ConditionalFormattingRuleModel {
             const rule = list[index];
             if (rule) {
                 list.splice(index, 1);
-                rule.ranges.forEach((range) => {
-                    Range.foreach(range, (row, col) => {
-                        this._conditionalFormattingViewModel.deleteCellCf(unitId, subUnitId, row, col, rule.cfId);
-                    });
-                });
                 this._ruleChange$.next({ rule, subUnitId, unitId, type: 'delete' });
             }
         }
@@ -91,46 +155,9 @@ export class ConditionalFormattingRuleModel {
         const list = this._ensureList(unitId, subUnitId);
         const oldRule = list.find((item) => item.cfId === oldCfId);
         if (oldRule) {
-            const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
-                map.set(cur, index);
-                return map;
-            }, new Map<string, number>());
-            // After each setting, the cache needs to be cleared,
-            // and this cleanup is deferred until the end of the calculation.
-            // Otherwise the render will flash once
-            const cloneRange = [...oldRule.ranges];
-            const conditionalFormattingService = this._injector.get(ConditionalFormattingService);
-
+            const cloneRule = Tools.deepClone(oldRule);
             Object.assign(oldRule, rule);
-            const dispose = conditionalFormattingService.interceptorManager.intercept(conditionalFormattingService.interceptorManager.getInterceptPoints().beforeUpdateRuleResult, {
-                handler: (config, _, next) => {
-                    if (unitId === config?.unitId && subUnitId === config.subUnitId && oldRule.cfId === config.cfId) {
-                        cloneRange.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                this._conditionalFormattingViewModel.deleteCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-                            });
-                        });
-                        oldRule.ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-                                this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
-                            });
-                        });
-                        dispose();
-                        return;
-                    }
-                    next(config);
-                },
-            });
-
-            oldRule.ranges.forEach((range) => {
-                Range.foreach(range, (row, col) => {
-                    this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-                });
-            });
-
-            this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, oldRule);
-            this._ruleChange$.next({ rule: oldRule, subUnitId, unitId, type: 'set' });
+            this._ruleChange$.next({ rule: oldRule, subUnitId, unitId, type: 'set', oldRule: cloneRule });
         }
     }
 
@@ -141,17 +168,6 @@ export class ConditionalFormattingRuleModel {
             // The new conditional formatting has a higher priority
             list.unshift(rule);
         }
-        const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
-            map.set(cur, index);
-            return map;
-        }, new Map<string, number>());
-        rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
-                this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
-            });
-        });
-        this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
         this._ruleChange$.next({ rule, subUnitId, unitId, type: 'add' });
     }
 
@@ -169,15 +185,6 @@ export class ConditionalFormattingRuleModel {
         const rule = list[curIndex];
         if (rule) {
             moveByAnchor(start, end, list, (rule) => rule.cfId);
-            const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
-                map.set(cur, index);
-                return map;
-            }, new Map<string, number>());
-            rule.ranges.forEach((range) => {
-                Range.foreach(range, (row, col) => {
-                    this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
-                });
-            });
             this._ruleChange$.next({ rule, subUnitId, unitId, type: 'sort' });
         }
     }

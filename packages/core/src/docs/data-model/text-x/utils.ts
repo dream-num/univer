@@ -27,7 +27,7 @@ export enum SliceBodyType {
 }
 
 // TODO: Support other properties like custom ranges, tables, etc.
-// eslint-disable-next-line max-lines-per-function
+// eslint-disable-next-line max-lines-per-function, complexity
 export function getBodySlice(
     body: IDocumentBody,
     startOffset: number,
@@ -35,7 +35,7 @@ export function getBodySlice(
     returnEmptyTextRun = false,
     type = SliceBodyType.cut
 ): IDocumentBody {
-    const { dataStream, textRuns = [], paragraphs = [], customBlocks = [] } = body;
+    const { dataStream, textRuns = [], paragraphs = [], customBlocks = [], tables = [] } = body;
 
     const docBody: IDocumentBody = {
         dataStream: dataStream.slice(startOffset, endOffset),
@@ -85,6 +85,25 @@ export function getBodySlice(
         }];
     }
 
+    const newTables = [];
+
+    for (const table of tables) {
+        const clonedTable = Tools.deepClone(table);
+        const { startIndex, endIndex } = clonedTable;
+
+        if (startIndex >= startOffset && endIndex <= endOffset) {
+            newTables.push({
+                ...clonedTable,
+                startIndex: startIndex - startOffset,
+                endIndex: endIndex - startOffset,
+            });
+        }
+    }
+
+    if (newTables.length) {
+        docBody.tables = newTables;
+    }
+
     const newParagraphs: IParagraph[] = [];
 
     for (const paragraph of paragraphs) {
@@ -126,7 +145,7 @@ export function getBodySlice(
 }
 
 export function normalizeBody(body: IDocumentBody): IDocumentBody {
-    const { dataStream, textRuns, paragraphs, customRanges, customDecorations } = body;
+    const { dataStream, textRuns, paragraphs, customRanges, customDecorations, tables } = body;
     let leftOffset = 0;
     let rightOffset = 0;
 
@@ -170,6 +189,11 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         d.endIndex += rightOffset;
     });
 
+    tables?.forEach((table) => {
+        table.startIndex += leftOffset;
+        table.endIndex += rightOffset;
+    });
+
     return {
         ...body,
         dataStream: newData,
@@ -177,6 +201,7 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         paragraphs,
         customRanges,
         customDecorations,
+        tables,
     };
 }
 

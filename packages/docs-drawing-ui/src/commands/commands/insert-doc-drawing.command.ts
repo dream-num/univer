@@ -45,7 +45,7 @@ export const InsertDocDrawingCommand: ICommand = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const activeTextRange = textSelectionManagerService.getActiveRange();
+        const activeTextRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (activeTextRange == null || documentDataModel == null) {
             return false;

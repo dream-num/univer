@@ -513,7 +513,7 @@ export class PromptController extends Disposable {
     private _initAcceptFormula() {
         this.disposeWithMe(
             this._formulaPromptService.acceptFormulaName$.subscribe((formulaString: string) => {
-                const activeRange = this._textSelectionManagerService.getActiveRange();
+                const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
                 if (activeRange == null) {
                     this._hideFunctionPanel();
@@ -579,7 +579,7 @@ export class PromptController extends Disposable {
     }
 
     private _changeFunctionPanelState() {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
         if (activeRange == null) {
             this._hideFunctionPanel();
@@ -678,7 +678,7 @@ export class PromptController extends Disposable {
      * @returns Return the character under the current cursor in the editor.
      */
     private _getCurrentChar() {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
         if (activeRange == null) {
             return;
@@ -807,7 +807,7 @@ export class PromptController extends Disposable {
 
             this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 
-            const activeRange = this._textSelectionManagerService.getActiveRange();
+            const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
             if (activeRange == null) {
                 return;
@@ -1197,7 +1197,7 @@ export class PromptController extends Disposable {
 
         this._isSelectionMovingRefSelections = refSelections;
 
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
         if (activeRange == null) {
             return;
@@ -1835,7 +1835,7 @@ export class PromptController extends Disposable {
      * Absolute range, triggered by F4
      */
     private _changeRefString() {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
         if (activeRange == null) {
             return;

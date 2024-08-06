@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/uniui",
-    "version": "0.2.1",
+    "version": "0.2.6",
     "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -63,11 +63,8 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
-        "@univerjs/docs-drawing-ui": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": ">=2.0.0",
@@ -78,7 +75,7 @@
     "dependencies": {
         "@floating-ui/react-dom": "^2.1.1",
         "@univerjs/icons": "^0.1.70",
-        "@xyflow/react": "^12.0.3",
+        "@xyflow/react": "^12.0.4",
         "rc-util": "^5.43.0"
     },
     "devDependencies": {
@@ -95,7 +92,6 @@
         "less": "^4.2.0",
         "react": "18.3.1",
         "react-dom": "18.3.1",
-        "react-router-dom": "~6.25.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.4",
         "vite": "^5.3.5",

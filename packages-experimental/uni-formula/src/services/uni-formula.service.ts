@@ -113,8 +113,9 @@ export const UpdateDocUniFormulaCacheMutation: IMutation<IUpdateDocUniFormulaCac
 };
 
 /**
- * This service provides methods for docs and slides to register a formula into
- * Univer's formula system.
+ * This service provides methods for docs and slides to register a formula into Univer's formula system.
+ * And it also manages formula resources fields of docs and slides. `SHEETS_FORMULA_REMOTE_PLUGIN`
+ * is not required but optional here.
  */
 @OnLifecycle(LifecycleStages.Steady, UniFormulaService)
 export class UniFormulaService extends Disposable {
@@ -133,7 +134,10 @@ export class UniFormulaService extends Disposable {
 
         this._initCommands();
         this._initDocFormulaResources(resourceManagerService);
-        this._initDocDisposingListener();
+
+        this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
+            this._unregisterDoc(doc.getUnitId());
+        });
     }
 
     private _initCommands(): void {
@@ -296,18 +300,11 @@ export class UniFormulaService extends Disposable {
                 return formulas;
             },
             onLoad: (unitId, formulas) => {
-                // NOTE: Should wait for lifecycle?
                 formulas.forEach((f) => this.registerDocFormula(unitId, f.rangeId, f.f, f.v, f.t));
             },
             onUnLoad: (unitId) => {
                 this._unregisterDoc(unitId);
             },
-        });
-    }
-
-    private _initDocDisposingListener(): void {
-        this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
-            this._unregisterDoc(doc.getUnitId());
         });
     }
 
@@ -324,4 +321,3 @@ function getPseudoUnitKey(unitId: string): string {
 function getDocFormulaKey(unitId: string, formulaId: string): string {
     return `pseudo-${unitId}-${formulaId}`;
 }
-

@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniFormulaService } from './services/uni-formula.service';
 import { DOC_FORMULA_PLUGIN_NAME } from './const';
 
-@DependentOn(UniverSheetsFormulaPlugin)
 export class UniverDocUniFormulaPlugin extends Plugin {
     static override pluginName: string = DOC_FORMULA_PLUGIN_NAME;
 

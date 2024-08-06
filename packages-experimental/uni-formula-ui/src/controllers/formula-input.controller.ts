@@ -80,10 +80,10 @@ export class DocUniFormulaController extends Disposable {
 
             if (id === InsertCommand.id) {
                 const params = commandInfo.params as IInsertCommandParams;
-                const activeRange = this._textSelectionManagerService.getActiveRange();
+                const activeRange = this._textSelectionManagerService.getActiveTextRange();
                 if (params.body.dataStream === FORMULA_INPUT_TRIGGER_CHAR && activeRange) {
                     this._showPopup({
-                        startIndex: activeRange.startOffset - 1,
+                        startIndex: activeRange.startOffset! - 1,
                         unitId: focusedUnit.getUnitId(),
                     });
                 } else if (this._docFormulaPopupService.popupInfo) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { getParagraphsInRange } from './commands/commands/list.command';
+export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';
 export { replaceSelectionFactory } from './basics/replace';
 export { makeSelection, getSelectionText, getDeleteSelection, getInsertSelection, isSegmentIntersects } from './basics/selection';
 export type { IDocObjectParam } from './basics/component-tools';
@@ -58,7 +58,16 @@ export {
     ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatCommand,
 } from './commands/commands/inline-format.command';
-export { ListOperationCommand, BulletListCommand, OrderListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, getParagraphsInRanges } from './commands/commands/list.command';
+export {
+    ListOperationCommand,
+    BulletListCommand,
+    OrderListCommand,
+    ChangeListNestingLevelCommand,
+    ChangeListTypeCommand,
+    CheckListCommand,
+    ToggleCheckListCommand,
+    QuickListCommand,
+} from './commands/commands/list.command';
 export {
     AlignOperationCommand,
     AlignLeftCommand,
@@ -68,7 +77,7 @@ export {
 } from './commands/commands/paragraph-align.command';
 export { ReplaceContentCommand, CoverContentCommand } from './commands/commands/replace-content.command';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
-export { SpaceCommand, TabCommand, EnterCommand, type ITabCommandParams } from './commands/commands/auto-format.command';
+export { AfterSpaceCommand, TabCommand, EnterCommand, type ITabCommandParams } from './commands/commands/auto-format.command';
 export {
     RichTextEditingMutation,
     type IRichTextEditingMutationParams,

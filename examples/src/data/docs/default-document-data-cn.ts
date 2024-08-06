@@ -615,6 +615,9 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         renderConfig: {
             vertexAngle: 0,
             centerAngle: 0,
+            background: {
+                rgb: '#ccc',
+            },
         },
         defaultHeaderId: '',
         defaultFooterId: '',

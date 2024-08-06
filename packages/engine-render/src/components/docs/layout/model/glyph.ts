@@ -279,7 +279,10 @@ export function createSkeletonBulletGlyph(
 
     return {
         content,
-        ts: textStyle,
+        ts: {
+            ...glyph.ts,
+            ...textStyle,
+        },
         fontStyle,
         width,
         xOffset: 0,

@@ -33,14 +33,14 @@ export const TabCommand: ICommand<ITabCommandParams> = {
     },
 };
 
-const SpaceCommandId = 'doc.command.space';
+const AfterSpaceCommandId = 'doc.command.after-space';
 
-export const SpaceCommand: ICommand = {
-    id: SpaceCommandId,
+export const AfterSpaceCommand: ICommand = {
+    id: AfterSpaceCommandId,
     type: CommandType.COMMAND,
     handler(accessor) {
         const autoFormatService = accessor.get(DocAutoFormatService);
-        const mutations = autoFormatService.onAutoFormat(SpaceCommand.id);
+        const mutations = autoFormatService.onAutoFormat(AfterSpaceCommand.id);
         return sequenceExecute(mutations, accessor.get(ICommandService)).result;
     },
 };

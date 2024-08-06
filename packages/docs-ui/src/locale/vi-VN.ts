@@ -50,6 +50,7 @@ const locale: typeof zhCN = {
         alignRight: 'Căn phải',
         alignJustify: 'Căn đều hai bên',
         headerFooter: 'Đầu trang và chân trang',
+        checklist: 'Task list',
     },
     table: {
         insert: 'Insert',

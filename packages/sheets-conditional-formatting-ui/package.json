@@ -79,7 +79,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.70",
+        "@univerjs/icons": "^0.1.72",
         "@univerjs/protocol": "0.1.38",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",
@@ -94,7 +94,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons-svg": "^0.1.70",
+        "@univerjs/icons-svg": "^0.1.72",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",

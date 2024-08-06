@@ -100,9 +100,15 @@ export function getParagraphByGlyph(glyph: Nullable<IDocumentSkeletonGlyph>, bod
         return;
     }
 
-    for (const paragraph of paragraphs) {
+    for (let i = 0; i < paragraphs.length; i++) {
+        const paragraph = paragraphs[i];
+        const prevParagraph = paragraphs[i - 1];
         if (paragraph.startIndex === line.paragraphIndex) {
-            return paragraph;
+            return {
+                ...paragraph,
+                paragraphStart: (prevParagraph?.startIndex ?? -1) + 1,
+                paragraphEnd: paragraph.startIndex,
+            };
         }
     }
 }

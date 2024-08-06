@@ -26,7 +26,7 @@ export interface ICustomDecorationForInterceptor extends ICustomDecoration {
     show?: boolean;
 }
 
-export interface IParagrapRange extends IParagraph {
+export interface IParagraphRange extends IParagraph {
     paragraphStart: number;
     paragraphEnd: number;
 }

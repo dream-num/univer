@@ -21,6 +21,7 @@ import type { Subscription } from 'rxjs';
 
 import { InsertCommand } from '../commands/commands/core-editing.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
+import { AfterSpaceCommand } from '../commands/commands/auto-format.command';
 
 @OnLifecycle(LifecycleStages.Rendered, NormalInputController)
 export class NormalInputController extends Disposable {
@@ -98,6 +99,11 @@ export class NormalInputController extends Disposable {
                 range: activeRange,
                 segmentId,
             });
+
+            // Space
+            if (content === ' ') {
+                await this._commandService.executeCommand(AfterSpaceCommand.id);
+            }
         });
     }
 }

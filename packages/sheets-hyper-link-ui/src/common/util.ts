@@ -35,11 +35,11 @@ export function serializeUrl(urlStr: string) {
     if (isLegalLink(urlStr)) {
         const transformedUrl = hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `http://${urlStr}`;
 
-        let url:URL
+        let url: URL;
         try {
             url = new URL(transformedUrl);
         } catch {
-            return urlStr
+            return urlStr;
         }
 
         if (

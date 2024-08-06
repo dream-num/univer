@@ -15,29 +15,28 @@
  */
 
 import { Disposable } from '@univerjs/core';
-import { ICellHyperLink } from '@univerjs/sheets-hyper-link';
-import React from 'react';
-
+import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
+import type React from 'react';
 
 export interface CustomHyperLinkFormProps {
-    linkId: string,
-    payload: string,
-    display: string,
-    setByPayload: React.MutableRefObject<boolean>,
-    showError: boolean,
-    setDisplay: (display: string) => void,
-    setPayload: (payload: string) => void,
+    linkId: string;
+    payload: string;
+    display: string;
+    setByPayload: React.MutableRefObject<boolean>;
+    showError: boolean;
+    setDisplay: (display: string) => void;
+    setPayload: (payload: string) => void;
 }
 
 export interface ICustomHyperLinkView {
-    type: string,
+    type: string;
     option: {
-        label: string,
-        value: string
-    },
-    Form: React.FC<CustomHyperLinkFormProps>
-    convert: (link: ICellHyperLink) => { display: string, payload: string, type: string },
-    match: (link: ICellHyperLink) => boolean
+        label: string;
+        value: string;
+    };
+    Form: React.FC<CustomHyperLinkFormProps>;
+    convert: (link: ICellHyperLink) => { display: string; payload: string; type: string };
+    match: (link: ICellHyperLink) => boolean;
 }
 
 export enum LinkType {
@@ -51,7 +50,7 @@ export class SheetsHyperLinkSidePanelService extends Disposable {
     private _customHyperLinks = new Map<string, ICustomHyperLinkView>();
 
     isBuiltInLinkType(type: string) {
-        return Boolean((LinkType as any)[type])
+        return Boolean((LinkType as any)[type]);
     }
 
     getOptions() {
@@ -59,9 +58,9 @@ export class SheetsHyperLinkSidePanelService extends Disposable {
     }
 
     findCustomHyperLink(link: ICellHyperLink) {
-        const customLink = Array.from(this._customHyperLinks.values()).find(item => item.match(link));
+        const customLink = Array.from(this._customHyperLinks.values()).find((item) => item.match(link));
 
-        return customLink
+        return customLink;
     }
 
     registerCustomHyperLink(customHyperLink: ICustomHyperLinkView) {
@@ -74,7 +73,7 @@ export class SheetsHyperLinkSidePanelService extends Disposable {
 
     removeCustomHyperLink(type: string) {
         const { _customHyperLinks } = this;
-        _customHyperLinks.delete(type)
+        _customHyperLinks.delete(type);
     }
 
     override dispose() {

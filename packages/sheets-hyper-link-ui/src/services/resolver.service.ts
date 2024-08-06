@@ -57,7 +57,7 @@ function getContainRange(range: IRange, worksheet: Worksheet) {
 }
 
 export interface IHyperLinkInfo<T extends string> {
-    type: T
+    type: T;
     name: string;
     url: string;
     handler: () => void;

@@ -56,7 +56,6 @@ type LinkUpdate = {
     silent?: boolean;
 };
 
-
 export class HyperLinkModel extends Disposable {
     private _linkUpdate$ = new Subject<LinkUpdate>();
     linkUpdate$ = this._linkUpdate$.asObservable();

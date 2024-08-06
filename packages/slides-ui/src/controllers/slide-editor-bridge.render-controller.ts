@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDisposable, SlideDataModel, UnitModel } from '@univerjs/core';
+import type { IDisposable, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
 import { DisposableCollection, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import {
     TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { IChangeObserverConfig, IRenderContext, IRenderModule, RichText } from '@univerjs/engine-render';
+import type { BaseObject, IChangeObserverConfig, IRenderContext, IRenderModule, RichText } from '@univerjs/engine-render';
 import { ITextSelectionRenderManager, ObjectType } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
 import { Subject } from 'rxjs';
@@ -104,21 +104,20 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
 
             if (!transformer) return;
 
-            // This is the start of editing.
-            //TODO: @lumixraku calling twice when add an object.
-            d.add(transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
-                const target = param.target;
-                if (!target) return;
-                if (target.objectType !== ObjectType.RICH_TEXT) {
+            const subscription = scene?.onDblclick$.subscribeEvent(() => {
+                const selectedObjects = transformer.getSelectedObjectMap();
+                const object = selectedObjects.values().next().value as Nullable<BaseObject>;
+                if (!object) return;
+
+                if (object.objectType !== ObjectType.RICH_TEXT) {
                     this.setEditorVisible(false);
                     this.endEditing();
-
-                    // rm other text editor
                 } else {
-                    // const elementData = (target as RichText).toJson();
-                    this.startEditing(target as RichText);
+                    this.startEditing(object as RichText);
                 }
-            }));
+            });
+
+            subscription && d.add(subscription);
         }
     }
 

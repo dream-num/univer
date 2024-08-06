@@ -23,7 +23,7 @@ import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.servic
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const activeRange = textSelectionService.getActiveTextRangeWithStyle();
+    const textRanges = textSelectionService.getCurrentTextRanges();
     const renderManagerService = accessor.get(IRenderManagerService);
     const render = renderManagerService.getCurrent();
     const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
@@ -31,6 +31,11 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
     if (editArea === DocumentEditArea.FOOTER || editArea === DocumentEditArea.HEADER) {
         return true;
     }
+    if (!textRanges || textRanges.length > 1) {
+        return true;
+    }
+
+    const activeRange = textRanges[0];
     const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!doc || !activeRange || activeRange.collapsed) {
         return (true);
@@ -44,12 +49,12 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
 
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const p = paragraphs[i];
-        if ((activeRange.startOffset) <= p.startIndex && activeRange.endOffset > p.startIndex) {
+        if ((activeRange.startOffset!) <= p.startIndex && activeRange.endOffset! > p.startIndex) {
             return (true);
             return;
         }
 
-        if (p.startIndex > activeRange.endOffset) {
+        if (p.startIndex > activeRange.endOffset!) {
             break;
         }
     }

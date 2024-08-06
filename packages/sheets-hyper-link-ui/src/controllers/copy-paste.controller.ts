@@ -25,6 +25,21 @@ import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkCopyPasteController)
 export class SheetsHyperLinkCopyPasteController extends Disposable {
+    private _plainTextFilter = new Set<(text: string) => boolean>();
+
+    registerPlainTextFilter(filter: (text: string) => boolean) {
+        this._plainTextFilter.add(filter);
+    }
+
+    removePlainTextFilter(filter: (text: string) => boolean) {
+        this._plainTextFilter.delete(filter);
+    }
+
+    /* If return false the process of paste text will be stop */
+    private _filterPlainText(text: string) {
+        return Array.from(this._plainTextFilter).every((filter) => filter(text));
+    }
+
     private _copyInfo: Nullable<{
         matrix: ObjectMatrix<string>;
         unitId: string;
@@ -39,6 +54,9 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
     ) {
         super();
         this._initCopyPaste();
+        this.disposeWithMe(() => {
+            this._plainTextFilter.clear();
+        });
     }
 
     private _initCopyPaste() {
@@ -52,7 +70,8 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                 return this._generateMutations(pastedRange, { copyType, pasteType, copyRange, unitId, subUnitId });
             },
             onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
-                if (isLegalLink(clipText)) {
+                const filterResult = this._filterPlainText(clipText);
+                if (isLegalLink(clipText) && filterResult) {
                     const text = serializeUrl(clipText);
 
                     const { range, unitId, subUnitId } = pasteTo;

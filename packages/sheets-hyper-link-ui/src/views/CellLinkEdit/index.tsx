@@ -27,19 +27,13 @@ import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
 import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
+import { LinkType, SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import styles from './index.module.less';
-
-enum LinkType {
-    link = 'link',
-    range = 'range',
-    sheet = 'gid',
-    definedName = 'rangeid',
-}
 
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
     const [display, setDisplay] = useState('');
-    const [type, setType] = useState(LinkType.link);
+    const [type, setType] = useState<LinkType | string>(LinkType.link);
     const [payload, setPayload] = useState('');
     const localeService = useDependency(LocaleService);
     const definedNameService = useDependency(IDefinedNamesService);
@@ -49,6 +43,14 @@ export const CellLinkEdit = () => {
     const hyperLinkModel = useDependency(HyperLinkModel);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const commandService = useDependency(ICommandService);
+    const sidePanelService = useDependency(SheetsHyperLinkSidePanelService);
+    const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
+    const customHyperLinkSidePanel = useMemo(() => {
+        if (sidePanelService.isBuiltInLinkType(type)) {
+            return;
+        }
+        return sidePanelService.getCustomHyperLink(type);
+    }, [sidePanelService, type]);
     const [showError, setShowError] = useState(false);
 
     const setByPayload = useRef(false);
@@ -56,10 +58,19 @@ export const CellLinkEdit = () => {
     useEffect(() => {
         if (editing?.row !== undefined && editing.column !== undefined) {
             const link = hyperLinkModel.getHyperLinkByLocationSync(editing.unitId, editing.subUnitId, editing.row, editing.column);
+
             if (link) {
-                const linkInfo = resolverService.parseHyperLink(link.payload);
                 setId(link.id);
+                const customLink = sidePanelService.findCustomHyperLink(link);
+                if (customLink) {
+                    const customLinkInfo = customLink.convert(link);
+                    setType(customLinkInfo.type);
+                    setPayload(customLinkInfo.payload);
+                    setDisplay(customLinkInfo.display);
+                    return;
+                }
                 setDisplay(link.display);
+                const linkInfo = resolverService.parseHyperLink(link.payload);
                 if (linkInfo.type === 'outer') {
                     setType(LinkType.link);
                     setPayload(linkInfo.url);
@@ -125,7 +136,10 @@ export const CellLinkEdit = () => {
 
     const payloadInitial = useMemo(() => payload, [type]);
 
-    const linkTypeOptions = [
+    const linkTypeOptions: Array<{
+        label: string;
+        value: LinkType | string;
+    }> = [
         {
             label: localeService.t('hyperLink.form.link'),
             value: LinkType.link,
@@ -142,7 +156,9 @@ export const CellLinkEdit = () => {
             label: localeService.t('hyperLink.form.definedName'),
             value: LinkType.definedName,
         },
+        ...sidePanelOptions,
     ];
+
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     if (!workbook) {
         return;
@@ -154,7 +170,7 @@ export const CellLinkEdit = () => {
         value: value.id,
     }));
 
-    const formatUrl = (type: LinkType, payload: string) => {
+    const formatUrl = (type: LinkType | string, payload: string) => {
         if (type === LinkType.link) {
             return serializeUrl(payload);
         }
@@ -319,6 +335,20 @@ export const CellLinkEdit = () => {
                         }}
                     />
                 </FormLayout>
+            )}
+            {customHyperLinkSidePanel?.Form && (
+                <customHyperLinkSidePanel.Form
+                    linkId={id}
+                    payload={payload}
+                    display={display}
+                    showError={showError}
+                    setByPayload={setByPayload}
+                    setDisplay={(newLink) => {
+                        setDisplay(newLink);
+                        setByPayload.current = true;
+                    }}
+                    setPayload={setPayload}
+                />
             )}
             <div className={styles.cellLinkEditButtons}>
                 <Button

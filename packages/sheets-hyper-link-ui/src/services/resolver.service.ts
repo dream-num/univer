@@ -56,6 +56,13 @@ function getContainRange(range: IRange, worksheet: Worksheet) {
     return Rectangle.realUnion(range, ...relativeCells);
 }
 
+export interface IHyperLinkInfo<T extends string> {
+    type: T;
+    name: string;
+    url: string;
+    handler: () => void;
+}
+
 export class SheetsHyperLinkResolverService {
     constructor(
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,

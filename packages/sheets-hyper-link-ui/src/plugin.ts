@@ -31,6 +31,7 @@ import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.contr
 import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 import { SheetHyperLinkUrlController } from './controllers/url.controller';
 import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
+import { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
 
 @DependentOn(UniverSheetsHyperLinkPlugin)
 export class UniverSheetsHyperLinkUIPlugin extends Plugin {
@@ -49,6 +50,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [SheetsHyperLinkResolverService],
             [SheetsHyperLinkPopupService],
+            [SheetsHyperLinkSidePanelService],
 
             [SheetsHyperLinkRemoveSheetController],
             [SheetsHyperLinkRenderManagerController],

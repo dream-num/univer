@@ -100,11 +100,20 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         for (let i = 0; i < pages.length; i++) {
             const page = pages[i];
             const { scene } = this._canvasView.getRenderUnitByPageId(page.id);
-            const transformer = scene?.getTransformer();
+            if (!scene) break;
 
-            if (!transformer) return;
+            const transformer = scene.getTransformer();
+            if (!transformer) break;
 
-            const subscription = scene?.onDblclick$.subscribeEvent(() => {
+            d.add(transformer.clearControl$.subscribe(() => {
+                this.setEditorVisible(false);
+            }));
+            d.add(transformer.createControl$.subscribe(() => {
+                this.setEditorVisible(false);
+            }));
+
+            d.add(scene.onDblclick$.subscribeEvent(() => {
+                transformer.clearControls();
                 const selectedObjects = transformer.getSelectedObjectMap();
                 const object = selectedObjects.values().next().value as Nullable<BaseObject>;
                 if (!object) return;
@@ -115,9 +124,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
                 } else {
                     this.startEditing(object as RichText);
                 }
-            });
-
-            subscription && d.add(subscription);
+            }));
         }
     }
 

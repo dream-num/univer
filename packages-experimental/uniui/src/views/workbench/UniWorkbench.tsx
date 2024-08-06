@@ -17,8 +17,8 @@
 // Refer to packages/ui/src/views/App.tsx
 
 import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
-import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import type { ILocale } from '@univerjs/design';
+import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import {
     builtInGlobalComponents,
     BuiltInUIPart,
@@ -30,9 +30,6 @@ import {
     useComponentsOfPart,
     useObservable,
 } from '@univerjs/ui';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import clsx from 'clsx';
 import type {
     NodeTypes,
     ReactFlowInstance,
@@ -46,17 +43,20 @@ import {
     useNodesState,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import clsx from 'clsx';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { MenuSingle } from '@univerjs/icons';
-import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
-import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
-import { useUnitFocused, useUnitTitle } from '../hooks/title';
-import { type IFloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
-import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControls } from '../uni-controls/UniControls';
-import { UniToolbar } from '../uni-toolbar/UniToolbar';
-import { FlowManagerService } from '../../services/flow/flow-manager.service';
 import { UniFocusUnitOperation } from '../../commands/operations/uni-focus-unit.operation';
+import { FlowManagerService } from '../../services/flow/flow-manager.service';
+import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
+import { useUnitFocused, useUnitTitle } from '../hooks/title';
+import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControlItem, UniControls } from '../uni-controls/UniControls';
+import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
+import { type FloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
+import { UniToolbar } from '../uni-toolbar/UniToolbar';
 import styles from './workbench.module.less';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
 
@@ -81,9 +81,10 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const instanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const flowManagerService = useDependency(FlowManagerService);
+    const commandService = useDependency(ICommandService);
 
     const contentRef = useRef<HTMLDivElement>(null);
-    const floatingToolbarRef = useRef<IFloatingToolbarRef>(null);
+    const floatingToolbarRef = useRef<FloatingToolbarRef>(null);
     const reactFlowInstance = useRef<HTMLDivElement | null>(null);
 
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
@@ -108,6 +109,14 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
     const [zoom, setZoom] = useState<number>(DEFAULT_ZOOM);
 
+    const onControlItemClick = useCallback((key: UniControlItem) => {
+        switch (key) {
+            case UniControlItem.AI: {
+                commandService.executeCommand('project.controls-pro-search.operation');
+                break;
+            }
+        }
+    }, [commandService]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const resizeUnits = useCallback(debounce(() => {
         renderManagerService.getRenderAll().forEach(((renderer) => renderer.engine.resize()));
@@ -255,7 +264,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                         <RightSidebar />
 
                         {/* uni mode controller buttons */}
-                        <UniControls zoom={zoom} />
+                        <UniControls zoom={zoom} onItemClick={onControlItemClick} />
                     </div>
                 </div>
                 <ComponentContainer key="global" components={globalComponents} />

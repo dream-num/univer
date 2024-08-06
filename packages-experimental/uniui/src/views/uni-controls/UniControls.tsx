@@ -46,7 +46,11 @@ export const DEFAULT_ZOOM = 1;
 // 0 means fit view
 const shortcuts = [50, 75, 100, 125, 150, 175, 200, 0];
 
-export const UniControls = ({ zoom }: { zoom: number }) => {
+export enum UniControlItem {
+    AI = 'AI',
+}
+
+export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?: (key: UniControlItem) => void }) => {
     const zoomPercent = Math.floor(zoom * 100);
     const { zoomIn, zoomOut, fitView, setViewport, getNodes, setCenter, getZoom } = useReactFlow();
     const unitGridService = useDependency(IUnitGridService);
@@ -156,7 +160,7 @@ export const UniControls = ({ zoom }: { zoom: number }) => {
                 <ZoomReduceSingle />
             </UniControlButton>
             <UniDiv />
-            <UniControlButton tooltips="AI" onClick={() => {}} style={{ background: '#274FEE' }}>
+            <UniControlButton tooltips="AI" onClick={() => onItemClick?.(UniControlItem.AI)} style={{ background: '#274FEE' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M5.09091 19C4.63904 19 4.27273 18.6337 4.27273 18.1818C4.27273 17.7299 4.63904 17.3636 5.09091 17.3636C5.54278 17.3636 5.90909 17.7299 5.90909 18.1818C5.90909 18.6337 5.54278 19 5.09091 19Z" fill="white" />
                     <path d="M14.9091 2.63636C14.4572 2.63636 14.0909 2.27005 14.0909 1.81818C14.0909 1.36631 14.4572 1 14.9091 1C15.361 1 15.7273 1.36631 15.7273 1.81818C15.7273 2.27005 15.361 2.63636 14.9091 2.63636Z" fill="white" />

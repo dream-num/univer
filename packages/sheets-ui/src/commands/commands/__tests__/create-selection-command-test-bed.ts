@@ -86,6 +86,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender(unitId, {
         unitId,
+        type: UniverInstanceType.UNIVER_SHEET,
         engine: new Disposable() as any,
         scene: new DisposableCollection() as any,
         mainComponent: null as any,

@@ -214,6 +214,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
 
     private _skeletonListener() {
         let init = false;
+
         // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
         this.disposeWithMe(this._docSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
             if (!skeleton) return;
@@ -221,7 +222,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
             const { scene, mainComponent, unitId } = this._context;
             const isInternalEditor = isInternalEditorID(unitId);
 
-            if (init) {
+            if (init || !isInternalEditorID(this._context.unitId)) {
                 this._textSelectionRenderManager.changeRuntime(skeleton, scene, mainComponent as Documents);
                 this._textSelectionManagerService.setCurrentSelectionNotRefresh({
                     unitId,

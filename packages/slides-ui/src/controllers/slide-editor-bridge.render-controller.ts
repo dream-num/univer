@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDisposable, SlideDataModel, UnitModel } from '@univerjs/core';
+import type { IDisposable, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
 import { DisposableCollection, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import {
     TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { IChangeObserverConfig, IRenderContext, IRenderModule, RichText } from '@univerjs/engine-render';
+import type { BaseObject, IChangeObserverConfig, IRenderContext, IRenderModule, RichText } from '@univerjs/engine-render';
 import { ITextSelectionRenderManager, ObjectType } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
 import { Subject } from 'rxjs';
@@ -100,35 +100,61 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         for (let i = 0; i < pages.length; i++) {
             const page = pages[i];
             const { scene } = this._canvasView.getRenderUnitByPageId(page.id);
-            const transformer = scene?.getTransformer();
+            if (!scene) break;
 
-            if (!transformer) return;
+            const transformer = scene.getTransformer();
+            if (!transformer) break;
 
-            // calling twice when add an object.
+            d.add(transformer.clearControl$.subscribe(() => {
+                this.setEditorVisible(false);
+            }));
+            d.add(transformer.createControl$.subscribe(() => {
+                this.setEditorVisible(false);
+            }));
+
             d.add(transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
                 const target = param.target;
                 if (!target) return;
                 if (target.objectType !== ObjectType.RICH_TEXT) {
-                    this.saveCurrEditingState();
+                    this.pickOtherObjects();
+                } else if (target === this._curRichText) {
+                    // do nothing
+                }
+            }));
 
-                    // rm other text editor
-                    this.changeVisible(false);
+            d.add(scene.onDblclick$.subscribeEvent(() => {
+                transformer.clearControls();
+                const selectedObjects = transformer.getSelectedObjectMap();
+                const object = selectedObjects.values().next().value as Nullable<BaseObject>;
+                if (!object) return;
+
+                if (object.objectType !== ObjectType.RICH_TEXT) {
+                    this.pickOtherObjects();
                 } else {
-                    // const elementData = (target as RichText).toJson();
-                    this._curRichText = target as RichText;
-                    this.startEditing(target as RichText);
+                    this.startEditing(object as RichText);
                 }
             }));
         }
     }
 
-    saveCurrEditingState() {
+    pickOtherObjects() {
+        this.setEditorVisible(false);
+        this.endEditing();
+    }
+
+    /**
+     * invoked when picking other object.
+     *
+     * save editing state to curr richText.
+     */
+    endEditing() {
         if (!this._curRichText) return;
         const curRichText = this._curRichText;
 
         const slideData = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         if (!slideData) return false;
-        curRichText.updateDocumentByDocData();
+        curRichText.refreshDocumentByDocData();
+        this._curRichText = null;
     }
 
     /**
@@ -136,15 +162,21 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
      * editingParam derives from RichText object.
      *
      * TODO @lumixraku need scale param
-     * @param editingParam
+     * @param target
      */
     startEditing(target: RichText) {
         // this.setSlideTextEditor$.next({ content, rect });
+        this._curRichText = target as RichText;
         this._updateEditor(target);
-        this.changeVisible(true);
+        this.setEditorVisible(true);
     }
 
-    changeVisible(visible: boolean) {
+    setEditorVisible(visible: boolean) {
+        if (visible) {
+            this._curRichText?.hide();
+        } else {
+            this._curRichText?.show();
+        }
         const { unitId } = this._renderContext;
         this._editorBridgeService.changeVisible({ visible, eventType: 3, unitId });
     }

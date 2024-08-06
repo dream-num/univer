@@ -22,22 +22,32 @@ import {
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
+    HorizontalAlign,
     IContextService,
     VerticalAlign,
 } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, RichText, Scene } from '@univerjs/engine-render';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { SLIDE_KEY } from '@univerjs/slides';
 import type { KeyCode } from '@univerjs/ui';
 import { IEditorService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+
+// TODO same as @univerjs/slides/views/render/adaptors/index.js
+export enum SLIDE_VIEW_KEY {
+    MAIN = '__SLIDERender__',
+    SCENE_VIEWER = '__SLIDEViewer__',
+    SCENE = '__SLIDEScene__',
+    VIEWPORT = '__SLIDEViewPort_',
+}
 
 export const ISlideEditorBridgeService = createIdentifier<SlideEditorBridgeService>('univer.slide-editor-bridge.service');
 
 export interface IEditorBridgeServiceParam {
     unitId: string;
     position: IPosition;
-    canvasOffset: { left: number; top: number };
+    slideCardOffset: { left: number; top: number };
     documentLayoutObject: IDocumentLayoutObject;
     scaleX: number;
     scaleY: number;
@@ -109,7 +119,8 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
 
     constructor(
         @IEditorService private readonly _editorService: IEditorService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
     }
@@ -139,7 +150,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         const editCellState = this.getEditRectState();
         this._currentEditRectState = editCellState;
 
-        // editing render controller @_subscribeToCurrentCell
+        // slide-editing.render-controller.ts@_subscribeToCurrentCell --> activate(-1000, -1000)
         this._currentEditRectState$.next(editCellState);
     }
 
@@ -167,8 +178,9 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
 
     /**
      * get info from _currentEditRectInfo
+     *
+     * invoked by slide-editing.render-controller.ts@_handleEditorVisible & this@setEditorRect
      */
-
     getEditRectState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
         const editorUnitId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
 
@@ -193,8 +205,8 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
             fontString: 'document',
             textRotation: { a: 0, v: 0 },
             wrapStrategy: 0,
-            verticalAlign: VerticalAlign.MIDDLE,
-            horizontalAlign: 0,
+            verticalAlign: VerticalAlign.TOP,
+            horizontalAlign: HorizontalAlign.LEFT,
             paddingData: { t: 0, b: 1, l: 2, r: 2 },
         };
 
@@ -204,6 +216,26 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         const editorHeight = editorRectInfo.richTextObj.height;
         const left = editorRectInfo.richTextObj.left;
         const top = editorRectInfo.richTextObj.top;
+
+        const canvasOffset = {
+            left: 0,
+            top: 0,
+        };
+        // canvasOffset will be used in slide-editing.render-controller.ts@_handleEditorVisible
+        // const mainScene = this._mainScene;
+        const renderUnit = this._renderManagerService.getRenderById(unitId);
+        const mainScene = renderUnit?.scene;
+        const mainViewport = mainScene?.getViewport(SLIDE_KEY.VIEW);
+        const slideMainRect = mainScene?.getObject(SLIDE_KEY.COMPONENT);
+        const slidePos = {
+            x: slideMainRect?.left || 0,
+            y: slideMainRect?.top || 0,
+        };
+        const scrollX = mainViewport?.viewportScrollX || 0;
+        const scrollY = mainViewport?.viewportScrollY || 0;
+        canvasOffset.left = slidePos.x - scrollX;
+        canvasOffset.top = slidePos.y - scrollY;
+
         return {
             position: {
                 startX: left,
@@ -213,7 +245,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
             },
             scaleX: 1,
             scaleY: 1,
-            canvasOffset: { left: 0, top: 0 },
+            slideCardOffset: canvasOffset,
             unitId,
             editorUnitId,
             documentLayoutObject,
@@ -236,6 +268,9 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         return this._editorUnitId;
     }
 
+    /**
+     * @deprecated
+     */
     genDocData(target: RichText) {
         const editorUnitId = this.getCurrentEditorId();
         const content = target.text;

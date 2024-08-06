@@ -59,34 +59,68 @@ export class RichText extends BaseObject {
 
     private _documents!: Documents;
 
+    /**
+     * fontFamily
+     */
     private _ff?: Nullable<string>;
 
+    /**
+     * fontSize
+     * pt
+     */
     private _fs?: number = 12;
 
+    /**
+     * italic
+     * 0: false
+     * 1: true
+     */
     private _it?: BooleanNumber = BooleanNumber.FALSE;
 
+    /**
+     * bold
+     * 0: false
+     * 1: true
+     */
     private _bl?: BooleanNumber = BooleanNumber.FALSE;
 
+    /**
+     * underline
+     */
     private _ul?: ITextDecoration = {
         s: BooleanNumber.FALSE,
     };
 
+    /**
+     * strikethrough
+     */
     private _st?: ITextDecoration = {
         s: BooleanNumber.FALSE,
     };
 
+    /**
+     * overline
+     */
     private _ol?: ITextDecoration = {
         s: BooleanNumber.FALSE,
     };
 
+    /**
+     * background
+     */
     private _bg?: Nullable<IColorStyle>;
 
+    /**
+     * border
+     */
     private _bd?: Nullable<IBorderData>;
 
+    /**
+     * foreground
+     */
     private _cl?: Nullable<IColorStyle>;
 
     override objectType = ObjectType.RICH_TEXT;
-    private _originProps: IRichTextProps;
 
     constructor(
         private _localeService: LocaleService,
@@ -107,8 +141,6 @@ export class RichText extends BaseObject {
             this._bg = props.bg;
             this._bd = props.bd;
             this._cl = props.cl;
-
-            this._originProps = props;
 
             this._documentData = this._convertToDocumentData(props.text || '');
         }
@@ -134,6 +166,8 @@ export class RichText extends BaseObject {
                 const size = this.getDocsSkeletonPageSize();
                 this.height = size?.height || this.height;
                 this._setTransForm();
+
+                this.refreshDocumentByDocData();
             }
         });
     }
@@ -305,7 +339,10 @@ export class RichText extends BaseObject {
         this.makeDirty(true);
     }
 
-    updateDocumentByDocData() {
+    /**
+     * _documentData changed ---> update _documentSkeleton & _documentSkeleton
+     */
+    refreshDocumentByDocData() {
         const docModel = new DocumentDataModel(this._documentData);
         const docViewModel = new DocumentViewModel(docModel);
 
@@ -316,11 +353,10 @@ export class RichText extends BaseObject {
             pageMarginTop: 0,
         });
 
-        const props = this._originProps;
         this._documentSkeleton
             .getViewModel()
             .getDataModel()
-            .updateDocumentDataPageSize(props?.width, props?.height);
+            .updateDocumentDataPageSize(this.width, this.height);
 
         this._documentSkeleton.calculate();
     }

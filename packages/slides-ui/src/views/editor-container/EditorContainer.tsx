@@ -121,7 +121,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
     return (
         <div
-            className={styles.editorContainer}
+            className={styles.slideEditorContainer}
             style={{
                 left: state.left,
                 top: state.top,

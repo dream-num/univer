@@ -77,7 +77,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         // }));
     }
 
-    private _updateEditor(targetObject: RichText) {
+    private _setEditorRect(targetObject: RichText) {
         const { scene, engine } = this._renderContext;
         const unitId = this._renderContext.unitId;
 
@@ -115,10 +115,10 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             d.add(transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
                 const target = param.target;
                 if (!target) return;
-                if (target.objectType !== ObjectType.RICH_TEXT) {
-                    this.pickOtherObjects();
-                } else if (target === this._curRichText) {
+                if (target === this._curRichText) {
                     // do nothing
+                } else {
+                    this.pickOtherObjects();
                 }
             }));
 
@@ -167,7 +167,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
     startEditing(target: RichText) {
         // this.setSlideTextEditor$.next({ content, rect });
         this._curRichText = target as RichText;
-        this._updateEditor(target);
+        this._setEditorRect(target);
         this.setEditorVisible(true);
     }
 

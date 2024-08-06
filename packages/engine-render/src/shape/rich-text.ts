@@ -207,6 +207,10 @@ export class RichText extends BaseObject {
         return { width, height };
     }
 
+    /**
+     * this[`_${key}`] = props[key];
+     * @param props
+     */
     setProps(props?: IRichTextProps) {
         if (!props) {
             return;
@@ -326,6 +330,7 @@ export class RichText extends BaseObject {
 
         const contentSize = this.getDocsSkeletonPageSize();
 
+        // this[pKey] = option[pKey]
         this.transformByState({
             width: contentSize?.width || 0,
             height: contentSize?.height || 0,
@@ -334,13 +339,18 @@ export class RichText extends BaseObject {
             angle: props?.angle,
         });
 
+        // this[`_${key}`] = props[key];
         this.setProps(props);
 
         this.makeDirty(true);
     }
 
     /**
+     *
+     * it should be invoked when _documentData changed.
      * _documentData changed ---> update _documentSkeleton & _documentSkeleton
+     *
+     * now it is invoked when transformByState(change editor size) & end of editing
      */
     refreshDocumentByDocData() {
         const docModel = new DocumentDataModel(this._documentData);
@@ -356,7 +366,7 @@ export class RichText extends BaseObject {
         this._documentSkeleton
             .getViewModel()
             .getDataModel()
-            .updateDocumentDataPageSize(this.width, this.height);
+            .updateDocumentDataPageSize(this.width, Infinity);
 
         this._documentSkeleton.calculate();
     }

@@ -443,6 +443,10 @@ export class Scene extends ThinScene {
         return objects;
     }
 
+    /**
+     * get objects which is visible and not in a group in each layer.
+     * @returns BaseObject[]
+     */
     getAllObjects() {
         const objects: BaseObject[] = [];
         this._layers.sort(sortRules);
@@ -452,6 +456,11 @@ export class Scene extends ThinScene {
         return objects;
     }
 
+    /**
+     * get objects which is visible and not in a group.
+     * @param isDesc
+     * @returns BaseObject[]
+     */
     getAllObjectsByOrder(isDesc: boolean = false) {
         const objects: BaseObject[] = [];
         const useSortRules = isDesc ? sortRulesByDesc : sortRules;

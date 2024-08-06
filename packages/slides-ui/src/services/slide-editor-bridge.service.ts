@@ -147,11 +147,11 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
             this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
         }
 
-        const editCellState = this.getEditRectState();
-        this._currentEditRectState = editCellState;
+        const editRectState = this.getEditRectState();
+        this._currentEditRectState = editRectState;
 
         // slide-editing.render-controller.ts@_subscribeToCurrentCell --> activate(-1000, -1000)
-        this._currentEditRectState$.next(editCellState);
+        this._currentEditRectState$.next(editRectState);
     }
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
@@ -195,7 +195,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         docData.documentStyle = {
             ...docData.documentStyle,
             ...{
-                pageSize: { width: Infinity, height: Infinity },
+                pageSize: { width: editorRectInfo.richTextObj.width, height: Infinity },
             },
         };
 

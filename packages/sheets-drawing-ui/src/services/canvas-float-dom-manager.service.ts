@@ -38,7 +38,7 @@ export interface ICanvasFloatDom {
     unitId?: string;
     subUnitId?: string;
     /**
-     * props of component, wouldn't save to snapshot
+     * @deprecated Please use `data`. for saving to disk, everything add to float-dom must be serializable.
      */
     props?: Record<string, any>;
     /**
@@ -331,7 +331,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     });
                     listener && disposableCollection.add(listener);
                     this._domLayerInfoMap.set(drawingId, info);
-                    map.set(drawingId, {});
+                    map.set(drawingId, {
+                        ...map.get(drawingId),
+                    });
                 });
             })
         );

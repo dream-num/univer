@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/core",
-    "version": "0.2.4",
+    "version": "0.2.6",
     "private": false,
     "description": "Core library for Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -64,7 +64,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "0.1.38-alpha.23",
+        "@univerjs/protocol": "0.1.38",
         "@wendellhu/redi": "0.16.0",
         "nanoid": "5.0.7",
         "numeral": "^2.0.6",
@@ -74,9 +74,9 @@
         "@types/numeral": "^2.0.5",
         "@univerjs/shared": "workspace:*",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3"
+        "typescript": "^5.5.4",
+        "vite": "^5.3.5",
+        "vitest": "^2.0.5"
     },
     "univerSpace": {
         ".": {

@@ -36,11 +36,11 @@ export class UniverDebuggerPlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultDebuggerConfig, this._config);
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [PerformanceMonitorController],
             [E2EMemoryController],
-        ] as Dependency[]).forEach((d) => injector.add(d));
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
 
         this._injector.add([
             DebuggerController,
@@ -48,11 +48,10 @@ export class UniverDebuggerPlugin extends Plugin {
                 useFactory: () => this._injector.createInstance(DebuggerController, this._config),
             },
         ]);
-
-        this._debuggerController = this._injector.get(DebuggerController);
     }
 
     getDebuggerController() {
+        this._debuggerController = this._injector.get(DebuggerController);
         return this._debuggerController;
     }
 }

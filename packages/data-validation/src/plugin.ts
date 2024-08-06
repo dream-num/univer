@@ -37,20 +37,13 @@ export class UniverDataValidationPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
-            // model
             [DataValidationModel],
-            // service
             [DataValidatorRegistryService],
-
             [DataValidationResourceController],
             [DataValidationSheetController],
-        ] as Dependency[]).forEach(
-            (d) => {
-                injector.add(d);
-            }
-        );
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
 
         [
             // command

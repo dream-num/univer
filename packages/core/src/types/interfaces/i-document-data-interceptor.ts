@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomDecoration, ICustomRange } from './i-document-data';
+import type { ICustomDecoration, ICustomRange, IParagraph } from './i-document-data';
 
 export interface ICustomRangeForInterceptor extends ICustomRange {
     active?: boolean;
@@ -24,4 +24,9 @@ export interface ICustomRangeForInterceptor extends ICustomRange {
 export interface ICustomDecorationForInterceptor extends ICustomDecoration {
     active?: boolean;
     show?: boolean;
+}
+
+export interface IParagrapRange extends IParagraph {
+    paragraphStart: number;
+    paragraphEnd: number;
 }

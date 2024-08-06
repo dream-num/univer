@@ -97,7 +97,7 @@ export {
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { ISheetLocation, ISheetLocationBase, ISheetRowLocation } from './services/sheet-interceptor/utils/interceptor';
-export { MergeCellController } from './controllers/merge-cell.controller';
+export { MergeCellController, MERGE_CELL_INTERCEPTOR_CHECK } from './controllers/merge-cell.controller';
 export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from './commands/utils/handle-merge-operation';
 
 export type { FormatType } from './services/numfmt/type';
@@ -147,6 +147,7 @@ export {
     WorkbookViewHistoryPermission,
     WorkbookRecoverHistoryPermission,
 } from './services/permission/permission-point';
+export { checkRangesEditablePermission } from './services/permission/util';
 
 // range-protection
 export { RangeProtectionRenderModel, type ICellPermission } from './model/range-protection-render.model';
@@ -164,7 +165,7 @@ export {
 export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
 
-export { generateNullCellValue } from './basics/utils';
+export { generateNullCellValue, generateNullCell } from './basics/utils';
 
 // #region - all commands
 

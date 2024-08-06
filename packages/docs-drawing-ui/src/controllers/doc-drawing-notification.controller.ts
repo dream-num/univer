@@ -117,7 +117,7 @@ function getReOrderedDrawings(actions: JSONXActions): number[] {
     return drawingIndexes;
 }
 
-@OnLifecycle(LifecycleStages.Steady, DocDrawingAddRemoveController)
+@OnLifecycle(LifecycleStages.Ready, DocDrawingAddRemoveController)
 export class DocDrawingAddRemoveController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -144,8 +144,8 @@ export class DocDrawingAddRemoveController extends Disposable {
 
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId, actions } = params;
-                const addOrRemoveDrawings = getAddOrRemoveDrawings(actions);
 
+                const addOrRemoveDrawings = getAddOrRemoveDrawings(actions);
                 if (addOrRemoveDrawings != null) {
                     for (const { type, drawingId, drawing } of addOrRemoveDrawings) {
                         if (type === 'add') {

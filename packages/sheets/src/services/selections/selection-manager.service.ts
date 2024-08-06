@@ -226,10 +226,17 @@ export class WorkbookSelections extends Disposable {
         this._emitOnEnd(selections);
     }
 
+    /**
+     *
+     * @param sheetId
+     * @param selectionDatas
+     * @param type
+     */
     setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
-        const selections = this._ensureSheetSelection(sheetId);
-        selections.length = 0;
-        selections.push(...selectionDatas);
+        // @TODO lumixraku: selectionDatas should not be same variable !!!
+        // but there are some place get selection from this._worksheetSelections and set as 2nd parameter of this function cause problem!!
+        this._ensureSheetSelection(sheetId).length = 0;
+        this._ensureSheetSelection(sheetId).push(...selectionDatas);
 
         // WTF: why we would not refresh in add but in replace?
         if (type === SelectionMoveType.MOVE_START) {
@@ -263,6 +270,12 @@ export class WorkbookSelections extends Disposable {
     }
 
     private _worksheetSelections = new Map<string, ISelectionWithStyle[]>();
+
+    /**
+     * same as _getCurrentSelections, but would set [] if no selection.
+     * @param sheetId
+     * @returns this._worksheetSelections
+     */
     private _ensureSheetSelection(sheetId: string): ISelectionWithStyle[] {
         let worksheetSelection = this._worksheetSelections.get(sheetId);
         if (!worksheetSelection) {

@@ -18,8 +18,8 @@ import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
-import { BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type ISelectionWithStyle, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
+import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 
 /**
@@ -40,7 +40,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
         @IRenderManagerService renderManagerService: IRenderManagerService,
-        @IRefSelectionsService refSelectionsService: SheetsSelectionsService,
+        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super(
@@ -50,13 +50,13 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             renderManagerService
         );
 
-        this._workbookSelections = refSelectionsService.getWorkbookSelections(this._context.unitId);
+        this._workbookSelections = this._refSelectionsService.getWorkbookSelections(this._context.unitId);
 
         this._initSelectionChangeListener();
         this._initSkeletonChangeListener();
         this._initUserActionSyncListener();
 
-        this._setStyle(getRefSelectionStyle(this._themeService));
+        this._setStyle(getDefaultRefSelectionStyle(this._themeService));
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
     }
 
@@ -154,9 +154,6 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initUserActionSyncListener() {
-        // When user completes range selection, we should update the range into the `IRefSelectionService`,
-        // and later the selections would be updated to the `SelectionManagerService`.
-        // Note that it would also trigger the callback in `_initSelectionChangeListener`.
         this.disposeWithMe(this.selectionMoveEnd$.subscribe((params) => this._updateSelections(params)));
     }
 
@@ -173,13 +170,14 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initSelectionChangeListener(): void {
-        // When selection completes, we need to update the selections' rendering and clear event handlers.
-        this.disposeWithMe(this._workbookSelections.beforeSelectionMoveEnd$.subscribe((selectionsWithStyles) => {
-            // Clear already existed selections.
+        // selectionMoveEnd$ beforeSelectionMoveEnd$ was triggered when pointerup after dragging to change selection area.
+        // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
+
+        // beforeSelectionMoveEnd$ & selectionMoveEnd$ would triggered when change skeleton(change sheet).
+        this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((selectionsWithStyles) => {
             this._reset();
 
-            // The selections' style would be colorful here. PromptController would change the color of
-            // selections later.
+            // The selections' style would be colorful here. PromptController would change the color of selections later.
             for (const selectionWithStyle of selectionsWithStyles) {
                 const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
                 this._addSelectionControlBySelectionData(selectionData);
@@ -188,6 +186,9 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initSkeletonChangeListener(): void {
+        // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
+        // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
+        // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (!param) {
                 return;
@@ -196,8 +197,24 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const { skeleton } = param;
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+
+            if (this._skeleton && this._skeleton.worksheet.getSheetId() !== skeleton.worksheet.getSheetId()) {
+                this._reset();
+            }
             this._changeRuntime(skeleton, scene, viewportMain);
+
+            // for col width & row height resize
+            const currentSelections = this._workbookSelections.getCurrentSelections();
+            this._refreshSelectionControl(currentSelections || []);
         }));
+    }
+
+    protected override _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]) {
+        const selections = selectionsData.map((selectionWithStyle) => {
+            const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
+            return selectionData;
+        });
+        this.updateControlForCurrentByRangeData(selections);
     }
 
     private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
@@ -215,7 +232,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
  * @param themeService
  * @returns The selection's style.
  */
-function getRefSelectionStyle(themeService: ThemeService) {
+function getDefaultRefSelectionStyle(themeService: ThemeService) {
     const style = getNormalSelectionStyle(themeService);
     style.strokeDash = 8;
     style.hasAutoFill = false;

@@ -72,6 +72,7 @@ const config: StorybookConfig = {
                                 loader: 'css-loader',
                                 options: {
                                     modules: {
+                                        namedExport: false,
                                         exportLocalsConvention: 'camelCaseOnly',
                                         localIdentName: 'univer-[local]',
                                     },
@@ -102,8 +103,10 @@ const config: StorybookConfig = {
                 type: 'es6',
                 noInterop: true,
             },
-            jsc: {
+            env: {
                 target: 'es2022',
+            },
+            jsc: {
                 parser: {
                     syntax: 'typescript',
                     tsx: true,

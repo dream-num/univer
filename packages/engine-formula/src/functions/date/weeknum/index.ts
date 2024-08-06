@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject, getWeekDayByDateSerialNumber } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -22,85 +21,77 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
+interface IReturnTypeMap {
+    [index: number]: number;
+}
+
 export class Weeknum extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 2;
 
-    private returnTypeMap: {
-        [index: number]: number;
-    } = {
-            1: 0,
-            2: 1,
-            11: 1,
-            12: 2,
-            13: 3,
-            14: 4,
-            15: 5,
-            16: 6,
-            17: 0,
-            21: 4,
-        };
-
     override calculate(serialNumber: BaseValueObject, returnType?: BaseValueObject) {
-        if (serialNumber.isArray()) {
-            const rowCount = (serialNumber as ArrayValueObject).getRowCount();
-            const columnCount = (serialNumber as ArrayValueObject).getColumnCount();
+        let _serialNumber = serialNumber;
+        let _returnType = returnType ?? NumberValueObject.create(1);
+
+        if (_serialNumber.isArray()) {
+            const rowCount = (_serialNumber as ArrayValueObject).getRowCount();
+            const columnCount = (_serialNumber as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            serialNumber = (serialNumber as ArrayValueObject).get(0, 0) as BaseValueObject;
+            _serialNumber = (_serialNumber as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (returnType?.isArray()) {
-            const rowCount = (returnType as ArrayValueObject).getRowCount();
-            const columnCount = (returnType as ArrayValueObject).getColumnCount();
+        if (_serialNumber.isError()) {
+            return _serialNumber;
+        }
+
+        if (_returnType.isArray()) {
+            const rowCount = (_returnType as ArrayValueObject).getRowCount();
+            const columnCount = (_returnType as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            returnType = (returnType as ArrayValueObject).get(0, 0) as BaseValueObject;
+            _returnType = (_returnType as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        if (serialNumber.isError()) {
-            return serialNumber;
+        if (_returnType.isError()) {
+            return _returnType;
         }
 
-        if (returnType?.isError()) {
-            return returnType;
-        }
-
-        if (serialNumber.isBoolean()) {
+        if (_serialNumber.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const dateSerialNumber = getDateSerialNumberByObject(serialNumber);
+        const dateSerialNumber = getDateSerialNumberByObject(_serialNumber);
 
         if (typeof dateSerialNumber !== 'number') {
             return dateSerialNumber;
         }
 
-        let returnTypeValue = 1;
-
-        if (returnType) {
-            returnTypeValue = Math.floor(+returnType.getValue());
-
-            if (returnType.isBoolean()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (returnType.isString() && !isRealNum(returnTypeValue)) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
+        if (_returnType.isBoolean()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (!(returnTypeValue in this.returnTypeMap)) {
+        const returnTypeValue = Math.floor(+_returnType.getValue());
+
+        if (Number.isNaN(returnTypeValue)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        if (!(returnTypeValue in this._returnTypeMap)) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        return this._getResult(dateSerialNumber, returnTypeValue);
+    }
+
+    private _getResult(dateSerialNumber: number, returnTypeValue: number) {
         const currentDate = excelSerialToDate(dateSerialNumber);
         const currentYear = dateSerialNumber > 0 ? currentDate.getUTCFullYear() : 1900;
         let yearStart = new Date(Date.UTC(currentYear, 0, 1));
@@ -136,7 +127,7 @@ export class Weeknum extends BaseFunction {
         } else {
             // System 1
             // The week containing January 1 is the first week of the year, and is numbered week 1.
-            const weekDay = this.returnTypeMap[returnTypeValue];
+            const weekDay = this._returnTypeMap[returnTypeValue];
 
             if (yearStartWeekDay < weekDay) {
                 yearWeekStartSerialNumber = yearStartSerialNumber - (yearStartWeekDay + 7 - weekDay);
@@ -149,4 +140,17 @@ export class Weeknum extends BaseFunction {
 
         return NumberValueObject.create(result);
     }
+
+    private _returnTypeMap: IReturnTypeMap = {
+        1: 0,
+        2: 1,
+        11: 1,
+        12: 2,
+        13: 3,
+        14: 4,
+        15: 5,
+        16: 6,
+        17: 0,
+        21: 4,
+    };
 }

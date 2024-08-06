@@ -78,8 +78,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '包含要在新陣列中傳回之欄的陣列。' },
+            colNum1: { name: '欄數1', detail: '要返回的第一欄。' },
+            colNum2: { name: '欄數2', detail: '要返回的其他欄。' },
         },
     },
     CHOOSEROWS: {
@@ -92,8 +93,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '包含要在新陣列中傳回之欄的陣列。' },
+            rowNum1: { name: '列數1', detail: '要返回的第一列數。' },
+            rowNum2: { name: '列數2', detail: '要返回的其他列數。' },
         },
     },
     COLUMN: {
@@ -160,8 +162,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要篩選的區域或陣列。' },
+            include: { name: '布林值數組', detail: '布林值數組，其中 TRUE 表示要保留的一行或一列。' },
+            ifEmpty: { name: '空值返回', detail: '如果未保留任何項，則傳回。' },
         },
     },
     FORMULATEXT: {
@@ -230,8 +233,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列', detail: '要附加的陣列。' },
+            array2: { name: '陣列', detail: '要附加的陣列。' },
         },
     },
     HYPERLINK: {
@@ -395,8 +398,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要排序的範圍或陣列。' },
+            sortIndex: { name: '排序索引', detail: '表示排序依據(按行或按列)的數字。' },
+            sortOrder: { name: '排序順序', detail: '表示所需排序順序的數字；1表示順序(預設)，-1表示降序。' },
+            byCol: { name: '排序方向', detail: '表示所需排序方向的邏輯值；FALSE指依行排序(預設)，TRUE指依列排序。' },
         },
     },
     SORTBY: {
@@ -409,8 +414,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要排序的範圍或陣列。' },
+            byArray1: { name: '排序數組1', detail: '若要基於其進行排序的範圍或陣列。' },
+            sortOrder1: { name: '排序順序1', detail: '表示所需排序順序的數字；1表示順序(預設)，-1表示降序。' },
+            byArray2: { name: '排序數組2', detail: '若要基於其進行排序的範圍或陣列。' },
+            sortOrder2: { name: '排序順序2', detail: '表示所需排序順序的數字；1表示順序(預設)，-1表示降序。' },
         },
     },
     TAKE: {
@@ -465,8 +473,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '工作表中的儲存格區域或陣列。' },
         },
     },
     UNIQUE: {
@@ -479,8 +486,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '從中傳回唯一行或列的範圍或陣列。' },
+            byCol: { name: '依據列', detail: '是一個邏輯值：將行彼此比較並傳回唯一值 = FALSE，或已省略；將列彼此比較並傳回唯一值 = TRUE。' },
+            exactlyOnce: { name: '僅一次', detail: '是邏輯值：從陣列傳回只出現一次的行或列 = TRUE；從陣列傳回所有不同的行或列 = FALSE，或已省略。' },
         },
     },
     VLOOKUP: {
@@ -522,8 +530,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列', detail: '要附加的陣列。' },
+            array2: { name: '陣列', detail: '要附加的陣列。' },
         },
     },
     WRAPCOLS: {

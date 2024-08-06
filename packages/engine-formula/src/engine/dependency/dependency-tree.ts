@@ -72,7 +72,7 @@ export class FormulaDependencyTree extends Disposable {
     isPassive: boolean = true;
 
     getDirtyData: Nullable<
-        (tree: FormulaDependencyTree, dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
+        (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
             runtimeCellData: IRuntimeUnitDataType;
             dirtyRanges: IFeatureDirtyRangeType;
         }

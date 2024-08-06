@@ -1,5 +1,6 @@
 exports.baseRules = {
     curly: ['error', 'multi-line'],
+    'no-param-reassign': ['warn'],
     'eol-last': ['error', 'always'],
     'import/no-self-import': 'error',
     'ts/no-explicit-any': 'warn',
@@ -91,6 +92,7 @@ exports.baseRules = {
     'style/multiline-ternary': 'warn',
     'unicorn/prefer-type-error': 'warn',
     'accessor-pairs': 'warn',
+    'react/no-create-ref': 'warn',
 };
 
 exports.typescriptPreset = function typescriptPreset() {

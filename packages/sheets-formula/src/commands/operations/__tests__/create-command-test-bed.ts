@@ -61,11 +61,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
-
-            this._injector = _injector;
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
             injector.add([SheetsSelectionsService]);
             injector.add([LexerTreeBuilder]);

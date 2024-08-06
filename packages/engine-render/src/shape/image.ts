@@ -21,6 +21,7 @@ import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../
 import { RENDER_CLASS_TYPE, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
 import type { Scene } from '../scene';
+import { ObjectType } from '../base-object';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -50,6 +51,8 @@ export class Image extends Shape<IImageProps> {
     private _renderByCropper: boolean = false;
 
     private _transformCalculateSrcRect: boolean = true;
+
+    override objectType = ObjectType.IMAGE;
 
     constructor(id: string, config: IImageProps) {
         super(id, config);

@@ -91,7 +91,6 @@ export type { IRangeProtectionRenderCellData } from './views/permission/extensio
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
 export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';
 export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
-export { expandToContinuousRange } from './commands/commands/utils/selection-utils';
 export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 
 // #region - all commands
@@ -167,5 +166,6 @@ export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.oper
 export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-permission-open-dialog.operation';
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
+export { attachSelectionWithCoord, attachPrimaryWithCoord } from './services/selection/util';
 
 // #endregion

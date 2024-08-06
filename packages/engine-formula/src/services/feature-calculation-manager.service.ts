@@ -21,7 +21,6 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
 import type { IRemoveFeatureCalculationMutationParam } from '../commands/mutations/set-feature-calculation.mutation';
-import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
 import type { IAllRuntimeData } from './runtime.service';
 import type { IFormulaDirtyData } from './current-data.service';
 
@@ -29,7 +28,7 @@ export interface IFeatureCalculationManagerParam {
     unitId: string;
     subUnitId: string;
     dependencyRanges: IUnitRange[];
-    getDirtyData: (tree: FormulaDependencyTree, dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
+    getDirtyData: (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
         runtimeCellData: IRuntimeUnitDataType;
         dirtyRanges: IFeatureDirtyRangeType;
     };
@@ -84,7 +83,7 @@ export class FeatureCalculationManagerService extends Disposable implements IFea
     }
 
     has(unitId: string, subUnitId: string, featureId: string): boolean {
-        return this._referenceExecutorMap.get(unitId)?.get(subUnitId)?.has(featureId) !== null;
+        return Boolean(this._referenceExecutorMap.get(unitId)?.get(subUnitId)?.has(featureId));
     }
 
     register(unitId: string, subUnitId: string, featureId: string, referenceExecutor: IFeatureCalculationManagerParam) {

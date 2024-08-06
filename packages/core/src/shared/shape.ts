@@ -35,3 +35,10 @@ export interface ISrcRect extends IOffset {
 }
 
 export interface IAbsoluteTransform extends ISize, IOffset, IScale {}
+
+export interface IRectXYWH {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}

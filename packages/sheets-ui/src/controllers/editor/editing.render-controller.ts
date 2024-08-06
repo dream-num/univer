@@ -181,7 +181,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this.disposeWithMe(this._editorBridgeService.visible$
             .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
             .subscribe((param) => {
-                if (param.unitId === this._context.unitId && param.visible) {
+                if ((param.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY || param.unitId === this._context.unitId) && param.visible) {
                     this._isUnitEditing = true;
                     this._handleEditorVisible(param);
                 } else if (this._isUnitEditing) {
@@ -471,15 +471,16 @@ export class EditingRenderController extends Disposable implements IRenderModule
         documentComponent.resize(editorWidth / scaleX, editorHeight / scaleY);
 
         /**
+         * sometimes requestIdleCallback is invalid, so use setTimeout to ensure the successful execution of the resizeBySize method.
          * resize canvas
          * When modifying the selection area for a formula, it is necessary to add a setTimeout to ensure successful updating.
          */
-        requestIdleCallback(() => {
+        setTimeout(() => {
             docEngine.resizeBySize(
                 fixLineWidthByScale(editorWidth, precisionScaleX),
                 fixLineWidthByScale(physicHeight, precisionScaleY)
             );
-        });
+        }, 0);
 
         // const canvasElement = this._context.engine.getCanvasElement();
         // const canvasBoundingRect = canvasElement.getBoundingClientRect();
@@ -826,9 +827,14 @@ export class EditingRenderController extends Disposable implements IRenderModule
             const selections = this._workbookSelections.getCurrentSelections();
             if (selections) {
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    unitId: this._context.unit,
+                    unitId: this._context.unit.getUnitId(),
                     subUnitId: worksheetId,
-                    selections,
+
+                    // must be a new selectionData
+                    // in selection-manager.service.ts@setSelections
+                    // this._ensureWorkbookSelection(unitIdOrSelections).setSelections
+                    // would clear selection Data on selecitonManagerInstance.
+                    selections: [...selections],
                 });
             }
 

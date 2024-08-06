@@ -49,6 +49,8 @@ const locale: typeof zhCN = {
             thousandthPercentileDes: 'The percentile format is used for the representation of ordinary numbers. Monetary and accounting formats provide a specialized format for monetary value calculations.',
             addDecimal: 'Increase decimal places',
             subtractDecimal: 'Decreasing decimal places',
+            customFormat: 'Custom Format',
+            customFormatDes: 'Generate custom number formats based on existing formats.',
         },
     },
 };

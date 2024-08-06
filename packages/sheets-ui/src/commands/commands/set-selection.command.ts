@@ -17,6 +17,7 @@
 import type { Direction, ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
 import {
+    expandToContinuousRange,
     getCellAtRowCol,
     getSelectionsService,
     getSheetCommandTarget,
@@ -27,7 +28,6 @@ import { KeyCode } from '@univerjs/ui';
 import { ShortcutExperienceService } from '../../services/shortcut-experience.service';
 import {
     checkIfShrink,
-    expandToContinuousRange,
     expandToNextCell,
     expandToNextGapRange,
     expandToWholeSheet,
@@ -131,6 +131,7 @@ export interface IMoveSelectionEnterAndTabCommandParams {
 export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTabCommandParams> = {
     id: 'sheet.command.move-selection-enter-tab',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params) => {
         if (!params) {
             return false;

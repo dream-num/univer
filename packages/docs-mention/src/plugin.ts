@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { UniverDocsPlugin } from '@univerjs/docs';
 import { DOC_MENTION_PLUGIN } from './types/const/const';
 import { DocMentionModel } from './models/doc-mention.model';
 import { DocMentionController } from './controllers/doc-mention.controller';
-import { DocMentionCustomRangeController } from './controllers/doc-mention-custom-range.controller';
 import { DocMentionService } from './services/doc-mention.service';
 import { DocMentionResourceController } from './controllers/doc-mention-resource.controller';
 
-@DependentOn(UniverDocsPlugin)
 export class UniverDocsMentionPlugin extends Plugin {
     static override pluginName = DOC_MENTION_PLUGIN;
     static override type = UniverInstanceType.UNIVER_DOC;
@@ -36,18 +33,16 @@ export class UniverDocsMentionPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         const deps: Dependency[] = [
             [DocMentionModel],
             [DocMentionService],
-
             [DocMentionController],
-            [DocMentionCustomRangeController],
             [DocMentionResourceController],
         ];
 
         deps.forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
     }
 }

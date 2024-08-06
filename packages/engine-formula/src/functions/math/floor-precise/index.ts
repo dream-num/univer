@@ -28,38 +28,40 @@ export class FloorPrecise extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, significance?: BaseValueObject) {
+        const _significance = significance ?? NumberValueObject.create(1);
+
         if (number.isError()) {
             return number;
         }
 
-        if (significance?.isError()) {
-            return significance;
+        if (_significance.isError()) {
+            return _significance;
         }
 
-        // get max row length
         const maxRowLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getRowCount() : 1,
-            significance?.isArray() ? (significance as ArrayValueObject).getRowCount() : 1
+            _significance.isArray() ? (_significance as ArrayValueObject).getRowCount() : 1
         );
 
-        // get max column length
         const maxColumnLength = Math.max(
             number.isArray() ? (number as ArrayValueObject).getColumnCount() : 1,
-            significance?.isArray() ? (significance as ArrayValueObject).getColumnCount() : 1
+            _significance.isArray() ? (_significance as ArrayValueObject).getColumnCount() : 1
         );
 
         const numberArray = expandArrayValueObject(maxRowLength, maxColumnLength, number, ErrorValueObject.create(ErrorType.NA));
-        const significanceArray = significance ? expandArrayValueObject(maxRowLength, maxColumnLength, significance, ErrorValueObject.create(ErrorType.NA)) : [];
+        const significanceArray = expandArrayValueObject(maxRowLength, maxColumnLength, _significance, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = numberArray.map((numberObject, rowIndex, columnIndex) => {
-            let significanceObject = significance ? (significanceArray as ArrayValueObject).get(rowIndex, columnIndex) as BaseValueObject : NumberValueObject.create(1);
+            let significanceObject = significanceArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (numberObject.isString()) {
-                numberObject = numberObject.convertToNumberObjectValue();
+            let _numberObject = numberObject;
+
+            if (_numberObject.isString()) {
+                _numberObject = _numberObject.convertToNumberObjectValue();
             }
 
-            if (numberObject.isError()) {
-                return numberObject;
+            if (_numberObject.isError()) {
+                return _numberObject;
             }
 
             if (significanceObject.isString()) {
@@ -70,7 +72,7 @@ export class FloorPrecise extends BaseFunction {
                 return significanceObject;
             }
 
-            const numberValue = +numberObject.getValue();
+            const numberValue = +_numberObject.getValue();
             const significanceValue = +significanceObject.getValue();
 
             if (numberValue === 0 || significanceValue === 0) {
@@ -82,8 +84,8 @@ export class FloorPrecise extends BaseFunction {
             return NumberValueObject.create(result);
         });
 
-        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
-            return resultArray.getArrayValue()[0][0] as NumberValueObject;
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         return resultArray;

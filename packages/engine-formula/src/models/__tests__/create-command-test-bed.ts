@@ -67,7 +67,8 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([CalculateFormulaService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);

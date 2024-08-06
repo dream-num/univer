@@ -48,7 +48,7 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
             }
         );
         if (doMutation) {
-            const commentMutation = {
+            const addComment = {
                 id: AddCommentMutation.id,
                 params: {
                     unitId,
@@ -66,7 +66,7 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
                 },
             };
 
-            return (await sequenceExecuteAsync([commentMutation, doMutation, activeOperation], commandService)).result;
+            return (await sequenceExecuteAsync([addComment, doMutation, activeOperation], commandService)).result;
         }
 
         return false;

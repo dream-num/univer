@@ -61,7 +61,8 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             super();
         }
 
-        override onStarting(injector: Injector): void {
+        override onStarting(): void {
+            const injector = this._injector;
             injector.add([INumfmtService, { useClass: NumfmtService }]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetSkeletonManagerService]);

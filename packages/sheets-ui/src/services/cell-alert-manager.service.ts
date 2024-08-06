@@ -16,7 +16,7 @@
 
 import { Subject } from 'rxjs';
 import type { IDisposable } from '@univerjs/core';
-import { Inject } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
@@ -38,7 +38,7 @@ export interface ICellAlert {
     key: string;
 }
 
-export class CellAlertManagerService {
+export class CellAlertManagerService extends Disposable {
     private _currentAlert$ = new Subject<[string, { alert: ICellAlert; dispose: IDisposable }][]>();
     private _currentAlert: Map<string, { alert: ICellAlert; dispose: IDisposable }> = new Map();
 
@@ -52,7 +52,11 @@ export class CellAlertManagerService {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService
     ) {
-        // empty
+        super();
+
+        this.disposeWithMe(() => {
+            this._currentAlert$.complete();
+        });
     }
 
     showAlert(alert: ICellAlert) {

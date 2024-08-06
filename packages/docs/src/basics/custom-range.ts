@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomRange } from '@univerjs/core';
+import type { ICustomRange, ITextRange } from '@univerjs/core';
 import { DataStreamTreeTokenType } from '@univerjs/core';
 
 export function isCustomRangeSplitSymbol(text: string) {
@@ -52,4 +52,22 @@ export function shouldDeleteCustomRange(deleteStart: number, deleteLen: number, 
     }
 
     return true;
+}
+
+export function getCustomRangesIntesetsWithRange(range: ITextRange, customRanges: ICustomRange[]) {
+    const result: ICustomRange[] = [];
+    for (let i = 0, len = customRanges.length; i < len; i++) {
+        const customRange = customRanges[i];
+        if (range.collapsed) {
+            if (customRange.startIndex < range.startOffset && range.startOffset <= customRange.endIndex) {
+                result.push(customRange);
+            }
+        } else {
+            if (isIntersecting(range.startOffset, range.endOffset, customRange.startIndex, customRange.endIndex)) {
+                result.push(customRange);
+            }
+        }
+    }
+
+    return result;
 }

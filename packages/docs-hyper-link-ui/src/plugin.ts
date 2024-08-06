@@ -25,6 +25,7 @@ import { DocHyperLinkPopupService } from './services/hyper-link-popup.service';
 import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
 import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { DocHyperLinkClipboardController } from './controllers/doc-hyper-link-clipboard.controller';
+import { DocHyperLinkCustomRangeController } from './controllers/doc-hyper-link-custom-range.controller';
 
 @DependentOn(UniverDocsHyperLinkPlugin)
 export class UniverDocsHyperLinkUIPlugin extends Plugin {
@@ -39,7 +40,7 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         const deps: Dependency[] = [
             [DocHyperLinkPopupService],
             [DocHyperLinkUIController,
@@ -49,10 +50,11 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
             ],
             [DocHyperLinkSelectionController],
             [DocHyperLinkClipboardController],
+            [DocHyperLinkCustomRangeController],
         ];
 
         deps.forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
     }
 

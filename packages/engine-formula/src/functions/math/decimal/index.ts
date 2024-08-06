@@ -37,13 +37,11 @@ export class Decimal extends BaseFunction {
             return radix;
         }
 
-        // get max row length
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,
             radix.isArray() ? (radix as ArrayValueObject).getRowCount() : 1
         );
 
-        // get max column length
         const maxColumnLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getColumnCount() : 1,
             radix.isArray() ? (radix as ArrayValueObject).getColumnCount() : 1
@@ -53,18 +51,14 @@ export class Decimal extends BaseFunction {
         const radixArray = expandArrayValueObject(maxRowLength, maxColumnLength, radix, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = textArray.map((textObject, rowIndex, columnIndex) => {
+            if (textObject.isError()) {
+                return textObject;
+            }
+
             let radixObject = radixArray.get(rowIndex, columnIndex) as BaseValueObject;
 
             if (radixObject.isString()) {
                 radixObject = radixObject.convertToNumberObjectValue();
-            }
-
-            if (radixObject.isString()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (textObject.isError()) {
-                return textObject;
             }
 
             if (radixObject.isError()) {
@@ -92,7 +86,7 @@ export class Decimal extends BaseFunction {
                 return NumberValueObject.create(0);
             }
 
-            if (!this.isValidCharForRadix(textValue, radixValue)) {
+            if (!this._isValidCharForRadix(textValue, radixValue)) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
@@ -105,14 +99,14 @@ export class Decimal extends BaseFunction {
             return NumberValueObject.create(result);
         });
 
-        if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
-            return resultArray.getArrayValue()[0][0] as NumberValueObject;
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         return resultArray;
     }
 
-    private isValidCharForRadix(text: string, radix: number): boolean {
+    private _isValidCharForRadix(text: string, radix: number): boolean {
         for (const char of text) {
             const charCode = char.toUpperCase().charCodeAt(0);
 

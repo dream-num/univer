@@ -1,5 +1,68 @@
 
 
+## [0.2.6](https://github.com/dream-num/univer/compare/v0.2.5...v0.2.6) (2024-08-02)
+
+
+### Bug Fixes
+
+* **doc:** list update ([#2862](https://github.com/dream-num/univer/issues/2862)) ([b045042](https://github.com/dream-num/univer/commit/b045042001c931d37410bab54acffbde7459237e))
+* **docs-drawing:** formula ts error & docs-drawing load error ([#2879](https://github.com/dream-num/univer/issues/2879)) ([1182bee](https://github.com/dream-num/univer/commit/1182bee68dc5005eb18e116f38fa021548544a46))
+* **drawing:** update ([#2871](https://github.com/dream-num/univer/issues/2871)) ([1880552](https://github.com/dream-num/univer/commit/1880552c0054d3eff14d7a41966ea0f3f195a2fe))
+* **formula:** fix formula parameter assignment ([#2905](https://github.com/dream-num/univer/issues/2905)) ([8fb9655](https://github.com/dream-num/univer/commit/8fb965587023748d35f073d470bcc0b262ff61c1))
+* ref selection should call updateSelection after skelenton change ([#2839](https://github.com/dream-num/univer/issues/2839)) ([d37f669](https://github.com/dream-num/univer/commit/d37f6692dbe745426eb77888565ffde3df4e539f))
+* **sheet:** fix expand range performance ([#2882](https://github.com/dream-num/univer/issues/2882)) ([0de3488](https://github.com/dream-num/univer/commit/0de3488677144bfbdc4160bea2f38e617a87ed1c))
+* **sheet:** parse snapshot string ([#2897](https://github.com/dream-num/univer/issues/2897)) ([f4fe38d](https://github.com/dream-num/univer/commit/f4fe38df536d551064c7b4703c52a2e43e4ee952))
+* **ui:** ensure container DOM is removed when destroying Vue 3 components ([#2892](https://github.com/dream-num/univer/issues/2892)) ([5c38528](https://github.com/dream-num/univer/commit/5c385287b20b87720ac4c4761a8c044f80417cbb))
+* unitId type error in handle editor invisible ([#2907](https://github.com/dream-num/univer/issues/2907)) ([5e09017](https://github.com/dream-num/univer/commit/5e09017670dc7502ee3687a3b97238318c1ce69c))
+* use new selectionData not workbook._worksheetSelections ([#2909](https://github.com/dream-num/univer/issues/2909)) ([b597194](https://github.com/dream-num/univer/commit/b597194250d1615ad9b3052d911af3c2e04397b1))
+
+
+### Features
+
+* deprecated float-dom.props ([#2864](https://github.com/dream-num/univer/issues/2864)) ([43220a1](https://github.com/dream-num/univer/commit/43220a12aca5dc08f99aedc20fefc7efafe52f20))
+* **docs-ui:** debounce doc-hover event ([#2865](https://github.com/dream-num/univer/issues/2865)) ([ce949fd](https://github.com/dream-num/univer/commit/ce949fde72476196ee563ac4b0ed5dd1b9bd598e))
+* **docs-ui:** doc daily optimization ([#2869](https://github.com/dream-num/univer/issues/2869)) ([f0b6410](https://github.com/dream-num/univer/commit/f0b6410362e84b3a881204241a9b277c4bb0709c))
+* **docs:** doc-rename ([#2891](https://github.com/dream-num/univer/issues/2891)) ([307d1de](https://github.com/dream-num/univer/commit/307d1debbc0dcd661bc529a3b529d0aa38099d34))
+* **formula:** add some Text/Math/Lookup formulas ([#2842](https://github.com/dream-num/univer/issues/2842)) ([778e371](https://github.com/dream-num/univer/commit/778e371c53f41c0dbc1b4775e9256267ed275a42))
+* **numfmt:** support custom format ([#2888](https://github.com/dream-num/univer/issues/2888)) ([95314eb](https://github.com/dream-num/univer/commit/95314ebe593b5c33f56044d8ccefdd6de6c08bae))
+* **sheet-data-valiation:** using cell-raw on data-validation ([#2878](https://github.com/dream-num/univer/issues/2878)) ([935bdba](https://github.com/dream-num/univer/commit/935bdba18926b1905b934cfa790cde92dcd6fd0e))
+* **slides:** support partial slides function ([#2890](https://github.com/dream-num/univer/issues/2890)) ([3a90918](https://github.com/dream-num/univer/commit/3a90918b370fc5954e0ce38df4de6df20acc0089))
+
+
+### Performance Improvements
+
+* skip hidden row & col in sheet's extension drawing process ([#2899](https://github.com/dream-num/univer/issues/2899)) ([5dcfaa3](https://github.com/dream-num/univer/commit/5dcfaa3fa839a0944481113936c1669a721d39ec))
+
+## [0.2.5](https://github.com/dream-num/univer/compare/v0.2.4...v0.2.5) (2024-07-26)
+
+
+### Bug Fixes
+
+* **conditional-formatting:** close panel when switch subunit ([#2828](https://github.com/dream-num/univer/issues/2828)) ([6e772bc](https://github.com/dream-num/univer/commit/6e772bc9fbc5c2dea88f46e54331e2c6e4f93995))
+* doc-resize causing formula error ([#2857](https://github.com/dream-num/univer/issues/2857)) ([8d037a2](https://github.com/dream-num/univer/commit/8d037a264d02c05ca972846a657374ec14bcc108))
+* **editor:** paste and selection error ([#2843](https://github.com/dream-num/univer/issues/2843)) ([e6869e4](https://github.com/dream-num/univer/commit/e6869e49fd125a5d38399c7c74fe37aa7df2584b))
+* **formula:** array formula clear old value ([#2840](https://github.com/dream-num/univer/issues/2840)) ([efb5ecd](https://github.com/dream-num/univer/commit/efb5ecd45b8c7248d74baf696fcd567661d4b540))
+* **formula:** feature calculation update ([#2838](https://github.com/dream-num/univer/issues/2838)) ([f66e5a7](https://github.com/dream-num/univer/commit/f66e5a7485e95b2288676bbf63729e904dd757b6))
+* get SheetScrollManagerService from renderManagerSrv ([#2833](https://github.com/dream-num/univer/issues/2833)) ([ce4e7c4](https://github.com/dream-num/univer/commit/ce4e7c40ac886630089fc92d01391b6b62834eee))
+* move selection ([#2832](https://github.com/dream-num/univer/issues/2832)) ([b4205ff](https://github.com/dream-num/univer/commit/b4205ff9f865a89c5db41a2bfa7f63170ee6c99c))
+* ref selection ([#2770](https://github.com/dream-num/univer/issues/2770)) ([e885f76](https://github.com/dream-num/univer/commit/e885f76e0160fdb575b6ffc8353be7a85f0d0d49))
+* **sheet:** blur table name triggers slide ([#2772](https://github.com/dream-num/univer/issues/2772)) ([c328662](https://github.com/dream-num/univer/commit/c32866205df95efdd0a22778297745ac45533673))
+* **sheets-drawing-ui:** load float-dom from snapshot & support presist custom data with float dom drawing object ([#2841](https://github.com/dream-num/univer/issues/2841)) ([ca38723](https://github.com/dream-num/univer/commit/ca3872381879c9c0d546d085c38661e6a39b4572))
+* **sheets-ui:** formula editor can't exit ([#2858](https://github.com/dream-num/univer/issues/2858)) ([eb3c0dd](https://github.com/dream-num/univer/commit/eb3c0dde7e4ecd3655e1832524a072517945eb0a))
+* **sheet:** type import ([#2848](https://github.com/dream-num/univer/issues/2848)) ([ae0b012](https://github.com/dream-num/univer/commit/ae0b012c0bd0aaaa90c45d60883be330de5c03a4))
+
+
+### Features
+
+* **core:** optimize url validator & popup on selection moving ([#2845](https://github.com/dream-num/univer/issues/2845)) ([c6ab2a7](https://github.com/dream-num/univer/commit/c6ab2a71ad37431e43e1553c11dd0b16a71f1ae6))
+* **data-validation:** code optimize for data-validation ([#2815](https://github.com/dream-num/univer/issues/2815)) ([ab242a3](https://github.com/dream-num/univer/commit/ab242a32a1efabe15b6024c2fd45f11166a639a4))
+* **docs-thread-comment-ui:** doc datasource ([#2851](https://github.com/dream-num/univer/issues/2851)) ([b3ae99a](https://github.com/dream-num/univer/commit/b3ae99a4d90e82e7cf9b274b5ea79319c0420797))
+* **docs-ui:** support docs zoom bar & context menu ([#2830](https://github.com/dream-num/univer/issues/2830)) ([d840cb5](https://github.com/dream-num/univer/commit/d840cb5db042bda8214bc1f2c210ec3f58e10662))
+* **docs:** support doc-hover-service ([#2824](https://github.com/dream-num/univer/issues/2824)) ([28dbb78](https://github.com/dream-num/univer/commit/28dbb786a32cb67d38098344578e2525623162f0))
+* **formula:** add some information and date function ([#2798](https://github.com/dream-num/univer/issues/2798)) ([6b3413e](https://github.com/dream-num/univer/commit/6b3413e33f2d9756ab3ae0cdf1999abd0ba37d15))
+* **formula:** add some math function ([#2761](https://github.com/dream-num/univer/issues/2761)) ([344f4dd](https://github.com/dream-num/univer/commit/344f4dd5f77430b37b2bb6b53319e1107787a694))
+* **formula:** get dirty data ([#2837](https://github.com/dream-num/univer/issues/2837)) ([b3ebd79](https://github.com/dream-num/univer/commit/b3ebd7970309afd012fbdea4afaaca847417fe56))
+
 ## [0.2.4](https://github.com/dream-num/univer/compare/v0.2.3...v0.2.4) (2024-07-19)
 
 

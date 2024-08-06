@@ -47,6 +47,8 @@ const locale = {
             thousandthPercentileDes: '千分位符格式用于一般数字的表示。货币和会计格式则提供货币值计算的专用格式。',
             addDecimal: '增加小数位',
             subtractDecimal: '减少小数位',
+            customFormat: '自定义格式',
+            customFormatDes: '根据现有格式生成自定义数字格式。',
         },
     },
 };

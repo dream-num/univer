@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IOperation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { IAccessor, IOperation, SlideDataModel } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
 
 export interface IActiveSlidePageOperationParams {
@@ -26,6 +26,18 @@ export const ActivateSlidePageOperation: IOperation<IActiveSlidePageOperationPar
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params: IActiveSlidePageOperationParams) => {
         const canvasView = accessor.get(CanvasView);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const model = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        const id = model?.getActivePage()?.id;
+
+        if (!id) return false;
+
+        const page = canvasView.getRenderUnitByPageId(id);
+        const transformer = page.scene?.getTransformer();
+
+        if (!transformer) return false;
+        transformer.clearControls();
+
         canvasView.activePage(params.id);
         return true;
     },

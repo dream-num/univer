@@ -132,8 +132,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 id={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
                 className={styles.editorInput}
                 snapshot={snapshot}
-                cancelDefaultResizeListener={true}
-                isSheetEditor={true}
+                cancelDefaultResizeListener
+                isSheetEditor
                 isSingle={false}
             />
         </div>

@@ -20,7 +20,6 @@ import { DependentOn, ICommandService, Inject, Injector, mergeOverrideWithDepend
 import { PLUGIN_NAME } from './types/const';
 import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
 import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
-import { ThreadCommentUIController } from './controllers/thread-comment-ui.controller';
 import { IThreadCommentMentionDataService, ThreadCommentMentionDataService } from './services/thread-comment-mention-data.service';
 
 export interface IUniverThreadCommentUIConfig {
@@ -40,13 +39,12 @@ export class UniverThreadCommentUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         (mergeOverrideWithDependencies([
-            [ThreadCommentUIController],
             [ThreadCommentPanelService],
             [IThreadCommentMentionDataService, { useClass: ThreadCommentMentionDataService }],
         ], this._config?.overrides) as Dependency[]).forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
 
         [ToggleSheetCommentPanelOperation, SetActiveCommentOperation].forEach((command) => {

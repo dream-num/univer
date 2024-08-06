@@ -34,17 +34,17 @@ export class UniverDrawingPlugin extends Plugin {
         super();
     }
 
-    override onStarting(_injector: Injector): void {
-        this._initDependencies(_injector);
+    override onStarting(): void {
+        this._initDependencies();
     }
 
-    private _initDependencies(injector: Injector): void {
+    private _initDependencies(): void {
         const dependencies: Dependency[] = [
             [IImageIoService, { useClass: ImageIoService }],
             [IDrawingManagerService, { useClass: DrawingManagerService }],
         ];
 
         const dependency = mergeOverrideWithDependencies(dependencies, this._config?.override);
-        dependency.forEach((d) => injector.add(d));
+        dependency.forEach((d) => this._injector.add(d));
     }
 }

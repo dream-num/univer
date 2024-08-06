@@ -17,7 +17,7 @@
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '@univerjs/docs';
-import { debounceTime, throttleTime } from 'rxjs';
+import { debounceTime } from 'rxjs';
 import { DocHoverManagerService } from '../../services/doc-hover-manager.service';
 
 export class DocHoverRenderController extends Disposable implements IRenderModule {
@@ -34,7 +34,7 @@ export class DocHoverRenderController extends Disposable implements IRenderModul
     private _initPointerDown() {
         this.disposeWithMe(
             fromEventSubject(this._context.scene.onPointerMove$)
-                .pipe(throttleTime(16))
+                .pipe(debounceTime(200))
                 .subscribe((evt) => {
                     this._docHoverManagerService.onMouseMove(evt);
                 })

@@ -26,7 +26,8 @@ import type {
     ThemeService,
 } from '@univerjs/core';
 import {
-    createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+    createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE, UniverInstanceType,
+} from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderManagerService, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
@@ -51,6 +52,8 @@ export interface ISheetSelectionRenderService {
     readonly controlFillConfig$: Observable<IControlFillConfig | null>;
     readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
+
+    get selectionMoving(): boolean;
 
     interceptor: InterceptorManager<{
         RANGE_MOVE_PERMISSION_CHECK: IInterceptor<boolean, null>;
@@ -141,11 +144,23 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // #endregion
 
     protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
+
+    /**
+     * trigger when selection move end(pointerup)
+     * and then update selection model in selectionManagerService
+     * selectionMoveEnd$ ---> _updateSelections --> selectionOperation@selectionManagerService.setSelections
+     */
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
     protected readonly _selectionMoving$ = new Subject<ISelectionWithCoordAndStyle[]>();
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
     protected readonly _selectionMoveStart$ = new Subject<ISelectionWithCoordAndStyle[]>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
+
+    private _selectionMoving = false;
+
+    get selectionMoving() {
+        return this._selectionMoving;
+    }
 
     protected _activeViewport: Nullable<Viewport>;
 
@@ -159,8 +174,18 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         protected readonly _renderManagerService: IRenderManagerService
     ) {
         super();
-
         this._resetStyle();
+        this._initMoving();
+    }
+
+    private _initMoving() {
+        this.disposeWithMe(this._selectionMoving$.subscribe(() => {
+            this._selectionMoving = true;
+        }));
+
+        this.disposeWithMe(this._selectionMoveEnd$.subscribe(() => {
+            this._selectionMoving = false;
+        }));
     }
 
     protected _setStyle(style: ISelectionStyle) {
@@ -204,7 +229,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * selectionManagerService@_emitOnEnd -->
      * _workbookSelections.selectionMoveEnd$ --> _addSelectionControlBySelectionData
      *
-     *
      * @param selectionData
      */
     protected _addSelectionControlBySelectionData(selection: ISelectionWithCoordAndStyle) {
@@ -222,7 +246,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         // TODO: memory leak? This extension seems never released.
         // eslint-disable-next-line no-new
-        new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
+        new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector, {
+            selectionMoveEnd: () => {
+                this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+            },
+        });
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
@@ -238,9 +266,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         return control;
     }
 
+    /**
+     * Update the corresponding selectionControl based on selectionsData.
+     * selectionData[i] ---- selectionControls[i]
+     * @param selections
+     */
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
-        const currentControls = this.getSelectionControls();
-        if (!currentControls) {
+        const selectionControls = this.getSelectionControls();
+        if (!selectionControls) {
             return;
         }
 
@@ -252,12 +285,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
+        // TODO @lumixraku This is awful!
+        // selectionControls should create & remove base on selections.
         for (let i = 0, len = selections.length; i < len; i++) {
             const { rangeWithCoord, primaryWithCoord, style } = selections[i];
 
-            const control = currentControls[i];
+            const control = selectionControls[i];
 
-            control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+            control && control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
         }
     }
 
@@ -365,11 +400,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         // ---> _selectionMoveEnd$.next --> _initSelectionChangeListener _reset --> _clearSelectionControls
 
         this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-
         // when selection mouse up, enable the short cut service
         this._shortcutService.setDisable(false);
     }
 
+    /**
+     * Clear existed selections.
+     */
     protected _reset() {
         this._clearSelectionControls();
         this._downObserver?.unsubscribe();
@@ -962,6 +999,15 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             rangeType,
         };
         this._updateSelectionControlRange(activeControl, newSelectionRange, currentCell);
+    }
+
+    protected _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]) {
+        const selections = selectionsData.map((selectionWithStyle) => {
+            const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
+            selectionData.style = getNormalSelectionStyle(this._themeService);
+            return selectionData;
+        });
+        this.updateControlForCurrentByRangeData(selections);
     }
 }
 

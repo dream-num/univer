@@ -65,22 +65,24 @@ export class Lookup extends BaseFunction {
         lookupVector: ArrayValueObject,
         resultVector?: ArrayValueObject
     ) {
-        if (resultVector == null) {
-            resultVector = lookupVector;
+        let _resultVector = resultVector;
+
+        if (_resultVector == null) {
+            _resultVector = lookupVector;
         } else if (
-            resultVector.getRowCount() !== lookupVector.getRowCount() ||
-            resultVector.getColumnCount() !== lookupVector.getColumnCount()
+            _resultVector.getRowCount() !== lookupVector.getRowCount() ||
+            _resultVector.getColumnCount() !== lookupVector.getColumnCount()
         ) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (lookupValue.isArray()) {
             return lookupValue.map((value) => {
-                return this.binarySearch(value, lookupVector, resultVector!);
+                return this.binarySearch(value, lookupVector, _resultVector!);
             });
         }
 
-        return this.binarySearch(lookupValue, lookupVector, resultVector);
+        return this.binarySearch(lookupValue, lookupVector, _resultVector);
     }
 
     private _handleArray(lookupValue: BaseValueObject, lookupArray: ArrayValueObject) {

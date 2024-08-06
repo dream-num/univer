@@ -38,12 +38,12 @@ export class UniverSheetsSortUIPlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultSheetsSortUIConfig, this._config);
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [SheetsSortUIService],
             [SheetsSortUIController, {
                 useFactory: () => this._injector.createInstance(SheetsSortUIController, this._config),
             }],
-        ] as Dependency[]).forEach((d) => injector.add(d));
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 }

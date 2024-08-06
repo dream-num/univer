@@ -34,12 +34,12 @@ export class UniverSheetsThreadCommentBasePlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         ([
             [SheetsThreadCommentModel],
             [SheetsThreadCommentRefRangeController],
         ] as Dependency[]).forEach((dep) => {
-            injector.add(dep);
+            this._injector.add(dep);
         });
     }
 }

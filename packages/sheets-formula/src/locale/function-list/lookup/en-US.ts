@@ -88,8 +88,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array containing the columns to be returned in the new array.' },
+            colNum1: { name: 'col_num1', detail: 'The first column to be returned.' },
+            colNum2: { name: 'col_num2', detail: 'Additional columns to be returned.' },
         },
     },
     CHOOSEROWS: {
@@ -102,8 +103,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array containing the rows to be returned in the new array.' },
+            rowNum1: { name: 'row_num1', detail: 'The first row number to be returned.' },
+            rowNum2: { name: 'row_num2', detail: 'Additional row numbers to be returned.' },
         },
     },
     COLUMN: {
@@ -170,8 +172,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The range or array to filter.' },
+            include: { name: 'include', detail: 'An array of Boolean values ​​where TRUE indicates that a row or column is to be retained.' },
+            ifEmpty: { name: 'if_empty', detail: 'If no items are reserved, return.' },
         },
     },
     FORMULATEXT: {
@@ -240,8 +243,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array', detail: 'The arrays to append.' },
+            array2: { name: 'array', detail: 'The arrays to append.' },
         },
     },
     HYPERLINK: {
@@ -408,8 +411,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The range or array to be sorted.' },
+            sortIndex: { name: 'sort_index', detail: 'A number indicating the sort order (by row or by column).' },
+            sortOrder: { name: 'sort_order', detail: 'A number representing the desired sort order; 1 for ascending (default), -1 for descending.' },
+            byCol: { name: 'by_col', detail: 'Logical value indicating the desired sort direction; FALSE sorts by rows (default), TRUE sorts by columns.' },
         },
     },
     SORTBY: {
@@ -422,8 +427,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The range or array to be sorted.' },
+            byArray1: { name: 'by_array1', detail: 'The range or array to sort based on.' },
+            sortOrder1: { name: 'sort_order1', detail: 'A number representing the desired sort order; 1 for ascending (default), -1 for descending.' },
+            byArray2: { name: 'by_array2', detail: 'The range or array to sort based on.' },
+            sortOrder2: { name: 'sort_order2', detail: 'A number representing the desired sort order; 1 for ascending (default), -1 for descending.' },
         },
     },
     TAKE: {
@@ -478,8 +486,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'A range of cells or an array in a worksheet.' },
         },
     },
     UNIQUE: {
@@ -492,8 +499,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The range or array from which unique rows or columns are returned.' },
+            byCol: { name: 'by_col', detail: 'Is a logical value: compares rows to each other and returns unique values ​​= FALSE, or is omitted; compares columns to each other and returns unique values ​​= TRUE.' },
+            exactlyOnce: { name: 'exactly_once', detail: 'Is a logical value: returns rows or columns from the array that appear only once = TRUE; returns all distinct rows or columns from the array = FALSE, or has been omitted.' },
         },
     },
     VLOOKUP: {
@@ -534,8 +542,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array', detail: 'The arrays to append.' },
+            array2: { name: 'array', detail: 'The arrays to append.' },
         },
     },
     WRAPCOLS: {

@@ -32,7 +32,18 @@ export class ErrorType extends BaseFunction {
         return this._handleSingleObject(errorVal);
     }
 
-    private errorTypeValueMap = new Map([
+    private _handleSingleObject(errorVal: BaseValueObject) {
+        const errorValValue = errorVal.getValue();
+        const result = this._errorTypeValueMap.get(errorValValue as ErrorTypeBase);
+
+        if (result) {
+            return NumberValueObject.create(result);
+        }
+
+        return ErrorValueObject.create(ErrorTypeBase.NA);
+    }
+
+    private _errorTypeValueMap = new Map([
         [ErrorTypeBase.NULL, 1],
         [ErrorTypeBase.DIV_BY_ZERO, 2],
         [ErrorTypeBase.VALUE, 3],
@@ -43,15 +54,4 @@ export class ErrorType extends BaseFunction {
         [ErrorTypeBase.CONNECT, 8],
         [ErrorTypeBase.CALC, 14],
     ]);
-
-    private _handleSingleObject(errorVal: BaseValueObject) {
-        const errorValValue = errorVal.getValue();
-        const result = this.errorTypeValueMap.get(errorValValue as ErrorTypeBase);
-
-        if (result) {
-            return NumberValueObject.create(result);
-        }
-
-        return ErrorValueObject.create(ErrorTypeBase.NA);
-    }
 }

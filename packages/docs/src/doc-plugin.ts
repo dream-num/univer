@@ -41,7 +41,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
-import { BulletListCommand, ListOperationCommand, OrderListCommand } from './commands/commands/list.command';
+import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, ListOperationCommand, OrderListCommand } from './commands/commands/list.command';
 import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
@@ -58,12 +58,15 @@ import { DocStateChangeManagerService } from './services/doc-state-change-manage
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
 import { DocCustomRangeService } from './services/doc-custom-range.service';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
+import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
+import { DocAutoFormatService } from './services/doc-auto-format.service';
+import { EnterCommand, SpaceCommand, TabCommand } from './commands/commands/auto-format.command';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
 }
 
-const PLUGIN_NAME = 'docs';
+const PLUGIN_NAME = 'DOCS_PLUGIN';
 
 export class UniverDocsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
@@ -74,7 +77,6 @@ export class UniverDocsPlugin extends Plugin {
         @Inject(Injector) override _injector: Injector
     ) {
         super();
-
         this._initializeDependencies(_injector);
 
         this._initializeCommands();
@@ -121,6 +123,12 @@ export class UniverDocsPlugin extends Plugin {
                 AlignRightCommand,
                 AlignOperationCommand,
                 AlignJustifyCommand,
+                DocsRenameMutation,
+                TabCommand,
+                SpaceCommand,
+                EnterCommand,
+                ChangeListNestingLevelCommand,
+                ChangeListTypeCommand,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -141,6 +149,8 @@ export class UniverDocsPlugin extends Plugin {
                 ],
                 [TextSelectionManagerService],
                 [DocCustomRangeService],
+                [DocAutoFormatService],
+
                 // controllers
                 [NormalInputController],
                 [IMEInputController],

@@ -17,11 +17,11 @@
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode } from '@univerjs/ui';
 
-import { BreakLineCommand, DeleteLeftCommand, DeleteRightCommand } from '@univerjs/docs';
+import { DeleteLeftCommand, DeleteRightCommand, EnterCommand } from '@univerjs/docs';
 import { whenDocAndEditorFocused, whenDocAndEditorFocusedWithBreakLine } from './utils';
 
 export const BreakLineShortcut: IShortcutItem = {
-    id: BreakLineCommand.id,
+    id: EnterCommand.id,
     preconditions: whenDocAndEditorFocusedWithBreakLine,
     binding: KeyCode.ENTER,
 };

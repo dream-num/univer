@@ -49,10 +49,30 @@ const locale = {
         panel: '页眉页脚设置',
         firstPageCheckBox: '首页不同',
         oddEvenCheckBox: '奇偶页不同',
-        headerTopMargin: '页眉顶端距离（px）',
-        footerBottomMargin: '页脚底端距离（px）',
+        headerTopMargin: '页眉顶端距离',
+        footerBottomMargin: '页脚底端距离',
         closeHeaderFooter: '关闭页眉页脚',
         disableText: '页眉页脚设置不可用',
+    },
+    doc: {
+        menu: {
+            paragraphSetting: '段落设置',
+        },
+        slider: {
+            paragraphSetting: '段落设置',
+        },
+        paragraphSetting: {
+            alignment: '对齐方式',
+            indentation: '缩进',
+            left: '左边距',
+            right: '右边距',
+            firstLine: '首行',
+            hanging: '悬挂',
+            spacing: '间距',
+            before: '段落前',
+            after: '段落后',
+            lineSpace: '行距',
+        },
     },
 };
 

@@ -27,37 +27,25 @@ export class Odd extends BaseFunction {
     override maxParams = 1;
 
     override calculate(number: BaseValueObject) {
-        if (number.isString()) {
-            number = number.convertToNumberObjectValue();
-        }
-
-        if (number.isError()) {
-            return number;
-        }
-
         if (number.isArray()) {
-            return number.map((numberObject) => {
-                if (numberObject.isError()) {
-                    return numberObject;
-                }
-
-                return this._handleSingleObject(numberObject);
-            });
+            return number.map((numberObject) => this._handleSingleObject(numberObject));
         }
 
         return this._handleSingleObject(number);
     }
 
     private _handleSingleObject(number: BaseValueObject) {
-        if (number.isString()) {
-            number = number.convertToNumberObjectValue();
+        let numberObject = number;
+
+        if (numberObject.isString()) {
+            numberObject = numberObject.convertToNumberObjectValue();
         }
 
-        if (number.isError()) {
-            return number;
+        if (numberObject.isError()) {
+            return numberObject;
         }
 
-        const numberValue = +number.getValue();
+        const numberValue = +numberObject.getValue();
 
         if (!Number.isFinite(numberValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);

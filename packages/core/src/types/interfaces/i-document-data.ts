@@ -181,17 +181,19 @@ export interface IListData {
 /**
  * Contains properties describing the look and feel of a list bullet at a given level of nesting.
  */
-export interface INestingLevel extends IIndentStart {
-    bulletAlignment: BulletAlignment; // ordered list support
+export interface INestingLevel {
+    paragraphProperties?: IParagraphProperties;
+
+    bulletAlignment: BulletAlignment; // ordered list support lvlJc
 
     // The glyph format contains one or more placeholders, and these placeholder are replaced with the appropriate values depending on the glyphType or glyphSymbol. The placeholders follow the pattern %[nestingLevel]. Furthermore, placeholders can have prefixes and suffixes. Thus, the glyph format follows the pattern <prefix>%[nestingLevel]<suffix>. Note that the prefix and suffix are optional and can be arbitrary strings.
     //  <prefix>%[nestingLevel]<suffix>
     glyphFormat: string; // https://developers.google.com/docs/api/reference/rest/v1/documents#nestinglevel，ms word lvlText
-    textStyle: ITextStyle;
+    textStyle?: ITextStyle;
     startNumber: number;
 
     // Union field glyph_kind can be only one of the following:
-    glyphType?: GlyphType | string; // ordered list string is to support custom rules https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType | string
+    glyphType?: GlyphType; // ordered list string is to support custom rules https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType
     glyphSymbol?: string; // the tag of the unordered list
     // End of list of possible types for union field glyph_kind.
 }
@@ -209,14 +211,72 @@ export enum FollowNumberWithType {
  * An enumeration of the supported glyph types.
  */
 export enum GlyphType {
-    GLYPH_TYPE_UNSPECIFIED, // The glyph type is unspecified or unsupported.
+    BULLET, // The glyph type is unspecified or unsupported.
     NONE, // 	An empty string.
     DECIMAL, // 	A number, like 1, 2, or 3.
-    ZERO_DECIMAL, // 	A number where single digit numbers are prefixed with a zero, like 01, 02, or 03. Numbers with more than one digit are not prefixed with a zero.
-    UPPER_ALPHA, // 	An uppercase letter, like A, B, or C.
-    ALPHA, // 	A lowercase letter, like a, b, or c.
+    DECIMAL_ZERO, // 	A number where single digit numbers are prefixed with a zero, like 01, 02, or 03. Numbers with more than one digit are not prefixed with a zero.
+    UPPER_LETTER, // 	An uppercase letter, like A, B, or C.
+    LOWER_LETTER, // 	A lowercase letter, like a, b, or c.
     UPPER_ROMAN, // An uppercase Roman numeral, like I, II, or III.
-    ROMAN, // 	A lowercase Roman numeral, like i, ii, or iii.
+    LOWER_ROMAN, // 	A lowercase Roman numeral, like i, ii, or iii.
+
+    /**
+     * Not yet achieved, aligned with Excel's standards.
+     * 17.18.59 ST_NumberFormat (Numbering Format)
+     */
+    ORDINAL = 8,
+    CARDINAL_TEXT = 9,
+    ORDINAL_TEXT = 10,
+    HEX = 11,
+    CHICAGO = 12,
+    IDEOGRAPH_DIGITAL = 13,
+    JAPANESE_COUNTING = 14,
+    AIUEO = 15,
+    IROHA = 16,
+    DECIMAL_FULL_WIDTH = 17,
+    DECIMAL_HALF_WIDTH = 18,
+    JAPANESE_LEGAL = 19,
+    JAPANESE_DIGITAL_TEN_THOUSAND = 20,
+    DECIMAL_ENCLOSED_CIRCLE = 21,
+    DECIMAL_FULL_WIDTH2 = 22,
+    AIUEO_FULL_WIDTH = 23,
+    IROHA_FULL_WIDTH = 24,
+    GANADA = 25,
+    CHOSUNG = 26,
+    DECIMAL_ENCLOSED_FULLSTOP = 27,
+    DECIMAL_ENCLOSED_PAREN = 28,
+    DECIMAL_ENCLOSED_CIRCLE_CHINESE = 29,
+    IDEOGRAPH_ENCLOSED_CIRCLE = 30,
+    IDEOGRAPH_TRADITIONAL = 31,
+    IDEOGRAPH_ZODIAC = 32,
+    IDEOGRAPH_ZODIAC_TRADITIONAL = 33,
+    TAIWANESE_COUNTING = 34,
+    IDEOGRAPH_LEGAL_TRADITIONAL = 35,
+    TAIWANESE_COUNTING_THOUSAND = 36,
+    TAIWANESE_DIGITAL = 37,
+    CHINESE_COUNTING = 38,
+    CHINESE_LEGAL_SIMPLIFIED = 39,
+    CHINESE_COUNTING_THOUSAND = 40,
+    KOREAN_DIGITAL = 41,
+    KOREAN_COUNTING = 42,
+    KOREAN_LEGAL = 43,
+    KOREAN_DIGITAL2 = 44,
+    VIETNAMESE_COUNTING = 45,
+    RUSSIAN_LOWER = 46,
+    RUSSIAN_UPPER = 47,
+    NUMBER_IN_DASH = 48,
+    HEBREW1 = 49,
+    HEBREW2 = 50,
+    ARABIC_ALPHA = 51,
+    ARABIC_ABJAD = 52,
+    HINDI_VOWELS = 53,
+    HINDI_CONSONANTS = 54,
+    HINDI_NUMBERS = 55,
+    HINDI_COUNTING = 56,
+    THAI_LETTERS = 57,
+    THAI_NUMBERS = 58,
+    THAI_COUNTING = 59,
+    CUSTOM = 60,
 }
 
 /**
@@ -227,6 +287,9 @@ export enum BulletAlignment {
     START, //	The bullet is aligned to the start of the space allotted for rendering the bullet. Left-aligned for LTR text, right-aligned otherwise.
     CENTER, //	The bullet is aligned to the center of the space allotted for rendering the bullet.
     END, //	The bullet is aligned to the end of the space allotted for rendering the bullet. Right-aligned for LTR text, left-aligned otherwise.
+
+    //Not achieved, aligned with Excel's standards.
+    BOTH, //	The bullet is aligned such that it is equidistant from both the start and end of the space allotted for rendering the bullet.
 }
 
 // /**
@@ -536,7 +599,7 @@ export interface IBullet {
     listType: string; // listType orderList or bulletList etc.
     listId: string; // listId
     nestingLevel: number; // nestingLevel
-    textStyle: ITextStyle; // textStyle
+    textStyle?: ITextStyle; // textStyle
 }
 
 /**
@@ -635,12 +698,18 @@ export interface IIndentStart {
     hanging?: INumberUnit ; // hanging，offset of first word except first line
     indentStart?: INumberUnit ; // indentStart
     tabStops?: ITabStop[]; // tabStops
+    indentEnd?: INumberUnit ; // indentEnd
 }
 
 /**
  * Properties of paragraph style
  */
-export interface IParagraphStyle extends IIndentStart {
+export interface IParagraphStyle extends IParagraphProperties {
+    // Not achieved, aligned with Excel's standards.
+    textStyle?: ITextStyle; // paragraph textStyle
+}
+
+export interface IParagraphProperties extends IIndentStart {
     headingId?: string; // headingId
     namedStyleType?: NamedStyleType; // namedStyleType
     horizontalAlign?: HorizontalAlign; // Horizontal alignment
@@ -655,7 +724,6 @@ export interface IParagraphStyle extends IIndentStart {
     borderBottom?: IParagraphBorder; // borderBottom
     borderLeft?: IParagraphBorder; // borderLeft
     borderRight?: IParagraphBorder; // borderRight
-    indentEnd?: INumberUnit ; // indentEnd
     keepLines?: BooleanNumber; // 17.3.1.14 keepLines (Keep All Lines On One Page)
     keepNext?: BooleanNumber; // 17.3.1.15 keepNext (Keep Paragraph With Next Paragraph)
     wordWrap?: BooleanNumber; // 17.3.1.45 wordWrap (Allow Line Breaking At Character Level)

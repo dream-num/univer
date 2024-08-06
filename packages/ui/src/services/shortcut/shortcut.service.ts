@@ -22,6 +22,7 @@ import { Subject } from 'rxjs';
 import { fromGlobalEvent } from '../../common/lifecycle';
 import { ILayoutService } from '../layout/layout.service';
 import { IPlatformService } from '../platform/platform.service';
+import type { KeyCode } from './keycode';
 import { KeyCodeToChar, MetaKeys } from './keycode';
 
 export interface IShortcutItem<P extends object = object> {
@@ -36,7 +37,7 @@ export interface IShortcutItem<P extends object = object> {
     preconditions?: (contextService: IContextService) => boolean;
 
     /** A command can be bound to several bindings, with different static parameters perhaps. */
-    binding: number;
+    binding: KeyCode | number;
     mac?: number;
     win?: number;
     linux?: number;

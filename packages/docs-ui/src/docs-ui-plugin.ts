@@ -15,6 +15,7 @@
  */
 
 import {
+    ICommandService,
     ILogService,
     Inject,
     Injector,
@@ -54,8 +55,17 @@ import { DocBackScrollRenderController } from './controllers/render-controllers/
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
+import { DocContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
+import { DocPageLayoutService } from './services/doc-page-layout.service';
+import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocHoverManagerService } from './services/doc-hover-manager.service';
 import { DocHoverRenderController } from './controllers/render-controllers/doc-hover.render-controller';
+import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
+import { ShiftTabShortCut } from './shortcuts/format.shortcut';
+import { DocParagraphSettingController } from './controllers/doc-paragraph-setting.controller';
+
+import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
+import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -65,26 +75,34 @@ export class UniverDocsUIPlugin extends Plugin {
         private readonly _config: IUniverDocsUIConfig,
         @Inject(Injector) override _injector: Injector,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
+        @ICommandService private _commandService: ICommandService,
         @ILogService private _logService: ILogService
     ) {
         super();
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
         this._initDependencies(_injector);
-        this._initializeCommands();
+        this._initializeShortcut();
+        this._initCommand();
     }
 
     override onReady(): void {
         this._initRenderBasics();
+        this._markDocAsFocused();
     }
 
     override onRendered(): void {
         this._initUI();
         this._initRenderModules();
-        this._markDocAsFocused();
     }
 
-    private _initializeCommands(): void {
+    private _initCommand() {
+        [DocParagraphSettingCommand, DocParagraphSettingPanelOperation].forEach((e) => {
+            this._commandService.registerCommand(e);
+        });
+    }
+
+    private _initializeShortcut(): void {
         [
             MoveCursorUpShortcut,
             MoveCursorDownShortcut,
@@ -98,6 +116,7 @@ export class UniverDocsUIPlugin extends Plugin {
             DeleteLeftShortcut,
             DeleteRightShortcut,
             BreakLineShortcut,
+            ShiftTabShortCut,
         ].forEach((shortcut) => {
             this._injector.get(IShortcutService).registerShortcut(shortcut);
         });
@@ -108,11 +127,14 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocUIController, { useFactory: () => this._injector.createInstance(DocUIController, this._config) }],
             [DocClipboardController],
             [DocEditorBridgeController],
+            [DocAutoFormatController],
+
             [DocsRenderService],
             [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
             [DocHoverManagerService],
+            [DocParagraphSettingController],
         ];
 
         dependencies.forEach((d) => injector.add(d));
@@ -142,6 +164,7 @@ export class UniverDocsUIPlugin extends Plugin {
         ([
             [DocSkeletonManagerService],
             [DocInterceptorService],
+            [DocPageLayoutService],
             [DocRenderController],
             [DocZoomRenderController],
         ] as Dependency[]).forEach((m) => {
@@ -154,7 +177,9 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocBackScrollRenderController],
             [DocTextSelectionRenderController],
             [DocHeaderFooterController],
+            [DocResizeRenderController],
             [DocHoverRenderController],
+            [DocContextMenuRenderController],
         ] as Dependency[]).forEach((m) => {
             this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });

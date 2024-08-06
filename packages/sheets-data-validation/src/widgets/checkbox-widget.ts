@@ -93,9 +93,9 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     }
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext): void {
-        const { style, data, primaryWithCoord, unitId, subUnitId } = info;
+        const { style, data, primaryWithCoord, unitId, subUnitId, worksheet, row, col } = info;
         const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
-        const value = getCellValueOrigin(data);
+        const value = getCellValueOrigin(worksheet.getCellRaw(row, col));
         const rule = data.dataValidation?.rule;
         const validator = data.dataValidation?.validator as CheckboxValidator;
         if (!rule || !validator) {
@@ -170,8 +170,8 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         if (evt.button === 2) {
             return;
         }
-        const { primaryWithCoord, unitId, subUnitId, data } = info;
-        const value = getCellValueOrigin(data);
+        const { primaryWithCoord, unitId, subUnitId, data, worksheet, row, col } = info;
+        const value = getCellValueOrigin(worksheet.getCellRaw(row, col));
         const rule = data.dataValidation?.rule;
         const validator = data.dataValidation?.validator as BaseDataValidator;
         if (!rule || !validator) {

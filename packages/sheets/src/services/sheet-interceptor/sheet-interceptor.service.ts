@@ -19,6 +19,7 @@ import type {
     ICommandInfo,
     IDisposable,
     IInterceptor,
+    IRange,
     IUndoRedoCommandInfosByInterceptor,
     Nullable,
     Workbook,
@@ -38,9 +39,25 @@ import {
 
 import { INTERCEPTOR_POINT } from './interceptor-const';
 
+export interface IBeforeCommandInterceptor {
+    priority?: number;
+    performCheck(info: ICommandInfo): Promise<boolean>;
+}
+
 export interface ICommandInterceptor {
     priority?: number;
     getMutations(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor;
+}
+
+export interface IRangesInfo {
+    unitId: string;
+    subUnitId: string;
+    ranges: IRange[];
+}
+
+export interface IRangeInterceptors {
+    priority?: number;
+    getMutations(rangesInfo: IRangesInfo): IUndoRedoCommandInfosByInterceptor;
 }
 
 /**
@@ -52,6 +69,9 @@ export interface ICommandInterceptor {
 export class SheetInterceptorService extends Disposable {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
     private _commandInterceptors: ICommandInterceptor[] = [];
+    private _rangeInterceptors: IRangeInterceptors[] = [];
+
+    private _beforeCommandInterceptor: IBeforeCommandInterceptor[] = [];
 
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
@@ -102,13 +122,63 @@ export class SheetInterceptorService extends Disposable {
         return this.disposeWithMe(toDisposable(() => remove(this._commandInterceptors, interceptor)));
     }
 
+    // Add a listener function to the command, which will be run before the command is run to get whether it can be executed the command
+    interceptBeforeCommand(interceptor: IBeforeCommandInterceptor): IDisposable {
+        if (this._beforeCommandInterceptor.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+
+        this._beforeCommandInterceptor.push(interceptor);
+        this._beforeCommandInterceptor.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._beforeCommandInterceptor, interceptor)));
+    }
+
+    /**
+     * before command execute, call this method to get the flag of whether it can be executed the command，
+     * @param info ICommandInfo
+     * @returns Promise<boolean>
+     */
+    async beforeCommandExecute(info: ICommandInfo): Promise<boolean> {
+        const allPerformCheckRes = await Promise.all(this._beforeCommandInterceptor.map((i) => i.performCheck(info)));
+        return allPerformCheckRes.every((perform) => perform);
+    }
+
+    /**
+     * By adding callbacks to some Ranges can get some additional mutations, such as clearing all plugin data in a certain area.
+     * @param interceptor IRangeInterceptors
+     * @returns IDisposable
+     */
+    interceptRanges(interceptor: IRangeInterceptors): IDisposable {
+        if (this._rangeInterceptors.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+
+        this._rangeInterceptors.push(interceptor);
+        this._rangeInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._rangeInterceptors, interceptor)));
+    }
+
     /**
      * When command is executing, call this method to gether undo redo mutations from upper features.
      * @param command
      * @returns
      */
-    onCommandExecute(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
-        const infos = this._commandInterceptors.map((i) => i.getMutations(command));
+
+    onCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
+        const infos = this._commandInterceptors.map((i) => i.getMutations(info));
+
+        return {
+            preUndos: infos.map((i) => i.preUndos ?? []).flat(),
+            undos: infos.map((i) => i.undos).flat(),
+            preRedos: infos.map((i) => i.preRedos ?? []).flat(),
+            redos: infos.map((i) => i.redos).flat(),
+        };
+    }
+
+    generateMutationsByRanges(info: IRangesInfo): IUndoRedoCommandInfosByInterceptor {
+        const infos = this._rangeInterceptors.map((i) => i.getMutations(info));
 
         return {
             preUndos: infos.map((i) => i.preUndos ?? []).flat(),

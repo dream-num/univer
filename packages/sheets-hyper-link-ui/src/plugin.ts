@@ -46,7 +46,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting(): void {
         const dependencies: Dependency[] = [
             [SheetsHyperLinkResolverService],
             [SheetsHyperLinkPopupService],
@@ -68,7 +68,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [SheetHyperLinkUrlController],
         ];
 
-        dependencies.forEach((dep) => injector.add(dep));
+        dependencies.forEach((dep) => this._injector.add(dep));
     }
 
     override onReady(): void {

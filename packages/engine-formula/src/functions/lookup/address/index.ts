@@ -58,33 +58,33 @@ export class Address extends BaseFunction {
             return sheetText;
         }
 
-        absNumber = absNumber ?? NumberValueObject.create(1);
-        a1 = a1 ?? BooleanValueObject.create(true);
-        sheetText = sheetText ?? StringValueObject.create('');
+        const _absNumber = absNumber ?? NumberValueObject.create(1);
+        const _a1 = a1 ?? BooleanValueObject.create(true);
+        const _sheetText = sheetText ?? StringValueObject.create('');
 
         // get max row length
         const maxRowLength = Math.max(
             rowNumber.isArray() ? (rowNumber as ArrayValueObject).getRowCount() : 1,
             columnNumber.isArray() ? (columnNumber as ArrayValueObject).getRowCount() : 1,
-            absNumber.isArray() ? (absNumber as ArrayValueObject).getRowCount() : 1,
-            a1.isArray() ? (a1 as ArrayValueObject).getRowCount() : 1,
-            sheetText.isArray() ? (sheetText as ArrayValueObject).getRowCount() : 1
+            _absNumber.isArray() ? (_absNumber as ArrayValueObject).getRowCount() : 1,
+            _a1.isArray() ? (_a1 as ArrayValueObject).getRowCount() : 1,
+            _sheetText.isArray() ? (_sheetText as ArrayValueObject).getRowCount() : 1
         );
 
         // get max column length
         const maxColumnLength = Math.max(
             rowNumber.isArray() ? (rowNumber as ArrayValueObject).getColumnCount() : 1,
             columnNumber.isArray() ? (columnNumber as ArrayValueObject).getColumnCount() : 1,
-            absNumber.isArray() ? (absNumber as ArrayValueObject).getColumnCount() : 1,
-            a1.isArray() ? (a1 as ArrayValueObject).getColumnCount() : 1,
-            sheetText.isArray() ? (sheetText as ArrayValueObject).getColumnCount() : 1
+            _absNumber.isArray() ? (_absNumber as ArrayValueObject).getColumnCount() : 1,
+            _a1.isArray() ? (_a1 as ArrayValueObject).getColumnCount() : 1,
+            _sheetText.isArray() ? (_sheetText as ArrayValueObject).getColumnCount() : 1
         );
 
         const rowNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, rowNumber, ErrorValueObject.create(ErrorType.NA));
         const columnNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, columnNumber, ErrorValueObject.create(ErrorType.NA));
-        const absNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, absNumber, ErrorValueObject.create(ErrorType.NA));
-        const a1Array = expandArrayValueObject(maxRowLength, maxColumnLength, a1, ErrorValueObject.create(ErrorType.NA));
-        const sheetTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, sheetText, ErrorValueObject.create(ErrorType.NA));
+        const absNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, _absNumber, ErrorValueObject.create(ErrorType.NA));
+        const a1Array = expandArrayValueObject(maxRowLength, maxColumnLength, _a1, ErrorValueObject.create(ErrorType.NA));
+        const sheetTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, _sheetText, ErrorValueObject.create(ErrorType.NA));
 
         return rowNumArray.map((rowNumValue, rowIndex, columnIndex) => {
             const columnNumValue = columnNumArray.get(rowIndex, columnIndex) || ErrorValueObject.create(ErrorType.NA);

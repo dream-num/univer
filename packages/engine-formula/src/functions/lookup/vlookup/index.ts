@@ -55,16 +55,16 @@ export class Vlookup extends BaseFunction {
             return rangeLookup;
         }
 
-        rangeLookup = rangeLookup ?? BooleanValueObject.create(true);
+        const _rangeLookup = rangeLookup ?? BooleanValueObject.create(true);
 
         // When neither lookupValue nor rangeLookup is an array, but colIndexNum is an array, expansion is allowed based on the value of colIndexNum. However, if an error is encountered in subsequent matching, the first error needs to be returned (not the entire array)
         // Otherwise colIndexNum takes the first value
 
-        if (isSingleValueObject(lookupValue) && isSingleValueObject(rangeLookup) && colIndexNum.isArray()) {
-            return this._handleArrayColIndexNum(lookupValue, tableArray, colIndexNum, rangeLookup);
+        if (isSingleValueObject(lookupValue) && isSingleValueObject(_rangeLookup) && colIndexNum.isArray()) {
+            return this._handleArrayColIndexNum(lookupValue, tableArray, colIndexNum, _rangeLookup);
         }
 
-        return this._handleNonArrayColIndexNum(lookupValue, tableArray, colIndexNum, rangeLookup);
+        return this._handleNonArrayColIndexNum(lookupValue, tableArray, colIndexNum, _rangeLookup);
     }
 
     private _handleArrayColIndexNum(
@@ -73,7 +73,7 @@ export class Vlookup extends BaseFunction {
         colIndexNum: BaseValueObject,
         rangeLookup: BaseValueObject
     ) {
-        lookupValue = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getFirstCell() : lookupValue;
+        const _lookupValue = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getFirstCell() : lookupValue;
 
         const rangeLookupValue = this.getZeroOrOneByOneDefault(rangeLookup);
 
@@ -90,7 +90,7 @@ export class Vlookup extends BaseFunction {
                 return false;
             }
 
-            const searchObject = this._handleTableArray(lookupValue, tableArray, colIndexNumValueObject, rangeLookupValue);
+            const searchObject = this._handleTableArray(_lookupValue, tableArray, colIndexNumValueObject, rangeLookupValue);
 
             if (searchObject.isError()) {
                 errorValue = searchObject;

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-conditional-formatting",
-    "version": "0.2.4",
+    "version": "0.2.6",
     "private": false,
     "description": "Conditional formatting plugin for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -69,21 +69,21 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "0.1.38-alpha.23"
+        "@univerjs/protocol": "0.1.38"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons-svg": "^0.1.55",
+        "@univerjs/icons-svg": "^0.1.70",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "dayjs": "^1.11.11",
+        "dayjs": "^1.11.12",
         "rxjs": "^7.8.1",
         "sharp": "^0.33.4",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3"
+        "typescript": "^5.5.4",
+        "vite": "^5.3.5",
+        "vitest": "^2.0.5"
     },
     "univerSpace": {
         ".": {

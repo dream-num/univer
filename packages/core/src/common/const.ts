@@ -20,6 +20,8 @@ export const DOCS_NORMAL_EDITOR_UNIT_ID_KEY = `${PREFIX}DOCS_NORMAL`;
 
 export const DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY = `${PREFIX}DOCS_FORMULA_BAR`;
 
+export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = `${PREFIX}ZEN_EDITOR`;
+
 export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
 
 export function createInternalEditorID(id: string) {

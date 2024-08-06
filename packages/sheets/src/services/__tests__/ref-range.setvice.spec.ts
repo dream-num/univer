@@ -71,20 +71,20 @@ describe('Test ref-range.service', () => {
         univer.dispose();
     });
 
-    it('test registerRefRange', () => {
+    it('test registerRefRange', async () => {
         const mockFn = vi.fn(() => ({ redos: [], undos: [] }));
         refRangeService.registerRefRange(originRange, mockFn);
         const params: IMoveRangeCommandParams = {
             fromRange: { ...originRange },
             toRange: { startRow: 4, endRow: 4, startColumn: 4, endColumn: 4 },
         };
-        commandService.executeCommand(MoveRangeCommand.id, params);
+        await commandService.executeCommand(MoveRangeCommand.id, params);
         expect(mockFn.mock.calls.length).toBe(1);
         const callParams = (mockFn.mock.calls as any)[0][0];
         expect(callParams?.id).toBe('sheet.command.move-range');
     });
 
-    it('test registerRefRange 3', () => {
+    it('test registerRefRange 3', async () => {
         const redoMutationId = 'test-redo-mutation';
         const undoMutationId = 'test-undo-mutation';
 
@@ -114,7 +114,7 @@ describe('Test ref-range.service', () => {
             fromRange: { startRow: 2, endRow: 4, startColumn: 2, endColumn: 2 },
             toRange: { startRow: 3, endRow: 5, startColumn: 2, endColumn: 2 },
         };
-        commandService.executeCommand(MoveRangeCommand.id, params);
+        await commandService.executeCommand(MoveRangeCommand.id, params);
 
         expect(mockFn1.mock.calls.length).toBe(1);
         expect(mockFn2.mock.calls.length).toBe(1);
@@ -124,7 +124,7 @@ describe('Test ref-range.service', () => {
         expect(result.redos.length).toBe(3);
     });
 
-    it('test merge mutation', () => {
+    it('test merge mutation', async () => {
         const redoMutationId = 'test-redo-mutation';
         const undoMutationId = 'test-undo-mutation';
 
@@ -178,7 +178,7 @@ describe('Test ref-range.service', () => {
             fromRange: { startRow: 2, endRow: 4, startColumn: 2, endColumn: 2 },
             toRange: { startRow: 3, endRow: 5, startColumn: 2, endColumn: 2 },
         };
-        commandService.executeCommand(MoveRangeCommand.id, params);
+        await commandService.executeCommand(MoveRangeCommand.id, params);
         const result = sheetInterceptorService.onCommandExecute({ id: MoveRangeCommand.id, params });
         expect((result as any).redos.length).toBe(1);
         expect((result as any).redos[0].params.values.length).toBe(9);

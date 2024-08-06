@@ -29,19 +29,19 @@ function generateOrderedSymbol(startIndex: number, startNumber: number, glyphTyp
     if (glyphType === GlyphType.DECIMAL) {
         return decimal(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.ZERO_DECIMAL) {
+    if (glyphType === GlyphType.DECIMAL_ZERO) {
         return zeroDecimal(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.UPPER_ALPHA) {
+    if (glyphType === GlyphType.UPPER_LETTER) {
         return upperAlpha(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.ALPHA) {
+    if (glyphType === GlyphType.LOWER_LETTER) {
         return alpha(startIndex, startNumber);
     }
     if (glyphType === GlyphType.UPPER_ROMAN) {
         return upperRoman(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.ROMAN) {
+    if (glyphType === GlyphType.LOWER_ROMAN) {
         return roman(startIndex, startNumber);
     }
 

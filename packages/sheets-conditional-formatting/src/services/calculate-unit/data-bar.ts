@@ -19,6 +19,7 @@ import { CFRuleType } from '../../base/const';
 import type { IDataBarRenderParams } from '../../render/type';
 import type { IConditionFormattingRule, IDataBar } from '../../models/type';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
+import { defaultDataBarNativeColor, defaultDataBarPositiveColor } from '../../render/data-bar.render';
 import { filterRange, getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
 import { EMPTY_STYLE } from './type';
@@ -89,7 +90,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
                     return;
                 }
                 const v = getSafeValue((max - value) / length * 100);
-                computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor, startPoint, value: -v, isGradient, isShowValue });
+                computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor || defaultDataBarNativeColor, startPoint, value: -v, isGradient, isShowValue });
             });
         } else if (min < 0 && max > 0) {
             const length = Math.abs(max) + Math.abs(min);
@@ -103,7 +104,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
                     computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient, isShowValue });
                 } else {
                     const v = getSafeValue(Math.min(Math.abs(value) / Math.abs(min), 1) * 100);
-                    computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor, startPoint, value: -v, isGradient, isShowValue });
+                    computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor || defaultDataBarNativeColor, startPoint, value: -v, isGradient, isShowValue });
                 }
             });
         } else if (min >= 0 && max > 0) {
@@ -114,7 +115,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
                     return;
                 }
                 const v = getSafeValue((1 - (max - value) / length) * 100);
-                computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient, isShowValue });
+                computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor || defaultDataBarPositiveColor, startPoint, value: v, isGradient, isShowValue });
             });
         }
         return computeResult;

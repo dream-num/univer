@@ -42,7 +42,7 @@ export class DocHyperLinkClipboardController extends Disposable {
                 if (!doc) {
                     return body;
                 }
-                const activeRange = this._textSelectionManagerService.getActiveRange();
+                const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
                 const customRanges = doc.getBody()?.customRanges;
 
                 const matchedRange = activeRange ?

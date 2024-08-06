@@ -15,14 +15,48 @@
  */
 
 import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@univerjs/core';
 
+import { TextSelectionManagerService } from '@univerjs/docs';
+import { combineLatest, Observable } from 'rxjs';
 import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../upload-component/component-name';
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
 export const IMAGE_MENU_ID = 'doc.menu.image';
 const IMAGE_MENU_UPLOAD_FLOAT_ID = 'doc.menu.image.upload.float';
+
+// TODO: @Jocs, remove this when cell support drawing.
+const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
+    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    return new Observable<boolean>((subscriber) => {
+        const observable = textSelectionManagerService.textSelection$.subscribe(() => {
+            const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+
+            if (activeRange) {
+                const { segmentId, startOffset, endOffset } = activeRange;
+                const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+                const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
+
+                if (tables && tables.length) {
+                    if (tables.some((table) => {
+                        const { startIndex, endIndex } = table;
+                        return (startOffset >= startIndex && startOffset <= endIndex) || (endOffset >= startIndex && endOffset <= endIndex);
+                    })) {
+                        subscriber.next(true);
+                        return;
+                    }
+                }
+            }
+
+            subscriber.next(false);
+        });
+
+        return () => observable.unsubscribe();
+    });
+};
 
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
@@ -32,7 +66,9 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
         group: MenuGroup.TOOLBAR_LAYOUT,
         icon: ImageUploadIcon,
         tooltip: 'docImage.title',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: combineLatest(getDisableWhenSelectionInTableObservable(accessor), getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), (one, two) => {
+            return one || two;
+        }),
     };
 }
 

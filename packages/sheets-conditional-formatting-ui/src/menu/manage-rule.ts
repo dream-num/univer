@@ -99,22 +99,22 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
 
         const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), worksheet.getSheetId()) || [];
         const ruleList = allRule.filter((rule) => rule.ranges.some((ruleRange) => ranges.some((range) => Rectangle.intersects(range, ruleRange))));
-        subscriber.next(!!ruleList.length);
+        const hasPermission = ruleList.map((rule) => rule.ranges).every((ranges) => {
+            return checkRangesEditablePermission(accessor, workbook.getUnitId(), worksheet.getSheetId(), ranges);
+        });
+        subscriber.next(hasPermission);
     }));
     const clearSheetEnable$ = new Observable<boolean>((subscriber) =>
-        merge(
-            selectionManagerService.selectionMoveEnd$,
-            new Observable<null>((commandSubscribe) => {
-                const disposable = commandService.onCommandExecuted((commandInfo) => {
-                    const { id, params } = commandInfo;
-                    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
-                    if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
-                        commandSubscribe.next(null);
-                    }
-                });
-                return () => disposable.dispose();
-            })
-        ).pipe(debounceTime(16)).subscribe(() => {
+        new Observable<null>((commandSubscribe) => {
+            const disposable = commandService.onCommandExecuted((commandInfo) => {
+                const { id, params } = commandInfo;
+                const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+                if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
+                    commandSubscribe.next(null);
+                }
+            });
+            return () => disposable.dispose();
+        }).pipe(debounceTime(16)).subscribe(() => {
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) return;
             const worksheet = workbook.getActiveSheet();

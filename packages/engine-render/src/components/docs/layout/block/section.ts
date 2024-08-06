@@ -23,7 +23,7 @@ import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
 import { createSkeletonPage } from '../model/page';
 import { dealWithBlockError } from './block-error';
-import { dealWidthParagraph } from './paragraph/layout';
+import { dealWidthParagraph } from './paragraph/paragraph-layout';
 
 export function dealWithSection(
     ctx: ILayoutContext,

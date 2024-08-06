@@ -26,18 +26,18 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
-import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { serializeDocRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getRichTextEditPath } from '../util';
-import { getParagraphsInRange } from './list.command';
+import { getParagraphsInRanges } from './list.command';
 
 interface IAlignOperationCommandParams {
     alignType: HorizontalAlign;
 }
 
 export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
-    id: 'doc.command.align-operation',
+    id: 'doc.command.align-action',
 
     type: CommandType.COMMAND,
 
@@ -50,20 +50,26 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         const { alignType } = params;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const activeRange = textSelectionManagerService.getActiveRange();
-        if (docDataModel == null || activeRange == null) {
+        if (docDataModel == null) {
             return false;
         }
-        const { segmentId } = activeRange;
-        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
+
+        const allRanges = textSelectionManagerService.getDocRanges();
+        if (allRanges.length === 0) {
+            return false;
+        }
+
+        const segmentId = allRanges[0].segmentId;
+
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
-        const serializedSelections = selections.map(serializeTextRange);
+        const serializedSelections = allRanges.map(serializeDocRange);
 
         if (paragraphs == null) {
             return false;
         }
 
-        const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
+        const currentParagraphs = getParagraphsInRanges(allRanges, paragraphs);
+
         const unitId = docDataModel.getUnitId();
         const isAlreadyAligned = currentParagraphs.every((paragraph) => paragraph.paragraphStyle?.horizontalAlign === alignType);
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { ITable, Nullable } from '@univerjs/core';
 import { BooleanNumber, PageOrientType } from '@univerjs/core';
 import type {
     IDocumentSkeletonHeaderFooter,
@@ -27,6 +27,7 @@ import { dealWithSection } from '../block/section';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
 import { resetContext, updateBlockIndex } from '../tools';
+import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -179,6 +180,8 @@ function _getNullPage(
         angle: 0,
         width: 0,
         height: 0,
+        // Only use in cell.
+        left: 0,
         marginLeft: 0,
         marginRight: 0,
         originMarginTop: 0,
@@ -189,6 +192,7 @@ function _getNullPage(
         st: 0,
         ed: 0,
         skeDrawings: new Map(),
+        skeTables: new Map(),
         type,
         segmentId,
     };
@@ -275,6 +279,62 @@ function _createSkeletonHeaderFooter(
     return page;
 }
 
+export function createSkeletonCellPage(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    cellNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    tableConfig: ITable,
+    row: number,
+    col: number
+) {
+    const { lists, footerTreeMap, headerTreeMap, localeService, drawings } = sectionBreakConfig;
+    const { skeletonResourceReference } = ctx;
+    const { cellMargin, tableRows, tableColumns, tableId } = tableConfig;
+    const cellConfig = tableRows[row].tableCells[col];
+    // Table cell only has one section.
+    const sectionNode = cellNode.children[0];
+    const {
+        start = { v: 10 },
+        end = { v: 10 },
+        top = { v: 5 },
+        bottom = { v: 5 },
+    } = cellConfig.margin ?? cellMargin ?? {};
+    const pageWidth = tableColumns[col].size.width.v;
+    const pageHeight = Number.POSITIVE_INFINITY;
+    const cellSectionBreakConfig: ISectionBreakConfig = {
+        lists,
+        footerTreeMap,
+        headerTreeMap,
+        pageSize: {
+            width: pageWidth,
+            height: pageHeight,
+        },
+        marginTop: top.v,
+        marginBottom: bottom.v,
+        marginLeft: start.v,
+        marginRight: end.v,
+        localeService,
+        drawings,
+    };
+
+    const areaPage = createSkeletonPage(ctx, cellSectionBreakConfig, skeletonResourceReference);
+    areaPage.type = DocumentSkeletonPageType.CELL;
+    areaPage.segmentId = tableId;
+
+    const page = dealWithSection(
+        ctx,
+        viewModel,
+        sectionNode,
+        areaPage,
+        cellSectionBreakConfig
+    ).pages[0];
+
+    updateBlockIndex([page], cellNode.startIndex);
+
+    return page;
+}
+
 function _getVerticalMargin(
     marginTB: number,
     headerOrFooter: Nullable<IDocumentSkeletonHeaderFooter>,
@@ -289,22 +349,4 @@ function _getVerticalMargin(
     const maxMargin = getHeaderFooterMaxHeight(pageHeight);
 
     return Math.min(maxMargin, Math.max(marginTB, HeaderFooterPageHeight));
-}
-
-function __getHeaderMarginTop(marginTop: number, marginHeader: number, height: number) {
-    const maxMargin = Math.max(marginTop, marginHeader);
-    if (height > maxMargin) {
-        return 0;
-    }
-
-    return maxMargin - height;
-}
-
-function __getHeaderMarginBottom(marginBottom: number, marginFooter: number, height: number) {
-    const maxMargin = Math.max(marginBottom, marginFooter);
-    if (height > maxMargin) {
-        return 0;
-    }
-
-    return maxMargin - height;
 }

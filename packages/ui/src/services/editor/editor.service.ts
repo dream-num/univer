@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
 import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
-import type { IRender, ISuccinctTextRangeParam, Scene } from '@univerjs/engine-render';
+import type { IRender, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 
@@ -284,7 +284,7 @@ export interface IEditorService {
     blur$: Observable<unknown>;
     blur(): void;
 
-    focus$: Observable<ISuccinctTextRangeParam>;
+    focus$: Observable<ISuccinctDocRangeParam>;
     focus(editorUnitId?: string): void;
 
     setValue$: Observable<IEditorSetValueParam>;
@@ -348,7 +348,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private readonly _blur$ = new Subject();
     readonly blur$ = this._blur$.asObservable();
 
-    private readonly _focus$ = new Subject<ISuccinctTextRangeParam>();
+    private readonly _focus$ = new Subject<ISuccinctDocRangeParam>();
     readonly focus$ = this._focus$.asObservable();
 
     private readonly _setValue$ = new Subject<IEditorSetValueParam>();
@@ -653,6 +653,19 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._editors.delete(editorUnitId);
         this._univerInstanceService.disposeUnit(editorUnitId);
         this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
+
+        /**
+         * Compatible with the editor in the sheet scenario,
+         * it is necessary to refocus back to the current sheet when unloading.
+         */
+        const sheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (sheets.length > 0) {
+            const current = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+            if (current) {
+                this._univerInstanceService.focusUnit(current.getUnitId());
+            }
+        }
     }
 
     refreshValueChange(editorUnitId: string) {

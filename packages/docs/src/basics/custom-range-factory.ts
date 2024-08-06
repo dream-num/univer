@@ -117,7 +117,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const selection = textSelectionManagerService.getActiveRange();
+    const selection = textSelectionManagerService.getActiveTextRangeWithStyle();
     if (!selection) {
         return false;
     }

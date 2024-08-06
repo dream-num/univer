@@ -15,13 +15,14 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
+import { createIdentifier, LifecycleStages, runOnLifecycle } from '@univerjs/core';
 import type { Subject } from 'rxjs';
 
 import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
 
 export const IConfirmService = createIdentifier<IConfirmService>('univer.confirm-service');
 
+runOnLifecycle(LifecycleStages.Rendered, IConfirmService);
 export interface IConfirmService {
     readonly confirmOptions$: Subject<IConfirmPartMethodOptions[]>;
 

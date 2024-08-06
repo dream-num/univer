@@ -23,7 +23,7 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, IPoint, Viewport } from '@univerjs/engine-render';
+import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
 import { DocumentSkeletonPageType, getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, ITextSelectionRenderManager, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
@@ -45,6 +45,12 @@ interface IDrawingAnchor {
     segmentPage: number;
     docTransform?: IDocDrawingPosition;
     contentBoxPointGroup?: IPoint[][];
+}
+
+function isInTableCell(nodePosition: INodeSearch) {
+    const { path } = nodePosition;
+
+    return path.some((p) => p === 'cells');
 }
 
 // Listen doc drawing transformer change, and update drawing data.
@@ -408,6 +414,11 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
+        // TODO: @JOCS, table cell do not support drawings now. so need to disable it.
+        if (isInTableCell(nodePosition)) {
+            return;
+        }
+
         const positionWithIsBack = {
             ...nodePosition,
             isBack,
@@ -600,6 +611,11 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
+        // TODO: @JOCS, table cell do not support drawings now. so need to disable it.
+        if (isInTableCell(nodePosition)) {
+            return;
+        }
+
         const positionWithIsBack = {
             ...nodePosition,
             isBack,
@@ -663,10 +679,6 @@ export class DocDrawingTransformerController extends Disposable {
         const anchor = this._getInlineDrawingAnchor(drawing, offsetX, offsetY);
         const { offset, segmentId, segmentPage } = anchor ?? {};
 
-        if (offset == null) {
-            return;
-        }
-
         return this._commandService.executeCommand(IMoveInlineDrawingCommand.id, {
             unitId: drawing.unitId,
             subUnitId: drawing.unitId,
@@ -674,6 +686,7 @@ export class DocDrawingTransformerController extends Disposable {
             offset,
             segmentId,
             segmentPage,
+            needRefreshDrawings: offset == null,
         });
     }
 

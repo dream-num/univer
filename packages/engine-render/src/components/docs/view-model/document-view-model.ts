@@ -16,9 +16,13 @@
 
 import type { ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IDisposable, IDocumentBody, ITextRun, Nullable } from '@univerjs/core';
 import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, toDisposable } from '@univerjs/core';
-
 import { BehaviorSubject } from 'rxjs';
 import { DataStreamTreeNode } from './data-stream-tree-node';
+
+interface ITableCache {
+    table: DataStreamTreeNode;
+    isFinished: boolean;
+}
 
 export interface ICustomRangeInterceptor {
     getCustomRange: (index: number) => Nullable<ICustomRangeForInterceptor>;
@@ -29,6 +33,128 @@ export enum DocumentEditArea {
     BODY = 'BODY',
     HEADER = 'HEADER',
     FOOTER = 'FOOTER',
+}
+
+function batchParent(
+    parent: DataStreamTreeNode,
+    children: DataStreamTreeNode[],
+    nodeType = DataStreamTreeNodeType.SECTION_BREAK
+) {
+    if (children.length === 0) {
+        throw new Error('Missing `paragraphs` or `sectionBreaks` fields, or doesn\'t correspond to the location in `dataStream`.');
+    }
+
+    for (const child of children) {
+        child.parent = parent;
+        parent.children.push(child);
+    }
+
+    const startOffset = nodeType === DataStreamTreeNodeType.SECTION_BREAK ? 0 : 1;
+    const allChildren = parent.children;
+
+    parent.setIndexRange(allChildren[0].startIndex - startOffset, allChildren[allChildren.length - 1].endIndex + 1);
+}
+
+export function parseDataStreamToTree(dataStream: string) {
+    let content = '';
+    const dataStreamLen = dataStream.length;
+    const sectionList: DataStreamTreeNode[] = [];
+    // Only use to cache the outer paragraphs.
+    const paragraphList: DataStreamTreeNode[] = [];
+    // Use to cache paragraphs in cell.
+    const cellParagraphList: DataStreamTreeNode[] = [];
+    const tableList: ITableCache[] = [];
+    const tableRowList: DataStreamTreeNode[] = [];
+    const tableCellList: DataStreamTreeNode[] = [];
+    const currentBlocks: number[] = [];
+
+    for (let i = 0; i < dataStreamLen; i++) {
+        const char = dataStream[i];
+
+        if (char === DataStreamTreeTokenType.PARAGRAPH) {
+            content += DataStreamTreeTokenType.PARAGRAPH;
+
+            const paragraphNode = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, content);
+
+            const lastTableCache = tableList[tableList.length - 1];
+            if (lastTableCache && lastTableCache.isFinished) {
+                // Paragraph Node will only has one table node.
+                batchParent(paragraphNode, [lastTableCache.table], DataStreamTreeNodeType.PARAGRAPH);
+
+                tableList.pop();
+            }
+
+            // Paragraph start and end index is from the first char of the paragraph to the last char of the paragraph. not include the Table content.
+            paragraphNode.setIndexRange(i - content.length + 1, i);
+            paragraphNode.addBlocks(currentBlocks);
+            currentBlocks.length = 0;
+            content = '';
+
+            if (tableCellList.length > 0) {
+                cellParagraphList.push(paragraphNode);
+            } else {
+                paragraphList.push(paragraphNode);
+            }
+        } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
+            const sectionNode = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
+            const tempParagraphList = tableCellList.length > 0 ? cellParagraphList : paragraphList;
+
+            batchParent(sectionNode, tempParagraphList);
+
+            const lastNode = tempParagraphList[tempParagraphList.length - 1];
+
+            if (lastNode && lastNode.content) {
+                lastNode.content += DataStreamTreeTokenType.SECTION_BREAK;
+            }
+
+            if (tableCellList.length > 0) {
+                const lastCell = tableCellList[tableCellList.length - 1];
+
+                batchParent(lastCell, [sectionNode], DataStreamTreeNodeType.TABLE_CELL);
+            } else {
+                sectionList.push(sectionNode);
+            }
+
+            tempParagraphList.length = 0;
+        } else if (char === DataStreamTreeTokenType.TABLE_START) {
+            const tableNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE);
+
+            tableList.push({
+                table: tableNode,
+                isFinished: false,
+            });
+        } else if (char === DataStreamTreeTokenType.TABLE_ROW_START) {
+            const rowNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_ROW);
+
+            tableRowList.push(rowNode);
+        } else if (char === DataStreamTreeTokenType.TABLE_CELL_START) {
+            const cellNode = DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_CELL);
+
+            tableCellList.push(cellNode);
+        } else if (char === DataStreamTreeTokenType.TABLE_END) {
+            const lastTable = tableList[tableList.length - 1];
+            lastTable.isFinished = true;
+            content = '';
+        } else if (char === DataStreamTreeTokenType.TABLE_ROW_END) {
+            const rowNode = tableRowList.pop();
+            const lastTableCache = tableList[tableList.length - 1];
+
+            batchParent(lastTableCache.table, [rowNode!], DataStreamTreeNodeType.TABLE);
+        } else if (char === DataStreamTreeTokenType.TABLE_CELL_END) {
+            const cellNode = tableCellList.pop();
+
+            const lastRow = tableRowList[tableRowList.length - 1];
+
+            batchParent(lastRow, [cellNode!], DataStreamTreeNodeType.TABLE_ROW);
+        } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+            currentBlocks.push(i);
+            content += char;
+        } else {
+            content += char;
+        }
+    }
+
+    return sectionList;
 }
 
 export class DocumentViewModel implements IDisposable {
@@ -54,7 +180,7 @@ export class DocumentViewModel implements IDisposable {
             return;
         }
 
-        this.children = this._transformToTree(_documentDataModel.getBody()!.dataStream);
+        this.children = parseDataStreamToTree(_documentDataModel.getBody()!.dataStream);
 
         this._buildHeaderFooterViewModel();
     }
@@ -70,7 +196,7 @@ export class DocumentViewModel implements IDisposable {
         });
     }
 
-    selfPlus(len: number, index: number) {
+    selfPlus(_len: number, _index: number) {
         // empty
     }
 
@@ -97,6 +223,10 @@ export class DocumentViewModel implements IDisposable {
         return this._documentDataModel.getBody();
     }
 
+    getSnapshot() {
+        return this._documentDataModel.getSnapshot();
+    }
+
     getDataModel() {
         return this._documentDataModel;
     }
@@ -120,7 +250,7 @@ export class DocumentViewModel implements IDisposable {
     reset(documentDataModel: DocumentDataModel) {
         this._documentDataModel = documentDataModel;
 
-        this.children = this._transformToTree(documentDataModel.getBody()!.dataStream);
+        this.children = parseDataStreamToTree(documentDataModel.getBody()!.dataStream);
 
         this._buildHeaderFooterViewModel();
     }
@@ -279,16 +409,19 @@ export class DocumentViewModel implements IDisposable {
         }
     }
 
-    getParagraph(index: number) {
+    getParagraph(index: number, fromStart = false) {
         const paragraphs = this.getBody()!.paragraphs;
         if (paragraphs == null) {
             return;
         }
 
-        for (let i = this._paragraphCurrentIndex; i < paragraphs.length; i++) {
+        for (let i = fromStart ? 0 : this._paragraphCurrentIndex; i < paragraphs.length; i++) {
             const paragraph = paragraphs[i];
             if (paragraph.startIndex === index) {
-                this._paragraphCurrentIndex = i;
+                if (!fromStart) {
+                    this._paragraphCurrentIndex = i;
+                }
+
                 return paragraph;
             }
         }
@@ -406,17 +539,25 @@ export class DocumentViewModel implements IDisposable {
     }
 
     getTable(index: number) {
-        const tables = this.getBody()!.tables;
-        if (tables == null) {
+        const tables = this.getBody()?.tables;
+        const tableSource = this.getSnapshot().tableSource;
+        if (tables == null || tableSource == null) {
             return;
         }
+
+        let tableId: Nullable<string> = null;
 
         for (let i = this._tableBlockCurrentIndex; i < tables.length; i++) {
             const table = tables[i];
             if (table.startIndex === index) {
                 this._tableBlockCurrentIndex = i;
-                return table;
+                tableId = table.tableId;
+                break;
             }
+        }
+
+        if (tableId != null && tableSource[tableId] != null) {
+            return tableSource[tableId];
         }
     }
 
@@ -462,131 +603,6 @@ export class DocumentViewModel implements IDisposable {
         }
 
         return this.getCustomDecorationRaw(index);
-    }
-
-    protected _transformToTree(dataStream: string) {
-        const dataStreamLen = dataStream.length;
-
-        let content = '';
-        const sectionList: DataStreamTreeNode[] = [];
-        let nodeList: DataStreamTreeNode[] = [];
-        let currentBlocks: number[] = [];
-
-        // let paragraphIndex = 0;
-        for (let i = 0; i < dataStreamLen; i++) {
-            const char = dataStream[i];
-
-            if (char === DataStreamTreeTokenType.PARAGRAPH) {
-                content += DataStreamTreeTokenType.PARAGRAPH;
-
-                const node = DataStreamTreeNode.create(DataStreamTreeNodeType.PARAGRAPH, content);
-
-                // const isBullet = this._checkParagraphBullet(paragraphIndex);
-                // const isIndent = isBullet === true ? true : this._checkParagraphIndent(paragraphIndex);
-                // paragraphIndex++;
-                node.setIndexRange(i - content.length + 1, i);
-                node.addBlocks(currentBlocks);
-                // node.isBullet = isBullet;
-                // node.isIndent = isIndent;
-                nodeList.push(node);
-                content = '';
-                currentBlocks = [];
-            } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
-                const sectionTree = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
-
-                this._batchParent(sectionTree, nodeList);
-
-                const lastNode = nodeList[nodeList.length - 1];
-
-                if (lastNode && lastNode.content) {
-                    lastNode.content += DataStreamTreeTokenType.SECTION_BREAK;
-                }
-
-                sectionList.push(sectionTree);
-                nodeList = [];
-            } else if (char === DataStreamTreeTokenType.TABLE_START) {
-                nodeList.push(DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE));
-            } else if (char === DataStreamTreeTokenType.TABLE_ROW_START) {
-                nodeList.push(DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_ROW));
-            } else if (char === DataStreamTreeTokenType.TABLE_CELL_START) {
-                nodeList.push(DataStreamTreeNode.create(DataStreamTreeNodeType.TABLE_CELL));
-            } else if (char === DataStreamTreeTokenType.TABLE_END) {
-                this._processPreviousNodesUntil(nodeList, DataStreamTreeNodeType.TABLE);
-            } else if (char === DataStreamTreeTokenType.TABLE_ROW_END) {
-                this._processPreviousNodesUntil(nodeList, DataStreamTreeNodeType.TABLE_ROW);
-            } else if (char === DataStreamTreeTokenType.TABLE_CELL_END) {
-                this._processPreviousNodesUntil(nodeList, DataStreamTreeNodeType.TABLE_CELL);
-            } else if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-                currentBlocks.push(i);
-                content += char;
-            } else {
-                content += char;
-            }
-        }
-
-        return sectionList;
-    }
-
-    private _processPreviousNodesUntil(nodeList: DataStreamTreeNode[], untilNodeType: DataStreamTreeNodeType) {
-        const nodeCollection: DataStreamTreeNode[] = [];
-        let node = nodeList.pop();
-        while (node) {
-            if (node.nodeType === untilNodeType) {
-                break;
-            }
-
-            nodeCollection.push(node);
-
-            node = nodeList.pop();
-        }
-
-        const recentTree = nodeList[nodeList.length - 1];
-        this._batchParent(recentTree, nodeCollection, DataStreamTreeNodeType.TABLE);
-
-        if (untilNodeType === DataStreamTreeNodeType.TABLE_CELL) {
-            const firstNode = nodeCollection[0];
-            const lastNode = nodeCollection[nodeCollection.length];
-            firstNode.content = DataStreamTreeTokenType.TABLE_CELL_START + firstNode.content || '';
-            firstNode.startIndex -= 1;
-            lastNode.content += DataStreamTreeTokenType.TABLE_CELL_END;
-            lastNode.endIndex += 1;
-        } else if (untilNodeType === DataStreamTreeNodeType.TABLE_ROW) {
-            const firstNode = nodeCollection[0].children[0];
-            let lastNode = nodeCollection[nodeCollection.length];
-            lastNode = lastNode.children[lastNode.children.length - 1];
-            firstNode.content = DataStreamTreeTokenType.TABLE_ROW_START + firstNode.content || '';
-            firstNode.startIndex -= 1;
-            lastNode.content += DataStreamTreeTokenType.TABLE_ROW_END;
-            lastNode.endIndex += 1;
-        } else if (untilNodeType === DataStreamTreeNodeType.TABLE) {
-            const firstNode = nodeCollection[0].children[0].children[0];
-            let lastNode = nodeCollection[nodeCollection.length];
-            lastNode = lastNode.children[lastNode.children.length - 1];
-            lastNode = lastNode.children[lastNode.children.length - 1];
-            firstNode.content = DataStreamTreeTokenType.TABLE_START + firstNode.content || '';
-            firstNode.startIndex -= 1;
-            lastNode.content += DataStreamTreeTokenType.TABLE_END;
-            lastNode.endIndex += 1;
-        }
-    }
-
-    private _batchParent(
-        parent: DataStreamTreeNode,
-        children: DataStreamTreeNode[],
-        nodeType = DataStreamTreeNodeType.SECTION_BREAK
-    ) {
-        if (children.length === 0) {
-            throw new Error('Missing `paragraphs` or `sectionBreaks` fields, or doesn\'t correspond to the location in `dataStream`.');
-        }
-
-        for (const child of children) {
-            child.parent = parent;
-            parent.children.push(child);
-        }
-
-        const startOffset = nodeType === DataStreamTreeNodeType.SECTION_BREAK ? 0 : 1;
-
-        parent.setIndexRange(children[0].startIndex - startOffset, children[children.length - 1].endIndex + 1);
     }
 
     private _buildHeaderFooterViewModel() {
@@ -777,10 +793,4 @@ export class DocumentViewModel implements IDisposable {
             }
         });
     }
-
-    // private move() {}
-
-    // private split() {}
-
-    // private merge() {}
 }

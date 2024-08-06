@@ -42,7 +42,10 @@ export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {
             }
 
             case 'line-height': {
-                const lineHeightValue = Number.parseFloat(cssValue);
+                let lineHeightValue = Number.parseFloat(cssValue);
+                if (cssValue.endsWith('%')) {
+                    lineHeightValue /= 100;
+                }
                 paragraphStyle.lineSpacing = lineHeightValue;
 
                 break;

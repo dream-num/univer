@@ -127,7 +127,7 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
     }
 
     const body = docDataModel.getBody();
-    const selection = params.selection ?? textSelectionManagerService.getActiveRange();
+    const selection = params.selection ?? textSelectionManagerService.getActiveTextRangeWithStyle();
     if (!selection || !body) {
         return false;
     }

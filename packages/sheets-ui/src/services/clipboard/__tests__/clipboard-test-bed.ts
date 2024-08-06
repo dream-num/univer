@@ -598,6 +598,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
     injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
     injector.get(IRenderManagerService).addRender('test', {
+        type: UniverInstanceType.UNIVER_SHEET,
         unitId: 'test',
         type: UniverInstanceType.UNIVER_SHEET,
         engine: new DisposableCollection() as any,

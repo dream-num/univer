@@ -17,12 +17,14 @@
 import type { Nullable } from '@univerjs/core';
 import { ICommandService, RxDisposable } from '@univerjs/core';
 import type {
+    IDocRange,
     INodePosition,
-    ISuccinctTextRangeParam,
+    ISuccinctDocRangeParam,
     ITextRangeWithStyle,
     ITextSelectionInnerParam,
     ITextSelectionStyle,
     RANGE_DIRECTION,
+    RectRange,
     TextRange,
 } from '@univerjs/engine-render';
 import { ITextSelectionRenderManager, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
@@ -30,7 +32,7 @@ import { BehaviorSubject, takeUntil } from 'rxjs';
 
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 
-interface ITextSelectionManagerSearchParam {
+interface IDocSelectionManagerSearchParam {
     unitId: string;
     subUnitId: string;
 }
@@ -47,11 +49,11 @@ export interface ITextActiveRange {
     segmentPage: number;
 }
 
-interface ITextSelectionManagerInsertParam extends ITextSelectionManagerSearchParam, ITextSelectionInnerParam {}
+interface ITextSelectionManagerInsertParam extends IDocSelectionManagerSearchParam, ITextSelectionInnerParam {}
 
 type ITextSelectionInfo = Map<string, Map<string, ITextSelectionInnerParam>>;
 
-export function serializeTextRange(textRange: TextRange): ITextRangeWithStyle {
+export function serializeDocRange(textRange: IDocRange): ITextRangeWithStyle {
     const { startOffset, endOffset, collapsed } = textRange;
 
     const serializedTextRange: ITextRangeWithStyle = {
@@ -71,7 +73,7 @@ export function serializeTextRange(textRange: TextRange): ITextRangeWithStyle {
  * This service is for text selection.
  */
 export class TextSelectionManagerService extends RxDisposable {
-    private _currentSelection: Nullable<ITextSelectionManagerSearchParam> = null;
+    private _currentSelection: Nullable<IDocSelectionManagerSearchParam> = null;
 
     private readonly _textSelectionInfo: ITextSelectionInfo = new Map();
 
@@ -109,17 +111,40 @@ export class TextSelectionManagerService extends RxDisposable {
     }
 
     // **Only used in test case** because this does not go through the render layer.
-    setCurrentSelection(param: ITextSelectionManagerSearchParam) {
+    setCurrentSelection(param: IDocSelectionManagerSearchParam) {
         this._currentSelection = param;
         this._refresh(param);
     }
 
-    setCurrentSelectionNotRefresh(param: ITextSelectionManagerSearchParam) {
+    setCurrentSelectionNotRefresh(param: IDocSelectionManagerSearchParam) {
         this._currentSelection = param;
     }
 
-    getCurrentSelections(): Readonly<Nullable<TextRange[]>> {
+    getCurrentTextRanges(): Readonly<Nullable<TextRange[]>> {
         return this._getTextRanges(this._currentSelection)?.textRanges;
+    }
+
+    getCurrentRectRanges(): Readonly<Nullable<RectRange[]>> {
+        return this._getTextRanges(this._currentSelection)?.rectRanges;
+    }
+
+    getDocRanges() {
+        const textRanges = this.getCurrentTextRanges() ?? [];
+        const rectRanges = this.getCurrentRectRanges() ?? [];
+        // Sort ranges by startOffset in ascending order.
+        const allRanges = [...textRanges, ...rectRanges]
+            .filter((range) => range.startOffset != null && range.endOffset != null)
+            .sort((a, b) => {
+                if (a.startOffset! > b.startOffset!) {
+                    return 1;
+                } else if (a.startOffset! < b.startOffset!) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+
+        return allRanges;
     }
 
     getActiveTextRange(): Nullable<TextRange> {
@@ -132,7 +157,17 @@ export class TextSelectionManagerService extends RxDisposable {
         return textRanges.find((textRange) => textRange.isActive());
     }
 
-    getActiveRange(): Nullable<ITextActiveRange> {
+    getActiveRectRange(): Nullable<RectRange> {
+        const selectionInfo = this._getTextRanges(this._currentSelection);
+        if (selectionInfo == null) {
+            return;
+        }
+
+        const { rectRanges } = selectionInfo;
+        return rectRanges.find((rectRange) => rectRange.isActive());
+    }
+
+    getActiveTextRangeWithStyle(): Nullable<ITextActiveRange> {
         const selectionInfo = this._getTextRanges(this._currentSelection);
         if (selectionInfo == null) {
             return;
@@ -165,7 +200,7 @@ export class TextSelectionManagerService extends RxDisposable {
     }
 
     // **Only used in test case** because this does not go through the render layer.
-    add(textRanges: ISuccinctTextRangeParam[], isEditing = true) {
+    add(textRanges: ISuccinctDocRangeParam[], isEditing = true) {
         if (this._currentSelection == null) {
             return;
         }
@@ -173,6 +208,7 @@ export class TextSelectionManagerService extends RxDisposable {
         this._addByParam({
             ...this._currentSelection,
             textRanges: textRanges as TextRange[],
+            rectRanges: [],
             segmentId: '',
             segmentPage: -1,
             isEditing,
@@ -180,15 +216,15 @@ export class TextSelectionManagerService extends RxDisposable {
         });
     }
 
-    replaceTextRanges(textRanges: ISuccinctTextRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
+    replaceTextRanges(docRanges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         if (this._currentSelection == null) {
             return;
         }
 
         // Remove all textRanges.
-        this._textSelectionRenderManager.removeAllTextRanges();
+        this._textSelectionRenderManager.removeAllRanges();
         // Add new textRanges.
-        this._textSelectionRenderManager.addTextRanges(textRanges, isEditing, options);
+        this._textSelectionRenderManager.addDocRanges(docRanges, isEditing, options);
     }
 
     // All textRanges should be synchronized from the render layer.
@@ -229,11 +265,11 @@ export class TextSelectionManagerService extends RxDisposable {
             segmentId,
             style,
             isEditing,
-            ranges: textRanges.map(serializeTextRange),
+            ranges: textRanges.map(serializeDocRange),
         });
     }
 
-    private _getTextRanges(param: Nullable<ITextSelectionManagerSearchParam>) {
+    private _getTextRanges(param: Nullable<IDocSelectionManagerSearchParam>) {
         if (param == null) {
             return;
         }
@@ -243,23 +279,27 @@ export class TextSelectionManagerService extends RxDisposable {
         return this._textSelectionInfo.get(unitId)?.get(subUnitId);
     }
 
-    private _refresh(param: ITextSelectionManagerSearchParam): void {
+    private _refresh(param: IDocSelectionManagerSearchParam): void {
         const allTextSelectionInfo = this._getTextRanges(param);
 
         // Remove all textRanges.
-        this._textSelectionRenderManager.removeAllTextRanges();
+        this._textSelectionRenderManager.removeAllRanges();
 
-        if (
-            allTextSelectionInfo &&
-            Array.isArray(allTextSelectionInfo.textRanges) &&
-            allTextSelectionInfo.textRanges.length
-        ) {
-            this._textSelectionRenderManager.addTextRanges(allTextSelectionInfo.textRanges.map(serializeTextRange));
+        if (allTextSelectionInfo == null) {
+            return;
+        }
+
+        const { textRanges, rectRanges } = allTextSelectionInfo;
+
+        const docRanges = [...textRanges, ...rectRanges];
+
+        if (docRanges.length > 0) {
+            this._textSelectionRenderManager.addDocRanges(docRanges.map(serializeDocRange));
         }
     }
 
     private _replaceByParam(insertParam: ITextSelectionManagerInsertParam) {
-        const { unitId, subUnitId, style, segmentId, textRanges, isEditing, segmentPage } = insertParam;
+        const { unitId, subUnitId, style, segmentId, textRanges, rectRanges, isEditing, segmentPage } = insertParam;
 
         if (!this._textSelectionInfo.has(unitId)) {
             this._textSelectionInfo.set(unitId, new Map());
@@ -267,11 +307,11 @@ export class TextSelectionManagerService extends RxDisposable {
 
         const unitTextRange = this._textSelectionInfo.get(unitId)!;
 
-        unitTextRange.set(subUnitId, { textRanges, style, segmentId, isEditing, segmentPage });
+        unitTextRange.set(subUnitId, { textRanges, rectRanges, style, segmentId, isEditing, segmentPage });
     }
 
     private _addByParam(insertParam: ITextSelectionManagerInsertParam): void {
-        const { unitId, subUnitId, textRanges, style, segmentId, isEditing, segmentPage } = insertParam;
+        const { unitId, subUnitId, textRanges, rectRanges, style, segmentId, isEditing, segmentPage } = insertParam;
 
         if (!this._textSelectionInfo.has(unitId)) {
             this._textSelectionInfo.set(unitId, new Map());
@@ -280,7 +320,7 @@ export class TextSelectionManagerService extends RxDisposable {
         const unitTextRange = this._textSelectionInfo.get(unitId)!;
 
         if (!unitTextRange.has(subUnitId)) {
-            unitTextRange.set(subUnitId, { textRanges, style, segmentId, isEditing, segmentPage });
+            unitTextRange.set(subUnitId, { textRanges, rectRanges, style, segmentId, isEditing, segmentPage });
         } else {
             const OldTextRanges = unitTextRange.get(subUnitId)!;
             OldTextRanges.textRanges.push(...textRanges);

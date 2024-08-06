@@ -111,7 +111,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                 }
             }
 
-            this._textSelectionRenderManager.eventTrigger(evt);
+            this._textSelectionRenderManager.onPointDown(evt);
 
             if (this._editorService.getEditor(unitId)) {
                 /**

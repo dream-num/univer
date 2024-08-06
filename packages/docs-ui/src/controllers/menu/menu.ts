@@ -30,6 +30,7 @@ import {
     AlignOperationCommand,
     AlignRightCommand,
     BulletListCommand,
+    DocSkeletonManagerService,
     getParagraphsInRange,
     OrderListCommand,
     ResetInlineFormatTextBackgroundColorCommand,
@@ -46,7 +47,7 @@ import {
     SetInlineFormatUnderlineCommand,
     SetTextSelectionsOperation,
     TextSelectionManagerService } from '@univerjs/docs';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
@@ -60,11 +61,97 @@ import type { IAccessor, PresetListType } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
 import { combineLatest, map, Observable } from 'rxjs';
 
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../components/list-type-picker';
+import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
+
+function getInsertTableHiddenObservable(
+    accessor: IAccessor
+): Observable<boolean> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const renderManagerService = accessor.get(IRenderManagerService);
+
+    return new Observable((subscriber) => {
+        const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            if (unitId == null) {
+                return subscriber.next(true);
+            }
+            const univerType = univerInstanceService.getUnitType(unitId);
+
+            if (univerType !== UniverInstanceType.UNIVER_DOC) {
+                return subscriber.next(true);
+            }
+
+            const currentRender = renderManagerService.getRenderById(unitId);
+            if (currentRender == null) {
+                return subscriber.next(true);
+            }
+
+            const viewModel = currentRender.with(DocSkeletonManagerService).getViewModel();
+
+            viewModel.editAreaChange$.subscribe((editArea) => {
+                subscriber.next(editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER);
+            });
+        });
+
+        const currentRender = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC);
+        if (currentRender == null) {
+            return subscriber.next(true);
+        }
+
+        const viewModel = currentRender.with(DocSkeletonManagerService).getViewModel();
+
+        subscriber.next(viewModel.getEditArea() !== DocumentEditArea.BODY);
+
+        return () => subscription.unsubscribe();
+    });
+}
+
+function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
+    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+    return new Observable((subscriber) => {
+        const subscription = textSelectionManagerService.textSelection$.subscribe((selection) => {
+            if (selection == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            const { textRanges } = selection;
+
+            if (textRanges.length !== 1) {
+                subscriber.next(true);
+                return;
+            }
+
+            const textRange = textRanges[0];
+            const { collapsed, anchorNodePosition } = textRange;
+
+            if (!collapsed) {
+                subscriber.next(true);
+                return;
+            }
+
+            if (anchorNodePosition != null) {
+                const { path } = anchorNodePosition;
+
+                // TODO: Not support insert table in table cell now.
+                if (path.indexOf('cells') !== -1) {
+                    subscriber.next(true);
+                    return;
+                }
+            }
+
+            subscriber.next(false);
+        });
+
+        return () => subscription.unsubscribe();
+    });
+}
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
@@ -420,6 +507,35 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     };
 }
 
+export const TableIcon = 'GridSingle';
+const TABLE_MENU_ID = 'doc.menu.table';
+
+export function TableMenuFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: TABLE_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        positions: [MenuPosition.TOOLBAR_START],
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        icon: TableIcon,
+        tooltip: 'toolbar.table.main',
+        disabled$: getTableDisabledObservable(accessor),
+        // Do not show header footer menu and insert table at zen mode.
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), getHeaderFooterMenuHiddenObservable(accessor), (one, two, three) => {
+            return one || two || three;
+        }),
+    };
+}
+
+export function InsertTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DocCreateTableOperation.id,
+        title: 'toolbar.table.insert',
+        type: MenuItemType.BUTTON,
+        positions: [TABLE_MENU_ID],
+        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
+    };
+}
+
 export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
 
@@ -577,7 +693,7 @@ const listValueFactory$ = (accessor: IAccessor) => {
             }
 
             textSubscription = textSelectionManagerService.textSelection$.subscribe(() => {
-                const range = textSelectionManagerService.getActiveRange();
+                const range = textSelectionManagerService.getActiveTextRangeWithStyle();
                 if (range) {
                     const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
                     const paragraphs = getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
@@ -698,7 +814,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-    const activeTextRange = textSelectionService.getActiveRange();
+    const activeTextRange = textSelectionService.getActiveTextRangeWithStyle();
 
     if (docDataModel == null || activeTextRange == null) {
         return;
@@ -736,7 +852,7 @@ function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-    const activeTextRange = textSelectionService.getActiveRange();
+    const activeTextRange = textSelectionService.getActiveTextRangeWithStyle();
 
     if (docDataModel == null || activeTextRange == null) {
         return;

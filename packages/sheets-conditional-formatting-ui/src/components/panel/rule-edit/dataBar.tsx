@@ -19,7 +19,7 @@ import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/desi
 import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
-import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarPositiveColor, defaultDataBarNativeColor, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarNativeColor, defaultDataBarPositiveColor, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionalFormattingRuleConfig, IValueConfig } from '@univerjs/sheets-conditional-formatting';
 import { ColorPicker } from '../../color-picker';
 import stylesBase from '../index.module.less';

@@ -18,7 +18,7 @@ import React, { useMemo } from 'react';
 import { BooleanNumber, ColorKit } from '@univerjs/core';
 import { SlashSingle } from '@univerjs/icons';
 import type { IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
-import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, defaultDataBarNativeColor,defaultDataBarPositiveColor, getColorScaleFromValue, iconMap } from '@univerjs/sheets-conditional-formatting';
+import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, defaultDataBarNativeColor, defaultDataBarPositiveColor, getColorScaleFromValue, iconMap } from '@univerjs/sheets-conditional-formatting';
 import styles from './index.module.less';
 
 export const Preview = (props: { rule?: IConditionalFormattingRuleConfig }) => {

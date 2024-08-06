@@ -81,10 +81,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const instanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const flowManagerService = useDependency(FlowManagerService);
-    const commandService = useDependency(ICommandService);
 
     const contentRef = useRef<HTMLDivElement>(null);
-    const selectedNodeRef = useRef<HTMLElement | null>(null);
     const floatingToolbarRef = useRef<IFloatingToolbarRef>(null);
     const reactFlowInstance = useRef<HTMLDivElement | null>(null);
 
@@ -93,9 +91,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
     const focusedUnit = useObservable(instanceService.focused$);
-    const focusUnit = useCallback((unitId: string) => {
-        commandService.executeCommand(UniFocusUnitOperation.id, { unitId });
-    }, [instanceService]);
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
@@ -159,7 +154,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             unitId: item.data.unitId,
             gridService: unitGridService,
             instanceService,
-            onFocus: focusUnit,
         },
         position: item.position,
     })), [unitGrid]);
@@ -174,15 +168,11 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         const { zoom } = viewport;
         setZoom(zoom);
         flowManagerService.setViewportChanged(viewport);
-    }, [floatingToolbarRef, selectedNodeRef, setZoom, flowManagerService]);
+    }, [floatingToolbarRef, setZoom, flowManagerService]);
 
     const onFlowInit = useCallback((instance: ReactFlowInstance<any>) => {
         flowManagerService.setReactFlowInstance(instance);
     }, [flowManagerService]);
-
-    useEffect(() => {
-        selectedNodeRef.current = document.querySelector(`[data-id="${focusedUnit}"]`);
-    }, [focusedUnit, selectedNodeRef]);
 
     const disableReactFlowBehavior = !!focusedUnit;
 
@@ -259,7 +249,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                 </div>
                             </div>
                         )}
-                        <UniFloatingToolbar ref={floatingToolbarRef} node={nodes.find((n) => n.id === focusedUnit)?.data} anchorRef={selectedNodeRef} />
+                        <UniFloatingToolbar ref={floatingToolbarRef} node={nodes.find((n) => n.id === focusedUnit)?.data} />
 
                         <LeftSidebar />
                         <RightSidebar />
@@ -288,6 +278,7 @@ function UnitNode({ data }: IUnitNodeProps) {
 
     const instanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
+    const commandService = useDependency(ICommandService);
 
     const disableChangingUnitFocusing = useObservable(
         () => contextService.subscribeContextValue$(UNI_DISABLE_CHANGING_FOCUS_KEY),
@@ -298,9 +289,9 @@ function UnitNode({ data }: IUnitNodeProps) {
 
     const focus = useCallback(() => {
         if (!disableChangingUnitFocusing && !focused) {
-            instanceService.focusUnit(unitId);
+            commandService.executeCommand(UniFocusUnitOperation.id, { unitId });
         }
-    }, [disableChangingUnitFocusing, focused, instanceService, unitId]);
+    }, [disableChangingUnitFocusing, focused, unitId, commandService]);
 
     return (
         <div className={styles.uniNodeContainer} onPointerDownCapture={focus}>

@@ -43,7 +43,7 @@ const UNI_FLOATING_TOOLBAR_SCHEMA: string[] = [
     DELETE_MENU_ID,
 ];
 
-export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: Nullable<IUnitRendererProps>; anchorRef: React.MutableRefObject<HTMLElement | null> }>(({ node, anchorRef }, ref) => {
+export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: Nullable<IUnitRendererProps> }>(({ node }, ref) => {
     const { x, y, refs, strategy, update } = useFloating({
         placement: 'top',
         middleware: [offset(10), flip(), shift({ padding: 5 })],
@@ -61,13 +61,13 @@ export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: 
     }), [update]);
 
     useEffect(() => {
-        if (anchorRef.current) {
-            setReference(anchorRef.current);
+        if (node) {
+            const ref = document.querySelector(`[data-id="${node.unitId}"]`);
+            setReference(ref);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [anchorRef.current, setReference]);
+    }, [node, setReference]);
 
-    if (!node || !anchorRef.current) {
+    if (!node) {
         return null;
     }
 

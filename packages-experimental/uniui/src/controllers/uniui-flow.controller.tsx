@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { throttleTime } from 'rxjs';
+import { auditTime, throttleTime } from 'rxjs';
 import { SetFlowViewportOperation } from '../commands/operations/set-flow-viewport.operation';
 import type { IFlowViewport } from '../services/flow/flow-manager.service';
 import { FlowManagerService } from '../services/flow/flow-manager.service';
@@ -42,7 +42,10 @@ export class UniuiFlowController extends Disposable {
     }
 
     private _triggerCommands() {
-        this._flowManagerService.viewportChanged$.pipe(throttleTime(100)).subscribe((viewport: IFlowViewport | null) => {
+        this._flowManagerService.viewportChanged$.pipe(
+            throttleTime(100, undefined, { leading: true, trailing: true }),
+            auditTime(100)
+        ).subscribe((viewport: IFlowViewport | null) => {
             if (viewport) {
                 this._commandService.executeCommand(SetFlowViewportOperation.id, { viewport });
             }

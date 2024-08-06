@@ -26,6 +26,7 @@ export enum QuickListType {
     ORDER_LIST_QUICK_4 = 'i.',
     ORDER_LIST_QUICK_5 = 'A.',
     ORDER_LIST_QUICK_6 = 'I.',
+    ORDER_LIST_QUICK_7 = '01.',
 }
 
 export enum PresetListType {
@@ -36,11 +37,29 @@ export enum PresetListType {
     BULLET_LIST_4 = 'BULLET_LIST_4',
     BULLET_LIST_5 = 'BULLET_LIST_5',
 
+    /**
+     * 1 a i
+     */
     ORDER_LIST = 'ORDER_LIST',
+    /**
+     * 1) a) i)
+     */
     ORDER_LIST_1 = 'ORDER_LIST_1',
+    /**
+     * 1. 1.1. 1.1.1.
+     */
     ORDER_LIST_2 = 'ORDER_LIST_2',
+    /**
+     * A a i
+     */
     ORDER_LIST_3 = 'ORDER_LIST_3',
+    /**
+     * A 1 i
+     */
     ORDER_LIST_4 = 'ORDER_LIST_4',
+    /**
+     * 01 a i
+     */
     ORDER_LIST_5 = 'ORDER_LIST_5',
 
     ORDER_LIST_QUICK_2 = 'ORDER_LIST_QUICK_2',
@@ -262,7 +281,6 @@ const QUICK_LIST_TYPE = {
     [PresetListType.ORDER_LIST_QUICK_2]: generateOrderList(orderListSymbolMap[QuickListType.ORDER_LIST_QUICK_2]),
     [PresetListType.ORDER_LIST_QUICK_3]: generateOrderList(orderListSymbolMap[QuickListType.ORDER_LIST_QUICK_3]),
     [PresetListType.ORDER_LIST_QUICK_4]: generateOrderList(orderListSymbolMap[QuickListType.ORDER_LIST_QUICK_4]),
-    [PresetListType.ORDER_LIST_QUICK_5]: generateOrderList(orderListSymbolMap[QuickListType.ORDER_LIST_QUICK_5]),
     [PresetListType.ORDER_LIST_QUICK_6]: generateOrderList(orderListSymbolMap[QuickListType.ORDER_LIST_QUICK_6]),
 };
 
@@ -273,6 +291,7 @@ export const QuickListTypeMap = {
     [QuickListType.ORDER_LIST_QUICK_2]: PresetListType.ORDER_LIST_QUICK_2,
     [QuickListType.ORDER_LIST_QUICK_3]: PresetListType.ORDER_LIST_QUICK_3,
     [QuickListType.ORDER_LIST_QUICK_4]: PresetListType.ORDER_LIST_QUICK_4,
-    [QuickListType.ORDER_LIST_QUICK_5]: PresetListType.ORDER_LIST_QUICK_5,
+    [QuickListType.ORDER_LIST_QUICK_5]: PresetListType.ORDER_LIST_3,
     [QuickListType.ORDER_LIST_QUICK_6]: PresetListType.ORDER_LIST_QUICK_6,
+    [QuickListType.ORDER_LIST_QUICK_7]: PresetListType.ORDER_LIST_5,
 };

@@ -107,7 +107,7 @@ export function getRangeListFromSelection(
         };
     }
 
-    const viewModel = skeleton.getViewModel();
+    const viewModel = skeleton.getViewModel().getSelfOrHeaderFooterViewModel(segmentId);
     const anchorOffset = skeleton.findCharIndexByPosition(anchorPosition);
     const focusOffset = skeleton.findCharIndexByPosition(focusPosition);
 

@@ -23,6 +23,7 @@ import { Disposable, DisposableCollection, toDisposable } from '../../shared/lif
 import type { IKeyValue } from '../../shared/types';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
+import { CustomError } from '../../common/error';
 
 export enum CommandType {
     /** Command could generate some operations or mutations. */
@@ -309,8 +310,12 @@ export class CommandService extends Disposable implements ICommandService {
             }
             throw new Error(`[CommandService]: command "${id}" is not registered.`);
         } catch (error) {
-            this._logService.error(error);
-            throw error;
+            if (error instanceof CustomError) {
+                this._logService.log(error);
+            } else {
+                this._logService.error(error);
+                throw error;
+            }
         }
     }
 

@@ -23,11 +23,13 @@ import type {
     IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    IDocumentSkeletonTable,
     LineType,
 } from '../../../../basics/i-document-skeleton-cached';
 import { Path2 } from '../../../../basics/path2';
 import { Transform } from '../../../../basics/transform';
 import { Vector2 } from '../../../../basics/vector2';
+import type { IParagraphConfig } from '../../../../basics';
 
 interface IDrawingsSplit {
     left: number;
@@ -65,6 +67,7 @@ export function createSkeletonLine(
     columnWidth: number,
     lineIndex: number = 0,
     isParagraphStart: boolean = false,
+    paragraphConfig: IParagraphConfig,
     page: IDocumentSkeletonPage,
     headerPage: Nullable<IDocumentSkeletonPage>,
     footerPage: Nullable<IDocumentSkeletonPage>
@@ -80,6 +83,7 @@ export function createSkeletonLine(
         marginTop = 0,
         spaceBelowApply = 0,
     } = lineBoundingBox;
+    const { skeTablesInParagraph } = paragraphConfig;
     const pageSkeDrawings = page.skeDrawings ?? new Map();
     const headersDrawings = headerPage?.skeDrawings;
     const footersDrawings = footerPage?.skeDrawings;
@@ -95,6 +99,12 @@ export function createSkeletonLine(
     lineSke.paddingBottom = paddingBottom;
     lineSke.marginTop = marginTop; // marginTop is initialized when it is created, and marginBottom is not calculated when it is created, it will be determined according to the situation of the next paragraph
     lineSke.spaceBelowApply = spaceBelowApply;
+
+    if (isParagraphStart && Array.isArray(skeTablesInParagraph) && skeTablesInParagraph.length > 0) {
+        const tableId = skeTablesInParagraph[skeTablesInParagraph.length - 1].tableId;
+        lineSke.isBehindTable = true;
+        lineSke.tableId = tableId;
+    }
 
     const affectSkeDrawings = new Map(Array.from(pageSkeDrawings).filter(([_, drawing]) => drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE));
 
@@ -128,6 +138,7 @@ export function calculateLineTopByDrawings(
 ) {
     let maxTop = lineTop;
     const pageSkeDrawings = page.skeDrawings;
+    const skeTables = page.skeTables;
     const headersDrawings = headerPage?.skeDrawings;
     const footersDrawings = footerPage?.skeDrawings;
 
@@ -158,7 +169,25 @@ export function calculateLineTopByDrawings(
         }
     });
 
+    skeTables?.forEach((table) => {
+        const top = _getLineTopWidthWrapNone(table, lineHeight, lineTop);
+        if (top) {
+            maxTop = Math.max(maxTop, top);
+        }
+    });
+
     return maxTop;
+}
+
+function _getLineTopWidthWrapNone(table: IDocumentSkeletonTable, lineHeight: number, lineTop: number) {
+    const { top, height } = table;
+
+    // No need to consider the dist.
+    if (top + height < lineTop || top > lineHeight + lineTop) {
+        return;
+    }
+
+    return top + height;
 }
 
 function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHeight: number, lineTop: number) {
@@ -567,6 +596,8 @@ function _getLineSke(lineType: LineType, paragraphIndex: number): IDocumentSkele
         divideLen: 0, // divideLen 被对象分割为多少块
         st: -1, // startIndex 文本开始索引
         ed: -1, // endIndex 文本结束索引
+        isBehindTable: false, // isBehindTable 是否在表格后面
+        tableId: '', // tableId 表格id
         lineIndex: 0, // lineIndex 行号
         paragraphStart: false,
     };

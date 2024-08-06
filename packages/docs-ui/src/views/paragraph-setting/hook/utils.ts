@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IParagraph } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { getParagraphsInRange, TextSelectionManagerService } from '@univerjs/docs';
+import { getParagraphsInRanges, TextSelectionManagerService } from '@univerjs/docs';
 import { useState } from 'react';
 import { getNumberUnitValue } from '@univerjs/engine-render';
 import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
@@ -26,12 +26,17 @@ export const useCurrentParagraph = () => {
     const textSelectionManagerService = useDependency(TextSelectionManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    const activeRange = textSelectionManagerService.getActiveRange();
-    if (!docDataModel || !activeRange) {
+    const docRanges = textSelectionManagerService.getDocRanges();
+
+    if (!docDataModel || docRanges.length === 0) {
         return [];
     }
-    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody()?.paragraphs ?? [];
-    const currentParagraphs = getParagraphsInRange(activeRange, paragraphs) ?? [];
+
+    const segmentId = docRanges[0].segmentId;
+
+    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
+    const currentParagraphs = getParagraphsInRanges(docRanges, paragraphs) ?? [];
+
     return currentParagraphs;
 };
 

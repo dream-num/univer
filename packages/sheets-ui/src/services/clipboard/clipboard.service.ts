@@ -39,7 +39,6 @@ import {
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 
-import { PastePluginLark, PastePluginUniver, PastePluginWord } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -60,6 +59,9 @@ import type {
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
 import { clipboardItemIsFromExcel, convertTextToTable, discreteRangeContainsRange, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
+import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
+import { LarkPastePlugin } from './html-to-usm/paste-plugins/plugin-lark';
+import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -83,9 +85,9 @@ interface ICopyContent {
  * This service provide hooks for sheet features to supplement content or modify behavior of clipboard.
  */
 
-HtmlToUSMService.use(PastePluginWord);
-HtmlToUSMService.use(PastePluginLark);
-HtmlToUSMService.use(PastePluginUniver);
+HtmlToUSMService.use(WordPastePlugin);
+HtmlToUSMService.use(LarkPastePlugin);
+HtmlToUSMService.use(UniverPastePlugin);
 
 export interface ISheetClipboardService {
     copy(): Promise<boolean>;

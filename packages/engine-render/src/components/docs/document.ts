@@ -20,7 +20,7 @@ import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@un
 import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { degToRad } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
@@ -31,6 +31,7 @@ import type { Scene } from '../../scene';
 import type { ComponentExtension, IExtensionConfig } from '../extension';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
+import { BORDER_TYPE, drawLineByBorderType } from '../../basics';
 import { Liquid } from './liquid';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import { DocComponent } from './doc-component';
@@ -153,6 +154,7 @@ export class Documents extends DocComponent {
                 headerId,
                 footerId,
                 renderConfig = {},
+                skeTables,
             } = page;
             const {
                 verticalAlign = VerticalAlign.TOP, // Do not make changes, otherwise the document will not render.
@@ -163,7 +165,6 @@ export class Documents extends DocComponent {
                 cellValueType,
                 // isRotateNonEastAsian = BooleanNumber.FALSE,
             } = renderConfig;
-
             const horizontalOffsetNoAngle = this._horizontalHandler(
                 actualWidth,
                 pagePaddingLeft,
@@ -173,20 +174,15 @@ export class Documents extends DocComponent {
                 centerAngleDeg,
                 cellValueType
             );
-
             const verticalOffsetNoAngle = this._verticalHandler(
                 actualHeight,
                 pagePaddingTop,
                 pagePaddingBottom,
                 verticalAlign
             );
-
             const alignOffsetNoAngle = Vector2.create(horizontalOffsetNoAngle, verticalOffsetNoAngle);
-
             const centerAngle = degToRad(centerAngleDeg);
-
             const vertexAngle = degToRad(vertexAngleDeg);
-
             const finalAngle = vertexAngle - centerAngle;
 
             if (this.isSkipByDiffBounds(page, pageTop, pageLeft, bounds)) {
@@ -200,6 +196,22 @@ export class Documents extends DocComponent {
                 pageTop += y;
 
                 continue;
+            }
+
+            if (skeTables.size > 0) {
+                this._drawTable(
+                    ctx,
+                    page,
+                    skeTables,
+                    extensions,
+                    backgroundExtension,
+                    glyphExtensionsExcludeBackground,
+                    alignOffsetNoAngle,
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale
+                );
             }
 
             const headerSkeletonPage = skeHeaders.get(headerId)?.get(pageWidth);
@@ -467,6 +479,266 @@ export class Documents extends DocComponent {
         }
     }
 
+    private _drawTable(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        skeTables: Map<string, IDocumentSkeletonTable>,
+        extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        alignOffsetNoAngle: Vector2,
+        centerAngle: number,
+        vertexAngle: number,
+        renderConfig: IDocumentRenderConfig,
+        parentScale: IScale
+    ) {
+        for (const [_tableId, tableSkeleton] of skeTables) {
+            const { top: tableTop, left: tableLeft, rows } = tableSkeleton;
+            this._drawLiquid?.translateSave();
+            this._drawLiquid?.translate(tableLeft, tableTop);
+
+            for (const row of rows) {
+                const { top: rowTop, cells } = row;
+                this._drawLiquid?.translateSave();
+                this._drawLiquid?.translate(0, rowTop);
+
+                for (const cell of cells) {
+                    const { left: cellLeft } = cell;
+                    this._drawLiquid?.translateSave();
+                    this._drawLiquid?.translate(cellLeft, 0);
+
+                    this._drawTableCell(
+                        ctx,
+                        page,
+                        cell,
+                        extensions,
+                        backgroundExtension,
+                        glyphExtensionsExcludeBackground,
+                        alignOffsetNoAngle,
+                        centerAngle,
+                        vertexAngle,
+                        renderConfig,
+                        parentScale
+                    );
+
+                    this._drawLiquid?.translateRestore();
+                }
+
+                this._drawLiquid?.translateRestore();
+            }
+
+            this._drawLiquid?.translateRestore();
+        }
+    }
+
+    // TODO: @JOCS, DRY!!!
+    private _drawTableCell(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        cell: IDocumentSkeletonPage,
+        extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        alignOffsetNoAngle: Vector2,
+        centerAngle: number,
+        vertexAngle: number,
+        renderConfig: IDocumentRenderConfig,
+        parentScale: IScale
+    ) {
+        if (this._drawLiquid == null) {
+            return;
+        }
+        this._drawTableCellBorders(ctx, page, cell);
+        const { sections, marginLeft, marginTop } = cell;
+
+        alignOffsetNoAngle = Vector2.create(alignOffsetNoAngle.x + marginLeft, alignOffsetNoAngle.y + marginTop);
+
+        for (const section of sections) {
+            const { columns } = section;
+
+            this._drawLiquid.translateSave();
+            this._drawLiquid.translateSection(section);
+
+            for (const column of columns) {
+                const { lines } = column;
+
+                this._drawLiquid.translateSave();
+                this._drawLiquid.translateColumn(column);
+
+                const linesCount = lines.length;
+
+                const alignOffset = alignOffsetNoAngle;
+
+                for (let i = 0; i < linesCount; i++) {
+                    const line = lines[i];
+                    const { divides, asc = 0, type, lineHeight = 0 } = line;
+
+                    const maxLineAsc = asc;
+
+                    const maxLineAscSin = maxLineAsc * Math.sin(centerAngle);
+                    const maxLineAscCos = maxLineAsc * Math.cos(centerAngle);
+
+                    if (type === LineType.BLOCK) {
+                        for (const extension of extensions) {
+                            if (extension.type === DOCS_EXTENSION_TYPE.LINE) {
+                                extension.extensionOffset = {
+                                    alignOffset,
+                                    renderConfig,
+                                };
+                                extension.draw(ctx, parentScale, line);
+                            }
+                        }
+                    } else {
+                        this._drawLiquid.translateSave();
+                        this._drawLiquid.translateLine(line, true);
+
+                        const divideLength = divides.length;
+
+                        for (let i = 0; i < divideLength; i++) {
+                            const divide = divides[i];
+                            const { glyphGroup } = divide;
+
+                            this._drawLiquid.translateSave();
+                            this._drawLiquid.translateDivide(divide);
+
+                            // Draw text background.
+                            for (const glyph of glyphGroup) {
+                                if (!glyph.content || glyph.content.length === 0) {
+                                    continue;
+                                }
+
+                                const { width: spanWidth, left: spanLeft } = glyph;
+
+                                const { x: translateX, y: translateY } = this._drawLiquid;
+
+                                const originTranslate = Vector2.create(translateX, translateY);
+
+                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+
+                                const spanStartPoint = calculateRectRotate(
+                                    originTranslate.addByPoint(spanLeft, 0),
+                                    centerPoint,
+                                    centerAngle,
+                                    vertexAngle,
+                                    alignOffset
+                                );
+
+                                const extensionOffset: IExtensionConfig = {
+                                    spanStartPoint,
+                                };
+
+                                if (backgroundExtension) {
+                                    backgroundExtension.extensionOffset = extensionOffset;
+                                    backgroundExtension.draw(ctx, parentScale, glyph);
+                                }
+                            }
+
+                            // Draw text\border\lines etc.
+                            for (const glyph of glyphGroup) {
+                                if (!glyph.content || glyph.content.length === 0) {
+                                    continue;
+                                }
+
+                                const { width: spanWidth, left: spanLeft, xOffset } = glyph;
+
+                                const { x: translateX, y: translateY } = this._drawLiquid;
+
+                                const originTranslate = Vector2.create(translateX, translateY);
+
+                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+
+                                const spanStartPoint = calculateRectRotate(
+                                    originTranslate.addByPoint(spanLeft + xOffset, 0),
+                                    centerPoint,
+                                    centerAngle,
+                                    vertexAngle,
+                                    alignOffset
+                                );
+
+                                const spanPointWithFont = calculateRectRotate(
+                                    originTranslate.addByPoint(
+                                        spanLeft + maxLineAscSin + xOffset,
+                                        maxLineAscCos
+                                    ),
+                                    centerPoint,
+                                    centerAngle,
+                                    vertexAngle,
+                                    alignOffset
+                                );
+
+                                const extensionOffset: IExtensionConfig = {
+                                    originTranslate,
+                                    spanStartPoint,
+                                    spanPointWithFont,
+                                    centerPoint,
+                                    alignOffset,
+                                    renderConfig,
+                                };
+
+                                for (const extension of glyphExtensionsExcludeBackground) {
+                                    extension.extensionOffset = extensionOffset;
+                                    extension.draw(ctx, parentScale, glyph);
+                                }
+                            }
+
+                            this._drawLiquid.translateRestore();
+                        }
+
+                        this._drawLiquid.translateRestore();
+                    }
+                }
+
+                this._drawLiquid.translateRestore();
+            }
+
+            this._drawLiquid.translateRestore();
+        }
+    }
+
+    private _drawTableCellBorders(
+        ctx: UniverRenderingContext,
+        page: IDocumentSkeletonPage,
+        cell: IDocumentSkeletonPage
+    ) {
+        const { marginLeft, marginTop } = page;
+        const { pageWidth, pageHeight } = cell;
+        if (this._drawLiquid == null) {
+            return;
+        }
+        let { x, y } = this._drawLiquid;
+
+        x += marginLeft;
+        y += marginTop;
+
+        drawLineByBorderType(ctx, BORDER_TYPE.LEFT, 0, {
+            startX: x,
+            startY: y,
+            endX: x + pageWidth,
+            endY: y + pageHeight,
+        });
+
+        drawLineByBorderType(ctx, BORDER_TYPE.TOP, 0, {
+            startX: x,
+            startY: y,
+            endX: x + pageWidth,
+            endY: y + pageHeight,
+        });
+
+        drawLineByBorderType(ctx, BORDER_TYPE.RIGHT, 0, {
+            startX: x,
+            startY: y,
+            endX: x + pageWidth,
+            endY: y + pageHeight,
+        });
+
+        drawLineByBorderType(ctx, BORDER_TYPE.BOTTOM, 0, {
+            startX: x,
+            startY: y,
+            endX: x + pageWidth,
+            endY: y + pageHeight,
+        });
+    }
+
     private _drawHeaderFooter(
         page: IDocumentSkeletonPage,
         ctx: UniverRenderingContext,
@@ -640,10 +912,6 @@ export class Documents extends DocComponent {
 
             this._drawLiquid.translateRestore();
         }
-
-        // if (!isEditHeaderFooter) {
-        //     ctx.restore();
-        // }
     }
 
     private _horizontalHandler(

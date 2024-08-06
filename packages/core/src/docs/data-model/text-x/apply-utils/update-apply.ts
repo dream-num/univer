@@ -20,10 +20,10 @@ import type {
     ICustomBlock,
     ICustomDecoration,
     ICustomRange,
+    ICustomTable,
     IDocumentBody,
     IParagraph,
     ISectionBreak,
-    ITable,
     ITextRun,
 } from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
@@ -406,10 +406,10 @@ function updateTables(
 
     const removeTables = deleteTables(body, textLength, currentIndex);
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
-        const newUpdateTables: ITable[] = [];
+        const newUpdateTables: ICustomTable[] = [];
         for (const updateTable of updateDataTables) {
             const { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateTable;
-            let splitUpdateTables: ITable[] = [];
+            let splitUpdateTables: ICustomTable[] = [];
             for (const removeTable of removeTables) {
                 const { startIndex: removeStartIndex, endIndex: removeEndIndex } = removeTable;
                 if (removeStartIndex >= updateStartIndex && removeEndIndex <= updateEndIndex) {

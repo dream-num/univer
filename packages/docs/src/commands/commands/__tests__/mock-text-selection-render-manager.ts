@@ -24,11 +24,11 @@ export class TextSelectionRenderManager {
 
     readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
 
-    removeAllTextRanges() {
+    removeAllRanges() {
         // empty
     }
 
-    addTextRanges() {
+    addDocRanges() {
         // empty
     }
 }

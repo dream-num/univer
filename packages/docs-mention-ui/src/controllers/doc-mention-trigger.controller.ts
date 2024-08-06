@@ -39,7 +39,7 @@ export class DocMentionTriggerController extends Disposable {
             this._commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id === InsertCommand.id) {
                     const params = commandInfo.params as IInsertCommandParams;
-                    const activeRange = this._textSelectionManagerService.getActiveRange();
+                    const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
                     if (params.body.dataStream === '@' && activeRange && !Tools.isDefine(this._docMentionService.editing)) {
                         this._commandService.executeCommand(ShowMentionEditPopupOperation.id, {
                             startIndex: activeRange.startOffset - 1,
@@ -55,7 +55,7 @@ export class DocMentionTriggerController extends Disposable {
                     if (this._docMentionPopupService.editPopup == null) {
                         return;
                     }
-                    const activeRange = this._textSelectionManagerService.getActiveRange();
+                    const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
                     if (activeRange && activeRange.endOffset <= this._docMentionPopupService.editPopup.anchor) {
                         this._commandService.executeCommand(CloseMentionEditPopupOperation.id);
                     }

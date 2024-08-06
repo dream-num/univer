@@ -20,13 +20,11 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../../basics/const';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import { PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import type { IMouseEvent, IPointerEvent } from '../../../basics/i-events';
 import type { INodeInfo, INodePosition } from '../../../basics/interfaces';
-import { getOffsetRectForDom } from '../../../basics/position';
 import type {
-    ISuccinctTextRangeParam,
+    ISuccinctDocRangeParam,
     ITextRangeWithStyle,
     ITextSelectionStyle,
     RANGE_DIRECTION,
@@ -40,65 +38,13 @@ import type { IScrollObserverParam, Viewport } from '../../../viewport';
 import type { DocumentSkeleton, IFindNodeRestrictions } from '../layout/doc-skeleton';
 import type { Documents } from '../document';
 import { getSystemHighlightColor } from '../../../basics/tools';
-import { cursorConvertToTextRange, TextRange } from './text-range';
-
-export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
-    const canvas = engine?.getCanvasElement();
-
-    if (!canvas) {
-        return {
-            left: 0,
-            top: 0,
-        };
-    }
-
-    const { top, left } = getOffsetRectForDom(canvas);
-
-    return {
-        left,
-        top,
-    };
-}
-
-function getParagraphInfoByGlyph(node: IDocumentSkeletonGlyph) {
-    const line = node.parent?.parent;
-    const column = line?.parent;
-
-    if (line == null || column == null) {
-        return;
-    }
-
-    const { paragraphIndex } = line;
-    const lines = column.lines.filter((line) => line.paragraphIndex === paragraphIndex);
-    let nodeIndex = -1;
-    let content = '';
-    let hasFound = false;
-
-    for (const line of lines) {
-        for (const divide of line.divides) {
-            for (const glyph of divide.glyphGroup) {
-                if (!hasFound) {
-                    nodeIndex += glyph.count;
-                }
-                if (glyph === node) {
-                    hasFound = true;
-                }
-
-                content += glyph.count > 0 ? glyph.content : '';
-            }
-        }
-    }
-
-    return {
-        st: lines[0].st,
-        ed: paragraphIndex,
-        content,
-        nodeIndex,
-    };
-}
+import { TextRange } from './text-range';
+import type { RectRange } from './rect-range';
+import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection } from './selection-utils';
 
 export interface ITextSelectionInnerParam {
     textRanges: TextRange[];
+    rectRanges: RectRange[];
     segmentId: string;
     isEditing: boolean;
     style: ITextSelectionStyle;
@@ -142,24 +88,25 @@ export interface ITextSelectionRenderManager {
     getSegmentPage(): number;
     setStyle(style: ITextSelectionStyle): void;
     resetStyle(): void;
-    removeAllTextRanges(): void;
 
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean, options?: { [key: string]: boolean }): void;
+    removeAllRanges(): void;
+    addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing?: boolean, options?: { [key: string]: boolean }): void;
 
     sync(): void;
+
     activate(x: number, y: number): void;
     deactivate(): void;
     hasFocus(): boolean;
     focus(): void;
     blur(): void;
-
     focusEditor(): void;
     blurEditor(): void;
+
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, document: Documents): void;
     dispose(): void;
     handleDblClick(evt: IPointerEvent | IMouseEvent): void;
     handleTripleClick(evt: IPointerEvent | IMouseEvent): void;
-    eventTrigger(evt: IPointerEvent | IMouseEvent): void;
+    onPointDown(evt: IPointerEvent | IMouseEvent): void;
     setCursorManually(evtOffsetX: number, evtOffsetY: number): void;
 }
 
@@ -211,9 +158,16 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _inputParent!: HTMLDivElement;
     private _input!: HTMLDivElement;
     private _scrollTimers: ScrollTimer[] = [];
-    private _viewportScrollX: number = 0;
-    private _viewportScrollY: number = 0;
     private _rangeList: TextRange[] = [];
+    // Use to cache range list in moving.
+    private _rangeListCache: TextRange[] = [];
+    // Rect range list.
+    private _rectRangeList: RectRange[] = [];
+    // Use to cache rect range list in moving.
+    private _rectRangeListCache: RectRange[] = [];
+    private _anchorNodePosition: Nullable<INodePosition> = null;
+    private _focusNodePosition: Nullable<INodePosition> = null;
+
     private _currentSegmentId: string = '';
     private _currentSegmentPage: number = -1;
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
@@ -237,9 +191,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
-
         this._initDOM();
-
         this._setSystemHighlightColorToStyle();
     }
 
@@ -283,7 +235,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._isSelectionEnabled = false;
     }
 
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
+    addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         const {
             _scene: scene, _docSkeleton: docSkeleton, _document: document,
             _currentSegmentId: segmentId, _currentSegmentPage: segmentPage,
@@ -291,18 +243,28 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         } = this;
 
         for (const range of ranges) {
-            const textSelection = cursorConvertToTextRange(scene!, {
-                style: this._selectionStyle,
-                ...range,
-                segmentId,
-                segmentPage,
-            }, docSkeleton!, document!);
+            const { startOffset, endOffset } = range;
 
-            this._add(textSelection);
+            const rangeList = getRangeListFromCharIndex(
+                startOffset, endOffset, scene!, document!, docSkeleton!, style, segmentId, segmentPage
+            );
+
+            if (rangeList == null) {
+                continue;
+            }
+
+            const { textRanges, rectRanges } = rangeList;
+
+            for (const textRange of textRanges) {
+                this._addTextRange(textRange);
+            }
+
+            this._addRectRanges(rectRanges);
         }
 
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
+            rectRanges: this._getAllRectRanges(),
             segmentId,
             segmentPage,
             style,
@@ -323,7 +285,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const position = this._getNodePosition(startNode);
 
         if (position == null) {
-            this._removeAllTextRanges();
+            this._removeAllRanges();
 
             return;
         }
@@ -339,6 +301,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
+            rectRanges: this._getAllRectRanges(),
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
             style: this._selectionStyle,
@@ -393,7 +356,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, document: Documents) {
         // Need to empty text ranges when change doc.
         if (docSkeleton !== this._docSkeleton) {
-            this.removeAllTextRanges();
+            this.removeAllRanges();
         }
 
         this._docSkeleton = docSkeleton;
@@ -457,7 +420,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         }
 
         if (Number.isFinite(startOffset) && Number.isFinite(endOffset)) {
-            this.removeAllTextRanges();
+            this.removeAllRanges();
 
             const textRanges = [
                 {
@@ -466,7 +429,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 },
             ];
 
-            this.addTextRanges(textRanges, false);
+            this.addDocRanges(textRanges, false);
         }
     }
 
@@ -491,7 +454,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        this.removeAllTextRanges();
+        this.removeAllRanges();
 
         const { st, ed } = paragraphInfo;
 
@@ -503,11 +466,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             },
         ];
 
-        this.addTextRanges(textRanges, false);
+        this.addDocRanges(textRanges, false);
     }
 
     // Handle pointer down.
-    eventTrigger(evt: IPointerEvent | IMouseEvent) {
+    onPointDown(evt: IPointerEvent | IMouseEvent) {
         if (!this._scene || !this._isSelectionEnabled) {
             return;
         }
@@ -523,19 +486,29 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         });
 
         const position = this._getNodePosition(startNode);
+
+        if (position == null || startNode == null) {
+            this._removeAllRanges();
+
+            return;
+        }
+
+        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+            position.isBack = true;
+        }
+
         const textSelection = this._textSelectionInner$.value;
         if (startNode && evt.button === 2 && textSelection) {
-            const index = this._getNodeIndex(startNode);
-            if (textSelection.textRanges.some((textRange) => textRange.startOffset! <= index && textRange.endOffset! > index)) {
+            const nodeCharIndex = this._docSkeleton?.findCharIndexByPosition(position);
+            if (typeof nodeCharIndex === 'number' && textSelection.textRanges.some((textRange) => textRange.startOffset! <= nodeCharIndex && textRange.endOffset! > nodeCharIndex)) {
+                return;
+            }
+
+            if (typeof nodeCharIndex === 'number' && textSelection.rectRanges.some((rectRange) => rectRange.startOffset! <= nodeCharIndex && rectRange.endOffset! >= nodeCharIndex)) {
                 return;
             }
         }
 
-        if (position == null || startNode == null) {
-            this._removeAllTextRanges();
-
-            return;
-        }
         const { segmentId, segmentPage } = startNode;
 
         if (segmentId && this._currentSegmentId && segmentId !== this._currentSegmentId) {
@@ -546,21 +519,13 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this.setSegmentPage(segmentPage);
         }
 
-        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
-            position.isBack = true;
-        }
+        this._anchorNodePosition = position;
 
         if (evt.shiftKey && this._getActiveRangeInstance()) {
-            this._updateActiveRangeFocusPosition(position);
-        } else if (evt.ctrlKey || this._isEmpty()) {
-            const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle);
-
-            this._addTextRange(newTextSelection);
-        } else {
-            this._updateTextRangeAnchorPosition(position);
+            this._updateActiveRangePosition(position);
+        } else if (!evt.ctrlKey && !this._isEmpty()) {
+            this._removeAllRanges();
         }
-
-        this._activeSelectionRefresh();
 
         scene.disableEvent();
 
@@ -586,25 +551,38 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             this._moving(moveOffsetX, moveOffsetY);
 
-            // scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-            // this._moving(moveOffsetX, moveOffsetY);
-            // });
-
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
         }));
 
         this._scenePointerUpSubs.push(scene.onPointerUp$.subscribeEvent(() => {
-            // scene.onPointerMoveObserver.remove(this._moveObserver);
-            // scene.onPointerUpObserver.remove(this._upObserver);
             [...this._scenePointerMoveSubs, ...this._scenePointerUpSubs].forEach((e) => {
                 e.unsubscribe();
             });
-
             scene.enableEvent();
+
+            // Add cursor.
+            if (this._anchorNodePosition && !this._focusNodePosition) {
+                const textRange = new TextRange(this._scene!, this._document!, this._docSkeleton!, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId);
+
+                this._addTextRange(textRange);
+            } else if (this._anchorNodePosition && this._focusNodePosition) {
+                for (const textRange of this._rangeListCache) {
+                    this._addTextRange(textRange);
+                }
+
+                this._addRectRanges(this._rectRangeListCache);
+
+                this._rangeListCache = [];
+                this._rectRangeListCache = [];
+            }
+
+            this._anchorNodePosition = null;
+            this._focusNodePosition = null;
 
             const selectionInfo = {
                 textRanges: this._getAllTextRanges(),
+                rectRanges: this._getAllRectRanges(),
                 segmentId: this._currentSegmentId,
                 segmentPage: this._currentSegmentPage,
                 style: this._selectionStyle,
@@ -623,8 +601,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         }));
     }
 
-    removeAllTextRanges() {
-        this._removeAllTextRanges();
+    removeAllRanges() {
+        this._removeAllRanges();
         this.deactivate();
     }
 
@@ -644,6 +622,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _getAllTextRanges() {
         return this._rangeList;
+    }
+
+    private _getAllRectRanges() {
+        return this._rectRangeList;
     }
 
     private _getActiveRange(): Nullable<IActiveTextRange> {
@@ -672,17 +654,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         };
     }
 
-    private _add(textRange: Nullable<TextRange>) {
-        if (textRange == null) {
-            return;
-        }
-
-        this._addTextRange(textRange);
-
-        // FIXME: @JOCS, why I need to refresh textRange? it already refreshed when create.
-        textRange.refresh();
-    }
-
     private _getActiveRangeInstance() {
         return this._rangeList.find((range) => range.isActive());
     }
@@ -691,7 +662,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         super.dispose();
 
         this._detachEvent();
-        this._removeAllTextRanges();
+        this._removeAllRanges();
         this._container.remove();
     }
 
@@ -742,7 +713,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         `;
     }
 
-    private _getNodePosition(node: Nullable<INodeInfo>) {
+    private _getNodePosition(node: Nullable<INodeInfo>): Nullable<INodePosition> {
         if (node == null) {
             return;
         }
@@ -764,30 +735,52 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         };
     }
 
-    private _interactTextRange(textRange: TextRange) {
-        const newTextSelection: TextRange[] = [];
-        let hasIntersection = false;
+    private _interactTextRanges(textRanges: TextRange[]) {
+        const newTextRanges: TextRange[] = [];
 
-        this._rangeList.forEach((range) => {
-            if (range === textRange) {
-                return true;
-            }
-
-            if (!textRange.isIntersection(range)) {
-                newTextSelection.push(range);
-            } else {
-                hasIntersection = true;
+        for (const range of this._rangeList) {
+            if (textRanges.some((textRange) => textRange.isIntersection(range))) {
                 range.dispose();
+                continue;
             }
-        });
 
-        if (!hasIntersection) {
-            return;
+            newTextRanges.push(range);
         }
 
-        newTextSelection.push(textRange);
+        this._rangeList = newTextRanges;
+    }
 
-        this._rangeList = newTextSelection;
+    private _interactRectRanges(rectRanges: RectRange[]) {
+        const newRanges: RectRange[] = [];
+
+        for (const range of this._rectRangeList) {
+            if (rectRanges.some((rectRange) => rectRange.isIntersection(range))) {
+                range.dispose();
+                continue;
+            }
+
+            newRanges.push(range);
+        }
+
+        this._rectRangeList = newRanges;
+    }
+
+    private _removeAllRanges() {
+        this._removeAllTextRanges();
+        this._removeAllRectRanges();
+    }
+
+    private _removeAllCacheRanges() {
+        this._rangeListCache.forEach((range) => {
+            range.dispose();
+        });
+
+        this._rectRangeListCache.forEach((range) => {
+            range.dispose();
+        });
+
+        this._rangeListCache = [];
+        this._rectRangeListCache = [];
     }
 
     private _removeAllTextRanges() {
@@ -798,10 +791,28 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._rangeList = [];
     }
 
+    private _removeAllRectRanges() {
+        this._rectRangeList.forEach((range) => {
+            range.dispose();
+        });
+
+        this._rectRangeList = [];
+    }
+
     private _deactivateAllTextRanges() {
         this._rangeList.forEach((range) => {
             range.deactivate();
         });
+    }
+
+    private _deactivateAllRectRanges() {
+        this._rectRangeList.forEach((range) => {
+            range.deactivate();
+        });
+    }
+
+    private _addTextRangesToCache(textRanges: TextRange[]) {
+        this._rangeListCache.push(...textRanges);
     }
 
     private _addTextRange(textRange: TextRange) {
@@ -809,6 +820,21 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         textRange.activate();
 
         this._rangeList.push(textRange);
+    }
+
+    private _addRectRangesToCache(rectRanges: RectRange[]) {
+        this._rectRangeListCache.push(...rectRanges);
+    }
+
+    private _addRectRanges(rectRanges: RectRange[]) {
+        if (rectRanges.length === 0) {
+            return;
+        }
+
+        this._deactivateAllRectRanges();
+        rectRanges[rectRanges.length - 1].activate();
+
+        this._rectRangeList.push(...rectRanges);
     }
 
     private _updateTextRangeAnchorPosition(position: INodePosition) {
@@ -819,7 +845,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         let lastRange = this._rangeList.pop();
 
         if (!lastRange) {
-            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle);
+            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle, this._currentSegmentId);
         }
 
         this._removeAllTextRanges();
@@ -829,7 +855,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._rangeList = [lastRange];
     }
 
-    private _updateActiveRangeFocusPosition(position: INodePosition) {
+    private _updateActiveRangePosition(position: INodePosition) {
         if (!this._scene) {
             this._logService.error('[TextSelectionRenderManager] _updateActiveRangeFocusPosition: scene is null');
 
@@ -846,16 +872,42 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        this._removeAllTextRanges();
-        activeTextRange.activate();
-        activeTextRange.focusNodePosition = position;
+        this._removeAllRanges();
+
+        this._anchorNodePosition = activeTextRange.anchorNodePosition;
+        this._focusNodePosition = position;
+
+        const { _anchorNodePosition, _focusNodePosition, _scene, _document, _docSkeleton, _selectionStyle, _currentSegmentId, _currentSegmentPage } = this;
+
+        if (_anchorNodePosition == null || _focusNodePosition == null || _scene == null || _document == null || _docSkeleton == null) {
+            return;
+        }
+
+        const ranges = getRangeListFromSelection(
+            _anchorNodePosition,
+            _focusNodePosition,
+            _scene,
+            _document,
+            _docSkeleton,
+            _selectionStyle,
+            _currentSegmentId,
+            _currentSegmentPage
+        );
+
+        if (ranges == null) {
+            return;
+        }
+
+        const { textRanges, rectRanges } = ranges;
+
+        this._addTextRangesToCache(textRanges);
+        this._addRectRangesToCache(rectRanges);
 
         this.deactivate();
-        this._rangeList = [activeTextRange];
     }
 
     private _isEmpty() {
-        return this._rangeList.length === 0;
+        return this._rangeList.length === 0 && this._rectRangeList.length === 0;
     }
 
     private _getCanvasOffset() {
@@ -893,31 +945,68 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const endNode = this._findNodeByCoord(moveOffsetX, moveOffsetY, {
+        const focusNode = this._findNodeByCoord(moveOffsetX, moveOffsetY, {
             strict: true,
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
         });
 
-        const focusNodePosition = this._getNodePosition(endNode);
+        const focusNodePosition = this._getNodePosition(focusNode);
 
-        if (!focusNodePosition) {
+        if (!focusNodePosition || focusNode == null) {
             return;
         }
 
-        const activeRangeInstance = this._getActiveRangeInstance();
+        const divide = focusNode?.node.parent;
+        const nextGlyph = divide?.glyphGroup[divide.glyphGroup.indexOf(focusNode.node) + 1];
 
-        if (!activeRangeInstance) {
+        // Should not select the last paragraph break.
+        if (
+            focusNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH &&
+            nextGlyph?.streamType === DataStreamTreeTokenType.SECTION_BREAK
+        ) {
+            focusNodePosition.isBack = true;
+        }
+
+        this._focusNodePosition = focusNodePosition;
+
+        this._removeAllCacheRanges();
+
+        const { _anchorNodePosition, _focusNodePosition, _scene, _document, _docSkeleton, _selectionStyle, _currentSegmentId, _currentSegmentPage } = this;
+
+        if (_anchorNodePosition == null || _focusNodePosition == null || _scene == null || _document == null || _docSkeleton == null) {
             return;
         }
 
-        activeRangeInstance.focusNodePosition = focusNodePosition;
+        const ranges = getRangeListFromSelection(
+            _anchorNodePosition,
+            _focusNodePosition,
+            _scene,
+            _document,
+            _docSkeleton,
+            _selectionStyle,
+            _currentSegmentId,
+            _currentSegmentPage
+        );
 
-        activeRangeInstance.refresh();
+        if (ranges == null) {
+            return;
+        }
+
+        const { textRanges, rectRanges } = ranges;
+
+        if (this._rangeList.length > 0 && textRanges.length > 0) {
+            this._interactTextRanges(textRanges);
+        }
+
+        if (this._rectRangeList.length > 0 && rectRanges.length > 0) {
+            this._interactRectRanges(rectRanges);
+        }
+
+        this._addTextRangesToCache(textRanges);
+        this._addRectRangesToCache(rectRanges);
 
         this.deactivate();
-
-        this._interactTextRange(activeRangeInstance);
 
         this._scene?.getEngine()?.setRemainCapture();
     }
@@ -994,6 +1083,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this.disposeWithMe(
             fromEvent(this._input, 'input').subscribe((e) => {
+                // Prevent input when there is any rect ranges.
+                if (this._rectRangeList.length > 0) {
+                    e.stopPropagation();
+                    return e.preventDefault();
+                }
+
                 if (this._isIMEInputApply) {
                     return;
                 }
@@ -1007,6 +1102,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this.disposeWithMe(
             fromEvent(this._input, 'compositionstart').subscribe((e) => {
+                // Prevent input when there is any rect ranges.
+                if (this._rectRangeList.length > 0) {
+                    e.stopPropagation();
+                    return e.preventDefault();
+                }
+
                 this._isIMEInputApply = true;
 
                 this._eventHandle(e, (config) => {

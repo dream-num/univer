@@ -39,6 +39,7 @@ import type {
     IDocumentSkeletonFontStyle,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonHeaderFooter,
+    IDocumentSkeletonTable,
 } from './i-document-skeleton-cached';
 import type { Vector2 } from './vector2';
 import type { ITransformerConfig } from './transformer-config';
@@ -106,10 +107,17 @@ export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, I
     evenAndOddHeaders?: BooleanNumber;
 }
 
+export interface IParagraphTableCache {
+    tableId: string;
+    table: IDocumentSkeletonTable;
+    hasPositioned: boolean;
+}
+
 export interface IParagraphConfig {
     paragraphIndex: number;
     paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
+    skeTablesInParagraph?: IParagraphTableCache[];
     // headerAndFooterAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     bulletSkeleton?: IDocumentSkeletonBullet;
     // pageContentWidth: number;
@@ -158,6 +166,7 @@ export interface INodeSearch {
     page: number;
     segmentPage: number; // The index of the page where the header and footer reside.
     pageType: DocumentSkeletonPageType;
+    path: (string | number)[];
 }
 
 export interface INodePosition extends INodeSearch {

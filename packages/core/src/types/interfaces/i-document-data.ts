@@ -31,7 +31,7 @@ export interface IDocumentData extends IReferenceSource, IExtraModelData {
     rev?: number;
     locale?: LocaleType;
     title?: string;
-    body?: IDocumentBody;
+    body?: IDocumentBody; // Rich text.
     documentStyle: IDocumentStyle;
     settings?: IDocumentSettings;
     // The type of data depends on how the plug-in is defined
@@ -40,6 +40,7 @@ export interface IDocumentData extends IReferenceSource, IExtraModelData {
 }
 
 export interface IReferenceSource {
+    tableSource?: ITables; // Table
     footers?: IFooters;
     headers?: IHeaders;
     lists?: ILists;
@@ -64,6 +65,10 @@ export interface IHeaders {
  */
 export interface IFooters {
     [footerId: string]: IFooterData;
+}
+
+export interface ITables {
+    [tableId: string]: ITable;
 }
 
 /**
@@ -124,7 +129,7 @@ export interface IDocumentBody {
 
     customBlocks?: ICustomBlock[]; // customBlock user-defined block through plug-in
 
-    tables?: ITable[]; // Table
+    tables?: ICustomTable[]; // Table
 
     // tableOfContents?: { [index: number]: ITableOfContent }; // tableOfContents
     // links?: { [index: number]: IHyperlink }; // links
@@ -814,70 +819,131 @@ export interface IShading {
     backgroundColor: IColorStyle; // backgroundColor
 }
 
-/**
- * Type of width
- */
-export enum WidthType {
-    EVENLY_DISTRIBUTED = '0',
-    FIXED_WIDTH = '1',
+export interface IDistFromText {
+    distT: number; // distance between top text and table.
+    distB: number; // distance between bottom text and table.
+    distL: number; // distance between left text and table.
+    distR: number; // distance between right text and table.
+}
+
+export interface ITableAnchor {
+    positionH: IObjectPositionH; // horzAnchor (Table Horizontal Anchor)
+    positionV: IObjectPositionV;
+}
+
+export enum TableSizeType {
+    UNSPECIFIED,
+    SPECIFIED,
+}
+export interface IWidthInTableSize {
+    type: TableSizeType;
+    width: INumberUnit;
+}
+
+// 17.18.45 ST_JcTable (Table Alignment Type)
+export enum TableAlignmentType {
+    START,
+    CENTER,
+    END,
+}
+
+// 17.18.87 ST_TblLayoutType (Table Layout Type)
+export enum TableLayoutType {
+    AUTO_FIT,
+    FIXED,
+}
+
+export enum TableTextWrapType {
+    NONE,
+    WRAP,
+}
+
+export interface ICustomTable {
+    startIndex: number;
+    endIndex: number;
+    // A unique ID associated with a table.
+    tableId: string;
 }
 
 /**
  * Properties of table
  */
 export interface ITable {
-    startIndex: number;
-    endIndex: number;
-    rows: number; // rows
-    columns: number; // columns
     tableRows: ITableRow[]; // tableRows
-    tableStyle: WidthType; // tableStyle
-    width: number; // width
+    tableColumns: ITableColumn[]; // tableColumns
+    align: TableAlignmentType; // 17.4.28 jc (Table Alignment)
+    indent: INumberUnit; // left align only. leftIndent
+    textWrap: TableTextWrapType; // 17.4.57 tblpPr (Floating Table Positioning)
+    position: ITableAnchor; // 17.4.57 tblpPr (Floating Table Positioning)
+    dist: IDistFromText; // 17.4.57 tblpPr (Floating Table Positioning)
+    size: IWidthInTableSize;
+    tableId: string;
+    cellMargin?: ITableCellMargin; // cellMargin
+    layout?: TableLayoutType; // 17.4.52 tblLayout (Table Layout)
+    overlap?: BooleanNumber; // 17.4.56 tblOverlap (Floating Table Allows Other Tables to Overlap)
+    description?: string; // 17.4.46 tblDescription (Table Description)
+}
+
+// Specifies the meaning of the height specified for this table row
+// The meaning of the value of the val attribute is defined based on the value of the hRule
+// attribute for this table row as follows:
+//  If the value of hRule is auto, then the table row's height should be automatically
+// determined based on the height of its contents. The h value is ignored.
+//  If the value of hRule is atLeast, then the table row's height should be at least
+// the value the h attribute.
+//  If the value of hRule is exact, then the table row's height should be exactly the
+// value of the h attribute.
+export enum TableCellHeightRule {
+    AUTO,
+    AT_LEAST,
+    EXACT,
+}
+
+export interface ITableColumn { // 合并拆分列，HTML 合并单元格
+    size: IWidthInTableSize;
+}
+
+export interface ITableRowSize {
+    val: INumberUnit;
+    hRule: TableCellHeightRule;
 }
 
 /**
  * Properties of row of table
  */
 export interface ITableRow {
-    st: number; // startIndex
-    ed: number; // endIndex
     tableCells: ITableCell[]; // tableCells
-    tableRowStyle: ITableRowStyle; // tableRowStyle
-}
-
-/**
- * Properties of style table row
- */
-export interface ITableRowStyle {
-    minRowHeight: number; // minRowHeight
+    // If omitted, then the table row shall automatically resize its height to the height required by its contents
+    // (the equivalent of an hRule value of auto)
+    trHeight: ITableRowSize; // 17.4.80 trHeight (Table Row Height)
+    cantSplit?: BooleanNumber; // allowBreakAcrossPages, the default is true.
+    isFirstRow?: BooleanNumber; // isFirstRow.
+    repeatHeaderRow?: BooleanNumber; // Show header row in different pages. only for the first row.
 }
 
 /**
  * Properties of table cell
  */
 export interface ITableCell {
-    // st: number; // startIndex
-    // ed: number; // endIndex
-    // content: IBlockElement[]; // content
-    tableCellStyle: ITableCellStyle; // tableCellStyle
+    margin?: ITableCellMargin; // margin
+    rowSpan?: number; // rowSpan
+    columnSpan?: number; // columnSpan
+    backgroundColor?: IColorStyle; // backgroundColor
+    borderLeft?: ITableCellBorder; // borderLeft
+    borderRight?: ITableCellBorder; // borderRight
+    borderTop?: ITableCellBorder; // borderTop
+    borderBottom?: ITableCellBorder; // borderBottom
+    size?: IWidthInTableSize; // size
+    tcFitText?: BooleanNumber; // 17.4.67 tcFitText (Fit Text Within Cell)
+    // hAlign: use paragraph align to instead.
+    vAlign?: VerticalAlignmentType; // 17.4.83 vAlign (Table Cell Vertical Alignment)
 }
 
-/**
- * Properties of style of table cell
- */
-export interface ITableCellStyle {
-    rowSpan: number; // rowSpan
-    columnSpan: number; // columnSpan
-    backgroundColor: IColorStyle; // backgroundColor
-    borderLeft: ITableCellBorder; // borderLeft
-    borderRight: ITableCellBorder; // borderRight
-    borderTop: ITableCellBorder; // borderTop
-    borderBottom: ITableCellBorder; // borderBottom
-    paddingLeft: number; // paddingLeft
-    paddingRight: number; // paddingRight
-    paddingTop: number; // paddingTop
-    paddingBottom: number; // paddingBottom
-    contentAlignment: ContentAlignment; // contentAlignment
+export interface ITableCellMargin {
+    start: INumberUnit; // start
+    end: INumberUnit; // end
+    top: INumberUnit; // top
+    bottom: INumberUnit; // bottom
 }
 
 /**
@@ -885,17 +951,19 @@ export interface ITableCellStyle {
  */
 export interface ITableCellBorder {
     color: IColorStyle; // color
-    width: number; // width
+    width: INumberUnit; // width
     dashStyle: DashStyleType; // dashStyle
 }
+
+// 17.18.101ST_VerticalJc (Vertical Alignment Type)
 /**
  * The content alignments for a Shape or TableCell. The supported alignments correspond to predefined text anchoring types from the ECMA-376 standard.
  */
-export enum ContentAlignment {
+export enum VerticalAlignmentType {
     CONTENT_ALIGNMENT_UNSPECIFIED, // An unspecified content alignment. The content alignment is inherited from the parent if one exists.
-    CONTENT_ALIGNMENT_UNSUPPORTED, // An unsupported content alignment.
+    BOTH,
     TOP, // An alignment that aligns the content to the top of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 't'.
-    MIDDLE, // An alignment that aligns the content to the middle of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 'ctr'.
+    CENTER, // An alignment that aligns the content to the middle of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 'ctr'.
     BOTTOM, // An alignment that aligns the content to the bottom of the content holder. Corresponds to ECMA-376 ST_TextAnchoringType 'b'.
 }
 
@@ -957,6 +1025,7 @@ export enum NumberUnitType {
     LINE,
     CHARACTER,
     PIXEL,
+    PERCENT,
 }
 
 // 20.4.3.1 ST_AlignH (Relative Horizontal Alignment Positions)

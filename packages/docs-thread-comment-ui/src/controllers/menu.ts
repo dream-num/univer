@@ -33,7 +33,7 @@ export const shouldDisableAddComment = (accessor: IAccessor) => {
         return true;
     }
 
-    const range = textSelectionManagerService.getActiveRange();
+    const range = textSelectionManagerService.getActiveTextRangeWithStyle();
     if (!range || range.collapsed) {
         return true;
     }

@@ -168,17 +168,19 @@ describe('test cases in clipboard', () => {
 
             const commandParams: IInnerPasteCommandParams = {
                 segmentId: '',
-                body: {
-                    dataStream: 'univer',
-                    textRuns: [
-                        {
-                            st: 0,
-                            ed: 6,
-                            ts: {
-                                bl: BooleanNumber.TRUE,
+                doc: {
+                    body: {
+                        dataStream: 'univer',
+                        textRuns: [
+                            {
+                                st: 0,
+                                ed: 6,
+                                ts: {
+                                    bl: BooleanNumber.TRUE,
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
                 textRanges: [], // only used to eliminate TS type check error.
             };

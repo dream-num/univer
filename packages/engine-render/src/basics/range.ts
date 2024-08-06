@@ -35,7 +35,7 @@ export interface ITextRangeWithStyle extends ITextRangeParam {
 }
 
 // Only use in add/replaceTextRanges methods.
-export interface ISuccinctTextRangeParam {
+export interface ISuccinctDocRangeParam {
     startOffset: number;
     endOffset: number;
     segmentId?: string; // Header of footer id.

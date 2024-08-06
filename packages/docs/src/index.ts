@@ -23,7 +23,7 @@ export * from './basics/docs-view-key';
 
 export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
-export { TextSelectionManagerService, serializeTextRange } from './services/text-selection-manager.service';
+export { TextSelectionManagerService, serializeDocRange } from './services/text-selection-manager.service';
 export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';
 export { IMEInputManagerService } from './services/ime-input-manager.service';
 export { DocCustomRangeService, type ICustomRangeHook } from './services/doc-custom-range.service';
@@ -58,7 +58,7 @@ export {
     ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatCommand,
 } from './commands/commands/inline-format.command';
-export { ListOperationCommand, BulletListCommand, OrderListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand } from './commands/commands/list.command';
+export { ListOperationCommand, BulletListCommand, OrderListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, getParagraphsInRanges } from './commands/commands/list.command';
 export {
     AlignOperationCommand,
     AlignLeftCommand,
@@ -92,3 +92,16 @@ export { DocInterceptorService } from './services/doc-interceptor/doc-intercepto
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocAutoFormatService } from './services/doc-auto-format.service';
 export { ChangeListNestingLevelType } from './commands/commands/list.command';
+export { getCommandSkeleton } from './commands/util';
+export { generateParagraphs } from './commands/commands/break-line.command';
+export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';
+export { CreateDocTableCommand, type ICreateDocTableCommandParams } from './commands/commands/table/doc-table-create.command';
+export { DocTableDeleteRowsCommand, DocTableDeleteColumnsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
+export type { IDocTableDeleteRowsCommandParams, IDocTableDeleteColumnsCommandParams, IDocTableDeleteTableCommandParams } from './commands/commands/table/doc-table-delete.command';
+export type { IDocTableInsertColumnCommandParams, IDocTableInsertRowCommandParams, IDocTableInsertColumnRightCommandParams, IDocTableInsertRowAboveCommandParams, IDocTableInsertRowBellowCommandParams, IDocTableInsertColumnLeftCommandParams } from './commands/commands/table/doc-table-insert.command';
+export { DocTableInsertColumnCommand, DocTableInsertRowCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertColumnLeftCommand } from './commands/commands/table/doc-table-insert.command';
+export type { IDocTableShiftTabCommandParams, IDocTableTabCommandParams } from './commands/commands/table/doc-table-tab.command';
+export { DocTableTabCommand, DocTableShiftTabCommand } from './commands/commands/table/doc-table-tab.command';
+
+export { genTableSource, getEmptyTableRow, getEmptyTableCell, getTableColumn } from './commands/commands/table/table';
+export { getCursorWhenDelete } from './commands/commands/delete.command';

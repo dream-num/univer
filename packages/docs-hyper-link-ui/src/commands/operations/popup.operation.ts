@@ -23,7 +23,7 @@ import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.servic
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const activeRange = textSelectionService.getActiveRange();
+    const activeRange = textSelectionService.getActiveTextRangeWithStyle();
     const renderManagerService = accessor.get(IRenderManagerService);
     const render = renderManagerService.getCurrent();
     const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();

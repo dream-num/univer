@@ -47,7 +47,8 @@ export class JSONX {
     private static _subTypes: Map<string, ISubType> = new Map();
 
     static registerSubtype(subType: ISubType) {
-        if (this._subTypes.has(subType.name) && this._subTypes.get(subType.name)?.id !== TextX.id) {
+        // Add `subType == null` just use to pass tests.
+        if (subType == null || (this._subTypes.has(subType.name) && this._subTypes.get(subType.name)?.id !== TextX.id)) {
             return;
         }
 
@@ -67,9 +68,17 @@ export class JSONX {
         return json1.type.compose(thisActions, otherActions);
     }
 
-    // Do not use transform in JsonX, pls use transform in JsonXPro.
-    static transform(_thisActions: JSONOp, _otherActions: JSONOp, _priority: TPriority) {
-        throw new Error('transform is not implemented in JsonX');
+    static transform(thisActions: JSONOp, otherActions: JSONOp, priority: TPriority) {
+        return json1.type.transform(thisActions, otherActions, priority);
+    }
+
+    // Use to transform cursor position, just call TextXPro.transformPosition.
+    static transformPosition(thisActions: JSONOp, index: number, priority: TPriority = 'right'): number {
+        if (thisActions && thisActions.length === 2 && thisActions[0] === 'body' && (thisActions[1] as any).et === TextX.name) {
+            return TextX.transformPosition((thisActions[1] as any).e, index, priority === 'left');
+        }
+
+        return index;
     }
 
     static invertWithDoc(actions: JSONOp, doc: IDocumentData) {

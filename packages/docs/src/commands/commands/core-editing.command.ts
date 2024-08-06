@@ -65,7 +65,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             return false;
         }
 
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         const originBody = docDataModel.getSelfOrHeaderFooterModel(activeRange?.segmentId ?? '').getBody();
 
         if (!originBody) {

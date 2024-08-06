@@ -72,7 +72,7 @@ export const DocThreadCommentPanel = () => {
         return null;
     }
 
-    const activeRange = textSelectionManagerService.getActiveRange();
+    const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
     const isInValidSelection = Boolean(
         activeRange &&
         (activeRange.endOffset === activeRange.startOffset || activeRange.segmentId)

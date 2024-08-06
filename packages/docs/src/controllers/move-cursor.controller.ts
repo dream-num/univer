@@ -27,12 +27,15 @@ import {
 } from '@univerjs/core';
 import type {
     DocumentSkeleton,
+    IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonTable,
     INodePosition,
     INodeSearch,
 } from '@univerjs/engine-render';
-import { IRenderManagerService, NodePositionConvertToCursor, RANGE_DIRECTION } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, IRenderManagerService, NodePositionConvertToCursor, RANGE_DIRECTION } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 
 import { getDocObject } from '../basics/component-tools';
@@ -40,6 +43,7 @@ import type { IMoveCursorOperationParams } from '../commands/operations/cursor.o
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/cursor.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
+import { findAboveCell, findBellowCell, findLineBeforeAndAfterTable, findTableAfterLine, findTableBeforeLine, firstLineInCell, firstLineInTable, lastLineInCell, lastLineInTable } from '../basics/table';
 
 @OnLifecycle(LifecycleStages.Rendered, MoveCursorController)
 export class MoveCursorController extends Disposable {
@@ -92,10 +96,10 @@ export class MoveCursorController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _handleShiftMoveSelection(direction: Direction) {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
-        const allRanges = this._textSelectionManagerService.getCurrentSelections()!;
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+        const allRanges = this._textSelectionManagerService.getCurrentTextRanges()!;
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        if (docDataModel == null) {
             return;
         }
 
@@ -138,7 +142,11 @@ export class MoveCursorController extends Disposable {
                 ? startOffset
                 : endOffset;
 
-        let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
+        let focusOffset = collapsed
+            ? endOffset
+            : rangeDirection === RANGE_DIRECTION.FORWARD
+                ? endOffset
+                : startOffset;
         const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
@@ -162,7 +170,7 @@ export class MoveCursorController extends Disposable {
             const documentOffsetConfig = docObject.document.getOffsetConfig();
             const focusNodePosition = collapsed ? startNodePosition : rangeDirection === RANGE_DIRECTION.FORWARD ? endNodePosition : startNodePosition;
 
-            const newPos = this._getTopOrBottomPosition(skeleton, focusGlyph, focusNodePosition, direction === Direction.DOWN);
+            const newPos = this._getTopOrBottomPosition(skeleton, focusGlyph, focusNodePosition, direction === Direction.DOWN, true);
 
             if (newPos == null) {
                 // move selection
@@ -201,24 +209,28 @@ export class MoveCursorController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _handleMoveCursor(direction: Direction) {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
-        const allRanges = this._textSelectionManagerService.getCurrentSelections();
+        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+        const allRanges = this._textSelectionManagerService.getCurrentTextRanges();
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        if (docDataModel == null) {
             return false;
         }
 
         const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
             ?.with(DocSkeletonManagerService).getSkeleton();
         const docObject = this._getDocObject();
-        const body = docDataModel.getBody();
-        if (activeRange == null || skeleton == null || docObject == null || allRanges == null || body == null) {
+        if (activeRange == null || skeleton == null || docObject == null || allRanges == null) {
             return;
         }
 
         const { startOffset, endOffset, style, collapsed, segmentId, startNodePosition, endNodePosition, segmentPage } = activeRange;
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
-        const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        if (body == null) {
+            return;
+        }
+
+        const dataStreamLength = body.dataStream.length ?? Number.POSITIVE_INFINITY;
         const customRanges = docDataModel.getCustomRanges() ?? [];
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
@@ -237,21 +249,32 @@ export class MoveCursorController extends Disposable {
             } else {
                 const preSpan = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
                 const curSpan = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
+                const nextGlyph = skeleton.findNodeByCharIndex(startOffset + 1, segmentId, segmentPage);
 
                 if (direction === Direction.LEFT) {
-                    cursor = Math.max(0, startOffset - (preSpan?.count ?? 0));
+                    cursor = Math.max(0, startOffset - (preSpan?.count ?? 1));
                 } else {
                     // -1 because the length of the string will be 1 larger than the index, and the reason for subtracting another 1 is because it ends in \n
-                    cursor = Math.min(dataStreamLength - 2, endOffset + curSpan.count);
+                    cursor = Math.min(dataStreamLength - 2, endOffset + curSpan.count + (nextGlyph?.streamType === DataStreamTreeTokenType.SECTION_BREAK ? 1 : 0));
                 }
             }
-            const skipTokens: string[] = [DataStreamTreeTokenType.CUSTOM_RANGE_START, DataStreamTreeTokenType.CUSTOM_RANGE_END];
+            const skipTokens: string[] = [
+                DataStreamTreeTokenType.CUSTOM_RANGE_START,
+                DataStreamTreeTokenType.CUSTOM_RANGE_END,
+                DataStreamTreeTokenType.TABLE_START,
+                DataStreamTreeTokenType.TABLE_END,
+                DataStreamTreeTokenType.TABLE_ROW_START,
+                DataStreamTreeTokenType.TABLE_ROW_END,
+                DataStreamTreeTokenType.TABLE_CELL_START,
+                DataStreamTreeTokenType.TABLE_CELL_END,
+                DataStreamTreeTokenType.SECTION_BREAK,
+            ];
             if (direction === Direction.LEFT) {
                 while (skipTokens.includes(body.dataStream[cursor])) {
                     cursor--;
                 }
             } else {
-                while (skipTokens.includes(body.dataStream[cursor - 1])) {
+                while (skipTokens.includes(body.dataStream[cursor])) {
                     cursor++;
                 }
             }
@@ -327,7 +350,8 @@ export class MoveCursorController extends Disposable {
         docSkeleton: DocumentSkeleton,
         glyph: Nullable<IDocumentSkeletonGlyph>,
         nodePosition: Nullable<INodePosition>,
-        direction: boolean
+        direction: boolean,
+        skipCellContent = false
     ): Nullable<INodePosition> {
         if (glyph == null || nodePosition == null) {
             return;
@@ -335,7 +359,7 @@ export class MoveCursorController extends Disposable {
 
         const offsetLeft = this._getGlyphLeftOffsetInLine(glyph);
 
-        const line = this._getNextOrPrevLine(glyph, direction);
+        const line = this._getNextOrPrevLine(glyph, direction, skipCellContent);
 
         if (line == null) {
             return;
@@ -377,6 +401,9 @@ export class MoveCursorController extends Disposable {
             const divideLeft = divide.left;
 
             for (const glyph of divide.glyphGroup) {
+                if (glyph.streamType === DataStreamTreeTokenType.SECTION_BREAK) {
+                    continue;
+                }
                 const { left } = glyph;
                 const leftSide = divideLeft + left;
 
@@ -398,20 +425,15 @@ export class MoveCursorController extends Disposable {
         return docSkeleton.findPositionByGlyph(nearestNode.glyph, segmentPage);
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    private _getNextOrPrevLine(glyph: IDocumentSkeletonGlyph, direction: boolean) {
+    // eslint-disable-next-line max-lines-per-function, complexity
+    private _getNextOrPrevLine(glyph: IDocumentSkeletonGlyph, direction: boolean, skipCellContent = false) {
         const divide = glyph.parent;
-        if (divide == null) {
-            return;
-        }
+        const line = divide?.parent;
+        const column = line?.parent;
+        const section = column?.parent;
+        const page = section?.parent;
 
-        const line = divide.parent;
-        if (line == null) {
-            return;
-        }
-
-        const column = line.parent;
-        if (column == null) {
+        if (divide == null || line == null || column == null || section == null || page == null) {
             return;
         }
 
@@ -423,20 +445,38 @@ export class MoveCursorController extends Disposable {
 
         let newLine: IDocumentSkeletonLine;
 
+        if (page.type === DocumentSkeletonPageType.CELL && skipCellContent) {
+            const nLine = findAboveOrBellowCellLine(page, direction);
+
+            if (nLine) {
+                return nLine;
+            }
+        }
+
         if (direction === true) {
             newLine = column.lines[currentLineIndex + 1];
+            const tableAfterLine = findTableAfterLine(line, page);
+
+            if (tableAfterLine) {
+                const firstLine = firstLineInTable(tableAfterLine);
+                if (firstLine) {
+                    newLine = firstLine;
+                }
+            }
         } else {
             newLine = column.lines[currentLineIndex - 1];
+            // If the previous line is behind the table, find the last line of the table.
+            const tableBeforeLine = findTableBeforeLine(line, page);
+            if (tableBeforeLine) {
+                const lastLine = lastLineInTable(tableBeforeLine);
+                if (lastLine) {
+                    newLine = lastLine;
+                }
+            }
         }
 
         if (newLine != null) {
             return newLine;
-        }
-
-        const section = column.parent;
-
-        if (section == null) {
-            return;
         }
 
         const currentColumnIndex = section.columns.indexOf(column);
@@ -454,12 +494,6 @@ export class MoveCursorController extends Disposable {
 
         if (newLine != null) {
             return newLine;
-        }
-
-        const page = section.parent;
-
-        if (page == null) {
-            return;
         }
 
         const currentSectionIndex = page.sections.indexOf(section);
@@ -481,7 +515,11 @@ export class MoveCursorController extends Disposable {
             return newLine;
         }
 
-        const skeleton = page.parent;
+        if (page.type === DocumentSkeletonPageType.CELL) {
+            return findAboveOrBellowCellLine(page, direction);
+        }
+
+        const skeleton: Nullable<IDocumentSkeletonCached> = page.parent as IDocumentSkeletonCached;
 
         if (skeleton == null) {
             return;
@@ -514,4 +552,42 @@ export class MoveCursorController extends Disposable {
     private _getDocObject() {
         return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
+}
+
+function findAboveOrBellowCellLine(
+    page: IDocumentSkeletonPage,
+    direction: boolean
+) {
+    let newLine = null;
+    if (direction === true) {
+        const bellowCell = findBellowCell(page);
+        if (bellowCell) {
+            newLine = firstLineInCell(bellowCell);
+        } else {
+            const table = page.parent?.parent as IDocumentSkeletonTable;
+            const { lineAfterTable } = findLineBeforeAndAfterTable(table);
+
+            if (lineAfterTable) {
+                newLine = lineAfterTable;
+            }
+        }
+    } else {
+        const aboveCell = findAboveCell(page);
+        if (aboveCell) {
+            newLine = lastLineInCell(aboveCell)!;
+        } else {
+            const table = page.parent?.parent as IDocumentSkeletonTable;
+            const { lineBeforeTable } = findLineBeforeAndAfterTable(table);
+
+            if (lineBeforeTable) {
+                newLine = lineBeforeTable;
+            }
+        }
+    }
+
+    if (newLine != null) {
+        return newLine;
+    }
+
+    return newLine;
 }

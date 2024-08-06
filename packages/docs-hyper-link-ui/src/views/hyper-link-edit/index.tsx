@@ -63,7 +63,7 @@ export const DocHyperLinkEdit = () => {
             setLink(linkDetail?.payload ?? '');
             return;
         }
-        const activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (!activeRange) {
             return;
         }

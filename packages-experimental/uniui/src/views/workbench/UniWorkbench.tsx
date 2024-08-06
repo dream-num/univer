@@ -81,6 +81,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const instanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const flowManagerService = useDependency(FlowManagerService);
+    const commandService = useDependency(ICommandService);
 
     const contentRef = useRef<HTMLDivElement>(null);
     const floatingToolbarRef = useRef<IFloatingToolbarRef>(null);
@@ -226,8 +227,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                     ) {
                                         return;
                                     }
-
-                                    instanceService.focusUnit(null);
+                                    commandService.executeCommand(UniFocusUnitOperation.id, { unitId: null });
                                 }}
                                 onMove={onMove}
                                 onInit={onFlowInit}

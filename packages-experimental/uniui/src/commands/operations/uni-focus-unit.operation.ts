@@ -18,7 +18,7 @@ import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
 export interface IUniFocusUnitParams {
-    unitId: string;
+    unitId: string | null;
 }
 
 export const UniFocusUnitOperation: ICommand = {
@@ -28,7 +28,6 @@ export const UniFocusUnitOperation: ICommand = {
         const { unitId } = params;
         const instanceService = accessor.get(IUniverInstanceService);
         instanceService.focusUnit(unitId);
-        instanceService.setCurrentUnitForType(unitId);
         return true;
     },
 };

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { ILogContext } from '@univerjs/core';
 import type { IAllowedRequest, IAllowedResponse, IBatchAllowedResponse, ICreateCollaboratorRequest, ICreateRequest, ICreateResponse, IDeleteCollaboratorRequest, IListCollaboratorRequest, IListCollaboratorResponse, IListPermPointRequest, IListPermPointResponse, IListRolesRequest, IListRolesResponse, IPutCollaboratorsRequest, IUpdateCollaboratorRequest, IUpdatePermPointRequest } from '@univerjs/protocol';
 import { createIdentifier } from '../../common/di';
+import type { ILogContext } from '../log/context';
+
+// FIXME: should not import ILogContext here
 
 export interface IAuthzIoService {
     create(config: ICreateRequest, context?: ILogContext): Promise<ICreateResponse['objectID']>;

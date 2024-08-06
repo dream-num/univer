@@ -16,7 +16,7 @@
 
 import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useObservable } from '@univerjs/ui';
 
 import { CountBar } from '../count-bar/CountBar';
@@ -25,11 +25,11 @@ import { FormulaBar } from '../formula-bar/FormulaBar';
 import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
+import { useActiveWorkbook } from '../../components/hook';
 import styles from './index.module.less';
 
 export function RenderSheetFooter() {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
+    const workbook = useActiveWorkbook();
     if (!workbook) return null;
 
     return (
@@ -42,9 +42,8 @@ export function RenderSheetFooter() {
 }
 
 export function RenderSheetHeader() {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
-    if (!workbook) return null;
+    const hasWorkbook = useHasWorkbook();
+    if (!hasWorkbook) return null;
 
     return (
         <FormulaBar />
@@ -55,9 +54,8 @@ export function RenderSheetHeader() {
  * @deprecated We should not write into this component anymore.
  */
 export function RenderSheetContent() {
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
-    if (!workbook) return null;
+    const hasWorkbook = useHasWorkbook();
+    if (!hasWorkbook) return null;
 
     return (
         <>
@@ -65,4 +63,10 @@ export function RenderSheetContent() {
             <OperateContainer />
         </>
     );
+}
+
+function useHasWorkbook(): boolean {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
+    return useMemo(() => univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0, [univerInstanceService, workbook]);
 }

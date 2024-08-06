@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/slides",
     "version": "0.2.6",
-    "private": true,
+    "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -61,7 +61,6 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "rxjs": ">=7.0.0"
     },

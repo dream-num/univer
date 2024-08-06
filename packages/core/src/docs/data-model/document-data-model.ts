@@ -50,12 +50,21 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         throw new Error('Method not implemented.');
     }
 
+    protected readonly _name$ = new BehaviorSubject<string>('');
+    override name$ = this._name$.asObservable();
+
     protected snapshot: IDocumentData;
 
     constructor(snapshot: Partial<IDocumentData>) {
         super();
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
+        this._name$.next(this.snapshot.title ?? 'No Title');
+    }
+
+    setName(name: string) {
+        this.snapshot.title = name;
+        this._name$.next(name);
     }
 
     get drawings() {
@@ -206,9 +215,6 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
     footerModelMap: Map<string, DocumentDataModel> = new Map();
 
-    private _name$ = new BehaviorSubject('');
-    readonly name$ = this._name$.asObservable();
-
     constructor(snapshot: Partial<IDocumentData>) {
         super(Tools.isEmptyObject(snapshot) ? getEmptySnapshot() : snapshot);
 
@@ -218,11 +224,6 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
         this._initializeHeaderFooterModel();
         this._name$.next(this.snapshot.title ?? '');
-    }
-
-    setName(name: string) {
-        this.snapshot.title = name;
-        this._name$.next(name);
     }
 
     override dispose() {

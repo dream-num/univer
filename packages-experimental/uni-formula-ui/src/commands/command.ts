@@ -14,27 +14,45 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService, type IMutationInfo, sequenceExecute } from '@univerjs/core';
-import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
-
-import type { IAddDocUniFormulaMutationParams, IRemoveDocUniFormulaMutationParams, IUpdateDocUniFormulaMutationParams } from './mutation';
-import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from './mutation';
+import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
+import { CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream, sequenceExecute } from '@univerjs/core';
+import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
+import type { IAddDocUniFormulaMutationParams, IRemoveDocUniFormulaMutationParams, IUpdateDocUniFormulaMutationParams } from '@univerjs/uni-formula';
+import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '@univerjs/uni-formula';
 
 export interface IAddDocUniFormulaCommandParams {
     unitId: string;
     f: string;
+    startIndex: number;
 }
 
 export const AddDocUniFormulaCommand: ICommand<IAddDocUniFormulaCommandParams> = {
     type: CommandType.COMMAND,
     id: 'doc.command.add-uni-formula',
     async handler(accessor, params: IAddDocUniFormulaCommandParams) {
-        const { f, unitId } = params;
+        const { f, unitId, startIndex } = params;
+
         const commandService = accessor.get(ICommandService);
+        const localeService = accessor.get(LocaleService);
+
         const rangeId = generateRandomId();
-        const redoMutation = addCustomRangeBySelectionFactory(accessor, {
-            rangeId,
-            rangeType: CustomRangeType.CUSTOM,
+        const placeholder = localeService.t('uni-formula.command.stream-placeholder');
+        const dataStream = makeCustomRangeStream(placeholder);
+        const body: IDocumentBody = {
+            dataStream,
+            customRanges: [{
+                startIndex: 0,
+                endIndex: dataStream.length - 1,
+                rangeId,
+                rangeType: CustomRangeType.UNI_FORMULA,
+                wholeEntity: true,
+            }],
+        };
+
+        const redoMutation = replaceSelectionFactory(accessor, {
+            unitId,
+            body,
+            selection: makeSelection(startIndex, startIndex + 1),
         });
 
         if (redoMutation) {
@@ -60,7 +78,7 @@ export interface IUpdateDocUniFormulaCommandParams {
 
 export const UpdateDocUniFormulaCommand: ICommand<IUpdateDocUniFormulaCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'doc.command.add-uni-formula',
+    id: 'doc.command.update-uni-formula',
     handler: (accessor, params: IUpdateDocUniFormulaCommandParams) => {
         const commandService = accessor.get(ICommandService);
         return commandService.syncExecuteCommand(UpdateDocUniFormulaMutation.id, params as IUpdateDocUniFormulaMutationParams);
@@ -77,7 +95,7 @@ export const RemoveDocUniFormulaCommand: ICommand<IRemoveDocUniFormulaCommandPar
     id: 'doc.command.remove-uni-formula',
     handler: (accessor, params: IRemoveDocUniFormulaCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        // TODO: maybed remove formula under selection?
+        // TODO: maybe remove formula under selection?
         return commandService.syncExecuteCommand(RemoveDocUniFormulaMutation.id, params as IRemoveDocUniFormulaMutationParams);
     },
 };

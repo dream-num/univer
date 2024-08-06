@@ -66,6 +66,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/rpc": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

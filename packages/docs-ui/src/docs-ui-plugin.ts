@@ -22,6 +22,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    mergeOverrideWithDependencies,
     Plugin,
     Tools, UniverInstanceType } from '@univerjs/core';
 import { IEditorService, IShortcutService } from '@univerjs/ui';
@@ -150,7 +151,9 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocParagraphSettingController],
         ];
 
-        dependencies.forEach((d) => injector.add(d));
+        const dependency = mergeOverrideWithDependencies(dependencies, this._config.override);
+
+        dependency.forEach((d) => injector.add(d));
     }
 
     private _markDocAsFocused() {

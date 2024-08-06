@@ -173,8 +173,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
     getAllRenderersOfType(type: UniverInstanceType): RenderUnit[] {
         const renderUnits: RenderUnit[] = [];
-        for (const [unitId, render] of this._renderMap) {
-            const renderType = this._univerInstanceService.getUnitType(unitId);
+        for (const [_, render] of this._renderMap) {
+            const renderType = render.type;
             if (renderType === type) {
                 renderUnits.push(render as RenderUnit);
             }
@@ -240,8 +240,9 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         } else {
             // For slide pages
             renderUnit = {
-                unitId,
+                isThumbNail: true,
                 type: UniverInstanceType.UNIVER_SLIDE,
+                unitId,
                 engine,
                 scene,
                 mainComponent: null,

@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-export class DocFormulaInputController {
+import type { ICommand } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 
-}
-
+export const generateCloneMutation = (cloneId: string, sourceMutation: ICommand): ICommand => {
+    return {
+        ...Tools.deepClone(sourceMutation),
+        id: cloneId,
+    };
+};

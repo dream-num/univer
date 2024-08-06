@@ -16,9 +16,9 @@
 
 // Refer to packages/ui/src/views/App.tsx
 
-import { IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
-import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
+import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import {
     builtInGlobalComponents,
     BuiltInUIPart,
@@ -26,31 +26,49 @@ import {
     ContextMenu,
     IMessageService,
     type IWorkbenchOptions,
-    Sidebar,
-    Toolbar,
     UNI_DISABLE_CHANGING_FOCUS_KEY,
     useComponentsOfPart,
     useObservable,
-    ZenZone,
 } from '@univerjs/ui';
+import type {
+    NodeTypes,
+    ReactFlowInstance,
+    Viewport,
+} from '@xyflow/react';
+import {
+    Background,
+    NodeResizer,
+    ReactFlow,
+    ReactFlowProvider,
+    useNodesState,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import clsx from 'clsx';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import clsx from 'clsx';
-import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
-import styles from './workbench.module.less';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { MenuSingle } from '@univerjs/icons';
+import { UniFocusUnitOperation } from '../../commands/operations/uni-focus-unit.operation';
+import { FlowManagerService } from '../../services/flow/flow-manager.service';
+import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
+import { useUnitFocused, useUnitTitle } from '../hooks/title';
+import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM, UniControlItem, UniControls } from '../uni-controls/UniControls';
+import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
+import { type IFloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
+import { UniToolbar } from '../uni-toolbar/UniToolbar';
+import styles from './workbench.module.less';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
 
 export interface IUniWorkbenchProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
 
-    onRendered: () => void;
+    onRendered: (contentEl: HTMLElement) => void;
 }
 
 export function UniWorkbench(props: IUniWorkbenchProps) {
     const {
         header = true,
-        footer = true,
         contextMenu = true,
         mountContainer,
         onRendered,
@@ -59,36 +77,50 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const messageService = useDependency(IMessageService);
-    const unitGridService = useDependency(UnitGridService);
+    const unitGridService = useDependency(IUnitGridService);
     const instanceService = useDependency(IUniverInstanceService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const flowManagerService = useDependency(FlowManagerService);
+    const commandService = useDependency(ICommandService);
 
     const contentRef = useRef<HTMLDivElement>(null);
+    const floatingToolbarRef = useRef<IFloatingToolbarRef>(null);
+    const reactFlowInstance = useRef<HTMLDivElement | null>(null);
 
-    const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
-    const headerMenuComponents = useComponentsOfPart(BuiltInUIPart.HEADER_MENU);
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
-    const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
-    const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
-    const focused = useObservable(instanceService.focused$);
-
-    const focusUnit = useCallback((unitId: string) => {
-        instanceService.focusUnit(unitId);
-        instanceService.setCurrentUnitForType(unitId);
-    }, [instanceService]);
+    const focusedUnit = useObservable(instanceService.focused$);
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
         }
-
-        onRendered();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    useEffect(() => {
+        if (contentRef.current) {
+            onRendered?.(contentRef.current);
+        }
+    }, [onRendered]);
+
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
+    const [zoom, setZoom] = useState<number>(DEFAULT_ZOOM);
+
+    const onControlItemClick = useCallback((key: UniControlItem) => {
+        switch (key) {
+            case UniControlItem.AI: {
+                commandService.executeCommand('project.controls-pro-search.operation');
+                break;
+            }
+        }
+    }, [commandService]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const resizeUnits = useCallback(debounce(() => {
+        renderManagerService.getRenderAll().forEach(((renderer) => renderer.engine.resize()));
+    }, 400), [renderManagerService]); // TODO: this is not
 
     // Create a portal container for injecting global component themes.
     const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
@@ -116,6 +148,43 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
         };
     }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
 
+    const nodeTypes: NodeTypes = {
+        customNode: UnitNode,
+    };
+
+    const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
+    const gridNodes = useMemo(() => unitGrid.map((item) => ({
+        id: item.id,
+        type: 'customNode',
+        dragHandle: '.univer-uni-node-drag-handle',
+        style: item.style,
+        focusable: true,
+        data: {
+            unitId: item.data.unitId,
+            gridService: unitGridService,
+            instanceService,
+        },
+        position: item.position,
+    })), [unitGrid]);
+
+    const [nodes, setNodes, onNodesChange] = useNodesState(gridNodes);
+    useEffect(() => {
+        setNodes(gridNodes);
+    }, [gridNodes]);
+
+    const onMove = useCallback((event: MouseEvent | TouchEvent | null, viewport: Viewport) => {
+        floatingToolbarRef.current?.update();
+        const { zoom } = viewport;
+        setZoom(zoom);
+        flowManagerService.setViewportChanged(viewport);
+    }, [floatingToolbarRef, setZoom, flowManagerService]);
+
+    const onFlowInit = useCallback((instance: ReactFlowInstance<any>) => {
+        flowManagerService.setReactFlowInstance(instance);
+    }, [flowManagerService]);
+
+    const disableReactFlowBehavior = !!focusedUnit;
+
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
             {/**
@@ -123,85 +192,102 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
               * bubbled to this element and refocus the input element.
               */}
-            <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
-                {/* header */}
-                {header && (
-                    <header className={styles.workbenchContainerHeader}>
-                        <Toolbar headerMenuComponents={headerMenuComponents} />
-                    </header>
-                )}
+            <ReactFlowProvider>
+                <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
 
-                {/* content */}
-                <section className={styles.workbenchContainer}>
-                    <div className={styles.workbenchContainerWrapper}>
-                        <aside className={styles.workbenchContainerLeftSidebar}>
-                            <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
-                        </aside>
+                    <div className={styles.flowLayer}>
+                        <section
+                            className={styles.workbenchContainerCanvasContainer}
+                            ref={contentRef}
+                            data-range-selector
+                            onContextMenu={(e) => e.preventDefault()}
+                        >
+                            <ReactFlow
+                                ref={reactFlowInstance}
+                                maxZoom={MAX_ZOOM}
+                                minZoom={MIN_ZOOM}
+                                zoomOnDoubleClick={!disableReactFlowBehavior}
+                                zoomOnPinch={!disableReactFlowBehavior}
+                                zoomOnScroll={!disableReactFlowBehavior}
+                                panOnDrag={!disableReactFlowBehavior}
+                                panOnScroll={!disableReactFlowBehavior}
+                                nodes={nodes}
+                                nodeTypes={nodeTypes}
+                                onNodesChange={(nodes) => {
+                                    nodes.forEach((node) => {
+                                        if (node.type === 'dimensions' && node.resizing) {
+                                            unitGridService.changeDimension(node.id, { width: node.dimensions!.width, height: node.dimensions!.height });
+                                        } else if (node.type === 'position') {
+                                            unitGridService.changePosition(node.id, { x: node.position!.x, y: node.position!.y });
+                                        }
+                                    });
 
-                        <section className={styles.workbenchContainerContent}>
-                            <header>
-                                {header && <ComponentContainer key="header" components={headerComponents} />}
-                            </header>
-
-                            <section
-                                className={styles.workbenchContainerCanvasContainer}
-                                ref={contentRef}
-                                data-range-selector
-                                onContextMenu={(e) => e.preventDefault()}
+                                    onNodesChange(nodes);
+                                }}
+                                onResize={resizeUnits}
+                                fitView
+                                defaultViewport={{ zoom: MIN_ZOOM, x: 0, y: 0 }}
+                                onPointerDown={(event) => {
+                                    if (event.target instanceof HTMLElement
+                                        && (
+                                            event.target.classList.contains('univer-render-canvas')
+                                            || event.target.classList.contains('react-flow__resize-control'))
+                                    ) {
+                                        return;
+                                    }
+                                    commandService.executeCommand(UniFocusUnitOperation.id, { unitId: null });
+                                }}
+                                onMove={onMove}
+                                onInit={onFlowInit}
                             >
-                                {/* Render units. */}
-                                {unitGrid?.map((unitId) => (
-                                    <UnitRenderer
-                                        key={unitId}
-                                        unitId={unitId}
-                                        focused={focused === unitId}
-                                        onFocus={focusUnit}
-                                        gridService={unitGridService}
-                                        instanceService={instanceService}
-                                    />
-                                ))}
-                                <ComponentContainer key="content" components={contentComponents} />
-                            </section>
+                                <Background bgColor="#f4f6f8" color="#d9d9d9"></Background>
+                            </ReactFlow>
+
+                            {/* Sheet cell editors etc. Their size would not be affected the scale of ReactFlow. */}
+                            <ComponentContainer key="content" components={contentComponents} />
                         </section>
-
-                        <aside className={styles.workbenchContainerSidebar}>
-                            <Sidebar />
-                        </aside>
                     </div>
+                    <div className={styles.floatLayer}>
+                        {/* header */}
+                        {header && (
+                            <div className={styles.workbenchContainerHeader}>
+                                <div className={styles.workbenchToolbarWrapper}>
+                                    <UniToolbar />
+                                    <ComponentContainer key="header" components={headerComponents} />
+                                </div>
+                            </div>
+                        )}
+                        <UniFloatingToolbar ref={floatingToolbarRef} node={nodes.find((n) => n.id === focusedUnit)?.data} />
 
-                    {/* footer */}
-                    {footer && (
-                        <footer className={styles.workbenchFooter}>
-                            <ComponentContainer key="footer" components={footerComponents} />
-                        </footer>
-                    )}
+                        <LeftSidebar />
+                        <RightSidebar />
 
-                    <ZenZone />
-                </section>
-            </div>
-            <ComponentContainer key="global" components={globalComponents} />
-            <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
-            {contextMenu && <ContextMenu />}
-            <FloatingContainer />
+                        {/* uni mode controller buttons */}
+                        <UniControls zoom={zoom} onItemClick={onControlItemClick} />
+                    </div>
+                </div>
+                <ComponentContainer key="global" components={globalComponents} />
+                <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
+                {contextMenu && <ContextMenu />}
+                <FloatingContainer />
+            </ReactFlowProvider>
         </ConfigProvider>
     );
 }
 
-interface IUnitRendererProps {
-    unitId: string;
-    focused: boolean;
-
-    gridService: UnitGridService;
-    instanceService: IUniverInstanceService;
-
-    onFocus: (unitId: string) => void;
+interface IUnitNodeProps {
+    data: IUnitRendererProps;
 }
 
-function UnitRenderer(props: IUnitRendererProps) {
-    const { unitId, gridService, focused, onFocus } = props;
-    const mountRef = useRef<HTMLDivElement>(null);
+function UnitNode({ data }: IUnitNodeProps) {
+    const { unitId } = data;
+    const title = useUnitTitle(unitId);
+    const focused = useUnitFocused(unitId);
 
+    const instanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
+    const commandService = useDependency(ICommandService);
+
     const disableChangingUnitFocusing = useObservable(
         () => contextService.subscribeContextValue$(UNI_DISABLE_CHANGING_FOCUS_KEY),
         false,
@@ -211,9 +297,45 @@ function UnitRenderer(props: IUnitRendererProps) {
 
     const focus = useCallback(() => {
         if (!disableChangingUnitFocusing && !focused) {
-            onFocus(unitId);
+            commandService.executeCommand(UniFocusUnitOperation.id, { unitId });
         }
-    }, [focused, onFocus, disableChangingUnitFocusing, unitId]);
+    }, [disableChangingUnitFocusing, focused, unitId, commandService]);
+
+    return (
+        <div className={styles.uniNodeContainer} onPointerDownCapture={focus}>
+            <NodeResizer isVisible={focused} minWidth={180} minHeight={100} />
+            <UnitRenderer
+                key={data.unitId}
+                {...data}
+            />
+
+            <div className={styles.uniNodeDragHandle}>
+                <MenuSingle />
+            </div>
+
+            <div className={styles.uniNodeTitle}>
+                {title}
+            </div>
+        </div>
+
+    );
+}
+
+export interface IUnitRendererProps {
+    unitId: string;
+
+    gridService: IUnitGridService;
+    instanceService: IUniverInstanceService;
+}
+
+function UnitRenderer(props: IUnitRendererProps) {
+    const { unitId, gridService } = props;
+    const mountRef = useRef<HTMLDivElement>(null);
+
+    const instanceService = useDependency(IUniverInstanceService);
+
+    const focusedUnit = useObservable(instanceService.focused$);
+    const focused = focusedUnit === unitId;
 
     useEffect(() => {
         if (mountRef.current) {
@@ -229,8 +351,7 @@ function UnitRenderer(props: IUnitRendererProps) {
             ref={mountRef}
             // We bind these focusing events on capture phrase so the
             // other event handlers would have correct currently focused unit.
-            onPointerUpCapture={focus}
-            onWheelCapture={focus}
+            onWheel={(event) => event.stopPropagation()}
         >
         </div>
     );

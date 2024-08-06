@@ -15,11 +15,11 @@
  */
 
 import type { Dependency, SlideDataModel } from '@univerjs/core';
-import { Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
-import { SlideUIController } from './controllers/slide-ui.controller';
+import { SlidesUIController } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
 import { SlidePopupMenuController } from './controllers/popup-menu.controller';
 import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
@@ -44,16 +44,16 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        ([
+        mergeOverrideWithDependencies([
             [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
             // used by SlideUIController --> EditorContainer
             [ISlideEditorManagerService, { useClass: SlideEditorManagerService }],
             [SlideCanvasPopMangerService],
-        ] as Dependency[]).forEach((d) => this._injector.add(d));
+        ] as Dependency[], this._config.override).forEach((d) => this._injector.add(d));
     }
 
     override onReady(): void {
-        ([
+        mergeOverrideWithDependencies([
             // cannot register in _renderManagerService now.
             // [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
             // // used by SlideUIController --> EditorContainer
@@ -62,11 +62,12 @@ export class UniverSlidesUIPlugin extends Plugin {
             // This controller should be registered in Ready stage.
             // this controller would add a new RenderUnit (__INTERNAL_EDITOR__DOCS_NORMAL)
             // so this new RenderUnit does not have ISlideEditorBridgeService & ISlideEditorManagerService if
-            // editorservice were create in renderManagerService
-            [SlideUIController],
+            [SlidesUIController, {
+                useFactory: () => this._injector.createInstance(SlidesUIController, this._config),
+            }], // editor service were create in renderManagerService
             [SlideRenderController],
             [SlidePopupMenuController],
-        ] as Dependency[]).forEach((m) => {
+        ] as Dependency[], this._config.override).forEach((m) => {
             this._injector.add(m);
         });
     }

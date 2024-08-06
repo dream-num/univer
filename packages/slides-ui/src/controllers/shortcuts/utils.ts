@@ -20,14 +20,16 @@ import {
     FOCUSING_COMMON_DRAWINGS,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_FORMULA_EDITOR,
     FOCUSING_SLIDE,
     FOCUSING_UNIVER_EDITOR,
+    FORMULA_EDITOR_ACTIVATED,
 } from '@univerjs/core';
 
 export function whenSheetFocused(contextService: IContextService) {
     return contextService.getContextValue(FOCUSING_SLIDE);
 }
+
+// FIXME: why coupled with sheet editors?
 
 /**
  * Requires the currently focused unit to be Workbook and the sheet editor is focused but not activated.
@@ -48,7 +50,7 @@ export function whenSheetEditorFocusedAndFxNotFocused(contextService: IContextSe
         contextService.getContextValue(FOCUSING_SLIDE) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
         !contextService.getContextValue(EDITOR_ACTIVATED) &&
-        !contextService.getContextValue(FOCUSING_FORMULA_EDITOR) &&
+        !contextService.getContextValue(FORMULA_EDITOR_ACTIVATED) &&
         !contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
     );
 }
@@ -77,7 +79,7 @@ export function whenEditorActivated(contextService: IContextService) {
  */
 export function whenFormulaEditorFocused(contextService: IContextService) {
     return (
-        contextService.getContextValue(FOCUSING_FORMULA_EDITOR) &&
+        contextService.getContextValue(FORMULA_EDITOR_ACTIVATED) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR)
     );
 }

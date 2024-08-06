@@ -16,13 +16,16 @@
 
 import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniFormulaService } from './services/uni-formula.service';
 import { DOC_FORMULA_PLUGIN_NAME } from './const';
 
-@DependentOn(UniverFormulaEnginePlugin)
+@DependentOn(UniverFormulaEnginePlugin, UniverSheetsFormulaPlugin)
 export class UniverDocUniFormulaPlugin extends Plugin {
     static override pluginName: string = DOC_FORMULA_PLUGIN_NAME;
-    static override type: UniverInstanceType = UniverInstanceType.UNIVER_DOC;
+
+    // This plugin should load only when sheet related modules are loaded.
+    static override type: UniverInstanceType = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         _config: unknown,

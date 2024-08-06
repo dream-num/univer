@@ -21,7 +21,7 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
-    FOCUSING_FORMULA_EDITOR,
+    FOCUSING_FX_BAR_EDITOR,
     HorizontalAlign,
     ICommandService,
     IContextService,
@@ -93,7 +93,7 @@ export class FormulaEditorController extends RxDisposable {
             const { unitId } = param;
             // Mark formula editor as non-focused, when current selection is not in formula editor.
             if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-                this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
+                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
                 this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             }
         });
@@ -129,7 +129,7 @@ export class FormulaEditorController extends RxDisposable {
 
             if (isFocusButHidden) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-                this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
+                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
 
                 const currentSheet = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
                 const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
@@ -208,7 +208,7 @@ export class FormulaEditorController extends RxDisposable {
                 }
 
                 // Open the normal editor first, and then we mark formula editor as activated.
-                this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
+                this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
                 this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             })
         );

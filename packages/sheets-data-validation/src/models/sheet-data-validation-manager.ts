@@ -48,9 +48,11 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._dataValidationFormulaService = this._injector.get(DataValidationFormulaService);
         this._dataValidationCustomFormulaService = this._injector.get(DataValidationCustomFormulaService);
         this._cache = this._dataValidationCacheService.ensureCache(unitId, subUnitId);
+
         const univerInstanceService = this._injector.get(IUniverInstanceService);
         const worksheet = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId(subUnitId)!;
         const matrix = new ObjectMatrix<string>();
+
         this._ruleMatrix = new RuleMatrix(matrix, worksheet);
     }
 

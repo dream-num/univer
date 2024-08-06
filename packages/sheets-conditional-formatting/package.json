@@ -75,7 +75,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons-svg": "^0.1.70",
+        "@univerjs/icons-svg": "^0.1.72",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "dayjs": "^1.11.12",

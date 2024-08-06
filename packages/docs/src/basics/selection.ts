@@ -19,7 +19,19 @@ import { DataStreamTreeTokenType } from '@univerjs/core';
 import { DeleteDirection } from '../types/enums/delete-direction';
 import { isCustomRangeSplitSymbol } from './custom-range';
 
-export function normalizeSelection(selection: ITextRange) {
+export function makeSelection(startOffset: number, endOffset?: number): ITextRange {
+    if (typeof endOffset === 'undefined') {
+        return { startOffset, endOffset: startOffset, collapsed: true };
+    }
+
+    if (endOffset < startOffset) {
+        throw new Error(`Cannot make a doc selection when endOffset ${endOffset} is less than startOffset ${startOffset}.`);
+    }
+
+    return { startOffset, endOffset, collapsed: startOffset === endOffset };
+}
+
+export function normalizeSelection(selection: ITextRange): ITextRange {
     const { startOffset, endOffset, collapsed } = selection;
     const start = Math.min(startOffset, endOffset);
     const end = Math.max(startOffset, endOffset);

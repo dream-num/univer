@@ -116,9 +116,6 @@ export function SlideSideBar() {
                         </div>
                     ))}
                 </div>
-                {/* <div className={styles.slideAddButton}>
-                    <Button onClick={addSlide}>+</Button>
-                </div> */}
             </Scrollbar>
         </aside>
     );

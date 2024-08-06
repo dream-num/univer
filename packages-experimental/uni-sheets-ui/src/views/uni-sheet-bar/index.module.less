@@ -1,0 +1,80 @@
+.uni-sheet-bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    user-select: none;
+
+    .sheet-tab {
+        overflow-y: auto;
+        scrollbar-width: thin;
+
+        .sheet-items {
+            display: flex;
+            flex-direction: column;
+            gap: var(--margin-xxs);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+
+            .sheet-item {
+                display: flex;
+                align-items: center;
+                height: 32px;
+                padding: 0 var(--margin-xs);
+                border-radius: var(--border-radius-lg);
+
+                > span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    max-width: 142px;
+                }
+
+                &:hover {
+                    background-color: rgb(var(--grey-100));
+                    cursor: pointer;
+                }
+
+                &.active {
+                    color: rgba(var(--hyacinth-500));
+                    background-color: rgb(var(--hyacinth-500), 0.07);
+                }
+            }
+        }
+    }
+
+    .new-sheet-button {
+        position: relative;
+        height: 32px;
+        margin-top: 16px;
+        padding: 0 var(--margin-xs);
+        border-radius: var(--border-radius-lg);
+        color: rgba(var(--hyacinth-500));
+        background-color: transparent;
+        border: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+        }
+
+        &:hover {
+            background-color: rgb(var(--grey-100));
+            cursor: pointer;
+        }
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -10px;
+            height: 1px;
+            background-color: #ecedef;
+        }
+    }
+}

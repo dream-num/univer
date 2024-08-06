@@ -22,7 +22,7 @@ import {
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_FORMULA_EDITOR,
+    FOCUSING_FX_BAR_EDITOR,
     FOCUSING_SHEET,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     HorizontalAlign,
@@ -61,7 +61,7 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
-import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+import { IEditorService, ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import type { WorkbookSelections } from '@univerjs/sheets';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
@@ -110,6 +110,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @ILayoutService private readonly _layoutService: ILayoutService,
         @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IContextService private readonly _contextService: IContextService,
@@ -295,7 +296,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const { verticalAlign, paddingData, fill } = documentLayoutObject;
 
         let editorWidth = endX - startX;
-
         let editorHeight = endY - startY;
 
         if (editorWidth < actualWidth) {
@@ -397,7 +397,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
      * determine whether a scrollbar appears,
      * and calculate the editor's boundaries relative to the browser.
      */
-
     private _editAreaProcessing(
         editorWidth: number,
         editorHeight: number,
@@ -408,17 +407,27 @@ export class EditingRenderController extends Disposable implements IRenderModule
         scaleY: number = 1
     ) {
         const editorObject = this._getEditorObject();
-
         if (editorObject == null) {
             return;
         }
 
+        function pxToNum(width: string): number {
+            return Number.parseInt(width.replace('px', ''));
+        }
+
+        const engine = this._context.engine;
+        const canvasElement = engine.getCanvasElement();
+        const canvasClientRect = canvasElement.getBoundingClientRect();
+
+        // We should take the scale into account when canvas is scaled by CSS.
+        const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+        const { top, left, width } = canvasClientRect; // real width affected by scale
+        const scaleAdjust = width / widthOfCanvas;
+
         let { startX, startY } = actualRangeWithCoord;
 
-        const { document: documentComponent, scene, engine: docEngine } = editorObject;
-
-        const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
-
+        const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
+        const viewportMain = editorScene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
         const clientHeight =
             document.body.clientHeight -
             startY -
@@ -452,23 +461,20 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         startX -= FIX_ONE_PIXEL_BLUR_OFFSET;
-
         startY -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
-        // physicHeight = editorHeight;
+        this._addBackground(editorScene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
-        this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
+        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = editorScene.getPrecisionScale();
 
-        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
-
-        scene.transformByState({
-            width: editorWidth / scaleX,
-            height: editorHeight / scaleY,
-            scaleX,
-            scaleY,
+        editorScene.transformByState({
+            width: editorWidth * scaleAdjust / scaleX,
+            height: editorHeight * scaleAdjust / scaleY,
+            scaleX: scaleX * scaleAdjust,
+            scaleY: scaleY * scaleAdjust,
         });
 
-        documentComponent.resize(editorWidth / scaleX, editorHeight / scaleY);
+        documentComponent.resize(editorWidth * scaleAdjust / scaleX, editorHeight * scaleAdjust / scaleY);
 
         /**
          * sometimes requestIdleCallback is invalid, so use setTimeout to ensure the successful execution of the resizeBySize method.
@@ -482,17 +488,17 @@ export class EditingRenderController extends Disposable implements IRenderModule
             );
         }, 0);
 
-        // const canvasElement = this._context.engine.getCanvasElement();
-        // const canvasBoundingRect = canvasElement.getBoundingClientRect();
-        // startX += canvasBoundingRect.left;
-        // startY += canvasBoundingRect.top;
+        const contentBoundingRect = this._layoutService.getContentElement().getBoundingClientRect();
+        const canvasBoundingRect = canvasElement.getBoundingClientRect();
+        startX = startX * scaleAdjust + (canvasBoundingRect.left - contentBoundingRect.left);
+        startY = startY * scaleAdjust + (canvasBoundingRect.top - contentBoundingRect.top);
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
             startX,
             startY,
-            endX: editorWidth + startX,
-            endY: physicHeight + startY,
+            endX: editorWidth * scaleAdjust + startX,
+            endY: physicHeight * scaleAdjust + startY,
             show: true,
         });
     }
@@ -678,9 +684,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
      */
     private _initialKeyboardListener(d: DisposableCollection) {
         d.add(this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
-            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
-            const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+            if (!this._isCurrentSheetFocused()) {
+                return;
+            }
 
+            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+            const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
             // TODO@Jocs: should get editor instead of current doc
             const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
             if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
@@ -715,7 +724,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId: commandUnitId } = params;
 
-                if (!this._editorService.isSheetEditor(commandUnitId)) {
+                // Only when the sheet it attached to is focused. Maybe we should change it to the render unit sys.
+                if (
+                    !this._isCurrentSheetFocused() ||
+                    !this._editorService.isSheetEditor(commandUnitId)
+                ) {
                     return;
                 }
 
@@ -761,7 +774,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                  * but move the cursor within the editor instead.
                  */
                 if (keycode != null &&
-                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
+                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR))
                 ) {
                     this._moveInEditor(keycode, isShift);
                     return;
@@ -903,7 +916,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(EDITOR_ACTIVATED, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
-        this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
+        this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
 
         this._cellEditorManagerService.setState({
             show: param.visible,
@@ -991,6 +1004,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 direction,
             });
         }
+    }
+
+    // WTF: this is should not exist at all. It is because all editor instances reuse the singleton
+    // "TextSelectionManagerService" and other modules. Which will be refactored soon in August, 2024.
+    private _isCurrentSheetFocused(): boolean {
+        return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId;
     }
 }
 

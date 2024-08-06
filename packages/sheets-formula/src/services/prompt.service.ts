@@ -16,11 +16,14 @@
 
 import type { Direction, IDisposable } from '@univerjs/core';
 import { type IFunctionInfo, type ISequenceNode, sequenceNodeType } from '@univerjs/engine-formula';
-import { createIdentifier } from '@univerjs/core';
+import { createIdentifier, IContextService } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
 import type { ISearchItem } from './description.service';
+
+/** If the formula prompt is visible. */
+export const FORMULA_PROMPT_ACTIVATED = 'FORMULA_PROMPT_ACTIVATED';
 
 export interface ISearchFunctionOperationParams {
     /**
@@ -182,6 +185,11 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
     private _isLockedOnSelectionInsertRefString: boolean = false;
 
+    constructor(
+        @IContextService private readonly _contextService: IContextService
+    ) {
+    }
+
     dispose(): void {
         this._search$.complete();
         this._help$.complete();
@@ -192,6 +200,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
     }
 
     search(param: ISearchFunctionOperationParams) {
+        this._contextService.setContextValue(FORMULA_PROMPT_ACTIVATED, param.visible);
         this._searching = param.visible;
         this._search$.next(param);
     }

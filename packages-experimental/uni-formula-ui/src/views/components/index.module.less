@@ -1,0 +1,67 @@
+.doc-ui-formula-popup {
+    overflow: hidden;
+
+    width: 482px;
+    display: flex;
+
+    border-radius: 10px;
+    border: 1px solid var(--, #ecedef);
+    background: #fff;
+    height: 48px;
+    padding: 8px;
+    align-items: center;
+    box-sizing: border-box;
+    gap: 8px;
+    box-shadow: 0px 2px 4px 0px rgba(30, 34, 43, 0.06);
+
+    &-title {
+        font-size: var(--font-size-xs);
+    }
+
+    &-editor {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        color: var(---Hyacinth-Blue-500, #274fee);
+        font-size: 13px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 20px; /* 153.846% */
+
+        user-select: none;
+        transition: all 0.15s;
+        border-radius: var(--radius-m, 6px);
+        border: 1px solid var(---Hyacinth-Blue-500, #274fee);
+        background: #f0f3fe;
+        box-shadow: 0px 0px 4px 0px rgba(39, 79, 238, 0.4);
+
+        // &-activated {
+        //     border-color: rgb(var(--primary-color));
+        // }
+    }
+
+    &-button-grp {
+        margin-top: var(--margin-xs);
+        text-align: right;
+        text-wrap: nowrap;
+
+        button:not(:last-of-type) {
+            margin-right: var(--margin-xxs);
+        }
+    }
+
+    .formula-icon {
+        display: flex;
+    }
+    .icon-container {
+        display: flex;
+        padding: var(--radius-m, 6px);
+        align-items: center;
+        gap: 10px;
+        border-radius: 8px;
+        &:hover {
+            background: var(--hyacinth-blue-5007, rgba(39, 79, 238, 0.07));
+            color: #274fee;
+        }
+    }
+}

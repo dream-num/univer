@@ -162,6 +162,12 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             priority: -1,
             handler: (_value) => _value,
         }));
+
+        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+            if (unit.getUnitId() === this._currentEditCellState?.unitId) {
+                this._clearCurrentEditCellState();
+            }
+        });
     }
 
     refreshEditCellState() {
@@ -189,9 +195,14 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         }
 
         const editCellState = this.getLatestEditCellState();
-        this._currentEditCellState = editCellState;
 
+        this._currentEditCellState = editCellState;
         this._currentEditCellState$.next(editCellState);
+    }
+
+    private _clearCurrentEditCellState() {
+        this._currentEditCellState = null;
+        this._currentEditCellState$.next(null);
     }
 
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>> {

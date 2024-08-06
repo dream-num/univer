@@ -58,7 +58,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
 
             if (!selectionRangeWithStyle.primary) return;
 
-            const canvasRect = this._layoutService.getCanvasElement().getBoundingClientRect();
+            const canvasRect = this._layoutService.getContentElement().getBoundingClientRect();
             const range = this._selectionRenderService.attachSelectionWithCoord(selectionRangeWithStyle as unknown as ISelectionWithStyle);
             const rangeType = selectionRangeWithStyle.range.rangeType;
 

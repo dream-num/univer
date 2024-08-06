@@ -46,6 +46,7 @@ import {
     IEditorService,
     IGlobalZoneService,
     ILayoutService,
+    ILeftSidebarService,
     IMenuService,
     IMessageService,
     INotificationService,
@@ -69,8 +70,13 @@ import {
     UNIVER_UI_PLUGIN_NAME,
     ZIndexManager,
 } from '@univerjs/ui';
+import { FlowManagerService } from './services/flow/flow-manager.service';
 import { UniverUniUIController } from './controllers/uniui-desktop.controller';
-import { UnitGridService } from './services/unit-grid/unit-grid.service';
+import { IUnitGridService, UnitGridService } from './services/unit-grid/unit-grid.service';
+import { UniuiLeftSidebarController } from './controllers/uniui-leftsidebar.controller';
+import { UniuiToolbarController } from './controllers/uniui-toolbar.controller';
+import { UniuiFlowController } from './controllers/uniui-flow.controller';
+import { UniToolbarService } from './services/toolbar/uni-toolbar-service';
 
 const UI_BOOTSTRAP_DELAY = 16;
 
@@ -100,7 +106,9 @@ export class UniverUniUIPlugin extends Plugin {
             [ComponentManager],
             [ZIndexManager],
             [ShortcutPanelService],
-            [UnitGridService],
+            [FlowManagerService],
+            [UniToolbarService],
+            [IUnitGridService, { useClass: UnitGridService }],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: ShortcutService }],
@@ -112,6 +120,7 @@ export class UniverUniUIPlugin extends Plugin {
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
+            [ILeftSidebarService, { useClass: DesktopSidebarService, lazy: true }],
             [IZenZoneService, { useClass: DesktopZenZoneService, lazy: true }],
             [IGlobalZoneService, { useClass: DesktopGlobalZoneService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
@@ -132,6 +141,9 @@ export class UniverUniUIPlugin extends Plugin {
             [ShortcutPanelController, {
                 useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
             }],
+            [UniuiLeftSidebarController],
+            [UniuiToolbarController],
+            [UniuiFlowController],
         ], this._config.override);
         dependencies.forEach((dependency) => this._injector.add(dependency));
     }

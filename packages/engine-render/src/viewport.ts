@@ -1484,9 +1484,9 @@ export class Viewport {
         if (!preCacheVisibleBound) return 0b01;
         const viewBoundOutCacheArea =
             viewBound.right > preCacheVisibleBound.right ||
-            viewBound.top < preCacheVisibleBound.top ||
-            viewBound.left < preCacheVisibleBound.left ||
-            viewBound.bottom > preCacheVisibleBound.bottom
+                viewBound.top < preCacheVisibleBound.top ||
+                viewBound.left < preCacheVisibleBound.left ||
+                viewBound.bottom > preCacheVisibleBound.bottom
                 ? 0b01
                 : 0b00;
 

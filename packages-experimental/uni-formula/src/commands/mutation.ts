@@ -30,9 +30,9 @@ export interface IAddDocUniFormulaMutationParams {
 export const AddDocUniFormulaMutation: IMutation<IAddDocUniFormulaMutationParams> = {
     type: CommandType.MUTATION,
     id: 'doc.mutation.add-doc-uni-formula',
-    handler(accesstor, params: IAddDocUniFormulaMutationParams) {
+    handler(accessor, params: IAddDocUniFormulaMutationParams) {
         const { unitId, f, rangeId: id } = params;
-        const uniFormulaService = accesstor.get(UniFormulaService);
+        const uniFormulaService = accessor.get(UniFormulaService);
 
         uniFormulaService.registerDocFormula(unitId, id, f);
 

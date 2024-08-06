@@ -91,7 +91,6 @@ export function Dropdown(props: IDropdownProps) {
         onVisibleChange,
     } = props;
 
-    // eslint-disable-next-line react/prefer-destructuring-assignment
     const trigger = disabled ? [] : (props.trigger || ['click']);
 
     const { mountContainer } = useContext(ConfigContext);

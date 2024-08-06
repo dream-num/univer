@@ -50,3 +50,8 @@ export enum DataStreamTreeTokenType {
     LETTER = '',
     SPACE = ' ',
 }
+
+/** Wrap your stream in a pair of custom range tokens. */
+export function makeCustomRangeStream(stream: string): string {
+    return `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${stream}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+}

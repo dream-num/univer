@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer } from '@univerjs/core';
+import { LocaleType, Univer } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 
 const univer = new Univer({
     locale: LocaleType.ZH_CN,
-    logLevel: LogLevel.VERBOSE,
 });
 
 univer.registerPlugin(UniverSheetsPlugin, { onlyRegisterFormulaRelatedMutations: true });

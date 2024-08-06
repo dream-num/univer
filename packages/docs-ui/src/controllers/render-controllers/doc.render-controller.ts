@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
-import { ICommandService, IConfigService, Inject, RxDisposable } from '@univerjs/core';
+import { FOCUSING_DOC, ICommandService, IConfigService, IContextService, Inject, RxDisposable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
 import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
@@ -26,6 +26,7 @@ import { takeUntil } from 'rxjs';
 export class DocRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
+        @IContextService private readonly _contextService: IContextService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IConfigService private readonly _configService: IConfigService,
@@ -79,8 +80,11 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         scene.attachControl();
 
         scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
-            const e = evt as IWheelEvent;
+            if (!this._contextService.getContextValue(FOCUSING_DOC)) {
+                return;
+            }
 
+            const e = evt as IWheelEvent;
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);
                 let scrollNum = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;

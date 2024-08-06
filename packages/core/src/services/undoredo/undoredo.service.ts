@@ -23,7 +23,7 @@ import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } f
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import type { ICommand, IMutationInfo } from '../command/command.service';
 import { CommandType, ICommandService, sequenceExecute } from '../command/command.service';
-import { EDITOR_ACTIVATED, FOCUSING_FORMULA_EDITOR, FOCUSING_SHEET } from '../context/context';
+import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 import type { Nullable } from '../../common/type-util';
@@ -342,7 +342,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         let unitID: string = '';
 
         const isFocusSheet = this._contextService.getContextValue(FOCUSING_SHEET);
-        const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+        const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
         const isFocusEditor = this._contextService.getContextValue(EDITOR_ACTIVATED);
 
         if (isFocusSheet) {

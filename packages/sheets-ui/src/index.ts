@@ -23,6 +23,7 @@ export { SheetsRenderService } from './services/sheets-render.service';
 export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
+export { SheetUIController, type IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
 export {
@@ -32,7 +33,7 @@ export {
     getTransformCoord,
 } from './controllers/utils/component-tools';
 export { checkInHeaderRanges } from './controllers/utils/selections-tools';
-export { useActiveWorkbook, useActiveWorksheet } from './components/hook';
+export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './components/hook';
 export { whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
@@ -88,6 +89,8 @@ export { FormulaEditorController } from './controllers/editor/formula-editor.con
 export { StatusBarController } from './controllers/status-bar.controller';
 export { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
+export { RenderSheetFooter, RenderSheetHeader, RenderSheetContent } from './views/sheet-container/SheetContainer';
+export { SheetBar } from './views/sheet-bar/SheetBar';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
 export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';
 export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
@@ -166,6 +169,9 @@ export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.oper
 export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-permission-open-dialog.operation';
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
+export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
+export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
+export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
 export { attachSelectionWithCoord, attachPrimaryWithCoord } from './services/selection/util';
 
 // #endregion

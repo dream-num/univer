@@ -18,22 +18,21 @@ import type { IAccessor, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController, RangeProtectionRuleModel, SheetsSelectionsService } from '@univerjs/sheets';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, map, of, switchMap } from 'rxjs';
 
 export function getSheetSelectionsDisabled$(accessor: IAccessor) {
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-    const unitId = workbook.getUnitId();
-
     const mergeCellController = accessor.get(MergeCellController);
 
+    const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
     return combineLatest([
         selectionManagerService.selectionMoveEnd$,
-        workbook.activeSheet$,
+        workbook$.pipe(map((workbook) => workbook?.getUnitId() ?? '')),
+        workbook$.pipe(switchMap((workbook) => workbook?.activeSheet$ ?? of(null))),
     ]).pipe(
-        map(([selection, sheet]) => {
+        map(([selection, unitId, sheet]) => {
             if (!sheet) return false;
             if (!selection || selection.length === 0) return false;
             const subUnitId = sheet.getSheetId();

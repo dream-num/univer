@@ -100,9 +100,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         const { scene } = this._context;
 
         const listenerDisposables = new DisposableCollection();
-
         listenerDisposables.add(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            console.warn('debug start dragging', this._skeleton.worksheet?.getUnitId());
             this._onPointerDown(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
             if (evt.button !== 2) {
                 state.stopPropagation();

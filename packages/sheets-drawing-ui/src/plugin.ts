@@ -67,6 +67,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [DrawingPopupMenuController],
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
+            [SheetsDrawingCopyPasteController],
         ];
         dependencies.forEach((dependency) => this._injector.add(dependency));
     }
@@ -75,7 +76,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         ([
             [SheetDrawingUpdateController],
             [SheetDrawingTransformAffectedController],
-            [SheetsDrawingCopyPasteController],
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

@@ -327,9 +327,9 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
         this.disposeWithMe(
             this._headerFreezeRenderController.interceptor.intercept(this._headerFreezeRenderController.interceptor.getInterceptPoints().FREEZE_PERMISSION_CHECK, {
                 handler: (_: Nullable<boolean>, __) => {
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                    const worksheet = workbook.getActiveSheet();
-                    if (!worksheet) {
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                    const worksheet = workbook?.getActiveSheet();
+                    if (!worksheet || !workbook) {
                         return false;
                     }
                     const permission = this._permissionService.getPermissionPoint(new WorkbookEditablePermission(workbook.getUnitId()).id)?.value ?? false;

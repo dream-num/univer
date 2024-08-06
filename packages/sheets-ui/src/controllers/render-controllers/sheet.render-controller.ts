@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
-import { CommandType, ICommandService, Inject, Rectangle, RxDisposable } from '@univerjs/core';
+import { CommandType, FOCUSING_SHEET, ICommandService, IContextService, Inject, Rectangle, RxDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     Layer,
@@ -48,6 +48,7 @@ interface ISetWorksheetMutationParams {
 export class SheetRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService
@@ -412,7 +413,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _initMouseWheel(scene: Scene, viewMain: Viewport) {
         this.disposeWithMe(
             scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
-                if (evt.ctrlKey) {
+                if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
                     return;
                 }
 

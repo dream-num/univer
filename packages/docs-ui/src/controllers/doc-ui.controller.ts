@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
@@ -29,6 +29,8 @@ import {
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import type { IUniverDocsUIConfig } from '../basics';
+import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
+import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { DocFooter } from '../views/doc-footer';
 import {
     AlignCenterShortCut,
@@ -75,14 +77,15 @@ import { CopyMenuFactory, CutMenuFactory, DeleteColumnsMenuItemFactory, DeleteMe
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
 export class DocUIController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverDocsUIConfig>,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @ILayoutService private readonly _layoutService: ILayoutService,
-        @IMenuService private readonly _menuService: IMenuService,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        protected readonly _config: Partial<IUniverDocsUIConfig>,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @ILayoutService protected readonly _layoutService: ILayoutService,
+        @IMenuService protected readonly _menuService: IMenuService,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @IShortcutService protected readonly _shortcutService: IShortcutService
     ) {
         super();
 
@@ -188,8 +191,17 @@ export class DocUIController extends Disposable {
         this._initCustomComponents();
         this._initMenus();
         this._initFocusHandler();
+        this._initCommands();
         this._initUiParts();
         this._initShortCut();
+    }
+
+    private _initCommands(): void {
+        [
+            CoreHeaderFooterCommand,
+            OpenHeaderFooterPanelCommand,
+            SidebarDocHeaderFooterPanelOperation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initFocusHandler(): void {

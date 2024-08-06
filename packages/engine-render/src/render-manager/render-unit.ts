@@ -28,6 +28,7 @@ export interface IRender {
     mainComponent: Nullable<RenderComponentType>;
     components: Map<string, RenderComponentType>;
     isMainScene: boolean;
+    isThumbNail?: boolean;
 
     with<T>(dependency: DependencyIdentifier<T>): T;
 }

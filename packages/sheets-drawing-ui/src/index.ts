@@ -33,4 +33,5 @@ export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-draw
 export { InsertFloatImageOperation, InsertCellImageOperation } from './commands/operations/insert-image.operation';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 
+export { IMAGE_MENU_ID } from './views/menu/image.menu';
 // #endregion

@@ -17,22 +17,22 @@
 import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
+    FOCUSING_DOC,
     ICommandService,
+    IContextService,
     Inject,
     IUniverInstanceService,
 } from '@univerjs/core';
+import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, neoGetDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 
-interface ISetDocMutationParams {
-    unitId: string;
-}
-
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -42,10 +42,6 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
     ) {
         super();
 
-        this._init();
-    }
-
-    private _init() {
         this._initSkeletonListener();
         this._initCommandExecutedListener();
         this._initRenderRefresher();
@@ -65,7 +61,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
             }
 
             this.disposeWithMe(scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
-                if (!e.ctrlKey) {
+                if (!e.ctrlKey || !this._contextService.getContextValue(FOCUSING_DOC)) {
                     return;
                 }
 
@@ -115,18 +111,9 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         const updateCommandList = [SetDocZoomRatioOperation.id];
 
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (updateCommandList.includes(command.id)) {
-                const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-                if (!documentModel) return;
-
-                const params = command.params;
-                const { unitId } = params as ISetDocMutationParams;
-                if (!(unitId === documentModel.getUnitId())) {
-                    return;
-                }
-
+            if (updateCommandList.includes(command.id) && (command.params as ISetDocZoomRatioOperationParams).unitId === this._context.unitId) {
+                const documentModel = this._context.unit;
                 const zoomRatio = documentModel.zoomRatio || 1;
-
                 this.updateViewZoom(zoomRatio);
             }
         }));

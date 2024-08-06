@@ -35,6 +35,33 @@ import {
 } from './snapshot-utils';
 import type { ISnapshotServerService } from './snapshot-server.service';
 
+export async function generateTempDocumentSnapshot(
+    _context: ILogContext,
+    document: IDocumentData,
+    unitID: string,
+    rev: number
+) {
+    const documentMeta: IDocumentMeta = {
+        unitID: document.id,
+        rev,
+        creator: '',
+        name: document.title ?? '',
+        resources: document.resources || [],
+        originalMeta: encodeDocOriginalMeta(document),
+    };
+    const snapshot: ISnapshot = {
+        unitID,
+        rev: documentMeta.rev,
+        type: UniverType.UNIVER_DOC,
+        workbook: undefined,
+        doc: documentMeta,
+    };
+
+    return {
+        snapshot,
+    };
+}
+
 export async function generateTemporarySnap(
     context: ILogContext,
     workbook: IWorkbookData,
@@ -375,7 +402,7 @@ export async function getSheetBlocksFromSnapshot(snapshot: ISnapshot, snapshotSe
     const blocks: ISheetBlock[] = [];
     const promises: Promise<void>[] = [];
 
-    Object.entries(workbookMeta.blockMeta).forEach(([sheetID, blocksOfSheet]) => {
+    Object.entries(workbookMeta.blockMeta).forEach(([_, blocksOfSheet]) => {
         const blockPromises = blocksOfSheet.blocks.map(async (blockID) => {
             const params: IGetSheetBlockRequest = {
                 unitID: workbookMeta.unitID,

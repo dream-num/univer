@@ -35,7 +35,7 @@ import styles from './workbench.module.less';
 export interface IUniverWorkbenchProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
 
-    onRendered?: (container: HTMLElement) => void;
+    onRendered?: (containerElement: HTMLElement) => void;
 }
 
 export function DesktopWorkbench(props: IUniverWorkbenchProps) {

@@ -19,6 +19,7 @@ import {
     Direction,
     Disposable,
     ICommandService,
+    IContextService,
     Inject,
     Injector,
     RANGE_TYPE, toDisposable } from '@univerjs/core';
@@ -46,13 +47,16 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         private readonly _context: IRenderContext<Workbook>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IContextService private readonly _contextService: IContextService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService
     ) {
         super();
 
-        this._init();
+        this._initCommandListener();
+        this._initScrollEventListener();
+        this._initSkeletonListener();
     }
 
     scrollToRange(range: IRange): boolean {
@@ -75,26 +79,18 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         }
     }
 
-    private _init() {
-        this._initCommandListener();
-        this._initScrollEventListener();
-        this._initSkeletonListener();
-    }
-
     private _initCommandListener(): void {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command) => {
-                if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
-                    this._scrollToSelection();
-                } else if (command.id === ScrollToCellOperation.id) {
-                    const param = command.params as IRange;
-                    this.scrollToRange(param);
-                } else if (command.id === ExpandSelectionCommand.id) {
-                    const param = command.params as IExpandSelectionCommandParams;
-                    this._scrollToSelectionForExpand(param);
-                }
-            })
-        );
+        this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
+            if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
+                this._scrollToSelection();
+            } else if (command.id === ScrollToCellOperation.id) {
+                const param = command.params as IRange;
+                this.scrollToRange(param);
+            } else if (command.id === ExpandSelectionCommand.id) {
+                const param = command.params as IExpandSelectionCommandParams;
+                this._scrollToSelectionForExpand(param);
+            }
+        }));
     }
 
     private _scrollToSelectionForExpand(param: IExpandSelectionCommandParams) {

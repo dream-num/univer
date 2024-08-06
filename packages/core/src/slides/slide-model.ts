@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import type { Nullable } from '../shared';
-import { generateRandomId } from '../shared';
+import { generateRandomId, Tools } from '../shared';
 import { DEFAULT_SLIDE } from '../types/const';
 import type { ISlideData, ISlidePage } from '../types/interfaces';
 import { PageType } from '../types/interfaces';
@@ -42,6 +42,9 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
 
     readonly activePage$ = this._activePage$.asObservable();
 
+    private readonly _name$: BehaviorSubject<string>;
+    override name$: Observable<string>;
+
     private _snapshot: ISlideData;
 
     private _unitId: string;
@@ -50,6 +53,15 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         super();
 
         this._snapshot = { ...DEFAULT_SLIDE, ...snapshot };
+        this._unitId = this._snapshot.id ?? Tools.generateRandomId(6);
+
+        this._name$ = new BehaviorSubject(this._snapshot.title);
+        this.name$ = this._name$.asObservable();
+    }
+
+    override setName(name: string): void {
+        this._snapshot.title = name;
+        this._name$.next(name);
         this._unitId = this._snapshot.id ?? generateRandomId(6);
     }
 

@@ -30,7 +30,7 @@ import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
 
-// const IS_E2E: boolean = !!process.env.IS_E2E;
+const IS_E2E: boolean = !!process.env.IS_E2E;
 
 // package info
 // eslint-disable-next-line no-console
@@ -77,7 +77,9 @@ univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
-univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
+if (!IS_E2E) {
+    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
+}
 
 // use for console test
 declare global {

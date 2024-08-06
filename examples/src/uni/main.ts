@@ -15,20 +15,20 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
-import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { DocUIController, UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
-import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { SheetUIController, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniSheetsUIController } from '@univerjs/uni-sheets-ui';
 import { UniverUniUIPlugin } from '@univerjs/uniui';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { FUniver } from '@univerjs/facade';
-import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
@@ -40,15 +40,18 @@ import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
-
-import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
+import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
+import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
+import { UniverSlidesPlugin } from '@univerjs/slides';
+import { SlidesUIController, UniverSlidesUIPlugin } from '@univerjs/slides-ui';
+import { UniDocsUIController } from '@univerjs/uni-docs-ui';
+import { DEFAULT_DOCUMENT_DATA_CN, DEFAULT_DOCUMENT_DATA_EN, DEFAULT_SLIDE_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
 import { enUS } from '../locales';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
-const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
+const LOAD_LAZY_PLUGINS_TIMEOUT = 4_000;
 
 // univer
 const univer = new Univer({
@@ -60,36 +63,10 @@ const univer = new Univer({
     logLevel: LogLevel.VERBOSE,
 });
 
-univer.registerPlugin(UniverDocsPlugin, {
-    hasScroll: false,
-});
-univer.registerPlugin(UniverFormulaEnginePlugin, {
-    notExecuteFormula: true,
-});
-univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverUniUIPlugin, {
-    container: 'app',
-});
-
-univer.registerPlugin(UniverDrawingPlugin);
-
-univer.registerPlugin(UniverDocsUIPlugin);
-
-univer.registerPlugin(UniverSheetsPlugin);
-univer.registerPlugin(UniverSheetsUIPlugin);
-
-univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(UniverSheetsFormulaPlugin);
-univer.registerPlugin(UniverRPCMainThreadPlugin, {
-    workerURL: './worker.js',
-} as IUniverRPCMainThreadConfig);
-
-univer.registerPlugin(UniverSheetsFindReplacePlugin);
-univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
-// univer.registerPlugin(UniverSheetsDataValidationPlugin);
-univer.registerPlugin(UniverSheetsSortUIPlugin);
-
-univer.registerPlugin(UniverDocUniFormulaPlugin);
+registerBasicPlugins(univer);
+registerSheetPlugins(univer);
+registerSlidePlugins(univer);
+registerUniPlugins(univer);
 
 const mockUser = {
     userID: 'Owner_qxVnhPbQ',
@@ -121,19 +98,11 @@ class CustomMentionDataService implements IThreadCommentMentionDataService {
     }
 }
 
-univer.registerPlugin(UniverThreadCommentUIPlugin, {
-    overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
-});
-univer.registerPlugin(UniverSheetsThreadCommentPlugin);
-univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
-
-univer.registerPlugin(UniverSheetsDrawingUIPlugin);
-
-// create univer sheet instance
+// create univer instances
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
-    // univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
-    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
+    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_EN);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
 }
 
 // debugger plugin
@@ -151,8 +120,79 @@ setTimeout(() => {
     import('./lazy').then((lazy) => {
         const plugins = lazy.default();
         plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
+
+        univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
+        univer.createUnit(UniverInstanceType.UNIVER_SLIDE, DEFAULT_SLIDE_DATA);
     });
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;
 window.univerAPI = FUniver.newAPI(univer);
+
+function registerBasicPlugins(univer: Univer) {
+    univer.registerPlugin(UniverDocsPlugin, {
+        hasScroll: false,
+    });
+    univer.registerPlugin(UniverFormulaEnginePlugin, {
+        notExecuteFormula: true,
+    });
+    univer.registerPlugin(UniverRenderEnginePlugin);
+    univer.registerPlugin(UniverUniUIPlugin, {
+        container: 'app',
+    });
+
+    univer.registerPlugin(UniverDocsUIPlugin, {
+        override: [
+            [DocUIController, {
+                useFactory: (injector) => {
+                    injector.createInstance(UniDocsUIController, {});
+                }, deps: [Injector],
+            }],
+        ],
+    });
+
+    univer.registerPlugin(UniverRPCMainThreadPlugin, {
+        workerURL: './worker.js',
+    } as IUniverRPCMainThreadConfig);
+    univer.registerPlugin(UniverThreadCommentUIPlugin, {
+        overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
+    });
+
+    univer.registerPlugin(UniverDocsDrawingUIPlugin);
+}
+
+function registerSheetPlugins(univer: Univer) {
+    univer.registerPlugin(UniverSheetsPlugin);
+    univer.registerPlugin(UniverSheetsUIPlugin, {
+        override: [
+            [SheetUIController, {
+                useFactory: (injector) => {
+                    injector.createInstance(UniSheetsUIController, {});
+                }, deps: [Injector],
+            }],
+        ],
+    });
+    univer.registerPlugin(UniverSheetsNumfmtPlugin);
+    univer.registerPlugin(UniverSheetsFormulaPlugin);
+    univer.registerPlugin(UniverSheetsFindReplacePlugin);
+    univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
+    univer.registerPlugin(UniverSheetsSortUIPlugin);
+    univer.registerPlugin(UniverSheetsThreadCommentPlugin);
+    univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
+    univer.registerPlugin(UniverSheetsDrawingUIPlugin);
+}
+
+function registerSlidePlugins(univer: Univer) {
+    univer.registerPlugin(UniverSlidesPlugin);
+    univer.registerPlugin(UniverSlidesUIPlugin, {
+        override: [
+            [SlidesUIController, {
+                useClass: UniSlidesUIController,
+            }],
+        ],
+    });
+}
+
+function registerUniPlugins(univer: Univer) {
+    univer.registerPlugin(UniverDocUniFormulaPlugin);
+}

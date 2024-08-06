@@ -101,6 +101,7 @@
         "Ungroup",
         "unhine",
         "Uniscript",
+        "Uniui",
         "univer",
         "univerdoc",
         "univerjs",
@@ -169,5 +170,6 @@
         "toml",
         "less",
         "css"
-    ]
+    ],
+    "commentTranslate.multiLineMerge": true
 }

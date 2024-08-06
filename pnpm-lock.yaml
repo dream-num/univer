@@ -327,9 +327,21 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../packages/ui
+      '@univerjs/uni-docs-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-docs-ui
       '@univerjs/uni-formula':
         specifier: workspace:*
         version: link:../packages-experimental/uni-formula
+      '@univerjs/uni-formula-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-formula-ui
+      '@univerjs/uni-sheets-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-sheets-ui
+      '@univerjs/uni-slides-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-slides-ui
       '@univerjs/uniscript':
         specifier: workspace:*
         version: link:../packages/uniscript
@@ -389,6 +401,52 @@ importers:
         specifier: ^5.5.4
         version: 5.5.4
 
+  packages-experimental/uni-docs-ui:
+    dependencies:
+      '@univerjs/docs-drawing-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-drawing-ui
+      '@univerjs/icons':
+        specifier: ^0.1.72
+        version: 0.1.72(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@univerjs/uniui':
+        specifier: workspace:*
+        version: link:../uniui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.5.4
+        version: 5.5.4
+      vite:
+        specifier: ^5.3.5
+        version: 5.3.5(@types/node@22.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.1.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+
   packages-experimental/uni-formula:
     dependencies:
       '@univerjs/icons':
@@ -436,16 +494,151 @@ importers:
         version: 2.0.5(@types/node@22.1.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages-experimental/uni-formula-ui:
+    dependencies:
+      react:
+        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        version: 18.3.1
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
+      '@univerjs/icons':
+        specifier: ^0.1.72
+        version: 0.1.72(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../../packages/sheets-formula
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@univerjs/uni-formula':
         specifier: workspace:*
         version: link:../uni-formula
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.5.4
+        version: 5.5.4
+      vite:
+        specifier: ^5.3.5
+        version: 5.3.5(@types/node@22.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.1.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+
+  packages-experimental/uni-sheets-ui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.72
+        version: 0.1.72(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-drawing-ui
+      react:
+        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        version: 18.3.1
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../packages/sheets
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@univerjs/uniui':
+        specifier: workspace:*
+        version: link:../uniui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.5.3
+        version: 5.5.4
+      vite:
+        specifier: ^5.3.4
+        version: 5.3.5(@types/node@22.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^2.0.3
+        version: 2.0.5(@types/node@22.1.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+
+  packages-experimental/uni-slides-ui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.72
+        version: 0.1.72(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../packages/engine-render
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/slides':
+        specifier: workspace:*
+        version: link:../../packages/slides
+      '@univerjs/slides-ui':
+        specifier: workspace:*
+        version: link:../../packages/slides-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@univerjs/uniui':
+        specifier: workspace:*
+        version: link:../uniui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -461,9 +654,21 @@ importers:
 
   packages-experimental/uniui:
     dependencies:
+      '@floating-ui/react-dom':
+        specifier: ^2.1.1
+        version: 2.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
       '@univerjs/icons':
         specifier: ^0.1.72
         version: 0.1.72(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../packages/sheets
+      '@xyflow/react':
+        specifier: ^12.0.4
+        version: 12.0.4(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util:
         specifier: ^5.43.0
         version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -480,12 +685,18 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../../packages/design
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../../packages/docs-ui
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -767,10 +978,6 @@ importers:
         version: 2.0.5(@types/node@22.1.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/docs-drawing:
-    dependencies:
-      rxjs:
-        specifier: '>=7.0.0'
-        version: 7.8.1
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1442,6 +1649,9 @@ importers:
       '@univerjs/protocol':
         specifier: 0.1.38
         version: 0.1.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: 'link:'
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1487,8 +1697,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons-svg':
-        specifier: ^0.1.70
-        version: 0.1.70
+        specifier: ^0.1.72
+        version: 0.1.72
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1560,8 +1770,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons-svg':
-        specifier: ^0.1.70
-        version: 0.1.70
+        specifier: ^0.1.72
+        version: 0.1.72
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -2388,10 +2598,6 @@ importers:
         version: 2.0.5(@types/node@22.1.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/slides:
-    dependencies:
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2417,9 +2623,6 @@ importers:
 
   packages/slides-ui:
     dependencies:
-      '@univerjs/docs-ui':
-        specifier: workspace:*
-        version: link:../docs-ui
       '@univerjs/icons':
         specifier: ^0.1.72
         version: 0.1.72(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4134,6 +4337,12 @@ packages:
   '@floating-ui/dom@1.6.7':
     resolution: {integrity: sha512-wmVfPG5o2xnKDU4jx/m4w5qva9FWHcnZ8BvzEe90D/RpwsJaTAVYPEPdQ8sbr/N8zZTAHlZUTQdqg8ZUbzHmng==}
 
+  '@floating-ui/react-dom@2.1.1':
+    resolution: {integrity: sha512-4h84MJt3CHrtG18mGsXuLCHMrug49d7DFkU0RMIyshRveBeyV2hmV/pDaF2Uxtu8kgq5r46llp5E5FQiR0K2Yg==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
   '@floating-ui/utils@0.2.4':
     resolution: {integrity: sha512-dWO2pw8hhi+WrXq1YJy2yCuWoL20PddgGaqTgVe4cOS9Q6qklXCiA1tJEqX6BEwRNSCP84/afac9hd4MS+zEUA==}
 
@@ -5107,6 +5316,24 @@ packages:
   '@types/cross-spawn@6.0.6':
     resolution: {integrity: sha512-fXRhhUkG4H3TQk5dBhQ7m/JDdSNHKwR2BBia62lhwEIq9xGiQKLxd6LymNhn47SjXhsUEPmxi+PKw2OkW4LLjA==}
 
+  '@types/d3-color@3.1.3':
+    resolution: {integrity: sha512-iO90scth9WAbmgv7ogoq57O9YpKmFBbmoEoCHDB2xMBY0+/KVrqAaCDyCE16dUspeOvIxFFRI+0sEtqDqy2b4A==}
+
+  '@types/d3-drag@3.0.7':
+    resolution: {integrity: sha512-HE3jVKlzU9AaMazNufooRJ5ZpWmLIoc90A37WU2JMmeq28w1FQqCZswHZ3xR+SuxYftzHq6WU6KJHvqxKzTxxQ==}
+
+  '@types/d3-interpolate@3.0.4':
+    resolution: {integrity: sha512-mgLPETlrpVV1YRJIglr4Ez47g7Yxjl1lj7YKsiMCb27VJH9W8NVM6Bb9d8kkpG/uAQS5AmbA48q2IAolKKo1MA==}
+
+  '@types/d3-selection@3.0.10':
+    resolution: {integrity: sha512-cuHoUgS/V3hLdjJOLTT691+G2QoqAjCVLmr4kJXR4ha56w1Zdu8UUQ5TxLRqudgNjwXeQxKMq4j+lyf9sWuslg==}
+
+  '@types/d3-transition@3.0.8':
+    resolution: {integrity: sha512-ew63aJfQ/ms7QQ4X7pk5NxQ9fZH/z+i24ZfJ6tJSfqxJMrYLiK01EAs2/Rtw/JreGUsS3pLPNV644qXFGnoZNQ==}
+
+  '@types/d3-zoom@3.0.8':
+    resolution: {integrity: sha512-iqMC4/YlFCSlO8+2Ii1GGGliCAY4XdeG748w5vQUbevlbDu0zSjH/+jojorQVBK/se0j6DUFNPBGSqD3YWYnDw==}
+
   '@types/doctrine@0.0.3':
     resolution: {integrity: sha512-w5jZ0ee+HaPOaX25X2/2oGR/7rgAQSYII7X7pp0m9KgBfMP7uKfMfTvcpl5Dj+eDBbpxKGiqE+flqDr6XTd2RA==}
 
@@ -5393,8 +5620,8 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@univerjs/icons-svg@0.1.70':
-    resolution: {integrity: sha512-cy/Op8BQ8C4+K1kZdeHx+yfCAZ2qqYT6cMPy6Gosz1s6uBwDPsQa3HzZreOQh48Ew80I8XvrSMg61wL4K+6Ckg==}
+  '@univerjs/icons-svg@0.1.72':
+    resolution: {integrity: sha512-/gdfACMJo6mXfY72SiLqvA+oxl4eK2pIw2JU+yX6srK4zg7X8j2sxAvfzy+FNdmPIDqjhlk+lzB+xdWaRWz71w==}
 
   '@univerjs/icons@0.1.72':
     resolution: {integrity: sha512-LfBM6v7YJhwGgEZtG7m9589Y4k6zmkshdm+166LTRbBlMBZ6Jl7hcmm9rQwT3jOt97rDma5xmnFbs+83hCD8Yw==}
@@ -5562,6 +5789,15 @@ packages:
 
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
+
+  '@xyflow/react@12.0.4':
+    resolution: {integrity: sha512-eeQzw1gIbLKOB55rp2+20uB1PASDUf1q6zy2VsgugnuPEcL/olVMX3WT42XxyG8m3rcbUiHlq2NSmPTFWEjiUQ==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+
+  '@xyflow/system@0.0.37':
+    resolution: {integrity: sha512-hSIhezhxgftPUpC+xiQVIorcRILZUOWlLjpYPTyGWRu8s4RJvM4GqvrsFmD5OnMKXLgpU7/PqqUibDVO67oWQQ==}
 
   '@yarnpkg/fslib@2.10.3':
     resolution: {integrity: sha512-41H+Ga78xT9sHvWLlFOZLIhtU6mTGZ20pZ29EiZa97vnxdohJD2AF42rCoAoWfqUz486xY6fhjMH+DYEM9r14A==}
@@ -6036,6 +6272,9 @@ packages:
   class-validator@0.14.1:
     resolution: {integrity: sha512-2VEG9JICxIqTpoK1eMzZqaV+u/EiwEJkMGzTrZf6sU/fwsnOITVgYJ8yojSy6CaXtO9V0Cc6ZQZ8h8m4UBuLwQ==}
 
+  classcat@5.0.5:
+    resolution: {integrity: sha512-JhZUT7JFcQy/EzW605k/ktHtncoo9vnyW/2GspNYwFlN1C/WmjuV/xtS04e9SOkL2sTdw0VAZ2UGCcQ9lR6p6w==}
+
   classnames@2.5.1:
     resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
 
@@ -6372,6 +6611,44 @@ packages:
 
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
+
+  d3-color@3.1.0:
+    resolution: {integrity: sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==}
+    engines: {node: '>=12'}
+
+  d3-dispatch@3.0.1:
+    resolution: {integrity: sha512-rzUyPU/S7rwUflMyLc1ETDeBj0NRuHKKAcvukozwhshr6g6c5d8zh4c2gQjY2bZ0dXeGLWc1PF174P2tVvKhfg==}
+    engines: {node: '>=12'}
+
+  d3-drag@3.0.0:
+    resolution: {integrity: sha512-pWbUJLdETVA8lQNJecMxoXfH6x+mO2UQo8rSmZ+QqxcbyA3hfeprFgIT//HW2nlHChWeIIMwS2Fq+gEARkhTkg==}
+    engines: {node: '>=12'}
+
+  d3-ease@3.0.1:
+    resolution: {integrity: sha512-wR/XK3D3XcLIZwpbvQwQ5fK+8Ykds1ip7A2Txe0yxncXSdq1L9skcG7blcedkOX+ZcgxGAmLX1FrRGbADwzi0w==}
+    engines: {node: '>=12'}
+
+  d3-interpolate@3.0.1:
+    resolution: {integrity: sha512-3bYs1rOD33uo8aqJfKP3JWPAibgw8Zm2+L9vBKEHJ2Rg+viTR7o5Mmv5mZcieN+FRYaAOWX5SJATX6k1PWz72g==}
+    engines: {node: '>=12'}
+
+  d3-selection@3.0.0:
+    resolution: {integrity: sha512-fmTRWbNMmsmWq6xJV8D19U/gw/bwrHfNXxrIN+HfZgnzqTHp9jOmKMhsTUjXOJnZOdZY9Q28y4yebKzqDKlxlQ==}
+    engines: {node: '>=12'}
+
+  d3-timer@3.0.1:
+    resolution: {integrity: sha512-ndfJ/JxxMd3nw31uyKoY2naivF+r29V+Lc0svZxe1JvvIRmi8hUsrMvdOwgS1o6uBHmiz91geQ0ylPP0aj1VUA==}
+    engines: {node: '>=12'}
+
+  d3-transition@3.0.1:
+    resolution: {integrity: sha512-ApKvfjsSR6tg06xrL434C0WydLr7JewBB3V+/39RMHsaXTOG0zmt/OAXeng5M5LBm0ojmxJrpomQVZ1aPvBL4w==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      d3-selection: 2 - 3
+
+  d3-zoom@3.0.0:
+    resolution: {integrity: sha512-b8AmV3kfQaqWAuacbPuNbL6vahnOJflOhexLzMMNLga62+/nh0JzvJ0aO/5a5MVgUFGS7Hu1P9P03o3fJkDCyw==}
+    engines: {node: '>=12'}
 
   dargs@8.1.0:
     resolution: {integrity: sha512-wAV9QHOsNbwnWdNW2FYvE1P56wtgSbM+3SZcdGiWQILwVjACCXDCI3Ai8QlCjMDB8YK5zySiXZYBiwGmNY3lnw==}
@@ -10496,6 +10773,11 @@ packages:
   url@0.11.3:
     resolution: {integrity: sha512-6hxOLGfZASQK/cijlZnZJTq8OXAkt/3YGfQX45vvMYXpZoo8NdWZcY73K108Jf759lS1Bv/8wXnHDTSz17dSRw==}
 
+  use-sync-external-store@1.2.0:
+    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
@@ -10837,6 +11119,21 @@ packages:
     resolution: {integrity: sha512-D7eujBWkLa3p2sIpJA0d1pr7es+a7m0vFAnZLlCEKq/Ij2k0MLi9Br2UPxoxdYystm5K1yeBGzub0FlYUEWj2Q==}
     engines: {node: '>=8.0.0'}
     hasBin: true
+
+  zustand@4.5.4:
+    resolution: {integrity: sha512-/BPMyLKJPtFEvVL0E9E9BTUM63MNyhPGlvxk1XjrfWTUlV+BR8jufjsovHzrtR6YNcBEcL7cMHovL1n9xHawEg==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      '@types/react': '>=16.8'
+      immer: '>=9.0.6'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
 
 snapshots:
 
@@ -12277,6 +12574,12 @@ snapshots:
       '@floating-ui/core': 1.6.4
       '@floating-ui/utils': 0.2.4
 
+  '@floating-ui/react-dom@2.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@floating-ui/dom': 1.6.7
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
   '@floating-ui/utils@0.2.4': {}
 
   '@grpc/grpc-js@1.10.9':
@@ -13483,6 +13786,27 @@ snapshots:
     dependencies:
       '@types/node': 22.1.0
 
+  '@types/d3-color@3.1.3': {}
+
+  '@types/d3-drag@3.0.7':
+    dependencies:
+      '@types/d3-selection': 3.0.10
+
+  '@types/d3-interpolate@3.0.4':
+    dependencies:
+      '@types/d3-color': 3.1.3
+
+  '@types/d3-selection@3.0.10': {}
+
+  '@types/d3-transition@3.0.8':
+    dependencies:
+      '@types/d3-selection': 3.0.10
+
+  '@types/d3-zoom@3.0.8':
+    dependencies:
+      '@types/d3-interpolate': 3.0.4
+      '@types/d3-selection': 3.0.10
+
   '@types/doctrine@0.0.3': {}
 
   '@types/doctrine@0.0.9': {}
@@ -13823,7 +14147,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@univerjs/icons-svg@0.1.70': {}
+  '@univerjs/icons-svg@0.1.72': {}
 
   '@univerjs/icons@0.1.72(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -14094,6 +14418,27 @@ snapshots:
   '@xtuc/ieee754@1.2.0': {}
 
   '@xtuc/long@4.2.2': {}
+
+  '@xyflow/react@12.0.4(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@xyflow/system': 0.0.37
+      classcat: 5.0.5
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      zustand: 4.5.4(@types/react@18.3.3)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+
+  '@xyflow/system@0.0.37':
+    dependencies:
+      '@types/d3-drag': 3.0.7
+      '@types/d3-selection': 3.0.10
+      '@types/d3-transition': 3.0.8
+      '@types/d3-zoom': 3.0.8
+      d3-drag: 3.0.0
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
 
   '@yarnpkg/fslib@2.10.3':
     dependencies:
@@ -14604,6 +14949,8 @@ snapshots:
       libphonenumber-js: 1.11.3
       validator: 13.12.0
 
+  classcat@5.0.5: {}
+
   classnames@2.5.1: {}
 
   clean-css@5.3.3:
@@ -14942,6 +15289,42 @@ snapshots:
       rrweb-cssom: 0.6.0
 
   csstype@3.1.3: {}
+
+  d3-color@3.1.0: {}
+
+  d3-dispatch@3.0.1: {}
+
+  d3-drag@3.0.0:
+    dependencies:
+      d3-dispatch: 3.0.1
+      d3-selection: 3.0.0
+
+  d3-ease@3.0.1: {}
+
+  d3-interpolate@3.0.1:
+    dependencies:
+      d3-color: 3.1.0
+
+  d3-selection@3.0.0: {}
+
+  d3-timer@3.0.1: {}
+
+  d3-transition@3.0.1(d3-selection@3.0.0):
+    dependencies:
+      d3-color: 3.1.0
+      d3-dispatch: 3.0.1
+      d3-ease: 3.0.1
+      d3-interpolate: 3.0.1
+      d3-selection: 3.0.0
+      d3-timer: 3.0.1
+
+  d3-zoom@3.0.0:
+    dependencies:
+      d3-dispatch: 3.0.1
+      d3-drag: 3.0.0
+      d3-interpolate: 3.0.1
+      d3-selection: 3.0.0
+      d3-transition: 3.0.1(d3-selection@3.0.0)
 
   dargs@8.1.0: {}
 
@@ -19606,6 +19989,10 @@ snapshots:
       punycode: 1.4.1
       qs: 6.12.1
 
+  use-sync-external-store@1.2.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+
   util-deprecate@1.0.2: {}
 
   util@0.12.5:
@@ -19999,3 +20386,10 @@ snapshots:
       validator: 13.12.0
     optionalDependencies:
       commander: 9.5.0
+
+  zustand@4.5.4(@types/react@18.3.3)(react@18.3.1):
+    dependencies:
+      use-sync-external-store: 1.2.0(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.3
+      react: 18.3.1

@@ -50,9 +50,7 @@ export const UpdateDocUniFormulaMutation: IMutation<IUpdateDocUniFormulaMutation
         const { unitId, f, rangeId: id } = params;
         const uniFormulaService = accessor.get(UniFormulaService);
 
-        if (!uniFormulaService.hasFocFormula(unitId, id)) {
-            return false;
-        }
+        if (!uniFormulaService.hasFocFormula(unitId, id)) return false;
 
         uniFormulaService.unregisterDocFormula(unitId, id);
         uniFormulaService.registerDocFormula(unitId, id, f);

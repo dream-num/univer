@@ -74,10 +74,10 @@ export class ArrayFormulaDisplayController extends Disposable {
 
                     // The cell in the upper left corner of the array formula also triggers the default value determination
                     if (cellData.v == null && cellData.t == null) {
-                        return next({ ...cell,
-                                      ...cellData,
-                                      v: 0, // Default value for empty cell
-                                      t: CellValueType.NUMBER,
+                        return next({
+                            ...cell,
+                            v: 0, // Default value for empty cell
+                            t: CellValueType.NUMBER,
                         });
                     }
 
@@ -85,12 +85,15 @@ export class ArrayFormulaDisplayController extends Disposable {
                     if (cell?.t === CellValueType.NUMBER && typeof cell?.v === 'number') {
                         return next({
                             ...cell,
-                            ...cellData,
                             v: stripErrorMargin(cell.v),
                         });
                     }
 
-                    return next({ ...cell, ...cellData });
+                    return next({
+                        ...cell,
+                        v: cellData.v,
+                        t: cellData.t,
+                    });
                 },
             })
         );

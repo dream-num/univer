@@ -32,9 +32,9 @@ import {
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_FORMULA_EDITOR,
     FOCUSING_SHEET,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
+    FORMULA_EDITOR_ACTIVATED,
     HorizontalAlign,
     ICommandService,
     IContextService,
@@ -660,7 +660,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
      */
     private _initialKeyboardListener(d: DisposableCollection) {
         d.add(this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
-            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+            const isFocusFormulaEditor = this._contextService.getContextValue(FORMULA_EDITOR_ACTIVATED);
             const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
 
             // TODO@Jocs: should get editor instead of current doc
@@ -703,7 +703,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
                  * but move the cursor within the editor instead.
                  */
                 if (keycode != null &&
-                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
+                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FORMULA_EDITOR_ACTIVATED))
                 ) {
                     this._moveInEditor(keycode, isShift);
                     return;
@@ -773,7 +773,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(EDITOR_ACTIVATED, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
-        this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
+        this._contextService.setContextValue(FORMULA_EDITOR_ACTIVATED, false);
 
         this._cellEditorManagerService.setState({
             show: param.visible,

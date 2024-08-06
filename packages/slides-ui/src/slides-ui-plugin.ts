@@ -54,6 +54,12 @@ export class UniverSlidesUIPlugin extends Plugin {
 
     override onReady(): void {
         ([
+            [SlidesUIController, {
+                useFactory: () => this._injector.createInstance(SlidesUIController, this._config),
+            }]] as Dependency[]
+        ).forEach((d) => this._injector.add(d));
+
+        ([
             // cannot register in _renderManagerService now.
             // [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
             // // used by SlideUIController --> EditorContainer
@@ -62,12 +68,7 @@ export class UniverSlidesUIPlugin extends Plugin {
             // This controller should be registered in Ready stage.
             // this controller would add a new RenderUnit (__INTERNAL_EDITOR__DOCS_NORMAL)
             // so this new RenderUnit does not have ISlideEditorBridgeService & ISlideEditorManagerService if editorservice were create in renderManagerService
-            [
-                SlidesUIController,
-                {
-                    useFactory: () => this._injector.createInstance(SlidesUIController, this._config),
-                },
-            ],
+
             [SlideRenderController],
             [SlidePopupMenuController],
         ] as Dependency[]).forEach((m) => {

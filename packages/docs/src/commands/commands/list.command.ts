@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IListData, IMutationInfo, IParagraph, ISectionBreak } from '@univerjs/core';
+import type { ICommand, IListData, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
 import {
     CommandType,
     GridType,
@@ -627,6 +627,127 @@ export const OrderListCommand: ICommand<IOrderListCommandParams> = {
         return commandService.syncExecuteCommand(ListOperationCommand.id, {
             listType: PresetListType.ORDER_LIST,
         });
+    },
+};
+
+interface IQuickListCommandParams {
+    listType: PresetListType;
+    paragraph: IParagraphRange;
+}
+
+export const QuickListCommand: ICommand<IQuickListCommandParams> = {
+    id: 'doc.command.quick-list',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const selections = textSelectionManagerService.getCurrentSelections();
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const activeRange = textSelectionManagerService.getActiveRange();
+        if (docDataModel == null || activeRange == null || !selections) {
+            return false;
+        }
+
+        const { segmentId } = activeRange;
+        const { listType, paragraph } = params;
+        const { paragraphStart, paragraphEnd } = paragraph;
+        // const selection =
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+        const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
+        const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
+        const { startIndex, paragraphStyle = {} } = paragraph;
+        const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
+        const paragraphProperties = PRESET_LIST_TYPE[listType].nestingLevel[0].paragraphProperties || {};
+        const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
+        const bulletParagraphTextStyle = paragraphProperties.textStyle;
+        const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
+        const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+
+        const ID_LENGTH = 6;
+        let listId = Tools.generateRandomId(ID_LENGTH);
+        const paragraphs = docDataModel.getBody()?.paragraphs ?? [];
+
+        const curIndex = paragraphs.findIndex((i) => i.startIndex === paragraph.startIndex);
+        const prevParagraph = paragraphs[curIndex - 1];
+        const nextParagraph = paragraphs[curIndex + 1];
+
+        if (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listType.indexOf(listType) === 0) {
+            listId = prevParagraph.bullet.listId;
+        } else if (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listType.indexOf(listType) === 0) {
+            listId = nextParagraph.bullet.listId;
+        }
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId: docDataModel.getUnitId(),
+                actions: [],
+                textRanges: [{
+                    startOffset: paragraphStart,
+                    endOffset: paragraphStart,
+                    collapsed: true,
+                }],
+            },
+        };
+
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: paragraphStart,
+        });
+
+        textX.push({
+            t: TextXActionType.DELETE,
+            len: paragraphEnd - paragraphStart,
+            line: 1,
+        });
+
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: 1,
+            body: {
+                dataStream: '',
+                paragraphs: [
+                    {
+                        startIndex: 0,
+                        paragraphStyle: {
+                            ...paragraphStyle,
+                            textStyle: {
+                                ...paragraphStyle.textStyle,
+                                ...bulletParagraphTextStyle,
+                            },
+                            indentFirstLine: undefined,
+                            hanging: listHanging,
+                            indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
+                        },
+                        bullet: {
+                            ...(paragraph.bullet ?? {
+                                nestingLevel: 0,
+                                textStyle: {
+                                    fs: 20,
+                                },
+                            }),
+                            listType,
+                            listId,
+                        },
+                    },
+                ],
+            },
+        });
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
     },
 };
 

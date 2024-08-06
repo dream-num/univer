@@ -41,7 +41,7 @@ import {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
-import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, CheckListCommand, ListOperationCommand, OrderListCommand, ToggleCheckListCommand } from './commands/commands/list.command';
+import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, CheckListCommand, ListOperationCommand, OrderListCommand, QuickListCommand, ToggleCheckListCommand } from './commands/commands/list.command';
 import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
@@ -60,7 +60,7 @@ import { DocCustomRangeService } from './services/doc-custom-range.service';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
-import { EnterCommand, SpaceCommand, TabCommand } from './commands/commands/auto-format.command';
+import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -125,12 +125,13 @@ export class UniverDocsPlugin extends Plugin {
                 AlignJustifyCommand,
                 DocsRenameMutation,
                 TabCommand,
-                SpaceCommand,
+                AfterSpaceCommand,
                 EnterCommand,
                 ChangeListNestingLevelCommand,
                 ChangeListTypeCommand,
                 CheckListCommand,
                 ToggleCheckListCommand,
+                QuickListCommand,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);

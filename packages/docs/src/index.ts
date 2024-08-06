@@ -66,6 +66,7 @@ export {
     ChangeListTypeCommand,
     CheckListCommand,
     ToggleCheckListCommand,
+    QuickListCommand,
 } from './commands/commands/list.command';
 export {
     AlignOperationCommand,
@@ -76,7 +77,7 @@ export {
 } from './commands/commands/paragraph-align.command';
 export { ReplaceContentCommand, CoverContentCommand } from './commands/commands/replace-content.command';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
-export { SpaceCommand, TabCommand, EnterCommand, type ITabCommandParams } from './commands/commands/auto-format.command';
+export { AfterSpaceCommand, TabCommand, EnterCommand, type ITabCommandParams } from './commands/commands/auto-format.command';
 export {
     RichTextEditingMutation,
     type IRichTextEditingMutationParams,

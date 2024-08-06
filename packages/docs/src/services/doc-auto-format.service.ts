@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, ICustomRange, IDisposable, IParagraph, IParagrapRange, ITextRange, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, ICustomRange, IDisposable, IParagraph, IParagraphRange, ITextRange, Nullable } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { getCustomRangesIntesetsWithRange } from '../basics/custom-range';
 import { TextSelectionManagerService } from './text-selection-manager.service';
@@ -29,7 +29,7 @@ export interface IAutoFormatContext {
     /**
      * selection relative paragraphs
      */
-    paragraphs: IParagrapRange[];
+    paragraphs: IParagraphRange[];
     /**
      * selection relative custom ranges
      */
@@ -48,7 +48,7 @@ export interface IAutoFormat {
 
 function getParagraphsInRange(activeRange: ITextRange, paragraphs: IParagraph[]) {
     const { startOffset, endOffset } = activeRange;
-    const results: IParagrapRange[] = [];
+    const results: IParagraphRange[] = [];
 
     let start = -1;
 

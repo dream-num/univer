@@ -70,7 +70,7 @@ const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
                 if (tables && tables.length) {
                     if (tables.some((table) => {
                         const { startIndex, endIndex } = table;
-                        return (startOffset >= startIndex && startOffset <= endIndex) || (endOffset >= startIndex && endOffset <= endIndex);
+                        return (startOffset > startIndex && startOffset < endIndex) || (endOffset > startIndex && endOffset < endIndex);
                     })) {
                         subscriber.next(false);
                         return;

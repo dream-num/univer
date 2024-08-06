@@ -57,6 +57,6 @@ export { getOneTextSelectionRange } from './components/docs/text-selection/conve
 export { getLastLine } from './components/docs/layout/tools';
 export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tree-node';
 export type { IDocRange } from './components/docs/text-selection/range-interface';
-export { isInSameTableCell } from './components/docs/text-selection/convert-rect-range';
+export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './components/docs/text-selection/convert-rect-range';
 export { parseDataStreamToTree } from './components/docs/view-model/document-view-model';
 export { DOC_RANGE_TYPE } from './components/docs/text-selection/range-interface';

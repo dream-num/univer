@@ -34,7 +34,7 @@ export class DocHoverRenderController extends Disposable implements IRenderModul
     private _initPointerDown() {
         this.disposeWithMe(
             fromEventSubject(this._context.scene.onPointerMove$)
-                .pipe(debounceTime(200))
+                .pipe(debounceTime(100))
                 .subscribe((evt) => {
                     this._docHoverManagerService.onMouseMove(evt);
                 })

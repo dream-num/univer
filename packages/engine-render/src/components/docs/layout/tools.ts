@@ -826,8 +826,14 @@ export function getFontCreateConfig(
         return cache;
     }
 
-    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
-    textStyle = { ...documentTextStyle, ...textStyle, ...customDecorationStyle, ...customRangeStyle };
+    const { snapToGrid = BooleanNumber.TRUE, textStyle: paragraphStyleTextStyle } = paragraphStyle;
+    textStyle = {
+        ...documentTextStyle,
+        ...textStyle,
+        ...customDecorationStyle,
+        ...customRangeStyle,
+        ...paragraphStyleTextStyle,
+    };
 
     const fontStyle = getFontStyleString(textStyle, localeService);
 
@@ -848,6 +854,7 @@ export function getFontCreateConfig(
     };
 
     if (!hasAddonStyle) {
+        // TODO: cache should more precisely, take custom-range, custom-decroation, paragraphStyle into considering.
         fontCreateConfigCache.setValue(st, ed, result);
     }
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, LifecycleStages, OnLifecycle, QuickListTypeMap } from '@univerjs/core';
 import type { ITabCommandParams } from '@univerjs/docs';
-import { BreakLineCommand, ChangeListNestingLevelCommand, ChangeListNestingLevelType, DocAutoFormatService, EnterCommand, ListOperationCommand, TabCommand } from '@univerjs/docs';
+import { AfterSpaceCommand, BreakLineCommand, ChangeListNestingLevelCommand, ChangeListNestingLevelType, DocAutoFormatService, EnterCommand, ListOperationCommand, QuickListCommand, TabCommand } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 
 @OnLifecycle(LifecycleStages.Rendered, DocAutoFormatController)
@@ -26,12 +26,13 @@ export class DocAutoFormatController extends Disposable {
     ) {
         super();
 
-        this._initListAutoFormat();
+        this._initListTabAutoFormat();
+        this._initListSpaceAutoFormat();
         this._initDefaultEnterFormat();
         this._initExitListAutoFormat();
     }
 
-    private _initListAutoFormat() {
+    private _initListTabAutoFormat() {
         this.disposeWithMe(
             this._docAutoFormatService.registerAutoFormat({
                 id: TabCommand.id,
@@ -55,6 +56,43 @@ export class DocAutoFormatController extends Disposable {
                             type: params?.shift ? ChangeListNestingLevelType.decrease : ChangeListNestingLevelType.increase,
                         },
                     }];
+                },
+            })
+        );
+    }
+
+    private _initListSpaceAutoFormat() {
+        this.disposeWithMe(
+            this._docAutoFormatService.registerAutoFormat({
+                id: AfterSpaceCommand.id,
+                match: (context) => {
+                    const { selection, paragraphs, unit } = context;
+                    if (!selection.collapsed) {
+                        return false;
+                    }
+                    if (paragraphs.length !== 1) {
+                        return false;
+                    }
+                    const text = unit.getBody()?.dataStream.slice(paragraphs[0].paragraphStart, paragraphs[0].paragraphEnd - 1);
+                    if (text && Object.keys(QuickListTypeMap).includes(text)) {
+                        return true;
+                    }
+                    return false;
+                },
+                getMutations(context) {
+                    const { paragraphs, unit } = context;
+                    const text = unit.getBody()?.dataStream.slice(paragraphs[0].paragraphStart, paragraphs[0].paragraphEnd - 1);
+                    if (text && Object.keys(QuickListTypeMap).includes(text)) {
+                        const type = QuickListTypeMap[text as keyof typeof QuickListTypeMap];
+                        return [{
+                            id: QuickListCommand.id,
+                            params: {
+                                listType: type,
+                                paragraph: paragraphs[0],
+                            },
+                        }];
+                    }
+                    return [];
                 },
             })
         );

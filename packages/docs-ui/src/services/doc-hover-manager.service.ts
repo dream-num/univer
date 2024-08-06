@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IParagraph, Nullable } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { Documents, IMouseEvent, IPointerEvent, Viewport } from '@univerjs/engine-render';
-import { IRenderManagerService, PageLayoutType, Vector2 } from '@univerjs/engine-render';
-import { BehaviorSubject } from 'rxjs';
+import { getParagraphByGlyph, IRenderManagerService, PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import { Subject } from 'rxjs';
 
+// TODO: this service need to be remove, calc cost to much time
 export class DocHoverManagerService extends Disposable {
-    private readonly _activeCustomRanges$ = new BehaviorSubject<ICustomRange[]>([]);
+    private readonly _activeCustomRanges$ = new Subject<ICustomRange[]>();
     readonly activeCustomRanges$ = this._activeCustomRanges$.asObservable();
 
-    private readonly _activeIndex$ = new BehaviorSubject<Nullable<number>>(null);
+    private readonly _activeIndex$ = new Subject<Nullable<number>>();
     readonly activeIndex$ = this._activeIndex$.asObservable();
+
+    private readonly _bullet$ = new Subject<Nullable<IParagraph>>();
+    readonly bullet$ = this._bullet$.asObservable();
 
     private _scrolling = false;
 
@@ -86,23 +90,29 @@ export class DocHoverManagerService extends Disposable {
         if (node && node.node) {
             const left = node.node.left + pageMarginLeft;
             const right = node.node.left + node.node.width + pageMarginLeft;
-            if (coord.x < left || coord.x > right) {
+            let index = node.node.parent!.st! + node.node.parent!.glyphGroup.indexOf(node.node)!;
+            const paragraph = getParagraphByGlyph(node.node, document.getBody());
+            if (paragraph && paragraph.bullet && index === paragraph.paragraphStart) {
+                this._bullet$.next(paragraph);
                 this._activeIndex$.next(null);
                 this._activeCustomRanges$.next([]);
                 return;
             }
 
-            const index = node.node.parent!.st! + node.node.parent!.glyphGroup.indexOf(node.node)!;
-            if (index !== this._activeIndex$.value) {
-                this._activeIndex$.next(index);
-            }
-
-            const ranges = document.getCustomRanges()?.filter((range) => range.startIndex <= index && range.endIndex >= index) ?? [];
-            const currentRanges = this._activeCustomRanges$.value;
-            if (currentRanges.length === ranges.length && currentRanges.every((range, i) => range.rangeId === ranges[i].rangeId)) {
+            if (coord.x < left || coord.x > right) {
+                this._activeIndex$.next(null);
+                this._activeCustomRanges$.next([]);
+                this._bullet$.next(null);
                 return;
             }
 
+            if (paragraph && paragraph.bullet) {
+                index = index - 1;
+            }
+
+            this._bullet$.next(null);
+            this._activeIndex$.next(index);
+            const ranges = document.getCustomRanges()?.filter((range) => range.startIndex <= index && range.endIndex >= index) ?? [];
             this._activeCustomRanges$.next(ranges);
         }
     }

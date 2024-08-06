@@ -19,6 +19,7 @@ import type { IMenuItemFactory } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { TodoList } from '@univerjs/icons';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
@@ -53,6 +54,7 @@ import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
+    CheckListMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
     HeaderFooterMenuItemFactory,
@@ -95,6 +97,8 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
         this.disposeWithMe(componentManager.register(BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker));
         this.disposeWithMe(componentManager.register(ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker));
+
+        this.disposeWithMe(componentManager.register('TodoList', TodoList));
     }
 
     private _initUiParts() {
@@ -128,6 +132,7 @@ export class DocUIController extends Disposable {
                 AlignJustifyMenuItemFactory,
                 OrderListMenuItemFactory,
                 BulletListMenuItemFactory,
+                CheckListMenuItemFactory,
                 ResetBackgroundColorMenuItemFactory,
                 BackgroundColorSelectorMenuItemFactory,
             ] as IMenuItemFactory[]

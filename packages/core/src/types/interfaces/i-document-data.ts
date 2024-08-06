@@ -187,10 +187,10 @@ export interface IListData {
  * Contains properties describing the look and feel of a list bullet at a given level of nesting.
  */
 export interface INestingLevel {
-    paragraphProperties?: IParagraphProperties;
+    paragraphProperties?: IParagraphStyle;
+    paragraphTextStyle?: ITextStyle;
 
     bulletAlignment: BulletAlignment; // ordered list support lvlJc
-
     // The glyph format contains one or more placeholders, and these placeholder are replaced with the appropriate values depending on the glyphType or glyphSymbol. The placeholders follow the pattern %[nestingLevel]. Furthermore, placeholders can have prefixes and suffixes. Thus, the glyph format follows the pattern <prefix>%[nestingLevel]<suffix>. Note that the prefix and suffix are optional and can be arbitrary strings.
     //  <prefix>%[nestingLevel]<suffix>
     glyphFormat: string; // https://developers.google.com/docs/api/reference/rest/v1/documents#nestinglevel，ms word lvlText

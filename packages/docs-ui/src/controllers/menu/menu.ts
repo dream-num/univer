@@ -30,6 +30,7 @@ import {
     AlignOperationCommand,
     AlignRightCommand,
     BulletListCommand,
+    CheckListCommand,
     DocSkeletonManagerService,
     getParagraphsInRange,
     OrderListCommand,
@@ -762,6 +763,19 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('BULLET_LIST') === 0)),
+    };
+}
+
+export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: CheckListCommand.id,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'TodoList',
+        tooltip: 'toolbar.checklist',
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('CHECK_LIST') === 0)),
     };
 }
 

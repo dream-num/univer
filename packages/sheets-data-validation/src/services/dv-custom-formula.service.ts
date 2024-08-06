@@ -15,7 +15,7 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, Inject, isFormulaString, ObjectMatrix, Range } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
 import { isFormulaTransformable, LexerTreeBuilder, transformFormula } from '@univerjs/engine-formula';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
@@ -60,6 +60,7 @@ export class DataValidationCustomFormulaService extends Disposable {
     private _formulaCellMap: Map<UnitId, Map<SubUnitId, Map<FormulaId, ICellData>>> = new Map();
 
     constructor(
+        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
@@ -74,6 +75,10 @@ export class DataValidationCustomFormulaService extends Disposable {
         this.disposeWithMe(this._registerOtherFormulaService.formulaResult$.subscribe((resultMap) => {
             for (const unitId in resultMap) {
                 const unitMap = resultMap[unitId];
+
+                const type = this._instanceSrv.getUnitType(unitId);
+                if (type !== UniverInstanceType.UNIVER_SHEET) continue;
+
                 for (const subUnitId in unitMap) {
                     const results = unitMap[subUnitId];
                     const { formulaCellMap, ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);

@@ -62,6 +62,7 @@ export async function generateTempDocumentSnapshot(
     };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export async function generateTemporarySnap(
     context: ILogContext,
     workbook: IWorkbookData,
@@ -329,7 +330,10 @@ export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentD
 
     const { unitID, rev, name, originalMeta, resources = [] } = documentMeta;
 
-    const { body, documentStyle = {}, settings = {}, drawings = {}, drawingsOrder = [] } = decodeDocOriginalMeta(originalMeta);
+    const {
+        body, documentStyle = {}, settings = {}, drawings = {}, drawingsOrder = [],
+        tableSource = {}, headers = {}, footers = {}, lists = {},
+    } = decodeDocOriginalMeta(originalMeta);
 
     const documentData: IDocumentData = {
         id: unitID,
@@ -342,6 +346,10 @@ export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentD
         drawings,
         drawingsOrder,
         resources,
+        tableSource,
+        headers,
+        footers,
+        lists,
     };
 
     return documentData;

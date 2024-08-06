@@ -274,7 +274,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     getUnitType(unitId: string): UniverInstanceType {
         const result = this._getUnitById(unitId);
-        if (!result) throw new Error(`[UniverInstanceService]: No document with unitId ${unitId}`);
+        if (!result) return UniverInstanceType.UNRECOGNIZED;
 
         return result[1];
     }

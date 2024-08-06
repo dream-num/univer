@@ -106,7 +106,7 @@ export const DEFAULT_FIRST_PAGE = {
             zIndex: 2,
             left: 430,
             top: 42,
-            width: 100,
+            width: 120,
             height: 40,
             title: 'mask',
             description: '',

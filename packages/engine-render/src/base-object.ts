@@ -537,6 +537,10 @@ export abstract class BaseObject extends Disposable {
         return this;
     }
 
+    /**
+     * this[pKey] = option[pKey]
+     * @param option
+     */
     transformByState(option: IObjectFullState) {
         const optionKeys = Object.keys(option);
         const preKeys: IObjectFullState = {};

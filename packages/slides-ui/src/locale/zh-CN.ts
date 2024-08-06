@@ -48,6 +48,12 @@ const locale = {
             shape: '编辑图形',
             image: '编辑图片',
         },
+
+        panel: {
+            fill: {
+                title: '填充',
+            },
+        },
     },
 };
 

@@ -32,7 +32,7 @@ import { UploadFileMenu } from '../components/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
 import { EditorContainer } from '../views/editor-container';
 import { SlideSideBar } from '../components/slide-bar/SlideBar';
-import RectSidebar, { COMPONENT_SLIDE_RECT_SIDEBAR } from '../components/rect-sidebar/RectSidebar';
+import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
 import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
@@ -92,7 +92,7 @@ export class SlideUIController extends Disposable {
         this.disposeWithMe(componentManager.register(GRAPH_SINGLE_ICON, GraphSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_IMAGE_POPUP_MENU, SlideImagePopupMenu));
-        this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_RECT_SIDEBAR, RectSidebar));
+        this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_SIDEBAR, Sidebar));
     }
 
     private _initCommands(): void {

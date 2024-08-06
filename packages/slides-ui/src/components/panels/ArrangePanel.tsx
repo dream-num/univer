@@ -16,16 +16,63 @@
 
 import React from 'react';
 
-import { ArrangeTypeEnum, LocaleService, useDependency } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import { Button } from '@univerjs/design';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
+import { CanvasView } from '@univerjs/slides';
+import type { Image, Rect, RichText } from '@univerjs/engine-render';
 import styles from './index.module.less';
 
-export default function ArrangePanel() {
+enum ArrangeTypeEnum {
+    forward,
+    backward,
+    front,
+    back,
+}
+
+interface IProps {
+    unitId: string;
+}
+
+export default function ArrangePanel(props: IProps) {
+    const { unitId } = props;
+
     const localeService = useDependency(LocaleService);
+    const canvasView = useDependency(CanvasView);
+
+    const page = canvasView.getRenderUnitByPageId(unitId);
+    const scene = page?.scene;
+    if (!scene) return null;
+
+    const transformer = scene.getTransformer();
+    if (!transformer) return null;
+
+    const selectedObjects = transformer.getSelectedObjectMap();
+    const object = selectedObjects.values().next().value as Nullable<Rect | RichText | Image>;
+    if (!object) return null;
 
     const onArrangeBtnClick = (arrangeType: ArrangeTypeEnum) => {
+        const allObjects = scene.getAllObjects();
+
+        const [minZIndex, maxZIndex] = allObjects.reduce(([min, max], obj) => {
+            const zIndex = obj.zIndex;
+            const minZIndex = zIndex < min ? zIndex : min;
+            const maxZIndex = zIndex > max ? zIndex : max;
+
+            return [minZIndex, maxZIndex];
+        }, [0, 0]);
+
+        if (arrangeType === ArrangeTypeEnum.back) {
+            object.setProps({ zIndex: minZIndex - 1 });
+        } else if (arrangeType === ArrangeTypeEnum.front) {
+            object.setProps({ zIndex: maxZIndex + 1 });
+        } else if (arrangeType === ArrangeTypeEnum.forward) {
+            object.setProps({ zIndex: object.zIndex + 1 });
+        } else if (arrangeType === ArrangeTypeEnum.backward) {
+            object.setProps({ zIndex: object.zIndex - 1 });
+        }
     };
 
     return (

@@ -50,6 +50,12 @@ const locale: typeof zhCN = {
             shape: 'Edit Shape',
             image: 'Edit Image',
         },
+
+        panel: {
+            fill: {
+                title: 'Fill Color',
+            },
+        },
     },
 };
 

@@ -16,12 +16,11 @@
 
 import React, { useEffect, useState } from 'react';
 
-import type { ArrangeTypeEnum, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { LocaleService, useDependency } from '@univerjs/core';
 import clsx from 'clsx';
-import { Button, Checkbox, InputNumber } from '@univerjs/design';
-import type { BaseObject, IChangeObserverConfig } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { InputNumber } from '@univerjs/design';
+import type { BaseObject, IChangeObserverConfig, Image, Rect, RichText } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
 import styles from './index.module.less';
 
@@ -43,7 +42,7 @@ export default function TransformPanel(props: IProps) {
     if (!transformer) return null;
 
     const selectedObjects = transformer.getSelectedObjectMap();
-    const object = selectedObjects.values().next().value as Nullable<BaseObject>;
+    const object = selectedObjects.values().next().value as Nullable<Rect | Image | RichText>;
     if (!object) return null;
 
     const {
@@ -68,7 +67,23 @@ export default function TransformPanel(props: IProps) {
 
     const changeObs = (state: IChangeObserverConfig) => {
         const { objects } = state;
-        // console.log(objects);
+
+        const object = objects.values().next().value as BaseObject;
+
+        const {
+            width: originWidth = 0,
+            height: originHeight = 0,
+            left: originX = 0,
+            top: originY = 0,
+            angle: originRotation = 0,
+        } = object;
+
+        setWidth(originWidth);
+        setHeight(originHeight);
+        setXPosition(originX);
+        setYPosition(originY);
+        setRotation(originRotation);
+
         // const params = getUpdateParams(objects, drawingManagerService);
 
         // if (params.length !== 1) {
@@ -115,6 +130,7 @@ export default function TransformPanel(props: IProps) {
         //     setRotation(originRotation);
         // }
     };
+
     useEffect(() => {
         const changeStartSub = transformer.changeStart$.subscribe((state) => {
             changeObs(state);
@@ -178,6 +194,48 @@ export default function TransformPanel(props: IProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    function handleWidthChange(val: number | null) {
+        if (!val || !object) return;
+
+        object?.resize(val, object.height);
+        setWidth(val);
+        transformer?.refreshControls();
+    }
+
+    function handleHeightChange(val: number | null) {
+        if (!val || !object) return;
+
+        object?.resize(object.width, val);
+        setHeight(val);
+        transformer?.refreshControls();
+    }
+
+    function handleXChange(val: number | null) {
+        if (!val || !object) return;
+
+        object?.translate(val, object.top);
+        setXPosition(val);
+        transformer?.refreshControls();
+    }
+
+    function handleYChange(val: number | null) {
+        if (!val || !object) return;
+
+        object?.translate(object.left, val);
+        setYPosition(val);
+        transformer?.refreshControls();
+    }
+
+    function handleChangeRotation(val: number | null) {
+        if (!val) return;
+
+        object?.transformByState({
+            angle: val,
+        });
+        setRotation(val);
+        transformer?.refreshControls();
+    }
+
     return (
         <div
             className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}
@@ -197,8 +255,12 @@ export default function TransformPanel(props: IProps) {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                {/* <InputNumber precision={1} value={width} onChange={(val) => { handleWidthChange(val); }} className={styles.imageCommonPanelInput} /> */}
-                                <InputNumber className={styles.imageCommonPanelInput} precision={1} value={width} />
+                                <InputNumber
+                                    className={styles.imageCommonPanelInput}
+                                    min={1}
+                                    value={width}
+                                    onChange={(val) => { handleWidthChange(val); }}
+                                />
                             </div>
                         </div>
                     </label>
@@ -212,8 +274,12 @@ export default function TransformPanel(props: IProps) {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                {/* <InputNumber precision={1} value={height} onChange={(val) => { handleHeightChange(val); }} className={styles.imageCommonPanelInput} /> */}
-                                <InputNumber className={styles.imageCommonPanelInput} precision={1} value={height} />
+                                <InputNumber
+                                    className={styles.imageCommonPanelInput}
+                                    min={1}
+                                    value={height}
+                                    onChange={(val) => { handleHeightChange(val); }}
+                                />
                             </div>
                         </div>
                     </label>
@@ -243,8 +309,13 @@ export default function TransformPanel(props: IProps) {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                {/* <InputNumber precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} className={styles.imageCommonPanelInput} /> */}
-                                <InputNumber className={styles.imageCommonPanelInput} precision={1} value={xPosition} />
+                                <InputNumber
+                                    className={styles.imageCommonPanelInput}
+                                    precision={1}
+                                    min={0}
+                                    value={xPosition}
+                                    onChange={(val) => { handleXChange(val); }}
+                                />
                             </div>
                         </div>
                     </label>
@@ -258,8 +329,13 @@ export default function TransformPanel(props: IProps) {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                {/* <InputNumber precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} className={styles.imageCommonPanelInput} /> */}
-                                <InputNumber className={styles.imageCommonPanelInput} precision={1} value={yPosition} />
+                                <InputNumber
+                                    className={styles.imageCommonPanelInput}
+                                    precision={1}
+                                    min={0}
+                                    value={yPosition}
+                                    onChange={(val) => { handleYChange(val); }}
+                                />
                             </div>
                         </div>
                     </label>
@@ -273,8 +349,12 @@ export default function TransformPanel(props: IProps) {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                {/* <InputNumber precision={1} value={rotation} onChange={handleRotationChange} className={styles.imageCommonPanelInput} /> */}
-                                <InputNumber className={styles.imageCommonPanelInput} precision={1} value={rotation} />
+                                <InputNumber
+                                    className={styles.imageCommonPanelInput}
+                                    precision={1}
+                                    value={rotation}
+                                    onChange={handleChangeRotation}
+                                />
                             </div>
                         </div>
                     </label>

@@ -19,7 +19,7 @@ import { BasicShapes, CommandType, generateRandomId, IUniverInstanceService, Loc
 import { ObjectType } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
 import { ISidebarService } from '@univerjs/ui';
-import { COMPONENT_SLIDE_RECT_SIDEBAR } from '../../components/rect-sidebar/RectSidebar';
+import { COMPONENT_SLIDE_SIDEBAR } from '../../components/sidebar/Sidebar';
 
 export interface IInsertShapeOperationParams {
 };
@@ -89,13 +89,13 @@ export const ToggleSlideEditSidebarOperation: ICommand = {
         let children = '';
         if (objectType === ObjectType.RECT) {
             title = 'slide.sidebar.shape';
-            children = COMPONENT_SLIDE_RECT_SIDEBAR;
+            children = COMPONENT_SLIDE_SIDEBAR;
         } else if (objectType === ObjectType.IMAGE) {
             title = 'slide.sidebar.image';
-            children = 'image';
+            children = COMPONENT_SLIDE_SIDEBAR;
         } else if (objectType === ObjectType.RICH_TEXT) {
             title = 'slide.sidebar.text';
-            children = 'text';
+            children = COMPONENT_SLIDE_SIDEBAR;
         }
 
         if (visible) {

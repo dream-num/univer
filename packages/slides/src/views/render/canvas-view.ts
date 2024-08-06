@@ -280,8 +280,8 @@ export class CanvasView extends RxDisposable implements IRenderModule {
             width: pageWidth,
             height: pageHeight,
             strokeWidth: 1,
-            stroke: 'rgba(198,198,198, 1)',
-            fill: getColorStyle(fill) || 'rgba(255,255,255, 1)',
+            stroke: 'rgba(198,198,198,1)',
+            fill: getColorStyle(fill) || 'rgba(255,255,255,1)',
             zIndex: 0,
             evented: false,
         });
@@ -480,6 +480,7 @@ export class CanvasView extends RxDisposable implements IRenderModule {
 
     setObjectActiveByPage(obj: BaseObject, pageID: PageID) {
         const { scene } = this.getRenderUnitByPageId(pageID);
+        // console.log(obj);
         if (!scene) return;
         const transformer = scene.getTransformer();
         transformer?.activeAnObject(obj);

@@ -649,8 +649,11 @@ export class EditorService extends Disposable implements IEditorService, IDispos
          */
         const sheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (sheets.length > 0) {
-            const current = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            this._univerInstanceService.focusUnit(current.getUnitId());
+            const current = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+            if (current) {
+                this._univerInstanceService.focusUnit(current.getUnitId());
+            }
         }
     }
 

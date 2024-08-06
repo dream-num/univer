@@ -80,6 +80,12 @@ function getInsertTableHiddenObservable(
             if (unitId == null) {
                 return subscriber.next(true);
             }
+            const univerType = univerInstanceService.getUnitType(unitId);
+
+            if (univerType !== UniverInstanceType.UNIVER_DOC) {
+                return subscriber.next(true);
+            }
+
             const currentRender = renderManagerService.getRenderById(unitId);
             if (currentRender == null) {
                 return subscriber.next(true);

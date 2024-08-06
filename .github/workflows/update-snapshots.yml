@@ -23,6 +23,12 @@ on:
         types: [created]
 
 jobs:
+    echos:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Debug echo is conditions
+              run: echo ${{ github.event.comment.body }}
+
     update_snapshots:
         # Run this job only on comments of pull requests that strictly match
         # the "/update-snapshots" string

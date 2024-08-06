@@ -22,6 +22,7 @@ import {
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
+    HorizontalAlign,
     IContextService,
     VerticalAlign,
 } from '@univerjs/core';
@@ -204,8 +205,8 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
             fontString: 'document',
             textRotation: { a: 0, v: 0 },
             wrapStrategy: 0,
-            verticalAlign: VerticalAlign.MIDDLE,
-            horizontalAlign: 0,
+            verticalAlign: VerticalAlign.TOP,
+            horizontalAlign: HorizontalAlign.LEFT,
             paddingData: { t: 0, b: 1, l: 2, r: 2 },
         };
 
@@ -267,6 +268,9 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         return this._editorUnitId;
     }
 
+    /**
+     * @deprecated
+     */
     genDocData(target: RichText) {
         const editorUnitId = this.getCurrentEditorId();
         const content = target.text;

@@ -112,6 +112,16 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
                 this.setEditorVisible(false);
             }));
 
+            d.add(transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
+                const target = param.target;
+                if (!target) return;
+                if (target.objectType !== ObjectType.RICH_TEXT) {
+                    this.pickOtherObjects();
+                } else if (target === this._curRichText) {
+                    // do nothing
+                }
+            }));
+
             d.add(scene.onDblclick$.subscribeEvent(() => {
                 transformer.clearControls();
                 const selectedObjects = transformer.getSelectedObjectMap();
@@ -119,13 +129,17 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
                 if (!object) return;
 
                 if (object.objectType !== ObjectType.RICH_TEXT) {
-                    this.setEditorVisible(false);
-                    this.endEditing();
+                    this.pickOtherObjects();
                 } else {
                     this.startEditing(object as RichText);
                 }
             }));
         }
+    }
+
+    pickOtherObjects() {
+        this.setEditorVisible(false);
+        this.endEditing();
     }
 
     /**
@@ -139,7 +153,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
 
         const slideData = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         if (!slideData) return false;
-        curRichText.updateDocumentByDocData();
+        curRichText.refreshDocumentByDocData();
         this._curRichText = null;
     }
 
@@ -148,7 +162,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
      * editingParam derives from RichText object.
      *
      * TODO @lumixraku need scale param
-     * @param editingParam
+     * @param target
      */
     startEditing(target: RichText) {
         // this.setSlideTextEditor$.next({ content, rect });

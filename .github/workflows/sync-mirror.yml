@@ -1,4 +1,4 @@
-name: 🔮 Sync mirror
+name: 🔮 Sync Mirror
 
 on:
     push:

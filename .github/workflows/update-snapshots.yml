@@ -32,7 +32,7 @@ jobs:
     update_snapshots:
         # Run this job only on comments of pull requests that strictly match
         # the "/update-snapshots" string
-        if: ${{ github.event.issue.pull_request && github.event.comment.body == '/update-snapshots'}}
+        if: ${{ github.event.issue.pull_request && github.event.comment.body == '/update-snapshots' }}
         timeout-minutes: 10
         runs-on: ubuntu-latest
         steps:

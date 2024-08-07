@@ -35,6 +35,11 @@ export class PermissionService extends Disposable implements IPermissionService 
         }
     };
 
+    constructor() {
+        super();
+        window.tmp = this;
+    }
+
     addPermissionPoint<T = boolean>(_item: IPermissionPoint<T> | BehaviorSubject<IPermissionPoint<T>>) {
         const isSubject = _item instanceof BehaviorSubject;
         const item = isSubject ? _item.getValue() : _item;
@@ -58,7 +63,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         const subject = permissionPoint.getValue() as IPermissionPoint<T>;
         subject.value = value;
         subject.status = PermissionStatus.DONE;
-        permissionPoint.next({ ...subject });
+        permissionPoint.next(subject);
         this._permissionPointUpdate$.next(subject);
     };
 

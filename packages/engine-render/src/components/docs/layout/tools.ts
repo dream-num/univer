@@ -447,6 +447,13 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
             preSectionStartIndex = section.ed;
         }
 
+        // Some tables may across pages, so we need to calculate the page's end index by the tables.
+        for (const table of skeTables.values()) {
+            const { ed } = table;
+
+            preSectionStartIndex = Math.max(preSectionStartIndex, ed);
+        }
+
         page.st = pageStartIndex + 1;
         page.ed = preSectionStartIndex >= page.st ? preSectionStartIndex : page.st;
         page.height = contentHeight;

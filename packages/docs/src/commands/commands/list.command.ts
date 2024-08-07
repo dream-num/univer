@@ -54,16 +54,16 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         let listType: string = params.listType;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
-        if (docDataModel == null || activeRange == null) {
+        const docRanges = textSelectionManagerService.getDocRanges() ?? [];
+
+        if (docDataModel == null || docRanges.length === 0) {
             return false;
         }
 
-        const { segmentId } = activeRange;
+        const segmentId = docRanges[0].segmentId;
 
-        const selections = textSelectionManagerService.getCurrentTextRanges() ?? [];
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
-        const serializedSelections = selections.map(serializeDocRange);
+        const serializedSelections = docRanges.map(serializeDocRange);
 
         if (paragraphs == null) {
             return false;
@@ -71,7 +71,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
 
-        const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
+        const currentParagraphs = getParagraphsInRanges(docRanges, paragraphs);
 
         const unitId = docDataModel.getUnitId();
 

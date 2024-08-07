@@ -167,14 +167,14 @@ export class UnitGridService extends Disposable implements IUnitGridService {
                 type,
             },
             style: {
-                width: '660px',
-                height: '600px',
+                width: '940px',
+                height: '854px',
                 display: 'flex',
                 borderRadius: '8px',
                 border: '1px solid #ccc',
                 backgroundColor: '#fff',
             },
-            position: { x: (index % MAX_COUNT_IN_ROW) * 750, y: Math.floor(index / MAX_COUNT_IN_ROW) * 750 + 40 },
+            position: { x: (index % MAX_COUNT_IN_ROW) * 1050, y: Math.floor(index / MAX_COUNT_IN_ROW) * 950 + 40 },
         };
 
         this._unitGrid.push(newNode);

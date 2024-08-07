@@ -37,4 +37,10 @@ export class UniverDocUniFormulaPlugin extends Plugin {
             this._injector.add([IUniFormulaService, { useClass: DumbUniFormulaService }] as Dependency);
         }
     }
+
+    override onReady(): void {
+        if (this._config.playDumb) {
+            this._injector.get(IUniFormulaService);
+        }
+    }
 }

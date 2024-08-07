@@ -17,6 +17,7 @@
 import type { ICellData, IDisposable, Nullable } from '@univerjs/core';
 import {
     createIdentifier,
+    Disposable,
     ICommandService,
     IResourceManagerService,
     IUniverInstanceService,
@@ -38,7 +39,7 @@ export interface IUniFormulaService {
 
 export const IUniFormulaService = createIdentifier<IUniFormulaService>('uni-formula.uni-formula.service');
 
-export class DumbUniFormulaService implements IUniFormulaService {
+export class DumbUniFormulaService extends Disposable implements IUniFormulaService {
     /** This data maps doc formula key to the formula id in the formula system. */
     protected readonly _docFormulas = new Map<string, IDocFormulaReference>();
 
@@ -47,6 +48,8 @@ export class DumbUniFormulaService implements IUniFormulaService {
         @ICommandService protected readonly _commandSrv: ICommandService,
         @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
     ) {
+        super();
+
         this._initDocFormulaResources(resourceManagerService);
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {

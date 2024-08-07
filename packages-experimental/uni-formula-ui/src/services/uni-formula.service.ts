@@ -27,12 +27,11 @@ import {
     CustomRangeType,
     ICommandService,
     Inject,
+    Injector,
     IResourceManagerService,
     IUniverInstanceService,
-    LifecycleStages,
     makeCustomRangeStream,
-    OnLifecycle,
-    Optional,
+    Quantity,
     RCDisposable,
     toDisposable,
     UniverInstanceType,
@@ -42,6 +41,7 @@ import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import type { IDocFormulaCache } from '@univerjs/uni-formula';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
+import { take } from 'rxjs';
 
 const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';
 /**
@@ -107,7 +107,7 @@ export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCache
             });
 
             if (redoMutation) {
-                return commandService.syncExecuteCommand(redoMutation.id, redoMutation.params, { onlyLocal: true });
+                return commandService.syncExecuteCommand(redoMutation.id, redoMutation.params);
             }
 
             return false;
@@ -120,18 +120,35 @@ export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCache
  * And it also manages formula resources fields of docs and slides. `SHEETS_FORMULA_REMOTE_PLUGIN`
  * is not required but optional here.
  */
-@OnLifecycle(LifecycleStages.Steady, UniFormulaService)
 export class UniFormulaService extends DumbUniFormulaService implements IUniFormulaService {
     private readonly _formulaIdToKey = new Map<string, string>();
 
+    private _canPerformFormulaCalculation = false;
+
+    private get _registerOtherFormulaSrv() { return this._injector.get(RegisterOtherFormulaService); }
+    private get _dataSyncPrimaryController() { return this._injector.get(DataSyncPrimaryController, Quantity.OPTIONAL); }
+
     constructor(
-    @IResourceManagerService resourceManagerService: IResourceManagerService,
-        @ICommandService _commandSrv: ICommandService,
-        @IUniverInstanceService _instanceSrv: IUniverInstanceService,
-        @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaSrv: RegisterOtherFormulaService,
-        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
+        @Inject(Injector) private readonly _injector: Injector,
+        @IResourceManagerService resourceManagerService: IResourceManagerService,
+        @ICommandService commandSrv: ICommandService,
+        @IUniverInstanceService instanceSrv: IUniverInstanceService
     ) {
-        super(resourceManagerService, _commandSrv, _instanceSrv);
+        super(resourceManagerService, commandSrv, instanceSrv);
+
+        commandSrv.registerCommand(UpdateDocUniFormulaCacheCommand);
+
+        // Only able to perform formula calculation after a sheet is loaded.
+        // FIXME: the formula engine is not unit-agnostic.
+        if (instanceSrv.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length) {
+            this._canPerformFormulaCalculation = true;
+        } else {
+            this.disposeWithMe(this._instanceSrv.getTypeOfUnitAdded$(UniverInstanceType.UNIVER_SHEET).pipe(take(1))
+                .subscribe(() => {
+                    this._canPerformFormulaCalculation = true;
+                    this._initFormulaRegistration();
+                }));
+        }
     }
 
     /**
@@ -143,13 +160,18 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             throw new Error(`[UniFormulaService]: cannot register formula ${key} when it is already registered!`);
         }
 
-        const pseudoId = getPseudoUnitKey(unitId);
-        this._checkSyncingUnit(pseudoId);
-        this._checkResultSubscription();
+        if (this._canPerformFormulaCalculation) {
+            const pseudoId = getPseudoUnitKey(unitId);
+            this._checkSyncingUnit(pseudoId);
 
-        const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, DOC_PSEUDO_SUBUNIT, f);
-        this._docFormulas.set(key, { unitId, rangeId, f, formulaId: id, v, t });
-        this._formulaIdToKey.set(id, key);
+            const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, DOC_PSEUDO_SUBUNIT, f);
+            this._docFormulas.set(key, { unitId, rangeId, f, formulaId: id, v, t });
+            this._formulaIdToKey.set(id, key);
+
+            this._checkResultSubscription();
+        } else {
+            this._docFormulas.set(key, { unitId, rangeId, f, formulaId: '', v, t });
+        }
 
         return toDisposable(() => this.unregisterDocFormula(unitId, rangeId));
     }
@@ -157,17 +179,34 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
     override unregisterDocFormula(unitId: string, rangeId: string): void {
         const key = getDocFormulaKey(unitId, rangeId);
         const item = this._docFormulas.get(key);
-        if (!item) {
-            return;
-        }
+        if (!item) return;
 
         const pseudoId = getPseudoUnitKey(unitId);
         this._checkDisposingResultSubscription();
         this._dataSyncDisposables.get(pseudoId)?.dec();
 
-        this._registerOtherFormulaSrv.deleteFormula(pseudoId, DOC_PSEUDO_SUBUNIT, [item.formulaId]);
+        if (this._canPerformFormulaCalculation) {
+            this._registerOtherFormulaSrv.deleteFormula(pseudoId, DOC_PSEUDO_SUBUNIT, [item.formulaId]);
+            this._formulaIdToKey.delete(item.formulaId);
+        }
+
         this._docFormulas.delete(key);
-        this._formulaIdToKey.delete(item.formulaId);
+    }
+
+    private _initFormulaRegistration(): void {
+        // When the doc bootstraps, there could be no sheets modules loaded. So we need to check if there
+        // are registered formulas but not added to the formula system.
+        this._docFormulas.forEach((value, key) => {
+            if (!value.formulaId) {
+                const { unitId, f } = value;
+                const pseudoId = getPseudoUnitKey(unitId);
+                this._checkSyncingUnit(pseudoId);
+
+                const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, DOC_PSEUDO_SUBUNIT, f);
+                value.formulaId = id;
+                this._formulaIdToKey.set(id, key);
+            }
+        });
     }
 
     private _dataSyncDisposables = new Map<string, RCDisposable>();
@@ -232,6 +271,12 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         if (this._resultSubscription) {
             this._resultSubscription.dispose();
             this._resultSubscription = null;
+        }
+    }
+
+    private _checkFormulaUsable(): void {
+        if (!this._canPerformFormulaCalculation && this._instanceSrv.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length) {
+            this._canPerformFormulaCalculation = true;
         }
     }
 }

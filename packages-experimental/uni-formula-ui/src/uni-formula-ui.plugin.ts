@@ -26,7 +26,7 @@ import { UniFormulaService } from './services/uni-formula.service';
 @DependentOn(UniverDocUniFormulaPlugin)
 export class UniverDocUniFormulaUIPlugin extends Plugin {
     static override pluginName: string = DOC_FORMULA_UI_PLUGIN_NAME;
-    static override type: UniverInstanceType = UniverInstanceType.UNIVER_SHEET;
+    static override type: UniverInstanceType = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
         _config: unknown,
@@ -41,5 +41,9 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
             [DocFormulaPopupService],
             [IUniFormulaService, { useClass: UniFormulaService }],
         ] as Dependency[]).forEach((d) => injector.add(d));
+    }
+
+    override onReady(): void {
+        this._injector.get(IUniFormulaService);
     }
 }

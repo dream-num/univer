@@ -411,8 +411,8 @@ export function SheetBarTabs() {
                 <Menu
                     menuType={SheetMenuPosition.SHEET_BAR}
                     onOptionSelect={(params) => {
-                        const { label: commandId, value } = params;
-                        commandService.executeCommand(commandId as string, { value, subUnitId: activeKey });
+                        const { label: id, value, commandId } = params;
+                        commandService.executeCommand(commandId ?? id as string, { value, subUnitId: activeKey });
                         setVisible(false);
                     }}
                 />

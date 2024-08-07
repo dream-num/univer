@@ -59,6 +59,13 @@ export enum MenuItemType {
 interface IMenuItemBase<V> {
     /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
     id: string;
+
+    /**
+     * If two menus reuse the same command (e.g. copy & paste command). They should have the same command
+     * id and different ids.
+     */
+    commandId?: string;
+
     subId?: string;
     title?: string;
     description?: string;
@@ -97,6 +104,7 @@ export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
 }
 
 export interface IValueOption<T = undefined> {
+    id?: string;
     value?: string | number;
     value$?: Observable<T>;
     label?:
@@ -110,7 +118,7 @@ export interface IValueOption<T = undefined> {
     tooltip?: string;
     style?: object;
     disabled?: boolean;
-    id?: string; // command id
+    commandId?: string;
 }
 
 export interface ICustomComponentProps<T> {

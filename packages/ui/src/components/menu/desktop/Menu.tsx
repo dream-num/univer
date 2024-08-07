@@ -128,7 +128,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
             const key = `${parentKey}-${option.label ?? option.id}-${index}`;
 
             const onChange = (v: string | number) => {
-                onOptionSelect?.({ value: v, label: option?.label });
+                onOptionSelect?.({ value: v, label: option?.label, commandId: option?.commandId });
             };
 
             const handleClick = () => {
@@ -232,7 +232,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     [styles.menuItemActivated]: activated,
                 })}
                 onClick={() => {
-                    onClick({ value: inputValue, id: item.id }); // merge cell
+                    onClick({ commandId: item.commandId, value: inputValue, id: item.id });
                 }}
             >
                 <span className={styles.menuItemContent}>
@@ -271,7 +271,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                             menuType={item.id}
                             options={selections}
                             onOptionSelect={(v) => {
-                                onClick({ value: v.value, id: item.id });
+                                onClick({ value: v.value, id: item.id, commandId: v.commandId });
                             }}
                         />
                     )}

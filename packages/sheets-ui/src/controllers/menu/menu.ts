@@ -70,7 +70,6 @@ import {
 
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
-    CopyCommand,
     CutCommand,
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
@@ -79,14 +78,16 @@ import {
     MenuGroup,
     MenuItemType,
     MenuPosition,
-    PasteCommand,
 } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { combineLatestWith, map, Observable } from 'rxjs';
 
 import {
+    SheetCopyCommand,
+    SheetCutCommand,
     SheetPasteBesidesBorderCommand,
     SheetPasteColWidthCommand,
+    SheetPasteCommand,
     SheetPasteFormatCommand,
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
@@ -901,7 +902,8 @@ function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolea
 
 export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: CopyCommand.id,
+        id: SheetCopyCommand.name,
+        commandId: SheetCopyCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.copy',
@@ -918,7 +920,8 @@ export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: CutCommand.id,
+        id: SheetCutCommand.name,
+        commandId: CutCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'contextMenu.cut',
@@ -934,7 +937,8 @@ export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: PasteCommand.id,
+        id: SheetPasteCommand.name,
+        commandId: SheetPasteCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.paste',

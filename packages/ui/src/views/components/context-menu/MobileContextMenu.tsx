@@ -70,8 +70,8 @@ export function MobileContextMenu() {
                     <MobileMenu
                         menuType={[menuType]}
                         onOptionSelect={(params) => {
-                            const { label: commandId, value } = params;
-                            commandService && commandService.executeCommand(commandId as string, { value });
+                            const { label: id, value, commandId } = params;
+                            commandService && commandService.executeCommand(commandId ?? id as string, { value });
                             setVisible(false);
                         }}
                     />

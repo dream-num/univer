@@ -206,7 +206,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                 className={styles.toolbarItemTextButton}
                 active={activated}
                 disabled={disabled}
-                onClick={() => handleCommandExecuted(props.id)}
+                onClick={() => handleCommandExecuted(props.commandId ?? props.id)}
                 onDoubleClick={() => props.subId && handleCommandExecuted(props.subId)}
             >
                 {isCustomComponent

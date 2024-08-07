@@ -15,8 +15,9 @@
  */
 
 export { UniverDocUniFormulaPlugin } from './uni-formula.plugin';
-export { UniFormulaService, type IUpdateDocUniFormulaCacheMutationParams } from './services/uni-formula.service';
+export { IUniFormulaService, DumbUniFormulaService, UpdateDocUniFormulaCacheMutation, type IUpdateDocUniFormulaCacheMutationParams } from './services/uni-formula.service';
 export { DOC_FORMULA_PLUGIN_NAME } from './const';
+export { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference } from './models/doc-formula';
 
 // #region - all commands
 

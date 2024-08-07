@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
 import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import { UniFormulaService } from './services/uni-formula.service';
+import { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
 import { DOC_FORMULA_PLUGIN_NAME } from './const';
 
 export class UniverDocUniFormulaPlugin extends Plugin {
@@ -25,13 +26,21 @@ export class UniverDocUniFormulaPlugin extends Plugin {
     static override type: UniverInstanceType = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        _config: unknown,
+        private readonly _config: { playDumb: boolean } | undefined,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
     }
 
     override onStarting(): void {
-        this._injector.add([UniFormulaService]);
+        if (this._config?.playDumb) {
+            this._injector.add([IUniFormulaService, { useClass: DumbUniFormulaService }] as Dependency);
+        }
+    }
+
+    override onReady(): void {
+        if (this._config?.playDumb) {
+            this._injector.get(IUniFormulaService);
+        }
     }
 }

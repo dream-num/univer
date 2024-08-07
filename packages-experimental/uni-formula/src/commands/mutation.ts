@@ -16,7 +16,8 @@
 
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import { UniFormulaService } from '../services/uni-formula.service';
+
+import { IUniFormulaService } from '../services/uni-formula.service';
 
 export interface IAddDocUniFormulaMutationParams {
     unitId: string;
@@ -32,7 +33,7 @@ export const AddDocUniFormulaMutation: IMutation<IAddDocUniFormulaMutationParams
     id: 'doc.mutation.add-doc-uni-formula',
     handler(accessor, params: IAddDocUniFormulaMutationParams) {
         const { unitId, f, rangeId: id } = params;
-        const uniFormulaService = accessor.get(UniFormulaService);
+        const uniFormulaService = accessor.get(IUniFormulaService);
 
         uniFormulaService.registerDocFormula(unitId, id, f);
 
@@ -48,7 +49,7 @@ export const UpdateDocUniFormulaMutation: IMutation<IUpdateDocUniFormulaMutation
     id: 'doc.mutation.update-doc-uni-formula',
     handler(accessor, params: IUpdateDocUniFormulaMutationParams) {
         const { unitId, f, rangeId: id } = params;
-        const uniFormulaService = accessor.get(UniFormulaService);
+        const uniFormulaService = accessor.get(IUniFormulaService);
 
         if (!uniFormulaService.hasFocFormula(unitId, id)) return false;
 
@@ -68,7 +69,7 @@ export const RemoveDocUniFormulaMutation: IMutation<IRemoveDocUniFormulaMutation
     id: 'doc.mutation.remove-doc-uni-formula',
     handler(accessor, params: IRemoveDocUniFormulaMutationParams) {
         const { unitId, rangeId: id } = params;
-        const uniFormulaService = accessor.get(UniFormulaService);
+        const uniFormulaService = accessor.get(IUniFormulaService);
 
         if (!uniFormulaService.hasFocFormula(unitId, id)) {
             return false;

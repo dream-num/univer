@@ -61,9 +61,7 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/docs": "workspace:*",
-        "@univerjs/rpc": "workspace:*",
-        "@univerjs/sheets-formula": "workspace:*"
+        "@univerjs/docs": "workspace:*"
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.72"
@@ -71,10 +69,7 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",
-        "@univerjs/rpc": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.4",

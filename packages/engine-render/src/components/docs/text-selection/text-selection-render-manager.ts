@@ -497,14 +497,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             position.isBack = true;
         }
 
-        const textSelection = this._textSelectionInner$.value;
-        if (startNode && evt.button === 2 && textSelection) {
+        const docSelection = this._textSelectionInner$.value;
+        if (startNode && evt.button === 2 && docSelection) {
             const nodeCharIndex = this._docSkeleton?.findCharIndexByPosition(position);
-            if (typeof nodeCharIndex === 'number' && textSelection.textRanges.some((textRange) => textRange.startOffset! <= nodeCharIndex && textRange.endOffset! > nodeCharIndex)) {
+            if (typeof nodeCharIndex === 'number' && docSelection.textRanges.some((textRange) => textRange.startOffset! <= nodeCharIndex && textRange.endOffset! > nodeCharIndex)) {
                 return;
             }
 
-            if (typeof nodeCharIndex === 'number' && textSelection.rectRanges.some((rectRange) => rectRange.startOffset! <= nodeCharIndex && rectRange.endOffset! >= nodeCharIndex)) {
+            if (typeof nodeCharIndex === 'number' && docSelection.rectRanges.some((rectRange) => rectRange.startOffset! <= nodeCharIndex && rectRange.endOffset! >= nodeCharIndex)) {
                 return;
             }
         }

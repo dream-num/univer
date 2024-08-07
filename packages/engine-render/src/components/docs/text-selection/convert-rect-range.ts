@@ -90,7 +90,7 @@ export function compareNodePositionInTable(a: INodePosition, b: INodePosition): 
         return false;
     }
 
-    return aCellCount < bCellCount;
+    return aCellCount <= bCellCount;
 }
 
 function firstGlyphInCellPage(cellPage: IDocumentSkeletonPage): Nullable<IDocumentSkeletonGlyph> {

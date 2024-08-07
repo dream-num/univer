@@ -85,6 +85,7 @@ export interface ISlideEditorBridgeService {
     // refreshEditCellState(): void;
 
     setEditorRect(param: ISetEditorInfo): void;
+    getEditorRect(): ISetEditorInfo;
     getEditRectState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     // // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
     // getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
@@ -133,6 +134,10 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         super.dispose();
     }
 
+    getEditorRect() {
+        return this._currentEditRectInfo;
+    }
+
     /**
      * 1st part of startEditing.
      * editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
@@ -177,7 +182,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
             this._editorIsDirty = false;
         }
 
-        // subscribe: editing render controller
+        // subscriber: slide-editing.render-controller.ts@_handleEditorVisible
         this._visible$.next(this._visible);
         this._afterVisible$.next(this._visible);
     }

@@ -194,6 +194,9 @@ export class RichText extends BaseObject {
         return this._documentData;
     }
 
+    /**
+     * get last page size
+     */
     getDocsSkeletonPageSize() {
         const skeletonData = this._documentSkeleton?.getSkeletonData();
 
@@ -371,11 +374,14 @@ export class RichText extends BaseObject {
         this._documentSkeleton.calculate();
     }
 
-    adaptObjSizeToContentSize() {
+    /**
+     * invoked when end editing.
+     */
+    resizeToContentSize() {
         const contentSize = this.getDocsSkeletonPageSize();
         if (contentSize && contentSize.width !== 0 && contentSize.height !== 0) {
             this.transformByState({
-                width: contentSize?.width || 0,
+                // width: contentSize?.width || 0,
                 height: contentSize?.height || 0,
             });
         }

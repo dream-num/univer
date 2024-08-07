@@ -186,6 +186,11 @@ export function getRangeListFromSelection(
                 const ap = direction ? sp : ep;
                 const fp = direction ? ep : sp;
 
+                // Can not create cursor(startOffset === endOffset) and rect range at the same time.
+                if (rectRanges.length && start === end) {
+                    continue;
+                }
+
                 textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId));
             }
         }

@@ -1,25 +1,45 @@
-import {
-    OnLifecycle,
-    LifecycleStages,
-    IResourceManagerService,
-    ICommandService,
-    IUniverInstanceService,
-    Optional,
-    Nullable,
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type {
     ICellData,
     IDisposable,
-    toDisposable,
-    RCDisposable,
-    Inject
-} from "@univerjs/core";
-import { DataSyncPrimaryController } from "@univerjs/rpc";
-import { RegisterOtherFormulaService } from "@univerjs/sheets-formula";
+    Nullable } from '@univerjs/core';
 import {
+    ICommandService,
+    Inject,
+    IResourceManagerService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    Optional,
+    RCDisposable,
+    toDisposable,
+} from '@univerjs/core';
+import { DataSyncPrimaryController } from '@univerjs/rpc';
+import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import type {
+    IDocFormulaCache,
+    IDocFormulaReference,
     IUniFormulaService,
-    IUpdateDocUniFormulaCacheMutationParams,
-} from "@univerjs/uni-formula";
-import { IDocFormulaReference, IDocFormulaCache, toJson, IDocFormulaData } from "@univerjs/uni-formula/models/doc-formula.js";
-import { DumbUniFormulaService, UpdateDocUniFormulaCacheMutation } from "@univerjs/uni-formula/services/uni-formula.service.js";
+    IUpdateDocUniFormulaCacheMutationParams } from '@univerjs/uni-formula';
+import {
+    DumbUniFormulaService,
+    UpdateDocUniFormulaCacheMutation,
+} from '@univerjs/uni-formula';
 
 const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';
 
@@ -30,8 +50,10 @@ const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';
  */
 @OnLifecycle(LifecycleStages.Steady, UniFormulaService)
 export class UniFormulaService extends DumbUniFormulaService implements IUniFormulaService {
+    private readonly _formulaIdToKey = new Map<string, string>();
+
     constructor(
-        @IResourceManagerService resourceManagerService: IResourceManagerService,
+    @IResourceManagerService resourceManagerService: IResourceManagerService,
         @ICommandService _commandSrv: ICommandService,
         @IUniverInstanceService _instanceSrv: IUniverInstanceService,
         @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaSrv: RegisterOtherFormulaService,

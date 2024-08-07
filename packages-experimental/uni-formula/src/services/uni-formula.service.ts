@@ -118,7 +118,6 @@ export const IUniFormulaService = createIdentifier<IUniFormulaService>('uni-form
 export class DumbUniFormulaService {
     /** This data maps doc formula key to the formula id in the formula system. */
     protected readonly _docFormulas = new Map<string, IDocFormulaReference>();
-    protected readonly _formulaIdToKey = new Map<string, string>();
 
     constructor(
     @IResourceManagerService resourceManagerService: IResourceManagerService,

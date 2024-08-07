@@ -38,9 +38,9 @@ export function getSheetSelectionsDisabled$(accessor: IAccessor) {
             const subUnitId = sheet.getSheetId();
 
             const selectionRanges = selection.map((sel) => sel.range);
-            const withPivot = mergeCellController.interceptor.fetchThroughInterceptors(MERGE_CELL_INTERCEPTOR_CHECK)(false, selectionRanges);
+            const disableResByInterceptor = mergeCellController.interceptor.fetchThroughInterceptors(MERGE_CELL_INTERCEPTOR_CHECK)(false, selectionRanges);
 
-            if (withPivot) {
+            if (disableResByInterceptor) {
                 return true;
             }
 
@@ -49,10 +49,10 @@ export function getSheetSelectionsDisabled$(accessor: IAccessor) {
 
             if (selection.length < 2) {
                 const range = selection[0].range;
-                const hasLap = subUnitRuleRange.some((ruleRange) => {
+                const rangeIsOverlap = subUnitRuleRange.some((ruleRange) => {
                     return Rectangle.intersects(ruleRange, range) && !Rectangle.contains(ruleRange, range);
                 });
-                return hasLap;
+                return rangeIsOverlap;
             }
 
             for (let i = 0; i < selection.length; i++) {

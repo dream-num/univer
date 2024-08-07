@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICellData, IDisposable, IDocumentBody, IMutation, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, IDisposable, IDocumentBody, ICommand, Nullable } from '@univerjs/core';
 import {
     CommandType,
     createIdentifier,
@@ -35,7 +35,7 @@ import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniForm
 /**
  * Update calculating result in a batch.
  */
-export interface IUpdateDocUniFormulaCacheMutationParams {
+export interface IUpdateDocUniFormulaCacheCommandParams {
     /** The doc in which formula results changed. */
     unitId: string;
     /** Range ids. */
@@ -50,10 +50,10 @@ export interface IUpdateDocUniFormulaCacheMutationParams {
  *
  * @ignore
  */
-export const UpdateDocUniFormulaCacheMutation: IMutation<IUpdateDocUniFormulaCacheMutationParams> = {
-    type: CommandType.MUTATION,
+export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCacheCommandParams> = {
+    type: CommandType.COMMAND,
     id: 'doc.mutation.update-doc-uni-formula-cache',
-    handler(accessor, params: IUpdateDocUniFormulaCacheMutationParams) {
+    handler(accessor, params: IUpdateDocUniFormulaCacheCommandParams) {
         const { unitId, ids, cache } = params;
 
         const uniFormulaService = accessor.get(IUniFormulaService);
@@ -115,7 +115,7 @@ export interface IUniFormulaService {
 
 export const IUniFormulaService = createIdentifier<IUniFormulaService>('uni-formula.uni-formula.service');
 
-export class DumbUniFormulaService {
+export class DumbUniFormulaService implements IUniFormulaService {
     /** This data maps doc formula key to the formula id in the formula system. */
     protected readonly _docFormulas = new Map<string, IDocFormulaReference>();
 
@@ -132,11 +132,32 @@ export class DumbUniFormulaService {
         });
     }
 
+    hasFocFormula(unitId: string, formulaId: string): boolean {
+        return this._docFormulas.has(getDocFormulaKey(unitId, formulaId));
+    }
+
+    getFormulaWithRangeId(unitId: string, rangeId: string): Nullable<IDocFormulaReference> {
+        return this._docFormulas.get(getDocFormulaKey(unitId, rangeId)) ?? null;
+    }
+
+    updateFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean {
+        formulaIds.forEach((id, index) => {
+            const formulaData = this._docFormulas.get(getDocFormulaKey(unitId, id));
+            if (!formulaData) return true;
+
+            formulaData.v = v[index].v;
+            formulaData.t = v[index].t;
+            return true;
+        });
+
+        return true;
+    }
+
     private _initCommands(): void {
         [
             AddDocUniFormulaMutation,
             UpdateDocUniFormulaMutation,
-            UpdateDocUniFormulaCacheMutation,
+            UpdateDocUniFormulaCacheCommand,
             RemoveDocUniFormulaMutation,
         ].forEach((command) => this._commandSrv.registerCommand(command));
     }

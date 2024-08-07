@@ -62,10 +62,6 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         super(resourceManagerService, _commandSrv, _instanceSrv);
     }
 
-    getFormulaWithRangeId(unitId: string, rangeId: string): Nullable<IDocFormulaReference> {
-        return this._docFormulas.get(getDocFormulaKey(unitId, rangeId)) ?? null;
-    }
-
     /**
      * Register a doc formula into the formula system.
      */
@@ -100,23 +96,6 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         this._registerOtherFormulaSrv.deleteFormula(pseudoId, DOC_PSEUDO_SUBUNIT, [item.formulaId]);
         this._docFormulas.delete(key);
         this._formulaIdToKey.delete(item.formulaId);
-    }
-
-    hasFocFormula(unitId: string, formulaId: string): boolean {
-        return this._docFormulas.has(getDocFormulaKey(unitId, formulaId));
-    }
-
-    updateFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean {
-        formulaIds.forEach((id, index) => {
-            const formulaData = this._docFormulas.get(getDocFormulaKey(unitId, id));
-            if (!formulaData) return true;
-
-            formulaData.v = v[index].v;
-            formulaData.t = v[index].t;
-            return true;
-        });
-
-        return true;
     }
 
     private _dataSyncDisposables = new Map<string, RCDisposable>();

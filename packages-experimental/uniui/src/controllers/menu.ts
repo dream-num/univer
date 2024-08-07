@@ -36,6 +36,7 @@ export const FAKE_FONT_COLOR_MENU_ID = 'FAKE_FONT_COLOR_MENU_ID';
 export const FAKE_BG_COLOR_MENU_ID = 'FAKE_BG_COLOR_MENU_ID';
 export const FAKE_IMAGE_MENU_ID = 'FAKE_IMAGE_MENU_ID';
 export const FAKE_FONT_GROUP_MENU_ID = 'FAKE_FONT_GROUP_MENU_ID';
+export const FAKE_PIVOT_TABLE_MENU_ID = 'FAKE_PIVOT_TABLE_MENU_ID';
 
 export enum UNI_MENU_POSITIONS {
     TOOLBAR_MAIN = 'toolbar_main',
@@ -131,6 +132,18 @@ export function FakeFontGroupMenuItemFactory(accessor: IAccessor): IMenuSelector
         type: MenuItemType.SUBITEMS,
         tooltip: 'Font group',
         icon: 'BoldSingle',
+        positions: [MenuPosition.TOOLBAR_START],
+        disabled$: new Observable((subscriber) => { subscriber.next(true); }),
+    };
+}
+
+export function FakePivotTableMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: FAKE_PIVOT_TABLE_MENU_ID,
+        type: MenuItemType.BUTTON,
+        group: MenuGroup.TOOLBAR_OTHERS,
+        icon: 'PivotTableSingle',
+        tooltip: 'PivotTable',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable((subscriber) => { subscriber.next(true); }),
     };

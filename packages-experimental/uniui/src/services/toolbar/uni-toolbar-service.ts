@@ -15,7 +15,7 @@
  */
 
 import { Disposable, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import { FAKE_BG_COLOR_MENU_ID, FAKE_FONT_COLOR_MENU_ID, FAKE_FONT_FAMILY_MENU_ID, FAKE_FONT_GROUP_MENU_ID, FAKE_FONT_SIZE_MENU_ID, FAKE_IMAGE_MENU_ID, FONT_GROUP_MENU_ID } from '../../controllers/menu';
+import { FAKE_BG_COLOR_MENU_ID, FAKE_FONT_COLOR_MENU_ID, FAKE_FONT_FAMILY_MENU_ID, FAKE_FONT_GROUP_MENU_ID, FAKE_FONT_SIZE_MENU_ID, FAKE_IMAGE_MENU_ID, FAKE_PIVOT_TABLE_MENU_ID, FONT_GROUP_MENU_ID } from '../../controllers/menu';
 
 interface IItemImpl {
     id: string;
@@ -84,6 +84,10 @@ export class UniToolbarService extends Disposable {
             {
                 id: BuiltinUniToolbarItemId.IMAGE,
                 impl: [{ id: FAKE_IMAGE_MENU_ID, type: UniverInstanceType.UNIVER_UNKNOWN }],
+            },
+            {
+                id: BuiltinUniToolbarItemId.PIVOT_TABLE,
+                impl: [{ id: FAKE_PIVOT_TABLE_MENU_ID, type: UniverInstanceType.UNIVER_UNKNOWN }],
             },
         ];
     }

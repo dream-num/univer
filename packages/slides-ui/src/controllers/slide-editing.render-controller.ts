@@ -239,19 +239,18 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     /**
-     * Should update current editing cell info when selection is changed.
+     * Set editorUnitId to curr doc.
      * @param d DisposableCollection
      */
     private _subscribeToCurrentCell(d: DisposableCollection) {
         // first part of editing.
         // startEditing --> _updateEditor --> slide-editor-bridge.service.ts@setEditorRect---> currentEditRectState$.next(editCellState)
-        // startEditing --> changeVisible
+        // 2nd part is startEditing --> changeVisible
         d.add(this._editorBridgeService.currentEditRectState$.subscribe((editCellState) => {
             if (editCellState == null) {
                 return;
             }
 
-            const { position, documentLayoutObject, scaleX, editorUnitId } = editCellState;
             if (
                 this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) ||
                 this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
@@ -259,8 +258,12 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
                 return;
             }
 
-            const { startX, endX } = position;
-            const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
+            const {
+                position: { startX, endX },
+                documentLayoutObject: { textRotation, wrapStrategy, documentModel },
+                scaleX,
+                editorUnitId,
+            } = editCellState;
             const { vertexAngle: angle } = convertTextRotation(textRotation);
             documentModel!.updateDocumentId(editorUnitId);
 
@@ -275,26 +278,40 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
                 endOffset: 0,
             }]);
 
-            // the last active, calling stack trace:
-            // EditorContainer.tsx cellEditorManagerService.state$.subscribe -->
+            // the valid pos of activate:
             // EditorContainer.tsx cellEditorManagerService.setFocus(true) -->
-            // _textSelectionRenderManager.sync() --> _updateInputPosition --> activate
+            // ---> _focus$.next --> editingRenderController
+            // _textSelectionRenderManager.sync() --> _updateInputPosition --> activate(left, top)
 
-            // hide the editor, but the editor is still exist.
-            // the last and valid call activate is in _textSelectionRenderManager.sync() --> _updateInputPosition
             this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
         }));
     }
 
+    /**
+     * set size and pos of editing area
+     * invoked by _handleEditorVisible
+     *
+     * set pos of editing area
+     * EditorContainer.tsx cellEditorManagerService.setFocus(true) -->
+     * _focus$.next --> editingRenderController -->
+     * _textSelectionRenderManager.sync() --> _updateInputPosition --> activate(left, top)
+     *
+     * @param positionFromEditRectState
+     * @param canvasOffset
+     * @param documentSkeleton
+     * @param documentLayoutObject
+     * @param scaleX
+     * @param scaleY
+     */
     private _fitTextSize(
-        actualRangeWithCoord: IPosition,
+        positionFromEditRectState: IPosition,
         canvasOffset: ICanvasOffset,
         documentSkeleton: DocumentSkeleton,
         documentLayoutObject: IDocumentLayoutObject,
         scaleX: number = 1,
         scaleY: number = 1
     ) {
-        const { startX, startY, endX, endY } = actualRangeWithCoord;
+        const { startX, startY, endX, endY } = positionFromEditRectState;
         const documentDataModel = documentLayoutObject.documentModel;
 
         if (documentDataModel == null) {
@@ -302,7 +319,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         }
 
         const { actualWidth, actualHeight } = this._predictingSize(
-            actualRangeWithCoord,
+            positionFromEditRectState,
             canvasOffset,
             documentSkeleton,
             documentLayoutObject,
@@ -346,7 +363,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
 
-        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill, scaleX, scaleY);
+        this._editAreaProcessing(editorWidth, editorHeight, positionFromEditRectState, canvasOffset, fill, scaleX, scaleY);
     }
 
     /**
@@ -410,15 +427,13 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     /**
-     * Mainly used to calculate the volume of scenes and objects,
-     * determine whether a scrollbar appears,
-     * and calculate the editor's boundaries relative to the browser.
+     * control the size of editing area
      */
     // eslint-disable-next-line max-lines-per-function
     private _editAreaProcessing(
         editorWidth: number,
         editorHeight: number,
-        actualRangeWithCoord: IPosition,
+        positionFromEditRectState: IPosition,
         canvasOffset: ICanvasOffset,
         fill: Nullable<string>,
         scaleX: number = 1,
@@ -430,7 +445,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             return;
         }
 
-        let { startX, startY } = actualRangeWithCoord;
+        let { startX, startY } = positionFromEditRectState;
 
         startX += canvasOffset.left;
         startY += canvasOffset.top;
@@ -466,9 +481,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
 
         editorWidth += scrollBar?.barSize || 0;
 
-        if (editorWidth > clientWidth) {
-            editorWidth = clientWidth;
-        }
+        editorWidth = Math.min(editorWidth, clientWidth);
 
         startX -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
@@ -606,6 +619,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             return;
         }
 
+        // core function! set editing area size and pos
         this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
         // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.

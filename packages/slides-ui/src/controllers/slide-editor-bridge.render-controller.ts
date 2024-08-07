@@ -154,6 +154,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         const slideData = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         if (!slideData) return false;
         curRichText.refreshDocumentByDocData();
+        curRichText.adaptObjSizeToContentSize();
         this._curRichText = null;
     }
 

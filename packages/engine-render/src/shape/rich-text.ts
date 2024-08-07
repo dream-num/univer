@@ -370,4 +370,14 @@ export class RichText extends BaseObject {
 
         this._documentSkeleton.calculate();
     }
+
+    adaptObjSizeToContentSize() {
+        const contentSize = this.getDocsSkeletonPageSize();
+        if (contentSize && contentSize.width !== 0 && contentSize.height !== 0) {
+            this.transformByState({
+                width: contentSize?.width || 0,
+                height: contentSize?.height || 0,
+            });
+        }
+    }
 }

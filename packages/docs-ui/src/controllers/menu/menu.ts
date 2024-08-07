@@ -32,6 +32,7 @@ import {
     BulletListCommand,
     CheckListCommand,
     DocSkeletonManagerService,
+    getCommandSkeleton,
     getParagraphsInRange,
     OrderListCommand,
     ResetInlineFormatTextBackgroundColorCommand,
@@ -114,6 +115,7 @@ function getInsertTableHiddenObservable(
 
 function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return new Observable((subscriber) => {
         const subscription = textSelectionManagerService.textSelection$.subscribe((selection) => {
@@ -130,9 +132,33 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
             }
 
             const textRange = textRanges[0];
-            const { collapsed, anchorNodePosition } = textRange;
+            const { collapsed, anchorNodePosition, startOffset } = textRange;
 
-            if (!collapsed) {
+            if (!collapsed || startOffset == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+            if (docDataModel == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            const docSkeletonManagerService = getCommandSkeleton(accessor, docDataModel.getUnitId());
+
+            if (docSkeletonManagerService == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            const viewModel = docSkeletonManagerService.getViewModel();
+
+            const customRange = viewModel.getCustomRangeRaw(startOffset);
+
+            // Can not insert table in custom range.
+            if (customRange) {
                 subscriber.next(true);
                 return;
             }

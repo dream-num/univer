@@ -26,7 +26,6 @@ import {
 
 import { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
 import { DOC_FORMULA_PLUGIN_NAME } from '../const';
-import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '../commands/mutation';
 
 export interface IUniFormulaService {
     getFormulaWithRangeId(unitId: string, rangeId: string): Nullable<IDocFormulaReference>;
@@ -48,7 +47,6 @@ export class DumbUniFormulaService implements IUniFormulaService {
         @ICommandService protected readonly _commandSrv: ICommandService,
         @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
     ) {
-        this._initCommands();
         this._initDocFormulaResources(resourceManagerService);
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
@@ -75,14 +73,6 @@ export class DumbUniFormulaService implements IUniFormulaService {
         });
 
         return true;
-    }
-
-    private _initCommands(): void {
-        [
-            AddDocUniFormulaMutation,
-            UpdateDocUniFormulaMutation,
-            RemoveDocUniFormulaMutation,
-        ].forEach((command) => this._commandSrv.registerCommand(command));
     }
 
     /**

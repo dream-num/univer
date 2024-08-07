@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
 import { DOC_FORMULA_PLUGIN_NAME } from './const';
+import { UniFormulaController } from './controller/uni-formula.controller';
 
 export class UniverDocUniFormulaPlugin extends Plugin {
     static override pluginName: string = DOC_FORMULA_PLUGIN_NAME;
@@ -33,6 +34,9 @@ export class UniverDocUniFormulaPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.add([UniFormulaController]);
+        this._injector.get(UniFormulaController);
+
         if (this._config?.playDumb) {
             this._injector.add([IUniFormulaService, { useClass: DumbUniFormulaService }] as Dependency);
             this._injector.get(IUniFormulaService);

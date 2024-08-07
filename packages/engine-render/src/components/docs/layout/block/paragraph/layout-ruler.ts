@@ -262,13 +262,14 @@ function _divideOperator(
                 }
 
                 if (glyphGroup.length) {
+                    // Only Divide in the first paragraph is the beginning of the paragraph
                     _divideOperator(
                         ctx,
                         glyphGroup,
                         pages,
                         sectionBreakConfig,
                         paragraphConfig,
-                        paragraphStart,
+                        false,
                         breakPointType,
                         defaultSpanLineHeight
                     );

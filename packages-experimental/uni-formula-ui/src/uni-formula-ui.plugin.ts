@@ -42,4 +42,8 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
             [IUniFormulaService, { useClass: UniFormulaService }],
         ] as Dependency[]).forEach((d) => injector.add(d));
     }
+
+    override onReady(): void {
+        this._injector.get(IUniFormulaService);
+    }
 }

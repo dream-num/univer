@@ -30,9 +30,7 @@ import {
     Injector,
     IResourceManagerService,
     IUniverInstanceService,
-    LifecycleStages,
     makeCustomRangeStream,
-    OnLifecycle,
     Quantity,
     RCDisposable,
     toDisposable,
@@ -122,7 +120,6 @@ export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCache
  * And it also manages formula resources fields of docs and slides. `SHEETS_FORMULA_REMOTE_PLUGIN`
  * is not required but optional here.
  */
-@OnLifecycle(LifecycleStages.Steady, UniFormulaService)
 export class UniFormulaService extends DumbUniFormulaService implements IUniFormulaService {
     private readonly _formulaIdToKey = new Map<string, string>();
 

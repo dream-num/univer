@@ -15,6 +15,7 @@
  */
 
 import type { ITextRangeParam } from '@univerjs/core';
+import type { DOC_RANGE_TYPE } from '../components/docs/text-selection/range-interface';
 
 export interface ITextSelectionStyle {
     strokeWidth: number;
@@ -32,6 +33,7 @@ export const NORMAL_TEXT_SELECTION_PLUGIN_STYLE: ITextSelectionStyle = {
 
 export interface ITextRangeWithStyle extends ITextRangeParam {
     style?: ITextSelectionStyle;
+    rangeType?: DOC_RANGE_TYPE;
 }
 
 // Only use in add/replaceTextRanges methods.
@@ -41,6 +43,7 @@ export interface ISuccinctDocRangeParam {
     segmentId?: string; // Header of footer id.
     segmentPage?: number; // Optional, because header and footer are in different pages, so need pageIndex to allocate selection in header or footer.
     style?: ITextSelectionStyle;
+    rangeType?: DOC_RANGE_TYPE;
 }
 
 export enum RANGE_DIRECTION {

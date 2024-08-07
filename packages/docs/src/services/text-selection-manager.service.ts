@@ -54,12 +54,12 @@ interface ITextSelectionManagerInsertParam extends IDocSelectionManagerSearchPar
 type ITextSelectionInfo = Map<string, Map<string, ITextSelectionInnerParam>>;
 
 export function serializeDocRange(textRange: IDocRange): ITextRangeWithStyle {
-    const { startOffset, endOffset, collapsed } = textRange;
-
+    const { startOffset, endOffset, collapsed, rangeType } = textRange;
     const serializedTextRange: ITextRangeWithStyle = {
         startOffset: startOffset!,
         endOffset: endOffset!,
         collapsed,
+        rangeType,
     };
 
     if (typeof textRange.isActive === 'function') {

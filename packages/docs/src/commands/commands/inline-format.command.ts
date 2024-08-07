@@ -371,6 +371,7 @@ function isTextDecoration(value: unknown | ITextDecoration): value is ITextDecor
  * or bold if there is no bold text. This method is used to get the reverse style value calculated
  * from textRuns in the selection
  */
+// eslint-disable-next-line complexity
 function getReverseFormatValueInSelection(
     textRuns: ITextRun[],
     preCommandId: string,

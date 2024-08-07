@@ -40,7 +40,8 @@ import type { Documents } from '../document';
 import { getSystemHighlightColor } from '../../../basics/tools';
 import { TextRange } from './text-range';
 import type { RectRange } from './rect-range';
-import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection } from './selection-utils';
+import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex } from './selection-utils';
+import { DOC_RANGE_TYPE } from './range-interface';
 
 export interface ITextSelectionInnerParam {
     textRanges: TextRange[];
@@ -243,23 +244,41 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         } = this;
 
         for (const range of ranges) {
-            const { startOffset, endOffset } = range;
+            const { startOffset, endOffset, rangeType } = range;
 
-            const rangeList = getRangeListFromCharIndex(
-                startOffset, endOffset, scene!, document!, docSkeleton!, style, segmentId, segmentPage
-            );
+            if (rangeType === DOC_RANGE_TYPE.RECT) {
+                const rectRange = getRectRangeFromCharIndex(
+                    startOffset, endOffset, scene!, document!, docSkeleton!, style, segmentId, segmentPage
+                );
 
-            if (rangeList == null) {
-                continue;
+                if (rectRange) {
+                    this._addRectRanges([rectRange]);
+                }
+            } else if (rangeType === DOC_RANGE_TYPE.TEXT) {
+                const textRange = getTextRangeFromCharIndex(
+                    startOffset, endOffset, scene!, document!, docSkeleton!, style, segmentId, segmentPage
+                );
+
+                if (textRange) {
+                    this._addTextRange(textRange);
+                }
+            } else {
+                const rangeList = getRangeListFromCharIndex(
+                    startOffset, endOffset, scene!, document!, docSkeleton!, style, segmentId, segmentPage
+                );
+
+                if (rangeList == null) {
+                    continue;
+                }
+
+                const { textRanges, rectRanges } = rangeList;
+
+                for (const textRange of textRanges) {
+                    this._addTextRange(textRange);
+                }
+
+                this._addRectRanges(rectRanges);
             }
-
-            const { textRanges, rectRanges } = rangeList;
-
-            for (const textRange of textRanges) {
-                this._addTextRange(textRange);
-            }
-
-            this._addRectRanges(rectRanges);
         }
 
         this._textSelectionInner$.next({

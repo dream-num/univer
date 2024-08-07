@@ -15,7 +15,7 @@
  */
 
 import type { Documents, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, getParagraphByGlyph, PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, getParagraphByGlyph, GlyphType, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, PresetListType } from '@univerjs/core';
 import { DocSkeletonManagerService, ToggleCheckListCommand, VIEWPORT_KEY } from '@univerjs/docs';
@@ -60,10 +60,8 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
                 if (!node) {
                     return;
                 }
-                const index = node.node.parent!.st! + node.node.parent!.glyphGroup.indexOf(node.node)!;
-
                 const paragraph = getParagraphByGlyph(node.node, this._context.unit.getBody());
-                if (paragraph && paragraph.bullet && index === paragraph.paragraphStart) {
+                if (paragraph && paragraph.bullet && node.node.glyphType === GlyphType.LIST) {
                     if (
                         paragraph.bullet.listType === PresetListType.CHECK_LIST ||
                         paragraph.bullet.listType === PresetListType.CHECK_LIST_CHECKED

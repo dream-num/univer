@@ -689,14 +689,10 @@ export class DocumentSkeleton extends Skeleton {
         x: number,
         y: number,
         nestLevel: number = 0
-    // eslint-disable-next-line ts/no-explicit-any
+        // eslint-disable-next-line ts/no-explicit-any
     ): any {
         const { sections, skeTables } = segmentPage;
         this._findLiquid.translateSave();
-        const pointInPage = x >= this._findLiquid.x
-            && x <= this._findLiquid.x + segmentPage.pageWidth
-            && y >= this._findLiquid.y
-            && y <= this._findLiquid.y + segmentPage.pageHeight;
 
         switch (pageType) {
             case DocumentSkeletonPageType.HEADER: {
@@ -718,6 +714,11 @@ export class DocumentSkeleton extends Skeleton {
                 break;
             }
         }
+
+        const pointInPage = x >= this._findLiquid.x
+            && x <= this._findLiquid.x + segmentPage.pageWidth
+            && y >= this._findLiquid.y
+            && y <= this._findLiquid.y + segmentPage.pageHeight;
 
         if (pointInPage) {
             for (const section of sections) {

@@ -24,7 +24,6 @@ import type {
     ICustomTable,
     IDocumentBody,
     IParagraph,
-    IParagraphRange,
     ISectionBreak,
     ITextRun,
 } from '../../../../types/interfaces';

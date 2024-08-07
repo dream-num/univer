@@ -24,7 +24,6 @@ import { Vector2 } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
-import { Checkbox } from '../../../shape';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 

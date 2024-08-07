@@ -221,13 +221,12 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const { listType } = params;
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
-        if (docDataModel == null || activeRange == null) {
+        const activeRanges = textSelectionManagerService.getDocRanges();
+        if (docDataModel == null || activeRanges == null || !activeRanges.length) {
             return false;
         }
 
-        const { segmentId } = activeRange;
-
+        const { segmentId } = activeRanges[0];
         const selections = textSelectionManagerService.getDocRanges() ?? [];
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
         const serializedSelections = selections.map(serializeDocRange);
@@ -237,7 +236,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         }
 
         const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
-        const currentParagraphs = getParagraphsRelative(activeRange, paragraphs);
+        const currentParagraphs = getParagraphsRelative(activeRanges, paragraphs);
         const unitId = docDataModel.getUnitId();
         const ID_LENGTH = 6;
         const listId = Tools.generateRandomId(ID_LENGTH);
@@ -766,8 +765,8 @@ export function getParagraphsInRange(activeRange: IActiveTextRange, paragraphs: 
     return results;
 }
 
-export function getParagraphsRelative(activeRange: IActiveTextRange, paragraphs: IParagraph[]) {
-    const selectionParagraphs = getParagraphsInRange(activeRange, paragraphs);
+export function getParagraphsRelative(ranges: IDocRange[], paragraphs: IParagraph[]) {
+    const selectionParagraphs = getParagraphsInRanges(ranges, paragraphs);
     const startIndex = paragraphs.indexOf(selectionParagraphs[0]);
     const endIndex = paragraphs.indexOf(selectionParagraphs[selectionParagraphs.length - 1]);
     if (selectionParagraphs[0].bullet) {

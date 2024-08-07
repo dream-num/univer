@@ -55,7 +55,12 @@ exports.baseRules = {
     // TODO: just for compatibility with old code
     'unused-imports/no-unused-vars': 'warn',
     'style/jsx-closing-tag-location': 'warn',
-    'ts/ban-types': 'warn',
+    // 'ts/ban-types': 'warn',
+    'ts/no-restricted-types': 'warn',
+    'ts/no-wrapper-object-types': 'warn',
+    'ts/no-empty-object-type': 'warn',
+    'ts/no-unsafe-function-type': 'warn',
+    'ts/no-unused-expressions': 'warn',
     'unicorn/prefer-dom-node-text-content': 'warn',
     'unicorn/prefer-number-properties': 'warn',
     'no-prototype-builtins': 'warn',

@@ -26,20 +26,20 @@ export class UniverDocUniFormulaPlugin extends Plugin {
     static override type: UniverInstanceType = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: { playDumb: boolean },
+        private readonly _config: { playDumb: boolean } | undefined,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
     }
 
     override onStarting(): void {
-        if (this._config.playDumb) {
+        if (this._config?.playDumb) {
             this._injector.add([IUniFormulaService, { useClass: DumbUniFormulaService }] as Dependency);
         }
     }
 
     override onReady(): void {
-        if (this._config.playDumb) {
+        if (this._config?.playDumb) {
             this._injector.get(IUniFormulaService);
         }
     }

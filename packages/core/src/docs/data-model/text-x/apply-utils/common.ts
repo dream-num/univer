@@ -619,7 +619,6 @@ export function deleteParagraphs(body: IDocumentBody, textLength: number, curren
     const { paragraphs } = body;
 
     const startIndex = currentIndex;
-
     const endIndex = currentIndex + textLength;
     const removeParagraphs: IParagraph[] = [];
     let removeAfterFirstNew: Nullable<IParagraph> = null;
@@ -630,7 +629,6 @@ export function deleteParagraphs(body: IDocumentBody, textLength: number, curren
         for (let i = 0, len = paragraphs.length; i < len; i++) {
             const paragraph = paragraphs[i];
             const { startIndex: index } = paragraph;
-
             if (index >= startIndex && index < endIndex) {
                 removeParagraphs.push({
                     ...paragraph,
@@ -638,7 +636,6 @@ export function deleteParagraphs(body: IDocumentBody, textLength: number, curren
                 });
 
                 isRemove = true;
-
                 continue;
             } else if (index >= endIndex) {
                 paragraph.startIndex -= textLength;

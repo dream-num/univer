@@ -16,14 +16,14 @@
 
 import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const activeRange = textSelectionService.getActiveTextRangeWithStyle();
+    const textRanges = textSelectionService.getCurrentTextRanges()?.map(serializeDocRange);
     const renderManagerService = accessor.get(IRenderManagerService);
     const render = renderManagerService.getCurrent();
     const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
@@ -31,30 +31,33 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
     if (editArea === DocumentEditArea.FOOTER || editArea === DocumentEditArea.HEADER) {
         return true;
     }
+    if (!textRanges || textRanges.length > 1) {
+        return true;
+    }
+
+    const activeRange = textRanges[0];
     const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!doc || !activeRange || activeRange.collapsed) {
-        return (true);
+        return true;
     }
 
     const paragraphs = doc.getBody()?.paragraphs;
     if (!paragraphs) {
-        return (true);
-        return;
+        return true;
     }
 
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const p = paragraphs[i];
-        if ((activeRange.startOffset) <= p.startIndex && activeRange.endOffset > p.startIndex) {
-            return (true);
-            return;
+        if (activeRange.startOffset <= p.startIndex && activeRange.endOffset > p.startIndex) {
+            return true;
         }
 
-        if (p.startIndex > activeRange.endOffset) {
+        if (p.startIndex > activeRange.endOffset!) {
             break;
         }
     }
 
-    return (false);
+    return false;
 };
 
 export interface IShowDocHyperLinkEditPopupOperationParams {

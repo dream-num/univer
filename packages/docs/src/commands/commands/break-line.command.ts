@@ -102,13 +102,13 @@ export const BreakLineCommand: ICommand = {
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
         // line breaks to 2
         if (prevParagraph && prevParagraph.startIndex > endOffset) {
-            const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex));
+            const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex + 1));
 
             bodyAfter.customRanges = bodyAfter.customRanges?.map((range) => customRangeService.copyCustomRange(unitId, range));
 
             const deleteRange = {
                 startOffset,
-                endOffset: prevParagraph.startIndex,
+                endOffset: prevParagraph.startIndex + 1,
                 collapsed: false,
             };
             updateAttributeByInsert(
@@ -120,6 +120,7 @@ export const BreakLineCommand: ICommand = {
                 1,
                 0
             );
+
             const result = await commandService.executeCommand(InsertCommand.id, {
                 unitId,
                 body: bodyAfter,

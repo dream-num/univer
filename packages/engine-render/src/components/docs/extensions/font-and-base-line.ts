@@ -17,7 +17,7 @@
 import type { IScale } from '@univerjs/core';
 import { BaselineOffset, getColorStyle } from '@univerjs/core';
 
-import { hasCJK } from '../../../basics';
+import { GlyphType, hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
@@ -106,14 +106,17 @@ export class FontAndBaseLine extends docExtension {
             ctx.fillText(content, 0, 0);
             ctx.restore();
         } else {
-            if (content === '\u2610' || content === '\u2611') {
+            const CHECKED_GLYPH = '\u2611';
+            const UNCHECKED_GLYPH = '\u2610';
+            if ((content === UNCHECKED_GLYPH || content === CHECKED_GLYPH) && glyph.glyphType === GlyphType.LIST) {
                 ctx.save();
                 const size = glyph.ts?.fs ?? 16;
-                ctx.translate(spanStartPoint.x, spanStartPoint.y + centerPoint.y - size);
+                const MAGIC_OFFSET = 3;
+                ctx.translate(spanPointWithFont.x, spanPointWithFont.y - (bBox.aba + bBox.abd) - MAGIC_OFFSET);
                 Checkbox.drawWith(ctx, {
                     width: size,
                     height: size,
-                    checked: content === '\u2611',
+                    checked: content === CHECKED_GLYPH,
                 });
                 ctx.restore();
             } else {

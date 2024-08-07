@@ -18,20 +18,19 @@ import type { CustomDecorationType, DocumentDataModel, IAccessor, IMutationInfo,
 import { getBodySlice, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
+import { serializeDocRange, TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 interface IAddCustomDecorationParam {
     unitId: string;
-    range: ITextRange;
+    ranges: ITextRange[];
     segmentId?: string;
     id: string;
     type: CustomDecorationType;
 }
 
 export function addCustomDecorationFactory(param: IAddCustomDecorationParam) {
-    const { unitId, range, id, type, segmentId } = param;
+    const { unitId, ranges, id, type, segmentId } = param;
 
-    const { startOffset: start, endOffset: end } = range;
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
@@ -43,29 +42,36 @@ export function addCustomDecorationFactory(param: IAddCustomDecorationParam) {
 
     const textX = new TextX();
     const jsonX = JSONX.getInstance();
+    let cursor = 0;
 
-    if (start > 0) {
+    for (let i = 0; i < ranges.length; i++) {
+        const range = ranges[i];
+        const { startOffset: start, endOffset: end } = range;
+        if (start > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: start - cursor,
+                segmentId,
+            });
+        }
+
         textX.push({
             t: TextXActionType.RETAIN,
-            len: start,
+            body: {
+                dataStream: '',
+                customDecorations: [{
+                    id,
+                    type,
+                    startIndex: 0,
+                    endIndex: end - start - 1,
+                }],
+            },
+            len: end - start,
             segmentId,
         });
-    }
 
-    textX.push({
-        t: TextXActionType.RETAIN,
-        body: {
-            dataStream: '',
-            customDecorations: [{
-                id,
-                type,
-                startIndex: 0,
-                endIndex: end - start - 1,
-            }],
-        },
-        len: end - start,
-        segmentId,
-    });
+        cursor = end;
+    }
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;
@@ -82,8 +88,8 @@ export function addCustomDecorationBySelectionFactory(accessor: IAccessor, param
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const selection = textSelectionManagerService.getActiveTextRangeWithStyle();
-    if (!selection) {
+    const selections = textSelectionManagerService.getCurrentTextRanges();
+    if (!selections) {
         return false;
     }
 
@@ -100,11 +106,7 @@ export function addCustomDecorationBySelectionFactory(accessor: IAccessor, param
     const doMutation = addCustomDecorationFactory(
         {
             unitId,
-            range: {
-                startOffset: selection.startOffset,
-                endOffset: selection.endOffset,
-                collapsed: true,
-            },
+            ranges: selections.map(serializeDocRange),
             id,
             type,
             segmentId,

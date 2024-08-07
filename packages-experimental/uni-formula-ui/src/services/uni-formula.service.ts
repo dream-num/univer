@@ -17,7 +17,8 @@
 import type {
     ICellData,
     IDisposable,
-    Nullable } from '@univerjs/core';
+    Nullable 
+} from '@univerjs/core';
 import {
     ICommandService,
     Inject,
@@ -32,13 +33,11 @@ import {
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import type {
-    IDocFormulaCache,
-    IDocFormulaReference,
     IUniFormulaService,
     IUpdateDocUniFormulaCacheMutationParams } from '@univerjs/uni-formula';
 import {
     DumbUniFormulaService,
-    UpdateDocUniFormulaCacheMutation,
+    UpdateDocUniFormulaCacheCommand,
 } from '@univerjs/uni-formula';
 
 const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';
@@ -146,7 +145,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
 
                     if (mutationParam.ids.length === 0) return;
 
-                    this._commandSrv.executeCommand(UpdateDocUniFormulaCacheMutation.id, mutationParam as IUpdateDocUniFormulaCacheMutationParams);
+                    this._commandSrv.executeCommand(UpdateDocUniFormulaCacheCommand.id, mutationParam as IUpdateDocUniFormulaCacheMutationParams);
                 }
             }
         }));

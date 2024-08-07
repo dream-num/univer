@@ -15,33 +15,105 @@
  */
 
 import type {
+    DocumentDataModel,
     ICellData,
+    ICommand,
     IDisposable,
-    Nullable } from '@univerjs/core';
+    IDocumentBody,
+    Nullable,
+} from '@univerjs/core';
 import {
+    CommandType,
+    CustomRangeType,
     ICommandService,
     Inject,
     IResourceManagerService,
     IUniverInstanceService,
     LifecycleStages,
+    makeCustomRangeStream,
     OnLifecycle,
     Optional,
     RCDisposable,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
+import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import type {
-    IDocFormulaCache,
-    IDocFormulaReference,
-    IUniFormulaService,
-    IUpdateDocUniFormulaCacheMutationParams } from '@univerjs/uni-formula';
-import {
-    DumbUniFormulaService,
-    UpdateDocUniFormulaCacheMutation,
-} from '@univerjs/uni-formula';
+import type { IDocFormulaCache } from '@univerjs/uni-formula';
+import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
 
 const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';
+/**
+ * Update calculating result in a batch.
+ */
+export interface IUpdateDocUniFormulaCacheCommandParams {
+    /** The doc in which formula results changed. */
+    unitId: string;
+    /** Range ids. */
+    ids: string[];
+    /** Calculation results. */
+    cache: IDocFormulaCache[];
+}
+
+/**
+ * This command is internal. It should not be exposed to third-party developers.
+ *
+ * @ignore
+ */
+export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCacheCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'doc.mutation.update-doc-uni-formula-cache',
+    handler(accessor, params: IUpdateDocUniFormulaCacheCommandParams) {
+        const { unitId, ids, cache } = params;
+
+        const uniFormulaService = accessor.get(IUniFormulaService);
+        const instanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const data = instanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+
+        /** The document may have not loaded on this client. We are safe to ignore cache updating. */
+        if (!data) return true;
+        const body = data.getBody();
+
+        function getRange(rangeId: string) {
+            return body?.customRanges?.find((r) => r.rangeId === rangeId);
+        }
+
+        const saveCacheResult = uniFormulaService.updateFormulaResults(unitId, ids, cache);
+        if (!saveCacheResult) return false;
+
+        return ids.every((id, index) => {
+            const range = getRange(id);
+            if (!range) return true; // If we cannot find that rangeId, we are save to ignore cache.
+
+            const dataStream = makeCustomRangeStream(`${cache[index].v ?? ''}`);
+            const body: IDocumentBody = {
+                dataStream,
+                customRanges: [{
+                    startIndex: 0,
+                    endIndex: dataStream.length - 1,
+                    rangeId: id,
+                    rangeType: CustomRangeType.UNI_FORMULA,
+                    wholeEntity: true,
+                }],
+            };
+
+            const redoMutation = replaceSelectionFactory(accessor, {
+                unitId,
+                body,
+                selection: makeSelection(range.startIndex, range.endIndex),
+            });
+
+            if (redoMutation) {
+                return commandService.syncExecuteCommand(redoMutation.id, redoMutation.params, { onlyLocal: true });
+            }
+
+            return false;
+        });
+    },
+};
 
 /**
  * This service provides methods for docs and slides to register a formula into Univer's formula system.
@@ -60,10 +132,6 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
     ) {
         super(resourceManagerService, _commandSrv, _instanceSrv);
-    }
-
-    getFormulaWithRangeId(unitId: string, rangeId: string): Nullable<IDocFormulaReference> {
-        return this._docFormulas.get(getDocFormulaKey(unitId, rangeId)) ?? null;
     }
 
     /**
@@ -100,23 +168,6 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         this._registerOtherFormulaSrv.deleteFormula(pseudoId, DOC_PSEUDO_SUBUNIT, [item.formulaId]);
         this._docFormulas.delete(key);
         this._formulaIdToKey.delete(item.formulaId);
-    }
-
-    hasFocFormula(unitId: string, formulaId: string): boolean {
-        return this._docFormulas.has(getDocFormulaKey(unitId, formulaId));
-    }
-
-    updateFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean {
-        formulaIds.forEach((id, index) => {
-            const formulaData = this._docFormulas.get(getDocFormulaKey(unitId, id));
-            if (!formulaData) return true;
-
-            formulaData.v = v[index].v;
-            formulaData.t = v[index].t;
-            return true;
-        });
-
-        return true;
     }
 
     private _dataSyncDisposables = new Map<string, RCDisposable>();
@@ -167,7 +218,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
 
                     if (mutationParam.ids.length === 0) return;
 
-                    this._commandSrv.executeCommand(UpdateDocUniFormulaCacheMutation.id, mutationParam as IUpdateDocUniFormulaCacheMutationParams);
+                    this._commandSrv.executeCommand(UpdateDocUniFormulaCacheCommand.id, mutationParam as IUpdateDocUniFormulaCacheCommandParams);
                 }
             }
         }));

@@ -23,7 +23,7 @@ export class UniverDocUniFormulaPlugin extends Plugin {
     static override pluginName: string = DOC_FORMULA_PLUGIN_NAME;
 
     // This plugin should load only when sheet related modules are loaded.
-    static override type: UniverInstanceType = UniverInstanceType.UNIVER_SHEET;
+    static override type: UniverInstanceType = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
         private readonly _config: { playDumb: boolean } | undefined,
@@ -35,11 +35,6 @@ export class UniverDocUniFormulaPlugin extends Plugin {
     override onStarting(): void {
         if (this._config?.playDumb) {
             this._injector.add([IUniFormulaService, { useClass: DumbUniFormulaService }] as Dependency);
-        }
-    }
-
-    override onReady(): void {
-        if (this._config?.playDumb) {
             this._injector.get(IUniFormulaService);
         }
     }

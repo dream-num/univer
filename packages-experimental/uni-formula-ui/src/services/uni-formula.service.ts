@@ -109,7 +109,7 @@ export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCache
             });
 
             if (redoMutation) {
-                return commandService.syncExecuteCommand(redoMutation.id, redoMutation.params, { onlyLocal: true });
+                return commandService.syncExecuteCommand(redoMutation.id, redoMutation.params);
             }
 
             return false;

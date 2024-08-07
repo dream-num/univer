@@ -19,10 +19,10 @@ import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService } from '@univerjs/uniui';
 import type { IUniverDocsUIConfig } from '@univerjs/docs-ui';
-import { DocUIController } from '@univerjs/docs-ui';
-import { SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
+import { DocCreateTableOperation, DocUIController } from '@univerjs/docs-ui';
+import { BulletListCommand, OrderListCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
 import { IMAGE_MENU_ID as DocsImageMenuId } from '@univerjs/docs-drawing-ui';
-import { DOC_BOLD_MUTATION_ID, DOC_ITALIC_MUTATION_ID, DOC_STRIKE_MUTATION_ID, DOC_UNDERLINE_MUTATION_ID, DocBoldMenuItemFactory, DocItalicMenuItemFactory, DocStrikeThroughMenuItemFactory, DocUnderlineMenuItemFactory } from './menu';
+import { DOC_BOLD_MUTATION_ID, DOC_ITALIC_MUTATION_ID, DOC_STRIKE_MUTATION_ID, DOC_TABLE_MUTATION_ID, DOC_UNDERLINE_MUTATION_ID, DocBoldMenuItemFactory, DocItalicMenuItemFactory, DocStrikeThroughMenuItemFactory, DocTableMenuFactory, DocUnderlineMenuItemFactory } from './menu';
 
 @OnLifecycle(LifecycleStages.Ready, UniDocsUIController)
 export class UniDocsUIController extends DocUIController {
@@ -61,6 +61,9 @@ export class UniDocsUIController extends DocUIController {
             [BuiltinUniToolbarItemId.COLOR, SetInlineFormatTextColorCommand.id],
             [BuiltinUniToolbarItemId.BACKGROUND, SetInlineFormatTextBackgroundColorCommand.id],
             [BuiltinUniToolbarItemId.IMAGE, DocsImageMenuId],
+            [BuiltinUniToolbarItemId.TABLE, DOC_TABLE_MUTATION_ID],
+            [BuiltinUniToolbarItemId.ORDER_LIST, OrderListCommand.id],
+            [BuiltinUniToolbarItemId.UNORDER_LIST, BulletListCommand.id],
         ]).forEach(([id, menuId]) => {
             this.disposeWithMe(this._toolbarService.implementItem(id, { id: menuId, type: UniverInstanceType.UNIVER_DOC }));
         });
@@ -71,6 +74,7 @@ export class UniDocsUIController extends DocUIController {
                 DocItalicMenuItemFactory,
                 DocUnderlineMenuItemFactory,
                 DocStrikeThroughMenuItemFactory,
+                DocTableMenuFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
@@ -83,6 +87,7 @@ export class UniDocsUIController extends DocUIController {
             generateCloneMutation(DOC_ITALIC_MUTATION_ID, SetInlineFormatItalicCommand),
             generateCloneMutation(DOC_UNDERLINE_MUTATION_ID, SetInlineFormatUnderlineCommand),
             generateCloneMutation(DOC_STRIKE_MUTATION_ID, SetInlineFormatStrikethroughCommand),
+            generateCloneMutation(DOC_TABLE_MUTATION_ID, DocCreateTableOperation),
         ].forEach((mutation) => {
             this.disposeWithMe(this._commandService.registerCommand(mutation));
         });

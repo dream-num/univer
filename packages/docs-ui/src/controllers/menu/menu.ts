@@ -535,7 +535,7 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 }
 
 export const TableIcon = 'GridSingle';
-const TABLE_MENU_ID = 'doc.menu.table';
+export const TABLE_MENU_ID = 'doc.menu.table';
 
 export function TableMenuFactory(accessor: IAccessor): IMenuItem {
     return {

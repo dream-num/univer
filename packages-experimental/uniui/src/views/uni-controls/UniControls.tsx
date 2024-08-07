@@ -22,6 +22,7 @@ import { CheckMarkSingle, FullscreenSingle, IncreaseSingle, ZoomReduceSingle } f
 import { Dropdown, Tooltip } from '@univerjs/design';
 import clsx from 'clsx';
 import { useDependency } from '@univerjs/core';
+import { ISidebarService } from '@univerjs/ui';
 import { UniDiv } from '../uni-toolbar/UniFloatToolbar';
 import type { IProjectNode } from '../../services/unit-grid/unit-grid.service';
 import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
@@ -51,9 +52,11 @@ export enum UniControlItem {
 }
 
 export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?: (key: UniControlItem) => void }) => {
-    const zoomPercent = Math.floor(zoom * 100);
-    const { zoomIn, zoomOut, fitView, setViewport, getNodes, setCenter, getZoom } = useReactFlow();
     const unitGridService = useDependency(IUnitGridService);
+    const { zoomIn, zoomOut, fitView, getNodes, setCenter, getZoom } = useReactFlow();
+
+    const zoomPercent = Math.floor(zoom * 100);
+    const rightPadding = useRightSidebarVisible() ? 352 : 12;
 
     const onZoomInHandler = () => {
         zoomIn();
@@ -118,7 +121,7 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
     }, [fitView]);
 
     return (
-        <div className={styles.uniControls}>
+        <div className={styles.uniControls} style={{ right: `${rightPadding}px` }}>
             <UniControlButton tooltips="Full screen" onClick={onFullscreenHandler}>
                 <FullscreenSingle />
             </UniControlButton>
@@ -175,3 +178,19 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
     );
 };
 
+function useRightSidebarVisible() {
+    const sidebarService = useDependency(ISidebarService);
+    const [visible, setVisible] = React.useState(false);
+
+    useEffect(() => {
+        const sidebarSubscription = sidebarService.sidebarOptions$.subscribe((options) => {
+            setVisible(!!options.visible);
+        });
+
+        return () => {
+            sidebarSubscription.unsubscribe();
+        };
+    }, [sidebarService]);
+
+    return visible;
+}

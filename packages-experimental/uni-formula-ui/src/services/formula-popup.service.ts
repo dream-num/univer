@@ -22,7 +22,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { IShortcutItem } from '@univerjs/ui';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { FORMULA_PROMPT_ACTIVATED } from '@univerjs/sheets-formula';
-import { UniFormulaService } from '@univerjs/uni-formula';
+import { IUniFormulaService } from '@univerjs/uni-formula';
 import type { IAddDocUniFormulaCommandParams } from '../commands/command';
 import { AddDocUniFormulaCommand } from '../commands/command';
 import { ConfirmFormulaPopupCommand } from '../commands/operation';
@@ -57,7 +57,7 @@ export class DocFormulaPopupService extends Disposable {
 
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
-        @Inject(UniFormulaService) private readonly _uniFormulaService: UniFormulaService,
+        @IUniFormulaService private readonly _uniFormulaService: IUniFormulaService,
         @IContextService private readonly _contextService: IContextService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,

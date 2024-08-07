@@ -57,8 +57,7 @@ export interface IUpdateDocUniFormulaCacheCommandParams {
 }
 
 /**
- * This mutation is internal. It should not be exposed to third-party developers.
- * This mutation should be registered on the server side as well.
+ * This command is internal. It should not be exposed to third-party developers.
  *
  * @ignore
  */

@@ -39,7 +39,7 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
         ([
             [DocUniFormulaController],
             [DocFormulaPopupService],
-            [IUniFormulaService, { useClass: UniFormulaService }]
+            [IUniFormulaService, { useClass: UniFormulaService }],
         ] as Dependency[]).forEach((d) => injector.add(d));
     }
 }

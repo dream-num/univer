@@ -21,7 +21,7 @@ export type { Serializable } from './common/json';
 export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
 export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';
-export { CustomError } from './common/error';
+export { CustomCommandExecutionError } from './common/error';
 export { Univer } from './univer';
 export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
 export { isNumeric, isSafeNumeric } from './common/number';

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export class CustomError extends Error {
+export class CustomCommandExecutionError extends Error {
     constructor(message: string) {
         super(message);
-        this.name = 'CustomError';
+        this.name = 'CustomCommandExecutionError';
     }
 }

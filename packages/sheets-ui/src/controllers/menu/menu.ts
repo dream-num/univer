@@ -70,7 +70,6 @@ import {
 
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
-    CopyCommand,
     CutCommand,
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
@@ -79,7 +78,6 @@ import {
     MenuGroup,
     MenuItemType,
     MenuPosition,
-    PasteCommand,
 } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { combineLatestWith, map, Observable } from 'rxjs';

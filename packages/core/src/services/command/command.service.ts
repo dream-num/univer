@@ -311,7 +311,8 @@ export class CommandService extends Disposable implements ICommandService {
             throw new Error(`[CommandService]: command "${id}" is not registered.`);
         } catch (error) {
             if (error instanceof CustomError) {
-                this._logService.log(error);
+                // If need custom logic, can add it here
+                return false as R;
             } else {
                 this._logService.error(error);
                 throw error;

@@ -38,6 +38,7 @@ import {
     PageOrientType,
     SectionType,
     SpacingRule,
+    Tools,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -1062,4 +1063,19 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
 export function resetContext(ctx: ILayoutContext) {
     ctx.isDirty = false;
     ctx.skeleton.drawingAnchor?.clear();
+}
+
+export function mergeByV<T = unknown>(object: unknown, originObject: unknown, type: 'max' | 'min') {
+    const mergeIterator = (obj: unknown, originObj: unknown, key: string) => {
+        if (key !== 'v') {
+            return Tools.mergeWith(obj, originObj, mergeIterator);
+        }
+        if (typeof originObj === 'number') {
+            if (typeof obj === 'number') {
+                return type === 'max' ? Math.max(originObj, obj) : Math.min(originObj, obj);
+            }
+        }
+        return originObj ?? obj;
+    };
+    return Tools.mergeWith(object, originObject, mergeIterator) as T;
 }

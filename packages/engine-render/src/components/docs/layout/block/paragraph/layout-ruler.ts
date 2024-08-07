@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, Nullable } from '@univerjs/core';
+import type { INumberUnit, IParagraphStyle, Nullable } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
@@ -56,6 +56,7 @@ import {
     getPositionVertical,
     isColumnFull,
     lineIterator,
+    mergeByV,
 } from '../../tools';
 import { BreakPointType } from '../../line-breaker/break';
 import { getNullTableSkeleton, getTableIdAndSliceIndex, getTableSliceId } from '../table';
@@ -78,10 +79,7 @@ export function layoutParagraph(
 
             const paragraphProperties = bulletSkeleton.paragraphProperties || {};
 
-            paragraphConfig.paragraphStyle = {
-                ...paragraphConfig.paragraphStyle,
-                ...paragraphProperties,
-            };
+            paragraphConfig.paragraphStyle = mergeByV<IParagraphStyle>(paragraphConfig.paragraphStyle, paragraphProperties, 'max');
 
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 

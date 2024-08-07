@@ -16,6 +16,7 @@
 
 import { customAlphabet, nanoid } from 'nanoid';
 
+import mergeWith from 'lodash.mergewith';
 import { isLegalUrl, normalizeUrl } from '../common/url';
 import type { Class, IKeyValue } from './types';
 
@@ -672,11 +673,11 @@ export class Tools {
     }
 
     static isValidParameter(name: string): boolean {
-       /**
-        *Validates that the name does not contain spaces or disallowed characters
-        *Assuming the set of disallowed characters includes some special characters,
-        *you can modify the regex below according to the actual requirements
-        */
+        /**
+         *Validates that the name does not contain spaces or disallowed characters
+         *Assuming the set of disallowed characters includes some special characters,
+         *you can modify the regex below according to the actual requirements
+         */
         const containsInvalidChars = /[~!@#$%^&*()+=\-{}\[\]\|:;"'<>,?\/ ]+/.test(name);
 
         const isValidLength = name.length <= 255;
@@ -709,6 +710,20 @@ export class Tools {
 
     static clamp(value: number, min: number, max: number) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     *
+     *
+     * @static
+     * @param {unknown} object Modify the property while leaving the reference unchanged.
+     * @param {unknown} source The source  being merged in object.
+     * @param {(value: unknown, originValue: unknown, key: string, object: unknown, source: unknown, stack: string[]) => {}} [customizer]
+     * @return {*}
+     * @memberof Tools
+     */
+    static mergeWith(object: unknown, source: unknown, customizer?: (value: unknown, originValue: unknown, key: string, object: unknown, source: unknown, stack: string[]) => {}) {
+        return mergeWith(object, source, customizer);
     }
 }
 

@@ -36,7 +36,9 @@ export const FAKE_FONT_COLOR_MENU_ID = 'FAKE_FONT_COLOR_MENU_ID';
 export const FAKE_BG_COLOR_MENU_ID = 'FAKE_BG_COLOR_MENU_ID';
 export const FAKE_IMAGE_MENU_ID = 'FAKE_IMAGE_MENU_ID';
 export const FAKE_FONT_GROUP_MENU_ID = 'FAKE_FONT_GROUP_MENU_ID';
-export const FAKE_PIVOT_TABLE_MENU_ID = 'FAKE_PIVOT_TABLE_MENU_ID';
+export const FAKE_TABLE_MENU_ID = 'FAKE_TABLE_MENU_ID';
+export const FAKE_UNORDER_LIST_MENU_ID = 'FAKE_UNORDER_LIST_MENU_ID';
+export const FAKE_ORDER_LIST_MENU_ID = 'FAKE_ORDER_LIST_MENU_ID';
 
 export enum UNI_MENU_POSITIONS {
     TOOLBAR_MAIN = 'toolbar_main',
@@ -114,6 +116,30 @@ export function FakeImageMenuFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
+export function FakeUnorderListMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: FAKE_UNORDER_LIST_MENU_ID,
+        type: MenuItemType.BUTTON_SELECTOR,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        icon: 'UnorderSingle',
+        tooltip: 'toolbar.unorder',
+        positions: [MenuPosition.TOOLBAR_START],
+        disabled$: new Observable((subscriber) => { subscriber.next(true); }),
+    };
+}
+
+export function FakeOrderListMenuItemFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: FAKE_ORDER_LIST_MENU_ID,
+        type: MenuItemType.BUTTON_SELECTOR,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        icon: 'OrderSingle',
+        tooltip: 'toolbar.order',
+        positions: [MenuPosition.TOOLBAR_START],
+        disabled$: new Observable((subscriber) => { subscriber.next(true); }),
+    };
+}
+
 export function FontGroupMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     return {
@@ -139,7 +165,7 @@ export function FakeFontGroupMenuItemFactory(accessor: IAccessor): IMenuSelector
 
 export function FakePivotTableMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: FAKE_PIVOT_TABLE_MENU_ID,
+        id: FAKE_TABLE_MENU_ID,
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_OTHERS,
         icon: 'PivotTableSingle',

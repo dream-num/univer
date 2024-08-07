@@ -20,7 +20,7 @@ import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { DisposeUnitOperation } from '../commands/operations/uni.operation';
 import { UniToolbarService } from '../services/toolbar/uni-toolbar-service';
-import { DeleteMenuItemFactory, DownloadMenuItemFactory, FakeBackgroundColorSelectorMenuItemFactory, FakeFontFamilySelectorMenuItemFactory, FakeFontGroupMenuItemFactory, FakeFontSizeSelectorMenuItemFactory, FakeImageMenuFactory, FakePivotTableMenuItemFactory, FakeTextColorSelectorMenuItemFactory, FontGroupMenuItemFactory, LockMenuItemFactory, PrintMenuItemFactory, ShareMenuItemFactory, ZenMenuItemFactory } from './menu';
+import { DeleteMenuItemFactory, DownloadMenuItemFactory, FakeBackgroundColorSelectorMenuItemFactory, FakeFontFamilySelectorMenuItemFactory, FakeFontGroupMenuItemFactory, FakeFontSizeSelectorMenuItemFactory, FakeImageMenuFactory, FakeOrderListMenuItemFactory, FakePivotTableMenuItemFactory, FakeTextColorSelectorMenuItemFactory, FakeUnorderListMenuItemFactory, FontGroupMenuItemFactory, LockMenuItemFactory, PrintMenuItemFactory, ShareMenuItemFactory, ZenMenuItemFactory } from './menu';
 
 export interface IUniuiToolbarConfig {
     menu: MenuConfig;
@@ -77,6 +77,8 @@ export class UniuiToolbarController extends Disposable {
                 FakeImageMenuFactory,
                 FakeFontGroupMenuItemFactory,
                 FakePivotTableMenuItemFactory,
+                FakeOrderListMenuItemFactory,
+                FakeUnorderListMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));

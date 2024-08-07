@@ -61,6 +61,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniui": "workspace:*",
         "rxjs": ">=7.0.0"

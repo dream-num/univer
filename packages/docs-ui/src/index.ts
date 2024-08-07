@@ -29,5 +29,5 @@ export { DocUIController } from './controllers/doc-ui.controller';
 // #region - all commands
 
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
-
+export { DocCreateTableOperation } from './commands/operations/doc-create-table.operation';
 // #endregion

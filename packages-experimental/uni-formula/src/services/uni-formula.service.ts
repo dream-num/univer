@@ -28,7 +28,7 @@ import {
 } from '@univerjs/core';
 import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
 
-import type { type IDocFormulaCache, IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
+import { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
 import { DOC_FORMULA_PLUGIN_NAME } from '../const';
 import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '../commands/mutation';
 

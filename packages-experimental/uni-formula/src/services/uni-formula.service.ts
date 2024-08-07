@@ -14,95 +14,19 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICellData, ICommand, IDisposable, IDocumentBody, Nullable } from '@univerjs/core';
+import type { ICellData, IDisposable, Nullable } from '@univerjs/core';
 import {
-    CommandType,
     createIdentifier,
-    CustomRangeType,
     ICommandService,
     IResourceManagerService,
     IUniverInstanceService,
-    makeCustomRangeStream,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
 
 import { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
 import { DOC_FORMULA_PLUGIN_NAME } from '../const';
 import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '../commands/mutation';
-
-/**
- * Update calculating result in a batch.
- */
-export interface IUpdateDocUniFormulaCacheCommandParams {
-    /** The doc in which formula results changed. */
-    unitId: string;
-    /** Range ids. */
-    ids: string[];
-    /** Calculation results. */
-    cache: IDocFormulaCache[];
-}
-
-/**
- * This mutation is internal. It should not be exposed to third-party developers.
- * This mutation should be registered on the server side as well.
- *
- * @ignore
- */
-export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCacheCommandParams> = {
-    type: CommandType.COMMAND,
-    id: 'doc.mutation.update-doc-uni-formula-cache',
-    handler(accessor, params: IUpdateDocUniFormulaCacheCommandParams) {
-        const { unitId, ids, cache } = params;
-
-        const uniFormulaService = accessor.get(IUniFormulaService);
-        const instanceService = accessor.get(IUniverInstanceService);
-        const commandService = accessor.get(ICommandService);
-
-        const data = instanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-
-        /** The document may have not loaded on this client. We are safe to ignore cache updating. */
-        if (!data) return true;
-        const body = data.getBody();
-
-        function getRange(rangeId: string) {
-            return body?.customRanges?.find((r) => r.rangeId === rangeId);
-        }
-
-        const saveCacheResult = uniFormulaService.updateFormulaResults(unitId, ids, cache);
-        if (!saveCacheResult) return false;
-
-        return ids.every((id, index) => {
-            const range = getRange(id);
-            if (!range) return true; // If we cannot find that rangeId, we are save to ignore cache.
-
-            const dataStream = makeCustomRangeStream(`${cache[index].v ?? ''}`);
-            const body: IDocumentBody = {
-                dataStream,
-                customRanges: [{
-                    startIndex: 0,
-                    endIndex: dataStream.length - 1,
-                    rangeId: id,
-                    rangeType: CustomRangeType.UNI_FORMULA,
-                    wholeEntity: true,
-                }],
-            };
-
-            const redoMutation = replaceSelectionFactory(accessor, {
-                unitId,
-                body,
-                selection: makeSelection(range.startIndex, range.endIndex),
-            });
-
-            if (redoMutation) {
-                return commandService.syncExecuteCommand(redoMutation.id, redoMutation.params, { onlyLocal: true });
-            }
-
-            return false;
-        });
-    },
-};
 
 export interface IUniFormulaService {
     getFormulaWithRangeId(unitId: string, rangeId: string): Nullable<IDocFormulaReference>;
@@ -157,7 +81,6 @@ export class DumbUniFormulaService implements IUniFormulaService {
         [
             AddDocUniFormulaMutation,
             UpdateDocUniFormulaMutation,
-            UpdateDocUniFormulaCacheCommand,
             RemoveDocUniFormulaMutation,
         ].forEach((command) => this._commandSrv.registerCommand(command));
     }

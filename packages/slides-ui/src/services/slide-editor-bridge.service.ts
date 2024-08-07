@@ -46,6 +46,10 @@ export const ISlideEditorBridgeService = createIdentifier<SlideEditorBridgeServi
 
 export interface IEditorBridgeServiceParam {
     unitId: string;
+
+    /**
+     * pos and size of editing area
+     */
     position: IPosition;
     slideCardOffset: { left: number; top: number };
     documentLayoutObject: IDocumentLayoutObject;
@@ -81,6 +85,7 @@ export interface ISlideEditorBridgeService {
     // refreshEditCellState(): void;
 
     setEditorRect(param: ISetEditorInfo): void;
+    getEditorRect(): ISetEditorInfo;
     getEditRectState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     // // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
     // getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
@@ -129,7 +134,12 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         super.dispose();
     }
 
+    getEditorRect() {
+        return this._currentEditRectInfo;
+    }
+
     /**
+     * 1st part of startEditing.
      * editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
      * @editorInfo editorInfo
      */
@@ -138,7 +148,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
 
         /**
          * If there is no editor currently focused, then default to selecting the sheet editor to prevent the editorService from using the previously selected editor object.
-         * todo: wzhudev: In boundless mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
+         * todo: wzhudev: In univer mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
          */
         if (!this._editorService.getFocusEditor()) {
             this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
@@ -147,11 +157,12 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
             this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
         }
 
-        const editCellState = this.getEditRectState();
-        this._currentEditRectState = editCellState;
+        const editRectState = this.getEditRectState();
+        this._currentEditRectState = editRectState;
 
-        // slide-editing.render-controller.ts@_subscribeToCurrentCell --> activate(-1000, -1000)
-        this._currentEditRectState$.next(editCellState);
+        // slide-editing.render-controller@_subscribeToCurrentCell(Set editorUnitId to curr doc.)
+        // --> activate(-1000, -1000)
+        this._currentEditRectState$.next(editRectState);
     }
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
@@ -171,7 +182,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
             this._editorIsDirty = false;
         }
 
-        // subscribe: editing render controller
+        // subscriber: slide-editing.render-controller.ts@_handleEditorVisible
         this._visible$.next(this._visible);
         this._afterVisible$.next(this._visible);
     }
@@ -179,7 +190,8 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
     /**
      * get info from _currentEditRectInfo
      *
-     * invoked by slide-editing.render-controller.ts@_handleEditorVisible & this@setEditorRect
+     * invoked by slide-editing.render-controller.ts@_handleEditorVisible
+     * && this@setEditorRect
      */
     getEditRectState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
         const editorUnitId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
@@ -195,7 +207,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         docData.documentStyle = {
             ...docData.documentStyle,
             ...{
-                pageSize: { width: Infinity, height: Infinity },
+                pageSize: { width: editorRectInfo.richTextObj.width, height: Infinity },
             },
         };
 
@@ -211,7 +223,6 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         };
 
         // see insert-text.operation
-        // TODO: @lumixraku need to plus scrolling and offset of PPT card.
         const editorWidth = editorRectInfo.richTextObj.width;
         const editorHeight = editorRectInfo.richTextObj.height;
         const left = editorRectInfo.richTextObj.left;
@@ -249,7 +260,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
             unitId,
             editorUnitId,
             documentLayoutObject,
-        };
+        } as IEditorBridgeServiceParam;
     }
 
     changeEditorDirty(dirtyStatus: boolean) {

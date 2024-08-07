@@ -71,6 +71,10 @@ export class Layer extends Disposable {
         return this._allowCache;
     }
 
+    /**
+     * get objects which is visible and not in a group.
+     * @returns BaseObject[]
+     */
     getObjectsByOrder() {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);

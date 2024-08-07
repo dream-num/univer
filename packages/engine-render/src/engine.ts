@@ -238,6 +238,11 @@ export class Engine extends ThinEngine<Scene> {
         this.resizeBySize(width, height);
     }
 
+    /**
+     * set canvas element size
+     * @param width
+     * @param height
+     */
     resizeBySize(width: number, height: number) {
         const preWidth = this.width;
         const preHeight = this.height;

@@ -28,7 +28,7 @@ import {
 } from '@univerjs/core';
 import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
 
-import { IDocFormulaData, toJson, type IDocFormulaCache, type IDocFormulaReference } from '../models/doc-formula';
+import type { type IDocFormulaCache, IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
 import { DOC_FORMULA_PLUGIN_NAME } from '../const';
 import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '../commands/mutation';
 
@@ -113,7 +113,7 @@ export interface IUniFormulaService {
     updateFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean;
 }
 
-export const IUniFormulaService = createIdentifier<IUniFormulaService>('uni-formula.uni-formula.service')
+export const IUniFormulaService = createIdentifier<IUniFormulaService>('uni-formula.uni-formula.service');
 
 export class DumbUniFormulaService {
     /** This data maps doc formula key to the formula id in the formula system. */
@@ -121,9 +121,9 @@ export class DumbUniFormulaService {
     protected readonly _formulaIdToKey = new Map<string, string>();
 
     constructor(
-        @IResourceManagerService resourceManagerService: IResourceManagerService,
+    @IResourceManagerService resourceManagerService: IResourceManagerService,
         @ICommandService protected readonly _commandSrv: ICommandService,
-        @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService,
+        @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
     ) {
         this._initCommands();
         this._initDocFormulaResources(resourceManagerService);
@@ -161,7 +161,6 @@ export class DumbUniFormulaService {
             throw new Error(`[UniFormulaService]: cannot register formula ${key} when it is already registered!`);
         }
 
-
         this._docFormulas.set(key, { unitId, rangeId, f, formulaId: '', v, t });
 
         return toDisposable(() => this.unregisterDocFormula(unitId, rangeId));
@@ -170,8 +169,8 @@ export class DumbUniFormulaService {
     unregisterDocFormula(unitId: string, rangeId: string): void {
         const key = getDocFormulaKey(unitId, rangeId);
         const item = this._docFormulas.get(key);
-        if (!item) {
-            return;
+        if (item) {
+            this._docFormulas.delete(key);
         }
     }
 

@@ -43,7 +43,7 @@ import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import type { IDocFormulaCache } from '@univerjs/uni-formula';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
-import { delay } from 'rxjs';
+import { take } from 'rxjs';
 
 const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';
 /**
@@ -135,7 +135,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         @Inject(Injector) private readonly _injector: Injector,
         @IResourceManagerService resourceManagerService: IResourceManagerService,
         @ICommandService commandSrv: ICommandService,
-        @IUniverInstanceService instanceSrv: IUniverInstanceService,
+        @IUniverInstanceService instanceSrv: IUniverInstanceService
     ) {
         super(resourceManagerService, commandSrv, instanceSrv);
 
@@ -143,12 +143,15 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
 
         // Only able to perform formula calculation after a sheet is loaded.
         // FIXME: the formula engine is not unit-agnostic.
-        this.disposeWithMe(this._instanceSrv.getTypeOfUnitAdded$(UniverInstanceType.UNIVER_SHEET).pipe(
-            delay(1000)
-        ).subscribe(() => {
+        if (instanceSrv.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length) {
             this._canPerformFormulaCalculation = true;
-            this._initFormulaRegistration();
-        }));
+        } else {
+            this.disposeWithMe(this._instanceSrv.getTypeOfUnitAdded$(UniverInstanceType.UNIVER_SHEET).pipe(take(1))
+                .subscribe(() => {
+                    this._canPerformFormulaCalculation = true;
+                    this._initFormulaRegistration();
+                }));
+        }
     }
 
     /**
@@ -159,7 +162,6 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         if (this._docFormulas.has(key)) {
             throw new Error(`[UniFormulaService]: cannot register formula ${key} when it is already registered!`);
         }
-
 
         if (this._canPerformFormulaCalculation) {
             const pseudoId = getPseudoUnitKey(unitId);
@@ -272,6 +274,12 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         if (this._resultSubscription) {
             this._resultSubscription.dispose();
             this._resultSubscription = null;
+        }
+    }
+
+    private _checkFormulaUsable(): void {
+        if (!this._canPerformFormulaCalculation && this._instanceSrv.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length) {
+            this._canPerformFormulaCalculation = true;
         }
     }
 }

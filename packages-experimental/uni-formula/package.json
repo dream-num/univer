@@ -60,8 +60,7 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/docs": "workspace:*"
+        "@univerjs/core": "workspace:*"
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.72"

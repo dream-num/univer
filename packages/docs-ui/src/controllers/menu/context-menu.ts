@@ -87,7 +87,8 @@ const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
 
 export const CopyMenuFactory = (accessor: IAccessor): IMenuButtonItem => {
     return {
-        id: DocCopyCommand.id,
+        id: DocCopyCommand.name,
+        commandId: DocCopyCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'Copy',

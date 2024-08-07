@@ -24,7 +24,7 @@ import { IZenEditorManagerService, ZenEditorManagerService } from './services/ze
 
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'zen-editor';
-    static override type = UniverInstanceType.UNIVER_DOC;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         private readonly _config: Partial<IUniverSheetsZenEditorUIConfig> = {},

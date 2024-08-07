@@ -59,6 +59,13 @@ export enum MenuItemType {
 interface IMenuItemBase<V> {
     /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
     id: string;
+
+    /**
+     * If two menus reuse the same command (e.g. copy & paste command). They should have the same command
+     * id and different ids.
+     */
+    commandId?: string;
+
     subId?: string;
     title?: string;
     description?: string;

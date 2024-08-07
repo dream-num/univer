@@ -66,10 +66,7 @@ export default {
                 url: 'https://support.microsoft.com/ja-jp/office/false-%E9%96%A2%E6%95%B0-2d58dfa5-9c03-4259-bf8f-f0ae14346904',
             },
         ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
+        functionParameter: {},
     },
     IF: {
         description: '値または数式が条件を満たしているかどうかを判定します。',
@@ -101,8 +98,8 @@ export default {
         },
     },
     IFNA: {
-        description: 'それ以外の場合は、式の結果を返します。',
-        abstract: 'それ以外の場合は、式の結果を返します。',
+        description: '式の結果が #N/A になる場合に指定した値を返し、それ以外の場合は式の結果を返します',
+        abstract: '式の結果が #N/A になる場合に指定した値を返し、それ以外の場合は式の結果を返します',
         links: [
             {
                 title: '指導',
@@ -110,13 +107,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'エラー値 #N/A があるかどうかを確認する引数。' },
+            valueIfNa: { name: '値_if_na', detail: '式が #N/A エラー値と評価された場合に返される値。' },
         },
     },
     IFS: {
-        description: '1つ以上の条件が満たされているかどうかをチェックして、最初の TRUE 条件に対応する値を返します。',
-        abstract: '1つ以上の条件が満たされているかどうかをチェックして、最初の TRUE 条件に対応する値を返します。',
+        description: '1 つ以上の条件が満たされているかどうかを確認し、最初の TRUE 条件に対応する値を返します。',
+        abstract: '1 つ以上の条件が満たされているかどうかを確認し、最初の TRUE 条件に対応する値を返します。',
         links: [
             {
                 title: '指導',
@@ -124,8 +121,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logicalTest1: { name: '論理テスト1', detail: 'TRUE または FALSE に評価される条件。' },
+            valueIfTrue1: { name: '論理テスト1がTRUEの場合の値', detail: 'logical_test1 が TRUE と評価された場合に返される結果。空でもかまいません。' },
+            logicalTest2: { name: '論理テスト2...論理テスト127', detail: 'TRUE または FALSE に評価される条件。' },
+            valueIfTrue2: { name: '論理テスト2がTRUEの場合の値...論理テスト127がTRUEの場合の値', detail: 'logical_testN が TRUE と評価された場合に返される結果。各 value_if_trueN は条件 logical_testN に対応します。空でもかまいません。' },
         },
     },
     LAMBDA: {
@@ -195,8 +194,8 @@ export default {
         },
     },
     NOT: {
-        description: '引数の論理値 (TRUE または FALSE) を逆にして返します。',
-        abstract: '引数の論理値 (TRUE または FALSE) を逆にして返します。',
+        description: '引数の論理を反転します。',
+        abstract: '引数の論理を反転します。',
         links: [
             {
                 title: '指導',
@@ -204,8 +203,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical: { name: '論理式', detail: '論理を反転する条件。TRUE または FALSE に評価されます。' },
         },
     },
     OR: {
@@ -251,8 +249,8 @@ export default {
         },
     },
     SWITCH: {
-        description: '値の一覧に対して式を評価し、最初に一致する値に対応する結果を返します。 いずれにも一致しない場合は、任意指定の既定値が返されます。',
-        abstract: '値の一覧に対して式を評価し、最初に一致する値に対応する結果を返します。 いずれにも一致しない場合は、任意指定の既定値が返されます。',
+        description: '式を値のリストと比較し、最初に一致する値に対応する結果を返します。一致する値がない場合は、オプションで既定値が返される場合があります。',
+        abstract: '式を値のリストと比較し、最初に一致する値に対応する結果を返します。一致する値がない場合は、オプションで既定値が返される場合があります。',
         links: [
             {
                 title: '指導',
@@ -260,8 +258,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            expression: { name: '式', detail: '式は、値1...値126 と比較される値です（数値、日付、テキストなど）。' },
+            value: { name: '値1...値126', detail: '値N は式と比較される値です。' },
+            result: { name: '結果1...結果126', detail: '結果N は対応する値N 引数が式と一致した場合に返される値です。結果N は対応する値N 引数ごとに提供する必要があります。' },
+            default: { name: '既定', detail: '既定は、値N 式で一致するものが見つからなかった場合に返される値です。既定の引数は、対応する結果N 式がないことで識別されます（例を参照）。既定は関数の最後の引数でなければなりません。' },
         },
     },
     TRUE: {
@@ -273,14 +273,11 @@ export default {
                 url: 'https://support.microsoft.com/ja-jp/office/true-%E9%96%A2%E6%95%B0-7652c6e3-8987-48d0-97cd-ef223246b3fb',
             },
         ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
+        functionParameter: {},
     },
     XOR: {
-        description: 'すべての引数の排他的論理和を返します。',
-        abstract: 'すべての引数の排他的論理和を返します。',
+        description: '引数のうち奇数個の条件が TRUE の場合に TRUE を返し、偶数個の条件が TRUE の場合に FALSE を返します。',
+        abstract: '引数のうち奇数個の条件が TRUE の場合に TRUE を返します。',
         links: [
             {
                 title: '指導',
@@ -288,8 +285,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: '論理式 1', detail: 'TRUE または FALSE に評価できるテスト対象の 1 つ目の条件。' },
+            logical2: { name: '論理式 2', detail: '最大 255 個の条件まで、TRUE または FALSE のいずれかに評価できるテストする追加の条件。' },
         },
     },
 };

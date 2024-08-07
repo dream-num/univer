@@ -58,18 +58,15 @@ export default {
         },
     },
     FALSE: {
-        description: 'Returns the logical value FALSE',
-        abstract: 'Returns the logical value FALSE',
+        description: 'Returns the logical value FALSE.',
+        abstract: 'Returns the logical value FALSE.',
         links: [
             {
                 title: 'Instruction',
                 url: 'https://support.microsoft.com/en-us/office/false-function-2d58dfa5-9c03-4259-bf8f-f0ae14346904',
             },
         ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
+        functionParameter: {},
     },
     IF: {
         description: 'Specifies a logical test to perform',
@@ -116,8 +113,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'The argument that is checked for the #N/A error value.' },
+            valueIfNa: { name: 'value_if_na', detail: 'The value to return if the formula evaluates to the #N/A error value.' },
         },
     },
     IFS: {
@@ -130,8 +127,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logicalTest1: { name: 'logical_test1', detail: 'Condition that evaluates to TRUE or FALSE.' },
+            valueIfTrue1: { name: 'value_if_true1', detail: 'Result to be returned if logical_test1 evaluates to TRUE. Can be empty.' },
+            logicalTest2: { name: 'logical_test2...logical_test127', detail: 'Condition that evaluates to TRUE or FALSE.' },
+            valueIfTrue2: { name: 'value_if_true2...value_if_true127', detail: 'Result to be returned if logical_testN evaluates to TRUE. Each value_if_trueN corresponds with a condition logical_testN. Can be empty.' },
         },
     },
     LAMBDA: {
@@ -201,8 +200,8 @@ export default {
         },
     },
     NOT: {
-        description: 'Reverses the logic of its argument',
-        abstract: 'Reverses the logic of its argument',
+        description: 'Reverses the logic of its argument.',
+        abstract: 'Reverses the logic of its argument.',
         links: [
             {
                 title: 'Instruction',
@@ -210,8 +209,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical: { name: 'logical', detail: 'The condition that you want to reverse the logic for, which can evaluate to either TRUE or FALSE.' },
         },
     },
     OR: {
@@ -266,27 +264,26 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            expression: { name: 'expression', detail: 'Expression is the value (such as a number, date or some text) that will be compared against value1…value126.' },
+            value: { name: 'value1...value126', detail: 'ValueN is a value that will be compared against expression.' },
+            result: { name: 'result1...result126', detail: 'ResultN is the value to be returned when the corresponding valueN argument matches expression. ResultN and must be supplied for each corresponding valueN argument.' },
+            default: { name: 'default', detail: 'Default is the value to return in case no matches are found in the valueN expressions. The Default argument is identified by having no corresponding resultN expression (see examples). Default must be the final argument in the function.' },
         },
     },
     TRUE: {
-        description: 'Returns the logical value TRUE',
-        abstract: 'Returns the logical value TRUE',
+        description: 'Returns the logical value TRUE.',
+        abstract: 'Returns the logical value TRUE.',
         links: [
             {
                 title: 'Instruction',
                 url: 'https://support.microsoft.com/en-us/office/true-function-7652c6e3-8987-48d0-97cd-ef223246b3fb',
             },
         ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
+        functionParameter: {},
     },
     XOR: {
-        description: 'Returns a logical exclusive OR of all arguments',
-        abstract: 'Returns a logical exclusive OR of all arguments',
+        description: 'Returns TRUE if an odd number of its arguments evaluate to TRUE, and FALSE if an even number of its arguments evaluate to TRUE.',
+        abstract: 'Returns TRUE if an odd number of arguments are TRUE',
         links: [
             {
                 title: 'Instruction',
@@ -294,8 +291,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: 'logical1', detail: 'The first condition that you want to test that can evaluate to either TRUE or FALSE.' },
+            logical2: { name: 'logical2', detail: 'Additional conditions that you want to test that can evaluate to either TRUE or FALSE, up to a maximum of 255 conditions.' },
         },
     },
 };

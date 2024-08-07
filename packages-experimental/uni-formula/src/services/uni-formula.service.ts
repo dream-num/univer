@@ -22,7 +22,6 @@ import {
     CustomRangeType,
     Disposable,
     ICommandService,
-    Inject,
     IResourceManagerService,
     IUniverInstanceService,
     LifecycleStages,
@@ -53,8 +52,13 @@ export interface IUpdateDocUniFormulaCacheMutationParams {
     cache: IDocFormulaCache[];
 }
 
-/** This mutation is internal. It should not be exposed to third-party developers. */
-const UpdateDocUniFormulaCacheMutation: IMutation<IUpdateDocUniFormulaCacheMutationParams> = {
+/**
+ * This mutation is internal. It should not be exposed to third-party developers.
+ * This mutation should be registered on the server side as well.
+ *
+ * @ignore
+ */
+export const UpdateDocUniFormulaCacheMutation: IMutation<IUpdateDocUniFormulaCacheMutationParams> = {
     type: CommandType.MUTATION,
     id: 'doc.mutation.update-doc-uni-formula-cache',
     handler(accessor, params: IUpdateDocUniFormulaCacheMutationParams) {
@@ -109,8 +113,9 @@ const UpdateDocUniFormulaCacheMutation: IMutation<IUpdateDocUniFormulaCacheMutat
 };
 
 /**
- * This service provides methods for docs and slides to register a formula into
- * Univer's formula system.
+ * This service provides methods for docs and slides to register a formula into Univer's formula system.
+ * And it also manages formula resources fields of docs and slides. `SHEETS_FORMULA_REMOTE_PLUGIN`
+ * is not required but optional here.
  */
 @OnLifecycle(LifecycleStages.Steady, UniFormulaService)
 export class UniFormulaService extends Disposable {
@@ -120,23 +125,19 @@ export class UniFormulaService extends Disposable {
 
     constructor(
     @IResourceManagerService resourceManagerService: IResourceManagerService,
-        // TODO: wzhudev We may need to register the doc formulas to formula service in later lifecycle stages.
         @ICommandService private readonly _commandSrv: ICommandService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
-        @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaSrv: RegisterOtherFormulaService,
+        @Optional(RegisterOtherFormulaService) private readonly _registerOtherFormulaSrv?: RegisterOtherFormulaService,
         @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
     ) {
         super();
 
         this._initCommands();
         this._initDocFormulaResources(resourceManagerService);
-        this._initDocDisposingListener();
-    }
 
-    override dispose(): void {
-        super.dispose();
-
-        // TODO: wzhudev: concrete disposing methods
+        this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
+            this._unregisterDoc(doc.getUnitId());
+        });
     }
 
     private _initCommands(): void {
@@ -171,13 +172,17 @@ export class UniFormulaService extends Disposable {
             throw new Error(`[UniFormulaService]: cannot register formula ${key} when it is already registered!`);
         }
 
-        const pseudoId = getPseudoUnitKey(unitId);
-        this._checkResultSubscription();
-        this._checkSyncingUnit(pseudoId);
+        if (this._registerOtherFormulaSrv) {
+            const pseudoId = getPseudoUnitKey(unitId);
+            this._checkSyncingUnit(pseudoId);
+            this._checkResultSubscription();
 
-        const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, DOC_PSEUDO_SUBUNIT, f);
-        this._docFormulas.set(key, { unitId, rangeId, f, formulaId: id, v, t });
-        this._formulaIdToKey.set(id, key);
+            const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, DOC_PSEUDO_SUBUNIT, f);
+            this._docFormulas.set(key, { unitId, rangeId, f, formulaId: id, v, t });
+            this._formulaIdToKey.set(id, key);
+        } else {
+            this._docFormulas.set(key, { unitId, rangeId, f, formulaId: '', v, t });
+        }
 
         return toDisposable(() => this.unregisterDocFormula(unitId, rangeId));
     }
@@ -193,9 +198,11 @@ export class UniFormulaService extends Disposable {
         this._checkDisposingResultSubscription();
         this._dataSyncDisposables.get(pseudoId)?.dec();
 
-        this._registerOtherFormulaSrv.deleteFormula(pseudoId, DOC_PSEUDO_SUBUNIT, [item.formulaId]);
-        this._docFormulas.delete(key);
-        this._formulaIdToKey.delete(item.formulaId);
+        if (this._registerOtherFormulaSrv) {
+            this._registerOtherFormulaSrv.deleteFormula(pseudoId, DOC_PSEUDO_SUBUNIT, [item.formulaId]);
+            this._docFormulas.delete(key);
+            this._formulaIdToKey.delete(item.formulaId);
+        }
     }
 
     hasFocFormula(unitId: string, formulaId: string): boolean {
@@ -229,7 +236,7 @@ export class UniFormulaService extends Disposable {
 
     private _resultSubscription: Nullable<IDisposable>;
     private _checkResultSubscription(): void {
-        if (this._resultSubscription) return;
+        if (this._resultSubscription || !this._registerOtherFormulaSrv) return;
 
         this._resultSubscription = toDisposable(this._registerOtherFormulaSrv.formulaResult$.subscribe((resultMap) => {
             for (const resultOfUnit in resultMap) {
@@ -270,7 +277,11 @@ export class UniFormulaService extends Disposable {
     }
 
     private _checkDisposingResultSubscription(): void {
-        if (this._docFormulas.size === 0 && this._resultSubscription) {
+        if (this._docFormulas.size === 0) this._disposeResultSubscription();
+    }
+
+    private _disposeResultSubscription(): void {
+        if (this._resultSubscription) {
             this._resultSubscription.dispose();
             this._resultSubscription = null;
         }
@@ -289,18 +300,11 @@ export class UniFormulaService extends Disposable {
                 return formulas;
             },
             onLoad: (unitId, formulas) => {
-                // NOTE: Should wait for lifecycle?
                 formulas.forEach((f) => this.registerDocFormula(unitId, f.rangeId, f.f, f.v, f.t));
             },
             onUnLoad: (unitId) => {
                 this._unregisterDoc(unitId);
             },
-        });
-    }
-
-    private _initDocDisposingListener(): void {
-        this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
-            this._unregisterDoc(doc.getUnitId());
         });
     }
 
@@ -317,4 +321,3 @@ function getPseudoUnitKey(unitId: string): string {
 function getDocFormulaKey(unitId: string, formulaId: string): string {
     return `pseudo-${unitId}-${formulaId}`;
 }
-

@@ -49,19 +49,19 @@ export const AddDocUniFormulaCommand: ICommand<IAddDocUniFormulaCommandParams> =
             }],
         };
 
-        const redoMutation = replaceSelectionFactory(accessor, {
+        const insertCustomRangeMutation = replaceSelectionFactory(accessor, {
             unitId,
             body,
             selection: makeSelection(startIndex, startIndex + 1),
         });
 
-        if (redoMutation) {
+        if (insertCustomRangeMutation) {
             const addFormulaResourceMutation: IMutationInfo<IAddDocUniFormulaMutationParams> = {
                 id: AddDocUniFormulaMutation.id,
                 params: { unitId, rangeId, f },
             };
 
-            return sequenceExecute([addFormulaResourceMutation, redoMutation], commandService).result;
+            return sequenceExecute([insertCustomRangeMutation, addFormulaResourceMutation], commandService).result;
         }
 
         return false;

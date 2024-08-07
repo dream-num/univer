@@ -17,7 +17,7 @@
 import type {
     ICellData,
     IDisposable,
-    Nullable 
+    Nullable,
 } from '@univerjs/core';
 import {
     ICommandService,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICellData, IDisposable, IDocumentBody, ICommand, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommand, IDisposable, IDocumentBody, Nullable } from '@univerjs/core';
 import {
     CommandType,
     createIdentifier,

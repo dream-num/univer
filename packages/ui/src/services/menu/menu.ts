@@ -104,6 +104,7 @@ export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
 }
 
 export interface IValueOption<T = undefined> {
+    id?: string;
     value?: string | number;
     value$?: Observable<T>;
     label?:
@@ -117,7 +118,7 @@ export interface IValueOption<T = undefined> {
     tooltip?: string;
     style?: object;
     disabled?: boolean;
-    id?: string; // command id
+    commandId?: string;
 }
 
 export interface ICustomComponentProps<T> {

@@ -29,6 +29,7 @@ export const SHEETS_SORT_ASC_EXT_ICON = 'ExpandAscendingSingle';
 export const SHEETS_SORT_DESC_ICON = 'DescendingSingle';
 export const SHEETS_SORT_DESC_EXT_ICON = 'ExpandDescendingSingle';
 export const SHEETS_SORT_CUSTOM_ICON = 'CustomSortSingle';
+
 export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_SORT_MENU_ID,
@@ -92,7 +93,7 @@ export function sortRangeCustomMenuFactory(_accessor: IAccessor): IMenuItem {
     };
 }
 
-export function sortRangeCtxMenuFactory(_accessor: IAccessor): IMenuItem {
+export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_SORT_CTX_MENU_ID,
         title: 'sheets-sort.general.sort',
@@ -104,6 +105,12 @@ export function sortRangeCtxMenuFactory(_accessor: IAccessor): IMenuItem {
         ],
         group: MenuGroup.CONTEXT_MENU_DATA,
         icon: SHEETS_SORT_ASC_ICON,
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentRangeDisable$(accessor, {
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     };
 }
 

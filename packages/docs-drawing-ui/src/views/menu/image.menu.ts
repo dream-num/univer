@@ -19,7 +19,7 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@univerjs/core';
 
 import { TextSelectionManagerService } from '@univerjs/docs';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../upload-component/component-name';
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
@@ -49,6 +49,9 @@ const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
                         return;
                     }
                 }
+            } else {
+                subscriber.next(true);
+                return;
             }
 
             subscriber.next(false);
@@ -66,9 +69,8 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
         group: MenuGroup.TOOLBAR_LAYOUT,
         icon: ImageUploadIcon,
         tooltip: 'docImage.title',
-        hidden$: combineLatest(getDisableWhenSelectionInTableObservable(accessor), getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), (one, two) => {
-            return one || two;
-        }),
+        disabled$: getDisableWhenSelectionInTableObservable(accessor),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 

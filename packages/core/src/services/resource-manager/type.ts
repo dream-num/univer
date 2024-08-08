@@ -18,7 +18,7 @@ import type { Observable } from 'rxjs';
 import type { UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '../../common/di';
 import { createIdentifier } from '../../common/di';
-import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
+import type { Resources } from '../../types/interfaces/i-workbook-data';
 
 type IBusinessName = 'SHEET' | 'DOC';
 export type IResourceName = `${IBusinessName}_${string}_PLUGIN`;
@@ -36,9 +36,14 @@ export interface IResourceManagerService {
     registerPluginResource: <T = any>(hook: IResourceHook<T>) => IDisposable;
     disposePluginResource: (pluginName: IResourceName) => void;
     getAllResourceHooks: () => IResourceHook[];
-    getResources: (unitId: string) => IWorkbookData['resources'];
-    getResourcesByType: (unitId: string, type: UniverInstanceType) => IWorkbookData['resources'];
-    loadResources: (unitId: string, resources: IWorkbookData['resources']) => void;
+
+    /**
+     * @deprecated You should get resource with type specified.
+     */
+    getResources(unitId: string): Resources;
+    getResources(unitId: string, type: UniverInstanceType): Resources;
+    getResourcesByType: (unitId: string, type: UniverInstanceType) => Resources;
+    loadResources: (unitId: string, resources?: Resources) => void;
     unloadResources(unitId: string): void;
 }
 

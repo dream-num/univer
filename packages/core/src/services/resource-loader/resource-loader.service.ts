@@ -20,7 +20,7 @@ import type { IWorkbookData } from '../../types/interfaces';
 import type { IResourceHook } from '../resource-manager/type';
 import { IResourceManagerService } from '../resource-manager/type';
 import { IUniverInstanceService } from '../instance/instance.service';
-import { Disposable, toDisposable } from '../../shared/lifecycle';
+import { Disposable } from '../../shared/lifecycle';
 import { UniverInstanceType } from '../../common/unit';
 import type { DocumentDataModel } from '../../docs';
 import type { IResourceLoaderService } from './type';
@@ -84,25 +84,21 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         }));
 
         this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-                    this._resourceManagerService.loadResources(workbook.getUnitId(), workbook.getSnapshot().resources);
-                })
-            )
+            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+                this._resourceManagerService.loadResources(workbook.getUnitId(), workbook.getSnapshot().resources);
+            })
         );
 
         this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-                    this._resourceManagerService.unloadResources(workbook.getUnitId());
-                })
-            )
+            this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+                this._resourceManagerService.unloadResources(workbook.getUnitId());
+            })
         );
     }
 
     saveWorkbook: (workbook: Workbook) => IWorkbookData = (workbook) => {
         const unitId = workbook.getUnitId();
-        const resources = this._resourceManagerService.getResources(unitId) || [];
+        const resources = this._resourceManagerService.getResources(unitId, UniverInstanceType.UNIVER_SHEET);
         const snapshot = workbook.getSnapshot();
         snapshot.resources = resources;
         return snapshot;
@@ -110,7 +106,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
 
     saveDoc(doc: DocumentDataModel) {
         const unitId = doc.getUnitId();
-        const resources = this._resourceManagerService.getResourcesByType(unitId, UniverInstanceType.UNIVER_DOC) || [];
+        const resources = this._resourceManagerService.getResources(unitId, UniverInstanceType.UNIVER_DOC);
         const snapshot = doc.getSnapshot();
         snapshot.resources = resources;
         return snapshot;

@@ -70,6 +70,7 @@ import type {
 } from '@univerjs/engine-render';
 import {
     convertTextRotation,
+    DeviceInputEventType,
     FIX_ONE_PIXEL_BLUR_OFFSET,
     fixLineWidthByScale,
     IRenderManagerService,
@@ -560,14 +561,14 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
      * startEditing --> changeVisible --> slide-editor-bridge.render-controller.ts@changeVisible --> _editorBridgeService.changeVisible
      * @param param
      */
-    private _handleEditorVisible(_param: IEditorBridgeServiceVisibleParam) {
-        // const { eventType, keycode } = param;
+    private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
+        const { eventType, keycode } = param;
 
         // Change `CursorChange` to changed status, when formula bar clicked.
-        // this._cursorChange =
-        //     eventType === DeviceInputEventType.PointerDown
-        //         ? CursorChange.CursorChange
-        //         : CursorChange.StartEditor;
+        this._cursorChange =
+            [DeviceInputEventType.PointerDown, DeviceInputEventType.Dblclick].includes(eventType)
+                ? CursorChange.CursorChange
+                : CursorChange.StartEditor;
 
         const editCellState = this._editorBridgeService.getEditRectState();
         if (editCellState == null) {
@@ -716,16 +717,13 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
          * the up, down, left, and right keys can no longer switch editing cells,
          * but move the cursor within the editor instead.
          */
-        if (keycode != null &&
-            (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FORMULA_EDITOR_ACTIVATED))
+        if (keycode != null && this._cursorChange === CursorChange.CursorChange
         ) {
             this._moveInEditor(keycode, isShift);
-            return;
+        } else {
+            // TODO @Jocs: After we merging editor related controllers, this seems verbose.
+            this._editorBridgeService.changeVisible(params);
         }
-
-        // TODO @Jocs: After we merging editor related controllers, this seems verbose.
-
-        this._editorBridgeService.changeVisible(params);
     }
 
     private _editingChangedHandler() {

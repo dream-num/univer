@@ -90,7 +90,7 @@ export class Days360 extends BaseFunction {
                 return methodObject;
             }
 
-        const methodValue = +methodObject.getValue();
+            const methodValue = +methodObject.getValue();
 
             const { days } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, !methodValue ? 0 : 4);
 

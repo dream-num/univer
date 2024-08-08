@@ -220,7 +220,7 @@ interface IChangeListTypeCommandParams {
 export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
     id: 'doc.command.change-list-type',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: (accessor, params: IChangeListTypeCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -273,7 +273,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
 
         for (const paragraph of currentParagraphs) {
-            const { startIndex, paragraphStyle = {} } = paragraph;
+            const { startIndex, paragraphStyle = {}, bullet } = paragraph;
             const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
             const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
             const bulletParagraphTextStyle = paragraphProperties.textStyle;
@@ -301,18 +301,25 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
                                 textStyle: {
                                     ...paragraphStyle.textStyle,
                                     ...bulletParagraphTextStyle,
+                                    ...bullet?.listType === PresetListType.CHECK_LIST_CHECKED
+                                        ? {
+                                            st: {
+                                                s: BooleanNumber.FALSE,
+                                            },
+                                        }
+                                        : null,
                                 },
                                 indentFirstLine: undefined,
                                 hanging: listHanging,
                                 indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
                             },
                             bullet: {
-                                ...(paragraph.bullet ?? {
-                                    nestingLevel: 0,
-                                    textStyle: {
+                                nestingLevel: bullet?.nestingLevel ?? 0,
+                                textStyle: bullet?.listType === listType
+                                    ? bullet.textStyle
+                                    : {
                                         fs: 20,
                                     },
-                                }),
                                 listType,
                                 listId,
                             },

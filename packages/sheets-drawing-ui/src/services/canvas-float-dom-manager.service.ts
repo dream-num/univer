@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, IPosition, ITransformState, Nullable, Serializable, Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { Disposable, DisposableCollection, DrawingTypeEnum, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
@@ -451,7 +451,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         );
     }
 
-    addFloatDomToPosition(layer: ICanvasFloatDom) {
+    addFloatDomToPosition(layer: ICanvasFloatDom, propId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
             unitId: layer.unitId,
             subUnitId: layer.subUnitId,
@@ -462,7 +462,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
         const { unitId, subUnitId } = target;
         const { initPosition, componentKey, data } = layer;
-        const id = Tools.generateRandomId();
+        const id = propId ?? generateRandomId();
 
         const sheetTransform = this._getPosition(initPosition, unitId);
         if (sheetTransform == null) {

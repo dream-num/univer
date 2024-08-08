@@ -18,6 +18,7 @@ import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } 
 import {
     BooleanNumber,
     Disposable,
+    fromEventSubject,
     ICommandService,
     Inject,
     IUniverInstanceService,
@@ -30,9 +31,9 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Liquid } from '@univerjs/engine-render';
+import { Liquid, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
-import { filter, first } from 'rxjs';
+import { debounceTime, filter, first } from 'rxjs';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 interface IDrawingParamsWithBehindText {
@@ -70,6 +71,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
     private _initialize() {
         this._initialRenderRefresh();
         this._drawingInitializeListener();
+        this._initResize();
     }
 
     private _initialRenderRefresh() {
@@ -118,6 +120,21 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
                     this._refreshDrawing(skeleton);
                 }
+            })
+        );
+    }
+
+    private _initResize() {
+        this.disposeWithMe(
+            fromEventSubject(this._context.engine.onTransformChange$).pipe(
+                filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize),
+                debounceTime(16)
+            ).subscribe(() => {
+                const skeleton = this._docSkeletonManagerService.getSkeleton();
+                const { scene } = this._context;
+
+                scene.getTransformer()?.refreshControls();
+                this._refreshDrawing(skeleton);
             })
         );
     }

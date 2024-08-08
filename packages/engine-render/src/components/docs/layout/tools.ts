@@ -835,11 +835,11 @@ export function getFontCreateConfig(
 
     const { snapToGrid = BooleanNumber.TRUE, textStyle: paragraphStyleTextStyle } = paragraphStyle;
     textStyle = {
+        ...paragraphStyleTextStyle,
         ...documentTextStyle,
         ...textStyle,
         ...customDecorationStyle,
         ...customRangeStyle,
-        ...paragraphStyleTextStyle,
     };
 
     const fontStyle = getFontStyleString(textStyle, localeService);

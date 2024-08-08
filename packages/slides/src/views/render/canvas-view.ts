@@ -384,11 +384,11 @@ export class CanvasView extends RxDisposable implements IRenderModule {
     }
 
     private _sceneMap = new Map<string, Scene>();
+
     /**
-     *
      * @param pageId
      * @param page
-     * @returns
+     * @returns pageScene: Scene
      */
     private _createScene(pageId: string, page: ISlidePage) {
         const render = this._currentRender();

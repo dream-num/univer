@@ -832,7 +832,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const workbook = this._context.unit;
-        const worksheet = workbook.getActiveSheet();
+        let worksheet = workbook.getActiveSheet();
         const workbookId = this._context.unitId;
         const worksheetId = worksheet.getSheetId();
         // Reselect the current selections, when exist cell editor by press ESC.I
@@ -854,6 +854,20 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
+        /**
+         * When closing the editor, switch to the current tab of the editor.
+         */
+        if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
+            // SetWorksheetActivateCommand handler uses Promise
+            await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                subUnitId: sheetId,
+                unitId,
+            });
+        }
+
+        worksheet = workbook.getActiveSheet();
+
+        // If cross-sheet operation, switch current sheet first, then const cellData
         const cellData: Nullable<ICellData> = getCellDataByInput(
             worksheet.getCellRaw(row, column) || {},
             documentLayoutObject,
@@ -876,17 +890,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             row,
             col: column,
         };
-
-        /**
-         * When closing the editor, switch to the current tab of the editor.
-         */
-        if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
-            // SetWorksheetActivateCommand handler uses Promise
-            await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                subUnitId: sheetId,
-                unitId,
-            });
-        }
 
         const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
             this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT

@@ -70,7 +70,7 @@ export function UniSlideSideBar() {
         return () => {
             subscriber?.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -103,21 +103,21 @@ export function UniSlideSideBar() {
 
     return (
         <div className={styles.uniSlideBar} ref={slideBarRef}>
-                <div className={styles.uniSlideBarContent} style={{ height: `${barHeight}px` }}>
-                    {slideList.map((item, index) => (
-                        <div
-                            key={item.id}
-                            className={clsx(styles.uniSlideBarItem, {
-                                [styles.uniSlideBarItemActive]: item.id === activatePageId,
-                            })}
-                            onClick={() => activatePage(item.id)}
-                        >
-                            <span>{index + 1}</span>
-                            <div ref={divRefs[index]} className={styles.uniSlideBarBox} />
-                        </div>
-                    ))}
-                </div>
-                <button className={styles.newSlideButton} onClick={handleAppendSlide}>
+            <div className={styles.uniSlideBarContent} style={{ height: `${barHeight}px` }}>
+                {slideList.map((item, index) => (
+                    <div
+                        key={item.id}
+                        className={clsx(styles.uniSlideBarItem, {
+                            [styles.uniSlideBarItemActive]: item.id === activatePageId,
+                        })}
+                        onClick={() => activatePage(item.id)}
+                    >
+                        <span>{index + 1}</span>
+                        <div ref={divRefs[index]} className={styles.uniSlideBarBox} />
+                    </div>
+                ))}
+            </div>
+            <button className={styles.newSlideButton} onClick={handleAppendSlide}>
                 <IncreaseSingle className={styles.newSlideButtonIcon} />
                 <span>{localeService.t('slide.append')}</span>
             </button>

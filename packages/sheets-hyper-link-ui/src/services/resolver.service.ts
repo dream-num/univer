@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook, Worksheet } from '@univerjs/core';
+import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -23,6 +23,7 @@ import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/s
 import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
+import type { IUrlHandler } from '../types/interfaces/i-config';
 
 interface ISheetUrlParams {
     gid?: string;
@@ -65,6 +66,7 @@ export interface IHyperLinkInfo<T extends string> {
 
 export class SheetsHyperLinkResolverService {
     constructor(
+        private _urlHandler: Nullable<IUrlHandler>,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @ICommandService private _commandService: ICommandService,
         @IDefinedNamesService private _definedNamesService: IDefinedNamesService,
@@ -283,6 +285,10 @@ export class SheetsHyperLinkResolverService {
     }
 
     async navigateToOtherWebsite(url: string) {
+        if (this._urlHandler?.navigateToOtherWebsite) {
+            return this._urlHandler.navigateToOtherWebsite(url);
+        }
+
         window.open(url, '_blank', 'noopener noreferrer');
     }
 }

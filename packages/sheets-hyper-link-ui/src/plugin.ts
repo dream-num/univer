@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
+import type { Dependency, Nullable } from '@univerjs/core';
 import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -24,7 +24,6 @@ import { SheetsHyperLinkPopupService } from './services/popup.service';
 import { SheetsHyperLinkResolverService } from './services/resolver.service';
 import { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
 import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
-import type { IUniverSheetsHyperLinkUIConfig } from './controllers/ui.controller';
 import { SheetsHyperLinkUIController } from './controllers/ui.controller';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from './types/const';
 import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
@@ -32,6 +31,7 @@ import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.con
 import { SheetHyperLinkUrlController } from './controllers/url.controller';
 import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
 import { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
+import type { IUniverSheetsHyperLinkUIConfig } from './types/interfaces/i-config';
 
 @DependentOn(UniverSheetsHyperLinkPlugin)
 export class UniverSheetsHyperLinkUIPlugin extends Plugin {
@@ -39,7 +39,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private _config: IUniverSheetsHyperLinkUIConfig,
+        private _config: Nullable<IUniverSheetsHyperLinkUIConfig>,
         @Inject(Injector) protected override _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
@@ -48,7 +48,12 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
 
     override onStarting(): void {
         const dependencies: Dependency[] = [
-            [SheetsHyperLinkResolverService],
+            [
+                SheetsHyperLinkResolverService,
+                {
+                    useFactory: () => this._injector.createInstance(SheetsHyperLinkResolverService, this._config?.urlHandler),
+                },
+            ],
             [SheetsHyperLinkPopupService],
             [SheetsHyperLinkSidePanelService],
 

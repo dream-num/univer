@@ -24,7 +24,7 @@ import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationRefRangeController)
+@OnLifecycle(LifecycleStages.Starting, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {
     private _disposableMap: Map<string, Set<() => void>> = new Map();
 
@@ -145,7 +145,6 @@ export class DataValidationRefRangeController extends Disposable {
             const resultRangesOrigin = oldRanges.map((range) => {
                 return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo) as IRange | IRange[];
             }).filter((range) => !!range);
-
             const resultRanges = resultRangesOrigin.flat();
 
             const isEqual = isRangesEqual(resultRanges, oldRanges);

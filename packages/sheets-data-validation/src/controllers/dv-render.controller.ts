@@ -91,7 +91,9 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
         this.disposeWithMe(this._editorBridgeService.visible$.subscribe((visible) => {
             if (!visible.visible) {
-                this._dropdownManagerService.hideDropdown();
+                if (this._dropdownManagerService.activeDropdown?.trigger === 'editor-bridge') {
+                    this._dropdownManagerService.hideDropdown();
+                }
                 return;
             }
 
@@ -141,6 +143,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         },
                         componentKey: validator.dropdown,
                         onHide: () => { /* empty */ },
+                        trigger: 'editor-bridge',
                     },
                     false
                 );

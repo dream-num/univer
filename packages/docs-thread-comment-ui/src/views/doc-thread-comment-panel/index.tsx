@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { ICommandService, Injector, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime, Observable } from 'rxjs';
@@ -26,9 +26,11 @@ import { DocThreadCommentService } from '../../services/doc-thread-comment.servi
 import type { IAddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
 import { AddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment, type IDeleteDocCommentComment } from '../../commands/commands/delete-doc-comment.command';
+import { shouldDisableAddComment } from '../../controllers/menu';
 
 export const DocThreadCommentPanel = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const injector = useDependency(Injector);
     const doc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), [univerInstanceService]);
     const doc = useObservable(doc$);
     const subUnitId$ = useMemo(() => new Observable<string>((sub) => sub.next(DEFAULT_DOC_SUBUNIT_ID)), []);
@@ -72,11 +74,7 @@ export const DocThreadCommentPanel = () => {
         return null;
     }
 
-    const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
-    const isInValidSelection = Boolean(
-        activeRange &&
-        (activeRange.endOffset === activeRange.startOffset || activeRange.segmentId)
-    );
+    const isInValidSelection = shouldDisableAddComment(injector);
 
     const unitId = doc.getUnitId();
 

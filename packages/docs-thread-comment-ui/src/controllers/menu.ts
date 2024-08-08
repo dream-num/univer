@@ -74,16 +74,6 @@ export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButt
         title: 'threadCommentUI.panel.addComment',
         tooltip: 'threadCommentUI.panel.addComment',
         positions: [MenuPosition.TOOLBAR_START],
-        disabled$: new Observable(function (subscribe) {
-            const textSelectionService = accessor.get(TextSelectionManagerService);
-            const observer = textSelectionService.textSelection$.pipe(debounceTime(16)).subscribe(() => {
-                subscribe.next(shouldDisableAddComment(accessor));
-            });
-
-            return () => {
-                observer.unsubscribe();
-            };
-        }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

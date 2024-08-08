@@ -29,6 +29,7 @@ export interface IDropdownParam {
     location: ISheetLocation;
     onHide?: () => void;
     componentKey: string;
+    trigger?: 'editor-bridge';
 }
 
 export interface IDropdownComponentProps {

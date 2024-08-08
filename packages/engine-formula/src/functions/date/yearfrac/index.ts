@@ -83,4 +83,25 @@ export class Yearfrac extends BaseFunction {
 
         return NumberValueObject.create(result);
     }
+
+    private _checkArrayError(variant: BaseValueObject): BaseValueObject {
+        let _variant = variant;
+
+        if (_variant.isArray()) {
+            const rowCount = (_variant as ArrayValueObject).getRowCount();
+            const columnCount = (_variant as ArrayValueObject).getColumnCount();
+
+            if (rowCount > 1 || columnCount > 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            _variant = (_variant as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        if (_variant.isError()) {
+            return _variant;
+        }
+
+        return _variant;
+    }
 }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { type IAccessor, IUniverInstanceService } from '@univerjs/core';
+import { type IAccessor, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { type IMenuButtonItem, type IMenuItem, type IMenuSelectorItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { DisposeUnitOperation } from '../commands/operations/uni.operation';
 
 export const UNIT_LINE_COLOR_MENU_ID = 'UNIT_LINE_COLOR_MENU_ID';
@@ -148,7 +148,27 @@ export function FontGroupMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         tooltip: 'Font group',
         icon: 'BoldSingle',
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: univerInstanceService.focused$.pipe(map((focused) => !focused)),
+        hidden$: new Observable((subscriber) => {
+            const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+                if (unitId == null) {
+                    return subscriber.next(true);
+                }
+                const univerType = univerInstanceService.getUnitType(unitId);
+
+                subscriber.next(univerType === UniverInstanceType.UNIVER_SLIDE);
+            });
+
+            const focusedUniverInstance = univerInstanceService.getFocusedUnit();
+
+            if (focusedUniverInstance == null) {
+                return subscriber.next(true);
+            }
+
+            const univerType = univerInstanceService.getUnitType(focusedUniverInstance.getUnitId());
+            subscriber.next(univerType === UniverInstanceType.UNIVER_SLIDE);
+
+            return () => subscription.unsubscribe();
+        }),
     };
 }
 

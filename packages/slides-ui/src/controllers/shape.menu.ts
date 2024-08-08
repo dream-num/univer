@@ -21,11 +21,11 @@ import { UniverInstanceType } from '@univerjs/core';
 import { InsertSlideShapeRectangleOperation } from '../commands/operations/insert-shape.operation';
 
 export const GRAPH_SINGLE_ICON = 'graph-single';
-const IMAGE_MENU_ID = 'slide.menu.shape';
+export const SHAPE_MENU_ID = 'slide.menu.shape';
 
 export function SlideShapeMenuFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: IMAGE_MENU_ID,
+        id: SHAPE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
@@ -41,7 +41,7 @@ export function UploadSlideFloatShapeMenuFactory(_accessor: IAccessor): IMenuBut
         id: InsertSlideShapeRectangleOperation.id,
         title: 'slide.shape.insert.rectangle',
         type: MenuItemType.BUTTON,
-        positions: [IMAGE_MENU_ID],
+        positions: [SHAPE_MENU_ID],
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };
 }

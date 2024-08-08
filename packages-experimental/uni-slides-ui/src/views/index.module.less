@@ -2,8 +2,13 @@
     display: flex;
     flex-direction: column;
     border-right: 1px solid #eaecf0;
+    height: 100%;
+    user-select: none;
 
     &-content {
+        overflow-y: auto;
+        scrollbar-width: thin;
+
         .uni-slide-bar-item {
             box-sizing: border-box;
             position: relative;
@@ -46,20 +51,63 @@
                 border-color: rgb(var(--blue-500));
             }
         }
+
+        &-header {
+            padding-top: var(--padding-lg);
+            display: flex;
+            justify-content: center;
+
+            a {
+                width: 212px;
+                padding: var(--padding-xs) 0;
+                font-size: var(--font-size-sm);
+                background: rgb(var(--bg-color-secondary));
+                text-align: center;
+                border: 1px solid rgb(var(--border-color));
+                border-radius: var(--border-radius-base);
+                display: block;
+                transition: all 0.25s;
+                cursor: pointer;
+
+                &:hover {
+                    background: rgb(var(--bg-color-hover));
+                }
+            }
+        }
     }
 
-    .uni-slide-add-button {
-        padding: 10px 0;
-        text-align: center;
+    .new-slide-button {
+        position: relative;
+        height: 32px;
+        margin-top: 16px;
+        padding: 0 var(--margin-xs);
+        border-radius: var(--border-radius-lg);
+        color: rgba(var(--hyacinth-500));
+        background-color: transparent;
+        border: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-        button {
-            width: 45px;
-            height: auto;
+        &-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+        }
 
-            font-size: 24px;
-            line-height: 1;
+        &:hover {
+            background-color: rgb(var(--grey-100));
+            cursor: pointer;
+        }
 
-            border-radius: 10px;
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -10px;
+            height: 1px;
+            background-color: #ecedef;
         }
     }
 }

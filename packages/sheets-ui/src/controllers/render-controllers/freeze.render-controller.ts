@@ -391,7 +391,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         // );
     }
 
-    private _getCurrentLastVisibleRow() {
+    // eslint-disable-next-line complexity
+    private _getCurrentLastVisible() {
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
             return;
@@ -407,15 +408,15 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const currentScroll = this._scrollManagerService.getCurrentScrollState();
 
         const skeletonViewHeight = (sheetObject.engine.height - skeleton.columnHeaderHeight) / scale;
-        const start = currentScroll?.sheetViewStartRow ?? 0;
-        const startHeight =
-            start === 0
-                ? -(currentScroll?.offsetY ?? 0)
-                : skeleton.rowHeightAccumulation[start - 1] - (currentScroll?.offsetY ?? 0);
+        const skeletonViewWidth = (sheetObject.engine.width - skeleton.rowHeaderWidth) / scale;
+        const startRow = currentScroll?.sheetViewStartRow ?? 0;
+        const startHeight = startRow === 0
+            ? -(currentScroll?.offsetY ?? 0)
+            : skeleton.rowHeightAccumulation[startRow - 1] - (currentScroll?.offsetY ?? 0);
 
         let lastRow = 0;
         let hadFind = false;
-        for (let i = start, len = skeleton.rowHeightAccumulation.length; i < len; i++) {
+        for (let i = startRow, len = skeleton.rowHeightAccumulation.length; i < len; i++) {
             const height = skeleton.rowHeightAccumulation[i];
             if (height - startHeight > skeletonViewHeight) {
                 lastRow = i;
@@ -429,7 +430,27 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             lastRow = skeleton.rowHeightAccumulation.length - 1;
         }
 
-        return lastRow;
+        const startColumn = currentScroll?.sheetViewStartColumn ?? 0;
+        const startWidth = startColumn === 0
+            ? -(currentScroll?.offsetX ?? 0)
+            : skeleton.columnWidthAccumulation[startColumn - 1] - (currentScroll?.offsetX ?? 0);
+
+        let lastColumn = 0;
+        let hadFindCol = false;
+        for (let i = startColumn, len = skeleton.columnWidthAccumulation.length; i < len; i++) {
+            const width = skeleton.columnWidthAccumulation[i];
+            if (width - startWidth > skeletonViewWidth) {
+                lastColumn = i;
+                hadFindCol = true;
+                break;
+            }
+        }
+
+        if (!hadFindCol) {
+            lastColumn = skeleton.columnWidthAccumulation.length - 1;
+        }
+
+        return { lastRow, lastColumn };
     }
 
     private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
@@ -469,8 +490,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         scene.disableEvent();
 
-        const lastRow = this._getCurrentLastVisibleRow();
-        const lastRowY = lastRow === undefined ? Number.POSITIVE_INFINITY : skeleton.rowHeightAccumulation[lastRow];
+        const last = this._getCurrentLastVisible();
+        const lastRowY = last === undefined ? Number.POSITIVE_INFINITY : skeleton.rowHeightAccumulation[last.lastRow];
+        const lastColumnX = last === undefined ? Number.POSITIVE_INFINITY : skeleton.columnWidthAccumulation[last.lastColumn - 1] + skeleton.rowHeaderWidth;
         this._activeViewport = null;
         const oldFreeze = this._getFreeze();
 
@@ -514,26 +536,26 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     ?.setProps({
                         fill: this._freezeNormalHeaderColor,
                     });
-                this._changeToRow = lastRow === undefined ? row : Math.min(row, lastRow);
+                this._changeToRow = last === undefined ? row : Math.min(row, last.lastRow);
                 this._changeToOffsetY = Math.min(startY, lastRowY);
                 this._activeViewport = activeViewport;
             } else {
                 freezeObjectHeaderRect
                     .transformByState({
-                        left: startX - FREEZE_SIZE / 2,
+                        left: Math.min(startX, lastColumnX) - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
                         fill: this._freezeActiveColor,
                     });
                 freezeObjectMainRect
                     .transformByState({
-                        left: startX - FREEZE_SIZE / 2,
+                        left: Math.min(startX, lastColumnX) - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
                         fill: this._freezeNormalHeaderColor,
                     });
 
-                this._changeToColumn = column;
+                this._changeToColumn = last === undefined ? column : Math.min(column, last.lastColumn);
                 this._changeToOffsetX = startX;
                 this._activeViewport = activeViewport;
             }

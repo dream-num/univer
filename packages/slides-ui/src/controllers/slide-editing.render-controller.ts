@@ -727,7 +727,11 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     private _editingChangedHandler() {
-        const editingRichText = this._editorBridgeService.getEditorRect().richTextObj;
+        const editRect = this._editorBridgeService.getEditorRect();
+        if (!editRect) {
+            return;
+        }
+        const editingRichText = editRect.richTextObj;
         editingRichText.refreshDocumentByDocData();
         editingRichText.resizeToContentSize();
 

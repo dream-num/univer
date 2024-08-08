@@ -37,10 +37,17 @@ export class DocAutoFormatController extends Disposable {
             this._docAutoFormatService.registerAutoFormat({
                 id: TabCommand.id,
                 match: (context) => {
-                    const { selection, paragraphs } = context;
+                    const { selection, paragraphs, unit } = context;
+
                     // 1. match 1 bullet paragraph, range.start == paragraph.start
-                    if (paragraphs.length === 1 && selection.startOffset === paragraphs[0].paragraphStart) {
-                         // 2. cross paragraphs, some paragraph is bullet
+                    if (paragraphs.length === 1 && selection.startOffset === paragraphs[0].paragraphStart && paragraphs[0].bullet) {
+                        // 2. cross paragraphs, some paragraph is bullet
+                        const allParagraphs = unit.getBody()?.paragraphs;
+                        // 3. disable first bullet indent
+                        const bulletParagraphs = allParagraphs?.filter((p) => p.bullet?.listId === paragraphs[0].bullet!.listId);
+                        if (bulletParagraphs?.findIndex((p) => p.startIndex === paragraphs[0].startIndex) === 0) {
+                            return false;
+                        }
                         return true;
                     } else if (paragraphs.length > 1) {
                         return true;

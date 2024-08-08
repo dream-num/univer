@@ -75,24 +75,33 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         };
 
         const allResourceHooks = this._resourceManagerService.getAllResourceHooks();
-        allResourceHooks.forEach((hook) => {
-            handleHookAdd(hook);
-        });
+        allResourceHooks.forEach((hook) => handleHookAdd(hook));
 
-        this.disposeWithMe(this._resourceManagerService.register$.subscribe((hook) => {
-            handleHookAdd(hook);
-        }));
+        this.disposeWithMe(this._resourceManagerService.register$.subscribe((hook) => handleHookAdd(hook)));
 
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
                 this._resourceManagerService.loadResources(workbook.getUnitId(), workbook.getSnapshot().resources);
             })
         );
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
+                this._resourceManagerService.loadResources(doc.getUnitId(), doc.getSnapshot().resources);
+            })
+        );
+
+        // TODO: add slides in the future
 
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
                 this._resourceManagerService.unloadResources(workbook.getUnitId());
             })
+        );
+
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe(((doc) => {
+                this._resourceManagerService.unloadResources(doc.getUnitId());
+            }))
         );
     }
 

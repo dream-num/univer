@@ -313,6 +313,7 @@ export function getInsertRowActionsParams(rangeInfo: IRangeInfo, position: INSER
     };
 }
 
+// eslint-disable-next-line complexity
 export function getInsertColumnActionsParams(rangeInfo: IRangeInfo, position: INSERT_COLUMN_POSITION, viewModel: DocumentViewModel) {
     const { startOffset, endOffset, segmentId } = rangeInfo;
     const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
@@ -340,7 +341,7 @@ export function getInsertColumnActionsParams(rangeInfo: IRangeInfo, position: IN
                         const cellIndex = row.children.indexOf(cell);
 
                         if (index >= cell.startIndex && index <= cell.endIndex) {
-                            columnIndex = position === INSERT_COLUMN_POSITION.LEFT ? cellIndex : cellIndex + 1;
+                            columnIndex = cellIndex;
                             break;
                         }
                     }
@@ -369,9 +370,10 @@ export function getInsertColumnActionsParams(rangeInfo: IRangeInfo, position: IN
 
     for (const row of table.children) {
         const cell = row.children[columnIndex];
-        offsets.push(cell.startIndex - cursor);
+        const insertIndex = position === INSERT_COLUMN_POSITION.LEFT ? cell.startIndex : cell.endIndex + 1;
+        offsets.push(insertIndex - cursor);
 
-        cursor = cell.startIndex;
+        cursor = insertIndex;
     }
 
     return {
@@ -405,6 +407,7 @@ export function getColumnWidths(pageWidth: number, tableColumns: ITableColumn[],
     };
 }
 
+// eslint-disable-next-line complexity
 export function getDeleteRowsActionsParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
     const { startOffset, endOffset, segmentId } = rangeInfo;
     const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
@@ -478,7 +481,7 @@ interface IRetainDeleteOffset {
     delete: number;
 }
 
-// eslint-disable-next-line max-lines-per-function
+// eslint-disable-next-line max-lines-per-function, complexity
 export function getDeleteColumnsActionParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
     const { startOffset, endOffset, segmentId } = rangeInfo;
     const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);
@@ -607,6 +610,7 @@ export function getDeleteTableActionParams(rangeInfo: IRangeInfo, viewModel: Doc
     };
 }
 
+// eslint-disable-next-line complexity
 export function getDeleteRowContentActionParams(rangeInfo: IRangeInfo, viewModel: DocumentViewModel) {
     const { startOffset, endOffset, segmentId } = rangeInfo;
     const vm = viewModel.getSelfOrHeaderFooterViewModel(segmentId);

@@ -56,7 +56,7 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
     const { zoomIn, zoomOut, fitView, getNodes, setCenter, getZoom } = useReactFlow();
 
     const zoomPercent = Math.floor(zoom * 100);
-    const rightPadding = useRightSidebarVisible() ? 352 : 12;
+    const rightPadding = useRightSidebarVisible() ? 360 : 12;
 
     const onZoomInHandler = () => {
         zoomIn();
@@ -181,7 +181,6 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
 function useRightSidebarVisible() {
     const sidebarService = useDependency(ISidebarService);
     const [visible, setVisible] = React.useState(false);
-
     useEffect(() => {
         const sidebarSubscription = sidebarService.sidebarOptions$.subscribe((options) => {
             setVisible(!!options.visible);

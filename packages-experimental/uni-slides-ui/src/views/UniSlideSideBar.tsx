@@ -16,15 +16,15 @@
 
 import type { SlideDataModel } from '@univerjs/core';
 import clsx from 'clsx';
-import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { Scrollbar } from '@univerjs/design';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useObservable } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ActivateSlidePageOperation, SetSlidePageThumbOperation } from '@univerjs/slides-ui';
+import { ActivateSlidePageOperation, SetSlidePageThumbOperation, AppendSlideOperation } from '@univerjs/slides-ui';
 
 import styles from './index.module.less';
+import { IncreaseSingle } from '@univerjs/icons';
 
 /**
  * This components works as the root component of the left Sidebar of Slide.
@@ -34,6 +34,7 @@ export function UniSlideSideBar() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const localeService = useDependency(LocaleService);
 
     const slideBarRef = useRef<HTMLDivElement>(null);
     const currentSlide = useObservable(
@@ -53,6 +54,7 @@ export function UniSlideSideBar() {
 
     const [divRefs, setDivRefs] = useState<RefObject<HTMLDivElement>[]>([]);
     const [activatePageId, setActivatePageId] = useState<string | null>(pageOrder[0]);
+    const [barHeight, setBarHeight] = useState(0);
 
     useEffect(() => {
         setDivRefs(slideList.map((_) => React.createRef()));
@@ -84,14 +86,24 @@ export function UniSlideSideBar() {
         }
     }, [divRefs]); // 依赖于divRefs数组的变化
 
+    useEffect(() => {
+        const slideBar = slideBarRef.current;
+        if (slideBar) {
+            setBarHeight(slideBar.clientHeight - 38);
+        }
+    }, []);
+
     const activatePage = useCallback((page: string) => {
         commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page });
     }, [commandService]);
 
+    const handleAppendSlide = useCallback(() => {
+        commandService.syncExecuteCommand(AppendSlideOperation.id);
+    }, [commandService]);
+
     return (
         <div className={styles.uniSlideBar} ref={slideBarRef}>
-            <Scrollbar>
-                <div className={styles.uniSlideBarContent}>
+                <div className={styles.uniSlideBarContent} style={{ height: `${barHeight}px` }}>
                     {slideList.map((item, index) => (
                         <div
                             key={item.id}
@@ -105,7 +117,10 @@ export function UniSlideSideBar() {
                         </div>
                     ))}
                 </div>
-            </Scrollbar>
+                <button className={styles.newSlideButton} onClick={handleAppendSlide}>
+                <IncreaseSingle className={styles.newSlideButtonIcon} />
+                <span>{localeService.t('slide.append')}</span>
+            </button>
         </div>
     );
 }

@@ -22,7 +22,7 @@ import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../components/upload
 import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
 
 export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
-const IMAGE_MENU_ID = 'slide.menu.image';
+export const IMAGE_MENU_ID = 'slide.menu.image';
 
 export function SlideImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {

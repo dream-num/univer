@@ -21,7 +21,7 @@ import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useObservable } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ActivateSlidePageOperation, SetSlidePageThumbOperation, AppendSlideOperation } from '@univerjs/slides-ui';
+import { ActivateSlidePageOperation, AppendSlideOperation, SetSlidePageThumbOperation } from '@univerjs/slides-ui';
 
 import styles from './index.module.less';
 import { IncreaseSingle } from '@univerjs/icons';

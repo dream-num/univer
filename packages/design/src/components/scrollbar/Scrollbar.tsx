@@ -89,7 +89,10 @@ export function Scrollbar(props: IScrollbarProps) {
     const [thumbTop, setThumbTop] = useState(0);
     useEffect(() => {
         function resize() {
-            const { height: containerHeight } = containerRef.current!.parentElement!.getBoundingClientRect();
+            if (!containerRef.current) {
+                return;
+            }
+            const { height: containerHeight } = containerRef.current.parentElement!.getBoundingClientRect();
 
             const { scrollHeight } = contentRef.current!;
             setThumbHeight((containerHeight / scrollHeight) * 100);

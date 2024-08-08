@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { LinkSingle } from '@univerjs/icons';
 import { CellLinkPopup } from '../views/CellLinkPopup';
@@ -27,7 +27,7 @@ import { insertLinkMenuFactory, insertLinkMenuToolbarFactory, InsertLinkShortcut
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkUIController)
 export class SheetsHyperLinkUIController extends Disposable {
     constructor(
-        private _config: IUniverSheetsHyperLinkUIConfig | undefined,
+        private _config: Nullable<IUniverSheetsHyperLinkUIConfig>,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @ICommandService private _commandService: ICommandService,
         @Inject(LocaleService) private _localeService: LocaleService,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
+import type { Dependency, Nullable } from '@univerjs/core';
 import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -39,7 +39,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private _config: IUniverSheetsHyperLinkUIConfig,
+        private _config: Nullable<IUniverSheetsHyperLinkUIConfig>,
         @Inject(Injector) protected override _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
@@ -51,7 +51,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [
                 SheetsHyperLinkResolverService,
                 {
-                    useFactory: () => this._injector.createInstance(SheetsHyperLinkResolverService, this._config.urlHandler),
+                    useFactory: () => this._injector.createInstance(SheetsHyperLinkResolverService, this._config?.urlHandler),
                 },
             ],
             [SheetsHyperLinkPopupService],

@@ -376,6 +376,12 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    /**
+     * add object to layer (layer by zIndex))
+     * @param o
+     * @param zIndex layer index
+     * @returns scene
+     */
     override addObject(o: BaseObject, zIndex: number = 1) {
         this.getLayer(zIndex)?.addObject(o);
         this._addObject$.next(this);

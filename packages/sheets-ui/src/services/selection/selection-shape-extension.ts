@@ -259,6 +259,10 @@ export class SelectionShapeExtension {
         this._control.selectionMoving$.next(this._targetSelection);
     }
 
+    /**
+     * drag move whole selectionShape, when cusor is crosshair.
+     * @param evt
+     */
     private _controlEvent(evt: IMouseEvent | IPointerEvent) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
@@ -317,7 +321,7 @@ export class SelectionShapeExtension {
 
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
 
-        const style = this._control.selectionStyle!;
+        const style = this._control.currentStyle!;
         const scale = this._getScale();
 
         if (this.isHelperSelection) {
@@ -430,7 +434,6 @@ export class SelectionShapeExtension {
         const scene = this._scene;
 
         const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
-
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const moveActualSelection = this._skeleton.getCellPositionByOffset(
@@ -442,19 +445,12 @@ export class SelectionShapeExtension {
         );
 
         const { row, column } = moveActualSelection;
-
         const { rowHeaderWidth, columnHeaderHeight } = this._skeleton;
-
         // const maxRow = this._skeleton.getRowCount() - 1;
-
         // const maxColumn = this._skeleton.getColumnCount() - 1;
-
         let startRow = this._relativeSelectionPositionRow;
-
         let startColumn = this._relativeSelectionPositionColumn;
-
         let endRow = row;
-
         let endColumn = column;
 
         if (cursor === CURSOR_TYPE.NORTH_WEST_RESIZE) {
@@ -517,13 +513,13 @@ export class SelectionShapeExtension {
             endColumn,
         };
 
-        this._control.update(this._targetSelection, rowHeaderWidth, columnHeaderHeight, this._control.selectionStyle);
+        this._control.update(this._targetSelection, rowHeaderWidth, columnHeaderHeight, this._control.currentStyle);
         this._control.clearHighlight();
         this._control.selectionScaling$.next(this._targetSelection);
     }
 
     /**
-     * Events for 8 control point
+     * pointer down Events for 8 control point
      * @param evt
      * @param cursor
      */
@@ -547,12 +543,11 @@ export class SelectionShapeExtension {
             endColumn: originEndColumn,
         } = this._control.model;
 
-        this._relativeSelectionPositionRow = originStartRow;
-
-        this._relativeSelectionPositionColumn = originStartColumn;
-
+        // When dragging the bottom line of the selection area over the previous top line, at this time, endRow < startRow
+        // see https://github.com/dream-num/univer-pro/issues/1451
+        this._relativeSelectionPositionRow = Math.min(originStartRow, originEndRow);
+        this._relativeSelectionPositionColumn = Math.min(originStartColumn, originEndColumn);
         this._relativeSelectionRowLength = originEndRow - originStartRow;
-
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
 
         if (cursor === CURSOR_TYPE.NORTH_WEST_RESIZE) {
@@ -569,9 +564,7 @@ export class SelectionShapeExtension {
         }
 
         const scrollTimer = ScrollTimer.create(scene);
-
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
-
         this._scrollTimer = scrollTimer;
 
         scene.disableEvent();
@@ -627,6 +620,7 @@ export class SelectionShapeExtension {
         fillControl.onPointerDown$.subscribeEvent(this._fillEvent.bind(this));
     }
 
+    // eslint-disable-next-line complexity
     private _fillMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
         // const activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
@@ -800,7 +794,7 @@ export class SelectionShapeExtension {
 
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
 
-        const style = this._control.selectionStyle;
+        const style = this._control.currentStyle;
         let stroke = style?.stroke;
         let strokeWidth = style?.strokeWidth;
         const defaultStyle = getNormalSelectionStyle(this._themeService);

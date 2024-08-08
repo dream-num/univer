@@ -18,7 +18,7 @@ import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type ISelectionWithStyle, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
+import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type ISelectionWithStyle, SelectionMoveType, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
 import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 
@@ -28,6 +28,9 @@ import { IShortcutService } from '@univerjs/ui';
  *
  * Not that this service works with Uni-mode, which means it should be able to deal with multi render unit
  * and handle selections on them, though each at a time.
+ *
+ *
+ * dv render controller would cause row auto height, this._autoHeightController.getUndoRedoParamsOfAutoHeight ---> currentSKelenton$ change.
  */
 export class RefSelectionsRenderService extends BaseSelectionRenderService implements IRenderModule {
     private readonly _workbookSelections: WorkbookSelections;
@@ -55,7 +58,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._initSkeletonChangeListener();
         this._initUserActionSyncListener();
 
-        this._setStyle(getDefaultRefSelectionStyle(this._themeService));
+        this._setSelectionStyle(getDefaultRefSelectionStyle(this._themeService));
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
     }
 
@@ -140,7 +143,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const selectionWithStyle = getAllSelection(skeleton);
             const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
             this._addSelectionControlBySelectionData(selectionData);
-            this.refreshSelectionMoveStart();
+            this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -151,18 +154,28 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initUserActionSyncListener() {
-        this.disposeWithMe(this.selectionMoveEnd$.subscribe((params) => this._updateSelections(params)));
+        // this._pointerDown --> this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+        this.disposeWithMe(this.selectionMoveStart$.subscribe((selectionDataWithStyle) => {
+            this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVE_START);
+        }));
+        this.disposeWithMe(this.selectionMoving$.subscribe((selectionDataWithStyle) => {
+            this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVING);
+        }));
+        // prompt.controller _initSelectionsEndListener --> selectionMoveEnd$ --> _updateRefSelectionStyle --> change theme color!
+        this.disposeWithMe(this.selectionMoveEnd$.subscribe((selectionDataWithStyle) => {
+            this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVE_END);
+        }));
     }
 
-    private _updateSelections(selectionDataWithStyleList: ISelectionWithCoordAndStyle[]) {
+    private _updateSelections(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
         const workbook = this._context.unit;
         const sheetId = workbook.getActiveSheet()!.getSheetId();
 
         if (selectionDataWithStyleList.length === 0) return;
-
         this._workbookSelections.setSelections(
             sheetId,
-            selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle))
+            selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle)),
+            type
         );
     }
 
@@ -195,6 +208,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
+            // change sheet ---> currentSkeleton$ change
             if (this._skeleton && this._skeleton.worksheet.getSheetId() !== skeleton.worksheet.getSheetId()) {
                 this._reset();
             }
@@ -231,9 +245,9 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
  */
 function getDefaultRefSelectionStyle(themeService: ThemeService) {
     const style = getNormalSelectionStyle(themeService);
-    style.strokeDash = 8;
     style.hasAutoFill = false;
     style.hasRowHeader = false;
     style.hasColumnHeader = false;
+    style.widgets = { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true };
     return style;
 }

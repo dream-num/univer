@@ -160,7 +160,6 @@ export function getNormalSelectionStyle(themeService: ThemeService): ISelectionS
     return {
         strokeWidth: 1,
         stroke: styleSheet.primaryColor,
-        // strokeDash: 8,
         fill,
         // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
         widgets: {},

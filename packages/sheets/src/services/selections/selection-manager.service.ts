@@ -64,7 +64,10 @@ export class SheetsSelectionsService extends RxDisposable {
         });
     }
 
-    /** Clear all selections in all workbooks. */
+    /**
+     * Clear all selections in all workbooks.
+     * invoked by prompt.controller
+     */
     clear(): void {
         this._workbookSelections.forEach((wbSelection) => wbSelection.clear());
     }
@@ -97,6 +100,14 @@ export class SheetsSelectionsService extends RxDisposable {
 
     setSelections(selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
     setSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
+    /**
+     * SetSelectionsOperation with type=null would clear all exists selections
+     * SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
+     * @param unitIdOrSelections
+     * @param worksheetIdOrType
+     * @param selectionDatas
+     * @param type
+     */
     setSelections(
         unitIdOrSelections: string | ISelectionWithStyle[],
         worksheetIdOrType: string | SelectionMoveType | undefined,
@@ -227,24 +238,33 @@ export class WorkbookSelections extends Disposable {
     }
 
     /**
-     *
+     * setSelections and emit selectionDatas by type.
+     * SetSelectionsOperation with type=null would clear all exists selections
      * @param sheetId
      * @param selectionDatas
      * @param type
      */
     setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
-        // @TODO lumixraku: selectionDatas should not be same variable !!!
-        // but there are some place get selection from this._worksheetSelections and set as 2nd parameter of this function cause problem!!
+        // selectionDatas should not be same variable as this._worksheetSelections !!!
+        // but there are some place get selection from this._worksheetSelections and set selectionDatas(2nd parameter of this function ) cause selectionDatas is always []
+        // see univer/pull/2909
         this._ensureSheetSelection(sheetId).length = 0;
         this._ensureSheetSelection(sheetId).push(...selectionDatas);
 
         // WTF: why we would not refresh in add but in replace?
-        if (type === SelectionMoveType.MOVE_START) {
-            this._selectionMoveStart$.next(selectionDatas);
-        } else if (type === SelectionMoveType.MOVING) {
-            this._selectionMoving$.next(selectionDatas);
-        } else {
-            this._emitOnEnd(selectionDatas);
+        switch (type) {
+            case SelectionMoveType.MOVE_START:
+                this._selectionMoveStart$.next(selectionDatas);
+                break;
+            case SelectionMoveType.MOVING:
+                this._selectionMoving$.next(selectionDatas);
+                break;
+            case SelectionMoveType.MOVE_END:
+                this._emitOnEnd(selectionDatas);
+                break;
+            default:
+                this._emitOnEnd(selectionDatas);
+                break;
         }
     }
 
@@ -272,7 +292,7 @@ export class WorkbookSelections extends Disposable {
     private _worksheetSelections = new Map<string, ISelectionWithStyle[]>();
 
     /**
-     * same as _getCurrentSelections, but would set [] if no selection.
+     * same as _getCurrentSelections(which return this._worksheetSelections), but would set [] if no selection.
      * @param sheetId
      * @returns this._worksheetSelections
      */
@@ -286,6 +306,10 @@ export class WorkbookSelections extends Disposable {
         return worksheetSelection;
     }
 
+    /**
+     * _selectionMoveEnd$ not same as base-selection-render.service.ts@_selectionMoveEnd$
+     * @param selections
+     */
     private _emitOnEnd(selections: ISelectionWithStyle[]): void {
         this._beforeSelectionMoveEnd$.next(selections);
         this._selectionMoveEnd$.next(selections);

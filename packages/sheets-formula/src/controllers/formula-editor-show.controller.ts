@@ -15,10 +15,10 @@
  */
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import {
-    ColorKit,
+import { ColorKit,
     Disposable,
     ICommandService,
+    ILogService,
     Inject,
     ObjectMatrix,
     Rectangle,
@@ -31,7 +31,7 @@ import {
     SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
 import { SetColHiddenMutation, SetColVisibleMutation, SetRowHiddenMutation, SetRowVisibleMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation } from '@univerjs/sheets';
@@ -53,6 +53,7 @@ const REFRESH_ARRAY_SHAPE_MUTATIONS = [
 
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
     private _previousShape: Nullable<SelectionShape>;
+    private _skeleton: SpreadsheetSkeleton;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -61,14 +62,40 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
+        this._initSkeletonChangeListener();
         this._initInterceptorEditorStart();
-
         this._commandExecutedListener();
 
         // Do not intercept v:null and add t: CellValueType.NUMBER. When the cell =TODAY() is automatically filled, the number format will recognize the Number type and parse it as 1900-01-00 date format.
+    }
+
+    private _initSkeletonChangeListener() {
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                    if (param == null) {
+                        this._logService.error('[FormulaEditorShowController]: should not receive currentSkeleton$ as null!');
+                    } else {
+                        const { skeleton } = param;
+                        const prevSheetId = this._skeleton?.worksheet?.getSheetId();
+                        this._changeRuntime(skeleton);
+
+                        // change to another sheet
+                        if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+                            this._removeArrayFormulaRangeShape();
+                        }
+                    }
+                })
+            )
+        );
+    }
+
+    protected _changeRuntime(skeleton: SpreadsheetSkeleton) {
+        this._skeleton = skeleton;
     }
 
     private _initInterceptorEditorStart() {

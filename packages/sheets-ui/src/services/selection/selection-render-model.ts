@@ -153,10 +153,15 @@ export class SelectionRenderModel implements IRangeWithCoord {
         if (rangeType) {
             this._rangeType = rangeType;
         }
-
         this.setCurrentCell(currentCell);
     }
 
+    /**
+     * set primary cell
+     *
+     * TODO @lumixraku there are 3 concepts for same thing, primary and current and highlight, primary is better cuz selectionModel is using primary.
+     * @param currentCell
+     */
     setCurrentCell(currentCell: Nullable<ISelectionCellWithMergeInfo>) {
         if (currentCell) {
             this._primary = currentCell;

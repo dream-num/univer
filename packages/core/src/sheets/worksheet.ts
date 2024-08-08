@@ -238,6 +238,17 @@ export class Worksheet {
         return null;
     }
 
+    /**
+     * get cellData
+     *
+     * All sheet CELL_CONTENT interceptor will be called in this method.
+     * this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT
+     *
+     * ex: cf.render.controller@_initViewModelInterceptor
+     * @param row
+     * @param col
+     * @returns ICellDataForSheetInterceptor extends ICellData
+     */
     getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
         if (row < 0 || col < 0) {
             return null;

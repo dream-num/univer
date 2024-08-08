@@ -221,6 +221,7 @@ export class NumfmtEditorController extends Disposable {
                                 };
                             }
                             const list = self._collectEffectMutation.getEffects();
+                            self._collectEffectMutation.clean();
                             if (!list.length) {
                                 return {
                                     redos: [],
@@ -244,7 +245,7 @@ export class NumfmtEditorController extends Disposable {
                                 }));
                             const redos = [];
                             const undos = [];
-                            if (cells) {
+                            if (cells.length) {
                                 const redo = {
                                     id: SetNumfmtMutation.id,
                                     params: transformCellsToRange(unitId, subUnitId, cells) as ISetNumfmtMutationParams,
@@ -252,7 +253,7 @@ export class NumfmtEditorController extends Disposable {
                                 redos.push(redo);
                                 undos.push(...factorySetNumfmtUndoMutation(self._injector, redo.params));
                             }
-                            if (removeCells) {
+                            if (removeCells.length) {
                                 const redo = {
                                     id: RemoveNumfmtMutation.id,
                                     params: {

@@ -565,7 +565,7 @@ function _lineOperator(
     const lineIndex = preLine ? preLine.lineIndex + 1 : 0;
     const { charSpace, defaultTabStop } = getCharSpaceConfig(sectionBreakConfig, paragraphConfig);
     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-    const { paddingLeft, paddingRight } = __getIndentPadding(
+    let { paddingLeft, paddingRight } = __getIndentPadding(
         indentFirstLine,
         hanging,
         indentStart,
@@ -573,6 +573,13 @@ function _lineOperator(
         charSpaceApply,
         paragraphStart
     );
+
+    // 如果宽度不足以容纳边距,这里留 1px 的宽度进行占位.
+    if (paddingLeft + paddingRight >= column.width) {
+        const leftPercent = paddingLeft / (paddingLeft + paddingRight);
+        paddingLeft = column.width * leftPercent - 0.5;
+        paddingRight = column.width - paddingLeft - 0.5;
+    }
 
     const newLine = createSkeletonLine(
         paragraphIndex,

@@ -699,10 +699,10 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         const editedMutations = [RichTextEditingMutation.id];
 
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (moveCursorOP.includes(command.id)) {
+            if (moveCursorOP.includes(command.id) && (command.params as any)?.unitId === this._renderContext.unitId) {
                 this._moveCursorCmdHandler(command);
             }
-            if (editedMutations.includes(command.id)) {
+            if (editedMutations.includes(command.id) && (command.params as any)?.unitId === this._renderContext.unitId) {
                 this._editingChangedHandler();
             }
         }));

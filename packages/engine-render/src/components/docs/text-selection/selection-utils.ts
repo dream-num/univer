@@ -22,13 +22,53 @@ import type { DocumentSkeleton } from '../layout/doc-skeleton';
 import type { Engine } from '../../../engine';
 import type { Documents } from '../document';
 import type { Scene } from '../../../scene';
-import { convertPositionsToRectRanges, type RectRange } from './rect-range';
+import { convertPositionsToRectRanges, RectRange } from './rect-range';
 import { TextRange } from './text-range';
 import { isInSameTableCell, isValidRectRange } from './convert-rect-range';
 
 interface IDocRangeList {
     textRanges: TextRange[];
     rectRanges: RectRange[];
+}
+
+export function getTextRangeFromCharIndex(
+    startOffset: number,
+    endOffset: number,
+    scene: Scene,
+    document: Documents,
+    skeleton: DocumentSkeleton,
+    style: ITextSelectionStyle,
+    segmentId: string,
+    segmentPage: number
+): Nullable<TextRange> {
+    const startNodePosition = skeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
+    const endNodePosition = skeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage);
+
+    if (startNodePosition == null || endNodePosition == null) {
+        return;
+    }
+
+    return new TextRange(scene, document, skeleton, startNodePosition, endNodePosition, style, segmentId);
+}
+
+export function getRectRangeFromCharIndex(
+    startOffset: number,
+    endOffset: number,
+    scene: Scene,
+    document: Documents,
+    skeleton: DocumentSkeleton,
+    style: ITextSelectionStyle,
+    segmentId: string,
+    segmentPage: number
+): Nullable<RectRange> {
+    const startNodePosition = skeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
+    const endNodePosition = skeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage);
+
+    if (startNodePosition == null || endNodePosition == null) {
+        return;
+    }
+
+    return new RectRange(scene, document, skeleton, startNodePosition, endNodePosition, style, segmentId);
 }
 
 export function getRangeListFromCharIndex(

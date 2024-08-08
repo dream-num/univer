@@ -1094,7 +1094,7 @@ export function getCellDataByInput(
     return cellData;
 }
 
-function isRichText(body: IDocumentBody) {
+export function isRichText(body: IDocumentBody) {
     const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
 
     const bodyNoLineBreak = body.dataStream.replace('\r\n', '');

@@ -28,6 +28,8 @@ export interface ISidebarService {
     close(id?: string): void;
 
     get visible(): boolean;
+
+    get options(): ISidebarMethodOptions;
 }
 
 export const ILeftSidebarService = createIdentifier<ISidebarService>('ui.left-sidebar.service');

@@ -60,7 +60,7 @@ export const ToggleCommentPanelOperation: ICommand = {
         const panelService = accessor.get(ThreadCommentPanelService);
         const sidebarService = accessor.get(ISidebarService);
 
-        if (!panelService.panelVisible) {
+        if (!panelService.panelVisible || sidebarService.options.children?.label !== DocThreadCommentPanel.componentKey) {
             sidebarService.open({
                 header: { title: 'threadCommentUI.panel.title' },
                 children: { label: DocThreadCommentPanel.componentKey },

@@ -31,6 +31,10 @@ export class DesktopSidebarService implements ISidebarService {
         return this._sidebarOptions.visible || false;
     }
 
+    get options() {
+        return this._sidebarOptions;
+    }
+
     open(params: ISidebarMethodOptions): IDisposable {
         this._sidebarOptions = {
             ...params,

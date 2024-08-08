@@ -453,7 +453,7 @@ export default {
     },
     FLOOR_PRECISE: {
         description: 'Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.',
-        abstract: 'Rounds a number down to the nearest integer or to the nearest multiple of significance. Regardless of the sign of the number, the number is rounded down.',
+        abstract: 'Rounds a number down to the nearest integer or to the nearest multiple of significance.',
         links: [
             {
                 title: 'Instruction',
@@ -767,7 +767,7 @@ export default {
     },
     RANDARRAY: {
         description: 'Returns an array of random numbers between 0 and 1. However, you can specify the number of rows and columns to fill, minimum and maximum values, and whether to return whole numbers or decimal values.',
-        abstract: 'Returns an array of random numbers between 0 and 1. However, you can specify the number of rows and columns to fill, minimum and maximum values, and whether to return whole numbers or decimal values.',
+        abstract: 'Returns an array of random numbers between 0 and 1.',
         links: [
             {
                 title: 'Instruction',
@@ -1032,8 +1032,8 @@ export default {
         },
     },
     SUMIFS: {
-        description: 'Adds the cells in a range that meet multiple criteria',
-        abstract: 'Adds the cells in a range that meet multiple criteria',
+        description: 'Adds all of its arguments that meet multiple criteria.',
+        abstract: 'Adds all of its arguments that meet multiple criteria.',
         links: [
             {
                 title: 'Instruction',

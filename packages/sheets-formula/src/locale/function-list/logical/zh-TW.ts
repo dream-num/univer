@@ -67,8 +67,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     IF: {
@@ -97,7 +95,7 @@ export default {
         ],
         functionParameter: {
             value: { name: '值', detail: ' 檢查是否有錯誤的參數。 ' },
-            valueIfError: { name: '發生錯誤時的值', detail: '公式計算結果為錯誤時要傳回的值。 評估以下錯誤類型：#N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME? 或 #NULL!。 ' },
+            valueIfError: { name: '錯誤時傳回值', detail: '公式計算結果為錯誤時要傳回的值。 評估以下錯誤類型：#N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME? 或 #NULL!。 ' },
         },
     },
     IFNA: {
@@ -110,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '已核取 #N/A 錯誤值的自變數。' },
+            valueIfNa: { name: '如果為#N/A的值', detail: '如果公式評估為 #N/A 錯誤值，要傳回的值。' },
         },
     },
     IFS: {
@@ -124,8 +122,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logicalTest1: { name: '條件1', detail: '要評估的第一個條件，可以是布林值、數值、陣列或指向這些值的參考。' },
+            valueIfTrue1: { name: '值1', detail: '“條件1”為“TRUE”的情況下傳回的值。' },
+            logicalTest2: { name: '條件2', detail: '之前的條件為“FALSE”的情況下，要評估的其他條件。' },
+            valueIfTrue2: { name: '值2', detail: '對應條件為“TRUE”的情況下傳回的其他值。' },
         },
     },
     LAMBDA: {
@@ -205,8 +205,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical: { name: '邏輯表達式', detail: '您要反轉邏輯的條件，可評估為 TRUE 或 FALSE。' },
         },
     },
     OR: {
@@ -261,8 +260,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            expression: { name: '表達式', detail: '表達式是將要與 值1…值126 進行比較的值（例如數字、日期或一些文字）。' },
+            value1: { name: '值1', detail: '值N 是將要與表達式進行比較的值。' },
+            result1: { name: '結果1', detail: '結果N 是對應的值N 參數與表達式匹配時要傳回的值。必須為每個對應的值N 參數提供結果N。' },
+            defaultOrValue2: { name: '預設或值2', detail: '預設是在值N 表達式中找不到匹配項時要傳回的值。預設參數透過沒有對應的結果N 表達式來識別（請參閱範例）。預設必須是函數中的最後一個參數。' },
+            result2: { name: '結果2', detail: '結果N 是對應的值N 參數與表達式匹配時要傳回的值。必須為每個對應的值N 參數提供結果N。' },
         },
     },
     TRUE: {
@@ -275,8 +277,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     XOR: {
@@ -289,8 +289,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: '邏輯表達式 1', detail: '第一個想要測試且計算結果可為 TRUE 或 FALSE 的條件。 ' },
+            logical2: { name: '邏輯表達式 2', detail: '其他想要測試且計算結果可為 TRUE 或 FALSE 的條件（最多 255 個條件）。 ' },
         },
     },
 };

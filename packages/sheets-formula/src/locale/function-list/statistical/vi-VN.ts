@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'Số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình.' },
-            number2: { name: 'Số 2', detail: 'Các số khác, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình, tối đa là 255.' },
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình.' },
+            number2: { name: 'số 2', detail: 'Các số khác, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình, tối đa là 255.' },
         },
     },
     AVERAGE: {
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'Số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình.' },
-            number2: { name: 'Số 2', detail: 'Các số khác, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình, tối đa là 255.' },
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình.' },
+            number2: { name: 'số 2', detail: 'Các số khác, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình, tối đa là 255.' },
         },
     },
     AVERAGEA: {
@@ -303,14 +303,270 @@ export default {
         ],
         functionParameter: {
             number1: {
-                name: 'Số 1',
+                name: 'số 1',
                 detail: 'Bắt buộc. Tham số đầu tiên đại diện cho giá trị mà bạn muốn đếm',
             },
             number2: {
-                name: 'Số 2',
+                name: 'số 2',
                 detail: 'Tùy chọn. Các đối số khác đại diện cho giá trị bạn muốn đếm, có thể chứa tối đa 255 đối số.',
             },
         },
     },
-
+    COUNTBLANK: {
+        description: 'để đếm số ô trống trong phạm vi ô.',
+        abstract: 'để đếm số ô trống trong phạm vi ô.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/countblank-%E5%87%BD%E6%95%B0-6a92d772-675c-4bee-b346-24af6bd3ac22',
+            },
+        ],
+        functionParameter: {
+            range: { name: 'phạm vi', detail: 'Phạm vi mà từ đó bạn muốn đếm các ô trống.' },
+        },
+    },
+    COUNTIF: {
+        description: 'để đếm số lượng ô đáp ứng một tiêu chí.',
+        abstract: 'để đếm số lượng ô đáp ứng một tiêu chí.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/countif-%E5%87%BD%E6%95%B0-e0de10c6-f885-4e71-abb4-1f464816df34',
+            },
+        ],
+        functionParameter: {
+            range: { name: 'phạm vi', detail: 'Nhóm các ô mà bạn muốn đếm. Phạm vi có thể chứa số, mảng, phạm vi có tên hoặc tham chiếu có chứa số. Các giá trị trống và giá trị văn bản được bỏ qua.' },
+            criteria: { name: 'tiêu chí', detail: 'Số, biểu thức, tham chiếu ô hoặc chuỗi văn bản xác định ô nào sẽ được đếm.\nVí dụ: bạn có thể sử dụng một số như 32, một so sánh như "> 32", một ô như B4, hoặc một từ như "táo".' },
+        },
+    },
+    COUNTIFS: {
+        description: 'áp dụng tiêu chí cho các ô trong nhiều dải ô và đếm số lần đáp ứng tất cả các tiêu chí.',
+        abstract: 'áp dụng tiêu chí cho các ô trong nhiều dải ô và đếm số lần đáp ứng tất cả các tiêu chí.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/countifs-%E5%87%BD%E6%95%B0-dda3dc6e-f74e-4aee-88bc-aa8c2a866842',
+            },
+        ],
+        functionParameter: {
+            criteriaRange1: { name: 'phạm vi tiêu chí 1', detail: 'Phạm vi thứ nhất trong đó cần đánh giá các tiêu chí liên kết.' },
+            criteria1: { name: 'tiêu chí 1', detail: 'Tiêu chí dưới dạng một số, biểu thức, tham chiếu ô hoặc văn bản để xác định những ô nào cần đếm. Ví dụ: tiêu chí có thể được biểu thị là 32, ">32", B4, "táo" hoặc "32".' },
+            criteriaRange2: { name: 'phạm vi tiêu chí 2', detail: 'Khu vực bổ sung. Có thể nhập tới 127 khu vực.' },
+            criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
+        },
+    },
+    MAX: {
+        description: 'Trả về giá trị lớn nhất trong tập giá trị.',
+        abstract: 'Trả về giá trị lớn nhất trong tập giá trị.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/max-%E5%87%BD%E6%95%B0-e0012414-9ac8-4b34-9a47-73e662c08098',
+            },
+        ],
+        functionParameter: {
+            number1: {
+                name: 'số 1',
+                detail: 'Số, tham chiếu ô hoặc phạm vi ô đầu tiên để tính giá trị lớn nhất.',
+            },
+            number2: {
+                name: 'số 2',
+                detail: 'Bạn có thể bao gồm tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính giá trị tối đa.',
+            },
+        },
+    },
+    MAXA: {
+        description: 'Trả về giá trị lớn nhất trong một danh sách đối số.',
+        abstract: 'Trả về giá trị lớn nhất trong một danh sách đối số.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/maxa-%E5%87%BD%E6%95%B0-814bda1e-3840-4bff-9365-2f59ac2ee62d',
+            },
+        ],
+        functionParameter: {
+            value1: { name: 'giá trị 1', detail: 'Đối số dạng số thứ nhất mà bạn muốn tìm giá trị lớn nhất trong đó.' },
+            value2: { name: 'giá trị 2', detail: 'Các đối số dạng số thứ 2 đến 255 mà bạn muốn tìm giá trị lớn nhất trong đó.' },
+        },
+    },
+    MAXIFS: {
+        description: 'trả về giá trị tối đa giữa các ô được xác định bằng một loạt các điều kiện hoặc tiêu chí cho trước.',
+        abstract: 'trả về giá trị tối đa giữa các ô được xác định bằng một loạt các điều kiện hoặc tiêu chí cho trước.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/maxifs-%E5%87%BD%E6%95%B0-dfd611e6-da2c-488a-919b-9b6376b28883',
+            },
+        ],
+        functionParameter: {
+            maxRange: { name: 'phạm vi giá trị tối đa', detail: 'Dải ô thực tế để xác định giá trị lớn nhất.' },
+            criteriaRange1: { name: 'phạm vi tiêu chí 1', detail: 'Là tập hợp các ô cần đánh giá theo tiêu chí.' },
+            criteria1: { name: 'tiêu chí 1', detail: 'Là tiêu chí ở dạng số, biểu thức hoặc văn bản xác định ô nào sẽ được đánh giá là lớn nhất. ' },
+            criteriaRange2: { name: 'phạm vi tiêu chí 2', detail: 'Khu vực bổ sung. Có thể nhập tới 127 khu vực.' },
+            criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
+        },
+    },
+    MIN: {
+        description: 'Trả về số nhỏ nhất trong tập giá trị.',
+        abstract: 'Trả về số nhỏ nhất trong tập giá trị.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/min-%E5%87%BD%E6%95%B0-61635d12-920f-4ce2-a70f-96f202dcc152',
+            },
+        ],
+        functionParameter: {
+            number1: {
+                name: 'số 1',
+                detail: 'Số, tham chiếu ô hoặc phạm vi ô đầu tiên để tính giá trị tối thiểu.',
+            },
+            number2: {
+                name: 'số 2',
+                detail: 'Bạn có thể bao gồm tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính giá trị tối thiểu.',
+            },
+        },
+    },
+    MINA: {
+        description: 'Trả về giá trị nhỏ nhất trong một danh sách đối số.',
+        abstract: 'Trả về giá trị nhỏ nhất trong một danh sách đối số.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/mina-%E5%87%BD%E6%95%B0-245a6f46-7ca5-4dc7-ab49-805341bc31d3',
+            },
+        ],
+        functionParameter: {
+            value1: { name: 'giá trị 1', detail: 'Số, tham chiếu ô hoặc phạm vi ô đầu tiên để tính giá trị tối thiểu.' },
+            value2: { name: 'giá trị 2', detail: 'Bạn có thể bao gồm tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính giá trị tối thiểu.' },
+        },
+    },
+    MINIFS: {
+        description: 'trả về giá trị tối thiểu trong số các ô được xác định bởi một tập hợp các điều kiện hoặc tiêu chí cho trước.',
+        abstract: 'trả về giá trị tối thiểu trong số các ô được xác định bởi một tập hợp các điều kiện hoặc tiêu chí cho trước.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/minifs-%E5%87%BD%E6%95%B0-6ca1ddaa-079b-4e74-80cc-72eef32e6599',
+            },
+        ],
+        functionParameter: {
+            minRange: { name: 'phạm vi giá trị tối thiểu', detail: 'Dải ô thực tế để xác định giá trị nhỏ nhất.' },
+            criteriaRange1: { name: 'phạm vi tiêu chí 1', detail: 'Là tập hợp các ô cần đánh giá theo tiêu chí.' },
+            criteria1: { name: 'tiêu chí 1', detail: 'Là tiêu chí ở dạng số, biểu thức hoặc văn bản xác định ô nào sẽ được đánh giá là nhỏ nhất.' },
+            criteriaRange2: { name: 'phạm vi tiêu chí 2', detail: 'Khu vực bổ sung. Có thể nhập tới 127 khu vực.' },
+            criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
+        },
+    },
+    STDEV_P: {
+        description: 'Tính toán độ lệch chuẩn dựa trên toàn bộ tổng thể được cung cấp ở dạng đối số (bỏ qua giá trị lô-gic và văn bản).',
+        abstract: 'Tính độ lệch chuẩn dựa trên toàn bộ quần thể mẫu',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/stdev-p-%E5%87%BD%E6%95%B0-6e917c05-31a0-496f-ade7-4f4e7462f285',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Đối số dạng số đầu tiên tương ứng với tổng thể.' },
+            number2: { name: 'số 2', detail: 'Đối số dạng số từ 2 đến 254 tương ứng với tổng thể. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
+        },
+    },
+    STDEV_S: {
+        description: 'Ước tính độ lệch chuẩn dựa trên mẫu (bỏ qua giá trị lô-gic và văn bản trong mẫu).',
+        abstract: 'Ước tính độ lệch chuẩn dựa trên mẫu',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/stdev-s-%E5%87%BD%E6%95%B0-7d69cf97-0c1f-4acf-be27-f3e83904cc23',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Đối số dạng số đầu tiên tương ứng với mẫu tổng thể. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
+            number2: { name: 'số 2', detail: 'Đối số dạng số từ 2 đến 254 tương ứng với mẫu tổng thể. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
+        },
+    },
+    STDEVA: {
+        description: 'Ước tính độ lệch chuẩn dựa trên một mẫu. Độ lệch chuẩn là số đo độ phân tán của các giá trị so với giá trị trung bình (trung độ).',
+        abstract: 'Ước tính độ lệch chuẩn dựa trên một mẫu.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/stdeva-%E5%87%BD%E6%95%B0-5ff38888-7ea5-48de-9a6d-11ed73b29e9d',
+            },
+        ],
+        functionParameter: {
+            value1: { name: 'giá trị 1', detail: 'Đối số dạng số đầu tiên tương ứng với mẫu tổng thể. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
+            value2: { name: 'giá trị 2', detail: 'Đối số dạng số từ 2 đến 254 tương ứng với mẫu tổng thể. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
+        },
+    },
+    STDEVPA: {
+        description: 'Tính toán độ lệch chuẩn dựa trên toàn bộ tập hợp được cung cấp ở dạng đối số, bao gồm văn bản và giá trị lô-gic.',
+        abstract: 'Tính toán độ lệch chuẩn dựa trên toàn bộ tập hợp được cung cấp ở dạng đối số, bao gồm văn bản và giá trị lô-gic.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/stdevpa-%E5%87%BD%E6%95%B0-5578d4d6-455a-4308-9991-d405afe2c28c',
+            },
+        ],
+        functionParameter: {
+            value1: { name: 'giá trị 1', detail: 'Đối số dạng số đầu tiên tương ứng với tổng thể.' },
+            value2: { name: 'giá trị 2', detail: 'Đối số dạng số từ 2 đến 254 tương ứng với tổng thể. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
+        },
+    },
+    VAR_P: {
+        description: 'Tính toán phương sai dựa trên toàn bộ tập hợp (bỏ các giá trị lô-gic và văn bản trong tập hợp).',
+        abstract: 'Tính toán phương sai dựa trên toàn bộ tập hợp',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/var-p-%E5%87%BD%E6%95%B0-73d1285c-108c-4843-ba5d-a51f90656f3a',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Đối số dạng số đầu tiên tương ứng với tổng thể.' },
+            number2: { name: 'số 2', detail: 'Là các đối số dạng số từ 2 đến 254 tương ứng với một tập hợp.' },
+        },
+    },
+    VAR_S: {
+        description: 'Ước tính phương sai dựa trên mẫu (bỏ qua các giá trị lô-gic và văn bản trong mẫu).',
+        abstract: 'Ước tính phương sai dựa trên mẫu',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/var-s-%E5%87%BD%E6%95%B0-913633de-136b-449d-813e-65a00b2b990b',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Đối số dạng số đầu tiên tương ứng với mẫu tổng thể.' },
+            number2: { name: 'số 2', detail: 'Là các đối số dạng số từ 2 đến 254 tương ứng với một mẫu của một tập hợp.' },
+        },
+    },
+    VARA: {
+        description: 'Ước tính phương sai dựa trên mẫu.',
+        abstract: 'Ước tính phương sai dựa trên mẫu.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/vara-%E5%87%BD%E6%95%B0-3de77469-fa3a-47b4-85fd-81758a1e1d07',
+            },
+        ],
+        functionParameter: {
+            value1: { name: 'giá trị 1', detail: 'Đối số dạng số đầu tiên tương ứng với mẫu tổng thể.' },
+            value2: { name: 'giá trị 2', detail: 'Là các đối số dạng số từ 2 đến 254 tương ứng với một mẫu của một tập hợp.' },
+        },
+    },
+    VARPA: {
+        description: 'Tính toán phương sai dựa trên toàn bộ tập hợp.',
+        abstract: 'Tính toán phương sai dựa trên toàn bộ tập hợp.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/varpa-%E5%87%BD%E6%95%B0-59a62635-4e89-4fad-88ac-ce4dc0513b96',
+            },
+        ],
+        functionParameter: {
+            value1: { name: 'giá trị 1', detail: 'Đối số dạng số đầu tiên tương ứng với tổng thể.' },
+            value2: { name: 'giá trị 2', detail: 'Là các đối số dạng số từ 2 đến 254 tương ứng với một tập hợp.' },
+        },
+    },
 };

@@ -111,7 +111,7 @@ export default {
         ],
         functionParameter: {
             startDate: { name: '開始日期', detail: '一個代表開始日期的日期。 應使用 DATE 函數輸入日期，或將日期輸入為其他公式或函數的結果。 例如，使用函數 DATE(2008,5,23) 輸入 2008 年 5 月 23 日。 ' },
-            months: { name: '月份', detail: 'Start Date 之前或之後的月份數。 Months 為正值將產生未來日期；為負值將產生過去日期。 ' },
+            months: { name: '月份數', detail: 'Start Date 之前或之後的月份數。 Months 為正值將產生未來日期；為負值將產生過去日期。 ' },
         },
     },
     EOMONTH: {
@@ -190,8 +190,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日期', detail: '這是代表開始日期的日期。' },
+            endDate: { name: '結束日期', detail: '這是代表結束日期的日期。' },
+            holidays: { name: '假日', detail: '這是要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
         },
     },
     NETWORKDAYS_INTL: {
@@ -204,8 +205,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日期', detail: '這是代表開始日期的日期。' },
+            endDate: { name: '結束日期', detail: '這是代表結束日期的日期。' },
+            weekend: { name: '週末', detail: '是指定何時是週末的數字或字串。' },
+            holidays: { name: '假日', detail: '這是要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
         },
     },
     NOW: {
@@ -258,7 +261,7 @@ export default {
             },
         ],
         functionParameter: {
-            timeText: { name: 'time_text', detail: '一個文字字串，代表以任一Microsoft Excel 時間格式表示的時間（例如，代表時間的具有引號的文字字串"6:45 PM" 和"18: 45"）。 ' },
+            timeText: { name: '時間文字', detail: '這是以任何一種時間格式表示的文字字串；例如，"6:45 PM" 和 "18:45"，引號中的文字字串表示時間。' },
         },
     },
     TODAY: {
@@ -310,8 +313,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日期', detail: '這是代表開始日期的日期。' },
+            days: { name: '天數', detail: '這是開始日期之前或之後的非週末和非假日的天數。正值代表未來的日期；負值代表過去的日期。' },
+            holidays: { name: '假日', detail: '這是要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
         },
     },
     WORKDAY_INTL: {
@@ -324,8 +328,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日期', detail: '這是代表開始日期的日期。' },
+            days: { name: '天數', detail: '這是開始日期之前或之後的非週末和非假日的天數。正值代表未來的日期；負值代表過去的日期。' },
+            weekend: { name: '週末', detail: '是指定何時是週末的數字或字串。' },
+            holidays: { name: '假日', detail: '這是要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
         },
     },
     YEAR: {

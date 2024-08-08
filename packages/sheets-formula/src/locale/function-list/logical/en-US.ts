@@ -129,8 +129,8 @@ export default {
         functionParameter: {
             logicalTest1: { name: 'logical_test1', detail: 'Condition that evaluates to TRUE or FALSE.' },
             valueIfTrue1: { name: 'value_if_true1', detail: 'Result to be returned if logical_test1 evaluates to TRUE. Can be empty.' },
-            logicalTest2: { name: 'logical_test2...logical_test127', detail: 'Condition that evaluates to TRUE or FALSE.' },
-            valueIfTrue2: { name: 'value_if_true2...value_if_true127', detail: 'Result to be returned if logical_testN evaluates to TRUE. Each value_if_trueN corresponds with a condition logical_testN. Can be empty.' },
+            logicalTest2: { name: 'logical_test2', detail: 'Condition that evaluates to TRUE or FALSE.' },
+            valueIfTrue2: { name: 'value_if_true2', detail: 'Result to be returned if logical_testN evaluates to TRUE. Each value_if_trueN corresponds with a condition logical_testN. Can be empty.' },
         },
     },
     LAMBDA: {
@@ -265,9 +265,10 @@ export default {
         ],
         functionParameter: {
             expression: { name: 'expression', detail: 'Expression is the value (such as a number, date or some text) that will be compared against value1…value126.' },
-            value: { name: 'value1...value126', detail: 'ValueN is a value that will be compared against expression.' },
-            result: { name: 'result1...result126', detail: 'ResultN is the value to be returned when the corresponding valueN argument matches expression. ResultN and must be supplied for each corresponding valueN argument.' },
-            default: { name: 'default', detail: 'Default is the value to return in case no matches are found in the valueN expressions. The Default argument is identified by having no corresponding resultN expression (see examples). Default must be the final argument in the function.' },
+            value1: { name: 'value1', detail: 'ValueN is a value that will be compared against expression.' },
+            result1: { name: 'result1', detail: 'ResultN is the value to be returned when the corresponding valueN argument matches expression. ResultN and must be supplied for each corresponding valueN argument.' },
+            defaultOrValue2: { name: 'default_or_value2', detail: 'Default is the value to return in case no matches are found in the valueN expressions. The Default argument is identified by having no corresponding resultN expression (see examples). Default must be the final argument in the function.' },
+            result2: { name: 'result2', detail: 'ResultN is the value to be returned when the corresponding valueN argument matches expression. ResultN and must be supplied for each corresponding valueN argument.' },
         },
     },
     TRUE: {

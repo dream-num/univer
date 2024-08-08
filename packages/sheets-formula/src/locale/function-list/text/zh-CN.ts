@@ -249,7 +249,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: '要查找其长度的文本。 空格将作为字符进行计数。' },
+            text: { name: '文本', detail: '要查找其长度的文本。 空格将作为字符进行计数。' },
         },
     },
     LENB: {
@@ -262,7 +262,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: ' 要查找其长度的文本。 空格将作为字符进行计数。' },
+            text: { name: '文本', detail: '要查找其长度的文本。 空格将作为字符进行计数。' },
         },
     },
     LOWER: {

@@ -294,11 +294,11 @@ export default {
         ],
         functionParameter: {
             value1: {
-                name: 'Value 1',
+                name: 'value 1',
                 detail: 'The first item, cell reference, or range within which you want to count numbers.',
             },
             value2: {
-                name: 'Value 2',
+                name: 'value 2',
                 detail: 'Up to 255 additional items, cell references, or ranges within which you want to count numbers.',
             },
         },

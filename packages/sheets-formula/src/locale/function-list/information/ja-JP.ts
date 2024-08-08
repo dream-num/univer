@@ -66,7 +66,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '値', detail: 'テストする値を指定します。 テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
+            value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     ISERR: {
@@ -79,8 +79,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     ISERROR: {
@@ -93,8 +92,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     ISEVEN: {
@@ -107,7 +105,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '値', detail: '検定する値を指定します。 数値が整数でない場合は、小数点以下が切り捨てられます。' },
+            value: { name: '値', detail: '検定する値を指定します。数値が整数でない場合は、小数点以下が切り捨てられます。' },
         },
     },
     ISFORMULA: {
@@ -134,8 +132,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     ISNA: {
@@ -148,8 +145,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     ISNONTEXT: {
@@ -162,8 +158,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     ISNUMBER: {
@@ -176,8 +171,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     ISODD: {
@@ -190,7 +184,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '値', detail: '検定する値を指定します。 数値が整数でない場合は、小数点以下が切り捨てられます。' },
+            value: { name: '値', detail: '検定する値を指定します。数値が整数でない場合は、小数点以下が切り捨てられます。' },
         },
     },
     ISOMITTED: {
@@ -217,8 +211,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     ISTEXT: {
@@ -231,8 +224,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
     N: {
@@ -301,7 +293,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '値', detail: ' 数値、文字列、論理値など、の任意の値を指定です。' },
+            value: { name: '値', detail: '数値、文字列、論理値など、の任意の値を指定です。' },
         },
     },
 };

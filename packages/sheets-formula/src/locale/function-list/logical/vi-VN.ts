@@ -67,8 +67,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
         },
     },
     IF: {
@@ -97,7 +95,7 @@ export default {
         ],
         functionParameter: {
             value: { name: 'Giá trị', detail: 'Tham số để kiểm tra lỗi.' },
-            valueIfError: { name: 'Giá trị khi xảy ra lỗi', detail: 'Giá trị trả về khi kết quả tính toán của công thức là lỗi. Đánh giá các loại lỗi sau: #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME? hoặc #NULL!.' },
+            valueIfError: { name: 'Trả về giá trị khi có lỗi', detail: 'Giá trị trả về khi kết quả tính toán của công thức là lỗi. Đánh giá các loại lỗi sau: #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME? hoặc #NULL!.' },
         },
     },
     IFNA: {
@@ -110,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            value: { name: 'Giá trị', detail: 'Đối số được kiểm tra cho giá trị lỗi #N/A.' },
+            valueIfNa: { name: 'Nếu đó là giá trị của #N/A', detail: 'Giá trị cần trả về nếu công thức cho kết quả là giá trị lỗi #N/A.' },
         },
     },
     IFS: {
@@ -124,8 +122,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            logicalTest1: { name: 'logic 1', detail: 'Điều kiện đầu tiên được đánh giá, có thể là giá trị Boolean, giá trị số, mảng hoặc tham chiếu đến một trong các giá trị này.' },
+            valueIfTrue1: { name: 'Giá trị 1', detail: 'Giá trị được trả về khi "Điều kiện 1" là "TRUE".' },
+            logicalTest2: { name: 'logic 2', detail: 'Các điều kiện khác được đánh giá trước điều kiện trước đó là FALSE.' },
+            valueIfTrue2: { name: 'Giá trị 2', detail: 'Giá trị bổ sung được trả về nếu điều kiện tương ứng là "TRUE".' },
         },
     },
     LAMBDA: {
@@ -204,8 +204,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            logical: { name: 'biểu thức logic', detail: 'Điều kiện mà bạn muốn đảo ngược logic có thể đánh giá là TRUE hoặc FALSE.' },
         },
     },
     OR: {
@@ -260,8 +259,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            expression: { name: 'Sự biểu lộ', detail: 'Biểu thức là một giá trị (chẳng hạn như số, ngày hoặc một số văn bản) được so sánh với value1…value126.' },
+            value1: { name: 'Giá trị 1', detail: 'Giá trị N là giá trị được so sánh với biểu thức.' },
+            result1: { name: 'Kết quả 1', detail: 'Kết quả N là giá trị được trả về khi tham số giá trị N tương ứng khớp với biểu thức. Một kết quả N phải được cung cấp cho mỗi đối số N có giá trị tương ứng.' },
+            defaultOrValue2: { name: 'Mặc định hoặc giá trị 2', detail: 'Giá trị mặc định là giá trị được trả về nếu không tìm thấy kết quả khớp nào trong biểu thức giá trị N. Các tham số mặc định được xác định bằng cách không có biểu thức N kết quả tương ứng (xem ví dụ). Mặc định phải là tham số cuối cùng trong hàm.' },
+            result2: { name: 'Kết quả 2', detail: 'Kết quả N là giá trị được trả về khi tham số giá trị N tương ứng khớp với biểu thức. Một kết quả N phải được cung cấp cho mỗi đối số N có giá trị tương ứng.' },
         },
     },
     TRUE: {
@@ -274,8 +276,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
         },
     },
     XOR: {
@@ -288,8 +288,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            logical1: { name: 'Biểu thức logic 1', detail: 'Điều kiện đầu tiên muốn kiểm tra và có thể là TRUE hoặc FALSE.' },
+            logical2: { name: 'Biểu thức logic 2', detail: 'Các điều kiện khác muốn kiểm tra và có thể là TRUE hoặc FALSE (tối đa 255 điều kiện).' },
         },
     },
 };

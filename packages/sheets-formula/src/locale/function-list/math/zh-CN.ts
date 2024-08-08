@@ -66,7 +66,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '数值', detail: 'Number 是需要的角度的正切值。 这必须是实数。' },
+            number: { name: '数值', detail: '数字是需要的角度的正切值。 这必须是实数。' },
         },
     },
     ACOTH: {
@@ -79,7 +79,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '数值', detail: 'Number 的绝对值必须大于 1。' },
+            number: { name: '数值', detail: '数字的绝对值必须大于 1。' },
         },
     },
     AGGREGATE: {
@@ -186,9 +186,9 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '数值', detail: '要转换的数字。 必须是大于或等于 0 且小于 2^53 的整数。' },
-            radix: { name: '基数', detail: '要将数字转换为的基数。 必须是大于或等于 2 且小于或等于 36 的整数。' },
-            minLength: { name: '最小长度', detail: '返回的字符串的最小长度。 必须是大于或等于 0 的整数。' },
+            number: { name: '数值', detail: '要转换的数字。必须是大于或等于 0 且小于 2^53 的整数。' },
+            radix: { name: '基数', detail: '要将数字转换为的基数。必须是大于或等于 2 且小于或等于 36 的整数。' },
+            minLength: { name: '最小长度', detail: '返回的字符串的最小长度。必须是大于或等于 0 的整数。' },
         },
     },
     CEILING: {
@@ -452,7 +452,7 @@ export default {
     },
     FLOOR_PRECISE: {
         description: '将数字向下舍入为最接近的整数或最接近的指定基数的倍数。 无论该数字的符号如何，该数字都向下舍入。',
-        abstract: '将数字向下舍入为最接近的整数或最接近的指定基数的倍数。 无论该数字的符号如何，该数字都向下舍入。',
+        abstract: '将数字向下舍入为最接近的整数或最接近的指定基数的倍数。',
         links: [
             {
                 title: '教学',
@@ -707,7 +707,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '基数', detail: ' 基数。 可为任意实数。' },
+            number: { name: '数值', detail: '基数。可为任意实数。' },
             power: { name: '指数', detail: '基数乘幂运算的指数。' },
         },
     },
@@ -765,10 +765,8 @@ export default {
         },
     },
     RANDARRAY: {
-        description:
-            'RANDARRAY 函数返回 0 和 1 之间的随机数字数组。 但是，你可以指定要填充的行数和列数、最小值和最大值，以及是否返回整个数字或小数值。',
-        abstract:
-            'RANDARRAY 函数返回 0 和 1 之间的随机数字数组。 但是，你可以指定要填充的行数和列数、最小值和最大值，以及是否返回整个数字或小数值。',
+        description: 'RANDARRAY 函数返回 0 和 1 之间的随机数字数组。但是，你可以指定要填充的行数和列数、最小值和最大值，以及是否返回整个数字或小数值。',
+        abstract: 'RANDARRAY 函数返回 0 和 1 之间的随机数字数组。',
         links: [
             {
                 title: '教学',
@@ -1033,8 +1031,8 @@ export default {
         },
     },
     SUMIFS: {
-        description: '在区域中添加满足多个条件的单元格',
-        abstract: '在区域中添加满足多个条件的单元格',
+        description: '用于计算其满足多个条件的全部参数的总量。',
+        abstract: '用于计算其满足多个条件的全部参数的总量。',
         links: [
             {
                 title: '教学',

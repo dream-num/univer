@@ -124,7 +124,7 @@ export default {
         ],
         functionParameter: {
             text1: { name: '文字 1', detail: '要聯結的第一個項目。 項目可以是文字值、數字或儲存格引用。 ' },
-            text2: { name: '文本 2', detail: '要聯結的其他文字項目。 最多可以有 255 個項目，總共最多支援 8,192 個字元。 ' },
+            text2: { name: '文字 2', detail: '要聯結的其他文字項目。 最多可以有 255 個項目，總共最多支援 8,192 個字元。 ' },
         },
     },
     DBCS: {
@@ -249,7 +249,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: '要找出其長度的文字。 空格將作為字元進行計數。 ' },
+            text: { name: '文字', detail: '要找出其長度的文字。 空格將作為字元進行計數。' },
         },
     },
     LENB: {
@@ -262,11 +262,11 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: ' 要找出其長度的文字。 空格將作為字元進行計數。 ' },
+            text: { name: '文字', detail: '要找出其長度的文字。 空格將作為字元進行計數。' },
         },
     },
     LOWER: {
-        description: '將文字轉換為小寫。 ',
+        description: '將文字轉換為小寫。',
         abstract: '將文字轉換為小寫',
         links: [
             {
@@ -276,7 +276,7 @@ export default {
         ],
         functionParameter: {
             text: {
-                name: '文本',
+                name: '文字',
                 detail: '要轉換為小寫字母的文字。 LOWER 不會改變文字中的非字母字元。 ',
             },
         },

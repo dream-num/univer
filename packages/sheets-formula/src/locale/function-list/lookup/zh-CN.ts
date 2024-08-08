@@ -49,8 +49,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '引用', detail: '对某个单元格或单元格区域的引用，可包含多个区域。' },
         },
     },
     CHOOSE: {
@@ -275,10 +274,10 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: '引用', detail: '对一个或多个单元格区域的引用。\n如果为引用输入一个不连续的区域，必须将其用括号括起来。\n如果引用中的每个区域均只包含一行（或一列），则 row_num（或 column_num）为可选参数。 例如，对于单行的引用，可以使用函数 INDEX(reference,,column_num)。\n如果数组有多行和多列，但只使用 row_num 或 column_num，函数 INDEX 返回数组中的整行或整列，且返回值也为数组。' },
+            reference: { name: '引用', detail: '对一个或多个单元格区域的引用。' },
             rowNum: { name: '行号', detail: '引用中某行的行号，函数从该行返回一个引用。' },
             columnNum: { name: '列号', detail: '引用中某列的列标，函数从该列返回一个引用。' },
-            areaNum: { name: '区域编号', detail: '选择要返回 row_num 和 column_num 的交叉点的引用区域。 选择或输入的第一个区域的编号为 1，第二个的编号为 2，依此类推。 如果省略 area_num，则 INDEX 使用区域 1。  此处列出的区域必须全部位于一张工作表。  如果指定的区域不位于同一个工作表，将导致 #VALUE!。 错误。  如果需要使用的范围彼此位于不同工作表，建议使用函数 INDEX 的数组形式，并使用其他函数来计算构成数组的范围。  例如，可以使用 CHOOSE 函数计算将使用的范围。' },
+            areaNum: { name: '区域编号', detail: '选择要返回行号和列号的交叉点的引用区域。' },
         },
     },
     INDIRECT: {
@@ -291,8 +290,8 @@ export default {
             },
         ],
         functionParameter: {
-            refText: { name: '引用文本', detail: '对包含 A1 样式引用、R1C1 样式引用、定义为引用的名称或作为文本字符串引用的单元格的引用的引用。 如果ref_text不是有效的单元格引用，INDIRECT 将返回 #REF！ 。\n如果ref_text引用的单元格区域超出了行限制 1,048,576 或列限制 16,384 (XFD) ，INDIRECT 将返回 #REF！ 错误。' },
-            a1: { name: '引用类型', detail: '一个逻辑值，用于指定包含在单元格 ref_text 中的引用的类型。\n如果 a1 为 TRUE 或省略，ref_text 被解释为 A1-样式的引用。\n如果 a1 为 FALSE，则将 ref_text 解释为 R1C1 样式的引用。' },
+            refText: { name: '引用文本', detail: '对包含 A1 样式引用、R1C1 样式引用、定义为引用的名称或作为文本字符串引用的单元格的引用的引用。' },
+            a1: { name: '引用类型', detail: '一个逻辑值，用于指定包含在单元格引用文本中的引用的类型。' },
         },
     },
     LOOKUP: {
@@ -317,7 +316,7 @@ export default {
         },
     },
     MATCH: {
-        description: '使用 MATCH 函数在 范围 单元格中搜索特定的项，然后返回该项在此区域中的相对位置。 例如，如果 A1:A3 区域中包含值 5、25 和 38，那么公式 =MATCH(25,A1:A3,0) 返回数字 2，因为 25 是该区域中的第二项。',
+        description: '使用 MATCH 函数在 范围 单元格中搜索特定的项，然后返回该项在此区域中的相对位置。',
         abstract: '在引用或数组中查找值',
         links: [
             {
@@ -326,9 +325,9 @@ export default {
             },
         ],
         functionParameter: {
-            lookupValue: { name: '查找值', detail: '要在 lookup_array 中匹配的值。 例如，如果要在电话簿中查找某人的电话号码，则应该将姓名作为查找值，但实际上需要的是电话号码。lookup_value 参数可以为值（数字、文本或逻辑值）或对数字、文本或逻辑值的单元格引用。' },
+            lookupValue: { name: '查找值', detail: '要在 lookup_array 中匹配的值。' },
             lookupArray: { name: '搜索区域', detail: '要搜索的单元格区域。' },
-            matchType: { name: '匹配类型', detail: '数字 -1、0 或 1。 match_type 参数指定 Excel 如何将 lookup_value 与 lookup_array 中的值匹配。 此参数的默认值为 1。' },
+            matchType: { name: '匹配类型', detail: '数字 -1、0 或 1。' },
         },
     },
     OFFSET: {
@@ -341,11 +340,11 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: '引用', detail: '要基于偏移量的引用。 引用必须引用单元格或相邻单元格区域;否则，OFFSET 返回#VALUE！ 错误值。' },
-            rows: { name: '行数', detail: '需要左上角单元格引用的向上或向下行数。 使用 5 作为 rows 参数，可指定引用中的左上角单元格为引用下方的 5 行。 Rows 可为正数（这意味着在起始引用的下方）或负数（这意味着在起始引用的上方）。' },
-            cols: { name: '列数', detail: '需要结果的左上角单元格引用的从左到右的列数。 使用 5 作为 cols 参数，可指定引用中的左上角单元格为引用右方的 5 列。 Cols 可为正数（这意味着在起始引用的右侧）或负数（这意味着在起始引用的左侧）。' },
-            height: { name: '行高', detail: '需要返回的引用的行高。 Height 必须为正数。' },
-            width: { name: '列宽', detail: '需要返回的引用的列宽。 Width 必须为正数。' },
+            reference: { name: '引用', detail: '要基于偏移量的引用。' },
+            rows: { name: '行数', detail: '需要左上角单元格引用的向上或向下行数。' },
+            cols: { name: '列数', detail: '需要结果的左上角单元格引用的从左到右的列数。' },
+            height: { name: '行高', detail: '需要返回的引用的行高。行高必须为正数。' },
+            width: { name: '列宽', detail: '需要返回的引用的列宽。列宽必须为正数。' },
         },
     },
     ROW: {
@@ -511,7 +510,7 @@ export default {
                 detail: 'VLOOKUP 在其中搜索 lookup_value 和返回值的单元格区域。 可以使用命名区域或表，并且可以在参数中使用名称，而不是单元格引用。 ',
             },
             colIndexNum: {
-                name: '行号',
+                name: '列号',
                 detail: '其中包含返回值的单元格的编号（table_array 最左侧单元格为 1 开始编号）。',
             },
             rangeLookup: {
@@ -580,15 +579,15 @@ export default {
             lookupArray: { name: '搜索区域', detail: '要搜索的数组或区域' },
             returnArray: { name: '返回区域', detail: '要返回的数组或区域' },
             ifNotFound: {
-                name: '[默认显示值]',
+                name: '默认显示值',
                 detail: '如果未找到有效的匹配项，则返回你提供的 [if_not_found] 文本，否则返回#N/A ',
             },
             matchMode: {
-                name: '[匹配类型]',
+                name: '匹配类型',
                 detail: '指定匹配类型： 0 - 完全匹配。 如果未找到，则返回 #N/A。默认选项。-1 - 完全匹配。 如果没有找到，则返回下一个较小的项。1 - 完全匹配。 如果没有找到，则返回下一个较大的项。 2 - 通配符匹配，其中 *, ? 和 ~ 有特殊含义。',
             },
             searchMode: {
-                name: '[搜索模式]',
+                name: '搜索模式',
                 detail: '指定要使用的搜索模式：1 从第一项开始执行搜索，默认选项。-1 从最后一项开始执行反向搜索。2 执行依赖于 lookup_array 按升序排序的二进制搜索, -2执行依赖于 lookup_array 按降序排序的二进制搜索',
             },
         },

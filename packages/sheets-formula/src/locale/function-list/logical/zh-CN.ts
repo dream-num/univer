@@ -94,7 +94,7 @@ export default {
         ],
         functionParameter: {
             value: { name: '值', detail: ' 检查是否存在错误的参数。' },
-            valueIfError: { name: '发生错误时的值', detail: '公式计算结果为错误时要返回的值。 评估以下错误类型：#N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME? 或 #NULL!。' },
+            valueIfError: { name: '错误时返回值', detail: '公式计算结果为错误时要返回的值。 评估以下错误类型：#N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME? 或 #NULL!。' },
         },
     },
     IFNA: {
@@ -121,10 +121,10 @@ export default {
             },
         ],
         functionParameter: {
-            logicalTest1: { name: '逻辑测试1', detail: '计算结果为 TRUE 或 FALSE 的条件。' },
-            valueIfTrue1: { name: '如果为 TRUE 的值1', detail: '如果 logical_test1 的计算结果为 TRUE，返回的结果。可以为空。' },
-            logicalTest2: { name: '逻辑测试2...逻辑测试127', detail: '计算结果为 TRUE 或 FALSE 的条件。' },
-            valueIfTrue2: { name: '如果为 TRUE 的值2...如果为 TRUE 的值127', detail: '如果 logical_testN 的计算结果为 TRUE，返回的结果。每个 value_if_trueN 对应于一个条件 logical_testN。可以为空。' },
+            logicalTest1: { name: '条件1', detail: '要评估的第一个条件，可以是布尔值、数值、数组或指向这些值的引用。' },
+            valueIfTrue1: { name: '值1', detail: '“条件1”为“TRUE”的情况下返回的值。' },
+            logicalTest2: { name: '条件2', detail: '之前的条件为“FALSE”的情况下，要评估的其他条件。' },
+            valueIfTrue2: { name: '值2', detail: '相应条件为“TRUE”的情况下返回的其他值。' },
         },
     },
     LAMBDA: {
@@ -259,10 +259,11 @@ export default {
             },
         ],
         functionParameter: {
-            expression: { name: '表达式', detail: '表达式是将要与 value1…value126 进行比较的值（例如数字、日期或一些文本）。' },
-            value: { name: '值1...值126', detail: '值N 是将要与表达式进行比较的值。' },
-            result: { name: '结果1...结果126', detail: '结果N 是当对应的值N 参数与表达式匹配时要返回的值。必须为每个对应的值N 参数提供结果N。' },
-            default: { name: '默认', detail: '默认是在值N 表达式中找不到匹配项时要返回的值。默认参数通过没有对应的结果N 表达式来识别（参见示例）。默认必须是函数中的最后一个参数。' },
+            expression: { name: '表达式', detail: '表达式是将要与 值1…值126 进行比较的值（例如数字、日期或一些文本）。' },
+            value1: { name: '值1', detail: '值N 是将要与表达式进行比较的值。' },
+            result1: { name: '结果1', detail: '结果N 是当对应的值N 参数与表达式匹配时要返回的值。必须为每个对应的值N 参数提供结果N。' },
+            defaultOrValue2: { name: '默认或值2', detail: '默认是在值N 表达式中找不到匹配项时要返回的值。默认参数通过没有对应的结果N 表达式来识别（参见示例）。默认必须是函数中的最后一个参数。' },
+            result2: { name: '结果2', detail: '结果N 是当对应的值N 参数与表达式匹配时要返回的值。必须为每个对应的值N 参数提供结果N。' },
         },
     },
     TRUE: {

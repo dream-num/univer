@@ -69,16 +69,20 @@ export function isCJKLocale(locale: LocaleType) {
  * @param lexerTreeBuilder
  * @returns
  */
-export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, functionService: IFunctionService) {
-    // Check if it is a mandatory string with single quotes
-    if (str.startsWith('＇') || str.startsWith("'")) {
-        return `'${str.slice(1)}`;
+export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: LocaleType, functionService: IFunctionService) {
+    let normalStr = str;
+
+    if (isCJKLocale(currentLocale)) {
+        // Check if it is a mandatory string with single quotes
+        if (str.startsWith('＇') || str.startsWith("'")) {
+            return `'${str.slice(1)}`;
+        }
+
+        // covert all full width characters to normal characters
+        normalStr = str.split('').map(toHalfWidth).join('');
     }
 
-    // covert all full width characters to normal characters
-    const normalStr = str.split('').map(toHalfWidth).join('');
-
-     // Check if it is a formula
+    // Check if it is a formula
     if (normalStr.startsWith('=')) {
         return normalizeFormulaString(str, normalStr, lexerTreeBuilder, functionService);
     }
@@ -100,32 +104,47 @@ function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder
 
     if (!nodes) return str;
 
+    let _normalStr = normalStr;
+
     nodes.forEach((node, index) => {
         if (typeof node === 'object') {
             const token = node.token;
-            const lowerCaseToken = token.toLowerCase();
 
             // boolean or function name
-            if (booleanMap[lowerCaseToken] || (node.nodeType === sequenceNodeType.FUNCTION && hasFunctionName(token, functionService, nodes, index)) || node.nodeType === sequenceNodeType.REFERENCE) {
+            if (booleanMap[token.toLowerCase()]) {
                 const startIndex = node.startIndex + 1;
                 const endIndex = node.endIndex + 2;
-                normalStr = replaceString(token.toLocaleUpperCase(), normalStr, startIndex, endIndex);
+                _normalStr = replaceString(token.toLocaleUpperCase(), _normalStr, startIndex, endIndex);
+            } else if ((node.nodeType === sequenceNodeType.FUNCTION && hasFunctionName(token, functionService, nodes, index)) || node.nodeType === sequenceNodeType.REFERENCE) {
+                const sheetNameIndex = token.indexOf('!');
+
+                if (sheetNameIndex > -1) {
+                    const refBody = token.substring(sheetNameIndex + 1);
+                    const startIndex = node.startIndex + (sheetNameIndex + 1) + 1;
+                    const endIndex = node.endIndex + 2;
+                    _normalStr = replaceString(refBody.toLocaleUpperCase(), _normalStr, startIndex, endIndex);
+                } else {
+                    const startIndex = node.startIndex + 1;
+                    const endIndex = node.endIndex + 2;
+                    _normalStr = replaceString(token.toLocaleUpperCase(), _normalStr, startIndex, endIndex);
+                }
             } else if ((token.startsWith('"') && token.endsWith('"')) || (token.startsWith("'") && token.endsWith("'"))) {
                 const startIndex = node.startIndex + 2;
                 const endIndex = node.endIndex + 1;
-                normalStr = replaceString(str.slice(startIndex, endIndex), normalStr, startIndex, endIndex);
+                _normalStr = replaceString(str.slice(startIndex, endIndex), _normalStr, startIndex, endIndex);
             } else if (node.nodeType !== sequenceNodeType.ARRAY) {
                 const parsedValue = numfmt.parseValue(token);
 
                 if (parsedValue == null) {
                     const startIndex = node.startIndex + 1;
                     const endIndex = node.endIndex + 2;
-                    normalStr = replaceString(str.slice(startIndex, endIndex), normalStr, startIndex, endIndex);
+                    _normalStr = replaceString(str.slice(startIndex, endIndex), _normalStr, startIndex, endIndex);
                 }
             }
         }
     });
-    return normalStr;
+
+    return _normalStr;
 }
 
 function hasFunctionName(name: string, functionService: IFunctionService, nodes: (string | ISequenceNode)[], index: number) {

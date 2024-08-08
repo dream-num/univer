@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
-import { CellValueType, IContextService, IResourceLoaderService, LocaleService } from '@univerjs/core';
+import { CellValueType, IContextService, IResourceLoaderService, LocaleService, LocaleType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -130,7 +130,7 @@ describe('Test EndEditController', () => {
 
         normalizeStringByLexer = (str: string) => {
             // @ts-ignore
-            return normalizeString(str, lexerTreeBuilder, get(IMockFunctionService));
+            return normalizeString(str, lexerTreeBuilder, LocaleType.ZH_CN, get(IMockFunctionService));
         };
     });
 
@@ -235,6 +235,7 @@ describe('Test EndEditController', () => {
             // formula
             expect(normalizeStringByLexer('＝ｗ')).toEqual('=ｗ');
             expect(normalizeStringByLexer('=a1')).toEqual('=A1');
+            expect(normalizeStringByLexer('=tan(sheet001!a1')).toEqual('=TAN(sheet001!A1');
 
             expect(normalizeStringByLexer('＝＂１＂')).toEqual('="１"');
             expect(normalizeStringByLexer('＝＇１＇')).toEqual("=＇１'"); // invalid in Excel

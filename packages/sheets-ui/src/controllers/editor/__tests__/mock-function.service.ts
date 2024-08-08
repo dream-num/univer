@@ -22,6 +22,7 @@ export class MockFunctionService {
     getDescriptions(): Map<IFunctionNames, IFunctionInfo> {
         const map = new Map<IFunctionNames, IFunctionInfo>();
         map.set('IF', { functionName: 'IF', functionType: FunctionType.Logical, description: 'IF function', abstract: 'IF function', functionParameter: [] });
+        map.set('TAN', { functionName: 'TAN', functionType: FunctionType.Logical, description: 'TAN function', abstract: 'TAN function', functionParameter: [] });
 
         return map;
     }

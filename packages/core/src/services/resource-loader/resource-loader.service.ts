@@ -23,6 +23,7 @@ import { IUniverInstanceService } from '../instance/instance.service';
 import { Disposable } from '../../shared/lifecycle';
 import { UniverInstanceType } from '../../common/unit';
 import type { DocumentDataModel } from '../../docs';
+import { isInternalEditorID } from '../../common/const';
 import type { IResourceLoaderService } from './type';
 
 export class ResourceLoaderService extends Disposable implements IResourceLoaderService {
@@ -86,7 +87,10 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         );
         this.disposeWithMe(
             this._univerInstanceService.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
-                this._resourceManagerService.loadResources(doc.getUnitId(), doc.getSnapshot().resources);
+                const unitId = doc.getUnitId();
+                if (!isInternalEditorID(unitId)) {
+                    this._resourceManagerService.loadResources(doc.getUnitId(), doc.getSnapshot().resources);
+                }
             })
         );
 

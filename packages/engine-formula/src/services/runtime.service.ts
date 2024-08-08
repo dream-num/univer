@@ -530,11 +530,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 objectValueRefOrArray.iterator((_, rowIndex, columnIndex) => {
                     const currentRow = rowIndex - startRow + row;
                     const currentColumn = columnIndex - startColumn + column;
+                    const cell = unitData[unitId]?.[sheetId]?.cellData.getValue(currentRow, currentColumn);
 
                     if (rowIndex === startRow && columnIndex === startColumn) {
                         runtimeArrayUnitData.setValue(row, column, errorObject);
-                    } else if (unitData[unitId]?.[sheetId]?.cellData?.getValue(currentRow, currentColumn) != null) {
-                        const cell = unitData[unitId]?.[sheetId]?.cellData.getValue(currentRow, currentColumn);
+                    } else if (cell != null) {
+                        if (cell.v == null) {
+                            cell.v = '';
+                        }
                         runtimeArrayUnitData.setValue(currentRow, currentColumn, cell);
                     } else {
                         runtimeArrayUnitData.setValue(currentRow, currentColumn, { v: '' });

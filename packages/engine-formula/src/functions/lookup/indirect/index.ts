@@ -38,10 +38,12 @@ export class Indirect extends BaseFunction {
     }
 
     override calculate(refText: BaseValueObject, a1?: BaseValueObject) {
-        let _refText = refText;
+        if (refText.isError()) {
+            return refText;
+        }
 
-        if (_refText.isError()) {
-            return _refText;
+        if (a1?.isError()) {
+            return a1;
         }
 
         let a1Value = this.getZeroOrOneByOneDefault(a1);
@@ -50,22 +52,33 @@ export class Indirect extends BaseFunction {
             a1Value = 1;
         }
 
-        if (_refText.isArray()) {
-            const refTextArray = _refText as ArrayValueObject;
-            if (refTextArray.getRowCount() === 1 && refTextArray.getColumnCount() === 1) {
-                _refText = refTextArray.getFirstCell();
-            } else {
-                return refTextArray.map(() => {
+        let _refText = refText;
+
+        if (refText.isArray()) {
+            const rowCount = (refText as ArrayValueObject).getRowCount();
+            const columnCount = (refText as ArrayValueObject).getColumnCount();
+
+            if (rowCount > 1 || columnCount > 1) {
+                // TO DO...
+                return refText.map(() => {
                     return ErrorValueObject.create(ErrorType.VALUE);
                 });
             }
+
+            _refText = (refText as ArrayValueObject).getFirstCell();
         }
 
-        if (!_refText.isString()) {
+        return this._handleSingleObject(_refText, a1Value);
+    }
+
+    private _handleSingleObject(refTextObject: BaseValueObject, a1Value: number) {
+        const refTextValue = `${refTextObject.getValue()}`;
+
+        if (refTextValue.trim() === '') {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
-        const refTextV = this._convertToDefinedName(_refText.getValue() as string);
+        const refTextV = this._convertToDefinedName(refTextValue);
 
         if (a1Value === 0) {
             const gridRange = deserializeRangeForR1C1(refTextV);
@@ -94,6 +107,10 @@ export class Indirect extends BaseFunction {
         const gridRange = deserializeRangeWithSheet(refTextV);
 
         const { range, sheetName, unitId } = gridRange;
+
+        if (Number.isNaN(range.startRow)) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
 
         const rangeReferenceObject = new RangeReferenceObject(range);
 

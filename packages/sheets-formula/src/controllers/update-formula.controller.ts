@@ -84,7 +84,6 @@ import {
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveCols,
-    handleMoveRange,
     handleMoveRows,
     InsertColCommand,
     InsertRangeMoveDownCommand,
@@ -899,37 +898,31 @@ export class UpdateFormulaController extends Disposable {
         const sequenceRange = Rectangle.moveOffset(unitRange, refOffsetX, refOffsetY);
         let newRange: Nullable<IRange> = null;
 
-        if (type === FormulaReferenceMoveType.MoveRange) {
-            if (from == null || to == null) {
-                return;
-            }
-
-            const moveEdge = this._checkMoveEdge(sequenceRange, from);
-
-            // const fromAndToDirection = this._checkMoveFromAndToDirection(from, to);
-
-            // if (moveEdge == null) {
+        if (type === FormulaReferenceMoveType.MoveRange) { // array move range not need handle
+            // if (from == null || to == null) {
             //     return;
             // }
 
-            const remainRange = Rectangle.getIntersects(sequenceRange, from);
+            // const moveEdge = this._checkMoveEdge(sequenceRange, from);
 
-            if (remainRange == null) {
-                return;
-            }
+            // const remainRange = Rectangle.getIntersects(sequenceRange, from);
 
-            const operators = handleMoveRange(
-                { id: EffectRefRangId.MoveRangeCommandId, params: { toRange: to, fromRange: from } },
-                remainRange
-            );
+            // if (remainRange == null) {
+            //     return;
+            // }
 
-            const result = runRefRangeMutations(operators, remainRange);
+            // const operators = handleMoveRange(
+            //     { id: EffectRefRangId.MoveRangeCommandId, params: { toRange: to, fromRange: from } },
+            //     remainRange
+            // );
 
-            if (result == null) {
-                return ErrorType.REF;
-            }
+            // const result = runRefRangeMutations(operators, remainRange);
 
-            newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
+            // if (result == null) {
+            //     return ErrorType.REF;
+            // }
+
+            // newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
         } else if (type === FormulaReferenceMoveType.MoveRows) {
             if (from == null || to == null) {
                 return;
@@ -937,10 +930,23 @@ export class UpdateFormulaController extends Disposable {
 
             const moveEdge = this._checkMoveEdge(sequenceRange, from);
 
-            const remainRange = Rectangle.getIntersects(sequenceRange, from);
+            let remainRange = Rectangle.getIntersects(sequenceRange, from);
+
+            if (
+                remainRange == null &&
+                ((from.endRow < sequenceRange.startRow && to.endRow < sequenceRange.startRow) || (from.startRow > sequenceRange.endRow && to.startRow > sequenceRange.endRow))
+            ) {
+                return;
+            }
 
             if (remainRange == null) {
-                return;
+                remainRange = {
+                    startRow: sequenceRange.startRow,
+                    endRow: sequenceRange.endRow,
+                    startColumn: sequenceRange.startColumn,
+                    endColumn: sequenceRange.endColumn,
+                    rangeType: RANGE_TYPE.NORMAL,
+                };
             }
 
             const operators = handleMoveRows(
@@ -962,10 +968,23 @@ export class UpdateFormulaController extends Disposable {
 
             const moveEdge = this._checkMoveEdge(sequenceRange, from);
 
-            const remainRange = Rectangle.getIntersects(sequenceRange, from);
+            let remainRange = Rectangle.getIntersects(sequenceRange, from);
+
+            if (
+                remainRange == null &&
+                ((from.endColumn < sequenceRange.startColumn && to.endColumn < sequenceRange.startColumn) || (from.startColumn > sequenceRange.endColumn && to.startColumn > sequenceRange.endColumn))
+            ) {
+                return;
+            }
 
             if (remainRange == null) {
-                return;
+                remainRange = {
+                    startRow: sequenceRange.startRow,
+                    endRow: sequenceRange.endRow,
+                    startColumn: sequenceRange.startColumn,
+                    endColumn: sequenceRange.endColumn,
+                    rangeType: RANGE_TYPE.NORMAL,
+                };
             }
 
             const operators = handleMoveCols(
@@ -1328,12 +1347,7 @@ export class UpdateFormulaController extends Disposable {
             if (startColumn === originStartColumn && endColumn === originEndColumn) {
                 if (startRow < originStartRow) {
                     newRange.startRow = startRow;
-                } else if (endRow < originEndRow) {
-                    newRange.startRow = startRow;
-                } else if (endRow >= originEndRow && toStartRow <= originEndRow) {
-                    newRange.startRow = fromEndRow + 1;
-                    newRange.endRow = endRow;
-                } else if (toStartRow > originEndRow) {
+                } else if (startRow >= originEndRow) {
                     newRange.endRow -= fromEndRow + 1 - originStartRow;
                 } else {
                     return;
@@ -1345,12 +1359,7 @@ export class UpdateFormulaController extends Disposable {
             if (startColumn === originStartColumn && endColumn === originEndColumn) {
                 if (endRow > originEndRow) {
                     newRange.endRow = endRow;
-                } else if (startRow > originStartRow) {
-                    newRange.endRow = endRow;
-                } else if (startRow <= originStartRow && toEndRow >= originStartRow) {
-                    newRange.endRow = fromStartRow + 1;
-                    newRange.startRow = startRow;
-                } else if (toEndRow < originStartRow) {
+                } else if (endRow <= originStartRow) {
                     newRange.startRow += originEndRow - fromStartRow + 1;
                 } else {
                     return;
@@ -1362,12 +1371,7 @@ export class UpdateFormulaController extends Disposable {
             if (startRow === originStartRow && endRow === originEndRow) {
                 if (startColumn < originStartColumn) {
                     newRange.startColumn = startColumn;
-                } else if (endColumn < originEndColumn) {
-                    newRange.startColumn = startColumn;
-                } else if (endColumn >= originEndColumn && toStartColumn <= originEndColumn) {
-                    newRange.startColumn = fromEndColumn + 1;
-                    newRange.endColumn = endColumn;
-                } else if (toStartColumn > originEndColumn) {
+                } else if (startColumn >= originEndColumn) {
                     newRange.endColumn -= fromEndColumn + 1 - originStartColumn;
                 } else {
                     return;
@@ -1379,12 +1383,7 @@ export class UpdateFormulaController extends Disposable {
             if (startRow === originStartRow && endRow === originEndRow) {
                 if (endColumn > originEndColumn) {
                     newRange.endColumn = endColumn;
-                } else if (startColumn > originStartColumn) {
-                    newRange.endColumn = endColumn;
-                } else if (startColumn <= originStartColumn && toEndColumn >= originStartColumn) {
-                    newRange.endColumn = fromStartColumn + 1;
-                    newRange.startColumn = startColumn;
-                } else if (toEndColumn < originStartColumn) {
+                } else if (endColumn <= originStartColumn) {
                     newRange.startColumn += originEndColumn - fromStartColumn + 1;
                 } else {
                     return;
@@ -1398,16 +1397,36 @@ export class UpdateFormulaController extends Disposable {
             newRange.endRow = endRow;
             newRange.endColumn = endColumn;
         } else if (fromStartColumn <= originStartColumn && fromEndColumn >= originEndColumn) {
-            if (toStartRow > originEndRow) {
-                newRange.endRow -= fromEndRow - fromStartRow + 1;
-            } else if (toEndRow < originStartRow) {
-                newRange.startRow += fromEndRow - fromStartRow + 1;
+            if (from.endRow < originStartRow) {
+                if (toStartRow >= originStartRow) {
+                    newRange.startRow -= fromEndRow - fromStartRow + 1;
+                }
+                if (toStartRow >= originEndRow) {
+                    newRange.endRow -= fromEndRow - fromStartRow + 1;
+                }
+            } else if (from.startRow > originEndRow) {
+                if (toEndRow <= originEndRow) {
+                    newRange.endRow += fromEndRow - fromStartRow + 1;
+                }
+                if (toEndRow <= originStartRow) {
+                    newRange.startRow += fromEndRow - fromStartRow + 1;
+                }
             }
         } else if (fromStartRow <= originStartRow && fromEndRow >= originEndRow) {
-            if (toStartColumn > originEndColumn) {
-                newRange.endColumn -= fromEndColumn - fromStartColumn + 1;
-            } else if (toEndColumn < originStartColumn) {
-                newRange.startColumn += fromEndColumn - fromStartColumn + 1;
+            if (from.endColumn < originStartColumn) {
+                if (toStartColumn >= originStartColumn) {
+                    newRange.startColumn -= fromEndColumn - fromStartColumn + 1;
+                }
+                if (toStartColumn >= originEndColumn) {
+                    newRange.endColumn -= fromEndColumn - fromStartColumn + 1;
+                }
+            } else if (from.startColumn > originEndColumn) {
+                if (toEndColumn <= originEndColumn) {
+                    newRange.endColumn += fromEndColumn - fromStartColumn + 1;
+                }
+                if (toEndColumn <= originStartColumn) {
+                    newRange.startColumn += fromEndColumn - fromStartColumn + 1;
+                }
             }
         } else if (
             ((toStartColumn <= remainEndColumn + 1 && toEndColumn >= originEndColumn) ||

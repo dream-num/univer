@@ -654,6 +654,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._univerInstanceService.disposeUnit(editorUnitId);
         this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
 
+        // DEBT: no necessary when we refactor editor module
+        if (!this.isSheetEditor(editorUnitId)) return;
+
         /**
          * Compatible with the editor in the sheet scenario,
          * it is necessary to refocus back to the current sheet when unloading.

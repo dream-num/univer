@@ -54,7 +54,7 @@ export const DocCreateTableConfirm = ({
                 <span className={styles.createLabel}>{localeService.t('toolbar.table.rowCount')}</span>
                 <InputNumber
                     min={1}
-                    max={100}
+                    max={20}
                     precision={0}
                     value={rowCount}
                     onChange={(val) => { handleInputChange(val as number, colCount); }}
@@ -65,7 +65,7 @@ export const DocCreateTableConfirm = ({
                 <span className={styles.createLabel}>{localeService.t('toolbar.table.colCount')}</span>
                 <InputNumber
                     min={1}
-                    max={100}
+                    max={20}
                     precision={0}
                     value={colCount}
                     onChange={(val) => { handleInputChange(rowCount, val as number); }}

@@ -108,7 +108,7 @@ export class Background extends SheetExtension {
                         return true;
                     } else {
                         const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(rowIndex);
-                        const visibleCol = spreadsheetSkeleton.worksheet.getRowVisible(columnIndex);
+                        const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(columnIndex);
                         if (!visibleRow || !visibleCol) return true;
                     }
 

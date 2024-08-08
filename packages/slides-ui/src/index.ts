@@ -21,9 +21,12 @@ export { SlideSideBar } from './components/slide-bar/SlideBar';
 export { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 export type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
 
+export { IMAGE_MENU_ID } from './controllers/image.menu';
+export { SHAPE_MENU_ID } from './controllers/shape.menu';
 // #region - all commands
 
 export { ActivateSlidePageOperation } from './commands/operations/activate.operation';
 export { SetSlidePageThumbOperation } from './commands/operations/set-thumb.operation';
-
+export { AppendSlideOperation } from './commands/operations/append-slide.operation';
+export { SlideAddTextOperation } from './commands/operations/insert-text.operation';
 // #endregion

@@ -18,9 +18,9 @@ import React from 'react';
 import type { SlideDataModel } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IUniverSlidesDrawingConfig } from '@univerjs/slides-ui';
-import { SlidesUIController } from '@univerjs/slides-ui';
+import { IMAGE_MENU_ID, SHAPE_MENU_ID, SlideAddTextOperation, SlidesUIController } from '@univerjs/slides-ui';
 import { ComponentManager, IMenuService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
-import { UniUIPart } from '@univerjs/uniui';
+import { BuiltinUniToolbarItemId, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';
 
 @OnLifecycle(LifecycleStages.Ready, UniSlidesUIController)
@@ -32,13 +32,25 @@ export class UniSlidesUIController extends SlidesUIController {
         @Inject(ComponentManager) _componentManager: ComponentManager,
         @IUIPartsService _uiPartsService: IUIPartsService,
         @ICommandService _commandService: ICommandService,
-        @IShortcutService _shortcutService: IShortcutService
+        @IShortcutService _shortcutService: IShortcutService,
+        @Inject(UniToolbarService) private readonly _toolbarService: UniToolbarService
     ) {
         super(_config, _injector, _menuService, _componentManager, _uiPartsService, _commandService, _shortcutService);
+        this._initUniMenus();
     }
 
     protected override _initUIComponents(): void {
         this.disposeWithMe(this._uiPartsService.registerComponent(UniUIPart.OUTLINE, () => connectInjector(RenderOutline, this._injector)));
+    }
+
+    private _initUniMenus(): void {
+        ([
+            [BuiltinUniToolbarItemId.IMAGE, IMAGE_MENU_ID],
+            [BuiltinUniToolbarItemId.FONT_SIZE, SHAPE_MENU_ID],
+            [BuiltinUniToolbarItemId.TABLE, SlideAddTextOperation.id],
+        ]).forEach(([id, menuId]) => {
+            this._toolbarService.implementItem(id, { id: menuId, type: UniverInstanceType.UNIVER_SLIDE });
+        });
     }
 }
 

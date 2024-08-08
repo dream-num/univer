@@ -1068,7 +1068,11 @@ export function resetContext(ctx: ILayoutContext) {
 export function mergeByV<T = unknown>(object: unknown, originObject: unknown, type: 'max' | 'min') {
     const mergeIterator = (obj: unknown, originObj: unknown, key: string) => {
         if (key !== 'v') {
-            return Tools.mergeWith(obj, originObj, mergeIterator);
+            if (typeof originObj === 'object') {
+                return Tools.mergeWith(obj, originObj, mergeIterator);
+            } else {
+                return originObj ?? obj;
+            }
         }
         if (typeof originObj === 'number') {
             if (typeof obj === 'number') {

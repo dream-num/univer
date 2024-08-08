@@ -161,7 +161,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 marginHeader = 0,
                 marginFooter = 0,
                 useFirstPageHeaderFooter = BooleanNumber.FALSE,
-                evenAndOddHeaders = BooleanNumber.FALSE
+                evenAndOddHeaders = BooleanNumber.FALSE,
             } = documentStyle;
 
             setOptions({

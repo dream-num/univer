@@ -28,6 +28,7 @@ export { SheetHyperLinkUrlController } from './controllers/url.controller';
 
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
 export { InsertLinkShortcut } from './controllers/menu';
+export type { IUrlHandler, IUniverSheetsHyperLinkUIConfig } from './types/interfaces/i-config';
 
 // #region - all commands
 

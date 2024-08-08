@@ -21,11 +21,8 @@ import { LinkSingle } from '@univerjs/icons';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkSidebarOperation } from '../commands/operations/sidebar.operations';
+import type { IUniverSheetsHyperLinkUIConfig } from '../types/interfaces/i-config';
 import { insertLinkMenuFactory, insertLinkMenuToolbarFactory, InsertLinkShortcut } from './menu';
-
-export interface IUniverSheetsHyperLinkUIConfig {
-    menu?: MenuConfig;
-}
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkUIController)
 export class SheetsHyperLinkUIController extends Disposable {

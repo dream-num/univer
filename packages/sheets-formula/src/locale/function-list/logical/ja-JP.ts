@@ -94,7 +94,7 @@ export default {
         ],
         functionParameter: {
             value: { name: '値', detail: 'エラーかどうかをチェックする引数です。' },
-            valueIfError: { name: 'エラーの場合の値', detail: '数式がエラー値と評価された場合に返す値を指定します。 次のエラーの種類はが評価されます: #N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME?、#NULL!。' },
+            valueIfError: { name: 'エラー時の戻り値', detail: '数式がエラー値と評価された場合に返す値を指定します。 次のエラーの種類はが評価されます: #N/A、#VALUE!、#REF!、#DIV/0!、#NUM!、#NAME?、#NULL!。' },
         },
     },
     IFNA: {
@@ -121,10 +121,10 @@ export default {
             },
         ],
         functionParameter: {
-            logicalTest1: { name: '論理テスト1', detail: 'TRUE または FALSE に評価される条件。' },
-            valueIfTrue1: { name: '論理テスト1がTRUEの場合の値', detail: 'logical_test1 が TRUE と評価された場合に返される結果。空でもかまいません。' },
-            logicalTest2: { name: '論理テスト2...論理テスト127', detail: 'TRUE または FALSE に評価される条件。' },
-            valueIfTrue2: { name: '論理テスト2がTRUEの場合の値...論理テスト127がTRUEの場合の値', detail: 'logical_testN が TRUE と評価された場合に返される結果。各 value_if_trueN は条件 logical_testN に対応します。空でもかまいません。' },
+            logicalTest1: { name: '論理1', detail: '評価される最初の条件。ブール値、数値、配列、またはこれらの値のいずれかへの参照を指定できます。' },
+            valueIfTrue1: { name: '値1', detail: '“条件1”が“TRUE”の場合に返される値。' },
+            logicalTest2: { name: '論理2', detail: '前の条件の前に評価される他の条件は FALSE です。' },
+            valueIfTrue2: { name: '値2', detail: '対応する条件が“TRUE”の場合に返される追加の値。' },
         },
     },
     LAMBDA: {
@@ -259,9 +259,10 @@ export default {
         ],
         functionParameter: {
             expression: { name: '式', detail: '式は、値1...値126 と比較される値です（数値、日付、テキストなど）。' },
-            value: { name: '値1...値126', detail: '値N は式と比較される値です。' },
-            result: { name: '結果1...結果126', detail: '結果N は対応する値N 引数が式と一致した場合に返される値です。結果N は対応する値N 引数ごとに提供する必要があります。' },
-            default: { name: '既定', detail: '既定は、値N 式で一致するものが見つからなかった場合に返される値です。既定の引数は、対応する結果N 式がないことで識別されます（例を参照）。既定は関数の最後の引数でなければなりません。' },
+            value1: { name: '値1', detail: '値N は式と比較される値です。' },
+            result1: { name: '結果1', detail: '結果N は対応する値N 引数が式と一致した場合に返される値です。結果N は対応する値N 引数ごとに提供する必要があります。' },
+            defaultOrValue2: { name: 'デフォルトまたは値2', detail: '既定は、値N 式で一致するものが見つからなかった場合に返される値です。既定の引数は、対応する結果N 式がないことで識別されます（例を参照）。既定は関数の最後の引数でなければなりません。' },
+            result2: { name: '結果2', detail: '結果N は対応する値N 引数が式と一致した場合に返される値です。結果N は対応する値N 引数ごとに提供する必要があります。' },
         },
     },
     TRUE: {

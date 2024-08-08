@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
+import { FUNCTION_NAMES_STATISTICAL } from './function-names';
+import { Avedev } from './avedev';
 import { Average } from './average';
+import { Averagea } from './averagea';
+import { Averageif } from './averageif';
+import { Averageifs } from './averageifs';
 import { Count } from './count';
 import { Counta } from './counta';
-import { FUNCTION_NAMES_STATISTICAL } from './function-names';
+import { Countblank } from './countblank';
+import { Countif } from './countif';
+import { Countifs } from './countifs';
 import { Max } from './max';
+import { Maxa } from './maxa';
+import { Maxifs } from './maxifs';
 import { Min } from './min';
+import { Mina } from './mina';
+import { Minifs } from './minifs';
 import { StdevP } from './stdev-p';
 import { StdevS } from './stdev-s';
 import { Stdeva } from './stdeva';
@@ -28,17 +39,6 @@ import { VarP } from './var-p';
 import { VarS } from './var-s';
 import { Vara } from './vara';
 import { Varpa } from './varpa';
-import { Maxifs } from './maxifs';
-import { Averagea } from './averagea';
-import { Minifs } from './minifs';
-import { Averageif } from './averageif';
-import { Averageifs } from './averageifs';
-import { Countif } from './countif';
-import { Countifs } from './countifs';
-import { Countblank } from './countblank';
-import { Mina } from './mina';
-import { Maxa } from './maxa';
-import { Avedev } from './avedev';
 
 export const functionStatistical = [
     [Avedev, FUNCTION_NAMES_STATISTICAL.AVEDEV],

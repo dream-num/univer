@@ -66,7 +66,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '數值', detail: 'Number 是需要的角度的正切值。 這必須是實數。 ' },
+            number: { name: '數值', detail: '數字是需要的角度的正切值。 這必須是實數。 ' },
         },
     },
     ACOTH: {
@@ -79,8 +79,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '數字的絕對值必須大於 1。' },
         },
     },
     AGGREGATE: {
@@ -121,8 +120,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是欲求角度的正弦值，其值必須介於 -1 到 1。' },
         },
     },
     ASINH: {
@@ -135,8 +133,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是任意實數。' },
         },
     },
     ATAN: {
@@ -149,8 +146,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是欲求角度的正切值。' },
         },
     },
     ATAN2: {
@@ -163,8 +159,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xNum: { name: 'x 座標', detail: '這是點的 X 座標。' },
+            yNum: { name: 'y 座標', detail: '這是點的 Y 座標。' },
         },
     },
     ATANH: {
@@ -177,8 +173,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是任何介於 1 和 -1 之間的實數。' },
         },
     },
     BASE: {
@@ -191,8 +186,9 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '數值', detail: '這是要轉換的數位。 必須是大於或等於 0 且小於 2^53 的整數。' },
-            radix: { name: '基數', detail: '這是要將數字轉換為底數的基數。 必須是大於或等於 2 且小於或等於 36 的整數。' },
+            number: { name: '數值', detail: '這是要轉換的數位。必須是大於或等於 0 且小於 2^53 的整數。' },
+            radix: { name: '基數', detail: '這是要將數字轉換為底數的基數。必須是大於或等於 2 且小於或等於 36 的整數。' },
+            minLength: { name: '最小長度', detail: '傳回之字串的最小長度。必須是大於或等於 0 的整數。' },
         },
     },
     CEILING: {
@@ -276,8 +272,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: ' 這是欲求算其餘弦值的角度，以弧度表示。' },
         },
     },
     COSH: {
@@ -290,8 +285,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是欲求得其雙曲線餘弦值的任意實數。' },
         },
     },
     COT: {
@@ -304,8 +298,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是欲求餘切值的角度，以弧度表示。' },
         },
     },
     COTH: {
@@ -313,12 +306,12 @@ export default {
         abstract: '傳回數字的雙曲餘切值',
         links: [
             {
-                title: '教導', url: 'https://support.microsoft.com/zh-tw/office/coth-%E5%87%BD%E6%95%B0-2e0b4cb6-0ba0-403e-aed4-deaa71b49df5',
+                title: '教導',
+                url: 'https://support.microsoft.com/zh-tw/office/coth-%E5%87%BD%E6%95%B0-2e0b4cb6-0ba0-403e-aed4-deaa71b49df5',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '想要求雙曲餘切的任意實數。' },
         },
     },
     CSC: {
@@ -331,8 +324,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '想要求餘割的角度，以弧度表示。' },
         },
     },
     CSCH: {
@@ -345,8 +337,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '想要求雙曲餘割值的角度，以弧度表示。' },
         },
     },
     DECIMAL: {
@@ -461,7 +452,7 @@ export default {
     },
     FLOOR_PRECISE: {
         description: '將數字向下捨去為最接近的整數或最接近的指定基數的倍數。 無論該數字的符號為何，該數字都向下捨去。 ',
-        abstract: '將數字向下捨去為最接近的整數或最接近的指定基數的倍數。 無論該數字的符號為何，該數字都向下捨去。 ',
+        abstract: '將數字向下捨去為最接近的整數或最接近的指定基數的倍數。',
         links: [
             {
                 title: '教導',
@@ -716,8 +707,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '基數', detail: ' 基數。 可為任意實數。 ' },
-            power: { name: '指數', detail: '基數乘冪運算的指數。 ' },
+            number: { name: '數值', detail: '基數。可為任意實數。' },
+            power: { name: '指數', detail: '基數乘冪運算的指數。' },
         },
     },
     PRODUCT: {
@@ -730,8 +721,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: '數值 1', detail: '要相乘的第一個數字或範圍。 ' },
-            number2: { name: '數值 2', detail: '要相乘的其他數字或儲存格區域，最多可以使用 255 個參數。 ' },
+            number1: { name: '數值 1', detail: '要相乘的第一個數字或範圍。' },
+            number2: { name: '數值 2', detail: '要相乘的其他數字或儲存格區域，最多可以使用 255 個參數。' },
         },
     },
     QUOTIENT: {
@@ -773,10 +764,8 @@ export default {
         },
     },
     RANDARRAY: {
-        description:
-            'RANDARRAY 函數傳回 0 和 1 之間的隨機數字數組。 但是，你可以指定要填滿的行數和列數、最小值和最大值，以及是否會傳回整個數字或小數值。 ',
-        abstract:
-            'RANDARRAY 函數傳回 0 和 1 之間的隨機數字數組。 但是，你可以指定要填滿的行數和列數、最小值和最大值，以及是否會傳回整個數字或小數值。 ',
+        description: 'RANDARRAY 函數傳回 0 和 1 之間的隨機數字數組。但是，你可以指定要填滿的行數和列數、最小值和最大值，以及是否會傳回整個數字或小數值。',
+        abstract: 'RANDARRAY 函數傳回 0 和 1 之間的隨機數字數組。',
         links: [
             {
                 title: '教導',
@@ -939,8 +928,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要求出正弦值的角度，以弧度表示。' },
         },
     },
     SINH: {
@@ -953,8 +941,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是任意實數。' },
         },
     },
     SQRT: {
@@ -1043,8 +1030,8 @@ export default {
         },
     },
     SUMIFS: {
-        description: '在區域中加入滿足多個條件的單元格',
-        abstract: '在區域中加入滿足多個條件的單元格',
+        description: '會加總符合多項準則的所有引數。',
+        abstract: '會加總符合多項準則的所有引數。',
         links: [
             {
                 title: '教導',
@@ -1139,8 +1126,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要求出正切值的角度，以弧度表示。' },
         },
     },
     TANH: {
@@ -1153,8 +1139,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是任意實數。' },
         },
     },
     TRUNC: {

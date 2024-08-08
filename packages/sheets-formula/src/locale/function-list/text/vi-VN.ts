@@ -109,8 +109,8 @@ export default {
             },
         ],
         functionParameter: {
-            text1: { name: '文本 1', detail: 'Mục văn bản đầu tiên để kết hợp. Có thể là một chuỗi hoặc một mảng chuỗi, chẳng hạn như một vùng ô.' },
-            text2: { name: '文本 2', detail: 'Các mục văn bản khác để kết hợp. Có thể lên đến 253 tham số văn bản. Mỗi tham số có thể là một chuỗi hoặc một mảng chuỗi, chẳng hạn như một vùng ô.' },
+            text1: { name: 'bản văn 1', detail: 'Mục văn bản đầu tiên để kết hợp. Có thể là một chuỗi hoặc một mảng chuỗi, chẳng hạn như một vùng ô.' },
+            text2: { name: 'bản văn 2', detail: 'Các mục văn bản khác để kết hợp. Có thể lên đến 253 tham số văn bản. Mỗi tham số có thể là một chuỗi hoặc một mảng chuỗi, chẳng hạn như một vùng ô.' },
         },
     },
     CONCATENATE: {
@@ -123,8 +123,8 @@ export default {
             },
         ],
         functionParameter: {
-            text1: { name: '文本 1', detail: 'Mục đầu tiên để kết hợp. Có thể là một giá trị văn bản, một số hoặc một tham chiếu ô.' },
-            text2: { name: '文本 2', detail: 'Các mục văn bản khác để kết hợp. Có thể có tối đa 255 mục, tổng cộng hỗ trợ tối đa 8,192 ký tự.' },
+            text1: { name: 'bản văn 1', detail: 'Mục đầu tiên để kết hợp. Có thể là một giá trị văn bản, một số hoặc một tham chiếu ô.' },
+            text2: { name: 'bản văn 2', detail: 'Các mục văn bản khác để kết hợp. Có thể có tối đa 255 mục, tổng cộng hỗ trợ tối đa 8,192 ký tự.' },
         },
     },
     DBCS: {
@@ -165,8 +165,8 @@ export default {
             },
         ],
         functionParameter: {
-            text1: { name: '文本 1', detail: 'Chuỗi văn bản đầu tiên' },
-            text2: { name: '文本 2', detail: 'Chuỗi văn bản thứ hai' },
+            text1: { name: 'bản văn 1', detail: 'Chuỗi văn bản đầu tiên' },
+            text2: { name: 'bản văn 2', detail: 'Chuỗi văn bản thứ hai' },
         },
     },
     FIND: {
@@ -223,7 +223,20 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản mà bạn muốn tìm số lượng ký tự.' },
+            text: { name: 'bản văn', detail: 'Văn bản mà bạn muốn tìm độ dài của nó. Khoảng trống được đếm là ký tự.' },
+        },
+    },
+    LENB: {
+        description: 'trả về số byte dùng để biểu thị các ký tự trong một chuỗi văn bản.',
+        abstract: 'trả về số byte dùng để biểu thị các ký tự trong một chuỗi văn bản.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/len-lenb-%E5%87%BD%E6%95%B0-29236f94-cedc-429d-affd-b5e33d2c67cb',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Văn bản mà bạn muốn tìm độ dài của nó. Khoảng trống được đếm là ký tự.' },
         },
     },
     LOWER: {
@@ -236,7 +249,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Văn bản mà bạn muốn chuyển đổi thành chữ thường.' },
+            text: { name: 'bản văn', detail: 'Văn bản mà bạn muốn chuyển đổi thành chữ thường.' },
         },
     },
     MID: {
@@ -350,8 +363,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản bạn muốn lặp lại.' },
-            number_times: { name: 'number_times', detail: 'Số lần bạn muốn lặp lại văn bản.' },
+            text: { name: 'bản văn', detail: 'Chuỗi văn bản bạn muốn lặp lại.' },
+            numberTimes: { name: 'lần lặp lại', detail: 'Số lần bạn muốn lặp lại văn bản.' },
         },
     },
     RIGHT: {
@@ -415,6 +428,56 @@ export default {
             instance_num: { name: 'instance_num', detail: 'Số lần xuất hiện của old_text mà bạn muốn thay thế.' },
         },
     },
+    TEXT: {
+        description: 'Định dạng và chuyển đổi số thành văn bản',
+        abstract: 'Định dạng và chuyển đổi số thành văn bản',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/text-%E5%87%BD%E6%95%B0-20d5ac4d-7b94-49fd-bb38-93d29371225c',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'giá trị', detail: 'Giá trị số mà bạn muốn được chuyển đổi thành văn bản.' },
+            formatText: { name: 'định dạng văn bản', detail: 'Một chuỗi văn bản xác định định dạng mà bạn muốn được áp dụng cho giá trị được cung cấp.' },
+        },
+    },
+    TEXTAFTER: {
+        description: 'Trả về văn bản xuất hiện sau ký tự hoặc chuỗi đã cho.',
+        abstract: 'Trả về văn bản xuất hiện sau ký tự hoặc chuỗi đã cho.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/textafter-%E5%87%BD%E6%95%B0-c8db2546-5b51-416a-9690-c7e6722e90b4',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Văn bản bạn đang tìm kiếm bên trong. Ký tự đại diện không được phép.' },
+            delimiter: { name: 'dấu tách', detail: 'Văn bản đánh dấu điểm sau đó bạn muốn trích xuất.' },
+            instanceNum: { name: 'số phiên bản', detail: 'Phiên bản của dấu tách sau đó bạn muốn trích xuất văn bản.' },
+            matchMode: { name: 'mẫu khớp', detail: 'Xác định xem tìm kiếm văn bản có phân biệt chữ hoa chữ thường hay không. Mặc định là phân biệt chữ hoa, chữ thường.' },
+            matchEnd: { name: 'trận đấu ở cuối', detail: 'Coi phần cuối văn bản là dấu tách. Theo mặc định, văn bản là kết quả khớp chính xác.' },
+            ifNotFound: { name: 'giá trị chưa khớp', detail: 'Giá trị được trả về nếu không tìm thấy kết quả khớp. Theo mặc định, #N/A được trả về.' },
+        },
+    },
+    TEXTBEFORE: {
+        description: 'Trả về văn bản xuất hiện trước một ký tự hoặc chuỗi đã cho.',
+        abstract: 'Trả về văn bản xuất hiện trước một ký tự hoặc chuỗi đã cho.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/textbefore-%E5%87%BD%E6%95%B0-d099c28a-dba8-448e-ac6c-f086d0fa1b29',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Văn bản bạn đang tìm kiếm bên trong. Ký tự đại diện không được phép.' },
+            delimiter: { name: 'dấu tách', detail: 'Văn bản đánh dấu điểm sau đó bạn muốn trích xuất.' },
+            instanceNum: { name: 'số phiên bản', detail: 'Phiên bản của dấu tách sau đó bạn muốn trích xuất văn bản.' },
+            matchMode: { name: 'mẫu khớp', detail: 'Xác định xem tìm kiếm văn bản có phân biệt chữ hoa chữ thường hay không. Mặc định là phân biệt chữ hoa, chữ thường.' },
+            matchEnd: { name: 'trận đấu ở cuối', detail: 'Coi phần cuối văn bản là dấu tách. Theo mặc định, văn bản là kết quả khớp chính xác.' },
+            ifNotFound: { name: 'giá trị chưa khớp', detail: 'Giá trị được trả về nếu không tìm thấy kết quả khớp. Theo mặc định, #N/A được trả về.' },
+        },
+    },
     TEXTJOIN: {
         description: 'Kết hợp nhiều chuỗi văn bản thành một chuỗi, với dấu phân cách giữa các phần tử',
         abstract: 'Kết hợp nhiều chuỗi văn bản thành một chuỗi, với dấu phân cách giữa các phần tử',
@@ -429,6 +492,24 @@ export default {
             ignore_empty: { name: 'ignore_empty', detail: 'Giá trị logic để chỉ định liệu bỏ qua các ô trống.' },
             text1: { name: 'text1', detail: 'Chuỗi văn bản đầu tiên để kết hợp.' },
             text2: { name: 'text2', detail: 'Chuỗi văn bản tiếp theo để kết hợp.' },
+        },
+    },
+    TEXTSPLIT: {
+        description: 'Tách chuỗi văn bản bằng cách dùng dấu tách cột và hàng.',
+        abstract: 'Tách chuỗi văn bản bằng cách dùng dấu tách cột và hàng.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/textsplit-%E5%87%BD%E6%95%B0-b1ca414e-4c21-4ca0-b1b7-bdecace8a6e7',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Văn bản bạn muốn tách.' },
+            colDelimiter: { name: 'dấu phân cách cột', detail: 'Ký tự hoặc chuỗi dùng để phân chia cột.' },
+            rowDelimiter: { name: 'dấu phân cách dòng', detail: 'Ký tự hoặc chuỗi dùng để phân chia các hàng.' },
+            ignoreEmpty: { name: 'bỏ qua các ô trống', detail: 'Có bỏ qua các ô trống hay không. Mặc định là FALSE.' },
+            matchMode: { name: 'mẫu khớp', detail: 'Xác định xem tìm kiếm văn bản có phân biệt chữ hoa chữ thường hay không. Mặc định là phân biệt chữ hoa, chữ thường.' },
+            padWith: { name: 'điền giá trị', detail: 'Giá trị được sử dụng cho phần đệm. Theo mặc định, #N/A được sử dụng.' },
         },
     },
     TRIM: {

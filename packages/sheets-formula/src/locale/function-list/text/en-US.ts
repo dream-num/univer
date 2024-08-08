@@ -123,8 +123,8 @@ export default {
             },
         ],
         functionParameter: {
-            text1: { name: 'Text 1', detail: 'The first item to join. The item can be a text value, number, or cell reference.' },
-            text2: { name: 'Text 2', detail: 'Additional text items to join. You can have up to 255 items, up to a total of 8,192 characters.' },
+            text1: { name: 'text1', detail: 'The first item to join. The item can be a text value, number, or cell reference.' },
+            text2: { name: 'text2', detail: 'Additional text items to join. You can have up to 255 items, up to a total of 8,192 characters.' },
         },
     },
     DBCS: {
@@ -390,7 +390,7 @@ export default {
         ],
         functionParameter: {
             text: { name: 'text', detail: 'The text you want to repeat.' },
-            numberTimes: { name: 'numberTimes', detail: 'A positive number specifying the number of times to repeat text.' },
+            numberTimes: { name: 'number_times', detail: 'A positive number specifying the number of times to repeat text.' },
         },
     },
     RIGHT: {

@@ -59,8 +59,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'reference', detail: 'A reference to a cell or range of cells and can refer to multiple areas.' },
         },
     },
     CHOOSE: {
@@ -285,10 +284,10 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: 'reference', detail: 'A reference to one or more cell ranges.\nIf you are entering a non-adjacent range for the reference, enclose reference in parentheses.\nIf each area in reference contains only one row or column, the row_num or column_num argument, respectively, is optional. For example, for a single row reference, use INDEX(reference,,column_num).\nIf array has more than one row and more than one column, and only row_num or column_num is used, INDEX returns an array of the entire row or column in array.' },
+            reference: { name: 'reference', detail: 'A reference to one or more cell ranges.' },
             rowNum: { name: 'row_num', detail: 'The number of the row in reference from which to return a reference.' },
             columnNum: { name: 'column_num', detail: 'The number of the column in reference from which to return a reference.' },
-            areaNum: { name: 'area_num', detail: 'Selects a range in reference from which to return the intersection of row_num and column_num. The first area selected or entered is numbered 1, the second is 2, and so on. If area_num is omitted, INDEX uses area 1.  The areas listed here must all be located on one sheet.  If you specify areas that are not on the same sheet as each other, it will cause a #VALUE! error.  If you need to use ranges that are located on different sheets from each other, it is recommended that you use the array form of the INDEX function, and use another function to calculate the range that makes up the array.  For example, you could use the CHOOSE function to calculate which range will be used.' },
+            areaNum: { name: 'area_num', detail: 'Selects a range in reference from which to return the intersection of row_num and column_num.' },
         },
     },
     INDIRECT: {
@@ -301,8 +300,8 @@ export default {
             },
         ],
         functionParameter: {
-            refText: { name: 'ref_text', detail: 'A reference to a cell that contains an A1-style reference, an R1C1-style reference, a name defined as a reference, or a reference to a cell as a text string. If ref_text is not a valid cell reference, INDIRECT returns the #REF! error value.\nIf ref_text refers to a cell range outside the row limit of 1,048,576 or the column limit of 16,384 (XFD), INDIRECT returns a #REF! error.' },
-            a1: { name: 'a1', detail: 'A logical value that specifies what type of reference is contained in the cell ref_text.\nIf a1 is TRUE or omitted, ref_text is interpreted as an A1-style reference.\nIf a1 is FALSE, ref_text is interpreted as an R1C1-style reference.' },
+            refText: { name: 'ref_text', detail: 'A reference to a cell that contains an A1-style reference, an R1C1-style reference, a name defined as a reference, or a reference to a cell as a text string. ' },
+            a1: { name: 'a1', detail: 'A logical value that specifies what type of reference is contained in the cell ref_text.' },
         },
     },
     LOOKUP: {
@@ -330,7 +329,7 @@ export default {
         },
     },
     MATCH: {
-        description: 'The MATCH function searches for a specified item in a range of cells, and then returns the relative position of that item in the range. For example, if the range A1:A3 contains the values 5, 25, and 38, then the formula =MATCH(25,A1:A3,0) returns the number 2, because 25 is the second item in the range.',
+        description: 'The MATCH function searches for a specified item in a range of cells, and then returns the relative position of that item in the range.',
         abstract: 'Looks up values in a reference or array',
         links: [
             {
@@ -339,9 +338,9 @@ export default {
             },
         ],
         functionParameter: {
-            lookupValue: { name: 'lookup_value', detail: 'The value that you want to match in lookup_array. For example, when you look up someone\'s number in a telephone book, you are using the person\'s name as the lookup value, but the telephone number is the value you want. The lookup_value argument can be a value (number, text, or logical value) or a cell reference to a number, text, or logical value.' },
+            lookupValue: { name: 'lookup_value', detail: 'The value that you want to match in lookup_array.' },
             lookupArray: { name: 'lookup_array', detail: 'The range of cells being searched.' },
-            matchType: { name: 'match_type', detail: 'The number -1, 0, or 1. The match_type argument specifies how Excel matches lookup_value with values in lookup_array. The default value for this argument is 1.' },
+            matchType: { name: 'match_type', detail: 'The number -1, 0, or 1.' },
         },
     },
     OFFSET: {
@@ -354,9 +353,9 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: 'reference', detail: 'The reference from which you want to base the offset. Reference must refer to a cell or range of adjacent cells; otherwise, OFFSET returns the #VALUE! error value.' },
-            rows: { name: 'rows', detail: 'The number of rows, up or down, that you want the upper-left cell to refer to. Using 5 as the rows argument specifies that the upper-left cell in the reference is five rows below reference. Rows can be positive (which means below the starting reference) or negative (which means above the starting reference).' },
-            cols: { name: 'columns', detail: 'The number of columns, to the left or right, that you want the upper-left cell of the result to refer to. Using 5 as the cols argument specifies that the upper-left cell in the reference is five columns to the right of reference. Cols can be positive (which means to the right of the starting reference) or negative (which means to the left of the starting reference).' },
+            reference: { name: 'reference', detail: 'The reference from which you want to base the offset.' },
+            rows: { name: 'rows', detail: 'The number of rows, up or down, that you want the upper-left cell to refer to.' },
+            cols: { name: 'columns', detail: 'The number of columns, to the left or right, that you want the upper-left cell of the result to refer to.' },
             height: { name: 'height', detail: 'The height, in number of rows, that you want the returned reference to be. Height must be a positive number.' },
             width: { name: 'width', detail: 'The width, in number of columns, that you want the returned reference to be. Width must be a positive number.' },
         },
@@ -591,15 +590,15 @@ export default {
             lookupArray: { name: 'lookup_array', detail: 'The array or range to search' },
             returnArray: { name: 'return_array', detail: 'The array or range to return' },
             ifNotFound: {
-                name: '[if_not_found]',
+                name: 'if_not_found',
                 detail: 'Where a valid match is not found, return the [if_not_found] text you supply. If a valid match is not found, and [if_not_found] is missing, #N/A is returned.',
             },
             matchMode: {
-                name: '[match_mode]',
+                name: 'match_mode',
                 detail: 'Specify the match type: 0 - Exact match. If none found, return #N/A. This is the default. -1 - Exact match. If none found, return the next smaller item. 1 - Exact match. If none found, return the next larger item. 2 - A wildcard match where *, ?, and ~ have special meaning.',
             },
             searchMode: {
-                name: '[search_mode]',
+                name: 'search_mode',
                 detail: 'Specify the search mode to use: 1 - Perform a search starting at the first item. This is the default. -1 - Perform a reverse search starting at the last item. 2 - Perform a binary search that relies on lookup_array being sorted in ascending order. If not sorted, invalid results will be returned. -2 - Perform a binary search that relies on lookup_array being sorted in descending order. If not sorted, invalid results will be returned.',
             },
         },

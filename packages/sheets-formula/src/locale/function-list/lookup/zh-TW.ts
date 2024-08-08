@@ -49,8 +49,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '引用', detail: '儲存格或儲存格範圍的參照，而且可參照多個區域。' },
         },
     },
     CHOOSE: {
@@ -275,10 +274,10 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: '引用', detail: '對一個或多個儲存格區域的引用。 \n如果為引用輸入不連續的區域，必須將其用括號括起來。 \n如果引用中的每個區域都只包含一行（或一列），則 row_num（或 column_num）為可選參數。 例如，對於單行的引用，可以使用函數 INDEX(reference,,column_num)。 \n如果陣列有多行和多列，但只使用 row_num 或 column_num，函數 INDEX 傳回數組中的整行或整列，且傳回值也為數組。 ' },
+            reference: { name: '引用', detail: '對一個或多個儲存格區域的引用。' },
             rowNum: { name: '行號', detail: '引用中某行的行號，函數從該行傳回一個引用。 ' },
             columnNum: { name: '列號', detail: '引用中某列的列標，函數從該列傳回一個引用。 ' },
-            areaNum: { name: '區域編號', detail: '選擇要傳回 row_num 和 column_num 的交叉點的參考區域。 選擇或輸入的第一個區域的編號為 1，第二個的編號為 2，依此類推。 如果省略 area_num，則 INDEX 使用區域 1。 此處列出的區域必須全部位於一張工作表。 如果指定的區域不位於同一個工作表，將導致 #VALUE!。 錯誤。 如果需要使用的範圍彼此位於不同工作表，建議使用函數 INDEX 的陣列形式，並使用其他函數來計算構成陣列的範圍。 例如，可以使用 CHOOSE 函數計算將使用的範圍。 ' },
+            areaNum: { name: '區域編號', detail: '選擇要傳回行號和列號的交叉點的參考區域。' },
         },
     },
     INDIRECT: {
@@ -291,8 +290,8 @@ export default {
             },
         ],
         functionParameter: {
-            refText: { name: '引用文本', detail: '對包含 A1 樣式引用、R1C1 樣式引用、定義為引用的名稱或作為文本字符串引用的單元格的引用的引用。 如果ref_text不是有效的單元格引用，INDIRECT 將返回 #REF！ 。 \n如果ref_text引用的單元格區域超出了行限制 1,048,576 或列限制 16,384 (XFD) ，INDIRECT 將返回 #REF！ 錯誤。 ' },
-            a1: { name: '引用類型', detail: '一個邏輯值，用於指定包含在單元格 ref_text 中的引用的類型。 \n如果 a1 為 TRUE 或省略，ref_text 被解釋為 A1-樣式的引用。 \n如果 a1 為 FALSE，則將 ref_text 解釋為 R1C1 樣式的參考。 ' },
+            refText: { name: '引用文本', detail: '對包含 A1 樣式引用、R1C1 樣式引用、定義為引用的名稱或作為文本字符串引用的單元格的引用的引用。' },
+            a1: { name: '引用類型', detail: '一個邏輯值，用於指定包含在單元格引用文本中的引用的類型。' },
         },
     },
     LOOKUP: {
@@ -317,7 +316,7 @@ export default {
         },
     },
     MATCH: {
-        description: '使用 MATCH 函數在 範圍 儲存格中搜尋特定的項，然後傳回該項在此區域中的相對位置。 例如，如果 A1:A3 區域中包含值 5、25 和 38，那麼公式 =MATCH(25,A1:A3,0) 傳回數字 2，因為 25 是該區域中的第二項。 ',
+        description: '使用 MATCH 函數在 範圍 儲存格中搜尋特定的項，然後傳回該項在此區域中的相對位置。',
         abstract: '在參考或陣列中尋找值',
         links: [
             {
@@ -326,9 +325,9 @@ export default {
             },
         ],
         functionParameter: {
-            lookupValue: { name: '尋找值', detail: '要在 lookup_array 中符合的值。 例如，如果要在電話簿中查找某人的電話號碼，則應該將姓名作為查找值，但實際上需要的是電話號碼。 lookup_value 參數可以為值（數字、文字或邏輯值）或數字、文字或邏輯值的儲存格參考。 ' },
-            lookupArray: { name: '搜尋區域', detail: '要搜尋的儲存格區域。 ' },
-            matchType: { name: '符合類型', detail: '數字 -1、0 或 1。 match_type 參數指定 Excel 如何將 lookup_value 與 lookup_array 中的值相符。 此參數的預設值為 1。 ' },
+            lookupValue: { name: '尋找值', detail: '要在 lookup_array 中符合的值。' },
+            lookupArray: { name: '搜尋區域', detail: '要搜尋的儲存格區域。' },
+            matchType: { name: '符合類型', detail: '數字 -1、0 或 1。' },
         },
     },
     OFFSET: {
@@ -341,11 +340,11 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: '引用', detail: '要基於偏移量的參考。 引用必須引用儲存格或相鄰儲存格區域;否則，OFFSET 回傳#VALUE！ 錯誤值。 ' },
-            rows: { name: '行數', detail: '需要左上角單元格引用的向上或向下行數。 使用 5 作為 rows 參數，可指定引用中的左上角儲存格為引用下方的 5 行。 Rows 可為正數（這表示在起始引用的下方）或負數（這表示在起始引用的上方）。 ' },
-            cols: { name: '列數', detail: '需要結果的左上角單元格引用的從左到右的列數。 使用 5 作為 cols 參數，可指定引用中的左上角儲存格為引用右邊的 5 列。 Cols 可為正數（這表示在起始引用的右側）或負數（這表示在起始引用的左側）。 ' },
-            height: { name: '行高', detail: '需要傳回的引用的行高。 Height 必須為正數。 ' },
-            width: { name: '列寬', detail: '需要傳回的引用的列寬。 Width 必須為正數。 ' },
+            reference: { name: '引用', detail: '要基於偏移量的參考。' },
+            rows: { name: '行數', detail: '需要左上角單元格引用的向上或向下行數。' },
+            cols: { name: '列數', detail: '需要結果的左上角單元格引用的從左到右的列數。' },
+            height: { name: '行高', detail: '需要傳回的引用的行高。行高必須為正數。' },
+            width: { name: '列寬', detail: '需要傳回的引用的列寬。列寬必須為正數。' },
         },
     },
     ROW: {
@@ -580,15 +579,15 @@ export default {
             lookupArray: { name: '搜尋區域', detail: '要搜尋的陣列或區域' },
             returnArray: { name: '傳回區域', detail: '要傳回的陣列或區域' },
             ifNotFound: {
-                name: '[預設顯示值]',
+                name: '預設顯示值',
                 detail: '如果未找到有效的匹配項，則返回你提供的 [if_not_found] 文本，否則返回#N/A ',
             },
             matchMode: {
-                name: '[符合類型]',
+                name: '符合類型',
                 detail: '指定符合類型： 0 - 完全符合。 如果未找到，則傳回 #N/A。預設選項。 -1 - 完全匹配。 如果沒有找到，則傳回下一個較小的項。 1 - 完全匹配。 如果沒有找到，則傳回下一個較大的項。 2 - 通配符匹配，其中 *, ? 和 ~ 有特殊意義。 ',
             },
             searchMode: {
-                name: '[搜尋模式]',
+                name: '搜尋模式',
                 detail: '指定要使用的搜尋模式：1 從第一項開始執行搜索，預設選項。 -1 從最後一項開始執行反向搜尋。 2 執行依賴 lookup_array 按升序排序的二進位搜尋, -2執行依賴於 lookup_array 按降序排序的二進位搜尋',
             },
         },

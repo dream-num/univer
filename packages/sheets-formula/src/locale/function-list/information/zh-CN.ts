@@ -66,7 +66,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISERR: {
@@ -79,7 +79,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISERROR: {
@@ -92,7 +92,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISEVEN: {
@@ -105,7 +105,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '要测试的值。如果 number 不是整数，将被截尾取整。' },
+            value: { name: '值', detail: '要测试的值。如果值不是整数，将被截尾取整。' },
         },
     },
     ISFORMULA: {
@@ -132,7 +132,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISNA: {
@@ -145,7 +145,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISNONTEXT: {
@@ -158,7 +158,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISNUMBER: {
@@ -171,7 +171,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISODD: {
@@ -184,7 +184,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '要测试的值。如果 number 不是整数，将被截尾取整。' },
+            value: { name: '值', detail: '要测试的值。如果值不是整数，将被截尾取整。' },
         },
     },
     ISOMITTED: {
@@ -211,7 +211,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     ISTEXT: {
@@ -224,7 +224,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要测试的值。 参数 value 可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+            value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
         },
     },
     N: {

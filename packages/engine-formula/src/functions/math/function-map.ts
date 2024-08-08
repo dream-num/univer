@@ -68,11 +68,11 @@ import { Subtotal } from './subtotal';
 import { Sum } from './sum';
 import { Sumif } from './sumif';
 import { Sumifs } from './sumifs';
+import { Sumproduct } from './sumproduct';
 import { Sumsq } from './sumsq';
 import { Sumx2my2 } from './sumx2my2';
 import { Sumx2py2 } from './sumx2py2';
 import { Sumxmy2 } from './sumxmy2';
-import { Sumproduct } from './sumproduct';
 import { Tan } from './tan';
 import { Tanh } from './tanh';
 import { Trunc } from './trunc';
@@ -105,14 +105,14 @@ export const functionMath = [
     [Floor, FUNCTION_NAMES_MATH.FLOOR],
     [FloorMath, FUNCTION_NAMES_MATH.FLOOR_MATH],
     [FloorPrecise, FUNCTION_NAMES_MATH.FLOOR_PRECISE],
-    [Log, FUNCTION_NAMES_MATH.LOG],
     [Ln, FUNCTION_NAMES_MATH.LN],
+    [Log, FUNCTION_NAMES_MATH.LOG],
     [Log10, FUNCTION_NAMES_MATH.LOG10],
     [Mod, FUNCTION_NAMES_MATH.MOD],
     [Mround, FUNCTION_NAMES_MATH.MROUND],
-    [Power, FUNCTION_NAMES_MATH.POWER],
     [Odd, FUNCTION_NAMES_MATH.ODD],
     [Pi, FUNCTION_NAMES_MATH.PI],
+    [Power, FUNCTION_NAMES_MATH.POWER],
     [Product, FUNCTION_NAMES_MATH.PRODUCT],
     [Radians, FUNCTION_NAMES_MATH.RADIANS],
     [Rand, FUNCTION_NAMES_MATH.RAND],
@@ -131,11 +131,11 @@ export const functionMath = [
     [Sum, FUNCTION_NAMES_MATH.SUM],
     [Sumif, FUNCTION_NAMES_MATH.SUMIF],
     [Sumifs, FUNCTION_NAMES_MATH.SUMIFS],
+    [Sumproduct, FUNCTION_NAMES_MATH.SUMPRODUCT],
     [Sumsq, FUNCTION_NAMES_MATH.SUMSQ],
     [Sumx2my2, FUNCTION_NAMES_MATH.SUMX2MY2],
     [Sumx2py2, FUNCTION_NAMES_MATH.SUMX2PY2],
     [Sumxmy2, FUNCTION_NAMES_MATH.SUMXMY2],
-    [Sumproduct, FUNCTION_NAMES_MATH.SUMPRODUCT],
     [Tan, FUNCTION_NAMES_MATH.TAN],
     [Tanh, FUNCTION_NAMES_MATH.TANH],
     [Trunc, FUNCTION_NAMES_MATH.TRUNC],

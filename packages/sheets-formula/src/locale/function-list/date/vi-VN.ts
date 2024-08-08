@@ -49,14 +49,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            startDate: { name: 'ngày bắt đầu', detail: 'Ngày đại diện cho ngày đầu tiên hoặc ngày bắt đầu của một khoảng thời gian đã cho.' },
+            endDate: { name: 'ngày kết thúc', detail: 'Ngày đại diện cho ngày cuối cùng hoặc ngày kết thúc khoảng thời gian.' },
+            method: { name: 'Loại thông tin', detail: 'Kiểu thông tin mà bạn muốn được trả về.' },
         },
     },
     DATEVALUE: {
@@ -101,14 +96,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            endDate: { name: 'ngày kết thúc', detail: 'Hai ngày mà bạn muốn biết số ngày giữa hai ngày đó.' },
+            startDate: { name: 'ngày bắt đầu', detail: 'Hai ngày mà bạn muốn biết số ngày giữa hai ngày đó.' },
         },
     },
     DAYS360: {
@@ -121,14 +110,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            startDate: { name: 'ngày bắt đầu', detail: 'Hai ngày mà bạn muốn biết số ngày giữa hai ngày đó.' },
+            endDate: { name: 'ngày kết thúc', detail: 'Hai ngày mà bạn muốn biết số ngày giữa hai ngày đó.' },
+            method: { name: 'phương pháp', detail: 'Giá trị lô-gic xác định sẽ dùng phương pháp của Hoa Kỳ hay của châu Âu trong tính toán.' },
         },
     },
     EDATE: {
@@ -161,13 +145,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
+            startDate: {
+                name: 'Ngày bắt đầu',
+                detail: 'Ngày biểu thị ngày bắt đầu.',
             },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
+            months: {
+                name: 'Số tháng',
+                detail: 'Số tháng trước hoặc sau start_date.',
             },
         },
     },
@@ -181,14 +165,23 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
+            serialNumber: {
+                name: 'Số sê-ri ngày',
+                detail: 'Ngày cần tìm. Nên sử dụng hàm DATE để nhập ngày hoặc nhập ngày dưới dạng kết quả của các công thức hoặc hàm khác. Ví dụ, sử dụng hàm DATE(2008,5,23) để nhập ngày 23 tháng 5 năm 2008.',
             },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
+        },
+    },
+    ISOWEEKNUM: {
+        description: 'Trả về số tuần ISO của năm đối với ngày đã cho.',
+        abstract: 'Trả về số tuần ISO của năm đối với ngày đã cho.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/isoweeknum-%E5%87%BD%E6%95%B0-1c2d0afe-d25b-4ab1-8894-8d0520e90e0e',
             },
+        ],
+        functionParameter: {
+            date: { name: 'Ngày', detail: 'Ngày là mã ngày-giờ được Excel dùng để tính toán ngày và giờ.' },
         },
     },
     MINUTE: {
@@ -201,13 +194,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
+            serialNumber: {
+                name: 'Số sê-ri ngày',
+                detail: 'Ngày cần tìm. Nên sử dụng hàm DATE để nhập ngày hoặc nhập ngày dưới dạng kết quả của các công thức hoặc hàm khác. Ví dụ, sử dụng hàm DATE(2008,5,23) để nhập ngày 23 tháng 5 năm 2008.',
             },
         },
     },
@@ -237,14 +226,37 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
+            startDate: { name: 'ngày bắt đầu', detail: 'Một ngày đại diện cho ngày bắt đầu.' },
+            endDate: { name: 'ngày kết thúc', detail: 'Ngày đại diện cho ngày chấm dứt.' },
+            holidays: { name: 'ngày lễ', detail: 'Một phạm vi tùy chọn gồm một hoặc nhiều ngày không có trong lịch làm việc.' },
+        },
+    },
+    NETWORKDAYS_INTL: {
+        description: 'Trả về số ngày làm việc trọn vẹn ở giữa hai ngày bằng cách dùng tham số để cho biết có bao nhiêu ngày cuối tuần và đó là những ngày nào.',
+        abstract: 'Trả về số ngày làm việc trọn vẹn ở giữa hai ngày bằng cách dùng tham số để cho biết có bao nhiêu ngày cuối tuần và đó là những ngày nào.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/networkdays-intl-%E5%87%BD%E6%95%B0-a9b26239-4f20-46a1-9ab8-4e925bfd5e28',
             },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
+        ],
+        functionParameter: {
+            startDate: { name: 'ngày bắt đầu', detail: 'Một ngày đại diện cho ngày bắt đầu.' },
+            endDate: { name: 'ngày kết thúc', detail: 'Ngày đại diện cho ngày chấm dứt.' },
+            weekend: { name: 'ngày cuối tuần', detail: 'Ngày cuối tuần có thể là số ngày cuối tuần hoặc một chuỗi cho biết ngày cuối tuần xảy ra khi nào.' },
+            holidays: { name: 'ngày lễ', detail: 'Một phạm vi tùy chọn gồm một hoặc nhiều ngày không có trong lịch làm việc.' },
+        },
+    },
+    NOW: {
+        description: 'Trả về số sê-ri của ngày và thời gian hiện tại.',
+        abstract: 'Trả về số sê-ri của ngày và thời gian hiện tại.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/now-%E5%87%BD%E6%95%B0-3337fd29-145a-4347-b2e6-20c904739c46',
             },
+        ],
+        functionParameter: {
         },
     },
     SECOND: {
@@ -257,13 +269,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
+            serialNumber: {
+                name: 'Số sê-ri ngày',
+                detail: 'Ngày cần tìm. Nên sử dụng hàm DATE để nhập ngày hoặc nhập ngày dưới dạng kết quả của các công thức hoặc hàm khác. Ví dụ, sử dụng hàm DATE(2008,5,23) để nhập ngày 23 tháng 5 năm 2008.',
             },
         },
     },
@@ -277,14 +285,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            hour: { name: 'Giờ', detail: 'Một số từ 0 (không) đến 32767 biểu thị giờ. Bất kỳ giá trị nào lớn hơn 23 đều được chia cho 24 và phần còn lại được sử dụng làm giá trị giờ. Ví dụ: TIME(27,0,0) = TIME(3,0,0) = 0,125 hoặc 3:00 AM.' },
+            minute: { name: 'phút', detail: 'Một số từ 0 đến 32767 biểu thị số phút. Mọi giá trị lớn hơn 59 sẽ được chuyển đổi thành giờ và phút. Ví dụ: TIME(0,750,0) = TIME(12,30,0) = 0,520833 hoặc 12:30 PM.' },
+            second: { name: 'giây', detail: 'Một số từ 0 đến 32767 biểu thị giây. Mọi giá trị lớn hơn 59 sẽ được chuyển đổi thành giờ, phút và giây. Ví dụ: TIME(0,0,2000) = TIME(0,33,22) = 0,023148 ​​​​hoặc 12:33:20 AM.' },
         },
     },
     TIMEVALUE: {
@@ -324,14 +327,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            serialNumber: { name: 'Số sê-ri ngày', detail: 'Số sê-ri đại diện cho ngày trong ngày cố gắng tra cứu.' },
+            returnType: { name: 'Kiểu giá trị trả về', detail: 'Một số được sử dụng để xác định loại giá trị trả về.' },
         },
     },
     WEEKNUM: {
@@ -344,14 +341,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            serialNumber: { name: 'Số sê-ri ngày', detail: 'Đại diện cho ngày trong tuần.' },
+            returnType: { name: 'Kiểu giá trị trả về', detail: 'Một con số xác định ngày bắt đầu trong tuần. Giá trị mặc định là 1.' },
         },
     },
     WORKDAY: {
@@ -376,6 +367,22 @@ export default {
                 name: 'Ngày nghỉ',
                 detail: 'Danh sách tùy chọn một hoặc nhiều ngày làm việc cần loại trừ khỏi lịch làm việc.',
             },
+        },
+    },
+    WORKDAY_INTL: {
+        description: '返回日期在指定的工作日天数之前或之后的序列号（使用参数指明周末有几天并指明是哪几天）',
+        abstract: '返回日期在指定的工作日天数之前或之后的序列号（使用参数指明周末有几天并指明是哪几天）',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.microsoft.com/vi-vn/office/workday-intl-%E5%87%BD%E6%95%B0-a378391c-9ba7-4678-8a39-39611a9bf81d',
+            },
+        ],
+        functionParameter: {
+            startDate: { name: 'Ngày bắt đầu', detail: 'Một ngày đại diện cho ngày bắt đầu.' },
+            days: { name: 'Số ngày', detail: 'Số ngày làm việc trước hoặc sau start_date. Giá trị dương sẽ trả về ngày trong tương lai; giá trị âm sẽ trả về ngày trong quá khứ.' },
+            weekend: { name: 'ngày cuối tuần', detail: 'Ngày cuối tuần có thể là số ngày cuối tuần hoặc một chuỗi cho biết ngày cuối tuần xảy ra khi nào.' },
+            holidays: { name: 'ngày lễ', detail: 'Một phạm vi tùy chọn gồm một hoặc nhiều ngày không có trong lịch làm việc.' },
         },
     },
     YEAR: {

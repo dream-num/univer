@@ -66,7 +66,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要測試的值。 參數 value 可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。 ' },
+            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
     ISERR: {
@@ -79,7 +79,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。 參數 value 可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。 ' },
+            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
     ISERROR: {
@@ -92,7 +92,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '指的是要測試的值。 參數 value 可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。 ' },
+            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
     ISEVEN: {
@@ -105,7 +105,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '要測試的值。如果 number 不是整數，將被截尾取整。 ' },
+            value: { name: '值', detail: '要測試的值。如果值不是整數，將被截尾取整。' },
         },
     },
     ISFORMULA: {
@@ -132,7 +132,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要測試的值。 參數 value 可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。 ' },
+            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
     ISNA: {
@@ -145,7 +145,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要測試的值。 參數 value 可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。 ' },
+            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
     ISNONTEXT: {
@@ -157,7 +157,7 @@ export default {
                 url: 'https://support.microsoft.com/zh-tw/office/is-%E5%87%BD%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
             }],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要測試的值。 參數 value 可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。 ' },
+            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
     ISNUMBER: {
@@ -170,7 +170,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要測試的值。 參數 value 可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。 ' },
+            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
     ISODD: {
@@ -183,7 +183,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '要測試的值。如果 number 不是整數，將被截尾取整。 ' },
+            value: { name: '值', detail: '要測試的值。如果值不是整數，將被截尾取整。' },
         },
     },
     ISOMITTED: {
@@ -210,7 +210,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要測試的值。 參數 value 可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。 ' },
+            value: { name: '值', detail: ' 指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
     ISTEXT: {
@@ -223,7 +223,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: ' 指的是要測試的值。 參數 value 可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。 ' },
+            value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
     N: {

@@ -699,10 +699,10 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         const editedMutations = [RichTextEditingMutation.id];
 
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (moveCursorOP.includes(command.id) && (command.params as any)?.unitId === this._renderContext.unitId) {
+            if (moveCursorOP.includes(command.id)) {
                 this._moveCursorCmdHandler(command);
             }
-            if (editedMutations.includes(command.id) && (command.params as any)?.unitId === this._renderContext.unitId) {
+            if (editedMutations.includes(command.id)) {
                 this._editingChangedHandler();
             }
         }));
@@ -727,7 +727,11 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     private _editingChangedHandler() {
-        const editingRichText = this._editorBridgeService.getEditorRect().richTextObj;
+        const editRect = this._editorBridgeService.getEditorRect();
+        if (!editRect) {
+            return;
+        }
+        const editingRichText = editRect.richTextObj;
         editingRichText.refreshDocumentByDocData();
         editingRichText.resizeToContentSize();
 

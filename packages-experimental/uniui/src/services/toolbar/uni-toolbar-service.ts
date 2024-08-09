@@ -72,7 +72,6 @@ export class UniToolbarService extends Disposable {
                     { id: FAKE_FONT_GROUP_MENU_ID, type: UniverInstanceType.UNIVER_UNKNOWN },
                     { id: FONT_GROUP_MENU_ID, type: UniverInstanceType.UNIVER_SHEET },
                     { id: FONT_GROUP_MENU_ID, type: UniverInstanceType.UNIVER_DOC },
-                    { id: FONT_GROUP_MENU_ID, type: UniverInstanceType.UNIVER_SLIDE },
                 ],
             },
             {

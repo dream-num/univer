@@ -67,7 +67,7 @@ export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: 
         }
     }, [node, setReference]);
 
-    if (!node) {
+    if (!node || !refs.reference.current) {
         return null;
     }
 

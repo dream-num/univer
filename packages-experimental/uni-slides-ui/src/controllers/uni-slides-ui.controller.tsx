@@ -46,7 +46,7 @@ export class UniSlidesUIController extends SlidesUIController {
     private _initUniMenus(): void {
         ([
             [BuiltinUniToolbarItemId.IMAGE, IMAGE_MENU_ID],
-            [BuiltinUniToolbarItemId.FONT_SIZE, SHAPE_MENU_ID],
+            [BuiltinUniToolbarItemId.FONT_GROUP, SHAPE_MENU_ID],
             [BuiltinUniToolbarItemId.TABLE, SlideAddTextOperation.id],
         ]).forEach(([id, menuId]) => {
             this._toolbarService.implementItem(id, { id: menuId, type: UniverInstanceType.UNIVER_SLIDE });

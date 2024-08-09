@@ -50,9 +50,15 @@ export function UniToolbar() {
 
     const uniVisibleItems = toolbarItems.map((item) => {
         const { impl } = item;
-        const id = impl.find((item) => item.type === type) || impl.find((item) => item.type === UniverInstanceType.UNIVER_UNKNOWN);
-        if (id !== undefined) {
-            return visibleItems.find((item) => item.id === id.id);
+        const typeImpl = impl.find((item) => item.type === type);
+        const visibleItem = visibleItems.find((item) => item.id === typeImpl?.id);
+        if (visibleItem) {
+            return visibleItem;
+        }
+        const placeHolderImpl = impl.find((item) => item.type === UniverInstanceType.UNIVER_UNKNOWN);
+        const placeHolderItem = visibleItems.find((item) => item.id === placeHolderImpl?.id);
+        if (placeHolderItem) {
+            return placeHolderItem;
         }
         return null;
     }).filter((item) => !!item);

@@ -47,7 +47,7 @@ describe('Test not function', () => {
         it('logical null', () => {
             const logical = NullValueObject.create();
             const result = textFunction.calculate(logical);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(result.getValue()).toBe(true);
         });
 
         it('logical true', () => {

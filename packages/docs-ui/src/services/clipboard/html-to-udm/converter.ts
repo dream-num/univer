@@ -73,6 +73,9 @@ export class HtmlToUDMService {
 
         const body: IDocumentBody = {
             dataStream: '',
+            paragraphs: [],
+            sectionBreaks: [],
+            tables: [],
             textRuns: [],
         };
 
@@ -272,9 +275,18 @@ export class HtmlToUDMService {
             }
 
             case 'TD': {
+                if (body.dataStream[body.dataStream.length - 1] !== '\r') {
+                    body.paragraphs?.push({
+                        startIndex: body.dataStream.length,
+                    });
+
+                    body.dataStream += '\r';
+                }
+
                 body.sectionBreaks?.push({
                     startIndex: body.dataStream.length,
                 });
+
                 body.dataStream += `\n${DataStreamTreeTokenType.TABLE_CELL_END}`;
 
                 break;

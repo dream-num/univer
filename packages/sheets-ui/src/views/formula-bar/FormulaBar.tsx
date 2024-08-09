@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
+import type { IDocumentData, Nullable, Workbook } from '@univerjs/core';
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, useDependency, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
@@ -30,6 +30,7 @@ import { DefinedName } from '../defined-name/DefinedName';
 
 import { useActiveWorkbook } from '../../components/hook';
 import styles from './index.module.less';
+import { table } from 'console';
 
 enum ArrowDirection {
     Down,
@@ -101,17 +102,22 @@ export function FormulaBar() {
         };
     }, []);
 
-    const INITIAL_SNAPSHOT = {
+    const INITIAL_SNAPSHOT: IDocumentData = {
         id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
         body: {
             dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
             textRuns: [],
+            tables: [],
             paragraphs: [
                 {
                     startIndex: 0,
                 },
             ],
+            sectionBreaks: [{
+                startIndex: 1,
+            }],
         },
+        tableSource: {},
         documentStyle: {
             pageSize: {
                 width: Number.POSITIVE_INFINITY,

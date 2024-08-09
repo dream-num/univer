@@ -23,6 +23,10 @@ export function whenDocOrEditor(contextService: IContextService): boolean {
     return contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED);
 }
 
+export function whenFocusEditor(contextService: IContextService): boolean {
+    return contextService.getContextValue(EDITOR_ACTIVATED);
+}
+
 const DOC_CLIPBOARD_PRIORITY = 999;
 
 // Commands here should have higher priority than commands of sheets

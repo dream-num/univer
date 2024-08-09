@@ -251,7 +251,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                     body,
                 }, segmentId, textRanges,
             });
-        } catch (_e) {
+        } catch (_) {
             this._logService.error('[DocClipboardController]', 'clipboard is empty.');
             return false;
         }

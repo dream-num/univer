@@ -31,3 +31,9 @@ export interface ISlideRichTextProps {
     fs: number;
   //... align margin...
 };
+
+export enum CursorChange {
+    InitialState,
+    StartEditor,
+    CursorChange,
+}

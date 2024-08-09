@@ -228,6 +228,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         });
 
         const unit = this._univerInstanceService.getUnit(unitId);
+        console.log('_createRender unit', unitId, unit);
         let renderUnit: IRender;
 
         if (unit) {

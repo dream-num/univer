@@ -33,20 +33,20 @@ import { UpdateSlideElementOperation } from '../commands/operations/update-eleme
 //     top: number;
 // }
 
-enum CursorChange {
-    InitialState,
-    StartEditor,
-    CursorChange,
-}
+// enum CursorChange {
+//     InitialState,
+//     StartEditor,
+//     CursorChange,
+// }
 
 export class SlideEditorBridgeRenderController extends RxDisposable implements IRenderModule {
     /**
      * It is used to distinguish whether the user has actively moved the cursor in the editor, mainly through mouse clicks.
      */
-    private _cursorChange: CursorChange = CursorChange.InitialState;
+    // private _cursorChange: CursorChange = CursorChange.InitialState;
 
     /** If the corresponding unit is active and prepared for editing. */
-    private _isUnitEditing = false;
+    // private _isUnitEditing = false;
 
     setSlideTextEditor$: Subject<ISlideRichTextProps> = new Subject();
 
@@ -97,16 +97,14 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
     }
 
     private _initEventListener(d: DisposableCollection) {
-        const model = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-        const pagesMap = model?.getPages() ?? {};
-        const pages = Object.values(pagesMap);
-        for (let i = 0; i < pages.length; i++) {
-            const page = pages[i];
-            const { scene } = this._canvasView.getRenderUnitByPageId(page.id);
-            if (!scene) break;
+        // const model = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const pagesMap = model?.getPages() ?? {};
+        // const pages = Object.values(pagesMap);
 
+        const canvasView = this._canvasView;
+        canvasView.setSceneMap$.subscribe((scene: Scene) => {
             const transformer = scene.getTransformer();
-            if (!transformer) break;
+            if (!transformer) return;
 
             d.add(transformer.clearControl$.subscribe(() => {
                 this.setEditorVisible(false);
@@ -203,6 +201,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
     }
 
     setEditorVisible(visible: boolean) {
+        // if editor is visible, hide curr RichTerxtObject
         if (visible) {
             this._curRichText?.hide();
         } else {

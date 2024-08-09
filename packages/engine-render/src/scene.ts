@@ -565,6 +565,10 @@ export class Scene extends ThinScene {
         });
     }
 
+    /**
+     * create transformer if not exist, and then transformer attach to object that passed in by parameter.
+     * @param o
+     */
     override attachTransformerTo(o: BaseObject) {
         if (!this._transformer) {
             this.initTransformer();

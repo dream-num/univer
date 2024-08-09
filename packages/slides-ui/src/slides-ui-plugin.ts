@@ -18,6 +18,7 @@ import type { Dependency, SlideDataModel } from '@univerjs/core';
 import { Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { CanvasView } from '@univerjs/slides';
 import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
 import { SlidesUIController } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
@@ -27,6 +28,7 @@ import { ISlideEditorBridgeService, SlideEditorBridgeService } from './services/
 import { SlideEditorBridgeRenderController } from './controllers/slide-editor-bridge.render-controller';
 import { ISlideEditorManagerService, SlideEditorManagerService } from './services/slide-editor-manager.service';
 import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
+import { SlideRenderService } from './services/slide-render.service';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
@@ -45,15 +47,24 @@ export class UniverSlidesUIPlugin extends Plugin {
 
     override onStarting(): void {
         mergeOverrideWithDependencies([
+            [SlideRenderService],
             [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
             // used by SlideUIController --> EditorContainer
             [ISlideEditorManagerService, { useClass: SlideEditorManagerService }],
             [SlideCanvasPopMangerService],
-        ] as Dependency[], this._config.override).forEach((d) => this._injector.add(d));
+        ] as Dependency[], this._config.override)
+            .forEach((d) => this._injector.add(d));
     }
 
     override onReady(): void {
+        ([
+            [SlideRenderController],
+        ] as Dependency[]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
+        });
         mergeOverrideWithDependencies([
+            [CanvasView],
+
             // cannot register in _renderManagerService now.
             // [ISlideEditorBridgeService, { useClass: SlideEditorBridgeService }],
             // // used by SlideUIController --> EditorContainer

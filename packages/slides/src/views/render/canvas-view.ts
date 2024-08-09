@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { EventState, IColorStyle, IPageElement, ISlidePage, Nullable, SlideDataModel } from '@univerjs/core';
+import type { EventState, IColorStyle, IPageElement, ISlidePage, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
 import { debounce, getColorStyle, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { BaseObject, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import type { BaseObject, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Rect,
@@ -26,7 +26,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 
-import { takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { ObjectProvider } from './object-provider';
 
 export enum SLIDE_KEY {
@@ -38,11 +38,13 @@ export enum SLIDE_KEY {
 export type PageID = string;
 
 // export const ICanvasView = createIdentifier<IUniverInstanceService>('univer.slide.canvas-view');
-@OnLifecycle(LifecycleStages.Ready, CanvasView)
+// @OnLifecycle(LifecycleStages.Ready, CanvasView)
 export class CanvasView extends RxDisposable implements IRenderModule {
     private _objectProvider: ObjectProvider | null = null;
 
     constructor(
+        // this controller needs by commands. that means this controller is  not init by renderUnit, no renderContext.
+        // private readonly _renderContext: IRenderContext<UnitModel>,
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
@@ -52,70 +54,50 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         this._initialize();
     }
 
+    get objectProvider() {
+        return this._objectProvider;
+    }
+
+    private _scene: Scene | null = null;
+
+    get Scene() {
+        return this._scene;
+    }
+
+    private _viewport: Viewport | null = null;
+
+    get Viewport() {
+        return this._viewport;
+    }
+
+    private _slide: Slide | null = null;
+
+    get Slide() {
+        return this._slide;
+    }
+
+    private _scrollBar: ScrollBar | null = null;
+
+    get ScrollBar() {
+        return this._scrollBar;
+    }
+
     private _initialize() {
-        this._renderManagerService.createRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
-            this._create(unitId);
-        });
+    //     this._renderManagerService.createRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
+    //         this._create(unitId);
+    //     });
 
-        this._univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).pipe(takeUntil(this.dispose$)).subscribe((slideModel) => {
-            this._create(slideModel?.getUnitId());
-        });
+    //     this._univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)
+    //         .pipe(takeUntil(this.dispose$)).subscribe((slideModel) => {
+    //             if (slideModel && slideModel.getUnitId()) {
+    //                 this._create(slideModel?.getUnitId());
+    //             }
+    //         });
 
-        this._univerInstanceService.getAllUnitsForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).forEach((slideModel) => {
-            this._create(slideModel.getUnitId());
-        });
-    }
-
-    activePage(_pageId?: string) {
-        let pageId = _pageId;
-        const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
-        let page: Nullable<ISlidePage>;
-        if (pageId) {
-            page = model.getPage(pageId);
-        } else {
-            const pageElements = model.getPages();
-            const pageOrder = model.getPageOrder();
-            if (pageOrder == null || pageElements == null) {
-                return;
-            }
-            page = pageElements[pageOrder[0]];
-
-            pageId = page.id;
-        }
-
-        const render = this._currentRender();
-
-        if (page == null || render == null || render.mainComponent == null) {
-            return;
-        }
-
-        const { id } = page;
-
-        const slide = render.mainComponent as Slide;
-
-        model.setActivePage(page);
-
-        if (slide?.hasPage(id)) {
-            slide.changePage(id);
-            return;
-        }
-
-        this._createScene(id, page);
-    }
-
-    private _scrollToCenter() {
-        const mainScene = this._currentRender()?.scene;
-        const viewMain = mainScene?.getViewport(SLIDE_KEY.VIEW);
-        const getCenterPositionViewPort = this._getCenterPositionViewPort(mainScene);
-        if (!viewMain || !getCenterPositionViewPort) return;
-        const { left: viewPortLeft, top: viewPortTop } = getCenterPositionViewPort;
-
-        const { x, y } = viewMain.transViewportScroll2ScrollValue(viewPortLeft, viewPortTop);
-
-        viewMain.scrollToBarPos({
-            x,
-            y,
-        });
+    //     this._univerInstanceService.getAllUnitsForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).forEach((slideModel) => {
+    //         this._create(slideModel.getUnitId());
+    //     });
+        // this._addNewRender(this._renderContext.unitId);
     }
 
     private _create(unitId: Nullable<string>) {
@@ -133,53 +115,57 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         }
     }
 
+    private _scrollToCenter() {
+        const mainScene = this._currentRender()?.scene;
+        const viewMain = mainScene?.getViewport(SLIDE_KEY.VIEW);
+        const getCenterPositionViewPort = this._getCenterPositionViewPort(mainScene);
+        if (!viewMain || !getCenterPositionViewPort) return;
+        const { left: viewPortLeft, top: viewPortTop } = getCenterPositionViewPort;
+
+        const { x, y } = viewMain.transViewportScroll2ScrollValue(viewPortLeft, viewPortTop);
+
+        viewMain.scrollToBarPos({
+            x,
+            y,
+        });
+    }
+
+    /**
+     * current Render by UnitId
+     * @returns IRender
+     */
     private _currentRender() {
         const slideDataModel = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
         return this._renderManagerService.getRenderById(slideDataModel.getUnitId());
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    /**
+     * _initialize --> _create --> _addNewRender
+     * @param unitId
+     */
+
     private _addNewRender(unitId: string) {
         const slideDataModel = this._univerInstanceService.getUnit<SlideDataModel>(unitId, UniverInstanceType.UNIVER_SLIDE);
 
-        if (slideDataModel == null) {
-            return;
-        }
+        if (!slideDataModel) return;
 
         this._renderManagerService.createRender(unitId);
-
         const currentRender = this._renderManagerService.getRenderById(unitId);
+        if (!currentRender) return;
 
-        if (currentRender == null) {
-            return;
-        }
-
-        const { scene, engine } = currentRender;
-
+        //#region scene subscribe
+        const { engine, scene } = currentRender;
         const observer = engine.onTransformChange$.subscribeEvent(() => {
             this._scrollToCenter();
             // add once
             observer?.unsubscribe();
         });
-
         engine.onTransformChange$.subscribeEvent(() => {
             setTimeout(() => {
                 this.createThumbs();
             }, 300);
         });
-
-        const viewMain = new Viewport(SLIDE_KEY.VIEW, scene, {
-            left: 0,
-            top: 0,
-            bottom: 0,
-            right: 0,
-            isRelativeX: true,
-            isRelativeY: true,
-            isWheelPreventDefaultX: true,
-        });
-
         scene.attachControl();
-
         scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {
@@ -203,34 +189,30 @@ export class CanvasView extends RxDisposable implements IRenderModule {
                 viewMain.onMouseWheel(e, state);
             }
         });
-
         scene.onFileLoaded$.subscribeEvent(() => {
             this._refreshThumb();
         });
+        //#endregion
 
+        const viewMain = new Viewport(SLIDE_KEY.VIEW, scene, {
+            left: 0,
+            top: 0,
+            bottom: 0,
+            right: 0,
+            isRelativeX: true,
+            isRelativeY: true,
+            isWheelPreventDefaultX: true,
+        });
         ScrollBar.attachTo(viewMain);
-
         this._renderManagerService.setCurrent(unitId);
 
-        // const getCenterPositionViewPort = this._getCenterPositionViewPort();
-        // const { left: viewPortLeft = 0, top: viewPortTop = 0 } = getCenterPositionViewPort;
-
-        // const { x, y } = viewMain.getBarScroll(viewPortLeft, viewPortTop);
-
-        // viewMain.scrollTo({
-        //     x,
-        //     y,
-        // });
-
-        // scene.addObject(new Rect('canvasTest', { left: 333, top: 333, width: 400, height: 300, fill: 'rgba(22,22,22, 1)' }));
-
+        // #region create slide
         const slideComponent = this._createSlide(scene);
-
         currentRender.mainComponent = slideComponent;
-
         currentRender.components.set(SLIDE_KEY.COMPONENT, slideComponent);
-
         this._createSlidePages(slideDataModel, slideComponent);
+        this.createThumbs();
+        // #endregion
 
         engine.runRenderLoop(() => {
             scene.render();
@@ -325,6 +307,12 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         slide.renderToThumb(thumbContext, pageId, pageWidth / width, pageHeight / height);
     }
 
+    /**
+     * _createScene by pages, createScene --> set sceneMap
+     * invoked stack: initialize --> _create --> _addNewRender --> _createSlidePages
+     * @param slideDataModel
+     * @param slide
+     */
     private _createSlidePages(slideDataModel: SlideDataModel, slide: Slide) {
         const pages = slideDataModel.getPages();
 
@@ -357,35 +345,17 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         slide.activeFirstPage();
     }
 
-    createThumbs() {
-        const slideDataModel = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
-
-        const pageOrder = slideDataModel.getPageOrder();
-
-        const render = this._currentRender();
-
-        if (!pageOrder || !render) {
-            return;
-        }
-
-        if (pageOrder.length === 0) {
-            return;
-        }
-
-        for (let i = 0, len = pageOrder.length; i < len; i++) {
-            const pageId = pageOrder[i];
-
-            this._thumbSceneRender(pageId, render.mainComponent as Slide);
-        }
-    }
-
     private _createThumb(pageId: string) {
         this._renderManagerService.createRender(pageId);
     }
 
     private _sceneMap = new Map<string, Scene>();
+    setSceneMap$ = new Subject<Scene>();
 
     /**
+     * _initialize --> _create --> _addNewRender --> _createSlidePages --> page forEach --> _createScene
+     * _sceneMap.set(pageId, pageScene);
+     *
      * @param pageId
      * @param page
      * @returns pageScene: Scene
@@ -441,6 +411,7 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         });
 
         slide.addPage(pageScene);
+        this.setSceneMap$.next(pageScene);
 
         return pageScene;
     }
@@ -449,12 +420,75 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         this._objectProvider = slideInjector.createInstance(ObjectProvider);
     }
 
+    createThumbs() {
+        const slideDataModel = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
+
+        const pageOrder = slideDataModel.getPageOrder();
+
+        const render = this._currentRender();
+
+        if (!pageOrder || !render) {
+            return;
+        }
+
+        if (pageOrder.length === 0) {
+            return;
+        }
+
+        for (let i = 0, len = pageOrder.length; i < len; i++) {
+            const pageId = pageOrder[i];
+
+            this._thumbSceneRender(pageId, render.mainComponent as Slide);
+        }
+    }
+
+    activePage(_pageId?: string) {
+        let pageId = _pageId;
+        const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
+        let page: Nullable<ISlidePage>;
+        if (pageId) {
+            page = model.getPage(pageId);
+        } else {
+            const pageElements = model.getPages();
+            const pageOrder = model.getPageOrder();
+            if (pageOrder == null || pageElements == null) {
+                return;
+            }
+            page = pageElements[pageOrder[0]];
+
+            pageId = page.id;
+        }
+
+        const render = this._currentRender();
+
+        if (page == null || render == null || render.mainComponent == null) {
+            return;
+        }
+
+        const { id } = page;
+
+        const slide = render.mainComponent as Slide;
+
+        model.setActivePage(page);
+
+        if (slide?.hasPage(id)) {
+            slide.changePage(id);
+            return;
+        }
+
+        this._createScene(id, page);
+    }
+
     getRenderUnitByPageId(pageId: PageID) {
-        const scene = this._sceneMap.get(pageId);
+        const renderUnit = this._currentRender();
+        if (!renderUnit) return;
+        // const sceneMap = renderUnit._renderContext.sceneMap;
+        const pageScene = renderUnit.components.get(pageId);
+
         // no render context
         // const { engine, unit } = this._renderContext;
         return {
-            scene,
+            scene: pageScene,
             // engine,
             // unit,
         };

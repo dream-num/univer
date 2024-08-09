@@ -15,7 +15,7 @@
  */
 
 import type { IBullet, IDocDrawingBase, IDrawings, Nullable } from '@univerjs/core';
-import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
+import { DataStreamTreeTokenType, PositionedObjectLayoutType, Tools } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
 import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
@@ -152,7 +152,8 @@ export function lineBreaking(
 
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
-        paragraphStyle,
+        // TODO optimize this deepClone
+        paragraphStyle: Tools.deepClone(paragraphStyle),
         paragraphAffectSkeDrawings,
         paragraphInlineSkeDrawings,
         skeTablesInParagraph: tableSkeleton ? [{ tableId: tableSkeleton.tableId, table: tableSkeleton, hasPositioned: false }] : undefined,

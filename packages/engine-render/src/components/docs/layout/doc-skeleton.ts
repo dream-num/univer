@@ -694,6 +694,16 @@ export class DocumentSkeleton extends Skeleton {
         const { sections, skeTables } = segmentPage;
         this._findLiquid.translateSave();
 
+        const pageLeft = this._findLiquid.x;
+        const pageRight = pageLeft + segmentPage.pageWidth;
+        const pageTop = this._findLiquid.y + (pageType === DocumentSkeletonPageType.FOOTER ? page.pageHeight - segmentPage.pageHeight : 0);
+        const pageBottom = pageTop + segmentPage.pageHeight;
+
+        const pointInPage = x >= pageLeft
+            && x <= pageRight
+            && y >= pageTop
+            && y <= pageBottom;
+
         switch (pageType) {
             case DocumentSkeletonPageType.HEADER: {
                 this._findLiquid.translatePagePadding({
@@ -714,11 +724,6 @@ export class DocumentSkeleton extends Skeleton {
                 break;
             }
         }
-
-        const pointInPage = x >= this._findLiquid.x
-            && x <= this._findLiquid.x + segmentPage.pageWidth
-            && y >= this._findLiquid.y
-            && y <= this._findLiquid.y + segmentPage.pageHeight;
 
         if (pointInPage) {
             for (const section of sections) {

@@ -38,7 +38,6 @@ export interface IInsertCommandParams {
     unitId: string;
     body: IDocumentBody;
     range: ITextRange;
-    textRanges?: ITextRangeWithStyle[];
     segmentId?: string;
     cursorOffset?: number;
 }
@@ -52,11 +51,10 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: EditorInsertTextCommandId,
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
 
-        const { range, segmentId, body, unitId, textRanges: propTextRanges, cursorOffset } = params;
+        const { range, segmentId, body, unitId, cursorOffset } = params;
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
@@ -88,7 +86,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             params: {
                 unitId,
                 actions: [],
-                textRanges: propTextRanges ?? textRanges,
+                textRanges,
                 debounce: true,
             },
         };
@@ -107,13 +105,11 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         } else {
             const { dos, retain } = getRetainAndDeleteFromReplace(actualRange, segmentId, 0, originBody);
             textX.push(...dos);
-            if (!propTextRanges) {
-                doMutation.params.textRanges = [{
-                    startOffset: startOffset + cursorMove + retain,
-                    endOffset: startOffset + cursorMove + retain,
-                    collapsed,
-                }];
-            }
+            doMutation.params.textRanges = [{
+                startOffset: startOffset + cursorMove + retain,
+                endOffset: startOffset + cursorMove + retain,
+                collapsed,
+            }];
         }
 
         textX.push({

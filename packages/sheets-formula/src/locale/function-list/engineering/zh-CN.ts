@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '用来计算函数的值。' },
+            n: { name: 'N', detail: '贝赛耳函数的阶数。如果n不是整数，将被截尾取整。' },
         },
     },
     BESSELJ: {
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '用来计算函数的值。' },
+            n: { name: 'N', detail: '贝赛耳函数的阶数。如果n不是整数，将被截尾取整。' },
         },
     },
     BESSELK: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '用来计算函数的值。' },
+            n: { name: 'N', detail: '贝赛耳函数的阶数。如果n不是整数，将被截尾取整。' },
         },
     },
     BESSELY: {
@@ -67,8 +67,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '用来计算函数的值。' },
+            n: { name: 'N', detail: '贝赛耳函数的阶数。如果n不是整数，将被截尾取整。' },
         },
     },
     BIN2DEC: {
@@ -81,8 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '二进制数', detail: '要转换的二进制数。' },
         },
     },
     BIN2HEX: {
@@ -95,8 +94,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '二进制数', detail: '要转换的二进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     BIN2OCT: {
@@ -109,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '二进制数', detail: '要转换的二进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     BITAND: {
@@ -123,8 +122,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '必须为十进制格式且大于等于 0。' },
+            number2: { name: '数值2', detail: '必须为十进制格式且大于等于 0。' },
         },
     },
     BITLSHIFT: {
@@ -137,8 +136,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '必须是大于或等于 0 的整数。' },
+            shiftAmount: { name: '移位量', detail: '必须为整数。' },
         },
     },
     BITOR: {
@@ -151,8 +150,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '必须为十进制格式且大于等于 0。' },
+            number2: { name: '数值2', detail: '必须为十进制格式且大于等于 0。' },
         },
     },
     BITRSHIFT: {
@@ -165,8 +164,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '必须是大于或等于 0 的整数。' },
+            shiftAmount: { name: '移位量', detail: '必须为整数。' },
         },
     },
     BITXOR: {
@@ -179,8 +178,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '必须为十进制格式且大于等于 0。' },
+            number2: { name: '数值2', detail: '必须为十进制格式且大于等于 0。' },
         },
     },
     COMPLEX: {
@@ -193,8 +192,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            realNum: { name: '实系数', detail: '复数的实系数。' },
+            iNum: { name: '虚系数', detail: '复数的虚系数。' },
+            suffix: { name: '后缀', detail: '复数中虚系数的后缀。如果省略，则认为它是“i”。' },
         },
     },
     CONVERT: {
@@ -207,8 +207,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要进行转换的数值。' },
+            fromUnit: { name: '转换前单位', detail: '是数值的单位。' },
+            toUnit: { name: '转换后单位', detail: '是结果的单位。' },
         },
     },
     DEC2BIN: {
@@ -221,8 +222,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十进制数', detail: '要转换的十进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     DEC2HEX: {
@@ -235,8 +236,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十进制数', detail: '要转换的十进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     DEC2OCT: {
@@ -249,8 +250,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十进制数', detail: '要转换的十进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     DELTA: {
@@ -263,8 +264,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '第一个数值。' },
+            number2: { name: '数值2', detail: '第二个数值。如果省略，则假设数值2为零。' },
         },
     },
     ERF: {
@@ -277,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lowerLimit: { name: '下限', detail: 'ERF函数的积分下限。' },
+            upperLimit: { name: '上限', detail: 'ERF函数的积分上限。如果省略，ERF积分将在零到下限之间。' },
         },
     },
     ERF_PRECISE: {
@@ -291,8 +292,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: 'ERF.PRECISE函数的积分下限。' },
         },
     },
     ERFC: {
@@ -305,8 +305,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: 'ERFC函数的积分下限。' },
         },
     },
     ERFC_PRECISE: {
@@ -319,8 +318,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: 'ERFC.PRECISE函数的积分下限。' },
         },
     },
     GESTEP: {
@@ -347,8 +345,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十六进制数', detail: '要转换的十六进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     HEX2DEC: {
@@ -361,8 +359,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十六进制数', detail: '要转换的十六进制数。' },
         },
     },
     HEX2OCT: {
@@ -375,8 +372,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '十六进制数', detail: '要转换的十六进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     IMABS: {
@@ -739,8 +736,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '八进制数', detail: '要转换的八进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
     OCT2DEC: {
@@ -753,8 +750,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '八进制数', detail: '要转换的八进制数。' },
         },
     },
     OCT2HEX: {
@@ -767,8 +763,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '八进制数', detail: '要转换的八进制数。' },
+            places: { name: '字符数', detail: '要使用的字符数。' },
         },
     },
 };

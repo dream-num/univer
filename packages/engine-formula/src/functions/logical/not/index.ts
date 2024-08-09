@@ -15,7 +15,6 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -25,26 +24,25 @@ export class Not extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(logicalValue: BaseValueObject) {
-        if (logicalValue.isError()) {
-            return logicalValue;
+    override calculate(logical: BaseValueObject) {
+        if (logical.isArray()) {
+            return logical.map((logicalObject) => this._handleSingleObject(logicalObject));
         }
 
-        if (logicalValue.isArray()) {
-            const resultArray = (logicalValue as ArrayValueObject).map((value) => {
-                if (value?.isError()) {
-                    return value;
-                } else if (value?.isBoolean() || value?.isNumber()) {
-                    return BooleanValueObject.create(!value.getValue());
-                } else {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-            });
-            return resultArray;
-        } else if (logicalValue.isBoolean() || logicalValue.isNumber()) {
-            return BooleanValueObject.create(!logicalValue.getValue());
-        } else {
+        return this._handleSingleObject(logical);
+    }
+
+    private _handleSingleObject(logical: BaseValueObject) {
+        if (logical.isError()) {
+            return logical;
+        }
+
+        const logicalValue = +logical.getValue();
+
+        if (Number.isNaN(logicalValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
+
+        return BooleanValueObject.create(!logicalValue);
     }
 }

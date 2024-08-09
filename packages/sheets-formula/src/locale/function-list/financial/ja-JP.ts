@@ -25,8 +25,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: '発行日', detail: '証券の発行日を指定します。' },
+            firstInterest: { name: '初回利払日', detail: '証券の利息が最初に支払われる日付を指定します。' },
+            settlement: { name: '受渡日', detail: '証券の満期日を指定します。' },
+            rate: { name: '利率', detail: '証券の年利を指定します。' },
+            par: { name: '額面', detail: '証券の額面価格を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
+            calcMethod: { name: '計算方式', detail: '論理値です: 発行日からの未払い利息 = TRUE、または最後のクーポン支払日から計算 = FALSE。' },
         },
     },
     ACCRINTM: {
@@ -39,8 +45,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: '発行日', detail: '証券の発行日を指定します。' },
+            settlement: { name: '受渡日', detail: '証券の満期日を指定します。' },
+            rate: { name: '利率', detail: '証券の年利を指定します。' },
+            par: { name: '額面', detail: '証券の額面価格を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     AMORDEGRC: {
@@ -67,8 +76,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
+            datePurchased: { name: '購入日', detail: '資産を購入した日付を指定します。' },
+            firstPeriod: { name: '開始期', detail: '最初の会計期が終了する日付を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格を指定します。' },
+            period: { name: '期', detail: '会計期 (会計年度) を指定します。' },
+            rate: { name: '率', detail: '減価償却率を指定します。' },
+            basis: { name: '基準', detail: '1 年を何日として計算するかを表す数値を指定します。' },
         },
     },
     COUPDAYBS: {
@@ -81,8 +95,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPDAYS: {
@@ -95,8 +111,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPDAYSNC: {
@@ -109,8 +127,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPNCD: {
@@ -123,8 +143,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPNUM: {
@@ -137,8 +159,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     COUPPCD: {
@@ -151,8 +175,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     CUMIPMT: {
@@ -165,8 +191,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '貸付期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間内支払回数', detail: '貸付期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '現在の貸付額、つまり将来行われる一連の支払いを、現時点で一括支払いした場合の合計金額を指定します。' },
+            startPeriod: { name: '開始期', detail: '計算の対象となる最初の期を指定します。 最初の期から順に、1 から始まる番号が割り当てられます。' },
+            endPeriod: { name: '終了期', detail: '計算の対象となる最後の期を指定します。' },
+            type: { name: '支払期日', detail: '支払いがいつ行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     CUMPRINC: {
@@ -179,8 +209,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '貸付期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間内支払回数', detail: '貸付期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '現在の貸付額、つまり将来行われる一連の支払いを、現時点で一括支払いした場合の合計金額を指定します。' },
+            startPeriod: { name: '開始期', detail: '計算の対象となる最初の期を指定します。 最初の期から順に、1 から始まる番号が割り当てられます。' },
+            endPeriod: { name: '終了期', detail: '計算の対象となる最後の期を指定します。' },
+            type: { name: '支払期日', detail: '支払いがいつ行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     DB: {
@@ -193,8 +227,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格 (資産の救済価額) を指定します。' },
+            life: { name: '耐用年数', detail: '資産を使用できる年数 (資産の寿命年数) を指定します。' },
+            period: { name: '期間', detail: '減価償却費を計算する期間を指定します。' },
+            month: { name: '月', detail: '資産を購入した期 (年度) の月数を指定します。 省略すると、12 を指定したと見なされます。' },
         },
     },
     DDB: {
@@ -207,8 +244,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格 (資産の救済価額) を指定します。' },
+            life: { name: '耐用年数', detail: '資産を使用できる年数 (資産の寿命年数) を指定します。' },
+            period: { name: '期間', detail: '減価償却費を計算する期間を指定します。' },
+            factor: { name: '率', detail: '減価償却率を指定します。率を省略すると、2 を指定したと見なされ、倍額定率法で計算が行われます。' },
         },
     },
     DISC: {
@@ -221,8 +261,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            pr: { name: '現在価値', detail: '額面 $100 に対する証券の価値を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     DOLLARDE: {
@@ -235,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            fractionalDollar: { name: '分数表現', detail: '整数部と小数部を小数点で区切って表現した数値です。' },
+            fraction: { name: '分母', detail: '分数の分母となる整数を指定します。' },
         },
     },
     DOLLARFR: {
@@ -249,8 +292,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            decimalDollar: { name: '小数値', detail: '小数で表された数値を指定します。' },
+            fraction: { name: '分母', detail: '分数の分母となる整数を指定します。' },
         },
     },
     DURATION: {
@@ -277,8 +320,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nominalRate: { name: '名目利率', detail: '名目年利率を指定します。' },
+            npery: { name: '複利計算回数', detail: '1 年あたりの複利計算回数を指定します。' },
         },
     },
     FV: {
@@ -291,8 +334,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間内支払回数', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pmt: { name: '定期支払額', detail: '各期間に行われた支払い。それは年金の生活の中で変わることはできません' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     FVSCHEDULE: {
@@ -305,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            principal: { name: '元金', detail: '現在の貸付額、つまり将来行われる一連の支払いを、現時点で一括支払いした場合の合計金額を指定します。' },
+            schedule: { name: '利率配列', detail: '投資期間内の変動金利を配列として指定します。' },
         },
     },
     INTRATE: {
@@ -319,8 +365,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            investment: { name: '投資額', detail: '証券への投資額を指定します。' },
+            redemption: { name: '償還価額', detail: '満期日における証券の償還額を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     IPMT: {
@@ -333,8 +382,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            per: { name: '期', detail: '金利支払額を求める期を 1 ～ "期間" の範囲で指定します。' },
+            nper: { name: '期間', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     IRR: {
@@ -361,8 +414,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資の利率を指定します。' },
+            per: { name: '期', detail: '関心を見つける期間であり、1 から Nper の間である必要があります。' },
+            nper: { name: '期間', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値を指定します。ローンの場合、Pv はローン金額です。' },
         },
     },
     MDURATION: {
@@ -403,8 +458,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            effectRate: { name: '実効利率', detail: '実効年利率を指定します。' },
+            npery: { name: '複利計算回数', detail: '1 年あたりの複利計算回数を指定します。' },
         },
     },
     NPER: {
@@ -417,8 +472,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            pmt: { name: '定期支払額', detail: '各期間に行われた支払い。それは年金の生活の中で変わることはできません' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     NPV: {
@@ -515,8 +573,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間内支払回数', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     PPMT: {
@@ -529,8 +590,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            per: { name: '期', detail: '金利支払額を求める期を 1 ～ "期間" の範囲で指定します。' },
+            nper: { name: '期間', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     PRICE: {
@@ -585,8 +650,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投資期間を通じて一定の利率を指定します。' },
+            nper: { name: '期間内支払回数', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pmt: { name: '定期支払額', detail: '各期間に行われた支払い。それは年金の生活の中で変わることはできません' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
         },
     },
     RATE: {
@@ -599,8 +667,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '期間内支払回数', detail: '投資期間全体での支払回数の合計を指定します。' },
+            pmt: { name: '定期支払額', detail: '各期間に行われた支払い。それは年金の生活の中で変わることはできません' },
+            pv: { name: '現在価値', detail: '投資の現在価値、つまり将来行われる一連の支払いを、現時点で一括払いした場合の合計金額を指定します。' },
+            fv: { name: '将来価値', detail: '投資の将来価値、つまり最後の支払いを行った後に残る現金の収支を指定します。' },
+            type: { name: '支払期日', detail: 'いつ支払いが行われるかを、数値の 0 または 1 で指定します。' },
+            guess: { name: '推定値', detail: '利率がおよそどれくらいになるかを推定した値を指定します。' },
         },
     },
     RECEIVED: {

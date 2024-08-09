@@ -52,7 +52,7 @@ export class Switch extends BaseFunction {
                 return switchValue;
             }
 
-            if (expression.getValue() === switchValue.getValue()) {
+            if (`${expression.getValue()}`.toLocaleLowerCase() === `${switchValue.getValue()}`.toLocaleLowerCase()) {
                 return resultValue.isNull() ? ErrorValueObject.create(ErrorType.NA) : resultValue;
             }
         }
@@ -92,7 +92,7 @@ export class Switch extends BaseFunction {
                     return switchValue.isError() ? switchValue : expValue;
                 }
 
-                if (expValue.getValue() === switchValue.getValue()) {
+                if (`${expValue.getValue()}`.toLocaleLowerCase() === `${switchValue.getValue()}`.toLocaleLowerCase()) {
                     return resultValue.isNull() ? ErrorValueObject.create(ErrorType.NA) : resultValue;
                 }
             }

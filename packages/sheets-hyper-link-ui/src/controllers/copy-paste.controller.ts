@@ -129,6 +129,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
 
                 return { undos: [], redos: [] };
             },
+            priority: 99,
         });
     }
 

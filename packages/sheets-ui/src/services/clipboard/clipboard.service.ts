@@ -667,7 +667,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             redoMutationsInfo,
         });
 
-        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+        const result = redoMutationsInfo.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
         if (result) {
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({

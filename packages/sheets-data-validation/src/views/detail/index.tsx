@@ -81,6 +81,9 @@ export function DataValidationDetail() {
     const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
 
     const handleOk = () => {
+        if(!localRule.ranges.length){
+            return
+        }
         if (validator.validatorFormula(localRule, unitId, subUnitId).success) {
             dataValidationPanelService.setActiveRule(null);
         } else {
@@ -209,7 +212,10 @@ export function DataValidationDetail() {
     };
     return (
         <div>
-            <FormLayout label={localeService.t('dataValidation.panel.range')}>
+            <FormLayout
+                label={localeService.t('dataValidation.panel.range')}
+                error={!localRule.ranges.length ? localeService.t('dataValidation.panel.rangeError') : ''}
+            >
                 <RangeSelector
                     key={key}
                     className={styles.dataValidationDetailFormItem}

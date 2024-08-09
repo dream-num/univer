@@ -81,8 +81,8 @@ export function DataValidationDetail() {
     const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
 
     const handleOk = () => {
-        if(!localRule.ranges.length){
-            return
+        if (!localRule.ranges.length) {
+            return;
         }
         if (validator.validatorFormula(localRule, unitId, subUnitId).success) {
             dataValidationPanelService.setActiveRule(null);

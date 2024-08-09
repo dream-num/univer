@@ -18,8 +18,8 @@ import React from 'react';
 import type { SlideDataModel } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IUniverSlidesDrawingConfig } from '@univerjs/slides-ui';
-import { IMAGE_MENU_ID, SHAPE_MENU_ID, SlideAddTextOperation, SlidesUIController } from '@univerjs/slides-ui';
-import { ComponentManager, IMenuService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
+import { EditorContainer, IMAGE_MENU_ID, SHAPE_MENU_ID, SlideAddTextOperation, SlidesUIController } from '@univerjs/slides-ui';
+import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';
 
@@ -41,6 +41,10 @@ export class UniSlidesUIController extends SlidesUIController {
 
     protected override _initUIComponents(): void {
         this.disposeWithMe(this._uiPartsService.registerComponent(UniUIPart.OUTLINE, () => connectInjector(RenderOutline, this._injector)));
+
+        this.disposeWithMe(
+            this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(EditorContainer, this._injector))
+        );
     }
 
     private _initUniMenus(): void {

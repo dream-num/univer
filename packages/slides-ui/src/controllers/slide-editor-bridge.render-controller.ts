@@ -61,7 +61,8 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         @Inject(CanvasView) private readonly _canvasView: CanvasView
     ) {
         super();
-        this._init();
+        //wait for sceneMap
+        Promise.resolve().then(() => this._init());
     }
 
     private _init(): IDisposable {

@@ -30,3 +30,5 @@ export { SetSlidePageThumbOperation } from './commands/operations/set-thumb.oper
 export { AppendSlideOperation } from './commands/operations/append-slide.operation';
 export { SlideAddTextOperation } from './commands/operations/insert-text.operation';
 // #endregion
+
+export { EditorContainer } from './views/editor-container/EditorContainer';

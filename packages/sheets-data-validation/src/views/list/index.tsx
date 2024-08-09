@@ -16,12 +16,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Workbook } from '@univerjs/core';
+import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import { createDefaultNewRule, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
-import type { ICellPermission } from '@univerjs/sheets';
-import { UnitAction } from '@univerjs/protocol';
+import { checkRangesEditablePermission } from '@univerjs/sheets';
 import { DataValidationItem } from '../item';
 import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 import { AddSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
@@ -93,26 +92,17 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     const getDvRulesByPermissionCorrect = (rules: ISheetDataValidationRule[]) => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const rulesByPermissionCheck = rules.map((rule) => {
-            const { ranges } = rule;
-            const haveNotPermission = ranges?.some((range) => {
-                const { startRow, startColumn, endRow, endColumn } = range;
-                for (let row = startRow; row <= endRow; row++) {
-                    for (let col = startColumn; col <= endColumn; col++) {
-                        const permission = (worksheet?.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                        if (permission?.[UnitAction.Edit] === false || permission?.[UnitAction.View] === false) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            });
-            if (haveNotPermission) {
-                return { ...rule, disable: true };
-            } else {
+            const hasPermission = checkRangesEditablePermission(injector, unitId, subUnitId, rule.ranges);
+            if (hasPermission) {
                 return { ...rule };
+            } else {
+                return { ...rule, disable: true };
             }
         });
+
         return rulesByPermissionCheck;
     };
 

@@ -102,7 +102,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
 
     saveWorkbook: (workbook: Workbook) => IWorkbookData = (workbook) => {
         const unitId = workbook.getUnitId();
-        const resources = this._resourceManagerService.getResources(unitId) || [];
+        const resources = this._resourceManagerService.getResourcesByType(unitId, UniverInstanceType.UNIVER_SHEET) || [];
         const snapshot = workbook.getSnapshot();
         snapshot.resources = resources;
         return snapshot;

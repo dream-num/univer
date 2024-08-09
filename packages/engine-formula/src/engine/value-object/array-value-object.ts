@@ -1639,14 +1639,6 @@ export class ArrayValueObject extends BaseValueObject {
                     (currentValue as ErrorValueObject).getErrorType(),
                     r + startRow
                 );
-            } else if (currentValue.isNull()) {
-                // In comparison operations, these two situations are equivalent
-
-                // ">"&A1 (A1 is an empty cell)
-                // ">"
-
-                // So the empty cell is also cached as an empty string so that it can be retrieved next time
-                CELL_INVERTED_INDEX_CACHE.set(unitId, sheetId, column + startColumn, '', r + startRow);
             } else {
                 CELL_INVERTED_INDEX_CACHE.set(
                     unitId,

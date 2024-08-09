@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IParagraph } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { getParagraphsInRanges, TextSelectionManagerService } from '@univerjs/docs';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getNumberUnitValue } from '@univerjs/engine-render';
 import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
 import { DocParagraphSettingCommand } from '../../../commands/commands/doc-paragraph-setting.command';
@@ -26,7 +26,12 @@ export const useCurrentParagraph = () => {
     const textSelectionManagerService = useDependency(TextSelectionManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    const docRanges = textSelectionManagerService.getDocRanges();
+    // The `getDocRanges` function internally needs to use `range.position` to obtain the offset.
+    // However, when the form control changes and triggers the `getDocRanges` function, the `Skeleton` has already been updated.
+    // The information of `range.position` in the textSelectionManagerService does not match the `Skeleton`, causing errors in value retrieval.
+    // To address this issue, adding useMemo here to only retrieve the range information for the first time to avoid mismatches between the `Skeleton` and `position`.
+    // TODO@GGGPOUND, the business side should not be aware of the timing issue with getDocRanges.
+    const docRanges = useMemo(() => textSelectionManagerService.getDocRanges(), []);
 
     if (!docDataModel || docRanges.length === 0) {
         return [];

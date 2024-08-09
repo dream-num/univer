@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/financial';
 import { ErrorType } from '../../../basics/error-type';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -32,11 +32,10 @@ export class Dollarfr extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        decimalDollar = (variants as BaseValueObject[])[0];
-        fraction = (variants as BaseValueObject[])[1];
+        const [decimalDollarObject, fractionObject] = variants as BaseValueObject[];
 
-        const decimalDollarValue = +decimalDollar.getValue();
-        let fractionValue = Math.floor(+fraction.getValue());
+        const decimalDollarValue = +decimalDollarObject.getValue();
+        let fractionValue = Math.floor(+fractionObject.getValue());
 
         if (Number.isNaN(decimalDollarValue) || Number.isNaN(fractionValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);

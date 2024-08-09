@@ -21,6 +21,7 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 
 export class Ispmt extends BaseFunction {
     override minParams = 4;
@@ -48,46 +49,22 @@ export class Ispmt extends BaseFunction {
         const pvArray = expandArrayValueObject(maxRowLength, maxColumnLength, pv, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = rateArray.map((rateObject, rowIndex, columnIndex) => {
-            let perObject = perArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let nperObject = nperArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let pvObject = pvArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const perObject = perArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const nperObject = nperArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const pvObject = pvArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (rateObject.isString()) {
-                rateObject = rateObject.convertToNumberObjectValue();
+            const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(rateObject, perObject, nperObject, pvObject);
+
+            if (isError) {
+                return errorObject as ErrorValueObject;
             }
 
-            if (rateObject.isError()) {
-                return rateObject;
-            }
+            const [_rateObject, _perObject, _nperObject, _pvObject] = variants as BaseValueObject[];
 
-            if (perObject.isString()) {
-                perObject = perObject.convertToNumberObjectValue();
-            }
-
-            if (perObject.isError()) {
-                return perObject;
-            }
-
-            if (nperObject.isString()) {
-                nperObject = nperObject.convertToNumberObjectValue();
-            }
-
-            if (nperObject.isError()) {
-                return nperObject;
-            }
-
-            if (pvObject.isString()) {
-                pvObject = pvObject.convertToNumberObjectValue();
-            }
-
-            if (pvObject.isError()) {
-                return pvObject;
-            }
-
-            const rateValue = +rateObject.getValue();
-            const perValue = +perObject.getValue();
-            const nperValue = +nperObject.getValue();
-            const pvValue = +pvObject.getValue();
+            const rateValue = +_rateObject.getValue();
+            const perValue = +_perObject.getValue();
+            const nperValue = +_nperObject.getValue();
+            const pvValue = +_pvObject.getValue();
 
             if (nperValue === 0) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
@@ -99,7 +76,7 @@ export class Ispmt extends BaseFunction {
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
-            return (resultArray as ArrayValueObject).get(0, 0) as NumberValueObject;
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         return resultArray;

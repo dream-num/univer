@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { calculateFV, calculatePMT, checkVariantsErrorIsArrayOrBoolean } from '../../../basics/financial';
+import { calculateFV, calculatePMT } from '../../../basics/financial';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 
 export class Cumipmt extends BaseFunction {
     override minParams = 6;
@@ -33,19 +34,14 @@ export class Cumipmt extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        rate = (variants as BaseValueObject[])[0];
-        nper = (variants as BaseValueObject[])[1];
-        pv = (variants as BaseValueObject[])[2];
-        startPeriod = (variants as BaseValueObject[])[3];
-        endPeriod = (variants as BaseValueObject[])[4];
-        type = (variants as BaseValueObject[])[5];
+        const [rateObject, nperObject, pvObject, startPeriodObject, endPeriodObject, typeObject] = variants as BaseValueObject[];
 
-        const rateValue = +rate.getValue();
-        const nperValue = +nper.getValue();
-        const pvValue = +pv.getValue();
-        let startPeriodValue = +startPeriod.getValue();
-        const endPeriodValue = +endPeriod.getValue();
-        const typeValue = +type.getValue();
+        const rateValue = +rateObject.getValue();
+        const nperValue = +nperObject.getValue();
+        const pvValue = +pvObject.getValue();
+        const startPeriodValue = +startPeriodObject.getValue();
+        const endPeriodValue = +endPeriodObject.getValue();
+        const typeValue = +typeObject.getValue();
 
         if (Number.isNaN(rateValue) || Number.isNaN(nperValue) || Number.isNaN(pvValue) || Number.isNaN(startPeriodValue) || Number.isNaN(endPeriodValue) || Number.isNaN(typeValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -67,21 +63,31 @@ export class Cumipmt extends BaseFunction {
             return NumberValueObject.create(0);
         }
 
-        startPeriodValue = Math.ceil(startPeriodValue);
+        return this._getResult(rateValue, nperValue, pvValue, startPeriodValue, endPeriodValue, typeValue);
+    }
 
+    private _getResult(
+        rateValue: number,
+        nperValue: number,
+        pvValue: number,
+        startPeriodValue: number,
+        endPeriodValue: number,
+        typeValue: number
+    ): NumberValueObject {
         const payment = calculatePMT(rateValue, nperValue, pvValue, 0, typeValue);
 
         let result = 0;
+        let _startPeriodValue = Math.ceil(startPeriodValue);
 
-        if (startPeriodValue === 1) {
+        if (_startPeriodValue === 1) {
             if (typeValue === 0) {
                 result = -pvValue;
             }
 
-            startPeriodValue++;
+            _startPeriodValue++;
         }
 
-        for (let i = startPeriodValue; i <= endPeriodValue; i++) {
+        for (let i = _startPeriodValue; i <= endPeriodValue; i++) {
             result += typeValue === 1
                 ? calculateFV(rateValue, i - 2, payment, pvValue, 1) - payment
                 : calculateFV(rateValue, i - 1, payment, pvValue, 0);

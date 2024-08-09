@@ -25,8 +25,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: 'ngày phát hành', detail: 'Ngày phát hành chứng khoán.' },
+            firstInterest: { name: 'ngày tính lãi đầu tiên', detail: 'Ngày tính lãi đầu tiên của chứng khoán.' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất phiếu lãi hàng năm của chứng khoán.' },
+            par: { name: 'mệnh giá', detail: 'Mệnh giá của chứng khoán.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Loại cơ sở đếm ngày sẽ dùng.' },
+            calcMethod: { name: 'phương pháp tính toán', detail: 'Là một giá trị logic: tiền lãi tích lũy từ ngày phát hành = TRUE hoặc bị bỏ qua; được tính từ ngày thanh toán phiếu lãi cuối cùng = FALSE.' },
         },
     },
     ACCRINTM: {
@@ -39,8 +45,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: 'ngày phát hành', detail: 'Ngày phát hành chứng khoán.' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất phiếu lãi hàng năm của chứng khoán.' },
+            par: { name: 'mệnh giá', detail: 'Mệnh giá của chứng khoán.' },
+            basis: { name: 'điểm chuẩn', detail: 'Loại cơ sở đếm ngày sẽ dùng.' },
         },
     },
     AMORDEGRC: {
@@ -67,8 +76,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'trị giá', detail: 'Chi phí của tài sản.' },
+            datePurchased: { name: 'ngày mua', detail: 'Ngày mua tài sản.' },
+            firstPeriod: { name: 'kỳ đầu tiên', detail: 'Ngày kết thúc của kỳ thứ nhất.' },
+            salvage: { name: 'giá trị còn lại', detail: 'Giá trị thu hồi khi kết thúc vòng đời của tài sản.' },
+            period: { name: 'kỳ', detail: 'Kỳ.' },
+            rate: { name: 'tỷ lệ khấu hao', detail: 'Tỷ lệ khấu hao.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     COUPDAYBS: {
@@ -81,8 +95,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     COUPDAYS: {
@@ -95,8 +111,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     COUPDAYSNC: {
@@ -109,8 +127,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     COUPNCD: {
@@ -123,8 +143,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     COUPNUM: {
@@ -137,8 +159,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     COUPPCD: {
@@ -151,8 +175,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     CUMIPMT: {
@@ -165,8 +191,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất.' },
+            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+            startPeriod: { name: 'kỳ đầu tiên', detail: 'Kỳ đầu tiên trong tính toán này. Các kỳ thanh toán được đánh số bắt đầu từ 1.' },
+            endPeriod: { name: 'kỳ cuối cùng', detail: 'Kỳ cuối cùng trong tính toán này.' },
+            type: { name: 'loại', detail: 'Thời hạn thanh toán.' },
         },
     },
     CUMPRINC: {
@@ -179,8 +209,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất.' },
+            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+            startPeriod: { name: 'kỳ đầu tiên', detail: 'Kỳ đầu tiên trong tính toán này. Các kỳ thanh toán được đánh số bắt đầu từ 1.' },
+            endPeriod: { name: 'kỳ cuối cùng', detail: 'Kỳ cuối cùng trong tính toán này.' },
+            type: { name: 'loại', detail: 'Thời hạn thanh toán.' },
         },
     },
     DB: {
@@ -193,8 +227,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'trị giá', detail: 'Chi phí của tài sản.' },
+            salvage: { name: 'giá trị còn lại', detail: 'Giá trị khi kết thúc khấu hao (đôi khi được gọi là giá trị thu hồi của tài sản).' },
+            life: { name: 'tuổi thọ sử dụng', detail: 'Số thời gian khấu hao của một tài sản (đôi khi còn được gọi là thời gian sử dụng hữu ích của tài sản).' },
+            period: { name: 'kỳ', detail: 'Khoảng thời gian mà bạn muốn tính khấu hao.' },
+            month: { name: 'tháng', detail: 'Số tháng trong năm đầu tiên. Nếu tháng bị bỏ qua, giá trị của nó được giả định là 12.' },
         },
     },
     DDB: {
@@ -207,8 +244,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'trị giá', detail: 'Chi phí của tài sản.' },
+            salvage: { name: 'giá trị còn lại', detail: 'Giá trị khi kết thúc khấu hao (đôi khi được gọi là giá trị thu hồi của tài sản).' },
+            life: { name: 'tuổi thọ sử dụng', detail: 'Số thời gian khấu hao của một tài sản (đôi khi còn được gọi là thời gian sử dụng hữu ích của tài sản).' },
+            period: { name: 'kỳ', detail: 'Khoảng thời gian mà bạn muốn tính khấu hao.' },
+            factor: { name: 'nhân tố', detail: 'Tỷ lệ suy giảm số dư. Nếu bỏ qua yếu tố ảnh hưởng thì giả định là 2 (phương pháp số dư giảm dần kép).' },
         },
     },
     DISC: {
@@ -221,8 +261,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            pr: { name: 'giá', detail: 'Giá của một chứng khoán có thể bán được trên thị trường.' },
+            redemption: { name: 'giá thanh lý', detail: 'Giá trị thanh lý của chứng khoán có mệnh giá 100' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     DOLLARDE: {
@@ -235,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            fractionalDollar: { name: 'phân số', detail: 'Một số được biểu thị dưới dạng phần nguyên và phần phân số, cách nhau bằng dấu thập phân.' },
+            fraction: { name: 'mẫu số', detail: 'Số nguyên dùng làm mẫu số của một phân số.' },
         },
     },
     DOLLARFR: {
@@ -249,8 +292,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            decimalDollar: { name: 'số thập phân', detail: 'số thập phân.' },
+            fraction: { name: 'mẫu số', detail: 'Số nguyên dùng làm mẫu số của một phân số.' },
         },
     },
     DURATION: {
@@ -277,8 +320,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nominalRate: { name: 'lãi suất danh nghĩa', detail: 'Lãi suất danh nghĩa.' },
+            npery: { name: 'số kỳ', detail: 'Số kỳ ghép lãi trong năm.' },
         },
     },
     FV: {
@@ -291,8 +334,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất.' },
+            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
+            pmt: { name: 'số tiền', detail: 'Số tiền phải trả trong mỗi kỳ không thay đổi trong suốt thời hạn niên kim.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+            type: { name: 'loại', detail: 'Số 0 hoặc 1, dùng để xác định thời điểm thanh toán của mỗi kỳ là đầu hay cuối kỳ.' },
         },
     },
     FVSCHEDULE: {
@@ -305,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            principal: { name: 'hiệu trưởng', detail: 'giá trị hiện tại.' },
+            schedule: { name: 'mảng lãi suất', detail: 'Mảng lãi suất áp dụng.' },
         },
     },
     INTRATE: {
@@ -319,8 +365,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            investment: { name: 'số tiền đầu', detail: 'Số tiền đầu tư vào chứng khoán có thể bán được.' },
+            redemption: { name: 'giá thanh lý', detail: 'Giá trị trao đổi của chứng khoán khi đáo hạn.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     IPMT: {
@@ -333,8 +382,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất theo từng thời kỳ.' },
+            per: { name: 'kỳ', detail: 'Số kỳ dùng để tính số tiền lãi phải nằm trong khoảng từ 1 đến nper.' },
+            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+            fv: { name: 'số dư tiền mặt', detail: 'Giá trị tương lai hoặc số dư tiền mặt mong muốn sau khi thực hiện khoản thanh toán cuối cùng.' },
+            type: { name: 'loại', detail: 'Số 0 hoặc 1, dùng để xác định thời điểm thanh toán của mỗi kỳ là đầu hay cuối kỳ.' },
         },
     },
     IRR: {
@@ -361,8 +414,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất theo từng thời kỳ.' },
+            per: { name: 'kỳ', detail: 'Số kỳ dùng để tính số tiền lãi phải nằm trong khoảng từ 1 đến nper.' },
+            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
         },
     },
     MIRR: {
@@ -389,8 +444,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            effectRate: { name: 'lãi suất thực', detail: 'lãi suất thực.' },
+            npery: { name: 'số kỳ', detail: 'Số kỳ ghép lãi trong năm.' },
         },
     },
     NPER: {
@@ -403,8 +458,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất theo từng thời kỳ.' },
+            pmt: { name: 'số tiền', detail: 'Số tiền phải trả trong mỗi kỳ không thay đổi trong suốt thời hạn niên kim.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+            fv: { name: 'số dư tiền mặt', detail: 'Giá trị tương lai hoặc số dư tiền mặt mong muốn sau khi thực hiện khoản thanh toán cuối cùng.' },
+            type: { name: 'loại', detail: 'Số 0 hoặc 1, dùng để xác định thời điểm thanh toán của mỗi kỳ là đầu hay cuối kỳ.' },
         },
     },
     NPV: {
@@ -487,8 +545,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất theo từng thời kỳ.' },
+            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+            fv: { name: 'số dư tiền mặt', detail: 'Giá trị tương lai hoặc số dư tiền mặt mong muốn sau khi thực hiện khoản thanh toán cuối cùng.' },
+            type: { name: 'loại', detail: 'Số 0 hoặc 1, dùng để xác định thời điểm thanh toán của mỗi kỳ là đầu hay cuối kỳ.' },
         },
     },
     PPMT: {
@@ -501,8 +562,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất theo từng thời kỳ.' },
+            per: { name: 'kỳ', detail: 'Số kỳ dùng để tính số tiền lãi phải nằm trong khoảng từ 1 đến nper.' },
+            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+            fv: { name: 'số dư tiền mặt', detail: 'Giá trị tương lai hoặc số dư tiền mặt mong muốn sau khi thực hiện khoản thanh toán cuối cùng.' },
+            type: { name: 'loại', detail: 'Số 0 hoặc 1, dùng để xác định thời điểm thanh toán của mỗi kỳ là đầu hay cuối kỳ.' },
         },
     },
     PRICE: {
@@ -557,8 +622,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất theo từng thời kỳ.' },
+            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
+            pmt: { name: 'số tiền', detail: 'Số tiền phải trả trong mỗi kỳ không thay đổi trong suốt thời hạn niên kim.' },
+            fv: { name: 'số dư tiền mặt', detail: 'Giá trị tương lai hoặc số dư tiền mặt mong muốn sau khi thực hiện khoản thanh toán cuối cùng.' },
+            type: { name: 'loại', detail: 'Số 0 hoặc 1, dùng để xác định thời điểm thanh toán của mỗi kỳ là đầu hay cuối kỳ.' },
         },
     },
     RATE: {
@@ -571,8 +639,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
+            pmt: { name: 'số tiền', detail: 'Số tiền phải trả trong mỗi kỳ không thay đổi trong suốt thời hạn niên kim.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+            fv: { name: 'số dư tiền mặt', detail: 'Giá trị tương lai hoặc số dư tiền mặt mong muốn sau khi thực hiện khoản thanh toán cuối cùng.' },
+            type: { name: 'loại', detail: 'Số 0 hoặc 1, dùng để xác định thời điểm thanh toán của mỗi kỳ là đầu hay cuối kỳ.' },
+            guess: { name: 'giá trị đoán', detail: 'lãi suất kỳ vọng.' },
         },
     },
     RECEIVED: {

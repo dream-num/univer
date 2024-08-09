@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/financial';
 import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -27,35 +27,31 @@ export class Accrintm extends BaseFunction {
     override maxParams = 5;
 
     override calculate(issue: BaseValueObject, settlement: BaseValueObject, rate: BaseValueObject, par: BaseValueObject, basis?: BaseValueObject) {
-        basis = basis ?? NumberValueObject.create(0);
+        const _basis = basis ?? NumberValueObject.create(0);
 
-        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(issue, settlement, rate, par, basis);
+        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(issue, settlement, rate, par, _basis);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        issue = (variants as BaseValueObject[])[0];
-        settlement = (variants as BaseValueObject[])[1];
-        rate = (variants as BaseValueObject[])[2];
-        par = (variants as BaseValueObject[])[3];
-        basis = (variants as BaseValueObject[])[4];
+        const [issueObject, settlementObject, rateObject, parObject, basisObject] = variants as BaseValueObject[];
 
-        const issueSerialNumber = getDateSerialNumberByObject(issue);
+        const issueSerialNumber = getDateSerialNumberByObject(issueObject);
 
         if (typeof issueSerialNumber !== 'number') {
             return issueSerialNumber;
         }
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlement);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const rateValue = +rate.getValue();
-        const parValue = +par.getValue();
-        const basisValue = Math.floor(+basis.getValue());
+        const rateValue = +rateObject.getValue();
+        const parValue = +parObject.getValue();
+        const basisValue = Math.floor(+basisObject.getValue());
 
         if (Number.isNaN(rateValue) || Number.isNaN(parValue) || Number.isNaN(basisValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);

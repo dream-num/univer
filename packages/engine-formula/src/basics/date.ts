@@ -348,6 +348,37 @@ export function getWeekDayByDateSerialNumber(dateSerialNumber: number): number {
 }
 
 export function getTwoDateDaysByBasis(startDateSerialNumber: number, endDateSerialNumber: number, basis: number) {
+    switch (basis) {
+        case 0:
+            // U.S. (NASD) method 30/360.
+            return getDaysByNASD(startDateSerialNumber, endDateSerialNumber);
+        case 1:
+            // Actual/actual
+            return getDaysByActual(startDateSerialNumber, endDateSerialNumber);
+        case 2:
+            // Actual/360
+            return {
+                days: Math.abs(endDateSerialNumber - startDateSerialNumber),
+                yearDays: 360,
+            };
+        case 3:
+            // Actual/365
+            return {
+                days: Math.abs(endDateSerialNumber - startDateSerialNumber),
+                yearDays: 365,
+            };
+        case 4:
+            // European method 30/360.
+            return getDaysByEuropean(startDateSerialNumber, endDateSerialNumber);
+        default:
+            return {
+                days: Math.abs(endDateSerialNumber - startDateSerialNumber),
+                yearDays: 365,
+            };
+    }
+}
+
+function getDaysByNASD(startDateSerialNumber: number, endDateSerialNumber: number) {
     const startDateDate = excelSerialToDate(startDateSerialNumber);
     const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
     const startMonth = startDateSerialNumber > 0 ? startDateDate.getUTCMonth() + 1 : 1;
@@ -358,117 +389,110 @@ export function getTwoDateDaysByBasis(startDateSerialNumber: number, endDateSeri
     let endMonth = endDateSerialNumber > 0 ? endDateDate.getUTCMonth() + 1 : 1;
     let endDay = endDateSerialNumber > 0 ? endDateDate.getUTCDate() : 0;
 
-    let result = {
-        days: 0,
-        yearDays: 365,
-    };
+    // If the starting date is the last day of a month, it becomes equal to the 30th day of the same month.
+    // If the ending date is the last day of a month and the starting date is earlier than the 30th day of a month, the ending date becomes equal to the 1st day of the next month; otherwise the ending date becomes equal to the 30th day of the same month.
+    if (startMonth === 2) {
+        const startDateAfterDay = excelSerialToDate(startDateSerialNumber + 1);
 
-    if (basis === 0) {
-        // U.S. (NASD) method 30/360.
-        // If the starting date is the last day of a month, it becomes equal to the 30th day of the same month.
-        // If the ending date is the last day of a month and the starting date is earlier than the 30th day of a month, the ending date becomes equal to the 1st day of the next month; otherwise the ending date becomes equal to the 30th day of the same month.
-        if (startMonth === 2) {
-            const startDateAfterDay = excelSerialToDate(startDateSerialNumber + 1);
-
-            if (startDateAfterDay.getUTCMonth() + 1 === 3) {
-                startDay = 30;
-            }
-        } else if (startDay === 31) {
+        if (startDateAfterDay.getUTCMonth() + 1 === 3) {
             startDay = 30;
         }
-
-        if (endDay === 31) {
-            if (startDay < 30) {
-                endDateDate = excelSerialToDate(endDateSerialNumber + 1);
-                endYear = endDateDate.getUTCFullYear();
-                endMonth = endDateDate.getUTCMonth() + 1;
-                endDay = endDateDate.getUTCDate();
-            } else {
-                endDay = 30;
-            }
-        }
-
-        const daysInYears = (endYear - startYear) * 360;
-        const daysInStartMonth = endDateSerialNumber >= startDateSerialNumber ? 30 - startDay : -startDay;
-        const daysInEndMonth = endDateSerialNumber >= startDateSerialNumber ? endDay : endDay - 30;
-        const daysInMidMonths = (endDateSerialNumber >= startDateSerialNumber ? (endMonth - startMonth - 1) : (endMonth - startMonth + 1)) * 30;
-        const totalDays = Math.abs(daysInYears + daysInStartMonth + daysInEndMonth + daysInMidMonths);
-
-        result = {
-            days: totalDays,
-            yearDays: 360,
-        };
-    } else if (basis === 1) {
-        // Actual/actual
-        const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
-        const totalYear = Math.abs(endYear - startYear) + 1;
-
-        let startYearFirstDaySerialNumber;
-        let endYearLastDaySerialNumber;
-
-        if (endYear < startYear) {
-            const startYearFirstDay = new Date(Date.UTC(endYear, 0, 1));
-            const endYearLastDay = new Date(Date.UTC(startYear, 11, 31));
-
-            startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
-            endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
-
-            if (endYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
-                startYearFirstDaySerialNumber += 1;
-            }
-        } else {
-            const startYearFirstDay = new Date(Date.UTC(startYear, 0, 1));
-            const endYearLastDay = new Date(Date.UTC(endYear, 11, 31));
-
-            startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
-            endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
-
-            if (startYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
-                startYearFirstDaySerialNumber += 1;
-            }
-        }
-
-        result = {
-            days: totalDays,
-            yearDays: (endYearLastDaySerialNumber - startYearFirstDaySerialNumber + 1) / totalYear,
-        };
-    } else if (basis === 2) {
-        // Actual/360
-        const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
-
-        result = {
-            days: totalDays,
-            yearDays: 360,
-        };
-    } else if (basis === 3) {
-        // Actual/365
-        const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
-
-        result = {
-            days: totalDays,
-            yearDays: 365,
-        };
-    } else if (basis === 4) {
-        // European method 30/360. Starting dates and ending dates that occur on the 31st day of a month become equal to the 30th day of the same month.
-        if (startDay === 31) {
-            startDay = 30;
-        }
-
-        if (endDay === 31) {
-            endDay = 30;
-        }
-
-        const daysInYears = (endYear - startYear) * 360;
-        const daysInStartMonth = endDateSerialNumber >= startDateSerialNumber ? 30 - startDay : -startDay;
-        const daysInEndMonth = endDateSerialNumber >= startDateSerialNumber ? endDay : endDay - 30;
-        const daysInMidMonths = (endDateSerialNumber >= startDateSerialNumber ? (endMonth - startMonth - 1) : (endMonth - startMonth + 1)) * 30;
-        const totalDays = Math.abs(daysInYears + daysInStartMonth + daysInEndMonth + daysInMidMonths);
-
-        result = {
-            days: totalDays,
-            yearDays: 360,
-        };
+    } else if (startDay === 31) {
+        startDay = 30;
     }
 
-    return result;
+    if (endDay === 31) {
+        if (startDay < 30) {
+            endDateDate = excelSerialToDate(endDateSerialNumber + 1);
+            endYear = endDateDate.getUTCFullYear();
+            endMonth = endDateDate.getUTCMonth() + 1;
+            endDay = endDateDate.getUTCDate();
+        } else {
+            endDay = 30;
+        }
+    }
+
+    const daysInYears = (endYear - startYear) * 360;
+    const daysInStartMonth = endDateSerialNumber >= startDateSerialNumber ? 30 - startDay : -startDay;
+    const daysInEndMonth = endDateSerialNumber >= startDateSerialNumber ? endDay : endDay - 30;
+    const daysInMidMonths = (endDateSerialNumber >= startDateSerialNumber ? (endMonth - startMonth - 1) : (endMonth - startMonth + 1)) * 30;
+    const totalDays = Math.abs(daysInYears + daysInStartMonth + daysInEndMonth + daysInMidMonths);
+
+    return {
+        days: totalDays,
+        yearDays: 360,
+    };
+}
+
+function getDaysByActual(startDateSerialNumber: number, endDateSerialNumber: number) {
+    const startDateDate = excelSerialToDate(startDateSerialNumber);
+    const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
+
+    const endDateDate = excelSerialToDate(endDateSerialNumber);
+    const endYear = endDateSerialNumber > 0 ? endDateDate.getUTCFullYear() : 1900;
+
+    const totalDays = Math.abs(endDateSerialNumber - startDateSerialNumber);
+    const totalYear = Math.abs(endYear - startYear) + 1;
+
+    let startYearFirstDaySerialNumber;
+    let endYearLastDaySerialNumber;
+
+    if (endYear < startYear) {
+        const startYearFirstDay = new Date(Date.UTC(endYear, 0, 1));
+        const endYearLastDay = new Date(Date.UTC(startYear, 11, 31));
+
+        startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
+        endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
+
+        if (endYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
+            startYearFirstDaySerialNumber += 1;
+        }
+    } else {
+        const startYearFirstDay = new Date(Date.UTC(startYear, 0, 1));
+        const endYearLastDay = new Date(Date.UTC(endYear, 11, 31));
+
+        startYearFirstDaySerialNumber = excelDateSerial(startYearFirstDay);
+        endYearLastDaySerialNumber = excelDateSerial(endYearLastDay);
+
+        if (startYear === 1900) { // Special handle. excel 1900 days = 365, 1900/12/31 SerialNumber = 366. so start add 1
+            startYearFirstDaySerialNumber += 1;
+        }
+    }
+
+    return {
+        days: totalDays,
+        yearDays: (endYearLastDaySerialNumber - startYearFirstDaySerialNumber + 1) / totalYear,
+    };
+}
+
+function getDaysByEuropean(startDateSerialNumber: number, endDateSerialNumber: number) {
+    const startDateDate = excelSerialToDate(startDateSerialNumber);
+    const startYear = startDateSerialNumber > 0 ? startDateDate.getUTCFullYear() : 1900;
+    const startMonth = startDateSerialNumber > 0 ? startDateDate.getUTCMonth() + 1 : 1;
+    let startDay = startDateSerialNumber > 0 ? startDateDate.getUTCDate() : 0;
+
+    const endDateDate = excelSerialToDate(endDateSerialNumber);
+    const endYear = endDateSerialNumber > 0 ? endDateDate.getUTCFullYear() : 1900;
+    const endMonth = endDateSerialNumber > 0 ? endDateDate.getUTCMonth() + 1 : 1;
+    let endDay = endDateSerialNumber > 0 ? endDateDate.getUTCDate() : 0;
+
+    // Starting dates and ending dates that occur on the 31st day of a month become equal to the 30th day of the same month.
+    if (startDay === 31) {
+        startDay = 30;
+    }
+
+    if (endDay === 31) {
+        endDay = 30;
+    }
+
+    const daysInYears = (endYear - startYear) * 360;
+    const daysInStartMonth = endDateSerialNumber >= startDateSerialNumber ? 30 - startDay : -startDay;
+    const daysInEndMonth = endDateSerialNumber >= startDateSerialNumber ? endDay : endDay - 30;
+    const daysInMidMonths = (endDateSerialNumber >= startDateSerialNumber ? (endMonth - startMonth - 1) : (endMonth - startMonth + 1)) * 30;
+    const totalDays = Math.abs(daysInYears + daysInStartMonth + daysInEndMonth + daysInMidMonths);
+
+    return {
+        days: totalDays,
+        yearDays: 360,
+    };
 }

@@ -14,52 +14,6 @@
  * limitations under the License.
  */
 
-import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../engine/value-object/base-value-object';
-import { ErrorType } from './error-type';
-
-export function checkVariantsErrorIsArrayOrBoolean(...variants: BaseValueObject[]) {
-    for (let i = 0; i < variants.length; i++) {
-        let variant = variants[i];
-
-        if (variant.isArray()) {
-            const rowCount = (variant as ArrayValueObject).getRowCount();
-            const columnCount = (variant as ArrayValueObject).getColumnCount();
-
-            if (rowCount > 1 || columnCount > 1) {
-                return {
-                    isError: true,
-                    errorObject: ErrorValueObject.create(ErrorType.VALUE),
-                };
-            }
-
-            variant = (variant as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        if (variant.isError()) {
-            return {
-                isError: true,
-                errorObject: variant,
-            };
-        }
-
-        if (variant.isBoolean()) {
-            return {
-                isError: true,
-                errorObject: ErrorValueObject.create(ErrorType.VALUE),
-            };
-        }
-
-        variants[i] = variant;
-    }
-
-    return {
-        isError: false,
-        variants,
-    };
-}
-
 export function calculatePMT(rate: number, nper: number, pv: number, fv: number, type: number): number {
     // type = 0  Payment at the end of the period
     // type = 1  Payment at the beginning of the period

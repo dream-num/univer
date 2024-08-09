@@ -20,6 +20,7 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 
 export class Db extends BaseFunction {
     override minParams = 4;
@@ -27,10 +28,10 @@ export class Db extends BaseFunction {
     override maxParams = 5;
 
     override calculate(cost: BaseValueObject, salvage: BaseValueObject, life: BaseValueObject, period: BaseValueObject, month?: BaseValueObject) {
-        month = month ?? NumberValueObject.create(12);
+        let _month = month ?? NumberValueObject.create(12);
 
-        if (month.isNull()) {
-            month = NumberValueObject.create(12);
+        if (_month.isNull()) {
+            _month = NumberValueObject.create(12);
         }
 
         const maxRowLength = Math.max(
@@ -38,7 +39,7 @@ export class Db extends BaseFunction {
             salvage.isArray() ? (salvage as ArrayValueObject).getRowCount() : 1,
             life.isArray() ? (life as ArrayValueObject).getRowCount() : 1,
             period.isArray() ? (period as ArrayValueObject).getRowCount() : 1,
-            month.isArray() ? (month as ArrayValueObject).getRowCount() : 1
+            _month.isArray() ? (_month as ArrayValueObject).getRowCount() : 1
         );
 
         const maxColumnLength = Math.max(
@@ -46,66 +47,34 @@ export class Db extends BaseFunction {
             salvage.isArray() ? (salvage as ArrayValueObject).getColumnCount() : 1,
             life.isArray() ? (life as ArrayValueObject).getColumnCount() : 1,
             period.isArray() ? (period as ArrayValueObject).getColumnCount() : 1,
-            month.isArray() ? (month as ArrayValueObject).getColumnCount() : 1
+            _month.isArray() ? (_month as ArrayValueObject).getColumnCount() : 1
         );
 
         const costArray = expandArrayValueObject(maxRowLength, maxColumnLength, cost, ErrorValueObject.create(ErrorType.NA));
         const salvageArray = expandArrayValueObject(maxRowLength, maxColumnLength, salvage, ErrorValueObject.create(ErrorType.NA));
         const lifeArray = expandArrayValueObject(maxRowLength, maxColumnLength, life, ErrorValueObject.create(ErrorType.NA));
         const periodArray = expandArrayValueObject(maxRowLength, maxColumnLength, period, ErrorValueObject.create(ErrorType.NA));
-        const monthArray = expandArrayValueObject(maxRowLength, maxColumnLength, month, ErrorValueObject.create(ErrorType.NA));
+        const monthArray = expandArrayValueObject(maxRowLength, maxColumnLength, _month, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = costArray.map((costObject, rowIndex, columnIndex) => {
-            let salvageObject = salvageArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let lifeObject = lifeArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let periodObject = periodArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let monthObject = monthArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const salvageObject = salvageArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const lifeObject = lifeArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const periodObject = periodArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const monthObject = monthArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (costObject.isString()) {
-                costObject = costObject.convertToNumberObjectValue();
+            const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(costObject, salvageObject, lifeObject, periodObject, monthObject);
+
+            if (isError) {
+                return errorObject as ErrorValueObject;
             }
 
-            if (costObject.isError()) {
-                return costObject;
-            }
+            const [_costObject, _salvageObject, _lifeObject, _periodObject, _monthObject] = variants as BaseValueObject[];
 
-            if (salvageObject.isString()) {
-                salvageObject = salvageObject.convertToNumberObjectValue();
-            }
-
-            if (salvageObject.isError()) {
-                return salvageObject;
-            }
-
-            if (lifeObject.isString()) {
-                lifeObject = lifeObject.convertToNumberObjectValue();
-            }
-
-            if (lifeObject.isError()) {
-                return lifeObject;
-            }
-
-            if (periodObject.isString()) {
-                periodObject = periodObject.convertToNumberObjectValue();
-            }
-
-            if (periodObject.isError()) {
-                return periodObject;
-            }
-
-            if (monthObject.isString()) {
-                monthObject = monthObject.convertToNumberObjectValue();
-            }
-
-            if (monthObject.isError()) {
-                return monthObject;
-            }
-
-            const costValue = +costObject.getValue();
-            const salvageValue = +salvageObject.getValue();
-            const lifeValue = +lifeObject.getValue();
-            let periodValue = +periodObject.getValue();
-            const monthValue = Math.floor(+monthObject.getValue());
+            const costValue = +_costObject.getValue();
+            const salvageValue = +_salvageObject.getValue();
+            const lifeValue = +_lifeObject.getValue();
+            let periodValue = +_periodObject.getValue();
+            const monthValue = Math.floor(+_monthObject.getValue());
 
             if (
                 costValue < 0 ||
@@ -125,43 +94,7 @@ export class Db extends BaseFunction {
 
             periodValue = Math.floor(periodValue);
 
-            const rate = +((1 - (salvageValue / costValue) ** (1 / lifeValue)).toFixed(3));
-
-            // Compute initial depreciation
-            const initial = (costValue * rate * monthValue) / 12;
-
-            // Compute total depreciation
-            let total = initial;
-            let current = 0;
-            const ceiling = periodValue === lifeValue ? lifeValue - 1 : periodValue;
-
-            for (let i = 2; i <= ceiling; i++) {
-                current = (costValue - total) * rate;
-                total += current;
-            }
-
-            let result;
-
-            // Depreciation for the first and last periods are special cases
-            if (periodValue === 1) {
-                // First period
-                result = initial;
-            } else if (periodValue === lifeValue) {
-                // Last period
-                result = (costValue - total) * rate;
-            } else {
-                result = current;
-            }
-
-            if (Number.isNaN(result) || !Number.isFinite(result)) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            if (rowIndex === 0 && columnIndex === 0) {
-                return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
-            } else {
-                return NumberValueObject.create(result);
-            }
+            return this._getResult(costValue, salvageValue, lifeValue, periodValue, monthValue, rowIndex, columnIndex);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -169,5 +102,53 @@ export class Db extends BaseFunction {
         }
 
         return resultArray;
+    }
+
+    private _getResult(
+        costValue: number,
+        salvageValue: number,
+        lifeValue: number,
+        periodValue: number,
+        monthValue: number,
+        rowIndex: number,
+        columnIndex: number
+    ): BaseValueObject {
+        const rate = +((1 - (salvageValue / costValue) ** (1 / lifeValue)).toFixed(3));
+
+        // Compute initial depreciation
+        const initial = (costValue * rate * monthValue) / 12;
+
+        // Compute total depreciation
+        let total = initial;
+        let current = 0;
+        const ceiling = periodValue === lifeValue ? lifeValue - 1 : periodValue;
+
+        for (let i = 2; i <= ceiling; i++) {
+            current = (costValue - total) * rate;
+            total += current;
+        }
+
+        let result;
+
+        // Depreciation for the first and last periods are special cases
+        if (periodValue === 1) {
+            // First period
+            result = initial;
+        } else if (periodValue === lifeValue) {
+            // Last period
+            result = (costValue - total) * rate;
+        } else {
+            result = current;
+        }
+
+        if (Number.isNaN(result) || !Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        if (rowIndex === 0 && columnIndex === 0) {
+            return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
+        } else {
+            return NumberValueObject.create(result);
+        }
     }
 }

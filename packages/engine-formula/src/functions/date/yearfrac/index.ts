@@ -16,7 +16,7 @@
 
 import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { checkVariantErrorIsArray } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -29,19 +29,19 @@ export class Yearfrac extends BaseFunction {
     override calculate(startDate: BaseValueObject, endDate: BaseValueObject, basis?: BaseValueObject) {
         let _basis = basis ?? NumberValueObject.create(0);
 
-        const _startDate = this._checkArrayError(startDate);
+        const _startDate = checkVariantErrorIsArray(startDate);
 
         if (_startDate.isError()) {
             return _startDate;
         }
 
-        const _endDate = this._checkArrayError(endDate);
+        const _endDate = checkVariantErrorIsArray(endDate);
 
         if (_endDate.isError()) {
             return _endDate;
         }
 
-        _basis = this._checkArrayError(_basis);
+        _basis = checkVariantErrorIsArray(_basis);
 
         if (_basis.isError()) {
             return _basis;
@@ -63,18 +63,14 @@ export class Yearfrac extends BaseFunction {
             return endDateSerialNumber;
         }
 
-        let basisValue = 0;
+        const basisValue = Math.floor(+_basis.getValue());
 
-        if (basis) {
-            basisValue = Math.floor(+basis.getValue());
+        if (Number.isNaN(basisValue)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
 
-            if (Number.isNaN(basisValue)) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (basisValue < 0 || basisValue > 4) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
+        if (basisValue < 0 || basisValue > 4) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const { days, yearDays } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basisValue);
@@ -82,26 +78,5 @@ export class Yearfrac extends BaseFunction {
         const result = days / yearDays;
 
         return NumberValueObject.create(result);
-    }
-
-    private _checkArrayError(variant: BaseValueObject): BaseValueObject {
-        let _variant = variant;
-
-        if (_variant.isArray()) {
-            const rowCount = (_variant as ArrayValueObject).getRowCount();
-            const columnCount = (_variant as ArrayValueObject).getColumnCount();
-
-            if (rowCount > 1 || columnCount > 1) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            _variant = (_variant as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        if (_variant.isError()) {
-            return _variant;
-        }
-
-        return _variant;
     }
 }

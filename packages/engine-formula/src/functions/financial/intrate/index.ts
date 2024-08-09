@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/financial';
 import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -27,35 +27,31 @@ export class Intrate extends BaseFunction {
     override maxParams = 5;
 
     override calculate(settlement: BaseValueObject, maturity: BaseValueObject, investment: BaseValueObject, redemption: BaseValueObject, basis?: BaseValueObject) {
-        basis = basis ?? NumberValueObject.create(0);
+        const _basis = basis ?? NumberValueObject.create(0);
 
-        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, investment, redemption, basis);
+        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, investment, redemption, _basis);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        settlement = (variants as BaseValueObject[])[0];
-        maturity = (variants as BaseValueObject[])[1];
-        investment = (variants as BaseValueObject[])[2];
-        redemption = (variants as BaseValueObject[])[3];
-        basis = (variants as BaseValueObject[])[4];
+        const [settlementObject, maturityObject, investmentObject, redemptionObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlement);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturity);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
         }
 
-        const investmentValue = +investment.getValue();
-        const redemptionValue = +redemption.getValue();
-        const basisValue = Math.floor(+basis.getValue());
+        const investmentValue = +investmentObject.getValue();
+        const redemptionValue = +redemptionObject.getValue();
+        const basisValue = Math.floor(+basisObject.getValue());
 
         if (Number.isNaN(investmentValue) || Number.isNaN(redemptionValue) || Number.isNaN(basisValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);

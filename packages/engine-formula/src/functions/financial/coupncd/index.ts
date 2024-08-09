@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/financial';
 import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -27,33 +27,30 @@ export class Coupncd extends BaseFunction {
     override maxParams = 4;
 
     override calculate(settlement: BaseValueObject, maturity: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject) {
-        basis = basis ?? NumberValueObject.create(0);
+        const _basis = basis ?? NumberValueObject.create(0);
 
-        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, frequency, basis);
+        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, frequency, _basis);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        settlement = (variants as BaseValueObject[])[0];
-        maturity = (variants as BaseValueObject[])[1];
-        frequency = (variants as BaseValueObject[])[2];
-        basis = (variants as BaseValueObject[])[3];
+        const [settlementObject, maturityObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlement);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const maturitySerialNumber = getDateSerialNumberByObject(maturity);
+        const maturitySerialNumber = getDateSerialNumberByObject(maturityObject);
 
         if (typeof maturitySerialNumber !== 'number') {
             return maturitySerialNumber;
         }
 
-        const frequencyValue = Math.floor(+frequency.getValue());
-        const basisValue = Math.floor(+basis.getValue());
+        const frequencyValue = Math.floor(+frequencyObject.getValue());
+        const basisValue = Math.floor(+basisObject.getValue());
 
         if (Number.isNaN(frequencyValue) || Number.isNaN(basisValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);

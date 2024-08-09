@@ -22,6 +22,7 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 
 export class Ppmt extends BaseFunction {
     override minParams = 4;
@@ -29,16 +30,16 @@ export class Ppmt extends BaseFunction {
     override maxParams = 6;
 
     override calculate(rate: BaseValueObject, per: BaseValueObject, nper: BaseValueObject, pv: BaseValueObject, fv?: BaseValueObject, type?: BaseValueObject) {
-        fv = fv ?? NumberValueObject.create(0);
-        type = type ?? NumberValueObject.create(0);
+        const _fv = fv ?? NumberValueObject.create(0);
+        const _type = type ?? NumberValueObject.create(0);
 
         const maxRowLength = Math.max(
             rate.isArray() ? (rate as ArrayValueObject).getRowCount() : 1,
             per.isArray() ? (per as ArrayValueObject).getRowCount() : 1,
             nper.isArray() ? (nper as ArrayValueObject).getRowCount() : 1,
             pv.isArray() ? (pv as ArrayValueObject).getRowCount() : 1,
-            fv.isArray() ? (fv as ArrayValueObject).getRowCount() : 1,
-            type.isArray() ? (type as ArrayValueObject).getRowCount() : 1
+            _fv.isArray() ? (_fv as ArrayValueObject).getRowCount() : 1,
+            _type.isArray() ? (_type as ArrayValueObject).getRowCount() : 1
         );
 
         const maxColumnLength = Math.max(
@@ -46,78 +47,38 @@ export class Ppmt extends BaseFunction {
             per.isArray() ? (per as ArrayValueObject).getColumnCount() : 1,
             nper.isArray() ? (nper as ArrayValueObject).getColumnCount() : 1,
             pv.isArray() ? (pv as ArrayValueObject).getColumnCount() : 1,
-            fv.isArray() ? (fv as ArrayValueObject).getColumnCount() : 1,
-            type.isArray() ? (type as ArrayValueObject).getColumnCount() : 1
+            _fv.isArray() ? (_fv as ArrayValueObject).getColumnCount() : 1,
+            _type.isArray() ? (_type as ArrayValueObject).getColumnCount() : 1
         );
 
         const rateArray = expandArrayValueObject(maxRowLength, maxColumnLength, rate, ErrorValueObject.create(ErrorType.NA));
         const perArray = expandArrayValueObject(maxRowLength, maxColumnLength, per, ErrorValueObject.create(ErrorType.NA));
         const nperArray = expandArrayValueObject(maxRowLength, maxColumnLength, nper, ErrorValueObject.create(ErrorType.NA));
         const pvArray = expandArrayValueObject(maxRowLength, maxColumnLength, pv, ErrorValueObject.create(ErrorType.NA));
-        const fvArray = expandArrayValueObject(maxRowLength, maxColumnLength, fv, ErrorValueObject.create(ErrorType.NA));
-        const typeArray = expandArrayValueObject(maxRowLength, maxColumnLength, type, ErrorValueObject.create(ErrorType.NA));
+        const fvArray = expandArrayValueObject(maxRowLength, maxColumnLength, _fv, ErrorValueObject.create(ErrorType.NA));
+        const typeArray = expandArrayValueObject(maxRowLength, maxColumnLength, _type, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = rateArray.map((rateObject, rowIndex, columnIndex) => {
-            let perObject = perArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let nperObject = nperArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let pvObject = pvArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let fvObject = fvArray.get(rowIndex, columnIndex) as BaseValueObject;
-            let typeObject = typeArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const perObject = perArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const nperObject = nperArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const pvObject = pvArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const fvObject = fvArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const typeObject = typeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (rateObject.isString()) {
-                rateObject = rateObject.convertToNumberObjectValue();
+            const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(rateObject, perObject, nperObject, pvObject, fvObject, typeObject);
+
+            if (isError) {
+                return errorObject as ErrorValueObject;
             }
 
-            if (rateObject.isError()) {
-                return rateObject;
-            }
+            const [_rateObject, _perObject, _nperObject, _pvObject, _fvObject, _typeObject] = variants as BaseValueObject[];
 
-            if (perObject.isString()) {
-                perObject = perObject.convertToNumberObjectValue();
-            }
-
-            if (perObject.isError()) {
-                return perObject;
-            }
-
-            if (nperObject.isString()) {
-                nperObject = nperObject.convertToNumberObjectValue();
-            }
-
-            if (nperObject.isError()) {
-                return nperObject;
-            }
-
-            if (pvObject.isString()) {
-                pvObject = pvObject.convertToNumberObjectValue();
-            }
-
-            if (pvObject.isError()) {
-                return pvObject;
-            }
-
-            if (fvObject.isString()) {
-                fvObject = fvObject.convertToNumberObjectValue();
-            }
-
-            if (fvObject.isError()) {
-                return fvObject;
-            }
-
-            if (typeObject.isString()) {
-                typeObject = typeObject.convertToNumberObjectValue();
-            }
-
-            if (typeObject.isError()) {
-                return typeObject;
-            }
-
-            const rateValue = +rateObject.getValue();
-            const perValue = +perObject.getValue();
-            const nperValue = +nperObject.getValue();
-            const pvValue = +pvObject.getValue();
-            const fvValue = +fvObject.getValue();
-            const typeValue = +typeObject.getValue();
+            const rateValue = +_rateObject.getValue();
+            const perValue = +_perObject.getValue();
+            const nperValue = +_nperObject.getValue();
+            const pvValue = +_pvObject.getValue();
+            const fvValue = +_fvObject.getValue();
+            const typeValue = +_typeObject.getValue();
 
             if (perValue < 1 || Math.floor(perValue) > Math.ceil(nperValue)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -137,7 +98,7 @@ export class Ppmt extends BaseFunction {
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
-            return (resultArray as ArrayValueObject).get(0, 0) as NumberValueObject;
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
         return resultArray;

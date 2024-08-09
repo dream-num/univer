@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/financial';
 import { ErrorType } from '../../../basics/error-type';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -32,11 +32,10 @@ export class Nominal extends BaseFunction {
             return errorObject as ErrorValueObject;
         }
 
-        effectRate = (variants as BaseValueObject[])[0];
-        npery = (variants as BaseValueObject[])[1];
+        const [effectRateObject, nperyObject] = variants as BaseValueObject[];
 
-        const effectRateValue = +effectRate.getValue();
-        let nperyValue = Math.floor(+npery.getValue());
+        const effectRateValue = +effectRateObject.getValue();
+        let nperyValue = Math.floor(+nperyObject.getValue());
 
         if (Number.isNaN(effectRateValue) || Number.isNaN(nperyValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);

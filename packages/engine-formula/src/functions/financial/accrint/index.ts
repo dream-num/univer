@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../basics/financial';
 import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -26,47 +26,50 @@ export class Accrint extends BaseFunction {
 
     override maxParams = 8;
 
-    override calculate(issue: BaseValueObject, firstInterest: BaseValueObject, settlement: BaseValueObject, rate: BaseValueObject, par: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject, calcMethod?: BaseValueObject) {
-        basis = basis ?? NumberValueObject.create(0);
-        calcMethod = calcMethod ?? BooleanValueObject.create(true);
+    override calculate(
+        issue: BaseValueObject,
+        firstInterest: BaseValueObject,
+        settlement: BaseValueObject,
+        rate: BaseValueObject,
+        par: BaseValueObject,
+        frequency: BaseValueObject,
+        basis?: BaseValueObject,
+        calcMethod?: BaseValueObject
+    ) {
+        const _basis = basis ?? NumberValueObject.create(0);
+        const _calcMethod = calcMethod ?? BooleanValueObject.create(true);
 
-        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(issue, firstInterest, settlement, rate, par, frequency, basis);
+        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(issue, firstInterest, settlement, rate, par, frequency, _basis);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        issue = (variants as BaseValueObject[])[0];
-        firstInterest = (variants as BaseValueObject[])[1];
-        settlement = (variants as BaseValueObject[])[2];
-        rate = (variants as BaseValueObject[])[3];
-        par = (variants as BaseValueObject[])[4];
-        frequency = (variants as BaseValueObject[])[5];
-        basis = (variants as BaseValueObject[])[6];
+        const [issueObject, firstInterestObject, settlementObject, rateObject, parObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
-        const issueSerialNumber = getDateSerialNumberByObject(issue);
+        const issueSerialNumber = getDateSerialNumberByObject(issueObject);
 
         if (typeof issueSerialNumber !== 'number') {
             return issueSerialNumber;
         }
 
-        const firstInterestSerialNumber = getDateSerialNumberByObject(firstInterest);
+        const firstInterestSerialNumber = getDateSerialNumberByObject(firstInterestObject);
 
         if (typeof firstInterestSerialNumber !== 'number') {
             return firstInterestSerialNumber;
         }
 
-        const settlementSerialNumber = getDateSerialNumberByObject(settlement);
+        const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
 
         if (typeof settlementSerialNumber !== 'number') {
             return settlementSerialNumber;
         }
 
-        const rateValue = +rate.getValue();
-        const parValue = +par.getValue();
-        const frequencyValue = Math.floor(+frequency.getValue());
-        const basisValue = Math.floor(+basis.getValue());
-        const calcMethodValue = +calcMethod.getValue();
+        const rateValue = +rateObject.getValue();
+        const parValue = +parObject.getValue();
+        const frequencyValue = Math.floor(+frequencyObject.getValue());
+        const basisValue = Math.floor(+basisObject.getValue());
+        const calcMethodValue = +_calcMethod.getValue();
 
         if (Number.isNaN(rateValue) || Number.isNaN(parValue) || Number.isNaN(frequencyValue) || Number.isNaN(basisValue) || Number.isNaN(calcMethodValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -83,6 +86,19 @@ export class Accrint extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        return this._getResult(issueSerialNumber, firstInterestSerialNumber, settlementSerialNumber, rateValue, parValue, frequencyValue, basisValue, calcMethodValue);
+    }
+
+    private _getResult(
+        issueSerialNumber: number,
+        firstInterestSerialNumber: number,
+        settlementSerialNumber: number,
+        rateValue: number,
+        parValue: number,
+        frequencyValue: number,
+        basisValue: number,
+        calcMethodValue: number
+    ): NumberValueObject {
         let TwoDateDays;
 
         if (Math.floor(settlementSerialNumber) >= Math.floor(firstInterestSerialNumber) && !calcMethodValue) {
@@ -106,7 +122,7 @@ export class Accrint extends BaseFunction {
             }
         }
 
-        // TO DO  now result is error
+        // TODO: The results are not very accurate now.
         const result = parValue * (rateValue / frequencyValue) * accruedDaysSum;
 
         return NumberValueObject.create(result);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
+import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -70,16 +70,17 @@ export class Coupnum extends BaseFunction {
         const settlementDate = excelSerialToDate(settlementSerialNumber);
         const coupDate = excelSerialToDate(maturitySerialNumber);
 
-        coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
-
-        if (coupDate < settlementDate) {
-            coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
-        }
-
         // eslint-disable-next-line
         while (coupDate > settlementDate) {
             coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequencyValue);
             result++;
+        }
+
+        const coupDateSerialNumber = excelDateSerial(coupDate);
+
+        // special handle for excel
+        if (coupDateSerialNumber < 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         return NumberValueObject.create(result);

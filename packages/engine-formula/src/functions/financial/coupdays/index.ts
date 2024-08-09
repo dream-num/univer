@@ -88,7 +88,12 @@ export class Coupdays extends BaseFunction {
 
             const afterSettlementDateSerialNumber = excelDateSerial(coupDate);
 
-            result = afterSettlementDateSerialNumber - beforeSettlementDateSerialNumber;
+            // special handle for excel
+            if (beforeSettlementDateSerialNumber < 0 && frequencyValue === 1) {
+                result = 365;
+            } else {
+                result = afterSettlementDateSerialNumber - beforeSettlementDateSerialNumber;
+            }
         } else if (basisValue === 3) {
             result = 365 / frequencyValue;
         } else {

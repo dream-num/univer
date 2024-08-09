@@ -103,6 +103,10 @@ export class Amorlinc extends BaseFunction {
         const firstPeriodYearsFraction = days / yearDays;
         const life = Math.ceil(totalDepreciation / baseDepreciation - firstPeriodYearsFraction);
 
+        if (life < 0) {
+            return NumberValueObject.create(costValue);
+        }
+
         let result = baseDepreciation;
 
         if (periodValue === 0) {

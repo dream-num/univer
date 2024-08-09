@@ -79,7 +79,12 @@ export class Coupdaybs extends BaseFunction {
             coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequencyValue);
         }
 
-        const coupDateSerialNumber = excelDateSerial(coupDate);
+        let coupDateSerialNumber = excelDateSerial(coupDate);
+
+        // special handle for excel
+        if (coupDateSerialNumber < 0) {
+            coupDateSerialNumber = 0;
+        }
 
         const { days } = getTwoDateDaysByBasis(coupDateSerialNumber, settlementSerialNumber, basisValue);
 

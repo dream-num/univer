@@ -78,7 +78,7 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
-import { IEditorService, KeyCode } from '@univerjs/ui';
+import { IEditorService, ILayoutService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
 import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
@@ -118,6 +118,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
 
     constructor(
         private readonly _renderContext: IRenderContext<UnitModel>,
+        @ILayoutService private readonly _layoutService: ILayoutService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
@@ -431,14 +432,27 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             return;
         }
 
+        function pxToNum(width: string): number {
+            return Number.parseInt(width.replace('px', ''));
+        }
+
+        const engine = this._renderContext.engine;
+        const canvasElement = engine.getCanvasElement();
+        const canvasClientRect = canvasElement.getBoundingClientRect();
+
+        // We should take the scale into account when canvas is scaled by CSS.
+        const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+        const { top, left, width } = canvasClientRect; // real width affected by scale
+        const scaleAdjust = width / widthOfCanvas;
+
         let { startX, startY } = positionFromEditRectState;
 
         startX += canvasOffset.left;
         startY += canvasOffset.top;
 
-        const { document: documentComponent, scene, engine: docEngine } = editorObject;
+        const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
 
-        const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = editorScene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
 
         const clientHeight =
             document.body.clientHeight -
@@ -475,15 +489,15 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
 
         // physicHeight = editorHeight;
 
-        this._addBackground(scene, editorWidth / scaleX, editorHeight / scaleY, fill);
+        this._addBackground(editorScene, editorWidth / scaleX, editorHeight / scaleY, fill);
 
-        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
+        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = editorScene.getPrecisionScale();
 
-        scene.transformByState({
-            width: editorWidth / scaleX,
-            height: editorHeight / scaleY,
-            scaleX,
-            scaleY,
+        editorScene.transformByState({
+            width: editorWidth * scaleAdjust / scaleX,
+            height: editorHeight * scaleAdjust / scaleY,
+            scaleX: scaleX * scaleAdjust,
+            scaleY: scaleY * scaleAdjust,
         });
 
         documentComponent.resize(editorWidth / scaleX, editorHeight / scaleY);
@@ -500,17 +514,17 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             );
         }, 0);
 
-        // const canvasElement = this._context.engine.getCanvasElement();
-        // const canvasBoundingRect = canvasElement.getBoundingClientRect();
-        // startX += canvasBoundingRect.left;
-        // startY += canvasBoundingRect.top;
+        const contentBoundingRect = this._layoutService.getContentElement().getBoundingClientRect();
+        const canvasBoundingRect = canvasElement.getBoundingClientRect();
+        startX = startX * scaleAdjust + (canvasBoundingRect.left - contentBoundingRect.left);
+        startY = startY * scaleAdjust + (canvasBoundingRect.top - contentBoundingRect.top);
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
             startX,
             startY,
-            endX: editorWidth + startX,
-            endY: physicHeight + startY,
+            endX: editorWidth * scaleAdjust + startX,
+            endY: physicHeight * scaleAdjust + startY,
             show: true,
         });
     }

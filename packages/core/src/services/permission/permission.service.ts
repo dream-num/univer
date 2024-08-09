@@ -58,7 +58,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         const subject = permissionPoint.getValue() as IPermissionPoint<T>;
         subject.value = value;
         subject.status = PermissionStatus.DONE;
-        permissionPoint.next({ ...subject });
+        permissionPoint.next(subject);
         this._permissionPointUpdate$.next(subject);
     };
 

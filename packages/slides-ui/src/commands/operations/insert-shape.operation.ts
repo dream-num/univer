@@ -33,10 +33,10 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
             id,
             zIndex: 20,
             left: 378,
-            top: 0,
-            width: 204,
-            height: 144,
-            title: 'mask',
+            top: 142,
+            width: 250,
+            height: 250,
+            title: id,
             description: '',
             type: PageElementType.SHAPE,
             shape: {
@@ -44,7 +44,7 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {
-                        rgb: 'rgb(0,79,86)',
+                        rgb: 'rgb(0,0,255)',
                     },
                 },
             },

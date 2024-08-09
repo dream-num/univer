@@ -17,11 +17,12 @@
 import React, { useEffect, useState } from 'react';
 
 import type { Nullable } from '@univerjs/core';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import { InputNumber } from '@univerjs/design';
 import type { BaseObject, IChangeObserverConfig, Image, Rect, RichText } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
+import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import styles from './index.module.less';
 
 interface IProps {
@@ -33,6 +34,7 @@ export default function TransformPanel(props: IProps) {
 
     const localeService = useDependency(LocaleService);
     const canvasView = useDependency(CanvasView);
+    const commandService = useDependency(ICommandService);
 
     const page = canvasView.getRenderUnitByPageId(unitId);
     const scene = page?.scene;
@@ -197,6 +199,12 @@ export default function TransformPanel(props: IProps) {
     function handleWidthChange(val: number | null) {
         if (!val || !object) return;
 
+        commandService.executeCommand(UpdateSlideElementOperation.id, {
+            oKey: object.oKey,
+            props: {
+                width: val,
+            },
+        });
         object?.resize(val, object.height);
         setWidth(val);
         transformer?.refreshControls();
@@ -205,6 +213,12 @@ export default function TransformPanel(props: IProps) {
     function handleHeightChange(val: number | null) {
         if (!val || !object) return;
 
+        commandService.executeCommand(UpdateSlideElementOperation.id, {
+            oKey: object.oKey,
+            props: {
+                height: val,
+            },
+        });
         object?.resize(object.width, val);
         setHeight(val);
         transformer?.refreshControls();
@@ -213,6 +227,12 @@ export default function TransformPanel(props: IProps) {
     function handleXChange(val: number | null) {
         if (!val || !object) return;
 
+        commandService.executeCommand(UpdateSlideElementOperation.id, {
+            oKey: object.oKey,
+            props: {
+                left: val,
+            },
+        });
         object?.translate(val, object.top);
         setXPosition(val);
         transformer?.refreshControls();
@@ -221,14 +241,26 @@ export default function TransformPanel(props: IProps) {
     function handleYChange(val: number | null) {
         if (!val || !object) return;
 
+        commandService.executeCommand(UpdateSlideElementOperation.id, {
+            oKey: object.oKey,
+            props: {
+                right: val,
+            },
+        });
         object?.translate(object.left, val);
         setYPosition(val);
         transformer?.refreshControls();
     }
 
     function handleChangeRotation(val: number | null) {
-        if (!val) return;
+        if (!val || !object) return;
 
+        commandService.executeCommand(UpdateSlideElementOperation.id, {
+            oKey: object.oKey,
+            props: {
+                angle: val,
+            },
+        });
         object?.transformByState({
             angle: val,
         });

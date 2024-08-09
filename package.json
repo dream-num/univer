@@ -65,7 +65,7 @@
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "eslint-plugin-react": "^7.35.0",
-        "eslint-plugin-react-hooks": "^4.6.2",
+        "eslint-plugin-react-hooks": "5.1.0-rc-107a2f8c3e-20240617",
         "eslint-plugin-react-refresh": "^0.4.9",
         "husky": "^9.1.4",
         "lint-staged": "^15.2.8",

@@ -58,13 +58,20 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
         body: {
             dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
+            tables: [],
             textRuns: [],
             paragraphs: [
                 {
                     startIndex: 0,
                 },
             ],
+            sectionBreaks: [
+                {
+                    startIndex: 1,
+                }
+            ]
         },
+        tableSource: {},
         documentStyle: {
             documentFlavor: DocumentFlavor.MODERN,
         },

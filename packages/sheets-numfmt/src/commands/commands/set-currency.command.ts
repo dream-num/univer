@@ -22,6 +22,33 @@ import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { SetNumfmtCommand } from './set-numfmt.command';
 
+// Mapping of country codes to currency symbols, including Euro countries
+const currencyMap: Record<string, string> = {
+    "US": "$",  // United States Dollar
+    "CA": "C$", // Canadian Dollar
+    "GB": "£",  // British Pound Sterling
+    "JP": "¥",  // Japanese Yen
+    "IN": "₹",  // Indian Rupee
+    "AU": "A$", // Australian Dollar
+    "CN": "¥",  // Chinese Yuan
+    "KR": "₩",  // South Korean Won
+    "RU": "₽",  // Russian Ruble
+    // Euro countries
+    "AT": "€", "BE": "€", "CY": "€", "EE": "€", "FI": "€", "FR": "€",
+    "DE": "€", "GR": "€", "IE": "€", "IT": "€", "LV": "€", "LT": "€",
+    "LU": "€", "MT": "€", "NL": "€", "PT": "€", "SK": "€", "SI": "€", "ES": "€",
+    // Add more mappings as needed
+};
+
+function getCurrencySymbol(): string {
+    // Get the user's locale
+    const userLocale: string = navigator.language || (navigator as any).userLanguage;
+    const regionCode: string = userLocale.split('-')[1] || userLocale.split('-')[0];
+
+    // Return the corresponding currency symbol or default to USD
+    return currencyMap[regionCode] || "$";
+}
+
 export const SetCurrencyCommand: ICommand = {
     id: 'sheet.command.numfmt.set.currency',
     type: CommandType.COMMAND,
@@ -35,7 +62,7 @@ export const SetCurrencyCommand: ICommand = {
         }
         const values: ISetNumfmtCommandParams['values'] = [];
 
-        const suffix = CURRENCYFORMAT[0].suffix('¥');
+        const suffix = CURRENCYFORMAT[0].suffix(getCurrencySymbol());
 
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {

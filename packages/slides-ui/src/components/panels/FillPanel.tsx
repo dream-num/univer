@@ -17,12 +17,13 @@
 import React from 'react';
 
 import type { Nullable } from '@univerjs/core';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import { ColorPicker, Dropdown } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
 import { CanvasView } from '@univerjs/slides';
 import type { Rect } from '@univerjs/engine-render';
+import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import styles from './index.module.less';
 
 interface IProps {
@@ -34,6 +35,7 @@ export default function ArrangePanel(props: IProps) {
 
     const localeService = useDependency(LocaleService);
     const canvasView = useDependency(CanvasView);
+    const commandService = useDependency(ICommandService);
 
     const page = canvasView.getRenderUnitByPageId(unitId);
     const scene = page?.scene;
@@ -49,7 +51,21 @@ export default function ArrangePanel(props: IProps) {
     const [color, setColor] = React.useState<string>(object.fill?.toString() ?? '');
 
     function handleChangeColor(color: string) {
-        object?.setProps({ fill: color });
+        object?.setProps({
+            fill: color,
+        });
+        commandService.executeCommand(UpdateSlideElementOperation.id, {
+            oKey: object?.oKey,
+            props: {
+                shape: {
+                    shapeProperties: {
+                        shapeBackgroundFill: {
+                            rgb: color,
+                        },
+                    },
+                },
+            },
+        });
         setColor(color);
     }
 

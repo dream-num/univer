@@ -17,12 +17,13 @@
 import React from 'react';
 
 import type { Nullable } from '@univerjs/core';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import { Button } from '@univerjs/design';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
 import { CanvasView } from '@univerjs/slides';
 import type { Image, Rect, RichText } from '@univerjs/engine-render';
+import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
 import styles from './index.module.less';
 
 enum ArrangeTypeEnum {
@@ -41,6 +42,7 @@ export default function ArrangePanel(props: IProps) {
 
     const localeService = useDependency(LocaleService);
     const canvasView = useDependency(CanvasView);
+    const commandService = useDependency(ICommandService);
 
     const page = canvasView.getRenderUnitByPageId(unitId);
     const scene = page?.scene;
@@ -64,15 +66,27 @@ export default function ArrangePanel(props: IProps) {
             return [minZIndex, maxZIndex];
         }, [0, 0]);
 
+        let zIndex = object.zIndex;
         if (arrangeType === ArrangeTypeEnum.back) {
-            object.setProps({ zIndex: minZIndex - 1 });
+            zIndex = minZIndex - 1;
         } else if (arrangeType === ArrangeTypeEnum.front) {
-            object.setProps({ zIndex: maxZIndex + 1 });
+            zIndex = maxZIndex + 1;
         } else if (arrangeType === ArrangeTypeEnum.forward) {
-            object.setProps({ zIndex: object.zIndex + 1 });
+            zIndex = object.zIndex + 1;
         } else if (arrangeType === ArrangeTypeEnum.backward) {
-            object.setProps({ zIndex: object.zIndex - 1 });
+            zIndex = object.zIndex - 1;
         }
+
+        object.setProps({
+            zIndex,
+        });
+
+        commandService.executeCommand(UpdateSlideElementOperation.id, {
+            oKey: object?.oKey,
+            props: {
+                zIndex,
+            },
+        });
     };
 
     return (

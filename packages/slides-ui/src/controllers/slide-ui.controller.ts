@@ -34,6 +34,7 @@ import { EditorContainer } from '../views/editor-container';
 import { SlideSideBar } from '../components/slide-bar/SlideBar';
 import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
+import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
@@ -104,6 +105,7 @@ export class SlidesUIController extends Disposable {
             InsertSlideShapeRectangleOperation,
             ToggleSlideEditSidebarOperation,
             DeleteSlideElementOperation,
+            UpdateSlideElementOperation,
 
             // commands for editor
             SetTextEditArrowOperation,

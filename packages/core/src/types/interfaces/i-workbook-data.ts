@@ -20,6 +20,8 @@ import type { IExtraModelData } from './i-extra-model-data';
 import type { IStyleData } from './i-style-data';
 import type { IWorksheetData } from './i-worksheet-data';
 
+export type Resources = Array<{ id?: string; name: string; data: string }>;
+
 /**
  * Properties of a workbook's configuration
  */
@@ -53,5 +55,5 @@ export interface IWorkbookData extends IExtraModelData {
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
 
     // The type of data depends on how the plug-in is defined
-    resources?: Array<{ id?: string; name: string; data: string }>;
+    resources?: Resources;
 }

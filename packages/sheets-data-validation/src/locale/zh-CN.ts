@@ -37,6 +37,7 @@ const locale = {
             removeAll: '全部删除',
             add: '新建规则',
             range: '应用范围',
+            rangeError: '请输入合法的应用范围',
             type: '条件类型',
             options: '高级设置',
             operator: '数据',

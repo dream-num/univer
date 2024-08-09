@@ -39,6 +39,7 @@ const locale: typeof zhCN = {
             removeAll: '全部刪除',
             add: '新建規則',
             range: '應用範圍',
+            rangeError: '應用範圍不合法',
             type: '條件型別',
             options: '進階設定',
             operator: '資料',

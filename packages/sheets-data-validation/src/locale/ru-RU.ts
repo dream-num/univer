@@ -39,6 +39,7 @@ const locale: typeof zhCN = {
             removeAll: 'Удалить все',
             add: 'добавить правило',
             range: 'Диапазоны',
+            rangeError: 'Диапазоны не являются законными',
             type: 'Тип',
             options: 'Дополнительные параметры',
             operator: 'Оператор',

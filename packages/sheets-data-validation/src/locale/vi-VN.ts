@@ -39,6 +39,7 @@ const locale: typeof zhCN = {
             removeAll: 'Xóa tất cả',
             add: 'Tạo quy tắc mới',
             range: 'Phạm vi áp dụng',
+            rangeError: 'Phạm vi không hợp pháp',
             type: 'Loại điều kiện',
             options: 'Cài đặt nâng cao',
             operator: 'Dữ liệu',

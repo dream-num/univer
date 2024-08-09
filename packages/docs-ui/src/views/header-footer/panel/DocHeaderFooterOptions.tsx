@@ -157,7 +157,12 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
         const documentStyle = docDataModel?.getSnapshot().documentStyle;
 
         if (documentStyle) {
-            const { marginHeader, marginFooter, useFirstPageHeaderFooter, evenAndOddHeaders } = documentStyle;
+            const {
+                marginHeader = 0,
+                marginFooter = 0,
+                useFirstPageHeaderFooter = BooleanNumber.FALSE,
+                evenAndOddHeaders = BooleanNumber.FALSE,
+            } = documentStyle;
 
             setOptions({
                 marginHeader,
@@ -166,7 +171,6 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 evenAndOddHeaders,
             });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [unitId]);
 
     return (

@@ -46,6 +46,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         this._initCommandExecutedListener();
         this._initRenderRefresher();
 
+        // TODO: do not use setTimeout.
         setTimeout(() => this.updateViewZoom(1, true), 20);
     }
 

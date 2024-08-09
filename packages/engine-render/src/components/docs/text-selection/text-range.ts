@@ -372,7 +372,9 @@ export class TextRange implements IDocRange {
 
         this._setCursorList(cursorList);
 
-        borderBoxPointGroup.length > 0 && this._createOrUpdateRange(borderBoxPointGroup, docsLeft, docsTop);
+        if (borderBoxPointGroup.length > 0) {
+            this._createOrUpdateRange(borderBoxPointGroup, docsLeft, docsTop);
+        }
     }
 
     private _isEmpty() {

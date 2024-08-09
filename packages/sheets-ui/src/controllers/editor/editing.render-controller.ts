@@ -1094,11 +1094,13 @@ export function getCellDataByInput(
     return cellData;
 }
 
-function isRichText(body: IDocumentBody) {
+export function isRichText(body: IDocumentBody) {
     const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
 
+    const bodyNoLineBreak = body.dataStream.replace('\r\n', '');
+
     return (
-        textRuns.some((textRun) => textRun.ts && !Tools.isEmptyObject(textRun.ts)) ||
+        textRuns.some((textRun) => textRun.ts && (textRun.st !== 0 || textRun.ed !== bodyNoLineBreak.length)) ||
         paragraphs.some((paragraph) => paragraph.bullet) ||
         paragraphs.length >= 2 ||
         Boolean(customRanges?.length) ||

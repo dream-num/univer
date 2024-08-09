@@ -15,11 +15,11 @@
  */
 
 import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
-import { CellValueType, IContextService, IResourceLoaderService, LocaleService, LocaleType } from '@univerjs/core';
+import { CellValueType, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getCellDataByInput } from '../editing.render-controller';
+import { getCellDataByInput, isRichText } from '../editing.render-controller';
 import { normalizeString } from '../../utils/char-tools';
 import { createTestBed } from './create-test-bed';
 import { IMockFunctionService, MockFunctionService } from './mock-function.service';
@@ -268,6 +268,39 @@ describe('Test EndEditController', () => {
             // eslint-disable-next-line no-irregular-whitespace
             // '＝ｉｆ（１，“Ａ”，“false　”）'
             // '＝Ａ１＋Ｂ２－Ｃ３＊（Ｄ４＞＝Ｅ５）／（Ｆ６＜Ｇ７）'
+        });
+
+        it('test isRichText util', () => {
+            const cellBody = {
+                dataStream: '11111111\r\n',
+                textRuns: [
+                    {
+                        ts: {
+                            fs: 18,
+                        },
+                        st: 0,
+                        ed: 8,
+                    },
+                ],
+                paragraphs: [
+                    {
+                        startIndex: 8,
+                        paragraphStyle: {
+                            horizontalAlign: 0,
+                        },
+                    },
+                ],
+                customRanges: [],
+                customDecorations: [],
+            };
+            const isRichTextRes = isRichText(cellBody);
+            // textRuns acts on the entire string
+            expect(isRichTextRes).toBe(false);
+            const anotherCellBody = Tools.deepClone(cellBody);
+            anotherCellBody.dataStream = `111${anotherCellBody.dataStream}`;
+            // textRuns works on parts of strings
+            const isRichTextRes2 = isRichText(anotherCellBody);
+            expect(isRichTextRes2).toBe(true);
         });
     });
 });

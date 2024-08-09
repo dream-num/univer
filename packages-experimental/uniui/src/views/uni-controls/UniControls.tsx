@@ -41,11 +41,11 @@ export const UniControlButton = (props: { tooltips: string; children?: React.Rea
 };
 
 export const MAX_ZOOM = 2;
-export const MIN_ZOOM = 0.5;
+export const MIN_ZOOM = 0.1;
 export const DEFAULT_ZOOM = 1;
 
 // 0 means fit view
-const shortcuts = [50, 75, 100, 125, 150, 175, 200, 0];
+const shortcuts = [10, 50, 75, 100, 125, 150, 200, 0];
 
 export enum UniControlItem {
     AI = 'AI',

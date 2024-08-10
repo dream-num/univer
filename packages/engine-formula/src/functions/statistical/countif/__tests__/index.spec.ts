@@ -133,7 +133,7 @@ describe('Test countif function', () => {
 
             const criteria = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    ['=1', '= ', '=1.23', '=true', '=false', '='],
+                    ['=1', '= ', '=1.23', '=true', '=false', '=0'],
                     ['=0', '=100', '=2.34', '=test', '=-3', ErrorType.NAME],
                 ]),
                 rowCount: 2,
@@ -145,7 +145,10 @@ describe('Test countif function', () => {
             });
 
             const resultObject = testFunction.calculate(range, criteria);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1]]);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([
+                [1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1],
+            ]);
         });
     });
 });

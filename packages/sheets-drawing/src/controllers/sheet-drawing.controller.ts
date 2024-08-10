@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, IResourceManagerService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IResourceManagerService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IDrawingSubunitMap } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { filter, first } from 'rxjs/operators';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
@@ -27,32 +26,14 @@ export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
 @OnLifecycle(LifecycleStages.Starting, SheetsDrawingLoadController)
 export class SheetsDrawingLoadController extends Disposable {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService
-    ) {
-        super();
-
-        this.disposeWithMe(this._commandService.registerCommand(SetDrawingApplyMutation));
-    }
-}
-
-@OnLifecycle(LifecycleStages.Starting, SheetsDrawingController)
-export class SheetsDrawingController extends Disposable {
-    constructor(
+        @ICommandService private readonly _commandService: ICommandService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IResourceManagerService private _resourceManagerService: IResourceManagerService,
-        @Inject(LifecycleService) private _lifecycleService: LifecycleService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
+        @IResourceManagerService private _resourceManagerService: IResourceManagerService
     ) {
         super();
-
-        this._init();
-    }
-
-    private _init(): void {
         this._initSnapshot();
-
-        this._drawingInitializeListener();
+        this.disposeWithMe(this._commandService.registerCommand(SetDrawingApplyMutation));
     }
 
     private _initSnapshot() {
@@ -89,14 +70,5 @@ export class SheetsDrawingController extends Disposable {
             })
         );
     }
-
-    private _drawingInitializeListener() {
-        this._lifecycleService.lifecycle$.pipe(filter((e) => e === LifecycleStages.Steady), first()).subscribe(() => {
-            const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
-            if (!unitId) {
-                return;
-            }
-            this._sheetDrawingService.initializeNotification(unitId);
-        });
-    }
 }
+

@@ -16,8 +16,10 @@
 
 import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { SHEET_DRAWING_PLUGIN, SheetsDrawingController, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SHEET_DRAWING_PLUGIN, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
 import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
+import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
 
 export class UniverSheetsDrawingPlugin extends Plugin {
     static override pluginName = SHEET_DRAWING_PLUGIN;
@@ -25,7 +27,8 @@ export class UniverSheetsDrawingPlugin extends Plugin {
 
     constructor(
         private readonly _config: unknown,
-        @Inject(Injector) override readonly _injector: Injector
+        @Inject(Injector) override readonly _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
     }
@@ -33,8 +36,13 @@ export class UniverSheetsDrawingPlugin extends Plugin {
     override onStarting(): void {
         ([
             [SheetsDrawingLoadController],
-            [SheetsDrawingController],
             [ISheetDrawingService, { useClass: SheetDrawingService }],
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
+    }
+
+    override onRendered(): void {
+        ([[SheetsDrawingRenderController]] as Dependency[]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
+        });
     }
 }

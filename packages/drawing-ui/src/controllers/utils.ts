@@ -56,8 +56,8 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
     );
 }
 
-export function getCurrentUnitInfo(currentUniverService: IUniverInstanceService) {
-    const current = currentUniverService.getFocusedUnit();
+export function getCurrentUnitInfo(currentUniverService: IUniverInstanceService, propUnitId?: string) {
+    const current = propUnitId ? currentUniverService.getUnit(propUnitId) : currentUniverService.getFocusedUnit();
     if (current == null) {
         return;
     }

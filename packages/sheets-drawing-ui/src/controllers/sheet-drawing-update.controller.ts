@@ -25,7 +25,7 @@ import { SheetsSelectionsService } from '@univerjs/sheets';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
-import type { IRenderContext } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
@@ -37,7 +37,7 @@ import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawi
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
-export class SheetDrawingUpdateController extends Disposable {
+export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
     private readonly _workbookSelections: WorkbookSelections;
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -368,7 +368,7 @@ export class SheetDrawingUpdateController extends Disposable {
         (params).forEach((param) => {
             const drawingParam = this._sheetDrawingService.getDrawingByParam(param) as ISheetDrawing;
 
-            if (drawingParam == null) {
+            if (drawingParam == null || drawingParam.unitId !== this._context.unitId) {
                 return;
             }
 

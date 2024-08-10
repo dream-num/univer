@@ -17,7 +17,7 @@
 import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
 import { UniFormulaPopup } from '../views/components/DocFormulaPopup';
-import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand, ShowFormulaPopupOperation } from '../commands/operations/doc.operation';
+import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand, ShowFormulaPopupOperation } from '../commands/operations/operation';
 
 @OnLifecycle(LifecycleStages.Steady, UniFormulaUniController)
 export class UniFormulaUniController extends Disposable {

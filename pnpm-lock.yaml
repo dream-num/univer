@@ -499,6 +499,9 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../../packages/docs-ui
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../packages/engine-render
       '@univerjs/icons':
         specifier: ^0.1.72
         version: 0.1.72(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

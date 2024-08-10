@@ -55,7 +55,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ISlideEditorBridgeService) private readonly _editorBridgeService: ISlideEditorBridgeService,
+        @ISlideEditorBridgeService private readonly _editorBridgeService: ISlideEditorBridgeService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(CanvasView) private readonly _canvasView: CanvasView
@@ -161,6 +161,9 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         if (!slideData) return false;
         curRichText.refreshDocumentByDocData();
         curRichText.resizeToContentSize();
+
+        this._editorBridgeService.endEditing$.next(curRichText);
+
         this._curRichText = null;
     }
 

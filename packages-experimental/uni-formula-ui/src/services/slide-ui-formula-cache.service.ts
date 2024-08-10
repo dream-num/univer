@@ -14,33 +14,63 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
+import { CustomRangeType, Disposable } from '@univerjs/core';
 import { IUniFormulaService } from '@univerjs/uni-formula';
+import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
+import type { RichText } from '@univerjs/engine-render';
 import type { IAddSlideUniFormulaCommandParams } from '../commands/commands/slide.command';
 import type { UniFormulaService } from './uni-formula.service';
 
 export class SlideUIFormulaCacheService extends Disposable {
-    private readonly _caches: IAddSlideUniFormulaCommandParams[] = [];
+    private readonly _caches: Map<string, IAddSlideUniFormulaCommandParams> = new Map();
 
     constructor(
+        @ISlideEditorBridgeService private readonly _editorBridgeService: ISlideEditorBridgeService,
         @IUniFormulaService private readonly _uniFormulaService: UniFormulaService
     ) {
         super();
+
+        this._editorBridgeService.endEditing$.subscribe((richText) => this._checkApplyCache(richText));
     }
 
-    writeCache(params: IAddSlideUniFormulaCommandParams) {
-        if (this._caches.length && this._caches[this._caches.length - 1].elementId === params.elementId) {
-            this._caches.length = 0;
+    writeCache(rangeId: string, params: IAddSlideUniFormulaCommandParams) {
+        if (this._caches.size && this._caches.values().next().value.unitId !== params.unitId) {
+            this.clearCache();
         }
 
-        this._caches.push(params);
+        this._caches.set(rangeId, params);
     }
 
-    applyCache() {
+    private _checkApplyCache(richText: RichText) {
+        const document = richText.documentData;
+        const customRanges = document.body?.customRanges;
+        if (!customRanges || customRanges.length === 0) {
+            this.clearCache();
+            return;
+        };
 
+        // Check if there are custom ranges in the rich text. If there are, we would write apply the cache
+        // to the uni formula service
+        customRanges.forEach((range) => {
+            if (range.rangeType === CustomRangeType.UNI_FORMULA) {
+                const cache = this._caches.get(range.rangeId);
+                if (cache) {
+                    this._applyCache(range.rangeId, cache);
+                } else {
+                    throw new Error('[SlideUIFormulaCacheService]: cache not found!');
+                }
+            }
+        });
+
+        this.clearCache();
     }
 
-    abortCache() {
-        this._caches.length = 0;
+    private _applyCache(rangeId: string, cache: IAddSlideUniFormulaCommandParams) {
+        const { unitId, pageId, elementId, f } = cache;
+        this._uniFormulaService.registerSlideFormula(unitId, pageId, elementId, rangeId, f);
+    }
+
+    clearCache() {
+        this._caches.clear();
     }
 }

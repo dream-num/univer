@@ -18,6 +18,7 @@ export { UniverSlidesUIPlugin } from './slides-ui-plugin';
 export { SlidesUIController } from './controllers/slide-ui.controller';
 export { SlideSideBar } from './components/slide-bar/SlideBar';
 
+export { ISlideEditorBridgeService } from './services/slide-editor-bridge.service';
 export { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 export type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
 

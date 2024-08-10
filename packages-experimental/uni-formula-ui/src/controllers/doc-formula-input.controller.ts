@@ -21,8 +21,8 @@ import { IEditorService } from '@univerjs/ui';
 import { DocHoverManagerService } from '@univerjs/docs-ui';
 
 import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/commands/doc.command';
-import type { IShowFormulaPopupOperationParams } from '../commands/operations/doc.operation';
-import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/doc.operation';
+import type { IShowFormulaPopupOperationParams } from '../commands/operations/operation';
+import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
 import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
 import { UniFormulaPopupService } from '../services/formula-popup.service';
 

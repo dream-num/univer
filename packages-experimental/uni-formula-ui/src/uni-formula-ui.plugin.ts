@@ -24,6 +24,7 @@ import { DocUniFormulaInputController } from './controllers/doc-formula-input.co
 import { UniFormulaService } from './services/uni-formula.service';
 import { UniFormulaUniController } from './controllers/uni-formula-ui.controller';
 import { SlideUniFormulaInputController } from './controllers/slide-formula-input.controller';
+import { SlideUIFormulaCacheService } from './services/slide-ui-formula-cache.service';
 
 @DependentOn(UniverDocUniFormulaPlugin)
 export class UniverDocUniFormulaUIPlugin extends Plugin {
@@ -42,6 +43,7 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
             [UniFormulaUniController],
             [DocUniFormulaInputController],
             [SlideUniFormulaInputController],
+            [SlideUIFormulaCacheService],
             [UniFormulaPopupService],
             [IUniFormulaService, { useClass: UniFormulaService }],
         ] as Dependency[]).forEach((d) => injector.add(d));

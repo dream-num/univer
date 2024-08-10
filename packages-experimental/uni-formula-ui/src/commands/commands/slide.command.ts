@@ -33,15 +33,16 @@ export const AddSlideUniFormulaCommand: ICommand<IAddSlideUniFormulaCommandParam
     type: CommandType.COMMAND,
     id: 'slide.command.add-slide-uni-formula',
     async handler(accessor, params: IAddSlideUniFormulaCommandParams) {
-        const { f, startIndex } = params;
+        const { startIndex } = params;
 
         const commandService = accessor.get(ICommandService);
         const slideUiFormulaCacheService = accessor.get(SlideUIFormulaCacheService);
         const localeService = accessor.get(LocaleService);
+        const placeholder = localeService.t('uni-formula.command.stream-placeholder');
 
         // TODO: use placeholder here?
         const rangeId = generateRandomId();
-        const dataStream = makeCustomRangeStream(f);
+        const dataStream = makeCustomRangeStream(placeholder);
         const body: IDocumentBody = {
             dataStream,
             customRanges: [{
@@ -65,7 +66,7 @@ export const AddSlideUniFormulaCommand: ICommand<IAddSlideUniFormulaCommandParam
         // We will do that when user confirms the change.
 
         if (insertCustomRangeMutation) {
-            slideUiFormulaCacheService.writeCache(params);
+            slideUiFormulaCacheService.writeCache(rangeId, params);
             return commandService.executeCommand(insertCustomRangeMutation.id, insertCustomRangeMutation.params, { onlyLocal: true });
         }
 

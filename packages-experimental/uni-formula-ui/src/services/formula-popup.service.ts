@@ -25,8 +25,8 @@ import { FORMULA_PROMPT_ACTIVATED } from '@univerjs/sheets-formula';
 import { IUniFormulaService } from '@univerjs/uni-formula';
 import type { IAddDocUniFormulaCommandParams } from '../commands/commands/doc.command';
 import { AddDocUniFormulaCommand } from '../commands/commands/doc.command';
-import type { IPopupPosition } from '../commands/operations/doc.operation';
-import { ConfirmFormulaPopupCommand, isSlidePosition } from '../commands/operations/doc.operation';
+import type { IPopupPosition } from '../commands/operations/operation';
+import { ConfirmFormulaPopupCommand, isSlidePosition } from '../commands/operations/operation';
 import type { IAddSlideUniFormulaCommandParams } from '../commands/commands/slide.command';
 import { AddSlideUniFormulaCommand } from '../commands/commands/slide.command';
 

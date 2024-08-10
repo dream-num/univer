@@ -43,7 +43,7 @@ import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
 import { take } from 'rxjs';
-import type { ISlidePopupPosition } from '../commands/operations/doc.operation';
+import type { ISlidePopupPosition } from '../commands/operations/operation';
 
 const PSEUDO_SUBUNIT = 'PSEUDO_SUBUNIT';
 

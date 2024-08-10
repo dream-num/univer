@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { IEditorService } from '@univerjs/ui';
 import type { IInsertCommandParams } from '@univerjs/docs';
 import { InsertCommand, TextSelectionManagerService } from '@univerjs/docs';
+import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
 import { AddSlideUniFormulaCommand } from '../commands/commands/slide.command';
 import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
 import { UniFormulaPopupService } from '../services/formula-popup.service';
-import type { IShowFormulaPopupOperationParams, ISlidePopupPosition } from '../commands/operations/doc.operation';
-import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/doc.operation';
+import type { IShowFormulaPopupOperationParams, ISlidePopupPosition } from '../commands/operations/operation';
+import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
 
 const FORMULA_INPUT_TRIGGER_CHAR = '=';
 
 @OnLifecycle(LifecycleStages.Steady, SlideUniFormulaInputController)
 export class SlideUniFormulaInputController extends Disposable {
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _commandSrv: ICommandService,
         @IEditorService private readonly _editorSrv: IEditorService,
@@ -65,13 +67,18 @@ export class SlideUniFormulaInputController extends Disposable {
                 const params = commandInfo.params as IInsertCommandParams;
                 const activeRange = this._textSelectionManagerService.getActiveTextRange();
                 if (params.body.dataStream === FORMULA_INPUT_TRIGGER_CHAR && activeRange) {
+                    // NOTE: we can avoid manually get the SlideEditorBridgeService when we split
+                    // slide formula editor plugin into a separate package.
+                    const editorBridgeService = this._injector.get(ISlideEditorBridgeService);
+                    const editorReact = editorBridgeService.getEditorRect();
+                    const { pageId, richTextObj } = editorReact;
+                    const { oKey } = richTextObj;
                     this._showPopup({
                         startIndex: activeRange.startOffset! - 1,
                         unitId: focusedUnit.getUnitId(),
                         position: {
-                            // TODO@wzhudev: we should know what page and element it is
-                            pageId: 'page123',
-                            elementId: 'element123',
+                            pageId,
+                            elementId: oKey,
                         } as ISlidePopupPosition,
                     });
                 } else if (this._formulaPopupSrv.popupInfo) {

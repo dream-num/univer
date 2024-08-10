@@ -23,7 +23,7 @@ import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import type { IUniFormulaPopupInfo } from '../../services/formula-popup.service';
 import { DOC_FORMULA_POPUP_KEY, UniFormulaPopupService } from '../../services/formula-popup.service';
 
-import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operations/doc.operation';
+import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operations/operation';
 import styles from './index.module.less';
 
 export const UNI_FORMULA_EDITOR_ID = createInternalEditorID('UNI_FORMULA');

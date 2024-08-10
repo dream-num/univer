@@ -24,6 +24,7 @@ import { SlideCanvasPopMangerService } from '../services/slide-popup-manager.ser
 import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
+import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 
 @OnLifecycle(LifecycleStages.Steady, SlidePopupMenuController)
 export class SlidePopupMenuController extends RxDisposable {
@@ -152,6 +153,27 @@ export class SlidePopupMenuController extends RxDisposable {
             this.disposeWithMe(
                 transformer.changing$.subscribe(() => {
                     singletonPopupDisposer?.dispose();
+
+                    const selectedObjects = transformer.getSelectedObjectMap();
+                    if (selectedObjects.size > 1) {
+                        singletonPopupDisposer?.dispose();
+                        return;
+                    }
+
+                    const object = selectedObjects.values().next().value as Nullable<BaseObject>;
+                    if (!object) {
+                        return;
+                    }
+
+                    this._commandService.executeCommand(UpdateSlideElementOperation.id, {
+                        oKey: object.oKey,
+                        props: {
+                            width: object.width,
+                            height: object.height,
+                            left: object.left,
+                            top: object.top,
+                        },
+                    });
                 })
             );
         });

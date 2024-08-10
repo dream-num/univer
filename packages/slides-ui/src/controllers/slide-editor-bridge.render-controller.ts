@@ -26,6 +26,7 @@ import { Subject } from 'rxjs';
 import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import type { ISlideRichTextProps } from '../type';
+import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 
 // interface ICanvasOffset {
 //     left: number;
@@ -164,6 +165,25 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
 
         this._editorBridgeService.endEditing$.next(curRichText);
 
+        const richText: Record<string, any> = {
+            bl: 1,
+            fs: curRichText.fs,
+            text: curRichText.text,
+        };
+        const textRuns = curRichText.documentData.body?.textRuns;
+        if (textRuns && textRuns.length) {
+            const textRun = textRuns[0];
+            const ts = textRun.ts;
+
+            richText.cl = ts?.cl;
+        }
+
+        this._commandService.executeCommand(UpdateSlideElementOperation.id, {
+            oKey: curRichText?.oKey,
+            props: {
+                richText,
+            },
+        });
         this._curRichText = null;
     }
 

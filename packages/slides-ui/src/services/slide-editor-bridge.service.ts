@@ -17,7 +17,7 @@
 import type { IDisposable, IDocumentBody, IDocumentData, IDocumentSettings, IDocumentStyle, IParagraph, IParagraphStyle, IPosition, Nullable } from '@univerjs/core';
 import {
     createIdentifier,
-    Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    Disposable,
     DocumentDataModel,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_STANDALONE,
@@ -33,6 +33,7 @@ import type { KeyCode } from '@univerjs/ui';
 import { IEditorService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import { SLIDE_EDITOR_ID } from '../const';
 
 // TODO same as @univerjs/slides/views/render/adaptors/index.js
 export enum SLIDE_VIEW_KEY {
@@ -92,7 +93,7 @@ export interface ISlideEditorBridgeService {
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
-    // isVisible(): IEditorBridgeServiceVisibleParam;
+    isVisible(): boolean;
     // enableForceKeepVisible(): void;
     // disableForceKeepVisible(): void;
     // isForceKeepVisible(): boolean;
@@ -100,7 +101,7 @@ export interface ISlideEditorBridgeService {
 }
 
 export class SlideEditorBridgeService extends Disposable implements ISlideEditorBridgeService, IDisposable {
-    private _editorUnitId: string = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+    private _editorUnitId: string = SLIDE_EDITOR_ID;
 
     private _isForceKeepVisible: boolean = false;
 
@@ -110,15 +111,15 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
     private readonly _currentEditRectState$ = new BehaviorSubject<Nullable<IEditorBridgeServiceParam>>(null);
     readonly currentEditRectState$ = this._currentEditRectState$.asObservable();
 
-    private _visible: IEditorBridgeServiceVisibleParam = {
+    private _visibleParam: IEditorBridgeServiceVisibleParam = {
         visible: false,
         eventType: DeviceInputEventType.Dblclick,
         unitId: '',
     };
 
-    private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
+    private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visibleParam);
     readonly visible$ = this._visible$.asObservable();
-    private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
+    private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visibleParam);
     readonly afterVisible$ = this._afterVisible$.asObservable();
     private _currentEditRectInfo: ISetEditorInfo;
 
@@ -151,7 +152,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
          * todo: wzhudev: In univer mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
          */
         if (!this._editorService.getFocusEditor()) {
-            this._editorService.focus(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            this._editorService.focus(SLIDE_EDITOR_ID);
             this._contextService.setContextValue(EDITOR_ACTIVATED, false);
             this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
             this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
@@ -175,7 +176,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         //     return;
         // }
 
-        this._visible = param;
+        this._visibleParam = param;
 
         // Reset the dirty status when the editor is visible.
         if (param.visible) {
@@ -183,8 +184,8 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         }
 
         // subscriber: slide-editing.render-controller.ts@_handleEditorVisible
-        this._visible$.next(this._visible);
-        this._afterVisible$.next(this._visible);
+        this._visible$.next(this._visibleParam);
+        this._afterVisible$.next(this._visibleParam);
     }
 
     /**
@@ -194,7 +195,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
      * && this@setEditorRect
      */
     getEditRectState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
-        const editorUnitId = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+        const editorUnitId = SLIDE_EDITOR_ID;
 
         //editorBridgeRenderController.slideTextEditor$ ---> editorBridgeRenderController@_updateEditor --> this._currentEditRectInfo = xxx
         const editorRectInfo = this._currentEditRectInfo;
@@ -268,7 +269,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
     }
 
     isVisible() {
-        return this._visible;
+        return this._visibleParam.visible;
     }
 
     getEditorDirty() {

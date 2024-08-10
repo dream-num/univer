@@ -15,13 +15,14 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { DISABLE_AUTO_FOCUS_KEY, IEditorService, TextEditor, useObservable } from '@univerjs/ui';
 // import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { ISlideEditorManagerService } from '../../services/slide-editor-manager.service';
+import { SLIDE_EDITOR_ID } from '../../const';
 import styles from './index.module.less';
 
 interface ICellIEditorProps { }
@@ -40,7 +41,7 @@ const EDITOR_DEFAULT_POSITION = {
  * @returns
  */
 
-export const EditorContainer: React.FC<ICellIEditorProps> = () => {
+export const SlideEditorContainer: React.FC<ICellIEditorProps> = () => {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,
     });
@@ -57,7 +58,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     );
 
     const snapshot: IDocumentData = {
-        id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        id: SLIDE_EDITOR_ID,
         body: {
             dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
             textRuns: [],
@@ -98,7 +99,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     top: startY + FIX_ONE_PIXEL_BLUR_OFFSET,
                 });
 
-                const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                const editor = editorService.getEditor(SLIDE_EDITOR_ID);
 
                 if (editor == null) {
                     return;
@@ -129,19 +130,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 height: state.height,
             }}
         >
-
-            {/* <TextEditor
-                id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                isSheetEditor
-                // resizeCallBack={resizeCallBack}
-                cancelDefaultResizeListener
-                onContextMenu={(e) => e.preventDefault()}
-                className={styles.formulaContent}
-                // snapshot={INITIAL_SNAPSHOT}
-                isSingle={false}
-            /> */}
             <TextEditor
-                id={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
+                id={SLIDE_EDITOR_ID}
                 className={styles.editorInput}
                 snapshot={snapshot}
                 cancelDefaultResizeListener={false}

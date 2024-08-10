@@ -29,7 +29,7 @@ export class PerformanceMonitorController extends RxDisposable {
     private _currentUnitSub: Nullable<Subscription>;
 
     constructor(
-    @Inject(LifecycleService) lifecycleService: LifecycleService,
+        @Inject(LifecycleService) lifecycleService: LifecycleService,
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {

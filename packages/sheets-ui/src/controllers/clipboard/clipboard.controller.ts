@@ -598,16 +598,12 @@ export class SheetClipboardController extends RxDisposable {
             redos: IMutationInfo[];
             undos: IMutationInfo[];
         } {
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
-        return getDefaultOnPasteCellMutations(pasteFrom, pasteTo, data, payload, accessor);
+        return this._injector.invoke((accessor) => {
+            return getDefaultOnPasteCellMutations(pasteFrom, pasteTo, data, payload, accessor);
+        });
     }
 
     private _initSpecialPasteHooks() {
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
         const self = this;
 
         const specialPasteValueHook: ISheetClipboardHook = {
@@ -616,7 +612,9 @@ export class SheetClipboardController extends RxDisposable {
                 label: 'specialPaste.value',
             },
             onPasteCells: (pasteFrom, pasteTo, data) => {
-                return getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
+                return this._injector.invoke((accessor) => {
+                    return getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
+                });
             },
         };
         const specialPasteFormatHook: ISheetClipboardHook = {
@@ -624,29 +622,35 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.format',
             },
-            onPasteCells(pasteFrom, pasteTo, matrix) {
+            onPasteCells: (pasteFrom, pasteTo, matrix) => {
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
 
                 // clear cell style
-                const { undos: styleUndos, redos: styleRedos } = getClearCellStyleMutations(pasteTo, matrix, accessor);
+                const { undos: styleUndos, redos: styleRedos } = this._injector.invoke((accessor) => {
+                    return getClearCellStyleMutations(pasteTo, matrix, accessor);
+                });
                 redoMutationsInfo.push(...styleRedos);
                 undoMutationsInfo.push(...styleUndos);
 
                 // clear and set merge
-                const { undos: mergeUndos, redos: mergeRedos } = getClearAndSetMergeMutations(
-                    pasteTo,
-                    matrix,
-                    accessor
-                );
+                const { undos: mergeUndos, redos: mergeRedos } = this._injector.invoke((accessor) => {
+                    return getClearAndSetMergeMutations(
+                        pasteTo,
+                        matrix,
+                        accessor
+                    );
+                });
                 redoMutationsInfo.push(...mergeRedos);
                 undoMutationsInfo.push(...mergeUndos);
 
-                const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(
-                    pasteTo,
-                    matrix,
-                    accessor
-                );
+                const { undos: setStyleUndos, redos: setStyleRedos } = this._injector.invoke((accessor) => {
+                    return getSetCellStyleMutations(
+                        pasteTo,
+                        matrix,
+                        accessor
+                    );
+                });
 
                 redoMutationsInfo.push(...setStyleRedos);
                 undoMutationsInfo.push(...setStyleUndos);
@@ -726,7 +730,7 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.besidesBorder',
             },
-            onPasteCells(pasteFrom, pasteTo, matrix, payload) {
+            onPasteCells: (pasteFrom, pasteTo, matrix, payload) => {
                 const workbook = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
@@ -757,8 +761,8 @@ export class SheetClipboardController extends RxDisposable {
                 });
 
                 // undo
-                const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-                    accessor,
+                const undoSetValuesMutation: ISetRangeValuesMutationParams = this._injector.invoke(
+                    SetRangeValuesUndoMutationFactory,
                     setValuesMutation
                 );
 
@@ -767,7 +771,9 @@ export class SheetClipboardController extends RxDisposable {
                     params: undoSetValuesMutation,
                 });
 
-                const { undos, redos } = getClearAndSetMergeMutations(pasteTo, matrix, accessor);
+                const { undos, redos } = this._injector.invoke((accessor) => {
+                    return getClearAndSetMergeMutations(pasteTo, matrix, accessor);
+                });
                 undoMutationsInfo.push(...undos);
                 redoMutationsInfo.push(...redos);
 

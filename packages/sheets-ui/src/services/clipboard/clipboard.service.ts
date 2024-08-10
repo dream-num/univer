@@ -348,11 +348,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!target.subUnitId || !target.selection) {
             return false;
         }
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
 
-        const range = rangeToDiscreteRange(target.selection.range, accessor, target.unitId, target.subUnitId);
+        const range = this._injector.invoke((accessor) => {
+            return rangeToDiscreteRange(target.selection!.range, accessor, target.unitId, target.subUnitId);
+        });
 
         if (!range) {
             return false;
@@ -808,10 +807,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!subUnitId || !selection) {
             return null;
         }
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
-        const discreteRange = rangeToDiscreteRange(selection.range, accessor, unitId, subUnitId);
+
+        const discreteRange = this._injector.invoke((accessor) => {
+            return rangeToDiscreteRange(selection.range, accessor, unitId, subUnitId);
+        });
 
         if (!discreteRange) {
             return null;
@@ -938,10 +937,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!subUnitId || !selection) {
             return null;
         }
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
-        const discreteRange = rangeToDiscreteRange(selection.range, accessor, unitId, subUnitId);
+        const discreteRange = this._injector.invoke((accessor) => {
+            return rangeToDiscreteRange(selection.range, accessor, unitId, subUnitId);
+        });
 
         if (!discreteRange) {
             return null;

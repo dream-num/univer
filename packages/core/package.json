@@ -67,7 +67,7 @@
     "dependencies": {
         "@types/lodash.mergewith": "^4.6.9",
         "@univerjs/protocol": "0.1.38",
-        "@wendellhu/redi": "0.16.0",
+        "@wendellhu/redi": "0.16.1",
         "lodash.mergewith": "^4.6.2",
         "nanoid": "5.0.7",
         "numeral": "^2.0.6",
@@ -78,7 +78,7 @@
         "@univerjs/shared": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.4",
-        "vite": "^5.3.5",
+        "vite": "^5.4.0",
         "vitest": "^2.0.5"
     },
     "univerSpace": {

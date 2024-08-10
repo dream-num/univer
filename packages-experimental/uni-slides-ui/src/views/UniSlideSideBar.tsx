@@ -26,8 +26,6 @@ import { IncreaseSingle } from '@univerjs/icons';
 
 import styles from './index.module.less';
 
-s;
-
 /**
  * This components works as the root component of the left Sidebar of Slide.
  */

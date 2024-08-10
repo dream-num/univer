@@ -23,12 +23,14 @@ export type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controll
 
 export { IMAGE_MENU_ID } from './controllers/image.menu';
 export { SHAPE_MENU_ID } from './controllers/shape.menu';
+
 // #region - all commands
 
 export { ActivateSlidePageOperation } from './commands/operations/activate.operation';
 export { SetSlidePageThumbOperation } from './commands/operations/set-thumb.operation';
 export { AppendSlideOperation } from './commands/operations/append-slide.operation';
 export { SlideAddTextOperation } from './commands/operations/insert-text.operation';
+
 // #endregion
 
-export { EditorContainer } from './views/editor-container/EditorContainer';
+export { SlideEditorContainer } from './views/editor-container/EditorContainer';

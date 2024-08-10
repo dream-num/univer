@@ -30,7 +30,7 @@ import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMe
 import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
 import { UploadFileMenu } from '../components/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
-import { EditorContainer } from '../views/editor-container';
+import { SlideEditorContainer } from '../views/editor-container';
 import { SlideSideBar } from '../components/slide-bar/SlideBar';
 import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
@@ -119,7 +119,7 @@ export class SlidesUIController extends Disposable {
         );
 
         this.disposeWithMe(
-            this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(EditorContainer, this._injector))
+            this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(SlideEditorContainer, this._injector))
         );
     }
 

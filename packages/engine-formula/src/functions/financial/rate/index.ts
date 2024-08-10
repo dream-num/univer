@@ -82,7 +82,7 @@ export class Rate extends BaseFunction {
 
             typeValue = typeValue ? 1 : 0;
 
-            if (pmtValue >= 0) {
+            if (nperValue <= 0 || pmtValue >= 0) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 

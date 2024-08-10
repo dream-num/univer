@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { ITransformState } from '@univerjs/drawing';
 import { precisionTo } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
-import type { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { attachRangeWithCoord, type ISheetSelectionRenderService, type SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export function drawingPositionToTransform(
     position: ISheetDrawingPosition,
@@ -27,8 +27,9 @@ export function drawingPositionToTransform(
     const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = position;
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
+    const skeleton = sheetSkeletonManagerService.getCurrentSkeleton()!;
 
-    const startSelectionCell = sheetSkeletonManagerService.attachRangeWithCoord({
+    const startSelectionCell = attachRangeWithCoord(skeleton, {
         startColumn: fromColumn,
         endColumn: fromColumn,
         startRow: fromRow,
@@ -39,7 +40,7 @@ export function drawingPositionToTransform(
         return;
     }
 
-    const endSelectionCell = sheetSkeletonManagerService.attachRangeWithCoord({
+    const endSelectionCell = attachRangeWithCoord(skeleton, {
         startColumn: toColumn,
         endColumn: toColumn,
         startRow: toRow,
@@ -68,7 +69,6 @@ export function drawingPositionToTransform(
         height = 0;
     }
 
-    const skeleton = sheetSkeletonManagerService.getCurrentSkeleton()!;
     const sheetWidth = skeleton.rowHeaderWidth + skeleton.columnTotalWidth;
     const sheetHeight = skeleton.columnHeaderHeight + skeleton.rowTotalHeight;
 

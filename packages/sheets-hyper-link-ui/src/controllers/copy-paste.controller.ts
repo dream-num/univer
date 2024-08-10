@@ -141,10 +141,9 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             matrix,
         };
 
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
-        const discreteRange = rangeToDiscreteRange(range, accessor, unitId, subUnitId);
+        const discreteRange = this._injector.invoke((accessor) => {
+            return rangeToDiscreteRange(range, accessor, unitId, subUnitId);
+        });
         if (!discreteRange) {
             return;
         }

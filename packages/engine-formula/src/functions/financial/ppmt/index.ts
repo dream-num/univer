@@ -80,7 +80,7 @@ export class Ppmt extends BaseFunction {
             const fvValue = +_fvObject.getValue();
             const typeValue = +_typeObject.getValue();
 
-            if (perValue < 1 || Math.floor(perValue) > Math.ceil(nperValue)) {
+            if (perValue < 1 || Math.floor(perValue) > Math.ceil(nperValue) || perValue - nperValue >= 1) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 

@@ -52,6 +52,7 @@ const locale: typeof zhCN = {
             rejectInput: 'Reject input',
             messageInfo: 'Helper message',
             showInfo: 'Show help text for a selected cell',
+            rangeError: 'Ranges are not legal',
         },
         operators: {
             between: 'between',

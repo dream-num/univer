@@ -92,6 +92,9 @@ export class SheetsThreadCommentController extends Disposable {
                 if ((type === SelectionMoveType.MOVE_END || type === undefined) && selections[0]?.primary) {
                     const range = selections[0].range;
                     if (range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) {
+                        if (this._threadCommentPanelService.activeCommentId) {
+                            this._commandService.executeCommand(SetActiveCommentOperation.id);
+                        }
                         return;
                     }
                     const row = selections[0].primary.actualRow;

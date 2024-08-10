@@ -61,7 +61,6 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/slides-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

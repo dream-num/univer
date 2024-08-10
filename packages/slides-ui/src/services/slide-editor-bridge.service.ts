@@ -93,7 +93,7 @@ export interface ISlideEditorBridgeService {
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
-    isVisible(): IEditorBridgeServiceVisibleParam;
+    isVisible(): boolean;
     // enableForceKeepVisible(): void;
     // disableForceKeepVisible(): void;
     // isForceKeepVisible(): boolean;

@@ -35,7 +35,7 @@ export const IRefSelectionsService = createIdentifier<SheetsSelectionsService>('
  */
 export class RefSelectionsService extends SheetsSelectionsService {
     constructor(
-    @IUniverInstanceService _instanceSrv: IUniverInstanceService
+        @IUniverInstanceService _instanceSrv: IUniverInstanceService
     ) {
         super(_instanceSrv);
     }

@@ -44,7 +44,7 @@ export class DumbUniFormulaService extends Disposable implements IUniFormulaServ
     protected readonly _docFormulas = new Map<string, IDocFormulaReference>();
 
     constructor(
-    @IResourceManagerService resourceManagerService: IResourceManagerService,
+        @IResourceManagerService resourceManagerService: IResourceManagerService,
         @ICommandService protected readonly _commandSrv: ICommandService,
         @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
     ) {

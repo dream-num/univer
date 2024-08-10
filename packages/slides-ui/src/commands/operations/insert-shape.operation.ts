@@ -41,9 +41,18 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
     type: CommandType.OPERATION,
     handler: async (accessor, params) => {
         const id = generateRandomId(6);
+
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+
+        if (!slideData) return false;
+
+        const activePage = slideData.getActivePage()!;
+        const maxIndex = activePage.pageElements ? Math.max(...Object.values(activePage.pageElements).map((element) => element.zIndex)) : 20;
+
         const data = {
             id,
-            zIndex: 20,
+            zIndex: maxIndex + 1,
             left: 378,
             top: 142,
             width: 250,
@@ -61,13 +70,6 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
                 },
             },
         };
-
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-
-        if (!slideData) return false;
-
-        const activePage = slideData.getActivePage()!;
 
         activePage.pageElements[id] = data;
 

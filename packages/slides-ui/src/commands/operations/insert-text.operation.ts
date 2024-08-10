@@ -45,9 +45,18 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         const left = 230;
         const top = 142;
         const textContent = params?.text || 'A New Text';
+
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        if (!slideData) return false;
+
+        const activePage = slideData.getActivePage()!;
+
+        const maxIndex = activePage.pageElements ? Math.max(...Object.values(activePage.pageElements).map((element) => element.zIndex)) : 21;
+
         const elementData: IPageElement = {
             id: elementId,
-            zIndex: 2,
+            zIndex: maxIndex + 1,
             left,
             top,
             width: defaultWidth,
@@ -65,11 +74,6 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
             },
         };
 
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-        if (!slideData) return false;
-
-        const activePage = slideData.getActivePage()!;
         activePage.pageElements[elementId] = elementData;
         slideData.updatePage(activePage.id, activePage);
 

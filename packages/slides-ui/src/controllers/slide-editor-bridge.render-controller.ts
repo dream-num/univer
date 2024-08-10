@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
+import type { IDisposable, ISlidePage, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
 import { DisposableCollection, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import {
     TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { BaseObject, IChangeObserverConfig, IRenderContext, IRenderModule, RichText } from '@univerjs/engine-render';
+import type { BaseObject, IChangeObserverConfig, IRenderContext, IRenderModule, RichText, Scene, Slide } from '@univerjs/engine-render';
 import { DeviceInputEventType, ITextSelectionRenderManager, ObjectType } from '@univerjs/engine-render';
-import { CanvasView } from '@univerjs/slides';
 import { Subject } from 'rxjs';
+import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import type { ISlideRichTextProps } from '../type';
-import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
+import { CanvasView } from './canvas-view';
 
 // interface ICanvasOffset {
 //     left: number;
@@ -92,17 +92,12 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             richTextObj: targetObject,
         };
 
-        // editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
+        // invoked by editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
         this._editorBridgeService.setEditorRect(setEditorRect);
     }
 
     private _initEventListener(d: DisposableCollection) {
-        // const model = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-        // const pagesMap = model?.getPages() ?? {};
-        // const pages = Object.values(pagesMap);
-
-        const canvasView = this._canvasView;
-        canvasView.setSceneMap$.subscribe((scene: Scene) => {
+        const listenersForPageScene = (page: ISlidePage, scene: Scene) => {
             const transformer = scene.getTransformer();
             if (!transformer) return;
 
@@ -139,6 +134,17 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             d.add(this._instanceSrv.focused$.subscribe((fc: Nullable<string>) => {
                 this.endEditing();
             }));
+        };
+
+        const model = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        const pagesMap = model?.getPages() ?? {};
+        // const pages = Object.values(pagesMap);
+
+        const { mainComponent } = this._renderContext;
+        const pageSceneList = Array.from((mainComponent as Slide).getSubScenes().values());
+        for (let i = 0; i < pageSceneList.length; i++) {
+            const pageScene = pageSceneList[i] as Scene;
+            listenersForPageScene(pagesMap[pageScene.sceneKey], pageScene);
         }
     }
 

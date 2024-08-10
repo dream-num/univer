@@ -72,7 +72,11 @@ export class SheetsRenderService extends RxDisposable {
     private _initWorkbookListener(): void {
         this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
-            .subscribe((workbook) => this._createRenderer(workbook));
+            .subscribe((workbook) => {
+                // TODO when does this function get called?
+                this._createRenderer(workbook);
+            });
+
         this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .forEach((workbook) => this._createRenderer(workbook));
 

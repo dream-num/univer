@@ -17,7 +17,7 @@
 import type { ICommand, Nullable, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, PageElementType, UniverInstanceType } from '@univerjs/core';
 import { getImageSize, IImageIoService } from '@univerjs/drawing';
-import { CanvasView } from '@univerjs/slides';
+import { CanvasView } from '../../controllers/canvas-view';
 
 export interface IInsertImageOperationParams {
     files: Nullable<File[]>;

@@ -48,12 +48,16 @@ export class Slide extends SceneViewer {
         this.changePage(firstKey);
     }
 
-    addPage(scene: Scene) {
-        const key = scene.sceneKey;
+    /**
+     * add pageScene to this._subScenes
+     * @param pageScene
+     */
+    addPageScene(pageScene: Scene) {
+        const key = pageScene.sceneKey;
         if (this.getSubScene(key) != null) {
             return;
         }
-        this.addSubScene(scene);
+        this.addSubScene(pageScene);
         this.addNavigation();
     }
 

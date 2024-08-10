@@ -107,7 +107,7 @@ export class SlideAdaptor extends ObjectAdaptor {
         for (let i = 0, len = pageOrder.length; i < len; i++) {
             const page = pages[pageOrder[i]];
             const { id } = page;
-            slideComponent.addPage(this._createScene(id, slideComponent, page, mainScene, model));
+            slideComponent.addPageScene(this._createScene(id, slideComponent, page, mainScene, model));
         }
 
         slideComponent.activeFirstPage();

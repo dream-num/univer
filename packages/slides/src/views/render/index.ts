@@ -14,4 +14,15 @@
  * limitations under the License.
  */
 
-export * from './canvas-view';
+export { SLIDE_VIEW_KEY } from './adaptors';
+
+// export * from '../../../../slides-ui/src/controllers/canvas-view';
+export * from './adaptor';
+export * from './object-provider';
+
+export enum SLIDE_KEY {
+    COMPONENT = '__slideRender__',
+    SCENE = '__mainScene__',
+    VIEW = '__mainView__',
+}
+export type PageID = string;

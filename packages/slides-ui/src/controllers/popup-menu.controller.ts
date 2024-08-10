@@ -19,11 +19,12 @@ import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, IUn
 import type { BaseObject, ObjectType, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';
-import { CanvasView } from '@univerjs/slides';
+
 import { SlideCanvasPopMangerService } from '../services/slide-popup-manager.service';
 import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
+import { CanvasView } from './canvas-view';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 
 @OnLifecycle(LifecycleStages.Steady, SlidePopupMenuController)

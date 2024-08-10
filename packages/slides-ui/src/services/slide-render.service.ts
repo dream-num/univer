@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, SlideDataModel, Workbook } from '@univerjs/core';
+import type { SlideDataModel, Workbook } from '@univerjs/core';
 import {
     IContextService,
     IUniverInstanceService,
@@ -50,30 +50,12 @@ export class SlideRenderService extends RxDisposable {
     }
 
     private _initSlideDataListener(): void {
-        // this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
-        //     .pipe(takeUntil(this.dispose$))
-        //     .subscribe((workbook) => this._createRenderer(workbook));
-        // this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
-        //     .forEach((workbook) => this._createRenderer(workbook));
-
-        // this._instanceSrv.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
-        //     .pipe(takeUntil(this.dispose$))
-        //     .subscribe((workbook) => this._disposeRenderer(workbook));
-
-        // this._renderManagerService.createRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
-        //     this._createRenderer(unitId);
-        // });
-
         this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SLIDE)
             .pipe(takeUntil(this.dispose$))
-            .subscribe((slideModel) => this._createRenderer(slideModel?.getUnitId()));
-
-        // this._instanceSrv.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)
-        //     .pipe(takeUntil(this.dispose$)).subscribe((slideModel) => {
-        //         if (slideModel && slideModel.getUnitId()) {
-        //             this._createRenderer(slideModel?.getUnitId());
-        //         }
-        //     });
+            .subscribe((slideModel) => {
+                // TODO when does this function get called?
+                this._createRenderer(slideModel?.getUnitId());
+            });
 
         this._instanceSrv.getAllUnitsForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).forEach((slideModel) => {
             this._createRenderer(slideModel.getUnitId());

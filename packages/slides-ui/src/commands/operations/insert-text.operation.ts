@@ -16,7 +16,7 @@
 
 import type { ICommand, IPageElement, SlideDataModel } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, PageElementType, Tools, UniverInstanceType } from '@univerjs/core';
-import { CanvasView } from '@univerjs/slides';
+import { CanvasView } from '../../controllers/canvas-view';
 
 export interface ISlideAddTextParam {
     text: string;

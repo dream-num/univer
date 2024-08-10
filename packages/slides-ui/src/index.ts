@@ -34,3 +34,4 @@ export { SlideAddTextOperation } from './commands/operations/insert-text.operati
 // #endregion
 
 export { SlideEditorContainer } from './views/editor-container/EditorContainer';
+export { SLIDE_EDITOR_ID } from './const';

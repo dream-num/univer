@@ -511,6 +511,9 @@ importers:
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../../packages/sheets-formula
+      '@univerjs/slides-ui':
+        specifier: workspace:*
+        version: link:../../packages/slides-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui

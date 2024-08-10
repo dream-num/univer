@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-export const DOC_FORMULA_PLUGIN_NAME = 'DOC_FORMULA_PLUGIN';
+export const UNI_FORMULA_PLUGIN_NAME = 'UI_FORMULA_PLUGIN';
+
+export const DOC_UNI_FORMULA_RESOURCE_NAME = 'DOC_FORMULA_PLUGIN';

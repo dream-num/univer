@@ -19,9 +19,11 @@ import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univ
 import { IUniFormulaService, UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 
 import { DOC_FORMULA_UI_PLUGIN_NAME } from './const';
-import { DocFormulaPopupService } from './services/formula-popup.service';
-import { DocUniFormulaController } from './controllers/formula-input.controller';
+import { UniFormulaPopupService } from './services/formula-popup.service';
+import { DocUniFormulaInputController } from './controllers/doc-formula-input.controller';
 import { UniFormulaService } from './services/uni-formula.service';
+import { UniFormulaUniController } from './controllers/uni-formula-ui.controller';
+import { SlideUniFormulaInputController } from './controllers/slide-formula-input.controller';
 
 @DependentOn(UniverDocUniFormulaPlugin)
 export class UniverDocUniFormulaUIPlugin extends Plugin {
@@ -37,8 +39,10 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
 
     override onStarting(injector: Injector): void {
         ([
-            [DocUniFormulaController],
-            [DocFormulaPopupService],
+            [UniFormulaUniController],
+            [DocUniFormulaInputController],
+            [SlideUniFormulaInputController],
+            [UniFormulaPopupService],
             [IUniFormulaService, { useClass: UniFormulaService }],
         ] as Dependency[]).forEach((d) => injector.add(d));
     }

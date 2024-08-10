@@ -20,16 +20,17 @@ import { TextEditor, useObservable } from '@univerjs/ui';
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import { BooleanNumber, createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, HorizontalAlign, ICommandService, LocaleService, useDependency, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
-import type { IDocFormulaPopupInfo } from '../../services/formula-popup.service';
-import { DOC_FORMULA_POPUP_KEY, DocFormulaPopupService } from '../../services/formula-popup.service';
+import type { IUniFormulaPopupInfo } from '../../services/formula-popup.service';
+import { DOC_FORMULA_POPUP_KEY, UniFormulaPopupService } from '../../services/formula-popup.service';
 
-import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operation';
+import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operations/doc.operation';
 import styles from './index.module.less';
 
-export const DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY = createInternalEditorID('UNI_FORMULA');
+export const UNI_FORMULA_EDITOR_ID = createInternalEditorID('UNI_FORMULA');
+
 function makeSnapshot(f: string): IDocumentData {
     return {
-        id: DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY,
+        id: UNI_FORMULA_EDITOR_ID,
         body: {
             dataStream: `${f}${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
             textRuns: [],
@@ -62,8 +63,8 @@ function makeSnapshot(f: string): IDocumentData {
     };
 }
 
-export function DocFormulaPopup() {
-    const docFormulaPopupService = useDependency(DocFormulaPopupService);
+export function UniFormulaPopup() {
+    const docFormulaPopupService = useDependency(UniFormulaPopupService);
     const popupInfo = useObservable(docFormulaPopupService.popupInfo$);
 
     if (!popupInfo) {
@@ -73,14 +74,14 @@ export function DocFormulaPopup() {
     return <DocFormula popupInfo={popupInfo} />;
 }
 
-DocFormulaPopup.componentKey = DOC_FORMULA_POPUP_KEY;
+UniFormulaPopup.componentKey = DOC_FORMULA_POPUP_KEY;
 
-function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
+function DocFormula(props: { popupInfo: IUniFormulaPopupInfo }) {
     const { popupInfo } = props;
     const { f } = popupInfo;
 
     const localeService = useDependency(LocaleService);
-    const formulaPopupService = useDependency(DocFormulaPopupService);
+    const formulaPopupService = useDependency(UniFormulaPopupService);
     const commandService = useDependency(ICommandService);
 
     const [formulaString, setFormulaString] = useState<Nullable<string>>(f);
@@ -122,7 +123,7 @@ function DocFormula(props: { popupInfo: IDocFormulaPopupInfo }) {
     return (
         <div className={styles.docUiFormulaPopup} onMouseEnter={() => onHovered(true)} onMouseLeave={() => onHovered(false)}>
             <TextEditor
-                id={DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY}
+                id={UNI_FORMULA_EDITOR_ID}
                 className={clsx(styles.docUiFormulaPopupEditor, focused && styles.docUiFormulaPopupEditorActivated)}
                 placeholder={localeService.t('uni-formula.popup.placeholder')}
                 snapshot={snapshotRef.current}

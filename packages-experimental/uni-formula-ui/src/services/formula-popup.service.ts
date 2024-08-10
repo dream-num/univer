@@ -23,29 +23,28 @@ import type { IShortcutItem } from '@univerjs/ui';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { FORMULA_PROMPT_ACTIVATED } from '@univerjs/sheets-formula';
 import { IUniFormulaService } from '@univerjs/uni-formula';
-import type { IAddDocUniFormulaCommandParams } from '../commands/command';
-import { AddDocUniFormulaCommand } from '../commands/command';
-import { ConfirmFormulaPopupCommand } from '../commands/operation';
+import type { IAddDocUniFormulaCommandParams } from '../commands/commands/doc.command';
+import { AddDocUniFormulaCommand } from '../commands/commands/doc.command';
+import type { IPopupPosition } from '../commands/operations/doc.operation';
+import { ConfirmFormulaPopupCommand, isSlidePosition } from '../commands/operations/doc.operation';
+import type { IAddSlideUniFormulaCommandParams } from '../commands/commands/slide.command';
+import { AddSlideUniFormulaCommand } from '../commands/commands/slide.command';
 
 export const DOC_FORMULA_POPUP_KEY = 'DOC_FORMULA_POPUP' as const;
 
-export interface IDocFormulaPopupInfo {
+export interface IUniFormulaPopupInfo {
     unitId: string;
-
-    /** If the popup is for inserting a formula or inspecting an existing formula. */
     type: 'new' | 'existing';
-
     f: Nullable<string>;
-
     disposable: IDisposable;
-
     startIndex: number;
+    position?: IPopupPosition;
 }
 
-export class DocFormulaPopupService extends Disposable {
-    private readonly _popupInfo$ = new BehaviorSubject<Nullable<IDocFormulaPopupInfo>>(null);
+export class UniFormulaPopupService extends Disposable {
+    private readonly _popupInfo$ = new BehaviorSubject<Nullable<IUniFormulaPopupInfo>>(null);
     readonly popupInfo$ = this._popupInfo$.asObservable();
-    get popupInfo(): Nullable<IDocFormulaPopupInfo> { return this._popupInfo$.getValue(); }
+    get popupInfo(): Nullable<IUniFormulaPopupInfo> { return this._popupInfo$.getValue(); }
 
     private _popupLocked = false;
     get popupLocked(): boolean { return this._popupLocked; }
@@ -94,22 +93,24 @@ export class DocFormulaPopupService extends Disposable {
         this._popupHovered$.next(hovered);
     }
 
-    showPopup(unitId: string, startIndex: number, type: 'new'): boolean;
-    showPopup(unitId: string, startIndex: number, type: 'existing', rangeId: string): boolean;
-    showPopup(unitId: string, startIndex: number, type: 'new' | 'existing', rangeId?: string): boolean;
-    showPopup(unitId: string, startIndex: number, type: 'new' | 'existing', rangeId?: string): boolean {
+    showDocPopup(unitId: string, startIndex: number, type: 'new'): boolean;
+    showDocPopup(unitId: string, startIndex: number, type: 'existing', position: IPopupPosition): boolean;
+    showDocPopup(unitId: string, startIndex: number, type: 'new' | 'existing', position?: IPopupPosition): boolean;
+    showDocPopup(unitId: string, startIndex: number, type: 'new' | 'existing', position?: IPopupPosition): boolean {
         this.closePopup();
 
-        const f = (rangeId && type === 'existing')
-            ? this._uniFormulaService.getFormulaWithRangeId(unitId, rangeId)?.f ?? '='
+        // Open existing doc formula.
+        const f = (position && position.rangeId && type === 'existing')
+            ? this._uniFormulaService.getDocFormula(unitId, position.rangeId)?.f ?? '='
             : '=';
+
         const disposable = this._docCanvasPopupManagerService.attachPopupToRange(makeSelection(startIndex), {
             componentKey: DOC_FORMULA_POPUP_KEY,
             onClickOutside: () => this.closePopup(), // user may update ref range selections
             direction: 'top',
         });
 
-        this._popupInfo$.next({ unitId, disposable, type, f, startIndex });
+        this._popupInfo$.next({ unitId, disposable, type, f, startIndex, position });
         return true;
     }
 
@@ -135,7 +136,18 @@ export class DocFormulaPopupService extends Disposable {
         this.unlockPopup();
         this.closePopup();
 
-        // write this formula string to doc
+        // Write to slide.
+        if (isSlidePosition(info.position)) {
+            return this._commandService.executeCommand<IAddSlideUniFormulaCommandParams>(AddSlideUniFormulaCommand.id, {
+                unitId: info.unitId,
+                f,
+                startIndex: info.startIndex,
+                pageId: info.position.pageId,
+                elementId: info.position.elementId,
+            });
+        }
+
+        // Write to doc.
         return this._commandService.executeCommand(AddDocUniFormulaCommand.id, {
             unitId: info.unitId,
             f,

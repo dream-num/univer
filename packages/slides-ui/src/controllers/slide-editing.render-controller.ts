@@ -181,7 +181,13 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         this._initialCursorSync(d);
         this._listenEditorFocus(d);
         this._commandExecutedListener(d);
-        this._cursorStateListener(d);
+
+        // FIXME: we should not use React component to create editor render, it would make the control
+        // flow not controllable.
+        setTimeout(() => {
+            this._cursorStateListener(d);
+        }, 200);
+
         return d;
     }
 

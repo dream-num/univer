@@ -19,6 +19,7 @@ import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univer
 import { CanvasView } from '@univerjs/slides';
 
 export interface IActiveSlidePageOperationParams {
+    unitId: string;
     id: string;
 }
 export const ActivateSlidePageOperation: IOperation<IActiveSlidePageOperationParams> = {

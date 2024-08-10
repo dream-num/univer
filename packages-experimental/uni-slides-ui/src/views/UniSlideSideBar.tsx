@@ -26,6 +26,8 @@ import { IncreaseSingle } from '@univerjs/icons';
 
 import styles from './index.module.less';
 
+s;
+
 /**
  * This components works as the root component of the left Sidebar of Slide.
  */
@@ -94,12 +96,12 @@ export function UniSlideSideBar() {
     }, []);
 
     const activatePage = useCallback((page: string) => {
-        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page });
-    }, [commandService]);
+        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page, unitId: currentSlide?.getUnitId() });
+    }, [commandService, currentSlide]);
 
     const handleAppendSlide = useCallback(() => {
-        commandService.syncExecuteCommand(AppendSlideOperation.id);
-    }, [commandService]);
+        commandService.syncExecuteCommand(AppendSlideOperation.id, { unitId: currentSlide?.getUnitId() });
+    }, [commandService, currentSlide]);
 
     return (
         <div className={styles.uniSlideBar} ref={slideBarRef}>

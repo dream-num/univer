@@ -15,13 +15,25 @@
  */
 
 import type { IAccessor, ICommand, SlideDataModel } from '@univerjs/core';
-import { BasicShapes, CommandType, generateRandomId, IUniverInstanceService, LocaleService, PageElementType, UniverInstanceType } from '@univerjs/core';
+import { BasicShapes, CommandType, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, PageElementType, UniverInstanceType } from '@univerjs/core';
 import { ObjectType } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
 import { ISidebarService } from '@univerjs/ui';
 import { COMPONENT_SLIDE_SIDEBAR } from '../../components/sidebar/Sidebar';
 
 export interface IInsertShapeOperationParams {
+    unitId: string;
+};
+
+export const InsertSlideShapeRectangleCommand: ICommand = {
+    id: 'slide.command.insert-float-shape',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const commandService = accessor.get(ICommandService);
+        const instanceService = accessor.get(IUniverInstanceService);
+        const unitId = instanceService.getFocusedUnit()?.getUnitId();
+        return commandService.executeCommand(InsertSlideShapeRectangleOperation.id, { unitId });
+    },
 };
 
 export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationParams> = {

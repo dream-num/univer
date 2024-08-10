@@ -18,6 +18,7 @@ import type { ICommand, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 
 export interface IUpdateElementOperationParams {
+    unitId: string;
     oKey: string;
     props: Record<string, any>;
 };

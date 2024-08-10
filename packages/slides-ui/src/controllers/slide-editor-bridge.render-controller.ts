@@ -179,6 +179,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         }
 
         this._commandService.executeCommand(UpdateSlideElementOperation.id, {
+            unitId,
             oKey: curRichText?.oKey,
             props: {
                 richText,

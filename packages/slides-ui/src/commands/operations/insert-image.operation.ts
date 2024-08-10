@@ -21,6 +21,7 @@ import { CanvasView } from '@univerjs/slides';
 
 export interface IInsertImageOperationParams {
     files: Nullable<File[]>;
+    unitId: string;
 };
 
 export const InsertSlideFloatImageOperation: ICommand<IInsertImageOperationParams> = {

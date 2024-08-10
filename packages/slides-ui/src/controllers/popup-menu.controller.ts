@@ -166,6 +166,7 @@ export class SlidePopupMenuController extends RxDisposable {
                     }
 
                     this._commandService.executeCommand(UpdateSlideElementOperation.id, {
+                        unitId,
                         oKey: object.oKey,
                         props: {
                             width: object.width,
@@ -195,6 +196,7 @@ export class SlidePopupMenuController extends RxDisposable {
             commandId: DeleteSlideElementOperation.id,
             commandParams: {
                 id: oKey,
+                unitId,
             },
             disable: false,
         }];

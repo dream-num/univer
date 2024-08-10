@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, isInternalEditorID, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocumentSkeleton, DocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
@@ -85,7 +85,7 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         }
 
         // Always need to reset document data model, because cell editor change doc instance every time.
-        if (this._docViewModel && unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+        if (this._docViewModel && isInternalEditorID(unitId)) {
             this._docViewModel.reset(documentDataModel);
 
             this._context.unit = documentDataModel;

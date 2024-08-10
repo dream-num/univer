@@ -582,7 +582,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
      * @param param
      */
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
-        const { eventType, keycode } = param;
+        const { eventType } = param;
 
         // Change `CursorChange` to changed status, when formula bar clicked.
         this._cursorChange =
@@ -723,7 +723,9 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
                 this._moveCursorCmdHandler(command);
             }
             if (editedMutations.includes(command.id)) {
-                this._editingChangedHandler();
+                if (this._editorBridgeService.isVisible()) {
+                    this._editingChangedHandler();
+                }
             }
         }));
     }

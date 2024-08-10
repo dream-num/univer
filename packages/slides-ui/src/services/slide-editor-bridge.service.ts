@@ -93,7 +93,7 @@ export interface ISlideEditorBridgeService {
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
-    // isVisible(): IEditorBridgeServiceVisibleParam;
+    isVisible(): IEditorBridgeServiceVisibleParam;
     // enableForceKeepVisible(): void;
     // disableForceKeepVisible(): void;
     // isForceKeepVisible(): boolean;
@@ -111,15 +111,15 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
     private readonly _currentEditRectState$ = new BehaviorSubject<Nullable<IEditorBridgeServiceParam>>(null);
     readonly currentEditRectState$ = this._currentEditRectState$.asObservable();
 
-    private _visible: IEditorBridgeServiceVisibleParam = {
+    private _visibleParam: IEditorBridgeServiceVisibleParam = {
         visible: false,
         eventType: DeviceInputEventType.Dblclick,
         unitId: '',
     };
 
-    private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
+    private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visibleParam);
     readonly visible$ = this._visible$.asObservable();
-    private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
+    private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visibleParam);
     readonly afterVisible$ = this._afterVisible$.asObservable();
     private _currentEditRectInfo: ISetEditorInfo;
 
@@ -176,7 +176,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         //     return;
         // }
 
-        this._visible = param;
+        this._visibleParam = param;
 
         // Reset the dirty status when the editor is visible.
         if (param.visible) {
@@ -184,8 +184,8 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
         }
 
         // subscriber: slide-editing.render-controller.ts@_handleEditorVisible
-        this._visible$.next(this._visible);
-        this._afterVisible$.next(this._visible);
+        this._visible$.next(this._visibleParam);
+        this._afterVisible$.next(this._visibleParam);
     }
 
     /**
@@ -269,7 +269,7 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
     }
 
     isVisible() {
-        return this._visible;
+        return this._visibleParam.visible;
     }
 
     getEditorDirty() {

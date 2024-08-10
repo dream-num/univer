@@ -20,7 +20,7 @@ import {
     TextSelectionManagerService,
 } from '@univerjs/docs';
 import type { BaseObject, IChangeObserverConfig, IRenderContext, IRenderModule, RichText } from '@univerjs/engine-render';
-import { ITextSelectionRenderManager, ObjectType } from '@univerjs/engine-render';
+import { DeviceInputEventType, ITextSelectionRenderManager, ObjectType } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides';
 import { Subject } from 'rxjs';
 import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
@@ -136,11 +136,14 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
                     this.startEditing(object as RichText);
                 }
             }));
+
+            d.add(this._instanceSrv.focused$.subscribe((fc: Nullable<string>) => {
+                this.endEditing();
+            }));
         }
     }
 
     pickOtherObjects() {
-        this.setEditorVisible(false);
         this.endEditing();
     }
 
@@ -151,6 +154,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
      */
     endEditing() {
         if (!this._curRichText) return;
+        this.setEditorVisible(false);
         const curRichText = this._curRichText;
 
         const slideData = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
@@ -181,6 +185,6 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             this._curRichText?.show();
         }
         const { unitId } = this._renderContext;
-        this._editorBridgeService.changeVisible({ visible, eventType: 3, unitId });
+        this._editorBridgeService.changeVisible({ visible, eventType: DeviceInputEventType.PointerDown, unitId });
     }
 }

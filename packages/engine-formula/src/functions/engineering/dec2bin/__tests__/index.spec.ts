@@ -55,8 +55,25 @@ describe('Test dec2bin function', () => {
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
-        it('Value is blank cell', () => {
+        it('Value is null', () => {
             const number = NullValueObject.create();
+            const places = NumberValueObject.create(4);
+            const result = testFunction.calculate(number, places);
+            expect(result.getValue()).toBe(ErrorType.NA);
+        });
+
+        it('Value is blank cell', () => {
+            const number = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
             const places = NumberValueObject.create(4);
             const result = testFunction.calculate(number, places);
             expect(result.getValue()).toBe('0000');

@@ -86,7 +86,7 @@ export class Bitor extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = number1Value | number2Value;
+            const result = Number(BigInt(number1Value) | BigInt(number2Value));
 
             return NumberValueObject.create(result);
         });

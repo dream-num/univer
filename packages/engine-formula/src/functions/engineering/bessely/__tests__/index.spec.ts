@@ -55,8 +55,25 @@ describe('Test bessely function', () => {
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
-        it('Value is blank cell', () => {
+        it('Value is null', () => {
             const x = NullValueObject.create();
+            const n = NumberValueObject.create(1);
+            const result = testFunction.calculate(x, n);
+            expect(result.getValue()).toBe(ErrorType.NA);
+        });
+
+        it('Value is blank cell', () => {
+            const x = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
             const n = NumberValueObject.create(1);
             const result = testFunction.calculate(x, n);
             expect(result.getValue()).toBe(ErrorType.NUM);

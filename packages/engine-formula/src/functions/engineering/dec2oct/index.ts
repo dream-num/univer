@@ -26,6 +26,10 @@ export class Dec2oct extends BaseFunction {
     override maxParams = 2;
 
     override calculate(number: BaseValueObject, places?: BaseValueObject) {
+        if (number.isNull()) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
         let placesValue = 0;
 
         if (places) {
@@ -44,7 +48,7 @@ export class Dec2oct extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            if (placesValue < 0) {
+            if (placesValue < 0 || placesValue > 10) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
         }

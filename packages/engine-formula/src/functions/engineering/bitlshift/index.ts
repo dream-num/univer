@@ -70,7 +70,7 @@ export class Bitlshift extends BaseFunction {
             }
 
             const numberValue = +numberObject.getValue();
-            const shiftAmountValue = +shiftAmountObject.getValue();
+            let shiftAmountValue = +shiftAmountObject.getValue();
 
             // Return error if number is less than 0
             // Return error if number is a non-integer
@@ -85,8 +85,14 @@ export class Bitlshift extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
+            shiftAmountValue = Math.trunc(shiftAmountValue);
+
             // Return number shifted by shift bits to the left or to the right if shift is negative
-            const result = shiftAmountValue >= 0 ? numberValue << shiftAmountValue : numberValue >> -shiftAmountValue;
+            const result = Number(shiftAmountValue >= 0 ? BigInt(numberValue) << BigInt(shiftAmountValue) : BigInt(numberValue) >> BigInt(-shiftAmountValue));
+
+            if (result > 281474976710655) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
 
             return NumberValueObject.create(result);
         });

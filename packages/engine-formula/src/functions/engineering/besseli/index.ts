@@ -26,6 +26,10 @@ export class Besseli extends BaseFunction {
     override maxParams = 2;
 
     override calculate(x: BaseValueObject, n: BaseValueObject) {
+        if (x.isNull() || n.isNull()) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(x, n);
 
         if (isError) {

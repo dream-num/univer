@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { access } from 'node:fs';
 import type {
     ICellData,
     IDocumentData,

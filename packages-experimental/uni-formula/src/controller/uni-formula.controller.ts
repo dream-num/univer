@@ -15,7 +15,7 @@
  */
 
 import { ICommandService } from '@univerjs/core';
-import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '../commands/mutation';
+import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '../commands/mutations/doc-formula.mutation';
 
 export class UniFormulaController {
     constructor(

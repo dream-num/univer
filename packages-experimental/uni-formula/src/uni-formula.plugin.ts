@@ -17,11 +17,11 @@
 import type { Dependency } from '@univerjs/core';
 import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { DumbUniFormulaService, IUniFormulaService } from './services/uni-formula.service';
-import { DOC_FORMULA_PLUGIN_NAME } from './const';
+import { UNI_FORMULA_PLUGIN_NAME } from './const';
 import { UniFormulaController } from './controller/uni-formula.controller';
 
 export class UniverDocUniFormulaPlugin extends Plugin {
-    static override pluginName: string = DOC_FORMULA_PLUGIN_NAME;
+    static override pluginName: string = UNI_FORMULA_PLUGIN_NAME;
 
     // This plugin should load only when sheet related modules are loaded.
     static override type: UniverInstanceType = UniverInstanceType.UNIVER_UNKNOWN;

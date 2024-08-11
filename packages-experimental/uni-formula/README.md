@@ -5,7 +5,7 @@
 
 ## Introduction
 
-Provide formula feature in Univer Docs. Univer Slides would be supported in the future.
+Provide formula feature in Univer Docs and Univer Slides.
 
 ## Usage
 

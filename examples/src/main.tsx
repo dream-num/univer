@@ -53,7 +53,7 @@ function Examples() {
         title: '📚 Docs Uniscript',
         href: './docs-uniscript/',
     }, {
-        title: '🌌 Universe',
+        title: '🌌 Uni Mode',
         href: './uni/',
     }, {
         title: '📱 Mobile',

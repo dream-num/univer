@@ -30,7 +30,7 @@ const locale: typeof zhCN = {
             },
         },
         command: {
-            'stream-placeholder': 'Doc Formula',
+            'stream-placeholder': 'Uni Formula',
         },
     },
 };

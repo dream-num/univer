@@ -16,8 +16,9 @@
 
 export { UniverDocUniFormulaPlugin } from './uni-formula.plugin';
 export { IUniFormulaService, DumbUniFormulaService } from './services/uni-formula.service';
-export { DOC_FORMULA_PLUGIN_NAME } from './const';
-export { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference } from './models/doc-formula';
+export { UNI_FORMULA_PLUGIN_NAME as DOC_FORMULA_PLUGIN_NAME } from './const';
+export type { IDocFormulaCache, IDocFormulaData, IDocFormulaReference } from './models/doc-formula';
+export type { ISlideFormulaCache, ISlideFormulaData, ISlideFormulaReference } from './models/slide-formula';
 
 // #region - all commands
 
@@ -28,6 +29,6 @@ export {
     AddDocUniFormulaMutation,
     RemoveDocUniFormulaMutation,
     UpdateDocUniFormulaMutation,
-} from './commands/mutation';
+} from './commands/mutations/doc-formula.mutation';
 
 // #endregion

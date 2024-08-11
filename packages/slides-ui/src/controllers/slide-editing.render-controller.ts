@@ -27,13 +27,10 @@ import {
     Direction,
     Disposable,
     DisposableCollection,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
-    FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
-    FORMULA_EDITOR_ACTIVATED,
     HorizontalAlign,
     ICommandService,
     IContextService,
@@ -719,9 +716,17 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         const editedMutations = [RichTextEditingMutation.id];
 
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            // Only should do something when it is the current editor.
+            // FIXME: listen to command execution is pretty expensive. We should
+            // have multi editor instances and only handle event from a single editor.
+            if (this._editorService.getFocusId() !== this._renderContext.unitId) {
+                return;
+            }
+
             if (moveCursorOP.includes(command.id)) {
                 this._moveCursorCmdHandler(command);
             }
+
             if (editedMutations.includes(command.id)) {
                 if (this._editorBridgeService.isVisible()) {
                     this._editingChangedHandler();
@@ -806,10 +811,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {
-        this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(EDITOR_ACTIVATED, false);
-        this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
-        this._contextService.setContextValue(FORMULA_EDITOR_ACTIVATED, false);
 
         this._cellEditorManagerService.setState({
             show: param.visible,
@@ -819,7 +821,6 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             return;
         }
         this._undoRedoService.clearUndoRedo(editorUnitId);
-        this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
     private _moveCursor(keycode?: KeyCode) {

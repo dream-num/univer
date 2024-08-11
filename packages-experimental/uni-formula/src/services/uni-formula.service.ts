@@ -26,46 +26,65 @@ import {
 } from '@univerjs/core';
 
 import { type IDocFormulaCache, type IDocFormulaData, type IDocFormulaReference, toJson } from '../models/doc-formula';
-import { DOC_FORMULA_PLUGIN_NAME } from '../const';
+import { DOC_UNI_FORMULA_RESOURCE_NAME } from '../const';
+import type { ISlideFormulaReference } from '../models/slide-formula';
 
 export interface IUniFormulaService {
-    getFormulaWithRangeId(unitId: string, rangeId: string): Nullable<IDocFormulaReference>;
-    registerDocFormula(unitId: string, rangeId: string, f: string, v: ICellData['v'], t: ICellData['t']): IDisposable;
+    updateDocFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean;
+    updateSlideFormulaResults(unitId: string, pageId: string, elementId: string, formulaId: string, v: IDocFormulaCache): boolean;
 
+    // #region doc
+
+    hasDocFormula(unitId: string, formulaId: string): boolean;
+    getDocFormula(unitId: string, rangeId: string): Nullable<IDocFormulaReference>;
+    registerDocFormula(unitId: string, rangeId: string, f: string, v: ICellData['v'], t: ICellData['t']): IDisposable;
     unregisterDocFormula(unitId: string, rangeId: string): void;
-    hasFocFormula(unitId: string, formulaId: string): boolean;
-    updateFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean;
+
+    // #endregion
+
+    // #region slide
+
+    hasSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): boolean;
+    getSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): Nullable<ISlideFormulaReference>;
+    registerSlideFormula(unitId: string, pageId: string, elementId: string, f: string, v: ICellData['v'], t: ICellData['t']): IDisposable;
+    unregisterSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): void;
+
+    // #endregion
 }
 
 export const IUniFormulaService = createIdentifier<IUniFormulaService>('uni-formula.uni-formula.service');
 
+// NOTE@wzhudev: we implement formula for doc and slide here for convenience, but we should separate them in the future.
+
 export class DumbUniFormulaService extends Disposable implements IUniFormulaService {
-    /** This data maps doc formula key to the formula id in the formula system. */
     protected readonly _docFormulas = new Map<string, IDocFormulaReference>();
+    protected readonly _slideFormulas = new Map<string, ISlideFormulaReference>();
 
     constructor(
-        @IResourceManagerService resourceManagerService: IResourceManagerService,
+        @IResourceManagerService resourceManagerSrv: IResourceManagerService,
         @ICommandService protected readonly _commandSrv: ICommandService,
         @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
     ) {
         super();
 
-        this._initDocFormulaResources(resourceManagerService);
+        this._initDocFormulaResources(resourceManagerSrv);
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
             this._unregisterDoc(doc.getUnitId());
         });
     }
 
-    hasFocFormula(unitId: string, formulaId: string): boolean {
+    // #region docs
+
+    hasDocFormula(unitId: string, formulaId: string): boolean {
         return this._docFormulas.has(getDocFormulaKey(unitId, formulaId));
     }
 
-    getFormulaWithRangeId(unitId: string, rangeId: string): Nullable<IDocFormulaReference> {
+    getDocFormula(unitId: string, rangeId: string): Nullable<IDocFormulaReference> {
         return this._docFormulas.get(getDocFormulaKey(unitId, rangeId)) ?? null;
     }
 
-    updateFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean {
+    updateDocFormulaResults(unitId: string, formulaIds: string[], v: IDocFormulaCache[]): boolean {
         formulaIds.forEach((id, index) => {
             const formulaData = this._docFormulas.get(getDocFormulaKey(unitId, id));
             if (!formulaData) return true;
@@ -76,16 +95,6 @@ export class DumbUniFormulaService extends Disposable implements IUniFormulaServ
         });
 
         return true;
-    }
-
-    /**
-     * Remove all formulas under a doc.
-     */
-    private _unregisterDoc(unitId: string): void {
-        const existingFormulas = Array.from(this._docFormulas.entries());
-        existingFormulas.forEach(([_, value]) => {
-            if (value.unitId === unitId) this.unregisterDocFormula(unitId, value.rangeId);
-        });
     }
 
     /**
@@ -110,9 +119,18 @@ export class DumbUniFormulaService extends Disposable implements IUniFormulaServ
         }
     }
 
+    updateSlideFormulaResults(unitId: string, pageId: string, elementId: string, formulaId: string, v: IDocFormulaCache): boolean {
+        const formulaData = this._slideFormulas.get(getSlideFormulaKey(unitId, pageId, elementId, formulaId));
+        if (!formulaData) return true;
+
+        formulaData.v = v.v;
+        formulaData.t = v.t;
+        return true;
+    }
+
     private _initDocFormulaResources(resourceManagerService: IResourceManagerService): void {
         resourceManagerService.registerPluginResource({
-            pluginName: DOC_FORMULA_PLUGIN_NAME,
+            pluginName: DOC_UNI_FORMULA_RESOURCE_NAME,
             businesses: [UniverInstanceType.UNIVER_DOC],
             toJson: (unitId: string) => {
                 const formulas = this._getAllFormulasOfUnit(unitId);
@@ -131,16 +149,72 @@ export class DumbUniFormulaService extends Disposable implements IUniFormulaServ
         });
     }
 
+    /**
+     * Remove all formulas under a doc.
+     */
+    private _unregisterDoc(unitId: string): void {
+        const existingFormulas = Array.from(this._docFormulas.entries());
+        existingFormulas.forEach(([_, value]) => {
+            if (value.unitId === unitId) this.unregisterDocFormula(unitId, value.rangeId);
+        });
+    }
+
+    // #endregion
+
+    // #region slides
+
+    registerSlideFormula(
+        unitId: string,
+        pageId: string,
+        elementId: string,
+        rangeId: string,
+        f: string,
+        v: ICellData['v'],
+        t: ICellData['t']
+    ): IDisposable {
+        const key = getSlideFormulaKey(unitId, pageId, elementId, f);
+        if (this._slideFormulas.has(key)) {
+            throw new Error(`[UniFormulaService]: cannot register formula ${key} when it is already registered!`);
+        }
+
+        this._slideFormulas.set(key, { unitId, pageId, elementId, rangeId, formulaId: '', f, v, t });
+
+        return toDisposable(() => this.unregisterDocFormula(unitId, rangeId));
+    }
+
+    hasSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): boolean {
+        return this._slideFormulas.has(getSlideFormulaKey(unitId, pageId, elementId, formulaId));
+    }
+
+    getSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): Nullable<ISlideFormulaReference> {
+        return this._slideFormulas.get(getSlideFormulaKey(unitId, pageId, elementId, formulaId)) ?? null;
+    }
+
+    unregisterSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): void {
+        const key = getSlideFormulaKey(unitId, pageId, elementId, formulaId);
+        const item = this._slideFormulas.get(key);
+        if (item) {
+            this._slideFormulas.delete(key);
+        }
+    }
+
+    // #endregion
+
     private _getAllFormulasOfUnit(unitId: string) {
         const formulas = Array.from(this._docFormulas.entries()).filter((v) => v[1].unitId === unitId);
         return formulas;
     }
 }
 
-export function getPseudoUnitKey(unitId: string): string {
+export function getPseudoDocUnitKey(unitId: string): string {
     return `pseudo-${unitId}`;
 }
 
 export function getDocFormulaKey(unitId: string, formulaId: string): string {
     return `pseudo-${unitId}-${formulaId}`;
 }
+
+function getSlideFormulaKey(unitId: string, pageId: string, elementId: string, formulaId: string): string {
+    return `pseudo-${unitId}-${pageId}-${elementId}-${formulaId}`;
+}
+

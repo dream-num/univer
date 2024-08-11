@@ -28,7 +28,7 @@ const locale = {
             },
         },
         command: {
-            'stream-placeholder': '文档公式',
+            'stream-placeholder': '无界公式',
         },
     },
 };

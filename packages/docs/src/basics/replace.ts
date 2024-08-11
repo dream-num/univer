@@ -113,20 +113,29 @@ export function getRetainAndDeleteAndExcludeLineBreak(
 export interface IReplaceSelectionFactoryParams {
     unitId: string;
     selection?: ITextRange;
+
+    originBody?: IDocumentBody;
+
+    /** Body to be inserted at the given position. */
     body: IDocumentBody; // Do not contain `\r\n` at the end.
+
     textRanges?: ITextRangeWithStyle[];
 }
 
 export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSelectionFactoryParams) {
-    const { unitId, body: insertBody } = params;
+    const { unitId, originBody, body: insertBody } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
-    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-    if (!docDataModel) {
-        return false;
-    }
 
-    const body = docDataModel.getBody();
+    let body: IDocumentBody | undefined;
+    if (!params.originBody) {
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+        body = docDataModel?.getBody();
+    } else {
+        body = originBody;
+    }
+    if (!body) return false;
+
+    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const selection = params.selection ?? textSelectionManagerService.getActiveTextRangeWithStyle();
     if (!selection || !body) {
         return false;

@@ -77,6 +77,7 @@ export class DocUniFormulaInputController extends Disposable {
                     this._showPopup({
                         startIndex: activeRange.startOffset! - 1,
                         unitId: focusedUnit.getUnitId(),
+                        position: {},
                     });
                 } else if (this._formulaPopupSrv.popupInfo) {
                     this._closePopup();
@@ -108,7 +109,7 @@ export class DocUniFormulaInputController extends Disposable {
                 this._showPopup({
                     startIndex,
                     unitId: focusedUnit.getUnitId(),
-                    rangeId,
+                    position: { rangeId },
                     type: 'existing',
                 });
             } else {

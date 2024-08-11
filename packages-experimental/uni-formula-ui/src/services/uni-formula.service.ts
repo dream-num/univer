@@ -21,7 +21,6 @@ import type {
     IDisposable,
     IDocumentBody,
     Nullable,
-
     SlideDataModel } from '@univerjs/core';
 import {
     CommandType,
@@ -40,10 +39,12 @@ import {
 import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { CanvasView } from '@univerjs/slides';
 import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
 import { take } from 'rxjs';
-import type { ISlidePopupPosition } from '../commands/operations/operation';
+import { RichText } from '@univerjs/engine-render';
+import { type IDocPopupPosition, type ISlidePopupPosition, isSlidePosition } from '../commands/operations/operation';
 
 const PSEUDO_SUBUNIT = 'PSEUDO_SUBUNIT';
 
@@ -56,8 +57,7 @@ export interface IUpdateSlideUniFormulaCacheCommandParams {
 export interface IUpdateDocUniFormulaCacheCommandParams {
     /** The doc in which formula results changed. */
     unitId: string;
-    /** Range ids. */
-    ids: string[];
+    positions: ISlidePopupPosition[] | IDocPopupPosition[];
     /** Calculation results. */
     cache: IDocFormulaCache[];
 }
@@ -70,13 +70,53 @@ export const UpdateSlideUniFormulaCacheCommand: ICommand<IUpdateSlideUniFormulaC
 
         const uniFormulaService = accessor.get(IUniFormulaService);
         const instanceService = accessor.get(IUniverInstanceService);
-        const commandService = accessor.get(ICommandService);
+        const slideCanvasView = accessor.get(CanvasView);
 
         const slide = instanceService.getUnit<SlideDataModel>(unitId, UniverInstanceType.UNIVER_SLIDE);
         if (!slide) return true;
 
         return positions.every((position, index) => {
-            // TODO@wzhudev: how to directly change the content of a slide element?
+            // TODO@wzhudev: we should get the slide's rendering modules to update the formula results.
+            // Note that this is very hacky because Univer Slide hasn't provide any mutations to
+            // modify its content. This is just for POC of uni formula.
+            const scene = slideCanvasView.getRenderUnitByPageId(position.pageId).scene;
+            if (!scene) return false;
+
+            const element = scene.getObject(position.elementId);
+            if (!element || !(element instanceof RichText)) return false;
+
+            const documentModel = element.documentModel;
+            const originBody = documentModel.getBody()!;
+            const range = originBody.customRanges?.find((r) => r.rangeId === position.rangeId);
+            if (!range) return false;
+
+            const dataStream = makeCustomRangeStream(`${cache[index].v ?? ''}`);
+            const body: IDocumentBody = {
+                dataStream,
+                customRanges: [{
+                    startIndex: 0,
+                    endIndex: dataStream.length - 1,
+                    rangeId: position.rangeId!,
+                    rangeType: CustomRangeType.UNI_FORMULA,
+                    wholeEntity: true,
+                }],
+            };
+
+            const redoMutation = replaceSelectionFactory(accessor, {
+                unitId,
+                originBody,
+                body,
+                selection: makeSelection(range.startIndex, range.endIndex),
+            });
+
+            if (!redoMutation) return false;
+
+            // This is pretty annoying...
+            element.documentModel.apply(redoMutation.params.actions);
+            element.refreshDocumentByDocData(); // trigger re-render
+
+            uniFormulaService.updateSlideFormulaResults(unitId, position.pageId, position.elementId, position.rangeId!, cache[index]);
+
             return true;
         });
     },
@@ -91,7 +131,7 @@ export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCache
     type: CommandType.COMMAND,
     id: 'uni-formula.mutation.update-doc-uni-formula-cache',
     handler(accessor, params: IUpdateDocUniFormulaCacheCommandParams) {
-        const { unitId, ids, cache } = params;
+        const { unitId, positions, cache } = params;
 
         const uniFormulaService = accessor.get(IUniFormulaService);
         const instanceService = accessor.get(IUniverInstanceService);
@@ -107,7 +147,8 @@ export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCache
             return body?.customRanges?.find((r) => r.rangeId === rangeId);
         }
 
-        const saveCacheResult = uniFormulaService.updateFormulaResults(unitId, ids, cache);
+        const ids = positions.map((position) => position.rangeId!);
+        const saveCacheResult = uniFormulaService.updateDocFormulaResults(unitId, ids, cache);
         if (!saveCacheResult) return false;
 
         return ids.every((id, index) => {
@@ -162,7 +203,10 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
     ) {
         super(resourceManagerService, commandSrv, instanceSrv);
 
-        commandSrv.registerCommand(UpdateDocUniFormulaCacheCommand);
+        [
+            UpdateSlideUniFormulaCacheCommand,
+            UpdateDocUniFormulaCacheCommand,
+        ].forEach((command) => commandSrv.registerCommand(command));
 
         // Only able to perform formula calculation after a sheet is loaded.
         // FIXME: the formula engine is not unit-agnostic.
@@ -307,32 +351,52 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
                         const key = this._formulaIdToKey.get(formulaId);
                         if (!key) return null;
 
-                        const item = this._docFormulas.get(key);
-                        if (!item) return null;
+                        const docItem = this._docFormulas.get(key);
+                        if (docItem) {
+                            const r = result.result?.[0][0];
+                            if (docItem.v === r?.v && docItem.t === r?.t) return null;
 
-                        const r = result.result?.[0][0];
-                        if (item.v === r?.v && item.t === r?.t) return null;
+                            return { position: { rangeId: docItem.rangeId }, unitId: docItem.unitId, cache: r };
+                        };
 
-                        return { id: item.rangeId, unitId: item.unitId, cache: r };
+                        const slideItem = this._slideFormulas.get(key);
+                        if (slideItem) {
+                            const r = result.result?.[0][0];
+                            if (slideItem.v === r?.v && slideItem.t === r?.t) return null;
+
+                            return {
+                                unitId: slideItem.unitId,
+                                position: {
+                                    elementId: slideItem.elementId,
+                                    rangeId: slideItem.rangeId,
+                                    pageId: slideItem.pageId,
+                                },
+                                cache: r,
+                            };
+                        }
+
+                        return null;
                     }).reduce((previous, curr) => {
                         if (!curr || !curr.cache) return previous;
 
                         if (!previous.unitId) previous.unitId = curr.unitId;
-                        previous.ids.push(curr.id);
+                        previous.positions.push(curr.position);
                         previous.cache.push(curr.cache);
 
                         return previous;
                     }, {
                         unitId: '',
-                        ids: [] as string[],
+                        positions: [] as (ISlidePopupPosition | IDocPopupPosition)[],
                         cache: [] as Pick<ICellData, 'v' | 't'>[],
                     });
 
-                    if (mutationParam.ids.length === 0) return;
+                    if (mutationParam.positions.length === 0) return;
 
-                    this._commandSrv.executeCommand(UpdateDocUniFormulaCacheCommand.id, mutationParam as IUpdateDocUniFormulaCacheCommandParams);
-
-                    // TODO@wzhudev: handle slide formula cache updating.
+                    if (isSlidePosition(mutationParam.positions[0])) {
+                        this._commandSrv.executeCommand(UpdateSlideUniFormulaCacheCommand.id, mutationParam as IUpdateSlideUniFormulaCacheCommandParams);
+                    } else {
+                        this._commandSrv.executeCommand(UpdateDocUniFormulaCacheCommand.id, mutationParam as IUpdateDocUniFormulaCacheCommandParams);
+                    }
                 }
             }
         }));

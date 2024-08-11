@@ -78,7 +78,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         // }));
     }
 
-    private _setEditorRect(targetObject: RichText) {
+    private _setEditorRect(pageId: string, targetObject: RichText) {
         this._curRichText = targetObject as RichText;
         const { scene, engine } = this._renderContext;
         const unitId = this._renderContext.unitId;
@@ -87,7 +87,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             scene,
             engine,
             unitId,
-            pageId: '',
+            pageId, // FIXME: wtf this is an empty string?
             richTextObj: targetObject,
         };
 
@@ -133,7 +133,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
                 if (object.objectType !== ObjectType.RICH_TEXT) {
                     this.pickOtherObjects();
                 } else {
-                    this.startEditing(object as RichText);
+                    this.startEditing(page.id, object as RichText);
                 }
             }));
 
@@ -174,10 +174,10 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
      * TODO @lumixraku need scale param
      * @param target
      */
-    startEditing(target: RichText) {
+    startEditing(pageId: string, target: RichText) {
         // this.setSlideTextEditor$.next({ content, rect });
 
-        this._setEditorRect(target);
+        this._setEditorRect(pageId, target);
         this.setEditorVisible(true);
     }
 

@@ -70,8 +70,8 @@ export class SlideUniFormulaInputController extends Disposable {
                     // NOTE: we can avoid manually get the SlideEditorBridgeService when we split
                     // slide formula editor plugin into a separate package.
                     const editorBridgeService = this._injector.get(ISlideEditorBridgeService);
-                    const editorReact = editorBridgeService.getEditorRect();
-                    const { pageId, richTextObj } = editorReact;
+                    const editorRect = editorBridgeService.getEditorRect();
+                    const { pageId, richTextObj } = editorRect;
                     const { oKey } = richTextObj;
                     this._showPopup({
                         startIndex: activeRange.startOffset! - 1,

@@ -59,6 +59,8 @@ export class RichText extends BaseObject {
 
     private _documents!: Documents;
 
+    documentModel!: DocumentDataModel;
+
     /**
      * fontFamily
      */
@@ -145,7 +147,7 @@ export class RichText extends BaseObject {
             this._documentData = this._convertToDocumentData(props.text || '');
         }
 
-        const docModel = new DocumentDataModel(this._documentData);
+        const docModel = this.documentModel = new DocumentDataModel(this._documentData);
         const docViewModel = new DocumentViewModel(docModel);
 
         this._documentSkeleton = DocumentSkeleton.create(docViewModel, this._localeService);
@@ -356,7 +358,7 @@ export class RichText extends BaseObject {
      * now it is invoked when transformByState(change editor size) & end of editing
      */
     refreshDocumentByDocData() {
-        const docModel = new DocumentDataModel(this._documentData);
+        const docModel = this.documentModel = new DocumentDataModel(this._documentData);
         const docViewModel = new DocumentViewModel(docModel);
 
         this._documentSkeleton = DocumentSkeleton.create(docViewModel, this._localeService);

@@ -33,6 +33,7 @@ import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test moving rows & cols', () => {
     let get: Injector['get'];
+    let has: Injector['has'];
     const getWorksheet = () => {
         const univerInstanceService = get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -88,7 +89,7 @@ describe('Test moving rows & cols', () => {
                     rangeType: 2,
                 },
             };
-            const undoDeleteParams = RemoveColMutationFactory({ get }, deleteCol);
+            const undoDeleteParams = RemoveColMutationFactory({ get, has }, deleteCol);
 
             expect(undoDeleteParams).toEqual({
                 ...getId(),

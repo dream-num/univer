@@ -148,9 +148,7 @@ export class FormatPainterController extends Disposable {
     private _getUndoRedoMutationInfo(unitId: string, subUnitId: string, range: IRange, format: ISelectionFormatInfo) {
         const sheetInterceptorService = this._sheetInterceptorService;
         const univerInstanceService = this._univerInstanceService;
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
+
         const { merges, styles: stylesMatrix } = format;
         if (!stylesMatrix) return { undos: [], redos: [] };
 
@@ -224,8 +222,8 @@ export class FormatPainterController extends Disposable {
             unitId,
             cellValue: realCellValue ?? cellValue.getMatrix(),
         };
-        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
+        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = this._injector.invoke(
+            SetRangeValuesUndoMutationFactory,
             setRangeValuesMutationParams
         );
 
@@ -259,14 +257,20 @@ export class FormatPainterController extends Disposable {
         mergeRedos.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
 
         // prepare undo mutations
-        const undoRemoveMergeMutationParams = RemoveMergeUndoMutationFactory(accessor, removeMergeMutationParams);
-        const undoMutationParams = AddMergeUndoMutationFactory(accessor, addMergeMutationParams);
+        const undoRemoveMergeMutationParams = this._injector.invoke(
+            RemoveMergeUndoMutationFactory,
+            removeMergeMutationParams
+        );
+        const undoMutationParams = this._injector.invoke(
+            AddMergeUndoMutationFactory,
+            addMergeMutationParams
+        );
         mergeUndos.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
         mergeUndos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
 
         // add set range values mutations to undo redo mutations
         if (willRemoveSomeCell) {
-            const data = getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges);
+            const data = this._injector.invoke((accessor) => getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges));
             mergeRedos.unshift(...data.redos);
             mergeUndos.push(...data.undos);
         }

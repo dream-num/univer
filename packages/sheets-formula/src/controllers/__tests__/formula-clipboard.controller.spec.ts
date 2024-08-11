@@ -28,6 +28,7 @@ import { createCommandTestBed } from './create-command-test-bed';
 describe('Test paste with formula', () => {
     let univer: Univer;
     let get: Injector['get'];
+    let has: Injector['has'];
     let commandService: ICommandService;
     let lexerTreeBuilder: LexerTreeBuilder;
     let formulaDataModel: FormulaDataModel;
@@ -88,6 +89,7 @@ describe('Test paste with formula', () => {
 
             const accessor = {
                 get,
+                has,
             };
 
             const copyInfo = {
@@ -318,6 +320,7 @@ describe('Test paste with formula', () => {
 
             const accessor = {
                 get,
+                has,
             };
 
             const copyInfo = {

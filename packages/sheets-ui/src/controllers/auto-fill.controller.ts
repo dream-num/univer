@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IExecutionOptions, IMutationCommonParams, IMutationInfo, IRange, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommandInfo, IExecutionOptions, IMutationCommonParams, IMutationInfo, IRange, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import {
     Direction,
     Disposable,
@@ -342,11 +342,9 @@ export class AutoFillController extends Disposable {
         if (!subUnitId) return;
 
         this._autoFillService.direction = direction;
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
-        const autoFillSource = rangeToDiscreteRange(source, accessor);
-        const autoFillTarget = rangeToDiscreteRange(target, accessor);
+
+        const autoFillSource = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(source, accessor));
+        const autoFillTarget = this._injector.invoke((accessor: IAccessor) => rangeToDiscreteRange(target, accessor));
 
         if (!autoFillSource || !autoFillTarget) {
             return;
@@ -571,10 +569,6 @@ export class AutoFillController extends Disposable {
             bArray = source.cols;
         }
 
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
-
         aArray.forEach((a) => {
             // a copyDataPiece is an array of original cells in same column or row, depending on direction (horizontal or vertical)
             const copyDataPiece = this._getEmptyCopyDataPiece();
@@ -589,7 +583,7 @@ export class AutoFillController extends Disposable {
                 } else {
                     data = currentCellDatas.getValue(a, b);
                 }
-                const { type, isContinue } = rules.find((r) => r.match(data, accessor)) || otherRule;
+                const { type, isContinue } = rules.find((r) => r.match(data, this._injector)) || otherRule;
                 if (isContinue(prevData, data)) {
                     const typeInfo = copyDataPiece[type];
 
@@ -849,9 +843,6 @@ export class AutoFillController extends Disposable {
             });
         }
 
-        const accessor = {
-            get: this._injector.get.bind(this._injector),
-        };
         // delete cross merge
         const deleteMergeRanges: IRange[] = [];
         const mergeData = this._univerInstanceService
@@ -870,8 +861,9 @@ export class AutoFillController extends Disposable {
             subUnitId,
             ranges: deleteMergeRanges,
         };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-            accessor,
+
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = this._injector.invoke(
+            AddMergeUndoMutationFactory,
             removeMergeMutationParams
         );
 
@@ -886,8 +878,9 @@ export class AutoFillController extends Disposable {
             unitId,
             cellValue: generateNullCellValueRowCol([target]),
         };
-        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
+
+        const undoClearMutationParams: ISetRangeValuesMutationParams = this._injector.invoke(
+            SetRangeValuesUndoMutationFactory,
             clearMutationParams
         );
 
@@ -911,8 +904,8 @@ export class AutoFillController extends Disposable {
             cellValue: cellValue.getMatrix(),
         };
 
-        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
+        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = this._injector.invoke(
+            SetRangeValuesUndoMutationFactory,
             setRangeValuesMutationParams
         );
 
@@ -928,8 +921,9 @@ export class AutoFillController extends Disposable {
                 subUnitId,
                 ranges,
             };
-            const undoRemoveMutationParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-                accessor,
+
+            const undoRemoveMutationParams: IRemoveWorksheetMergeMutationParams = this._injector.invoke(
+                RemoveMergeUndoMutationFactory,
                 addMergeMutationParams
             );
 

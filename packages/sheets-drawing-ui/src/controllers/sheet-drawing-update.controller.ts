@@ -298,7 +298,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
                 // const imageDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
-                if (sheetDrawing == null) {
+                if (sheetDrawing == null || sheetDrawing.unitId !== this._context.unitId) {
                     return;
                 }
 

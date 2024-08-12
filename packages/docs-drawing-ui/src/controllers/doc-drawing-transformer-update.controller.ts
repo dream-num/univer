@@ -154,11 +154,12 @@ export class DocDrawingTransformerController extends Disposable {
                     if (objects.size > 1) {
                         throttleMultipleDrawingUpdate(objects);
                     } else if (objects.size === 1) {
-                        const drawingCache: IDrawingCache = this._transformerCache.values().next().value;
+                        const drawingCache: Nullable<IDrawingCache> = this._transformerCache.values().next().value;
                         const object: BaseObject = objects.values().next().value;
                         const { width, height, top, left, angle } = object;
 
                         if (
+                            drawingCache &&
                             width === drawingCache.width &&
                             height === drawingCache.height &&
                             top === drawingCache.top &&
@@ -183,6 +184,7 @@ export class DocDrawingTransformerController extends Disposable {
         // Handle transformer mouseup.
         this.disposeWithMe(
             toDisposable(
+                // eslint-disable-next-line complexity
                 transformer.changeEnd$.subscribe((state) => {
                     const { objects, offsetX, offsetY } = state;
 
@@ -206,11 +208,12 @@ export class DocDrawingTransformerController extends Disposable {
                     if (objects.size > 1) {
                         this._updateMultipleDrawingDocTransform(objects);
                     } else if (objects.size === 1) {
-                        const drawingCache: IDrawingCache = this._transformerCache.values().next().value;
+                        const drawingCache: Nullable<IDrawingCache> = this._transformerCache.values().next().value;
                         const object: BaseObject = objects.values().next().value;
                         const { width, height, top, left, angle } = object;
 
                         if (
+                            drawingCache &&
                             width === drawingCache.width &&
                             height === drawingCache.height &&
                             top === drawingCache.top &&

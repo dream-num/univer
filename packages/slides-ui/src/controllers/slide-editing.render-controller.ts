@@ -183,7 +183,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         // flow not controllable.
         setTimeout(() => {
             this._cursorStateListener(d);
-        }, 200);
+        }, 1000);
 
         return d;
     }

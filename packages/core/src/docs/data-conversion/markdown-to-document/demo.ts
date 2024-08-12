@@ -20,7 +20,15 @@ export const markdownData = `# Example
 
 ## What is an Agentic Workflow?
 
-An **agentic workflow** is a system that uses AI agents to autonomously pursue complex goals and workflows with limited [direct human supervision](https://promptengineering.org/exploring-agentic-wagentic-workflows-the-power-of-ai-agent-collaborationorkflows-the-power-of-ai-agent-collaboration/)
+| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |
+
+- [ ] Task list
+- [x] Completed task
+
+An **agentic workflow** is a *system* that ~~uses~~ AI agents to autonomously pursue complex goals and workflows with limited [direct human supervision](https://promptengineering.org/exploring-agentic-wagentic-workflows-the-power-of-ai-agent-collaborationorkflows-the-power-of-ai-agent-collaboration/)
 
 [These AI agents exhibit autonomous decision-making, planning, and adaptive execution to complete multi-step processes](https://www.moveworks.com/us/en/resources/blog/agentic-ai-the-next-evolution-of-enterprise-ai).
 

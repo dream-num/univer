@@ -54,7 +54,7 @@ export class MarkdownToDocumentConvertor {
     constructor(private readonly _markdown: string) {}
 
     convert() {
-        const tokens = marked.lexer(this._markdown, { async: false });
+        const tokens = marked.lexer(this._markdown, { async: false, gfm: true });
 
         const docData: IDocumentData = {
             id: '',
@@ -90,6 +90,8 @@ export class MarkdownToDocumentConvertor {
             settings: {},
 
         };
+
+        console.log(tokens);
 
         this._process(tokens, docData);
 
@@ -147,13 +149,7 @@ export class MarkdownToDocumentConvertor {
                 }
 
                 case 'strong': {
-                    this._strongCache.push(token);
-
-                    if (token.tokens?.length) {
-                        this._process(token.tokens, docData);
-                    }
-
-                    this._strongCache.pop();
+                    this._processString(token, docData);
                     break;
                 }
 
@@ -164,8 +160,19 @@ export class MarkdownToDocumentConvertor {
         }
     }
 
+    private _processString(token: Tokens.Strong | Tokens.Generic, docData: Partial<IDocumentData>) {
+        this._strongCache.push(token);
+
+        if (token.tokens?.length) {
+            this._process(token.tokens, docData);
+        }
+
+        this._strongCache.pop();
+    }
+
     private _processHeading(token: Tokens.Heading | Tokens.Generic, docData: Partial<IDocumentData>) {
         this._headingCache.push(token);
+
         if (token.tokens?.length) {
             this._process(token.tokens, docData);
         }

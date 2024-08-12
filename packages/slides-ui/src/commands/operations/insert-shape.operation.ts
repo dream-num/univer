@@ -48,7 +48,8 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
         if (!slideData) return false;
 
         const activePage = slideData.getActivePage()!;
-        const maxIndex = activePage.pageElements ? Math.max(...Object.values(activePage.pageElements).map((element) => element.zIndex)) : 20;
+        const elements = Object.values(activePage.pageElements);
+        const maxIndex = (elements?.length) ? Math.max(...elements.map((element) => element.zIndex)) : 20;
 
         const data = {
             id,

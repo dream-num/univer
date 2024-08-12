@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-export * from './document-data-model';
-export * from './preset-list-type';
-export * from './types';
-export * from './table';
+/**
+ *1 pixel * 0.75 = 1 pt
+ */
+const PX_TO_PT_RATIO = 0.75;
+
+export function ptToPixel(pt: number) {
+    return pt / PX_TO_PT_RATIO;
+}
+
+export function pixelToPt(px: number) {
+    return px * PX_TO_PT_RATIO;
+}

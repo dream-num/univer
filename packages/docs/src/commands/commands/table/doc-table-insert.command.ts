@@ -15,11 +15,11 @@
  */
 
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, getEmptyTableCell, getEmptyTableRow, getTableColumn, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getCommandSkeleton, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getColumnWidths, getEmptyTableCell, getEmptyTableRow, getInsertColumnActionsParams, getInsertColumnBody, getInsertRowActionsParams, getInsertRowBody, getRangeInfoFromRanges, getTableColumn, INSERT_COLUMN_POSITION, INSERT_ROW_POSITION } from './table';
+import { getColumnWidths, getInsertColumnActionsParams, getInsertColumnBody, getInsertRowActionsParams, getInsertRowBody, getRangeInfoFromRanges, INSERT_COLUMN_POSITION, INSERT_ROW_POSITION } from './table';
 
 // Insert rows and columns are in this file.
 

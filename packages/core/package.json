@@ -65,15 +65,20 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@types/lodash.mergewith": "^4.6.9",
         "@univerjs/protocol": "0.1.38",
         "@wendellhu/redi": "0.16.1",
+        "dompurify": "^3.1.6",
+        "jsdom": "^24.1.0",
         "lodash.mergewith": "^4.6.2",
+        "marked": "^14.0.0",
         "nanoid": "5.0.7",
         "numeral": "^2.0.6",
         "ot-json1": "^1.0.2"
     },
     "devDependencies": {
+        "@types/dompurify": "^3.0.5",
+        "@types/jsdom": "^21.1.7",
+        "@types/lodash.mergewith": "^4.6.9",
         "@types/numeral": "^2.0.5",
         "@univerjs/shared": "workspace:*",
         "rxjs": "^7.8.1",

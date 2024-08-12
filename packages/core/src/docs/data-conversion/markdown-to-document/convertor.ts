@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-export * from './document-data-model';
-export * from './preset-list-type';
-export * from './types';
-export * from './table';
+import { marked } from 'marked';
+import { JSDOM } from 'jsdom';
+import createDOMPurify from 'dompurify';
+
+export class MarkdownToDocumentConvertor {
+    constructor(private readonly _markdown: string) {}
+
+    convert() {
+        const rawHtml = marked.parse(this._markdown, { async: false });
+
+        const window = new JSDOM('').window;
+        const DOMPurify = createDOMPurify(window);
+        const html = DOMPurify.sanitize(rawHtml);
+
+        // console.log(html);
+    }
+}

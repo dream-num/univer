@@ -724,9 +724,6 @@ importers:
 
   packages/core:
     dependencies:
-      '@types/lodash.mergewith':
-        specifier: ^4.6.9
-        version: 4.6.9
       '@univerjs/core':
         specifier: workspace:*
         version: 'link:'
@@ -736,9 +733,18 @@ importers:
       '@wendellhu/redi':
         specifier: 0.16.1
         version: 0.16.1
+      dompurify:
+        specifier: ^3.1.6
+        version: 3.1.6
+      jsdom:
+        specifier: ^24.1.0
+        version: 24.1.0
       lodash.mergewith:
         specifier: ^4.6.2
         version: 4.6.2
+      marked:
+        specifier: ^14.0.0
+        version: 14.0.0
       nanoid:
         specifier: 5.0.7
         version: 5.0.7
@@ -752,6 +758,15 @@ importers:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
         version: 18.3.1
     devDependencies:
+      '@types/dompurify':
+        specifier: ^3.0.5
+        version: 3.0.5
+      '@types/jsdom':
+        specifier: ^21.1.7
+        version: 21.1.7
+      '@types/lodash.mergewith':
+        specifier: ^4.6.9
+        version: 4.6.9
       '@types/numeral':
         specifier: ^2.0.5
         version: 2.0.5
@@ -5223,6 +5238,9 @@ packages:
   '@types/doctrine@0.0.9':
     resolution: {integrity: sha512-eOIHzCUSH7SMfonMG1LsC2f8vxBFtho6NGBznK41R84YzPuvSBzrhEps33IsQiOW9+VL6NQ9DbjQJznk/S4uRA==}
 
+  '@types/dompurify@3.0.5':
+    resolution: {integrity: sha512-1Wg0g3BtQF7sSb27fJQAKck1HECM6zV1EB66j8JH9i3LCjYabJa0FSdiSgsD5K/RbrsR0SiraKacLB+T8ZVYAg==}
+
   '@types/emscripten@1.39.13':
     resolution: {integrity: sha512-cFq+fO/isvhvmuP/+Sl4K4jtU6E23DoivtbO4r50e3odaxAiVdbfSYRDdJ4gCdxx+3aRjhphS5ZMwIH4hFy/Cw==}
 
@@ -5261,6 +5279,9 @@ packages:
 
   '@types/http-errors@2.0.4':
     resolution: {integrity: sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA==}
+
+  '@types/jsdom@21.1.7':
+    resolution: {integrity: sha512-yOriVnggzrnQ3a9OKOCxaVuSug3w3/SbOj5i7VwXWZEyUNl3bLF9V3MfxGbZKuwqJOQyRfqXyROBB1CoZLFWzA==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -5358,6 +5379,12 @@ packages:
 
   '@types/stylus@0.48.42':
     resolution: {integrity: sha512-CPGlr5teL4sqdap+EOowMifLuNGeIoLwc0VQ7u/BPxo+ocqiNa5jeVt0H0IVBblEh6ZwX1sGpIQIFnSSr8NBQA==}
+
+  '@types/tough-cookie@4.0.5':
+    resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
+
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
   '@types/unist@2.0.10':
     resolution: {integrity: sha512-IfYcSBWE3hLpBg8+X2SEa8LVkJdJEkT2Ese2aaLs3ptGdVtABxndrMaxuFlQ1qdFf9Q5rDvDpxI3WwgvKFAsQA==}
@@ -6726,6 +6753,9 @@ packages:
   domhandler@4.3.1:
     resolution: {integrity: sha512-GrwoxYN+uWlzO8uhUXRl0P+kHE4GtVPfYzVLcUxPL7KNdHKj66vvlhiweIHqYYXWlw+T8iLMp42Lm67ghw4WMQ==}
     engines: {node: '>= 4'}
+
+  dompurify@3.1.6:
+    resolution: {integrity: sha512-cTOAhc36AalkjtBpfG6O8JimdTMWNXjiePT2xQH/ppBGi/4uIpmj8eKyIkMJErXWARyINV/sB38yf8JCLF5pbQ==}
 
   domutils@2.8.0:
     resolution: {integrity: sha512-w96Cjofp72M5IIhpjgobBimYEfoPjx1Vx0BSX9P30WBdZW2WIKU0T1Bd0kz2eNZ9ikjKgHbEyKx8BB6H1L3h3A==}
@@ -8598,6 +8628,11 @@ packages:
     engines: {node: '>= 10'}
     peerDependencies:
       react: '>= 0.14.0'
+
+  marked@14.0.0:
+    resolution: {integrity: sha512-uIj4+faQ+MgHgwUW1l2PsPglZLOLOT1uErt06dAPtx2kjteLAkbsd/0FiYg/MGS+i7ZKLb7w2WClxHkzOOuryQ==}
+    engines: {node: '>= 18'}
+    hasBin: true
 
   matcher-collection@2.0.1:
     resolution: {integrity: sha512-daE62nS2ZQsDg9raM0IlZzLmI2u+7ZapXBwdoeBUKAYERPDDIc0qNqA8E0Rp2D+gspKR7BgIFP52GeujaGXWeQ==}
@@ -13557,6 +13592,10 @@ snapshots:
 
   '@types/doctrine@0.0.9': {}
 
+  '@types/dompurify@3.0.5':
+    dependencies:
+      '@types/trusted-types': 2.0.7
+
   '@types/emscripten@1.39.13': {}
 
   '@types/escodegen@0.0.6': {}
@@ -13603,6 +13642,12 @@ snapshots:
   '@types/http-cache-semantics@4.0.4': {}
 
   '@types/http-errors@2.0.4': {}
+
+  '@types/jsdom@21.1.7':
+    dependencies:
+      '@types/node': 22.2.0
+      '@types/tough-cookie': 4.0.5
+      parse5: 7.1.2
 
   '@types/json-schema@7.0.15': {}
 
@@ -13703,6 +13748,10 @@ snapshots:
   '@types/stylus@0.48.42':
     dependencies:
       '@types/node': 22.1.0
+
+  '@types/tough-cookie@4.0.5': {}
+
+  '@types/trusted-types@2.0.7': {}
 
   '@types/unist@2.0.10': {}
 
@@ -15221,6 +15270,8 @@ snapshots:
   domhandler@4.3.1:
     dependencies:
       domelementtype: 2.3.0
+
+  dompurify@3.1.6: {}
 
   domutils@2.8.0:
     dependencies:
@@ -17392,6 +17443,8 @@ snapshots:
   markdown-to-jsx@7.4.7(react@18.3.1):
     dependencies:
       react: 18.3.1
+
+  marked@14.0.0: {}
 
   matcher-collection@2.0.1:
     dependencies:

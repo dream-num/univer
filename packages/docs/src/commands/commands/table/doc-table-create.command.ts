@@ -15,11 +15,10 @@
  */
 
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
-import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, genEmptyTable, genTableSource, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { generateParagraphs, getCommandSkeleton, getInsertSelection, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { genEmptyTable, genTableSource } from './table';
 
 export const CreateDocTableCommandId = 'doc.command.create-table';
 

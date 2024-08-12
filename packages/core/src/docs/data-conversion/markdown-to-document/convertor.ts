@@ -16,12 +16,13 @@
 
 import type { Token, Tokens } from 'marked';
 import { marked } from 'marked';
-import type { IBullet, IDocumentData, ITextRun, ITextStyle } from '../../../types/interfaces';
+import type { IBullet, ICustomTable, IDocumentData, ITextRun, ITextStyle } from '../../../types/interfaces';
 import { DocumentFlavor } from '../../../types/interfaces';
 import { BooleanNumber } from '../../../types/enum';
 import { normalizeTextRuns } from '../../data-model/text-x/apply-utils/common';
 import { generateRandomId, Tools } from '../../../shared';
-import { PresetListType } from '../../data-model';
+import { DataStreamTreeTokenType, PresetListType } from '../../data-model';
+import { genTableSource } from '../../data-model/table';
 
 function addParagraphToken(docData: Partial<IDocumentData>, bullet?: IBullet) {
     const body = docData.body!;
@@ -55,19 +56,32 @@ interface IListCache {
     listItemCache: (Tokens.ListItem | Tokens.Generic)[];
 }
 
+const DEFAULT_PAGE_WIDTH = 595 / 0.75;
+const DEFAULT_PAGE_HEIGHT = 842 / 0.75;
+
+interface IMarkdownToDocumentConvertorParams {
+    pageWidth: number;
+    pageHeight: number;
+}
+
 export class MarkdownToDocumentConvertor {
     private _headingCache: (Tokens.Heading | Tokens.Generic)[] = [];
+    private _tableCache: (Tokens.Table | Tokens.Generic)[] = [];
     private _listCache: IListCache[] = [];
     private _strongCache: (Tokens.Strong | Tokens.Generic)[] = [];
+    private _emCache: (Tokens.Em | Tokens.Generic)[] = [];
+    private _delCache: (Tokens.Del | Tokens.Generic)[] = [];
 
     get _listItemCache() {
         return this._listCache[this._listCache.length - 1].listItemCache;
     }
 
-    constructor(private readonly _markdown: string) {}
+    constructor(private readonly _options?: IMarkdownToDocumentConvertorParams) {}
 
-    convert() {
-        const tokens = marked.lexer(this._markdown, { async: false, gfm: true });
+    convert(markdown: string) {
+        const tokens = marked.lexer(markdown, { async: false, gfm: true });
+        const pageWidth = this._options?.pageWidth || DEFAULT_PAGE_WIDTH;
+        const pageHeight = this._options?.pageHeight || DEFAULT_PAGE_HEIGHT;
 
         const docData: IDocumentData = {
             id: '',
@@ -87,8 +101,8 @@ export class MarkdownToDocumentConvertor {
             },
             documentStyle: {
                 pageSize: {
-                    width: 595 / 0.75,
-                    height: 842 / 0.75,
+                    width: pageWidth,
+                    height: pageHeight,
                 },
                 marginTop: 50,
                 marginBottom: 50,
@@ -128,6 +142,11 @@ export class MarkdownToDocumentConvertor {
                     break;
                 }
 
+                case 'table': {
+                    this._processTable(token, docData);
+                    break;
+                }
+
                 case 'space': {
                     this._processSpace(docData);
                     break;
@@ -162,7 +181,17 @@ export class MarkdownToDocumentConvertor {
                 }
 
                 case 'strong': {
-                    this._processString(token, docData);
+                    this._processStrong(token, docData);
+                    break;
+                }
+
+                case 'em': {
+                    this._processEm(token, docData);
+                    break;
+                }
+
+                case 'del': {
+                    this._processDel(token, docData);
                     break;
                 }
 
@@ -173,7 +202,7 @@ export class MarkdownToDocumentConvertor {
         }
     }
 
-    private _processString(token: Tokens.Strong | Tokens.Generic, docData: Partial<IDocumentData>) {
+    private _processStrong(token: Tokens.Strong | Tokens.Generic, docData: Partial<IDocumentData>) {
         this._strongCache.push(token);
 
         if (token.tokens?.length) {
@@ -181,6 +210,26 @@ export class MarkdownToDocumentConvertor {
         }
 
         this._strongCache.pop();
+    }
+
+    private _processEm(token: Tokens.Em | Tokens.Generic, docData: Partial<IDocumentData>) {
+        this._emCache.push(token);
+
+        if (token.tokens?.length) {
+            this._process(token.tokens, docData);
+        }
+
+        this._emCache.pop();
+    }
+
+    private _processDel(token: Tokens.Del | Tokens.Generic, docData: Partial<IDocumentData>) {
+        this._delCache.push(token);
+
+        if (token.tokens?.length) {
+            this._process(token.tokens, docData);
+        }
+
+        this._delCache.pop();
     }
 
     private _processHeading(token: Tokens.Heading | Tokens.Generic, docData: Partial<IDocumentData>) {
@@ -200,6 +249,87 @@ export class MarkdownToDocumentConvertor {
         }
 
         addParagraphToken(docData);
+    }
+
+    private _processTable(token: Tokens.Table | Tokens.Generic, docData: Partial<IDocumentData>) {
+        const pageWidth = this._options?.pageWidth ?? DEFAULT_PAGE_WIDTH;
+
+        this._tableCache.push(token);
+
+        const body = docData.body!;
+        const startIndex = body.dataStream.length;
+
+        body.dataStream += DataStreamTreeTokenType.TABLE_START;
+
+        let rowCount = 0;
+        let colCount = 0;
+
+        if (token.header?.length) {
+            body.dataStream += DataStreamTreeTokenType.TABLE_ROW_START;
+
+            for (const headerCell of token.header) {
+                body.dataStream += DataStreamTreeTokenType.TABLE_CELL_START;
+                const { tokens } = headerCell;
+
+                this._process(tokens, docData);
+
+                // Append \r\n in every table cell.
+                addParagraphToken(docData);
+                addSectionBreakToken(docData);
+
+                body.dataStream += DataStreamTreeTokenType.TABLE_CELL_END;
+            }
+
+            rowCount++;
+
+            body.dataStream += DataStreamTreeTokenType.TABLE_ROW_END;
+
+            colCount = token.header.length;
+        }
+
+        if (token.rows?.length) {
+            for (const row of token.rows) {
+                body.dataStream += DataStreamTreeTokenType.TABLE_ROW_START;
+
+                for (const cell of row) {
+                    body.dataStream += DataStreamTreeTokenType.TABLE_CELL_START;
+                    const { tokens } = cell;
+
+                    this._process(tokens, docData);
+
+                    // Append \r\n in every table cell.
+                    addParagraphToken(docData);
+                    addSectionBreakToken(docData);
+
+                    body.dataStream += DataStreamTreeTokenType.TABLE_CELL_END;
+                }
+
+                body.dataStream += DataStreamTreeTokenType.TABLE_ROW_END;
+
+                rowCount++;
+            }
+        }
+
+        const endIndex = body.dataStream.length;
+        body.dataStream += DataStreamTreeTokenType.TABLE_END;
+
+        addParagraphToken(docData);
+
+        const tableId = Tools.generateRandomId(6);
+
+        const table: ICustomTable = {
+            startIndex,
+            endIndex,
+            tableId,
+        };
+
+        body.tables?.push(table);
+
+        const tableSource = genTableSource(rowCount, colCount, pageWidth / colCount);
+
+        docData.tableSource![tableId] = tableSource;
+
+        this._tableCache.pop();
     }
 
     private _processSpace(docData: Partial<IDocumentData>) {
@@ -249,6 +379,14 @@ export class MarkdownToDocumentConvertor {
 
         if (this._strongCache.length) {
             ts.bl = BooleanNumber.TRUE;
+        }
+
+        if (this._emCache.length) {
+            ts.it = BooleanNumber.TRUE;
+        }
+
+        if (this._delCache.length) {
+            ts.st = { s: BooleanNumber.TRUE };
         }
 
         return {

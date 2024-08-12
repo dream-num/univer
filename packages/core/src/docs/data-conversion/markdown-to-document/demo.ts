@@ -20,7 +20,7 @@ export const markdownData = `# Example
 
 ## What is an Agentic Workflow?
 
-| Syntax      | Description |
+| Sy**nt**ax      | Description |
 | ----------- | ----------- |
 | Header      | Title       |
 | Paragraph   | Text        |
@@ -34,6 +34,11 @@ An **agentic workflow** is a *system* that ~~uses~~ AI agents to autonomously pu
 
 The key features of agentic workflows include:
 
+- hello world
+  another paragraph
+
+foo bar
+
 - **Autonomy**: [The ability to take goal-directed actions with minimal human oversight](https://www.moveworks.com/us/en/resources/blog/agentic-ai-the-next-evolution-of-enterprise-ai)
 - **Reasoning**: [Contextual decision-making to make judgment calls and weigh tradeoffs](https://www.moveworks.com/us/en/resources/blog/agentic-ai-the-next-evolution-of-enterprise-ai)
 
@@ -44,9 +49,9 @@ The key features of agentic workflows include:
 3. **Generative AI Networks**: [Agentic workflows leverage generative AI networks to perform a wide range of actions, from conducting web searches and executing code to manipulating images, significantly extending the utility and application range of LLMs](https://promptengineering.org/exploring-agentic-wagentic-workflows-the-power-of-ai-agent-collaborationorkflows-the-power-of-ai-agent-collaboration/).`;
 
 export function demo() {
-    const convertor = new MarkdownToDocumentConvertor(markdownData);
+    const convertor = new MarkdownToDocumentConvertor();
 
-    const umd = convertor.convert();
+    const umd = convertor.convert(markdownData);
 
     console.log(umd);
 

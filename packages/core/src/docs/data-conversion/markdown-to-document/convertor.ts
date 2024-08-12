@@ -16,7 +16,7 @@
 
 import type { Token, Tokens } from 'marked';
 import { marked } from 'marked';
-import type { IBullet, ICustomRange, IDocumentData, ITextRun, ITextStyle } from '../../../types/interfaces';
+import type { IBullet, ICustomRange, ICustomTable, IDocumentData, ITextRun, ITextStyle } from '../../../types/interfaces';
 import { CustomRangeType, DocumentFlavor } from '../../../types/interfaces';
 import { BooleanNumber } from '../../../types/enum';
 import { normalizeTextRuns } from '../../data-model/text-x/apply-utils/common';
@@ -159,6 +159,7 @@ export class MarkdownToDocumentConvertor {
         return docData;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _process(tokens: Token[], docData: Partial<IDocumentData>) {
         for (const token of tokens) {
             switch (token.type) {

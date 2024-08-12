@@ -198,6 +198,6 @@ export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/de
 export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
 export { nameCharacterCheck } from './shared/name';
 
-export { demo } from './docs/data-conversion/markdown-to-document/demo';
+export { MarkdownToDocumentConvertor } from './docs/data-conversion/markdown-to-document/convertor';
 
 export * from './common/di';

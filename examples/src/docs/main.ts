@@ -15,7 +15,7 @@
  */
 
 /* eslint-disable node/prefer-global/process */
-import { demo, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -29,8 +29,6 @@ import { UniverDocsHyperLinkUIPlugin } from '@univerjs/docs-hyper-link-ui';
 import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
-
-const DATA = demo();
 
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
@@ -80,7 +78,7 @@ univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_DOC, DATA);
+    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
 }
 
 // use for console test

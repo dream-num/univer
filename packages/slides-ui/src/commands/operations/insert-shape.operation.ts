@@ -17,9 +17,10 @@
 import type { IAccessor, ICommand, SlideDataModel } from '@univerjs/core';
 import { BasicShapes, CommandType, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, PageElementType, UniverInstanceType } from '@univerjs/core';
 import { ObjectType } from '@univerjs/engine-render';
-import { CanvasView } from '@univerjs/slides';
+
 import { ISidebarService } from '@univerjs/ui';
 import { COMPONENT_SLIDE_SIDEBAR } from '../../components/sidebar/Sidebar';
+import { CanvasView } from '../../controllers/canvas-view';
 
 export interface IInsertShapeOperationParams {
     unitId: string;

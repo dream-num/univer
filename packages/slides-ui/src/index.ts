@@ -39,3 +39,5 @@ export { UpdateSlideElementOperation } from './commands/operations/update-elemen
 
 export { SlideEditorContainer } from './views/editor-container/EditorContainer';
 export { SLIDE_EDITOR_ID } from './const';
+
+export { CanvasView } from './controllers/canvas-view';

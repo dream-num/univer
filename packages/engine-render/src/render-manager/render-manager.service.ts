@@ -34,6 +34,12 @@ export interface IRenderManagerService extends IDisposable {
     currentRender$: Observable<Nullable<string>>;
 
     addRender(unitId: string, renderer: IRender): void;
+
+    /**
+     * create renderUnit & init deps from renderDependencies by renderUnit's type.
+     * @param unitId
+     * @returns renderUnit:IRender
+     */
     createRender(unitId: string): IRender;
     removeRender(unitId: string): void;
     setCurrent(unitId: string): void;
@@ -68,6 +74,11 @@ export interface IRenderManagerService extends IDisposable {
     has(unitId: string): boolean;
     withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T>;
 
+    /**
+     * add dep to _renderDependencies(type, dep)
+     * @param type
+     * @param depCtor
+     */
     registerRenderModule<T extends UnitModel>(type: UnitType, dep: Dependency<T>): IDisposable;
 }
 
@@ -143,25 +154,35 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         });
     }
 
-    registerRenderModule(type: UnitType, ctor: Dependency): IDisposable {
+    /**
+     * add dep to _renderDependencies(type, dep)
+     * @param type
+     * @param depCtor
+     */
+    registerRenderModule(type: UnitType, depCtor: Dependency): IDisposable {
         if (!this._renderDependencies.has(type)) {
             this._renderDependencies.set(type, []);
         }
 
         const dependencies = this._renderDependencies.get(type)!;
-        dependencies.push(ctor);
+        dependencies.push(depCtor);
 
         for (const [_, render] of this._renderMap) {
             const renderType = render.type;
             if (renderType === type) {
-                this._tryAddRenderDependencies(render, [ctor]);
+                this._tryAddRenderDependencies(render, [depCtor]);
             }
         }
 
-        return toDisposable(() => remove(dependencies, ctor));
+        return toDisposable(() => remove(dependencies, depCtor));
     }
 
-    private _getRenderControllersForType(type: UnitType): Array<Dependency> {
+    /**
+     * get render dependencies from _renderDependencies
+     * @param type
+     * @returns Dependency[]
+     */
+    private _getRenderDepsByType(type: UnitType): Array<Dependency> {
         return Array.from(this._renderDependencies.get(type) ?? []);
     }
 
@@ -169,6 +190,11 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         this._createRender$.next(unitId);
     }
 
+    /**
+     * create renderUnit & init deps from renderDependencies
+     * @param unitId
+     * @returns renderUnit:IRender
+     */
     createRender(unitId: string): IRender {
         const renderer = this._createRender(unitId, new Engine());
         this._renderCreated$.next(renderer);
@@ -201,12 +227,24 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this.getRenderById(current.getUnitId())?.with(id);
     }
 
+    /**
+     * init deps by injector.get(dep), and injector derives from renderer.
+     * @param renderer
+     * @param deps
+     */
     private _tryAddRenderDependencies(renderer: IRender, deps: Dependency[]): void {
         if (renderer instanceof RenderUnit) {
             renderer.addRenderDependencies(deps);
         }
     }
 
+    /**
+     * create renderUnit & init deps from renderDependencies by renderUnit's type
+     * @param unitId
+     * @param engine
+     * @param isMainScene
+     * @returns renderUnit:IRender
+     */
     private _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
         const existItem = this.getRenderById(unitId);
         let shouldDestroyEngine = true;
@@ -232,7 +270,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
         if (unit) {
             const type = this._univerInstanceService.getUnitType(unitId);
-            const ctors = this._getRenderControllersForType(type);
+            const ctorOfDeps = this._getRenderDepsByType(type);
+
             renderUnit = this._injector.createInstance(RenderUnit, {
                 unit,
                 engine,
@@ -240,7 +279,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 isMainScene,
             });
 
-            this._tryAddRenderDependencies(renderUnit, ctors);
+            // init deps
+            this._tryAddRenderDependencies(renderUnit, ctorOfDeps);
         } else {
             // For slide pages
             renderUnit = {
@@ -256,7 +296,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 with(_dependency) {
                     return null;
                 },
-            };
+            } as IRender;
         }
 
         this._addRenderUnit(unitId, renderUnit);
@@ -298,6 +338,11 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return [...this.getRenderAll().values()][0];
     }
 
+    /**
+     * get RenderUnit from this._renderMap
+     * @param unitId
+     * @returns RenderUnit, aka IRender
+     */
     getRenderById(unitId: string): Nullable<IRender> {
         return this._renderMap.get(unitId);
     }

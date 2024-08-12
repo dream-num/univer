@@ -32,7 +32,7 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Liquid, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
-import { debounceTime, filter, first } from 'rxjs';
+import { debounceTime, filter } from 'rxjs';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 interface IDrawingParamsWithBehindText {
@@ -292,17 +292,16 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             this._refreshDrawing(skeleton);
 
             this._drawingManagerService.initializeNotification(this._context.unitId);
-        }
+        };
 
-        if(this._lifecycleService.stage === LifecycleStages.Steady){
+        if (this._lifecycleService.stage === LifecycleStages.Steady) {
             // wait for render unit ready
             // TODO@weird94 need refactor later
             setTimeout(() => {
                 init();
-            }, 1000)
+            }, 1000);
         } else {
             this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Steady)).subscribe(init);
         }
-
     }
 }

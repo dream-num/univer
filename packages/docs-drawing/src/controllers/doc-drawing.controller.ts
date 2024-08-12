@@ -95,7 +95,7 @@ export class DocDrawingController extends Disposable {
     }
 
     private _initDataLoader(unitId: string): boolean {
-        const dataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC,);
+        const dataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (!dataModel) {
             return false;
         }

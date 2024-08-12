@@ -21,6 +21,7 @@ import { CanvasView } from '@univerjs/slides';
 
 export interface IInsertImageOperationParams {
     files: Nullable<File[]>;
+    unitId: string;
 };
 
 export const InsertSlideFloatImageOperation: ICommand<IInsertImageOperationParams> = {
@@ -36,9 +37,16 @@ export const InsertSlideFloatImageOperation: ICommand<IInsertImageOperationParam
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
         const { width, height, image } = await getImageSize(base64Cache || '');
 
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        if (!slideData) return false;
+
+        const activePage = slideData.getActivePage()!;
+        const maxIndex = activePage.pageElements ? Math.max(...Object.values(activePage.pageElements).map((element) => element.zIndex)) : 20;
+
         const data = {
             id: imageId,
-            zIndex: 20,
+            zIndex: maxIndex + 1,
             left: 0,
             top: 0,
             width,
@@ -56,12 +64,6 @@ export const InsertSlideFloatImageOperation: ICommand<IInsertImageOperationParam
                 },
             },
         };
-
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-        if (!slideData) return false;
-
-        const activePage = slideData.getActivePage()!;
 
         activePage.pageElements[imageId] = data;
         // console.log(activePage.id);

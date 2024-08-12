@@ -19,6 +19,7 @@ import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univer
 import { CanvasView } from '@univerjs/slides';
 
 export interface IDeleteElementOperationParams {
+    unitId: string;
     id: string;
 };
 

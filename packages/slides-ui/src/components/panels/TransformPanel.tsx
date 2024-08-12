@@ -200,6 +200,7 @@ export default function TransformPanel(props: IProps) {
         if (!val || !object) return;
 
         commandService.executeCommand(UpdateSlideElementOperation.id, {
+            unitId,
             oKey: object.oKey,
             props: {
                 width: val,
@@ -214,6 +215,7 @@ export default function TransformPanel(props: IProps) {
         if (!val || !object) return;
 
         commandService.executeCommand(UpdateSlideElementOperation.id, {
+            unitId,
             oKey: object.oKey,
             props: {
                 height: val,
@@ -228,6 +230,7 @@ export default function TransformPanel(props: IProps) {
         if (!val || !object) return;
 
         commandService.executeCommand(UpdateSlideElementOperation.id, {
+            unitId,
             oKey: object.oKey,
             props: {
                 left: val,
@@ -242,6 +245,7 @@ export default function TransformPanel(props: IProps) {
         if (!val || !object) return;
 
         commandService.executeCommand(UpdateSlideElementOperation.id, {
+            unitId,
             oKey: object.oKey,
             props: {
                 right: val,
@@ -256,6 +260,7 @@ export default function TransformPanel(props: IProps) {
         if (!val || !object) return;
 
         commandService.executeCommand(UpdateSlideElementOperation.id, {
+            unitId,
             oKey: object.oKey,
             props: {
                 angle: val,

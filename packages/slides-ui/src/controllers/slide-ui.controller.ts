@@ -22,8 +22,8 @@ import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPar
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
-import { InsertSlideShapeRectangleOperation, ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
-import { SlideAddTextOperation } from '../commands/operations/insert-text.operation';
+import { InsertSlideShapeRectangleCommand, InsertSlideShapeRectangleOperation, ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
+import { SlideAddTextCommand, SlideAddTextOperation } from '../commands/operations/insert-text.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
@@ -102,7 +102,9 @@ export class SlidesUIController extends Disposable {
             SetSlidePageThumbOperation,
             InsertSlideFloatImageOperation,
             SlideAddTextOperation,
+            SlideAddTextCommand,
             InsertSlideShapeRectangleOperation,
+            InsertSlideShapeRectangleCommand,
             ToggleSlideEditSidebarOperation,
             DeleteSlideElementOperation,
             UpdateSlideElementOperation,

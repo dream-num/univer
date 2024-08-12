@@ -15,9 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, useDependency } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, useDependency } from '@univerjs/core';
 import React, { useRef } from 'react';
 import type { ICustomComponentProps } from '@univerjs/ui';
+import { useObservable } from '@univerjs/ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST } from '@univerjs/drawing';
 import { InsertSlideFloatImageOperation } from '../../commands/operations/insert-image.operation';
 import styles from './index.module.less';
@@ -31,6 +32,8 @@ export const UploadFileMenu = (props: IUploadFileProps) => {
     const { type } = props;
 
     const commandService = useDependency(ICommandService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const focused = useObservable(univerInstanceService.focused$);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,7 +53,7 @@ export const UploadFileMenu = (props: IUploadFileProps) => {
         const files: File[] = Array.from(fileList);
 
         if (type === UploadFileType.floatImage) {
-            commandService.executeCommand(InsertSlideFloatImageOperation.id, { files });
+            commandService.executeCommand(InsertSlideFloatImageOperation.id, { files, unitId: focused });
         }
 
         if (fileInputRef.current) {

@@ -55,6 +55,7 @@ export default function ArrangePanel(props: IProps) {
             fill: color,
         });
         commandService.executeCommand(UpdateSlideElementOperation.id, {
+            unitId,
             oKey: object?.oKey,
             props: {
                 shape: {

@@ -18,13 +18,13 @@ import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { SlideAddTextOperation } from '../commands/operations/insert-text.operation';
+import { SlideAddTextCommand } from '../commands/operations/insert-text.operation';
 
 export const TEXT_ICON_ID = 'text-single';
 
 export function SlideAddTextMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
     return {
-        id: SlideAddTextOperation.id,
+        id: SlideAddTextCommand.id,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         type: MenuItemType.BUTTON,
         icon: TEXT_ICON_ID,

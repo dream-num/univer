@@ -94,12 +94,12 @@ export function UniSlideSideBar() {
     }, []);
 
     const activatePage = useCallback((page: string) => {
-        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page });
-    }, [commandService]);
+        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page, unitId: currentSlide?.getUnitId() });
+    }, [commandService, currentSlide]);
 
     const handleAppendSlide = useCallback(() => {
-        commandService.syncExecuteCommand(AppendSlideOperation.id);
-    }, [commandService]);
+        commandService.syncExecuteCommand(AppendSlideOperation.id, { unitId: currentSlide?.getUnitId() });
+    }, [commandService, currentSlide]);
 
     return (
         <div className={styles.uniSlideBar} ref={slideBarRef}>

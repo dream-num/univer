@@ -20,7 +20,7 @@ import { createInternalEditorID, ICommandService, isValidRange, IUniverInstanceS
 import type { IUnitRangeWithName, Workbook } from '@univerjs/core';
 import { RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { AddHyperLinkCommand, ERROR_RANGE, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
+import { ERROR_RANGE, HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
@@ -28,6 +28,8 @@ import { SheetsHyperLinkResolverService } from '../../services/resolver.service'
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
 import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
 import { LinkType, SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
+import { AddHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
+import { UpdateHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
 import styles from './index.module.less';
 
 export const CellLinkEdit = () => {

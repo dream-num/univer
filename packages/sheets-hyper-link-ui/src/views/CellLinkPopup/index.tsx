@@ -15,7 +15,7 @@
  */
 
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { CancelHyperLinkCommand, HyperLinkModel } from '@univerjs/sheets-hyper-link';
+import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import React, { useEffect, useState } from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import cs from 'clsx';
@@ -25,6 +25,7 @@ import type { IHyperLinkPopup } from '../../services/popup.service';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
+import { CancelHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
 import styles from './index.module.less';
 
 const iconsMap = {

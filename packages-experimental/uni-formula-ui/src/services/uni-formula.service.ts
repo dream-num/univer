@@ -21,7 +21,7 @@ import type {
     IDisposable,
     IDocumentBody,
     Nullable,
-} from '@univerjs/core';
+    SlideDataModel } from '@univerjs/core';
 import {
     CommandType,
     CustomRangeType,
@@ -39,22 +39,88 @@ import {
 import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import type { IDocFormulaCache } from '@univerjs/uni-formula';
+import { CanvasView } from '@univerjs/slides';
+import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
 import { take } from 'rxjs';
+import { RichText } from '@univerjs/engine-render';
+import { type IDocPopupPosition, type ISlidePopupPosition, isSlidePosition } from '../commands/operations/operation';
 
-const DOC_PSEUDO_SUBUNIT = 'DOC_PSEUDO_SUBUNIT';
-/**
- * Update calculating result in a batch.
- */
+const PSEUDO_SUBUNIT = 'PSEUDO_SUBUNIT';
+
+export interface IUpdateSlideUniFormulaCacheCommandParams {
+    unitId: string;
+    positions: ISlidePopupPosition[];
+    cache: ISlideFormulaCache[];
+}
+
 export interface IUpdateDocUniFormulaCacheCommandParams {
     /** The doc in which formula results changed. */
     unitId: string;
-    /** Range ids. */
-    ids: string[];
+    positions: ISlidePopupPosition[] | IDocPopupPosition[];
     /** Calculation results. */
     cache: IDocFormulaCache[];
 }
+
+export const UpdateSlideUniFormulaCacheCommand: ICommand<IUpdateSlideUniFormulaCacheCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'uni-formula.mutation.update-slide-uni-formula-cache',
+    handler(accessor, params: IUpdateSlideUniFormulaCacheCommandParams) {
+        const { unitId, positions, cache } = params;
+
+        const uniFormulaService = accessor.get(IUniFormulaService);
+        const instanceService = accessor.get(IUniverInstanceService);
+        const slideCanvasView = accessor.get(CanvasView);
+
+        const slide = instanceService.getUnit<SlideDataModel>(unitId, UniverInstanceType.UNIVER_SLIDE);
+        if (!slide) return true;
+
+        return positions.every((position, index) => {
+            // TODO@wzhudev: we should get the slide's rendering modules to update the formula results.
+            // Note that this is very hacky because Univer Slide hasn't provide any mutations to
+            // modify its content. This is just for POC of uni formula.
+            const scene = slideCanvasView.getRenderUnitByPageId(position.pageId).scene;
+            if (!scene) return false;
+
+            const element = scene.getObject(position.elementId);
+            if (!element || !(element instanceof RichText)) return false;
+
+            const documentModel = element.documentModel;
+            const originBody = documentModel.getBody()!;
+            const range = originBody.customRanges?.find((r) => r.rangeId === position.rangeId);
+            if (!range) return false;
+
+            const dataStream = makeCustomRangeStream(`${cache[index].v ?? ''}`);
+            const body: IDocumentBody = {
+                dataStream,
+                customRanges: [{
+                    startIndex: 0,
+                    endIndex: dataStream.length - 1,
+                    rangeId: position.rangeId!,
+                    rangeType: CustomRangeType.UNI_FORMULA,
+                    wholeEntity: true,
+                }],
+            };
+
+            const redoMutation = replaceSelectionFactory(accessor, {
+                unitId,
+                originBody,
+                body,
+                selection: makeSelection(range.startIndex, range.endIndex),
+            });
+
+            if (!redoMutation) return false;
+
+            // This is pretty annoying...
+            element.documentModel.apply(redoMutation.params.actions);
+            element.refreshDocumentByDocData(); // trigger re-render
+
+            uniFormulaService.updateSlideFormulaResults(unitId, position.pageId, position.elementId, position.rangeId!, cache[index]);
+
+            return true;
+        });
+    },
+};
 
 /**
  * This command is internal. It should not be exposed to third-party developers.
@@ -63,25 +129,26 @@ export interface IUpdateDocUniFormulaCacheCommandParams {
  */
 export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCacheCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'doc.mutation.update-doc-uni-formula-cache',
+    id: 'uni-formula.mutation.update-doc-uni-formula-cache',
     handler(accessor, params: IUpdateDocUniFormulaCacheCommandParams) {
-        const { unitId, ids, cache } = params;
+        const { unitId, positions, cache } = params;
 
         const uniFormulaService = accessor.get(IUniFormulaService);
         const instanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const data = instanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const doc = instanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        // The document may have not loaded on this client. We are safe to ignore cache updating.
+        if (!doc) return true;
 
-        /** The document may have not loaded on this client. We are safe to ignore cache updating. */
-        if (!data) return true;
-        const body = data.getBody();
+        const body = doc.getBody();
 
         function getRange(rangeId: string) {
             return body?.customRanges?.find((r) => r.rangeId === rangeId);
         }
 
-        const saveCacheResult = uniFormulaService.updateFormulaResults(unitId, ids, cache);
+        const ids = positions.map((position) => position.rangeId!);
+        const saveCacheResult = uniFormulaService.updateDocFormulaResults(unitId, ids, cache);
         if (!saveCacheResult) return false;
 
         return ids.every((id, index) => {
@@ -136,7 +203,10 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
     ) {
         super(resourceManagerService, commandSrv, instanceSrv);
 
-        commandSrv.registerCommand(UpdateDocUniFormulaCacheCommand);
+        [
+            UpdateSlideUniFormulaCacheCommand,
+            UpdateDocUniFormulaCacheCommand,
+        ].forEach((command) => commandSrv.registerCommand(command));
 
         // Only able to perform formula calculation after a sheet is loaded.
         // FIXME: the formula engine is not unit-agnostic.
@@ -164,7 +234,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             const pseudoId = getPseudoUnitKey(unitId);
             this._checkSyncingUnit(pseudoId);
 
-            const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, DOC_PSEUDO_SUBUNIT, f);
+            const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, PSEUDO_SUBUNIT, f);
             this._docFormulas.set(key, { unitId, rangeId, f, formulaId: id, v, t });
             this._formulaIdToKey.set(id, key);
 
@@ -174,6 +244,36 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         }
 
         return toDisposable(() => this.unregisterDocFormula(unitId, rangeId));
+    }
+
+    override registerSlideFormula(
+        unitId: string,
+        pageId: string,
+        elementId: string,
+        rangeId: string,
+        f: string,
+        v: ICellData['v'],
+        t: ICellData['t']
+    ): IDisposable {
+        const key = getSlideFormulaKey(unitId, pageId, elementId, rangeId);
+        if (this._slideFormulas.has(key)) {
+            throw new Error(`[UniFormulaService]: cannot register formula ${key} when it is already registered!`);
+        }
+
+        if (this._canPerformFormulaCalculation) {
+            const pseudoId = getPseudoUnitKey(unitId);
+            this._checkSyncingUnit(pseudoId);
+
+            const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, PSEUDO_SUBUNIT, f);
+            this._slideFormulas.set(key, { unitId, pageId, elementId, rangeId, f, formulaId: id, v, t });
+            this._formulaIdToKey.set(id, key);
+
+            this._checkResultSubscription();
+        } else {
+            this._slideFormulas.set(key, { unitId, pageId, elementId, rangeId, f, formulaId: '', v, t });
+        }
+
+        return toDisposable(() => this.unregisterSlideFormula(unitId, pageId, elementId, rangeId));
     }
 
     override unregisterDocFormula(unitId: string, rangeId: string): void {
@@ -186,11 +286,28 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
         this._dataSyncDisposables.get(pseudoId)?.dec();
 
         if (this._canPerformFormulaCalculation) {
-            this._registerOtherFormulaSrv.deleteFormula(pseudoId, DOC_PSEUDO_SUBUNIT, [item.formulaId]);
+            this._registerOtherFormulaSrv.deleteFormula(pseudoId, PSEUDO_SUBUNIT, [item.formulaId]);
             this._formulaIdToKey.delete(item.formulaId);
         }
 
         this._docFormulas.delete(key);
+    }
+
+    override unregisterSlideFormula(unitId: string, pageId: string, elementId: string, formulaId: string): void {
+        const key = getSlideFormulaKey(unitId, pageId, elementId, formulaId);
+        const item = this._slideFormulas.get(key);
+        if (!item) return;
+
+        const pseudoId = getPseudoUnitKey(unitId);
+        this._checkDisposingResultSubscription();
+        this._dataSyncDisposables.get(pseudoId)?.dec();
+
+        if (this._canPerformFormulaCalculation) {
+            this._registerOtherFormulaSrv.deleteFormula(pseudoId, PSEUDO_SUBUNIT, [item.formulaId]);
+            this._formulaIdToKey.delete(item.formulaId);
+        }
+
+        this._slideFormulas.delete(key);
     }
 
     private _initFormulaRegistration(): void {
@@ -202,7 +319,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
                 const pseudoId = getPseudoUnitKey(unitId);
                 this._checkSyncingUnit(pseudoId);
 
-                const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, DOC_PSEUDO_SUBUNIT, f);
+                const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, PSEUDO_SUBUNIT, f);
                 value.formulaId = id;
                 this._formulaIdToKey.set(id, key);
             }
@@ -227,37 +344,59 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
 
         this._resultSubscription = toDisposable(this._registerOtherFormulaSrv.formulaResult$.subscribe((resultMap) => {
             for (const resultOfUnit in resultMap) {
-                const results = resultMap[resultOfUnit][DOC_PSEUDO_SUBUNIT];
+                const results = resultMap[resultOfUnit][PSEUDO_SUBUNIT];
                 if (results) {
                     const mutationParam = results.map((result) => {
                         const formulaId = result.formulaId;
                         const key = this._formulaIdToKey.get(formulaId);
                         if (!key) return null;
 
-                        const item = this._docFormulas.get(key);
-                        if (!item) return null;
+                        const docItem = this._docFormulas.get(key);
+                        if (docItem) {
+                            const r = result.result?.[0][0];
+                            if (docItem.v === r?.v && docItem.t === r?.t) return null;
 
-                        const r = result.result?.[0][0];
-                        if (item.v === r?.v && item.t === r?.t) return null;
+                            return { position: { rangeId: docItem.rangeId }, unitId: docItem.unitId, cache: r };
+                        };
 
-                        return { id: item.rangeId, unitId: item.unitId, cache: r };
+                        const slideItem = this._slideFormulas.get(key);
+                        if (slideItem) {
+                            const r = result.result?.[0][0];
+                            if (slideItem.v === r?.v && slideItem.t === r?.t) return null;
+
+                            return {
+                                unitId: slideItem.unitId,
+                                position: {
+                                    elementId: slideItem.elementId,
+                                    rangeId: slideItem.rangeId,
+                                    pageId: slideItem.pageId,
+                                },
+                                cache: r,
+                            };
+                        }
+
+                        return null;
                     }).reduce((previous, curr) => {
                         if (!curr || !curr.cache) return previous;
 
                         if (!previous.unitId) previous.unitId = curr.unitId;
-                        previous.ids.push(curr.id);
+                        previous.positions.push(curr.position);
                         previous.cache.push(curr.cache);
 
                         return previous;
                     }, {
                         unitId: '',
-                        ids: [] as string[],
+                        positions: [] as (ISlidePopupPosition | IDocPopupPosition)[],
                         cache: [] as Pick<ICellData, 'v' | 't'>[],
                     });
 
-                    if (mutationParam.ids.length === 0) return;
+                    if (mutationParam.positions.length === 0) return;
 
-                    this._commandSrv.executeCommand(UpdateDocUniFormulaCacheCommand.id, mutationParam as IUpdateDocUniFormulaCacheCommandParams);
+                    if (isSlidePosition(mutationParam.positions[0])) {
+                        this._commandSrv.executeCommand(UpdateSlideUniFormulaCacheCommand.id, mutationParam as IUpdateSlideUniFormulaCacheCommandParams);
+                    } else {
+                        this._commandSrv.executeCommand(UpdateDocUniFormulaCacheCommand.id, mutationParam as IUpdateDocUniFormulaCacheCommandParams);
+                    }
                 }
             }
         }));
@@ -273,12 +412,6 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             this._resultSubscription = null;
         }
     }
-
-    private _checkFormulaUsable(): void {
-        if (!this._canPerformFormulaCalculation && this._instanceSrv.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length) {
-            this._canPerformFormulaCalculation = true;
-        }
-    }
 }
 
 function getPseudoUnitKey(unitId: string): string {
@@ -287,4 +420,8 @@ function getPseudoUnitKey(unitId: string): string {
 
 function getDocFormulaKey(unitId: string, formulaId: string): string {
     return `pseudo-${unitId}-${formulaId}`;
+}
+
+function getSlideFormulaKey(unitId: string, pageId: string, elementId: string, rangeId: string): string {
+    return `pseudo-${unitId}-${pageId}-${elementId}-${rangeId}`;
 }

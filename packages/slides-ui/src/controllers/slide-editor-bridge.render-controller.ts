@@ -26,6 +26,7 @@ import { Subject } from 'rxjs';
 import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import type { ISlideRichTextProps } from '../type';
+import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 
 // interface ICanvasOffset {
 //     left: number;
@@ -55,7 +56,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(ISlideEditorBridgeService) private readonly _editorBridgeService: ISlideEditorBridgeService,
+        @ISlideEditorBridgeService private readonly _editorBridgeService: ISlideEditorBridgeService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(CanvasView) private readonly _canvasView: CanvasView
@@ -78,7 +79,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         // }));
     }
 
-    private _setEditorRect(targetObject: RichText) {
+    private _setEditorRect(pageId: string, targetObject: RichText) {
         this._curRichText = targetObject as RichText;
         const { scene, engine } = this._renderContext;
         const unitId = this._renderContext.unitId;
@@ -87,7 +88,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             scene,
             engine,
             unitId,
-            pageId: '',
+            pageId, // FIXME: wtf this is an empty string?
             richTextObj: targetObject,
         };
 
@@ -133,7 +134,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
                 if (object.objectType !== ObjectType.RICH_TEXT) {
                     this.pickOtherObjects();
                 } else {
-                    this.startEditing(object as RichText);
+                    this.startEditing(page.id, object as RichText);
                 }
             }));
 
@@ -161,6 +162,29 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         if (!slideData) return false;
         curRichText.refreshDocumentByDocData();
         curRichText.resizeToContentSize();
+
+        this._editorBridgeService.endEditing$.next(curRichText);
+
+        const richText: Record<string, any> = {
+            bl: 1,
+            fs: curRichText.fs,
+            text: curRichText.text,
+        };
+        const textRuns = curRichText.documentData.body?.textRuns;
+        if (textRuns && textRuns.length) {
+            const textRun = textRuns[0];
+            const ts = textRun.ts;
+
+            richText.cl = ts?.cl;
+        }
+
+        this._commandService.executeCommand(UpdateSlideElementOperation.id, {
+            unitId: this._renderContext.unitId,
+            oKey: curRichText?.oKey,
+            props: {
+                richText,
+            },
+        });
         this._curRichText = null;
     }
 
@@ -171,10 +195,10 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
      * TODO @lumixraku need scale param
      * @param target
      */
-    startEditing(target: RichText) {
+    startEditing(pageId: string, target: RichText) {
         // this.setSlideTextEditor$.next({ content, rect });
 
-        this._setEditorRect(target);
+        this._setEditorRect(pageId, target);
         this.setEditorVisible(true);
     }
 

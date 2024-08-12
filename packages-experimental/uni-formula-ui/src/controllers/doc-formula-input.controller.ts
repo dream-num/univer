@@ -17,53 +17,45 @@
 import { CustomRangeType, Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs';
 import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
-import { ComponentManager, IEditorService } from '@univerjs/ui';
+import { IEditorService } from '@univerjs/ui';
 import { DocHoverManagerService } from '@univerjs/docs-ui';
 
-import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/command';
-import type { IShowFormulaPopupOperationParams } from '../commands/operation';
-import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand, ShowFormulaPopupOperation } from '../commands/operation';
-import { DocFormulaPopup, DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY } from '../views/components/DocFormulaPopup';
-import { DocFormulaPopupService } from '../services/formula-popup.service';
+import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/commands/doc.command';
+import type { IShowFormulaPopupOperationParams } from '../commands/operations/operation';
+import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
+import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
+import { UniFormulaPopupService } from '../services/formula-popup.service';
 
 const FORMULA_INPUT_TRIGGER_CHAR = '=';
 
-@OnLifecycle(LifecycleStages.Steady, DocUniFormulaController)
-export class DocUniFormulaController extends Disposable {
+@OnLifecycle(LifecycleStages.Steady, DocUniFormulaInputController)
+export class DocUniFormulaInputController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService,
         @ILogService private readonly _logService: ILogService,
-        @Inject(DocHoverManagerService) private readonly _docHoverManagerService: DocHoverManagerService,
-        @Inject(DocFormulaPopupService) private readonly _docFormulaPopupService: DocFormulaPopupService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(DocHoverManagerService) private readonly _docHoverManagerSrv: DocHoverManagerService,
+        @Inject(UniFormulaPopupService) private readonly _formulaPopupSrv: UniFormulaPopupService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
         this._initKeyboardListeners();
-        this._initComponents();
         this._initCommands();
         this._initHoverListener();
     }
 
     private _initCommands(): void {
         [
-            ShowFormulaPopupOperation,
-            CloseFormulaPopupOperation,
-            ConfirmFormulaPopupCommand,
             AddDocUniFormulaCommand,
             RemoveDocUniFormulaCommand,
             UpdateDocUniFormulaCommand,
         ].forEach((command) => this._commandService.registerCommand(command));
     }
 
-    private _initComponents(): void {
-        this.disposeWithMe(this._componentManager.register(DocFormulaPopup.componentKey, DocFormulaPopup));
-    }
-
     private _initKeyboardListeners(): void {
+        // TODO@wzhudev: only need to listen when a doc unit is focused.
         // The formula input trigger works not exactly the same as Mention.
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             const currentEditor = this._editorService.getFocusEditor();
@@ -72,7 +64,7 @@ export class DocUniFormulaController extends Disposable {
             const { id } = commandInfo;
 
             if (
-                currentEditor?.editorUnitId === DOCS_UNI_FORMULA_EDITOR_UNIT_ID_KEY ||
+                currentEditor?.editorUnitId === UNI_FORMULA_EDITOR_ID ||
                 focusedUnit?.type !== UniverInstanceType.UNIVER_DOC
             ) {
                 return;
@@ -85,8 +77,9 @@ export class DocUniFormulaController extends Disposable {
                     this._showPopup({
                         startIndex: activeRange.startOffset! - 1,
                         unitId: focusedUnit.getUnitId(),
+                        position: {},
                     });
-                } else if (this._docFormulaPopupService.popupInfo) {
+                } else if (this._formulaPopupSrv.popupInfo) {
                     this._closePopup();
                 }
             }
@@ -98,13 +91,13 @@ export class DocUniFormulaController extends Disposable {
     }
 
     private _initHoverListener(): void {
-        this.disposeWithMe(this._docHoverManagerService.activeCustomRanges$.subscribe((customRanges) => {
+        this.disposeWithMe(this._docHoverManagerSrv.activeCustomRanges$.subscribe((customRanges) => {
             const focusedUnit = this._instanceSrv.getFocusedUnit();
 
             if (
                 !focusedUnit ||
-                this._docFormulaPopupService.popupInfo?.type === 'new' ||
-                this._docFormulaPopupService.popupLocked
+                this._formulaPopupSrv.popupInfo?.type === 'new' ||
+                this._formulaPopupSrv.popupLocked
             ) {
                 return;
             }
@@ -116,7 +109,7 @@ export class DocUniFormulaController extends Disposable {
                 this._showPopup({
                     startIndex,
                     unitId: focusedUnit.getUnitId(),
-                    rangeId,
+                    position: { rangeId },
                     type: 'existing',
                 });
             } else {
@@ -126,7 +119,7 @@ export class DocUniFormulaController extends Disposable {
             }
         }));
 
-        this.disposeWithMe(this._docFormulaPopupService.popupHovered$.subscribe((hovered) => {
+        this.disposeWithMe(this._formulaPopupSrv.popupHovered$.subscribe((hovered) => {
             if (hovered) {
                 this._removeTimer();
             }
@@ -151,7 +144,7 @@ export class DocUniFormulaController extends Disposable {
 
     private _closePopupTimer: number | null = null;
     private _closePopup(timeout: number = 0): void {
-        if (!this._docFormulaPopupService.popupInfo) {
+        if (!this._formulaPopupSrv.popupInfo) {
             return;
         }
 

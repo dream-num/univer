@@ -18,7 +18,7 @@ import type { IMenuButtonItem, IMenuItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
-import { InsertSlideShapeRectangleOperation } from '../commands/operations/insert-shape.operation';
+import { InsertSlideShapeRectangleCommand } from '../commands/operations/insert-shape.operation';
 
 export const GRAPH_SINGLE_ICON = 'graph-single';
 export const SHAPE_MENU_ID = 'slide.menu.shape';
@@ -38,7 +38,7 @@ export function SlideShapeMenuFactory(accessor: IAccessor): IMenuItem {
 
 export function UploadSlideFloatShapeMenuFactory(_accessor: IAccessor): IMenuButtonItem {
     return {
-        id: InsertSlideShapeRectangleOperation.id,
+        id: InsertSlideShapeRectangleCommand.id,
         title: 'slide.shape.insert.rectangle',
         type: MenuItemType.BUTTON,
         positions: [SHAPE_MENU_ID],

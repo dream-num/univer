@@ -22,8 +22,9 @@ import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniForm
 
 export interface IAddDocUniFormulaCommandParams {
     unitId: string;
-    f: string;
     startIndex: number;
+
+    f: string;
 }
 
 export const AddDocUniFormulaCommand: ICommand<IAddDocUniFormulaCommandParams> = {

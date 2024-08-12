@@ -32,7 +32,7 @@ import { SLIDE_KEY } from '@univerjs/slides';
 import type { KeyCode } from '@univerjs/ui';
 import { IEditorService } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { SLIDE_EDITOR_ID } from '../const';
 
 // TODO same as @univerjs/slides/views/render/adaptors/index.js
@@ -77,6 +77,13 @@ export interface ISetEditorInfo {
 export interface ISlideEditorBridgeService {
     currentEditRectState$: Observable<Nullable<IEditorBridgeServiceParam>>;
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
+
+    /**
+     * @deprecated This is a temp solution only for demo purposes. We should have mutations to directly write
+     * content to slides.
+     */
+    endEditing$: Subject<RichText>;
+
     // interceptor: InterceptorManager<{
     //     BEFORE_CELL_EDIT: typeof BEFORE_CELL_EDIT;
     //     AFTER_CELL_EDIT: typeof AFTER_CELL_EDIT;
@@ -119,8 +126,12 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
 
     private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visibleParam);
     readonly visible$ = this._visible$.asObservable();
+
     private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visibleParam);
     readonly afterVisible$ = this._afterVisible$.asObservable();
+
+    readonly endEditing$ = new Subject<RichText>();
+
     private _currentEditRectInfo: ISetEditorInfo;
 
     constructor(

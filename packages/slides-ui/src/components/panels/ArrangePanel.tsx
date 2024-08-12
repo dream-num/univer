@@ -82,6 +82,7 @@ export default function ArrangePanel(props: IProps) {
         });
 
         commandService.executeCommand(UpdateSlideElementOperation.id, {
+            unitId,
             oKey: object?.oKey,
             props: {
                 zIndex,

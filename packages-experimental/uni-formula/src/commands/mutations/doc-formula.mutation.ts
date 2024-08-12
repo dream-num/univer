@@ -17,15 +17,13 @@
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-import { IUniFormulaService } from '../services/uni-formula.service';
+import { IUniFormulaService } from '../../services/uni-formula.service';
 
 export interface IAddDocUniFormulaMutationParams {
     unitId: string;
+    rangeId: string;
 
     f: string;
-
-    /** Range id. It is also used as the formula id. */
-    rangeId: string;
 }
 
 export const AddDocUniFormulaMutation: IMutation<IAddDocUniFormulaMutationParams> = {
@@ -41,8 +39,7 @@ export const AddDocUniFormulaMutation: IMutation<IAddDocUniFormulaMutationParams
     },
 };
 
-export interface IUpdateDocUniFormulaMutationParams extends IAddDocUniFormulaMutationParams {
-}
+export interface IUpdateDocUniFormulaMutationParams extends IAddDocUniFormulaMutationParams {}
 
 export const UpdateDocUniFormulaMutation: IMutation<IUpdateDocUniFormulaMutationParams> = {
     type: CommandType.MUTATION,
@@ -51,7 +48,7 @@ export const UpdateDocUniFormulaMutation: IMutation<IUpdateDocUniFormulaMutation
         const { unitId, f, rangeId: id } = params;
         const uniFormulaService = accessor.get(IUniFormulaService);
 
-        if (!uniFormulaService.hasFocFormula(unitId, id)) return false;
+        if (!uniFormulaService.hasDocFormula(unitId, id)) return false;
 
         uniFormulaService.unregisterDocFormula(unitId, id);
         uniFormulaService.registerDocFormula(unitId, id, f);
@@ -71,7 +68,7 @@ export const RemoveDocUniFormulaMutation: IMutation<IRemoveDocUniFormulaMutation
         const { unitId, rangeId: id } = params;
         const uniFormulaService = accessor.get(IUniFormulaService);
 
-        if (!uniFormulaService.hasFocFormula(unitId, id)) {
+        if (!uniFormulaService.hasDocFormula(unitId, id)) {
             return false;
         }
 

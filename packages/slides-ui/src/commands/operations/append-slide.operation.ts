@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICommand, SlideDataModel } from '@univerjs/core';
+import type { IOperation, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
 
-export const AppendSlideOperation: ICommand = {
+export interface IAppendSlideOperationParams {
+    unitId: string;
+}
+
+export const AppendSlideOperation: IOperation<IAppendSlideOperationParams> = {
     id: 'slide.operation.append-slide',
     type: CommandType.OPERATION,
     handler: (accessor) => {

@@ -18,7 +18,7 @@ import React from 'react';
 import type { SlideDataModel } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IUniverSlidesDrawingConfig } from '@univerjs/slides-ui';
-import { IMAGE_MENU_ID, SHAPE_MENU_ID, SlideAddTextOperation, SlideEditorContainer, SlidesUIController } from '@univerjs/slides-ui';
+import { IMAGE_MENU_ID, SHAPE_MENU_ID, SlideAddTextCommand, SlideEditorContainer, SlidesUIController } from '@univerjs/slides-ui';
 import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';
@@ -51,7 +51,7 @@ export class UniSlidesUIController extends SlidesUIController {
         ([
             [BuiltinUniToolbarItemId.IMAGE, IMAGE_MENU_ID],
             [BuiltinUniToolbarItemId.FONT_GROUP, SHAPE_MENU_ID],
-            [BuiltinUniToolbarItemId.TABLE, SlideAddTextOperation.id],
+            [BuiltinUniToolbarItemId.TABLE, SlideAddTextCommand.id],
         ]).forEach(([id, menuId]) => {
             this._toolbarService.implementItem(id, { id: menuId, type: UniverInstanceType.UNIVER_SLIDE });
         });

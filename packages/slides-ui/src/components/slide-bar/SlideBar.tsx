@@ -88,11 +88,11 @@ export function SlideSideBar() {
     }, [divRefs]); // 依赖于divRefs数组的变化
 
     const activatePage = useCallback((page: string) => {
-        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page });
-    }, [commandService]);
+        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page, unitId: currentSlide?.getUnitId() });
+    }, [commandService, currentSlide]);
 
     const handleAppendSlide = useCallback(() => {
-        commandService.syncExecuteCommand(AppendSlideOperation.id);
+        commandService.syncExecuteCommand(AppendSlideOperation.id, { unitId: currentSlide?.getUnitId() });
     }, [commandService]);
 
     return (

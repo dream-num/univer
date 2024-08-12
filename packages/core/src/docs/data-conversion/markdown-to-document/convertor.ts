@@ -16,11 +16,14 @@
 
 import type { Token, Tokens } from 'marked';
 import { marked } from 'marked';
-import { DocumentFlavor, type IDocumentData, type ITextRun, type ITextStyle } from '../../../types/interfaces';
+import type { IBullet, IDocumentData, ITextRun, ITextStyle } from '../../../types/interfaces';
+import { DocumentFlavor } from '../../../types/interfaces';
 import { BooleanNumber } from '../../../types/enum';
 import { normalizeTextRuns } from '../../data-model/text-x/apply-utils/common';
+import { generateRandomId, Tools } from '../../../shared';
+import { PresetListType } from '../../data-model';
 
-function addParagraphToken(docData: Partial<IDocumentData>) {
+function addParagraphToken(docData: Partial<IDocumentData>, bullet?: IBullet) {
     const body = docData.body!;
 
     body.paragraphs?.push({
@@ -30,6 +33,7 @@ function addParagraphToken(docData: Partial<IDocumentData>) {
             lineSpacing: 2,
             spaceBelow: { v: 0 },
         },
+        bullet,
     });
 
     body.dataStream += '\r';
@@ -45,11 +49,20 @@ function addSectionBreakToken(docData: Partial<IDocumentData>) {
     body.dataStream += '\n';
 }
 
+interface IListCache {
+    token: (Tokens.List | Tokens.Generic);
+    id: string;
+    listItemCache: (Tokens.ListItem | Tokens.Generic)[];
+}
+
 export class MarkdownToDocumentConvertor {
     private _headingCache: (Tokens.Heading | Tokens.Generic)[] = [];
-    private _listCache: (Tokens.ListItem | Tokens.Generic)[] = [];
-    private _listItemCache: (Tokens.ListItem | Tokens.Generic)[] = [];
+    private _listCache: IListCache[] = [];
     private _strongCache: (Tokens.Strong | Tokens.Generic)[] = [];
+
+    get _listItemCache() {
+        return this._listCache[this._listCache.length - 1].listItemCache;
+    }
 
     constructor(private readonly _markdown: string) {}
 
@@ -121,7 +134,7 @@ export class MarkdownToDocumentConvertor {
                 }
 
                 case 'list': {
-                    this._listCache.push(token);
+                    this._listCache.push({ token, id: generateRandomId(6), listItemCache: [] });
 
                     if (token.items?.length) {
                         this._process(token.items, docData);
@@ -199,7 +212,14 @@ export class MarkdownToDocumentConvertor {
 
             // add paragraph token if text token is the child of list item.
             if (this._listItemCache.length) {
-                addParagraphToken(docData);
+                const list = this._listCache[this._listCache.length - 1];
+                const parent = this._listItemCache[this._listItemCache.length - 1];
+                const bullet: IBullet = {
+                    listId: list.id,
+                    listType: parent.task ? parent.checked ? PresetListType.CHECK_LIST_CHECKED : PresetListType.CHECK_LIST : list.token.ordered ? PresetListType.ORDER_LIST : PresetListType.BULLET_LIST,
+                    nestingLevel: this._listItemCache.length - 1,
+                };
+                addParagraphToken(docData, bullet);
             }
         } else {
             const text = token.text;

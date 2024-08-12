@@ -158,8 +158,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            name1: { name: '名称1', detail: '要分配的第一个名称。必须以字母开头。不能是公式的输出，也不能与范围语法冲突。' },
+            nameValue1: { name: '值1', detail: '分配给 name1 的值。' },
+            calculationOrName2: { name: '计算或名称2', detail: '下列任一项：\n1.使用 LET 函数中的所有名称的计算。这必须是 LET 函数中的最后一个参数。\n2.分配给第二个 name_value 的第二个名称。如果指定了名称，则 name_value2 和 calculation_or_name3 是必需的。' },
+            nameValue2: { name: '值2', detail: '分配给 calculation_or_name2 的值。' },
+            calculationOrName3: { name: '计算或名称3', detail: '下列任一项：\n1.使用 LET 函数中的所有名称的计算。LET 函数中的最后一个参数必须是一个计算。\n2.分配给第三个 name_value 的第三个名称。如果指定了名称，则 name_value3 和 calculation_or_name4 是必需的。' },
         },
     },
     MAKEARRAY: {

@@ -159,8 +159,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            name1: { name: '名稱1', detail: '第一個指派的名稱。必須以字母開頭。不能是公式的輸出結果，或與範圍語法衝突。' },
+            nameValue1: { name: '值1', detail: '指派給名稱1(name 1)的值。' },
+            calculationOrName2: { name: '計算或名稱2', detail: '下列其中一項：\n1.使用 LET 函數中所有名稱的計算。這必須是 LET 函數中的最後一個引數。\n2.指派給第二個 name_value 的第二個名稱。若有指定名稱，則必須要有 name_value2 和 calculation_ 或 _name3。' },
+            nameValue2: { name: '值2', detail: '指派給 calculation_or_name2 的值。' },
+            calculationOrName3: { name: '計算或名稱3', detail: '下列其中一項：\n1.使用 LET 函數中所有名稱的計算。LET 函數中的最後一個引數必須是計算。\n2.指派給第三個 name_value 的第三個名稱。若有指定名稱，則必須要有 name_value3 和 calculation_ 或 _name4。' },
         },
     },
     MAKEARRAY: {

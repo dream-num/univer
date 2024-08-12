@@ -67,7 +67,9 @@
     "dependencies": {
         "@univerjs/protocol": "0.1.38",
         "@wendellhu/redi": "0.16.1",
+        "@xmldom/xmldom": "^0.8.10",
         "dompurify": "^3.1.6",
+        "htmlparser2": "^9.1.0",
         "jsdom": "^24.1.0",
         "lodash.mergewith": "^4.6.2",
         "marked": "^14.0.0",

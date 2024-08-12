@@ -30,7 +30,7 @@ import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
 
-demo();
+const DATA = demo();
 
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
@@ -80,7 +80,7 @@ univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
+    univer.createUnit(UniverInstanceType.UNIVER_DOC, DATA);
 }
 
 // use for console test

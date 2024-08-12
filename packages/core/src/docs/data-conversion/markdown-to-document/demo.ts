@@ -39,4 +39,8 @@ export function demo() {
     const convertor = new MarkdownToDocumentConvertor(markdownData);
 
     const umd = convertor.convert();
+
+    console.log(umd);
+
+    return umd;
 }

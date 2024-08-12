@@ -125,7 +125,8 @@ export class StatusBarController extends Disposable {
             return this._clearResult();
         }
         const unitId = workbook.getUnitId();
-        const sheetId = workbook.getActiveSheet()?.getSheetId();
+        const sheet = workbook.getActiveSheet();
+        const sheetId = sheet?.getSheetId();
         if (!sheetId) {
             return this._clearResult();
         }
@@ -148,7 +149,27 @@ export class StatusBarController extends Disposable {
             });
 
         if (selections?.length) {
-            const refs = selections.map((s) => new RangeReferenceObject(s, sheetId, unitId));
+            const realSelections: IRange[] = [];
+            selections.forEach((selection) => {
+                const { startRow: start, endRow: end } = selection;
+                let prev = null;
+                for (let r = start; r <= end; r++) {
+                    if (sheet.getRowVisible(r)) {
+                        if (prev === null) {
+                            prev = r;
+                        }
+                    } else {
+                        if (prev !== null) {
+                            realSelections.push({ ...selection, startRow: prev, endRow: r - 1 });
+                            prev = null;
+                        }
+                    }
+                }
+                if (prev !== null) {
+                    realSelections.push({ ...selection, startRow: prev, endRow: end });
+                }
+            });
+            const refs = realSelections.map((s) => new RangeReferenceObject(s, sheetId, unitId));
             refs.forEach((ref) => {
                 ref.setUnitData({
                     [unitId]: sheetData,

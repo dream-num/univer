@@ -234,6 +234,17 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             };
                         }
 
+                        if (rule.type === DataValidationType.DATE) {
+                            extra = {
+                                interceptorStyle: {
+                                    ...cell?.interceptorStyle,
+                                    n: {
+                                        pattern: rule.bizInfo?.showTime ? 'yyyy-MM-dd hh:mm:ss' : 'yyyy-MM-dd',
+                                    },
+                                },
+                            };
+                        }
+
                         if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
                             const colorMap = (validator as ListValidator).getListWithColorMap(rule);
                             const valueStr = `${getCellValueOrigin(cell) ?? ''}`;

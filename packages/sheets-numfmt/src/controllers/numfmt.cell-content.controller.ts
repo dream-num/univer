@@ -53,6 +53,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
         this._initInterceptorCellContent();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initInterceptorCellContent() {
         const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
@@ -60,10 +61,14 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
                 let numfmtValue;
-                if (cell?.s) {
+
+                if (cell?.s || cell?.interceptorStyle) {
                     const style = location.workbook.getStyles().get(cell.s);
                     if (style?.n) {
                         numfmtValue = style.n;
+                    }
+                    if (cell.interceptorStyle?.n) {
+                        numfmtValue = cell.interceptorStyle.n;
                     }
                 }
                 if (!numfmtValue) {

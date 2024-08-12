@@ -31,7 +31,6 @@ export { InsertLinkShortcut } from './controllers/menu';
 export type { IUrlHandler, IUniverSheetsHyperLinkUIConfig } from './types/interfaces/i-config';
 
 // #region - all commands
-
 export {
     OpenHyperLinkSidebarOperation,
     InsertHyperLinkOperation,
@@ -39,4 +38,7 @@ export {
     type IOpenHyperLinkSidebarOperationParams,
 } from './commands/operations/sidebar.operations';
 
+export { AddHyperLinkCommand, type IAddHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
+export { RemoveHyperLinkCommand, CancelHyperLinkCommand, type IRemoveHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
+export { UpdateHyperLinkCommand, type IUpdateHyperLinkCommandParams } from './commands/commands/update-hyper-link.command';
 // #endregion

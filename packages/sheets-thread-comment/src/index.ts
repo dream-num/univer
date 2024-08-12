@@ -32,5 +32,19 @@ export { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 // #region - all commands
 
 export { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
+export {
+    AddCommentCommand,
+    DeleteCommentCommand,
+    UpdateCommentCommand,
+    ResolveCommentCommand,
+    DeleteCommentTreeCommand,
+} from '@univerjs/thread-comment';
+export type {
+    IAddCommentCommandParams,
+    IDeleteCommentCommandParams,
+    IResolveCommentCommandParams,
+    IUpdateCommentCommandParams,
+    IDeleteCommentTreeCommandParams,
+} from '@univerjs/thread-comment';
 
 // #endregion

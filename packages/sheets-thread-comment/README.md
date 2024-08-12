@@ -62,6 +62,35 @@ univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
 });
 ```
 
+### API
+```typescript
+import {
+    AddCommentCommand,
+    DeleteCommentCommand,
+    UpdateCommentCommand,
+    ResolveCommentCommand,
+    DeleteCommentTreeCommand,
+} from '@univerjs/sheets-thread-comment';
+import type {
+    IAddCommentCommandParams,
+    IDeleteCommentCommandParams,
+    IResolveCommentCommandParams,
+    IUpdateCommentCommandParams,
+    IDeleteCommentTreeCommandParams,
+} from '@univerjs/sheets-thread-comment';
+
+// Add comment by command
+const commandService = univer.__getInjector().get(ICommandService);
+
+commandService.executeCommand(AddCommentCommand.id, {
+    unitId: 'unitId',
+    subUnitId: 'subUnitId',
+    comment: {
+        // comment content
+    },
+} as IAddCommentCommandParams);
+```
+
 <!-- Links -->
 [npm-version-shield]: https://img.shields.io/npm/v/@univerjs/sheets-thread-comment?style=flat-square
 [npm-version-link]: https://npmjs.com/package/@univerjs/sheets-thread-comment

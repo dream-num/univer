@@ -17,25 +17,18 @@
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import { HyperLinkModel } from '../../models/hyper-link.model';
-import { UpdateHyperLinkMutation } from '../mutations/update-hyper-link.mutation';
-import type { ICellHyperLink, ICellLinkContent } from '../../types/interfaces/i-hyper-link';
+import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 
-export interface IUpdateHyperLinkCommandParams {
+export interface IRemoveHyperLinkCommandParams {
     unitId: string;
     subUnitId: string;
     id: string;
-    payload: ICellLinkContent;
 }
 
-function getHyperLinkContent(link: ICellHyperLink) {
-    const { row, column, id, ...content } = link;
-    return content;
-}
-
-export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
+export const RemoveHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.update-hyper-link',
+    id: 'sheets.command.remove-hyper-link',
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -46,25 +39,22 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         const model = accessor.get(HyperLinkModel);
         const { unitId, subUnitId, id } = params;
         const link = model.getHyperLink(unitId, subUnitId, id);
-        if (!link) {
-            return false;
-        }
         const { redos, undos } = sheetInterceptorService.onCommandExecute({
-            id: UpdateHyperLinkCommand.id,
+            id: RemoveHyperLinkCommand.id,
             params,
         });
+
         const redo: IMutationInfo = {
-            id: UpdateHyperLinkMutation.id,
+            id: RemoveHyperLinkMutation.id,
             params,
         };
         const undo: IMutationInfo = {
-            id: UpdateHyperLinkMutation.id,
+            id: AddHyperLinkMutation.id,
             params: {
                 unitId,
                 subUnitId,
-                id,
-                payload: getHyperLinkContent(link),
-            },
+                link,
+            } as IAddHyperLinkMutationParams,
         };
 
         const res = await sequenceExecuteAsync([redo, ...redos], commandService);
@@ -72,6 +62,46 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
             undoRedoService.pushUndoRedo({
                 redoMutations: [redo, ...redos],
                 undoMutations: [undo, ...undos],
+                unitID: unitId,
+            });
+            return true;
+        }
+
+        return false;
+    },
+};
+
+export const CancelHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheets.command.cancel-hyper-link',
+    async handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const model = accessor.get(HyperLinkModel);
+        const { unitId, subUnitId, id } = params;
+        const link = model.getHyperLink(unitId, subUnitId, id);
+
+        const redo: IMutationInfo = {
+            id: RemoveHyperLinkMutation.id,
+            params,
+        };
+        const undo: IMutationInfo = {
+            id: AddHyperLinkMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                link,
+            } as IAddHyperLinkMutationParams,
+        };
+
+        const res = await sequenceExecuteAsync([redo], commandService);
+        if (res.result) {
+            undoRedoService.pushUndoRedo({
+                redoMutations: [redo],
+                undoMutations: [undo],
                 unitID: unitId,
             });
             return true;

@@ -16,12 +16,12 @@
 
 import type { Token, Tokens } from 'marked';
 import { marked } from 'marked';
-import type { IBullet, IDocumentData, ITextRun, ITextStyle } from '../../../types/interfaces';
-import { DocumentFlavor } from '../../../types/interfaces';
+import type { IBullet, ICustomRange, IDocumentData, ITextRun, ITextStyle } from '../../../types/interfaces';
+import { CustomRangeType, DocumentFlavor } from '../../../types/interfaces';
 import { BooleanNumber } from '../../../types/enum';
 import { normalizeTextRuns } from '../../data-model/text-x/apply-utils/common';
 import { generateRandomId, Tools } from '../../../shared';
-import { PresetListType } from '../../data-model';
+import { DataStreamTreeTokenType, PresetListType } from '../../data-model';
 
 function addParagraphToken(docData: Partial<IDocumentData>, bullet?: IBullet) {
     const body = docData.body!;
@@ -49,6 +49,31 @@ function addSectionBreakToken(docData: Partial<IDocumentData>) {
     body.dataStream += '\n';
 }
 
+function addLinkToResource(docData: Partial<IDocumentData>, link: { id: string; payload: string }) {
+    let resource = docData.resources?.find((r) => r.name === 'DOC_HYPER_LINK_PLUGIN');
+
+    if (!resource) {
+        resource = {
+            id: 'DOC_HYPER_LINK_PLUGIN',
+            name: 'DOC_HYPER_LINK_PLUGIN',
+            data: '{"links":[]}',
+        };
+        docData.resources = [
+            ...docData.resources ?? [],
+            resource,
+        ];
+    }
+
+    resource.data = JSON.stringify(
+        {
+            links: [
+                ...JSON.parse(resource.data)?.links ?? [],
+                link,
+            ],
+        }
+    );
+}
+
 interface IListCache {
     token: (Tokens.List | Tokens.Generic);
     id: string;
@@ -59,6 +84,7 @@ export class MarkdownToDocumentConvertor {
     private _headingCache: (Tokens.Heading | Tokens.Generic)[] = [];
     private _listCache: IListCache[] = [];
     private _strongCache: (Tokens.Strong | Tokens.Generic)[] = [];
+    private _linkCache: (Tokens.Link | Tokens.Generic)[] = [];
 
     get _listItemCache() {
         return this._listCache[this._listCache.length - 1].listItemCache;
@@ -101,7 +127,11 @@ export class MarkdownToDocumentConvertor {
                 },
             },
             settings: {},
-
+            resources: [{
+                id: 'DOC_HYPER_LINK_PLUGIN',
+                name: 'DOC_HYPER_LINK_PLUGIN',
+                data: '{"links":[]}',
+            }],
         };
 
         // console.log(tokens);
@@ -166,6 +196,15 @@ export class MarkdownToDocumentConvertor {
                     break;
                 }
 
+                case 'link': {
+                    this._linkCache.push(token);
+                    if (token.tokens?.length) {
+                        this._process(token.tokens, docData);
+                    }
+                    this._linkCache.pop();
+                    break;
+                }
+
                 default: {
                     break;
                 }
@@ -222,9 +261,27 @@ export class MarkdownToDocumentConvertor {
                 addParagraphToken(docData, bullet);
             }
         } else {
-            const text = token.text.replaceAll('\n', ' ');
+            let text = token.text.replaceAll('\n', ' ');
+            if (this._linkCache.length) {
+                text = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+            }
             const body = docData.body!;
             const textRun = this._getTextRun(text, docData);
+
+            if (this._linkCache.length) {
+                const link = this._linkCache[this._linkCache.length - 1];
+                const customRange: ICustomRange = {
+                    rangeId: generateRandomId(6),
+                    rangeType: CustomRangeType.HYPERLINK,
+                    startIndex: body.dataStream.length,
+                    endIndex: body.dataStream.length + text.length - 1,
+                };
+                body.customRanges = [
+                    ...body.customRanges ?? [],
+                    customRange,
+                ];
+                addLinkToResource(docData, { id: customRange.rangeId, payload: link.href });
+            }
 
             body.dataStream += text;
             body.textRuns!.push(textRun);

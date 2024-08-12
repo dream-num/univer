@@ -52,8 +52,8 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
 
         const activePage = slideData.getActivePage()!;
 
-        const maxIndex = activePage.pageElements ? Math.max(...Object.values(activePage.pageElements).map((element) => element.zIndex)) : 21;
-
+        const elements = Object.values(activePage.pageElements);
+        const maxIndex = (elements?.length) ? Math.max(...elements.map((element) => element.zIndex)) : 21;
         const elementData: IPageElement = {
             id: elementId,
             zIndex: maxIndex + 1,

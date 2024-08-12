@@ -37,6 +37,8 @@ const arrowPath =
 export class Slide extends SceneViewer {
     slideChangePageByNavigation$ = new EventSubject<Nullable<string>>();
 
+    subSceneChanged$ = new EventSubject<Scene>();
+
     private _navigationEnabled = false;
 
     activeFirstPage() {
@@ -54,11 +56,11 @@ export class Slide extends SceneViewer {
      */
     addPageScene(pageScene: Scene) {
         const key = pageScene.sceneKey;
-        if (this.getSubScene(key) != null) {
-            return;
+        if (!this.getSubScene(key)) {
+            this.addSubScene(pageScene);
         }
-        this.addSubScene(pageScene);
         this.addNavigation();
+        this.subSceneChanged$.emitEvent(pageScene);
     }
 
     changePage(id?: string) {

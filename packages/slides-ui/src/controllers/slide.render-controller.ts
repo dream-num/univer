@@ -376,6 +376,8 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
 
         const slide = mainComponent as Slide;
         const { width, height } = slide;
+
+        // new Scene  ----> add SubScene.
         const pageScene = new Scene(pageId, slide, {
             width,
             height,
@@ -400,6 +402,7 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
         this._addBackgroundRect(pageScene, pageBackgroundFill);
         pageScene.addObjects(objects);
 
+        pageScene.initTransformer();
         objects.forEach((object) => {
             pageScene.attachTransformerTo(object);
         });
@@ -414,9 +417,8 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
             this._thumbSceneRender(pageId, slide);
         });
 
+        // add SubScene
         slide.addPageScene(pageScene);
-
-        window.slide = slide;
 
         return pageScene;
     }

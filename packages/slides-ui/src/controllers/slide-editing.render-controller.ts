@@ -469,7 +469,9 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             physicHeight = clientHeight;
 
             if (scrollBar == null) {
-                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
+                if (viewportMain) {
+                    const sb = new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
+                }
             } else {
                 viewportMain?.resetCanvasSizeAndUpdateScroll();
             }
@@ -716,6 +718,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             // FIXME: listen to command execution is pretty expensive. We should
             // have multi editor instances and only handle event from a single editor.
             if (this._editorService.getFocusId() !== SLIDE_EDITOR_ID) {
+            // if (this._editorService.getFocusId() !== this._renderContext.unitId) {
                 return;
             }
 

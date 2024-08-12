@@ -18,7 +18,7 @@ import type { CellValue, Injector, ISheetDataValidationRule, Nullable, Workbook 
 import { DataValidationManager, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { DataValidationStatus, DataValidationType, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { IUpdateRulePayload } from '@univerjs/data-validation';
-import type { ISheetLocation, ISheetLocationBase } from '@univerjs/sheets';
+import type { ISheetLocation } from '@univerjs/sheets';
 import { isReferenceString } from '@univerjs/engine-formula';
 import type { IDataValidationResCache } from '../services/dv-cache.service';
 import { DataValidationCacheService } from '../services/dv-cache.service';

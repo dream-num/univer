@@ -686,12 +686,10 @@ export function getSizeForDom(dom: HTMLElement) {
  */
 const PX_TO_PT_RATIO = 0.75;
 
-/** @deprecated */ // Use same function in `@univerjs/core`
 export function ptToPixel(pt: number) {
     return pt / PX_TO_PT_RATIO;
 }
 
-/** @deprecated */ // Use same function in `@univerjs/core`
 export function pixelToPt(px: number) {
     return px * PX_TO_PT_RATIO;
 }

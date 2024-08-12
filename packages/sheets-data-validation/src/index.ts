@@ -16,8 +16,6 @@
 
 export { UniverSheetsDataValidationPlugin } from './plugin';
 export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
-
-export { ICommandService, LocaleService, Plugin } from '@univerjs/core';
 export { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 export { DataValidationController } from './controllers/dv.controller';
 export { SheetDataValidationService } from './services/dv.service';
@@ -34,13 +32,20 @@ export { DataValidationFormulaController } from './controllers/dv-formula.contro
 export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
 
 // #region - all commands
-
+export {
+    RemoveDataValidationCommand as RemoveSheetDataValidationCommand,
+    type IRemoveDataValidationCommandParams as IRemoveSheetDataValidationCommandParams,
+} from '@univerjs/data-validation';
 export {
     UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationSettingCommand,
     AddSheetDataValidationCommand,
     AddSheetDataValidationAndOpenCommand,
     type IAddSheetDataValidationCommandParams,
     type IUpdateSheetDataValidationRangeCommandParams,
+    type IUpdateSheetDataValidationOptionsCommandParams,
+    type IUpdateSheetDataValidationSettingCommandParams,
 } from './commands/commands/data-validation.command';
 
 export {

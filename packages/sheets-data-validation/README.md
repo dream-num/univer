@@ -25,8 +25,26 @@ pnpm add
 ### Register the plugin
 
 ```typescript
+import type { IWorkbookData } from '@univerjs/core';
+import { DataValidationType, ICommandService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import type {
+    IAddSheetDataValidationCommandParams,
+    IRemoveSheetDataValidationCommandParams,
+    IUpdateSheetDataValidationOptionsCommandParams,
+    IUpdateSheetDataValidationRangeCommandParams,
+    IUpdateSheetDataValidationSettingCommandParams,
+} from '@univerjs/sheets-data-validation';
+import {
+    AddSheetDataValidationCommand,
+    DATA_VALIDATION_PLUGIN_NAME,
+    RemoveSheetDataValidationCommand,
+    UniverSheetsDataValidationPlugin,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+    SheetsDataValidationValidatorService
+} from '@univerjs/sheets-data-validation';
 
 univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
@@ -50,17 +68,62 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.ZH_CN,
     name: 'UniverSheet Demo',
-    resource: [{
+    resources: [{
         name: DATA_VALIDATION_PLUGIN_NAME,
         data: JSON.stringify({
             'sheetId-1': dataValidation,
         }),
-    }]
+    }],
     // ...
-}
+};
 
 // load initial snapshot
 univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+```
+
+### API
+```typescript
+// Commands and Command params for sheet-data-validation management
+import type {
+    IAddSheetDataValidationCommandParams,
+    IRemoveSheetDataValidationCommandParams,
+    IUpdateSheetDataValidationOptionsCommandParams,
+    IUpdateSheetDataValidationRangeCommandParams,
+    IUpdateSheetDataValidationSettingCommandParams,
+} from '@univerjs/sheets-data-validation';
+import {
+    AddSheetDataValidationCommand,
+    DATA_VALIDATION_PLUGIN_NAME,
+    RemoveSheetDataValidationCommand,
+    UniverSheetsDataValidationPlugin,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+    // internal service
+    SheetsDataValidationValidatorService
+} from '@univerjs/sheets-data-validation';
+
+// eg. Add data validation from command
+const commandService = univer.__getInjector().get(ICommandService);
+
+commandService.executeCommand(AddSheetDataValidationCommand.id, {
+    unitId: 'unitId',
+    subUnitId: 'subUnitId',
+    rule: {
+        uid: 'xxx-2',
+        type: DataValidationType.CHECKBOX,
+        ranges: [{
+            startRow: 6,
+            endRow: 10,
+            startColumn: 0,
+            endColumn: 5,
+        }],
+    },
+} as IAddSheetDataValidationCommandParams);
+
+// Using internal service Such as validator
+const sheetsDataValidationValidatorService = univer.__getInjector().get(SheetsDataValidationValidatorService);
+sheetsDataValidationValidatorService.validatorWorksheet('unitId', 'sheetId')
 ```
 
 <!-- Links -->

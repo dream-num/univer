@@ -174,7 +174,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._initialCursorSync(d);
         this._listenEditorFocus(d);
         this._commandExecutedListener(d);
-        this._cursorStateListener(d);
+
+        // FIXME: this problem is the same with slide. Should be fixed when refactoring editor.
+        setTimeout(() => {
+            this._cursorStateListener(d);
+        }, 1000);
+
         return d;
     }
 

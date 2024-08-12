@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable, UnitModel, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier, Disposable, ILocalStorageService, isInternalEditorID, IUniverInstanceService } from '@univerjs/core';
+import type { Nullable, UnitModel } from '@univerjs/core';
+import { createIdentifier, Disposable, ILocalStorageService, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
@@ -167,12 +167,12 @@ export class UnitGridService extends Disposable implements IUnitGridService {
                 type,
             },
             style: {
-                width: '940px',
+                width: type === UniverInstanceType.UNIVER_SLIDE ? '1000px' : '940px',
                 height: '854px',
                 display: 'flex',
                 borderRadius: '8px',
                 border: '1px solid #ccc',
-                backgroundColor: '#fff',
+                backgroundColor: type === UniverInstanceType.UNIVER_SHEET ? '#fff' : '#f4f6f8',
             },
             position: { x: (index % MAX_COUNT_IN_ROW) * 1050, y: Math.floor(index / MAX_COUNT_IN_ROW) * 950 + 40 },
         };

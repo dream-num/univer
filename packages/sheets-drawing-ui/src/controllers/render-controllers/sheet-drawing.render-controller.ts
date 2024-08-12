@@ -16,8 +16,8 @@
 
 import { Disposable, Inject, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { filter, first } from 'rxjs';
-import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 
 export class SheetsDrawingRenderController extends Disposable implements IRenderModule {
     constructor(

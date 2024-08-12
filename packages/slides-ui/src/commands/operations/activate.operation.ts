@@ -16,7 +16,7 @@
 
 import type { IAccessor, IOperation, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { CanvasView } from '@univerjs/slides';
+import { CanvasView } from '../../controllers/canvas-view';
 
 export interface IActiveSlidePageOperationParams {
     unitId: string;
@@ -34,6 +34,7 @@ export const ActivateSlidePageOperation: IOperation<IActiveSlidePageOperationPar
         if (!id) return false;
 
         const page = canvasView.getRenderUnitByPageId(id);
+        if (!page) return false;
         const transformer = page.scene?.getTransformer();
         if (transformer) {
             transformer.clearControls();

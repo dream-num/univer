@@ -82,6 +82,8 @@ import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.servi
 import { ISlideEditorManagerService } from '../services/slide-editor-manager.service';
 
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
+import { CursorChange } from '../type';
+import { SLIDE_EDITOR_ID } from '../const';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -92,12 +94,6 @@ const EDITOR_BORDER_SIZE = 2;
 interface ICanvasOffset {
     left: number;
     top: number;
-}
-
-enum CursorChange {
-    InitialState,
-    StartEditor,
-    CursorChange,
 }
 
 export class SlideEditingRenderController extends Disposable implements IRenderModule {
@@ -473,7 +469,9 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             physicHeight = clientHeight;
 
             if (scrollBar == null) {
-                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
+                if (viewportMain) {
+                    const sb = new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
+                }
             } else {
                 viewportMain?.resetCanvasSizeAndUpdateScroll();
             }
@@ -719,7 +717,8 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             // Only should do something when it is the current editor.
             // FIXME: listen to command execution is pretty expensive. We should
             // have multi editor instances and only handle event from a single editor.
-            if (this._editorService.getFocusId() !== this._renderContext.unitId) {
+            if (this._editorService.getFocusId() !== SLIDE_EDITOR_ID) {
+            // if (this._editorService.getFocusId() !== this._renderContext.unitId) {
                 return;
             }
 

@@ -89,7 +89,7 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
           // Use the setCenter method to position the viewport to the center of the node.
             setCenter(x + width / 2, y + height / 2, {
                 duration: 300,
-                zoom: getZoom(),
+                zoom: 1,
             });
         }
     };
@@ -110,12 +110,12 @@ export const UniControls = ({ zoom, onItemClick }: { zoom: number; onItemClick?:
     useEffect(() => {
         const newNodeSubscribe = unitGridService.newNode$.subscribe((node) => handleFitView(node));
 
-        const timer = setTimeout(() => {
-            fitView();
-        }, 1000);
+        // const timer = setTimeout(() => {
+        //     fitView();
+        // }, 1000);
 
         return () => {
-            clearTimeout(timer);
+            // clearTimeout(timer);
             newNodeSubscribe.unsubscribe();
         };
     }, [fitView]);

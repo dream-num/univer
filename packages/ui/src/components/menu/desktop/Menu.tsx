@@ -24,8 +24,8 @@ import {
 } from '@univerjs/design';
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { useState } from 'react';
-import { isObservable } from 'rxjs';
+import React, { useMemo, useState } from 'react';
+import { combineLatest, isObservable, map } from 'rxjs';
 
 import type {
     IDisplayMenuItem,
@@ -86,9 +86,34 @@ function MenuWrapper(props: IBaseMenuProps) {
             )
         );
 
+        function filterData(data: Record<MenuGroup, IDisplayMenuItem<IMenuItem>[]>[]) {
+            return data.map((group) => {
+                const filteredGroup: Record<string, IDisplayMenuItem<IMenuItem>[]> = {};
+
+                Object.entries(group).forEach(([key, items]) => {
+                    const hiddenObservables = items.map((item) => item.hidden$).filter((item) => !!item);
+
+                    combineLatest(hiddenObservables)
+                        .pipe(
+                            map((hiddenValues) => hiddenValues.every((hidden) => hidden === true))
+                        )
+                        .subscribe((allHidden) => {
+                            if (!allHidden) {
+                                filteredGroup[key] = items;
+                            }
+                        })
+                        .unsubscribe();
+                });
+
+                return filteredGroup;
+            }).filter((group) => Object.keys(group).length > 0);
+        };
+
+        const filteredGroup = useMemo(() => filterData(group), [group]);
+
         return (
             <>
-                {group.map((groupItem) =>
+                {filteredGroup.map((groupItem) =>
                     Object.keys(groupItem).map((groupKey: string) => (
                         <DesignMenuItemGroup key={groupKey} eventKey={groupKey}>
                             {groupItem[groupKey as unknown as MenuGroup].map((item: IDisplayMenuItem<IMenuItem>) => (
@@ -167,7 +192,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                     </span>
                 </DesignMenuItem>
             );
-        }) ?? <></>
+        }) ?? null
     );
 }
 

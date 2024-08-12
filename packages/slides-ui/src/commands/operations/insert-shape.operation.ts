@@ -17,9 +17,10 @@
 import type { IAccessor, ICommand, SlideDataModel } from '@univerjs/core';
 import { BasicShapes, CommandType, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, PageElementType, UniverInstanceType } from '@univerjs/core';
 import { ObjectType } from '@univerjs/engine-render';
-import { CanvasView } from '@univerjs/slides';
+
 import { ISidebarService } from '@univerjs/ui';
 import { COMPONENT_SLIDE_SIDEBAR } from '../../components/sidebar/Sidebar';
+import { CanvasView } from '../../controllers/canvas-view';
 
 export interface IInsertShapeOperationParams {
     unitId: string;
@@ -48,7 +49,8 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
         if (!slideData) return false;
 
         const activePage = slideData.getActivePage()!;
-        const maxIndex = activePage.pageElements ? Math.max(...Object.values(activePage.pageElements).map((element) => element.zIndex)) : 20;
+        const elements = Object.values(activePage.pageElements);
+        const maxIndex = (elements?.length) ? Math.max(...elements.map((element) => element.zIndex)) : 20;
 
         const data = {
             id,

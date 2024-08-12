@@ -21,9 +21,10 @@ import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import { Button } from '@univerjs/design';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
-import { CanvasView } from '@univerjs/slides';
+
 import type { Image, Rect, RichText } from '@univerjs/engine-render';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
+import { CanvasView } from '../../controllers/canvas-view';
 import styles from './index.module.less';
 
 enum ArrangeTypeEnum {

@@ -19,34 +19,33 @@ import { DisposableCollection, ICommandService, IContextService, Inject, IUniver
 import {
     TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { BaseObject, IChangeObserverConfig, IRenderContext, IRenderModule, RichText } from '@univerjs/engine-render';
+import type { BaseObject, IRenderContext, IRenderModule, RichText, Scene, Slide } from '@univerjs/engine-render';
 import { DeviceInputEventType, ITextSelectionRenderManager, ObjectType } from '@univerjs/engine-render';
-import { CanvasView } from '@univerjs/slides';
 import { Subject } from 'rxjs';
+import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import type { ISlideRichTextProps } from '../type';
-import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 
 // interface ICanvasOffset {
 //     left: number;
 //     top: number;
 // }
 
-enum CursorChange {
-    InitialState,
-    StartEditor,
-    CursorChange,
-}
+// enum CursorChange {
+//     InitialState,
+//     StartEditor,
+//     CursorChange,
+// }
 
 export class SlideEditorBridgeRenderController extends RxDisposable implements IRenderModule {
     /**
      * It is used to distinguish whether the user has actively moved the cursor in the editor, mainly through mouse clicks.
      */
-    private _cursorChange: CursorChange = CursorChange.InitialState;
+    // private _cursorChange: CursorChange = CursorChange.InitialState;
 
     /** If the corresponding unit is active and prepared for editing. */
-    private _isUnitEditing = false;
+    // private _isUnitEditing = false;
 
     setSlideTextEditor$: Subject<ISlideRichTextProps> = new Subject();
 
@@ -58,8 +57,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
         @ICommandService private readonly _commandService: ICommandService,
         @ISlideEditorBridgeService private readonly _editorBridgeService: ISlideEditorBridgeService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(CanvasView) private readonly _canvasView: CanvasView
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
     ) {
         super();
         //wait for sceneMap
@@ -88,42 +86,36 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             scene,
             engine,
             unitId,
-            pageId, // FIXME: wtf this is an empty string?
+            pageId,
             richTextObj: targetObject,
         };
 
-        // editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
+        // invoked by editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
         this._editorBridgeService.setEditorRect(setEditorRect);
     }
 
     private _initEventListener(d: DisposableCollection) {
-        const model = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-        const pagesMap = model?.getPages() ?? {};
-        const pages = Object.values(pagesMap);
-        for (let i = 0; i < pages.length; i++) {
-            const page = pages[i];
-            const { scene } = this._canvasView.getRenderUnitByPageId(page.id);
-            if (!scene) break;
-
+        const listenersForPageScene = (scene: Scene) => {
             const transformer = scene.getTransformer();
-            if (!transformer) break;
+            if (!transformer) return;
 
             d.add(transformer.clearControl$.subscribe(() => {
                 this.setEditorVisible(false);
+                this.pickOtherObjects();
             }));
             d.add(transformer.createControl$.subscribe(() => {
                 this.setEditorVisible(false);
             }));
 
-            d.add(transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
-                const target = param.target;
-                if (!target) return;
-                if (target === this._curRichText) {
-                    // do nothing
-                } else {
-                    this.pickOtherObjects();
-                }
-            }));
+            // d.add(transformer.changeStart$.subscribe((param: IChangeObserverConfig) => {
+            //     const target = param.target;
+            //     if (!target) return;
+            //     if (target === this._curRichText) {
+            //         // do nothing
+            //     } else {
+            //         this.pickOtherObjects();
+            //     }
+            // }));
 
             d.add(scene.onDblclick$.subscribeEvent(() => {
                 transformer.clearControls();
@@ -134,13 +126,34 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
                 if (object.objectType !== ObjectType.RICH_TEXT) {
                     this.pickOtherObjects();
                 } else {
-                    this.startEditing(page.id, object as RichText);
+                    this.startEditing(scene.sceneKey, object as RichText);
                 }
             }));
 
             d.add(this._instanceSrv.focused$.subscribe((fc: Nullable<string>) => {
                 this.endEditing();
             }));
+        };
+
+        // const model = this._instanceSrv.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const pagesMap = model?.getPages() ?? {};
+        // const pages = Object.values(pagesMap);
+
+        const { mainComponent } = this._renderContext;
+        const slide = mainComponent as Slide;
+
+        // for new pages created by user
+        // TODO: better only one pageScene listener. but how?
+        // TODO: this controller is in render stage. but default page created in ready stage.
+        slide.subSceneChanged$.subscribeEvent((pageScene: Scene) => {
+            listenersForPageScene(pageScene);
+        });
+
+        // for default pages that already exist
+        const pageSceneList = Array.from((mainComponent as Slide).getSubScenes().values());
+        for (let i = 0; i < pageSceneList.length; i++) {
+            const pageScene = pageSceneList[i] as Scene;
+            listenersForPageScene(pageScene);
         }
     }
 
@@ -203,6 +216,7 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
     }
 
     setEditorVisible(visible: boolean) {
+        // if editor is visible, hide curr RichTerxtObject
         if (visible) {
             this._curRichText?.hide();
         } else {

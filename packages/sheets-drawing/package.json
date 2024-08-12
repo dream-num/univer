@@ -59,14 +59,11 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/drawing": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "rxjs": ">=7.0.0"
+        "@univerjs/drawing": "workspace:*"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "typescript": "^5.5.4",

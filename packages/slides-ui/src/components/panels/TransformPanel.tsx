@@ -21,8 +21,8 @@ import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import { InputNumber } from '@univerjs/design';
 import type { BaseObject, IChangeObserverConfig, Image, Rect, RichText } from '@univerjs/engine-render';
-import { CanvasView } from '@univerjs/slides';
 import { UpdateSlideElementOperation } from '../../commands/operations/update-element.operation';
+import { CanvasView } from '../../controllers/canvas-view';
 import styles from './index.module.less';
 
 interface IProps {

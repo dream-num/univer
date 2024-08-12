@@ -64,16 +64,16 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                         label={localeService.t('dataValidation.panel.messageInfo')}
                     >
                         <Checkbox
-                            checked={value.showInputMessage}
+                            checked={value.showErrorMessage}
                             onChange={() => onChange({
                                 ...value,
-                                showInputMessage: !value.showInputMessage,
+                                showErrorMessage: !value.showErrorMessage,
                             })}
                         >
                             {localeService.t('dataValidation.panel.showInfo')}
                         </Checkbox>
                     </FormLayout>
-                    {value.showInputMessage
+                    {value.showErrorMessage
                         ? (
                             <FormLayout>
                                 <Input value={value.error} onChange={(error) => onChange({ ...value, error })} />

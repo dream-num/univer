@@ -108,4 +108,16 @@ describe('test ObjectMatrix', () => {
             2: { 1: '121', 2: '313' },
         });
     });
+
+    it('test getDataRange', () => {
+        const matrix = new ObjectMatrix({});
+        matrix.setValue(3, 3, '444');
+        matrix.setValue(2000, 2000, '555');
+        const range = matrix.getDataRange();
+
+        expect(range.startRow).toBe(3);
+        expect(range.startColumn).toBe(3);
+        expect(range.endRow).toBe(2000);
+        expect(range.endColumn).toBe(2000);
+    });
 });

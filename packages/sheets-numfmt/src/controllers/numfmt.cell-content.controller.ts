@@ -69,10 +69,6 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     }
                 }
 
-                if (cell?.interceptorStyle?.n) {
-                    numfmtValue = cell.interceptorStyle.n;
-                }
-
                 if (!numfmtValue) {
                     numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
                 }

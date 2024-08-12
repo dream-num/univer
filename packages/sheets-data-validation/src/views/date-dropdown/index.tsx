@@ -49,7 +49,7 @@ const transformDate = (value: Nullable<CellValue>) => {
 
 export function DateDropdown(props: IDropdownComponentProps) {
     const { location, hideFn } = props;
-    const { worksheet, row, col, unitId, subUnitId } = location;
+    const { worksheet, row, col, unitId, subUnitId, workbook } = location;
     const commandService = useDependency(ICommandService);
     const rejectInputController = useDependency(DataValidationRejectInputController);
     const cellData = worksheet.getCell(row, col);
@@ -81,6 +81,8 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 subUnitId,
                 row,
                 column: col,
+                worksheet,
+                workbook,
             }, rule))
         ) {
             commandService.executeCommand(SetRangeValuesCommand.id, {
@@ -98,6 +100,12 @@ export function DateDropdown(props: IDropdownComponentProps) {
                     p: null,
                     f: null,
                     si: null,
+                    s: {
+                        n: {
+                            pattern: showTime ? 'yyyy-MM-dd hh:mm:ss' : 'yyyy-MM-dd',
+                        },
+                    },
+
                 },
             });
             hideFn();

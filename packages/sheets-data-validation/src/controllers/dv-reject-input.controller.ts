@@ -42,7 +42,7 @@ export class DataValidationRejectInputController extends Disposable {
             {
                 handler: async (cellPromise, context, next) => {
                     const cell = await cellPromise;
-                    const { worksheet, row, col, unitId, subUnitId } = context;
+                    const { worksheet, row, col, unitId, subUnitId, workbook } = context;
                     const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
                     const ruleId = manager.getRuleIdByLocation(row, col);
                     const rule = ruleId ? manager.getRuleById(ruleId) : undefined;
@@ -62,6 +62,8 @@ export class DataValidationRejectInputController extends Disposable {
                             column: col,
                             unitId,
                             subUnitId,
+                            worksheet,
+                            workbook,
                         }, rule
                     );
 

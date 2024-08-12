@@ -285,12 +285,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
     }
 
     private _drawingInitializeListener() {
-        this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Steady), first()).subscribe((stage) => {
-            const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
-            if (!unitId) {
-                return;
-            }
-
+        this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Steady), first()).subscribe(() => {
             const skeleton = this._docSkeletonManagerService.getSkeleton();
 
             if (skeleton == null) {
@@ -299,7 +294,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
             this._refreshDrawing(skeleton);
 
-            this._drawingManagerService.initializeNotification(unitId);
+            this._drawingManagerService.initializeNotification(this._context.unitId);
         });
     }
 }

@@ -79,7 +79,7 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.72",
-        "@univerjs/protocol": "0.1.38"
+        "@univerjs/protocol": "0.1.39-alpha.3"
     },
     "devDependencies": {
         "@types/react": "^18.3.3",

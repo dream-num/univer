@@ -28,22 +28,9 @@ pnpm add
 import type { IWorkbookData } from '@univerjs/core';
 import { DataValidationType, ICommandService, LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import type {
-    IAddSheetDataValidationCommandParams,
-    IRemoveSheetDataValidationCommandParams,
-    IUpdateSheetDataValidationOptionsCommandParams,
-    IUpdateSheetDataValidationRangeCommandParams,
-    IUpdateSheetDataValidationSettingCommandParams,
-} from '@univerjs/sheets-data-validation';
 import {
-    AddSheetDataValidationCommand,
     DATA_VALIDATION_PLUGIN_NAME,
-    RemoveSheetDataValidationCommand,
     UniverSheetsDataValidationPlugin,
-    UpdateSheetDataValidationOptionsCommand,
-    UpdateSheetDataValidationRangeCommand,
-    UpdateSheetDataValidationSettingCommand,
-    SheetsDataValidationValidatorService
 } from '@univerjs/sheets-data-validation';
 
 univer.registerPlugin(UniverDataValidationPlugin);

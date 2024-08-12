@@ -25,7 +25,6 @@ import {
     LifecycleService,
     LifecycleStages,
     PositionedObjectLayoutType,
-    UniverInstanceType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';

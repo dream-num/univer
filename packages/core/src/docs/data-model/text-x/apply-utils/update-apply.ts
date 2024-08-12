@@ -97,7 +97,7 @@ function updateTextRuns(
     return removeTextRuns;
 }
 
-// eslint-disable-next-line max-lines-per-function
+// eslint-disable-next-line max-lines-per-function, complexity
 export function coverTextRuns(
     updateDataTextRuns: ITextRun[],
     removeTextRuns: ITextRun[],
@@ -202,7 +202,7 @@ export function coverTextRuns(
     const updateLastTextRun = updateDataTextRuns[updateLength - 1];
     const removeLastTextRun = removeTextRuns[removeLength - 1];
 
-    if (tempTopTextRun.ed !== Math.max(updateLastTextRun.ed, removeLastTextRun.ed)) {
+    if (tempTopTextRun && (tempTopTextRun.ed !== Math.max(updateLastTextRun.ed, removeLastTextRun.ed))) {
         if (updateLastTextRun.ed > removeLastTextRun.ed) {
             newUpdateTextRuns.push(updateLastTextRun);
         } else {

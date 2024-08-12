@@ -104,7 +104,7 @@ export class MarkdownToDocumentConvertor {
 
         };
 
-        console.log(tokens);
+        // console.log(tokens);
 
         this._process(tokens, docData);
 
@@ -222,7 +222,7 @@ export class MarkdownToDocumentConvertor {
                 addParagraphToken(docData, bullet);
             }
         } else {
-            const text = token.text;
+            const text = token.text.replaceAll('\n', ' ');
             const body = docData.body!;
             const textRun = this._getTextRun(text, docData);
 

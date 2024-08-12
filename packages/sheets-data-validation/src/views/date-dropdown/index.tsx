@@ -98,12 +98,6 @@ export function DateDropdown(props: IDropdownComponentProps) {
                     p: null,
                     f: null,
                     si: null,
-                    s: {
-                        n: {
-                            pattern: showTime ? 'yyyy-MM-dd hh:mm:ss' : 'yyyy-MM-dd',
-                        },
-                    },
-
                 },
             });
             hideFn();

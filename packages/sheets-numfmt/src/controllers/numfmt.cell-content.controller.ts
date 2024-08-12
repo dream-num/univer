@@ -62,15 +62,17 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 const sheetId = location.subUnitId;
                 let numfmtValue;
 
-                if (cell?.s || cell?.interceptorStyle) {
+                if (cell?.s) {
                     const style = location.workbook.getStyles().get(cell.s);
                     if (style?.n) {
                         numfmtValue = style.n;
                     }
-                    if (cell.interceptorStyle?.n) {
-                        numfmtValue = cell.interceptorStyle.n;
-                    }
                 }
+
+                if (cell?.interceptorStyle?.n) {
+                    numfmtValue = cell.interceptorStyle.n;
+                }
+
                 if (!numfmtValue) {
                     numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
                 }

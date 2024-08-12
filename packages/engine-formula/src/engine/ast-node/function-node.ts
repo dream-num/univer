@@ -74,7 +74,7 @@ export class FunctionNode extends BaseAstNode {
             if (object == null) {
                 continue;
             }
-            if (object.isReferenceObject()) {
+            if (object.isReferenceObject() && !this._functionExecutor.needsReferenceObject) {
                 variants.push((object as BaseReferenceObject).toArrayValueObject());
             } else {
                 variants.push(object as BaseValueObject);

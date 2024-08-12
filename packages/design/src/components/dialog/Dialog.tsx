@@ -92,6 +92,10 @@ export interface IDialogProps {
      *  Whether the dialog should show a mask.
      */
     mask?: boolean;
+
+    /**
+     * additional className for dialog
+     */
     className?: string;
 
     /**
@@ -100,9 +104,14 @@ export interface IDialogProps {
     dialogStyles?: ModalStyles;
 
     /**
-     *
+     * whether show close button
      */
     closable?: boolean;
+
+    /**
+     * whether click mask to close, default is true
+     */
+    maskClosable?: boolean;
 }
 
 export function Dialog(props: IDialogProps) {
@@ -123,6 +132,7 @@ export function Dialog(props: IDialogProps) {
         mask,
         dialogStyles,
         closable,
+        maskClosable,
     } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
     const [positionOffset, setPositionOffset] = useState<{ x: number; y: number } | null>(null);
@@ -223,6 +233,7 @@ export function Dialog(props: IDialogProps) {
             onClose={onClose}
             styles={dialogStyles}
             closable={closable}
+            maskClosable={maskClosable}
         >
             {children}
         </RcDialog>

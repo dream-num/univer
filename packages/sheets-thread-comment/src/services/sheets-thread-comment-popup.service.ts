@@ -73,7 +73,9 @@ export class SheetsThreadCommentPopupService extends Disposable {
             this._activePopup$.next(location);
             return;
         }
-        this._lastPopup && this._lastPopup.dispose();
+        if (this._lastPopup) {
+            this._lastPopup.dispose();
+        };
         if (this._zenZoneService.visible) {
             return;
         }
@@ -116,7 +118,9 @@ export class SheetsThreadCommentPopupService extends Disposable {
         if (!this._activePopup) {
             return;
         }
-        this._lastPopup && this._lastPopup.dispose();
+        if (this._lastPopup) {
+            this._lastPopup.dispose();
+        }
         this._lastPopup = null;
 
         this._activePopup = null;

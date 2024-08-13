@@ -29,9 +29,7 @@ import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.ope
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 
-export interface ICanvasPopup extends Pick<IPopup,
-    'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside'
-> {
+export interface ICanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
 }
@@ -134,6 +132,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             subUnitId,
             anchorRect: position,
             anchorRect$: position$,
+            canvasElement: currentRender.engine.getCanvasElement(),
         });
 
         return {
@@ -193,6 +192,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             subUnitId,
             anchorRect: position,
             anchorRect$: position$,
+            canvasElement: currentRender.engine.getCanvasElement(),
         });
 
         const disposableCollection = new DisposableCollection();

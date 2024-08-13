@@ -80,7 +80,9 @@ export class DataValidationDropdownManagerService extends Disposable {
         const { location } = param;
         const { row, col } = location;
 
-        this._currentPopup && this._currentPopup.dispose();
+        if (this._currentPopup) {
+            this._currentPopup.dispose();
+        };
 
         if (this._zenVisible) {
             return;

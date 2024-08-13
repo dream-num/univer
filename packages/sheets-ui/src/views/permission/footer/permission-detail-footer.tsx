@@ -18,7 +18,7 @@ import { Button } from '@univerjs/design';
 import { IAuthzIoService, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import React from 'react';
 import { ISidebarService, useObservable } from '@univerjs/ui';
-import { CreateRequest_WorkSheetObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
+import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { AddRangeProtectionCommand } from '@univerjs/sheets';
 import { SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
@@ -45,37 +45,30 @@ export const SheetPermissionPanelDetailFooter = () => {
                 onClick={async () => {
                     if (!activeRule.name || rangeErrMsg) return;
                     const collaborators = sheetPermissionUserManagerService.selectUserList;
-                    if (activeRule.viewStatus === viewState.othersCanView) {
-                        // If it is readable by everyone, then all the users not in the original collaboration list will be set as readers from all the user information pulled back and added to the collaborators array
-                        sheetPermissionUserManagerService.allUserList.forEach((user) => {
-                            const hasInCollaborators = collaborators.some((collaborator) => collaborator.id === user.id);
-                            if (!hasInCollaborators) {
-                                const userCanRead = {
-                                    ...user,
-                                    role: UnitRole.Reader,
-                                };
-                                collaborators.push(userCanRead);
-                            }
-                        });
-                    }
-                    const isSameCollaborators = getUserListEqual(collaborators, sheetPermissionUserManagerService.oldCollaboratorList);
 
-                    // If modify existing permission information, need to determine whether the collaborators have changed. If so, create a new permissionId. If not, modify the rendering information stored in the memory.
+                    // Editing existing permission rules
                     if (activeRule.permissionId) {
                         const oldRule = sheetPermissionPanelModel.oldRule;
-                        if (activeRule.unitType === oldRule?.unitType && activeRule.name === oldRule.name && activeRule.description === oldRule.description && activeRule.ranges === oldRule.ranges && !isSameCollaborators) {
-                            // collaborators is changed and rendering info is not change, so call the interface to update the list of collaborators
-                            await authzIoService.putCollaborators({
+                        // Collaborators only need to consider people with editing permissions
+                        const isSameCollaborators = getUserListEqual(collaborators.filter((user) => user.role === UnitRole.Editor), sheetPermissionUserManagerService.oldCollaboratorList.filter((user) => user.role === UnitRole.Editor));
+                        const isSameReader = oldRule?.viewStatus === activeRule.viewStatus;
+                        if (activeRule.unitType === oldRule?.unitType && activeRule.name === oldRule.name && activeRule.description === oldRule.description && activeRule.ranges === oldRule.ranges && (!isSameCollaborators || !isSameReader)) {
+                            // When only collaborators or readers change, the update interface is called. Here is the agreement strategies = [];
+                            await authzIoService.update({
+                                objectType: activeRule.unitType,
                                 objectID: activeRule.permissionId,
                                 unitID: activeRule.unitId,
-                                collaborators,
+                                share: undefined,
+                                name: '',
+                                strategies: [],
+                                scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
                             });
                         } else {
-                            // create new permissionId, broadcast to other collaborators
+                            // If the description of the permission is modified, it needs to be synchronized to other collaborators, so the create logic needs to be followed.
                             let newPermissionId = activeRule.permissionId;
 
-                            // If the collaborator does not change, there is no need to create a new permissionId
-                            if (!isSameCollaborators) {
+                            // If the collaborator or reader information is modified, a new permissionId is required,
+                            if (!isSameCollaborators || !isSameReader) {
                                 if (activeRule.unitType === UnitObject.Worksheet) {
                                     newPermissionId = await authzIoService.create({
                                         worksheetObject: {
@@ -83,7 +76,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                             unitID: activeRule.unitId,
                                             name: activeRule.name,
                                             strategies: [{ role: UnitRole.Editor, action: UnitAction.Edit }, { role: UnitRole.Reader, action: UnitAction.View }],
-                                            scope: CreateRequest_WorkSheetObjectScope.SomeCollaborator,
+                                            scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
                                         },
                                         objectType: UnitObject.Worksheet,
                                     });
@@ -93,8 +86,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                             collaborators,
                                             unitID: activeRule.unitId,
                                             name: activeRule.name,
-                                            readScope: CreateRequest_WorkSheetObjectScope.SomeCollaborator,
-
+                                            scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
                                         },
                                         objectType: UnitObject.SelectRange,
                                     });
@@ -109,7 +101,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                             });
                         }
                     } else {
-                        //  create rule
+                        //  Create new rule
                         if (activeRule.unitType === UnitObject.Worksheet) {
                             const permissionId = await authzIoService.create({
                                 worksheetObject: {
@@ -117,7 +109,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                     unitID: activeRule.unitId,
                                     name: activeRule.name,
                                     strategies: [{ role: UnitRole.Editor, action: UnitAction.Edit }, { role: UnitRole.Reader, action: UnitAction.View }],
-                                    scope: CreateRequest_WorkSheetObjectScope.SomeCollaborator,
+                                    scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
                                 },
                                 objectType: UnitObject.Worksheet,
                             });
@@ -133,7 +125,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                     collaborators,
                                     unitID: activeRule.unitId,
                                     name: activeRule.name,
-                                    readScope: CreateRequest_WorkSheetObjectScope.SomeCollaborator,
+                                    scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
                                 },
                                 objectType: UnitObject.SelectRange,
                             });

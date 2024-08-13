@@ -22,7 +22,7 @@ import { IDialogService, ISidebarService, RangeSelector, useObservable } from '@
 import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import type { ICollaborator, IUser } from '@univerjs/protocol';
-import { UnitObject, UnitRole } from '@univerjs/protocol';
+import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import clsx from 'clsx';
 import { UserEmptyBase64 } from '../user-dialog/constant';
 import Spin from '../spin';
@@ -193,15 +193,6 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             if (selectUserList?.length > 0) {
                 setEditorGroupValue('designedUserCanEdit');
             }
-            const readerList = collaborators.filter((user) => {
-                return user.role === UnitRole.Reader;
-            });
-
-            if (readerList.length === 0) {
-                setViewGroupValue(viewState.noOneElseCanView);
-            }
-
-            sheetPermissionUserManagerService.setOldCollaboratorList(selectUserList.concat(readerList));
         };
         if (activeRule?.permissionId) {
             getSelectUserList();
@@ -210,6 +201,22 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             setEditorGroupValue('onlyMe');
         }
     }, [activeRule?.permissionId]);
+
+    useEffect(() => {
+        if (!activeRule.permissionId) {
+            return;
+        }
+        const getViewPermission = async () => {
+            const res = await authzIoService.list({
+                unitID: unitId,
+                objectIDs: [activeRule?.permissionId],
+                actions: [UnitAction.View],
+            });
+            const isAllCanView = res[0].scope === ObjectScope.AllCollaborator;
+            setViewGroupValue(isAllCanView ? viewState.othersCanView : viewState.noOneElseCanView);
+        };
+        getViewPermission();
+    }, []);
 
     useEffect(() => {
         const getListCollaborators = async () => {
@@ -247,8 +254,6 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             activeSheetSubscribe.unsubscribe();
         };
     }, [sidebarService, subUnitId, univerInstanceService]);
-
-    const tmp = activeRule?.ranges?.map((i) => serializeRange(i)).join(',');
 
     return (
         <div className={styles.permissionPanelDetailWrapper}>

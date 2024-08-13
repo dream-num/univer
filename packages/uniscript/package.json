@@ -76,7 +76,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "0.1.39-alpha.3"
+        "@univerjs/protocol": "0.1.39-alpha.5"
     },
     "devDependencies": {
         "@types/react": "^18.3.3",

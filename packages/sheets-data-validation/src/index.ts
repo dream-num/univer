@@ -18,7 +18,6 @@ export { UniverSheetsDataValidationPlugin } from './plugin';
 export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
 export { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 export { DataValidationController } from './controllers/dv.controller';
-export { SheetDataValidationService } from './services/dv.service';
 export { DataValidationAlertController } from './controllers/dv-alert.controller';
 export { DataValidationCacheService } from './services/dv-cache.service';
 export { DataValidationFormulaService } from './services/dv-formula.service';

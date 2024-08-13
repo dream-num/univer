@@ -938,7 +938,8 @@ export class LexerTreeBuilder extends Disposable {
         this._segment += value;
     }
 
-    private _pushNodeToChildren(value: LexerNode | string, isUnshift = false) {
+    private _pushNodeToChildren(valueRaw: LexerNode | string, isUnshift = false) {
+        let value = valueRaw;
         if (value !== '') {
             const children = this._currentLexerNode.getChildren();
             if (!(value instanceof LexerNode) && this.isColonOpen()) {
@@ -987,7 +988,8 @@ export class LexerTreeBuilder extends Disposable {
         children.splice(-1);
     }
 
-    private _findPreviousToken(data: string[], index: number) {
+    private _findPreviousToken(data: string[], indexRaw: number) {
+        let index = indexRaw;
         while (index >= 0) {
             const token = data[index];
             if (token !== ' ') {
@@ -1037,7 +1039,8 @@ export class LexerTreeBuilder extends Disposable {
         this._colonState = false; // :
     }
 
-    private _checkSimilarErrorToken(currentString: string, cur: number, formulaStringArray: string[]) {
+    private _checkSimilarErrorToken(currentString: string, curRow: number, formulaStringArray: string[]) {
+        let cur = curRow;
         if (currentString !== suffixToken.POUND) {
             return true;
         }
@@ -1056,7 +1059,9 @@ export class LexerTreeBuilder extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _nodeMaker(formulaString: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
+    private _nodeMaker(formulaStringRaw: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
+        let formulaString = formulaStringRaw;
+
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);
         }

@@ -38,7 +38,7 @@ export const SlideAddTextCommand: ICommand = {
 export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
     id: 'slide.operation.add-text',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => {
+    handler: async (accessor, params: ISlideAddTextParam) => {
         const elementId = Tools.generateRandomId(6);
         const defaultWidth = 220;
         const defaultheight = 40;
@@ -78,10 +78,10 @@ export const SlideAddTextOperation: ICommand<ISlideAddTextParam> = {
         slideData.updatePage(activePage.id, activePage);
 
         const canvasview = accessor.get(CanvasView);
-        const sceneObject = canvasview.createObjectToPage(elementData, activePage.id);
+        const sceneObject = canvasview.createObjectToPage(elementData, activePage.id, params.unitId);
         // make object active: a control rect wrap the object.
         if (sceneObject) {
-            canvasview.setObjectActiveByPage(sceneObject, activePage.id);
+            canvasview.setObjectActiveByPage(sceneObject, activePage.id, params.unitId);
         }
 
         return true;

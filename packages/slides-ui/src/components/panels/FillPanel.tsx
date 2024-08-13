@@ -28,17 +28,18 @@ import { CanvasView } from '../../controllers/canvas-view';
 import styles from './index.module.less';
 
 interface IProps {
+    pageId: string;
     unitId: string;
 }
 
 export default function ArrangePanel(props: IProps) {
-    const { unitId } = props;
+    const { pageId, unitId } = props;
 
     const localeService = useDependency(LocaleService);
     const canvasView = useDependency(CanvasView);
     const commandService = useDependency(ICommandService);
 
-    const page = canvasView.getRenderUnitByPageId(unitId);
+    const page = canvasView.getRenderUnitByPageId(pageId, unitId);
     const scene = page?.scene;
     if (!scene) return null;
 

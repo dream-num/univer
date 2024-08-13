@@ -29,18 +29,18 @@ export const ActivateSlidePageOperation: IOperation<IActiveSlidePageOperationPar
         const canvasView = accessor.get(CanvasView);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const model = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
-        const id = model?.getActivePage()?.id;
+        const pageId = model?.getActivePage()?.id;
 
-        if (!id) return false;
+        if (!pageId) return false;
 
-        const page = canvasView.getRenderUnitByPageId(id);
+        const page = canvasView.getRenderUnitByPageId(pageId, params.unitId);
         if (!page) return false;
         const transformer = page.scene?.getTransformer();
         if (transformer) {
             transformer.clearControls();
         }
 
-        canvasView.activePage(params.id);
+        canvasView.activePage(params.id, params.unitId);
         return true;
     },
 };

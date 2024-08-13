@@ -71,9 +71,9 @@ export const InsertSlideFloatImageOperation: ICommand<IInsertImageOperationParam
         slideData.updatePage(activePage.id, activePage);
 
         const canvasview = accessor.get(CanvasView);
-        const sceneObject = canvasview.createObjectToPage(data, activePage.id);
+        const sceneObject = canvasview.createObjectToPage(data, activePage.id, params.unitId);
         if (sceneObject) {
-            canvasview.setObjectActiveByPage(sceneObject, activePage.id);
+            canvasview.setObjectActiveByPage(sceneObject, activePage.id, params.unitId);
         }
         // console.log(slideData);
 

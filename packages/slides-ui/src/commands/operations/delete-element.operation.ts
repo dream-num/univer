@@ -41,7 +41,7 @@ export const DeleteSlideElementOperation: ICommand<IDeleteElementOperationParams
         slideData.updatePage(activePage.id, activePage);
 
         const canvasview = accessor.get(CanvasView);
-        canvasview.removeObjectById(params.id, activePage.id);
+        canvasview.removeObjectById(params.id, activePage.id, params.unitId);
 
         return true;
     },

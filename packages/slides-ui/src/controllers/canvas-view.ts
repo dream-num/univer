@@ -15,14 +15,10 @@
  */
 
 import type { IPageElement, Nullable } from '@univerjs/core';
-import { Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type {
     BaseObject,
     IRenderModule,
-    Scene,
-    ScrollBar,
-    Slide,
-    Viewport,
 } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
@@ -42,89 +38,58 @@ export type PageID = string;
 @OnLifecycle(LifecycleStages.Ready, CanvasView)
 export class CanvasView extends RxDisposable implements IRenderModule {
     constructor(
-        // this controller needs by commands. The injector in Commands is root injector. T
-        // That means this controller is not init by renderUnit, no renderContext.
+        // this controller needs by commands. root injector. T
+        // That means this controller is not init by renderUnit ---> no renderContext.
         // private readonly _renderContext: IRenderContext<UnitModel>,
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
-        this._initialize();
     }
 
-    private _scene: Scene | null = null;
-    private _viewport: Viewport | null = null;
-    private _slide: Slide | null = null;
-    private _scrollBar: ScrollBar | null = null;
-
-    get Scene() {
-        return this._scene;
-    }
-
-    get Viewport() {
-        return this._viewport;
-    }
-
-    get Slide() {
-        return this._slide;
-    }
-
-    get ScrollBar() {
-        return this._scrollBar;
-    }
-
-    private _initialize() {
-        //...
-    }
-
-    private _getSlideRenderControllerFromRenderUnit() {
+    private _getSlideRenderControllerFromRenderUnit(unitId: string) {
         const renderUnit = this._renderManagerService
-            .getRenderById(this._instanceSrv.getCurrentUnitForType(UniverInstanceType.UNIVER_SLIDE)!.getUnitId())!;
+            .getRenderById(unitId)!;
         const slideRC = renderUnit.with(SlideRenderController);
         return slideRC;
     }
 
-    private _getRenderUnitByPageId(pageId: PageID) {
-        const slideRC = this._getSlideRenderControllerFromRenderUnit();
-        return slideRC.getPageRenderUnit(pageId);
-    }
-
-    createThumbs() {
-        const slideRC = this._getSlideRenderControllerFromRenderUnit();
+    createThumbs(unitId: string) {
+        const slideRC = this._getSlideRenderControllerFromRenderUnit(unitId);
         slideRC.createThumbs();
     }
 
-    activePage(_pageId?: string) {
-        const slideRC = this._getSlideRenderControllerFromRenderUnit();
-        slideRC.activePage(_pageId);
+    activePage(pageId: string, unitId: string) {
+        const slideRC = this._getSlideRenderControllerFromRenderUnit(unitId);
+        slideRC.activePage(pageId);
     }
 
-    getRenderUnitByPageId(pageId: PageID) {
-        const slideRC = this._getSlideRenderControllerFromRenderUnit();
+    getRenderUnitByPageId(pageId: PageID, unitId: string) {
+        const slideRC = this._getSlideRenderControllerFromRenderUnit(unitId);
         return slideRC.getPageRenderUnit(pageId);
     }
 
-    createObjectToPage(element: IPageElement, pageID: PageID): Nullable<BaseObject> {
-        const slideRC = this._getSlideRenderControllerFromRenderUnit();
+    createObjectToPage(element: IPageElement, pageID: PageID, unitId: string): Nullable<BaseObject> {
+        const slideRC = this._getSlideRenderControllerFromRenderUnit(unitId);
         return slideRC.createObjectToPage(element, pageID);
     }
 
-    setObjectActiveByPage(obj: BaseObject, pageID: PageID) {
-        const slideRC = this._getSlideRenderControllerFromRenderUnit();
+    setObjectActiveByPage(obj: BaseObject, pageID: PageID, unitId: string) {
+        const slideRC = this._getSlideRenderControllerFromRenderUnit(unitId);
         return slideRC.setObjectActiveByPage(obj, pageID);
     }
 
-    removeObjectById(id: string, pageID: PageID) {
-        const slideRC = this._getSlideRenderControllerFromRenderUnit();
+    removeObjectById(id: string, pageID: PageID, unitId: string) {
+        const slideRC = this._getSlideRenderControllerFromRenderUnit(unitId);
         slideRC.removeObjectById(id, pageID);
     }
 
     /**
      * append blank page
      */
-    appendPage() {
-        const slideRC = this._getSlideRenderControllerFromRenderUnit();
+    appendPage(unitId: string) {
+        const slideRC = this._getSlideRenderControllerFromRenderUnit(unitId);
         slideRC.appendPage();
     }
 }

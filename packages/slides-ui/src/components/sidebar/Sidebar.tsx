@@ -36,7 +36,7 @@ export default function RectSidebar() {
 
     if (!pageId) return null;
 
-    const page = canvasView.getRenderUnitByPageId(pageId);
+    const page = canvasView.getRenderUnitByPageId(pageId, pageId);
     const transformer = page.scene?.getTransformer();
 
     if (!transformer) return null;
@@ -48,11 +48,16 @@ export default function RectSidebar() {
         return null;
     }
 
+    // see packages/sheets-ui/src/views/permission/permission-dialog/index.tsx@SheetPermissionDialog
+    // see packages/sheets-conditional-formatting-ui/src/components/panel/rule-edit/index.tsx@getUnitId
+    // const unitId = univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SLIDE)!.getUnitId();
+    const unitId = univerInstanceService.getFocusedUnit()?.getUnitId() || '';
+
     return (
         <section className={styles.imageCommonPanel}>
-            <ArrangePanel unitId={pageId} />
-            <TransformPanel unitId={pageId} />
-            {object.objectType === ObjectType.RECT && <FillPanel unitId={pageId} />}
+            <ArrangePanel pageId={pageId} unitId={unitId} />
+            <TransformPanel pageId={pageId} unitId={unitId} />
+            {object.objectType === ObjectType.RECT && <FillPanel pageId={pageId} unitId={unitId} />}
         </section>
     );
 }

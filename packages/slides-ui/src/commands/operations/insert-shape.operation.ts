@@ -74,13 +74,13 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
         };
 
         activePage.pageElements[id] = data;
-
         slideData.updatePage(activePage.id, activePage);
 
+        const unitId = params?.unitId || '';
         const canvasview = accessor.get(CanvasView);
-        const sceneObject = canvasview.createObjectToPage(data, activePage.id);
+        const sceneObject = canvasview.createObjectToPage(data, activePage.id, unitId);
         if (sceneObject) {
-            canvasview.setObjectActiveByPage(sceneObject, activePage.id);
+            canvasview.setObjectActiveByPage(sceneObject, activePage.id, unitId);
         }
 
         return true;

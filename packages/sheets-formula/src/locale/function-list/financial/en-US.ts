@@ -25,8 +25,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: 'issue', detail: "The security's issue date." },
+            firstInterest: { name: 'first_interest', detail: "The security's first interest date." },
+            settlement: { name: 'settlement', detail: "The security's maturity date." },
+            rate: { name: 'rate', detail: "The security's annual coupon rate." },
+            par: { name: 'par', detail: "The security's par value." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
+            calcMethod: { name: 'calc_method', detail: 'Is a logical value: interest accrues from the issue date = TRUE or ignored; interest accrues from the last coupon payment date = FALSE.' },
         },
     },
     ACCRINTM: {
@@ -39,8 +45,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: 'issue', detail: "The security's issue date." },
+            settlement: { name: 'settlement', detail: "The security's maturity date." },
+            rate: { name: 'rate', detail: "The security's annual coupon rate." },
+            par: { name: 'par', detail: "The security's par value." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     AMORDEGRC: {
@@ -67,8 +76,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The cost of the asset.' },
+            datePurchased: { name: 'date_purchased', detail: 'The date of the purchase of the asset.' },
+            firstPeriod: { name: 'first_period', detail: 'The date of the end of the first period.' },
+            salvage: { name: 'salvage', detail: 'The salvage value at the end of the life of the asset.' },
+            period: { name: 'period', detail: 'The period.' },
+            rate: { name: 'rate', detail: 'The rate of depreciation.' },
+            basis: { name: 'basis', detail: 'The year basis to be used.' },
         },
     },
     COUPDAYBS: {
@@ -81,8 +95,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPDAYS: {
@@ -95,8 +111,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPDAYSNC: {
@@ -109,8 +127,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPNCD: {
@@ -123,8 +143,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPNUM: {
@@ -137,8 +159,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     COUPPCD: {
@@ -151,8 +175,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     CUMIPMT: {
@@ -165,8 +191,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods.' },
+            pv: { name: 'pv', detail: 'The present value.' },
+            startPeriod: { name: 'start_period', detail: 'The first period in the calculation. Payment periods are numbered beginning with 1.' },
+            endPeriod: { name: 'end_period', detail: 'The last period in the calculation.' },
+            type: { name: 'type', detail: 'The timing of the payment.' },
         },
     },
     CUMPRINC: {
@@ -179,8 +209,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods.' },
+            pv: { name: 'pv', detail: 'The present value.' },
+            startPeriod: { name: 'start_period', detail: 'The first period in the calculation. Payment periods are numbered beginning with 1.' },
+            endPeriod: { name: 'end_period', detail: 'The last period in the calculation.' },
+            type: { name: 'type', detail: 'The timing of the payment.' },
         },
     },
     DB: {
@@ -193,8 +227,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The initial cost of the asset.' },
+            salvage: { name: 'salvage', detail: 'The value at the end of the depreciation (sometimes called the salvage value of the asset).' },
+            life: { name: 'life', detail: 'The number of periods over which the asset is being depreciated (sometimes called the useful life of the asset).' },
+            period: { name: 'period', detail: 'The period for which you want to calculate the depreciation.' },
+            month: { name: 'month', detail: 'The number of months in the first year. If month is omitted, it is assumed to be 12.' },
         },
     },
     DDB: {
@@ -207,8 +244,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The initial cost of the asset.' },
+            salvage: { name: 'salvage', detail: 'The value at the end of the depreciation (sometimes called the salvage value of the asset).' },
+            life: { name: 'life', detail: 'The number of periods over which the asset is being depreciated (sometimes called the useful life of the asset).' },
+            period: { name: 'period', detail: 'The period for which you want to calculate the depreciation.' },
+            factor: { name: 'factor', detail: 'The rate at which the balance declines. If factor is omitted, it is assumed to be 2 (the double-declining balance method).' },
         },
     },
     DISC: {
@@ -221,8 +261,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            pr: { name: 'pr', detail: "The security's price per $100 face value." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     DOLLARDE: {
@@ -235,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            fractionalDollar: { name: 'fractional_dollar', detail: 'A number expressed as an integer part and a fraction part, separated by a decimal symbol.' },
+            fraction: { name: 'fraction', detail: 'The integer to use in the denominator of the fraction.' },
         },
     },
     DOLLARFR: {
@@ -249,8 +292,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            decimalDollar: { name: 'decimal_dollar', detail: 'A decimal number.' },
+            fraction: { name: 'fraction', detail: 'The integer to use in the denominator of the fraction.' },
         },
     },
     DURATION: {
@@ -277,8 +320,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nominalRate: { name: 'nominal_rate', detail: 'The nominal interest rate.' },
+            npery: { name: 'npery', detail: 'The number of compounding periods per year.' },
         },
     },
     FV: {
@@ -291,8 +334,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pmt: { name: 'pmt', detail: 'The payment made each period; it cannot change over the life of the annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     FVSCHEDULE: {
@@ -305,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            principal: { name: 'principal', detail: 'The present value.' },
+            schedule: { name: 'schedule', detail: 'An array of interest rates to apply.' },
         },
     },
     INTRATE: {
@@ -319,8 +365,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            investment: { name: 'investment', detail: 'The amount invested in the security.' },
+            redemption: { name: 'redemption', detail: 'The amount to be received at maturity.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     IPMT: {
@@ -333,8 +382,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            per: { name: 'per', detail: 'The period for which you want to find the interest and must be in the range 1 to nper.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     IRR: {
@@ -361,8 +414,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate for the investment.' },
+            per: { name: 'per', detail: 'The period for which you want to find the interest, and must be between 1 and Nper.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods for the investment.' },
+            pv: { name: 'pv', detail: 'The present value of the investment. For a loan, Pv is the loan amount.' },
         },
     },
     MDURATION: {
@@ -403,8 +458,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            effectRate: { name: 'effect_rate', detail: 'The effective interest rate.' },
+            npery: { name: 'npery', detail: 'The number of compounding periods per year.' },
         },
     },
     NPER: {
@@ -417,8 +472,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            pmt: { name: 'pmt', detail: 'The payment made each period; it cannot change over the life of the annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     NPV: {
@@ -515,8 +573,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     PPMT: {
@@ -529,8 +590,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            per: { name: 'per', detail: 'The period for which you want to find the interest and must be in the range 1 to nper.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     PRICE: {
@@ -585,8 +650,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The interest rate per period.' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pmt: { name: 'pmt', detail: 'The payment made each period; it cannot change over the life of the annuity.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
         },
     },
     RATE: {
@@ -599,8 +667,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: 'nper', detail: 'The total number of payment periods in an annuity.' },
+            pmt: { name: 'pmt', detail: 'The payment made each period; it cannot change over the life of the annuity.' },
+            pv: { name: 'pv', detail: 'The present value, or the lump-sum amount that a series of future payments is worth right now.' },
+            fv: { name: 'fv', detail: 'The future value, or a cash balance you want to attain after the last payment is made.' },
+            type: { name: 'type', detail: 'The number 0 or 1 and indicates when payments are due.' },
+            guess: { name: 'guess', detail: 'Your guess for what the rate will be.' },
         },
     },
     RECEIVED: {

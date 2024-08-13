@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { BESSEL, checkVariantsErrorIsArrayOrBoolean } from '../../../basics/engineering';
+import { BESSEL } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 
 export class Besselj extends BaseFunction {
     override minParams = 2;

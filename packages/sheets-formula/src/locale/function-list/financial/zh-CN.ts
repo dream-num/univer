@@ -25,8 +25,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: '发行日', detail: '有价证券的发行日。' },
+            firstInterest: { name: '首次计息日', detail: '有价证券的首次计息日。' },
+            settlement: { name: '到期日', detail: '有价证券的到期日。' },
+            rate: { name: '利率', detail: '有价证券的年息票利率。' },
+            par: { name: '面值', detail: '有价证券的票面值。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
+            calcMethod: { name: '计算方法', detail: '是一个逻辑值：从发行日期开始的应计利息 = TRUE 或忽略；从最后票息支付日期开始计算 = FALSE。' },
         },
     },
     ACCRINTM: {
@@ -39,8 +45,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            issue: { name: '发行日', detail: '有价证券的发行日。' },
+            settlement: { name: '到期日', detail: '有价证券的到期日。' },
+            rate: { name: '利率', detail: '有价证券的年息票利率。' },
+            par: { name: '面值', detail: '有价证券的票面值。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     AMORDEGRC: {
@@ -67,8 +76,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '资产原值。' },
+            datePurchased: { name: '购买日期', detail: '购入资产的日期。' },
+            firstPeriod: { name: '首个期间', detail: '第一个期间结束时的日期。' },
+            salvage: { name: '残值', detail: '资产在使用寿命结束时的残值。' },
+            period: { name: '期间', detail: '期间。' },
+            rate: { name: '折旧率', detail: '折旧率。' },
+            basis: { name: '基准', detail: '要使用的年基准。' },
         },
     },
     COUPDAYBS: {
@@ -81,8 +95,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPDAYS: {
@@ -95,8 +111,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPDAYSNC: {
@@ -109,8 +127,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPNCD: {
@@ -123,8 +143,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPNUM: {
@@ -137,8 +159,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     COUPPCD: {
@@ -151,8 +175,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     CUMIPMT: {
@@ -165,8 +191,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '利率。' },
+            nper: { name: '总期数', detail: '总付款期数。' },
+            pv: { name: '现值', detail: '现值。' },
+            startPeriod: { name: '首期', detail: '计算中的首期。付款期数从1开始计数。' },
+            endPeriod: { name: '末期', detail: '计算中的末期。' },
+            type: { name: '类型', detail: '付款时间类型。' },
         },
     },
     CUMPRINC: {
@@ -179,8 +209,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '利率。' },
+            nper: { name: '总期数', detail: '总付款期数。' },
+            pv: { name: '现值', detail: '现值。' },
+            startPeriod: { name: '首期', detail: '计算中的首期。付款期数从1开始计数。' },
+            endPeriod: { name: '末期', detail: '计算中的末期。' },
+            type: { name: '类型', detail: '付款时间类型。' },
         },
     },
     DB: {
@@ -193,8 +227,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '资产原值。' },
+            salvage: { name: '残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
+            period: { name: '期间', detail: '您要计算折旧的时期。' },
+            month: { name: '月份', detail: '第一年的月份数。如果省略月份，则假定其值为12。' },
         },
     },
     DDB: {
@@ -207,8 +244,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '资产原值。' },
+            salvage: { name: '残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
+            period: { name: '期间', detail: '您要计算折旧的时期。' },
+            factor: { name: '速率', detail: '余额递减速率。如果省略影响因素，则假定为2（双倍余额递减法）。' },
         },
     },
     DISC: {
@@ -221,8 +261,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            pr: { name: '价格', detail: '有价证券的价格（按面值为￥100计算）。' },
+            redemption: { name: '清偿价', detail: '面值￥100的有价证券的清偿价值。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     DOLLARDE: {
@@ -235,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            fractionalDollar: { name: '分数', detail: '以整数部份和分数部分表示的数字，用小数点隔开。' },
+            fraction: { name: '分母', detail: '用作分数中的分母的整数。' },
         },
     },
     DOLLARFR: {
@@ -249,8 +292,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            decimalDollar: { name: '小数', detail: '小数。' },
+            fraction: { name: '分母', detail: '用作分数中的分母的整数。' },
         },
     },
     DURATION: {
@@ -277,8 +320,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nominalRate: { name: '名义利率', detail: '名义利率。' },
+            npery: { name: '期数', detail: '每年的复利期数。' },
         },
     },
     FV: {
@@ -291,8 +334,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '各期利率。' },
+            nper: { name: '总期数', detail: '年金的付款总期数。' },
+            pmt: { name: '金额', detail: '各期所应支付的金额，在整个年金期间保持不变。' },
+            pv: { name: '现值', detail: '现值，或一系列未来付款的当前值的累积和。' },
+            type: { name: '类型', detail: '数字0或1，用以指定各期的付款时间是在期初还是期末。' },
         },
     },
     FVSCHEDULE: {
@@ -305,8 +351,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            principal: { name: '本金', detail: '现值。' },
+            schedule: { name: '利率数组', detail: '要应用的利率数组。' },
         },
     },
     INTRATE: {
@@ -319,8 +365,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            investment: { name: '投资额', detail: '有价证券的投资额。' },
+            redemption: { name: '清偿价', detail: '有价证券到期时的兑换值。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     IPMT: {
@@ -333,8 +382,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '各期利率。' },
+            per: { name: '期数', detail: '用于计算其利息数额的期数，必须在1到nper之间。' },
+            nper: { name: '总期数', detail: '年金的付款总期数。' },
+            pv: { name: '现值', detail: '现值，或一系列未来付款的当前值的累积和。' },
+            fv: { name: '余额', detail: '未来值，或在最后一次付款后希望得到的现金余额。' },
+            type: { name: '类型', detail: '数字0或1，用以指定各期的付款时间是在期初还是期末。' },
         },
     },
     IRR: {
@@ -361,8 +414,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '投资的利率。' },
+            per: { name: '期数', detail: '要查找兴趣的时间段，并且必须介于1和Nper之间。' },
+            nper: { name: '总期数', detail: '投资的总支付期数。' },
+            pv: { name: '现值', detail: '投资的现值。对于贷款，Pv是贷款金额。' },
         },
     },
     MDURATION: {
@@ -403,8 +458,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            effectRate: { name: '实际利率', detail: '实际利率。' },
+            npery: { name: '期数', detail: '每年的复利期数。' },
         },
     },
     NPER: {
@@ -417,8 +472,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '各期利率。' },
+            pmt: { name: '金额', detail: '各期所应支付的金额，在整个年金期间保持不变。' },
+            pv: { name: '现值', detail: '现值，或一系列未来付款的当前值的累积和。' },
+            fv: { name: '余额', detail: '未来值，或在最后一次付款后希望得到的现金余额。' },
+            type: { name: '类型', detail: '数字0或1，用以指定各期的付款时间是在期初还是期末。' },
         },
     },
     NPV: {
@@ -515,8 +573,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '各期利率。' },
+            nper: { name: '总期数', detail: '年金的付款总期数。' },
+            pv: { name: '现值', detail: '现值，或一系列未来付款的当前值的累积和。' },
+            fv: { name: '余额', detail: '未来值，或在最后一次付款后希望得到的现金余额。' },
+            type: { name: '类型', detail: '数字0或1，用以指定各期的付款时间是在期初还是期末。' },
         },
     },
     PPMT: {
@@ -529,8 +590,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '各期利率。' },
+            per: { name: '期数', detail: '用于计算其利息数额的期数，必须在1到nper之间。' },
+            nper: { name: '总期数', detail: '年金的付款总期数。' },
+            pv: { name: '现值', detail: '现值，或一系列未来付款的当前值的累积和。' },
+            fv: { name: '余额', detail: '未来值，或在最后一次付款后希望得到的现金余额。' },
+            type: { name: '类型', detail: '数字0或1，用以指定各期的付款时间是在期初还是期末。' },
         },
     },
     PRICE: {
@@ -585,8 +650,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '各期利率。' },
+            nper: { name: '总期数', detail: '年金的付款总期数。' },
+            pmt: { name: '金额', detail: '各期所应支付的金额，在整个年金期间保持不变。' },
+            fv: { name: '余额', detail: '未来值，或在最后一次付款后希望得到的现金余额。' },
+            type: { name: '类型', detail: '数字0或1，用以指定各期的付款时间是在期初还是期末。' },
         },
     },
     RATE: {
@@ -599,8 +667,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '总期数', detail: '年金的付款总期数。' },
+            pmt: { name: '金额', detail: '各期所应支付的金额，在整个年金期间保持不变。' },
+            pv: { name: '现值', detail: '现值，或一系列未来付款的当前值的累积和。' },
+            fv: { name: '余额', detail: '未来值，或在最后一次付款后希望得到的现金余额。' },
+            type: { name: '类型', detail: '数字0或1，用以指定各期的付款时间是在期初还是期末。' },
+            guess: { name: '猜测值', detail: '预期利率。' },
         },
     },
     RECEIVED: {

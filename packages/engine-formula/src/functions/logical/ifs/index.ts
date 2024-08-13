@@ -38,24 +38,6 @@ export class Ifs extends BaseFunction {
             }
         }
 
-        if (!params.some((param) => param.isArray())) {
-            // Handle non-array inputs
-            for (let i = 0; i < params.length; i += 2) {
-                const condition = params[i];
-                const result = params[i + 1];
-
-                if (condition.isNull()) {
-                    continue;
-                }
-
-                const conditionValue = condition.getValue();
-                if (conditionValue) {
-                    return result.isNull() ? ErrorValueObject.create(ErrorType.NA) : result;
-                }
-            }
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         // Determine max row and column length
         const maxRowLength = Math.max(
             ...params.map((param) => (param.isArray() ? (param as ArrayValueObject).getRowCount() : 1))
@@ -69,7 +51,7 @@ export class Ifs extends BaseFunction {
             expandArrayValueObject(maxRowLength, maxColumnLength, param, ErrorValueObject.create(ErrorType.NA))
         );
 
-        return expandedParams[0].map((_, rowIndex, columnIndex) => {
+        const resultArray = expandedParams[0].map((_, rowIndex, columnIndex) => {
             for (let i = 0; i < expandedParams.length; i += 2) {
                 const condition = expandedParams[i].get(rowIndex, columnIndex) || NullValueObject.create();
                 const result = expandedParams[i + 1].get(rowIndex, columnIndex) || NullValueObject.create();
@@ -83,11 +65,31 @@ export class Ifs extends BaseFunction {
                 }
 
                 const conditionValue = condition.getValue();
-                if (conditionValue) {
+
+                if (condition.isString()) {
+                    if (`${conditionValue}`.toLocaleUpperCase() === 'TRUE') {
+                        return result;
+                    }
+
+                    if (`${conditionValue}`.toLocaleUpperCase() === 'FALSE') {
+                        continue;
+                    }
+
+                    return ErrorValueObject.create(ErrorType.VALUE);
+                }
+
+                if (+conditionValue) {
                     return result.isNull() ? ErrorValueObject.create(ErrorType.NA) : result;
                 }
             }
+
             return ErrorValueObject.create(ErrorType.NA);
         });
+
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        return resultArray;
     }
 }

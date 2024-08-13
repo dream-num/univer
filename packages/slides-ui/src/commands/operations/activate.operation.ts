@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, IOperation, SlideDataModel } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { CanvasView } from '../../controllers/canvas-view';
 
 export interface IActiveSlidePageOperationParams {
@@ -26,21 +26,24 @@ export const ActivateSlidePageOperation: IOperation<IActiveSlidePageOperationPar
     id: 'slide.operation.activate-slide',
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params: IActiveSlidePageOperationParams) => {
+        const unitId = params.unitId;
         const canvasView = accessor.get(CanvasView);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const model = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const model = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+
+        const model = univerInstanceService.getUnit<SlideDataModel>(unitId);
         const pageId = model?.getActivePage()?.id;
 
         if (!pageId) return false;
 
-        const page = canvasView.getRenderUnitByPageId(pageId, params.unitId);
+        const page = canvasView.getRenderUnitByPageId(pageId, unitId);
         if (!page) return false;
         const transformer = page.scene?.getTransformer();
         if (transformer) {
             transformer.clearControls();
         }
 
-        canvasView.activePage(params.id, params.unitId);
+        canvasView.activePage(params.id, unitId);
         return true;
     },
 };

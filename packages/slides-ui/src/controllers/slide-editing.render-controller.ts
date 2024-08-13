@@ -21,7 +21,6 @@ import type {
     IPosition,
     Nullable,
     SlideDataModel,
-
     UnitModel } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -55,7 +54,6 @@ import {
     RichTextEditingMutation,
     TextSelectionManagerService,
 } from '@univerjs/docs';
-// import { IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import type {
     DocBackground,
     Documents,
@@ -81,7 +79,6 @@ import { filter } from 'rxjs';
 import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import { ISlideEditorManagerService } from '../services/slide-editor-manager.service';
-
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { CursorChange } from '../type';
 import { SLIDE_EDITOR_ID } from '../const';
@@ -105,8 +102,6 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
 
     /** If the corresponding unit is active and prepared for editing. */
     private _isUnitEditing = false;
-
-    // private _workbookSelections: WorkbookSelections;
 
     private _d: Nullable<IDisposable>;
 

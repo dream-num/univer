@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, Nullable, SlideDataModel } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, PageElementType, UniverInstanceType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, PageElementType } from '@univerjs/core';
 import { getImageSize, IImageIoService } from '@univerjs/drawing';
 import { CanvasView } from '../../controllers/canvas-view';
 
@@ -38,7 +38,10 @@ export const InsertSlideFloatImageOperation: ICommand<IInsertImageOperationParam
         const { width, height, image } = await getImageSize(base64Cache || '');
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+
+        const unitId = params.unitId;
+        const slideData = univerInstanceService.getUnit<SlideDataModel>(unitId);
         if (!slideData) return false;
 
         const activePage = slideData.getActivePage()!;
@@ -64,16 +67,13 @@ export const InsertSlideFloatImageOperation: ICommand<IInsertImageOperationParam
                 },
             },
         };
-
         activePage.pageElements[imageId] = data;
-        // console.log(activePage.id);
-
         slideData.updatePage(activePage.id, activePage);
 
         const canvasview = accessor.get(CanvasView);
-        const sceneObject = canvasview.createObjectToPage(data, activePage.id, params.unitId);
+        const sceneObject = canvasview.createObjectToPage(data, activePage.id, unitId);
         if (sceneObject) {
-            canvasview.setObjectActiveByPage(sceneObject, activePage.id, params.unitId);
+            canvasview.setObjectActiveByPage(sceneObject, activePage.id, unitId);
         }
         // console.log(slideData);
 

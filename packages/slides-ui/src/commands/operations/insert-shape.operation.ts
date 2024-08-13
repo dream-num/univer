@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand, SlideDataModel } from '@univerjs/core';
-import { BasicShapes, CommandType, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, PageElementType, UniverInstanceType } from '@univerjs/core';
+import { BasicShapes, CommandType, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, PageElementType } from '@univerjs/core';
 import { ObjectType } from '@univerjs/engine-render';
 
 import { ISidebarService } from '@univerjs/ui';
@@ -40,18 +40,20 @@ export const InsertSlideShapeRectangleCommand: ICommand = {
 export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationParams> = {
     id: 'slide.operation.insert-float-shape',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => {
+    handler: async (accessor, params: IInsertShapeOperationParams) => {
         const id = generateRandomId(6);
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+
+        const unitId = params.unitId;
+        const slideData = univerInstanceService.getUnit<SlideDataModel>(unitId);
 
         if (!slideData) return false;
 
         const activePage = slideData.getActivePage()!;
         const elements = Object.values(activePage.pageElements);
         const maxIndex = (elements?.length) ? Math.max(...elements.map((element) => element.zIndex)) : 20;
-
         const data = {
             id,
             zIndex: maxIndex + 1,
@@ -72,11 +74,9 @@ export const InsertSlideShapeRectangleOperation: ICommand<IInsertShapeOperationP
                 },
             },
         };
-
         activePage.pageElements[id] = data;
         slideData.updatePage(activePage.id, activePage);
 
-        const unitId = params?.unitId || '';
         const canvasview = accessor.get(CanvasView);
         const sceneObject = canvasview.createObjectToPage(data, activePage.id, unitId);
         if (sceneObject) {

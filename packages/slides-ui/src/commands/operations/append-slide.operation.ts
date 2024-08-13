@@ -15,7 +15,7 @@
  */
 
 import type { IOperation, SlideDataModel } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
 import { CanvasView } from '../../controllers/canvas-view';
 
@@ -27,12 +27,16 @@ export const AppendSlideOperation: IOperation<IAppendSlideOperationParams> = {
     id: 'slide.operation.append-slide',
     type: CommandType.OPERATION,
     handler: (accessor, params: IAppendSlideOperationParams) => {
+        const unitId = params.unitId;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+
+        const slideData = univerInstanceService.getUnit<SlideDataModel>(unitId);
+
         if (!slideData) return false;
 
         const canvasView = accessor.get(CanvasView);
-        canvasView.appendPage(params.unitId);
+        canvasView.appendPage(unitId);
 
         return true;
     },

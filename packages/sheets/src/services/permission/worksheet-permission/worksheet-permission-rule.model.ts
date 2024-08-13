@@ -112,8 +112,8 @@ export class WorksheetProtectionRuleModel {
         this._model = result;
     }
 
-    deleteUnitModel() {
-        this._model.clear();
+    deleteUnitModel(unitId: string) {
+        this._model.delete(unitId);
     }
 
     private _ensureSubUnitMap(unitId: string) {

@@ -155,8 +155,8 @@ export class WorksheetPermissionService extends RxDisposable {
                     });
                     this._worksheetProtectionRuleModel.changeRuleInitState(true);
                 },
-                onUnLoad: () => {
-                    this._worksheetProtectionRuleModel.deleteUnitModel();
+                onUnLoad: (unitId: string) => {
+                    this._worksheetProtectionRuleModel.deleteUnitModel(unitId);
                 },
             })
         );
@@ -191,8 +191,8 @@ export class WorksheetPermissionService extends RxDisposable {
                         });
                     });
                 },
-                onUnLoad: () => {
-                    this._worksheetProtectionPointRuleModel.deleteUnitModel();
+                onUnLoad: (unitId: string) => {
+                    this._worksheetProtectionPointRuleModel.deleteUnitModel(unitId);
                 },
             })
         );

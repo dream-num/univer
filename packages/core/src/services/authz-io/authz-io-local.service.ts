@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, ICreateRequest_WorksheetObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction } from '@univerjs/protocol';
+import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction } from '@univerjs/protocol';
 import { CreateRequest_WorkSheetObjectScope, UnitObject, UnitRole, UniverType } from '@univerjs/protocol';
 import { Inject } from '../../common/di';
 import { Tools } from '../../shared/tools';
@@ -100,49 +100,17 @@ export class AuthzIoLocalService implements IAuthzIoService {
         return id;
     }
 
-    async allowed(config: IAllowedRequest): Promise<IActionInfo[]> {
-        if (this._permissionMap.has(config.objectID)) {
-            const rule = this._permissionMap.get(config.objectID);
-            if (rule && rule.objectType === UnitObject.Worksheet) {
-                return (rule as unknown as ICreateRequest_WorksheetObject)?.strategies?.map((s) => {
-                    return {
-                        action: s.action,
-                        allowed: s.role === UnitRole.Editor,
-                    };
-                });
-            }
-        }
-        return config.actions.map((a) => ({
-            action: a, allowed: this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor),
-        }));
+    async allowed(_config: IAllowedRequest): Promise<IActionInfo[]> {
+        // Because this is a mockService for handling permissions, we will not write real logic in it. We will only return an empty array to ensure that the permissions originally set by the user are not modified.
+        // If you want to achieve persistence of permissions, you can modify the logic here.
+        return Promise.resolve([]);
     }
 
-    async batchAllowed(config: IAllowedRequest[]): Promise<IBatchAllowedResponse['objectActions']> {
-        const user = this._userManagerService.getCurrentUser();
-        const defaultValue = config.map((item) => ({
-            unitID: item.unitID,
-            objectID: item.objectID,
-            actions: item.actions.map((action) => ({
-                action,
-                allowed: false,
-            })),
-        }));
-        if (!user) {
-            return defaultValue;
-        }
-        if (isDevRole(user.userID, UnitRole.Owner) || isDevRole(user.userID, UnitRole.Editor)) {
-            return config.map((item) => ({
-                unitID: item.unitID,
-                objectID: item.objectID,
-                actions: item.actions.map((action) => ({
-                    action,
-                    allowed: true,
-                })),
-            }));
-        }
-        return defaultValue;
+    async batchAllowed(_config: IAllowedRequest[]): Promise<IBatchAllowedResponse['objectActions']> {
+        return Promise.resolve([]);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     async list(config: IListPermPointRequest): Promise<IPermissionPoint[]> {
         const result: IPermissionPoint[] = [];
         config.objectIDs.forEach((objectID) => {
@@ -155,16 +123,68 @@ export class AuthzIoLocalService implements IAuthzIoService {
                     name: rule!.name,
                     shareOn: false,
                     shareRole: UnitRole.Owner,
-                    // TODO: @gggpound
                     shareScope: -1,
                     creator: createDefaultUser(UnitRole.Owner),
-                    strategies: [],
+                    // mock data
+                    strategies: [
+                        {
+                            action: 6,
+                            role: 1,
+                        },
+                        {
+                            action: 16,
+                            role: 1,
+                        },
+                        {
+                            action: 17,
+                            role: 1,
+                        },
+                        {
+                            action: 18,
+                            role: 1,
+                        },
+                        {
+                            action: 19,
+                            role: 1,
+                        },
+                        {
+                            action: 33,
+                            role: 1,
+                        },
+                        {
+                            action: 34,
+                            role: 1,
+                        },
+                        {
+                            action: 35,
+                            role: 1,
+                        },
+                        {
+                            action: 36,
+                            role: 1,
+                        },
+                        {
+                            action: 37,
+                            role: 1,
+                        },
+                        {
+                            action: 38,
+                            role: 1,
+                        },
+                        {
+                            action: 39,
+                            role: 1,
+                        },
+                        {
+                            action: 40,
+                            role: 1,
+                        },
+                        {
+                            action: 41,
+                            role: 1,
+                        },
+                    ],
                     actions: config.actions.map((a) => {
-                        // if (a === UnitAction.ManageCollaborator) {
-
-                        // } else {
-
-                        // }
                         return { action: a, allowed: this._getRole(UnitRole.Owner) || this._getRole(UnitRole.Editor) };
                     }),
                 };

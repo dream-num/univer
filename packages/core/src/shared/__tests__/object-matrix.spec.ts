@@ -129,7 +129,25 @@ describe('test ObjectMatrix', () => {
         expect(range1.endRow).toBe(2000);
         expect(range1.endColumn).toBe(2000);
     });
-    it('test getDataRange biger', () => {
+
+    it('test getDataRange compare with getStartEndScope', () => {
+        const matrix = new ObjectMatrix({});
+
+        for (let i = 0; i < 100; i++) {
+            const row = Math.floor(Math.random() * 10000);
+            const col = Math.floor(Math.random() * 10000);
+            matrix.setValue(row, col, '444');
+        }
+
+        const range = matrix.getDataRange();
+        const range1 = matrix.getStartEndScope();
+
+        expect(range.startRow).toBe(range1.startRow);
+        expect(range.startColumn).toBe(range1.startColumn);
+        expect(range.endRow).toBe(range1.endRow);
+        expect(range.endColumn).toBe(range1.endColumn);
+    });
+    it('test getDataRange bigger', () => {
         const matrix = new ObjectMatrix({});
 
         for (let i = 0; i < 100; i++) {
@@ -145,6 +163,20 @@ describe('test ObjectMatrix', () => {
         // console.time('getStartEndScope');
         const range1 = matrix.getStartEndScope();
         // console.timeEnd('getStartEndScope');
+
+        //compare the time
+        // 100：
+        // getDataRange: 0.763ms
+        // getStartEndScope: 0.43ms
+        // 1000：
+        // getDataRange: 14.686ms
+        // getStartEndScope: 8.129ms
+        // 10000：
+        // getDataRange: 38.232ms
+        // getStartEndScope: 21.041ms
+        // 100000：
+        // getDataRange: 46.832ms
+        // getStartEndScope: 23.482ms
 
         // the getDataRange and getStartEndScope should be the same
         expect(range.startRow).toBe(range1.startRow);

@@ -14,4 +14,63 @@
  * limitations under the License.
  */
 
-export const functionEngineering = [];
+import { FUNCTION_NAMES_ENGINEERING } from './function-names';
+import { Besseli } from './besseli';
+import { Besselj } from './besselj';
+import { Besselk } from './besselk';
+import { Bessely } from './bessely';
+import { Bin2dec } from './bin2dec';
+import { Bin2hex } from './bin2hex';
+import { Bin2oct } from './bin2oct';
+import { Bitand } from './bitand';
+import { Bitlshift } from './bitlshift';
+import { Bitor } from './bitor';
+import { Bitrshift } from './bitrshift';
+import { Bitxor } from './bitxor';
+import { Complex } from './complex';
+import { Convert } from './convert';
+import { Dec2bin } from './dec2bin';
+import { Dec2hex } from './dec2hex';
+import { Dec2oct } from './dec2oct';
+import { Delta } from './delta';
+import { Erf } from './erf';
+import { ErfPrecise } from './erf-precise';
+import { Erfc } from './erfc';
+import { ErfcPrecise } from './erfc-precise';
+import { Hex2bin } from './hex2bin';
+import { Hex2dec } from './hex2dec';
+import { Hex2oct } from './hex2oct';
+import { Oct2bin } from './oct2bin';
+import { Oct2dec } from './oct2dec';
+import { Oct2hex } from './oct2hex';
+
+export const functionEngineering = [
+    [Besseli, FUNCTION_NAMES_ENGINEERING.BESSELI],
+    [Besselj, FUNCTION_NAMES_ENGINEERING.BESSELJ],
+    [Besselk, FUNCTION_NAMES_ENGINEERING.BESSELK],
+    [Bessely, FUNCTION_NAMES_ENGINEERING.BESSELY],
+    [Bin2dec, FUNCTION_NAMES_ENGINEERING.BIN2DEC],
+    [Bin2hex, FUNCTION_NAMES_ENGINEERING.BIN2HEX],
+    [Bin2oct, FUNCTION_NAMES_ENGINEERING.BIN2OCT],
+    [Bitand, FUNCTION_NAMES_ENGINEERING.BITAND],
+    [Bitlshift, FUNCTION_NAMES_ENGINEERING.BITLSHIFT],
+    [Bitor, FUNCTION_NAMES_ENGINEERING.BITOR],
+    [Bitrshift, FUNCTION_NAMES_ENGINEERING.BITRSHIFT],
+    [Bitxor, FUNCTION_NAMES_ENGINEERING.BITXOR],
+    [Complex, FUNCTION_NAMES_ENGINEERING.COMPLEX],
+    [Convert, FUNCTION_NAMES_ENGINEERING.CONVERT],
+    [Dec2bin, FUNCTION_NAMES_ENGINEERING.DEC2BIN],
+    [Dec2hex, FUNCTION_NAMES_ENGINEERING.DEC2HEX],
+    [Dec2oct, FUNCTION_NAMES_ENGINEERING.DEC2OCT],
+    [Delta, FUNCTION_NAMES_ENGINEERING.DELTA],
+    [Erf, FUNCTION_NAMES_ENGINEERING.ERF],
+    [ErfPrecise, FUNCTION_NAMES_ENGINEERING.ERF_PRECISE],
+    [Erfc, FUNCTION_NAMES_ENGINEERING.ERFC],
+    [ErfcPrecise, FUNCTION_NAMES_ENGINEERING.ERFC_PRECISE],
+    [Hex2bin, FUNCTION_NAMES_ENGINEERING.HEX2BIN],
+    [Hex2dec, FUNCTION_NAMES_ENGINEERING.HEX2DEC],
+    [Hex2oct, FUNCTION_NAMES_ENGINEERING.HEX2OCT],
+    [Oct2bin, FUNCTION_NAMES_ENGINEERING.OCT2BIN],
+    [Oct2dec, FUNCTION_NAMES_ENGINEERING.OCT2DEC],
+    [Oct2hex, FUNCTION_NAMES_ENGINEERING.OCT2HEX],
+];

@@ -107,7 +107,7 @@ export function Toolbar(props: IToolbarProps) {
                                     forceRender
                                     className={styles.toolbarMore}
                                     overlay={(
-                                        <div className={styles.toolbarMoreContainer} onClick={(e) => e.stopPropagation()}>
+                                        <div className={styles.toolbarMoreContainer}>
                                             {Object.entries(groupsByKey).map(([key, item]) => (
                                                 <div key={key} className={styles.toolbarGroup}>
                                                     {item.map(

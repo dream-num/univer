@@ -157,6 +157,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                                 [styles.toolbarItemSelectButtonArrowActivated]: activated,
                             })}
                             data-disabled={disabled}
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <MoreDownSingle />
                         </div>
@@ -178,6 +179,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                             [styles.toolbarItemSelectDisabled]: disabled,
                             [styles.toolbarItemSelectActivated]: activated,
                         })}
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <CustomLabel
                             icon={iconToDisplay}

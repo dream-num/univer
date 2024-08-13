@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
+            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
         },
     },
     BESSELJ: {
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
+            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
         },
     },
     BESSELK: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
+            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
         },
     },
     BESSELY: {
@@ -67,8 +67,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: 'The value at which to evaluate the function.' },
+            n: { name: 'N', detail: 'The order of the Bessel function. If n is not an integer, it is truncated.' },
         },
     },
     BIN2DEC: {
@@ -81,8 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The binary number you want to convert.' },
         },
     },
     BIN2HEX: {
@@ -95,8 +94,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The binary number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     BIN2OCT: {
@@ -109,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The binary number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     BITAND: {
@@ -123,8 +122,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'Must be in decimal form and greater than or equal to 0.' },
+            number2: { name: 'number2', detail: 'Must be in decimal form and greater than or equal to 0.' },
         },
     },
     BITLSHIFT: {
@@ -137,8 +136,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number must be an integer greater than or equal to 0.' },
+            shiftAmount: { name: 'shift_amount', detail: 'Shift_amount must be an integer.' },
         },
     },
     BITOR: {
@@ -151,8 +150,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'Must be in decimal form and greater than or equal to 0.' },
+            number2: { name: 'number2', detail: 'Must be in decimal form and greater than or equal to 0.' },
         },
     },
     BITRSHIFT: {
@@ -165,8 +164,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number must be an integer greater than or equal to 0.' },
+            shiftAmount: { name: 'shift_amount', detail: 'Shift_amount must be an integer.' },
         },
     },
     BITXOR: {
@@ -179,8 +178,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'Must be in decimal form and greater than or equal to 0.' },
+            number2: { name: 'number2', detail: 'Must be in decimal form and greater than or equal to 0.' },
         },
     },
     COMPLEX: {
@@ -193,8 +192,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            realNum: { name: 'real_num', detail: 'The real coefficient of the complex number.' },
+            iNum: { name: 'i_num', detail: 'The imaginary coefficient of the complex number.' },
+            suffix: { name: 'suffix', detail: 'The suffix for the imaginary component of the complex number. If omitted, suffix is assumed to be "i".' },
         },
     },
     CONVERT: {
@@ -207,8 +207,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'is the value in from_units to convert.' },
+            fromUnit: { name: 'from_unit', detail: 'is the units for number.' },
+            toUnit: { name: 'to_unit', detail: 'is the units for the result.' },
         },
     },
     DEC2BIN: {
@@ -221,8 +222,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The decimal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     DEC2HEX: {
@@ -235,8 +236,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The decimal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     DEC2OCT: {
@@ -249,8 +250,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The decimal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     DELTA: {
@@ -263,8 +264,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number.' },
+            number2: { name: 'number2', detail: 'The second number. If omitted, number2 is assumed to be zero.' },
         },
     },
     ERF: {
@@ -277,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lowerLimit: { name: 'lower_limit', detail: 'The lower bound for integrating ERF.' },
+            upperLimit: { name: 'upper_limit', detail: 'The upper bound for integrating ERF. If omitted, ERF integrates between zero and lower_limit.' },
         },
     },
     ERF_PRECISE: {
@@ -291,8 +292,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The lower bound for integrating ERF.PRECISE.' },
         },
     },
     ERFC: {
@@ -305,8 +305,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The lower bound for integrating ERFC.' },
         },
     },
     ERFC_PRECISE: {
@@ -319,8 +318,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The lower bound for integrating ERFC.PRECISE.' },
         },
     },
     GESTEP: {
@@ -347,8 +345,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The hexadecimal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     HEX2DEC: {
@@ -361,8 +359,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The hexadecimal number you want to convert.' },
         },
     },
     HEX2OCT: {
@@ -375,8 +372,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The hexadecimal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     IMABS: {
@@ -739,8 +736,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The octal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
     OCT2DEC: {
@@ -753,8 +750,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The octal number you want to convert.' },
         },
     },
     OCT2HEX: {
@@ -767,8 +763,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The octal number you want to convert.' },
+            places: { name: 'places', detail: 'The number of characters to use.' },
         },
     },
 };

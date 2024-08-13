@@ -54,6 +54,8 @@ export class Cumipmt extends BaseFunction {
             startPeriodValue < 1 ||
             endPeriodValue < 1 ||
             startPeriodValue > endPeriodValue ||
+            startPeriodValue > nperValue ||
+            endPeriodValue > nperValue ||
             ![0, 1].includes(typeValue)
         ) {
             return ErrorValueObject.create(ErrorType.NUM);
@@ -87,13 +89,26 @@ export class Cumipmt extends BaseFunction {
             _startPeriodValue++;
         }
 
+        let canNotCalculate = false;
+
         for (let i = _startPeriodValue; i <= endPeriodValue; i++) {
-            result += typeValue === 1
-                ? calculateFV(rateValue, i - 2, payment, pvValue, 1) - payment
+            const principal = typeValue === 1
+                ? calculateFV(rateValue, i - 2, payment, pvValue, 1)
                 : calculateFV(rateValue, i - 1, payment, pvValue, 0);
+
+            if (principal === 0) {
+                canNotCalculate = true;
+                break;
+            }
+
+            result += typeValue === 1 ? principal - payment : principal;
         }
 
         result *= rateValue;
+
+        if (result < payment * (endPeriodValue - startPeriodValue + 1) || canNotCalculate) {
+            result = payment * (endPeriodValue - startPeriodValue + 1);
+        }
 
         return NumberValueObject.create(result);
     }

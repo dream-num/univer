@@ -111,13 +111,45 @@ describe('test ObjectMatrix', () => {
 
     it('test getDataRange', () => {
         const matrix = new ObjectMatrix({});
+
         matrix.setValue(3, 3, '444');
         matrix.setValue(2000, 2000, '555');
         const range = matrix.getDataRange();
 
+        const range1 = matrix.getStartEndScope();
+
+        // the getDataRange and getStartEndScope should be the same
         expect(range.startRow).toBe(3);
         expect(range.startColumn).toBe(3);
         expect(range.endRow).toBe(2000);
         expect(range.endColumn).toBe(2000);
+
+        expect(range1.startRow).toBe(3);
+        expect(range1.startColumn).toBe(3);
+        expect(range1.endRow).toBe(2000);
+        expect(range1.endColumn).toBe(2000);
+    });
+    it('test getDataRange biger', () => {
+        const matrix = new ObjectMatrix({});
+
+        for (let i = 0; i < 100; i++) {
+            matrix.setValue(i, i, '444');
+        }
+        matrix.setValue(3, 3, '444');
+        matrix.setValue(2000, 2000, '555');
+
+        // console.time('getDataRange');
+        const range = matrix.getDataRange();
+        // console.timeEnd('getDataRange');
+
+        // console.time('getStartEndScope');
+        const range1 = matrix.getStartEndScope();
+        // console.timeEnd('getStartEndScope');
+
+        // the getDataRange and getStartEndScope should be the same
+        expect(range.startRow).toBe(range1.startRow);
+        expect(range.startColumn).toBe(range1.startColumn);
+        expect(range.endRow).toBe(range1.endRow);
+        expect(range.endColumn).toBe(range1.endColumn);
     });
 });

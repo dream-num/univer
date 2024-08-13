@@ -31,6 +31,7 @@ import {
     StringValueObject,
 } from '../value-object/primitive-object';
 import { getCellValue } from '../utils/cell';
+import { getRuntimeFeatureCell } from '../utils/get-runtime-feature-cell';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject | AsyncArrayObject;
 
@@ -468,23 +469,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getRuntimeFeatureCellValue(row: number, column: number) {
-        const featureKeys = Object.keys(this._runtimeFeatureCellData);
-
-        for (const featureId of featureKeys) {
-            const data = this._runtimeFeatureCellData[featureId];
-            const runtimeFeatureCellData = data?.[this.getUnitId()]?.[this.getSheetId()];
-            if (runtimeFeatureCellData == null) {
-                continue;
-            }
-
-            const value = runtimeFeatureCellData.getValue(row, column);
-
-            if (value == null) {
-                continue;
-            }
-
-            return value;
-        }
+        return getRuntimeFeatureCell(row, column, this.getSheetId(), this.getUnitId(), this._runtimeFeatureCellData);
     }
 
     getCellByPosition(row?: number, column?: number) {

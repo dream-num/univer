@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { checkVariantsErrorIsArrayOrBoolean, isValidBinaryNumber } from '../../../basics/engineering';
+import { isValidBinaryNumber } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 
 export class Bin2oct extends BaseFunction {
     override minParams = 1;

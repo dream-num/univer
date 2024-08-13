@@ -843,17 +843,9 @@ export class UpdateFormulaController extends Disposable {
 
                     const newSequenceNodes = this._updateRefOffset(sequenceNodes, refChangeIds, x, y);
 
-                    // The formula f that originally depended on si has been actually calculated and does not require si and x,y.
-                    if ((x !== undefined && (x > 0)) || (y !== undefined && (y > 0))) {
-                        newFormulaDataItem.setValue(row, column, {
-                            f: `=${generateStringWithSequence(newSequenceNodes)}`,
-                        });
-                    } else {
-                        newFormulaDataItem.setValue(row, column, {
-                            f: `=${generateStringWithSequence(newSequenceNodes)}`,
-                            si,
-                        });
-                    }
+                    newFormulaDataItem.setValue(row, column, {
+                        f: `=${generateStringWithSequence(newSequenceNodes)}`,
+                    });
                 });
 
                 if (newFormulaData[unitId]) {

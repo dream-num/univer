@@ -947,7 +947,6 @@ describe('Test insert function operation', () => {
                 t: 2,
             }, {
                 f: '=OFFSET(#REF!,1,1)',
-                si: 'id2',
                 v: 1,
                 t: 2,
             }, {
@@ -981,7 +980,6 @@ describe('Test insert function operation', () => {
                 t: 2,
             }, {
                 f: '=OFFSET(#REF!,1,1)',
-                si: 'id2',
                 v: 1,
                 t: 2,
             }, {

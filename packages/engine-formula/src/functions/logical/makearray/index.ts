@@ -17,6 +17,7 @@
 import { ErrorType } from '../../../basics/error-type';
 import type { AsyncObject } from '../../../engine/reference-object/base-reference-object';
 import { AsyncArrayObject } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -53,7 +54,11 @@ export class Makearray extends BaseFunction {
                 result[r] = [];
             }
             for (let c = 0; c < column; c++) {
-                const value = lambda.execute(NumberValueObject.create(r + 1), NumberValueObject.create(c + 1));
+                let value = lambda.execute(NumberValueObject.create(r + 1), NumberValueObject.create(c + 1));
+
+                if (value.isArray()) {
+                    value = (value as ArrayValueObject).get(0, 0) as BaseValueObject;
+                }
 
                 result[r][c] = value;
             }

@@ -22,6 +22,7 @@ import { Iferror } from './iferror';
 import { Ifna } from './ifna';
 import { Ifs } from './ifs';
 import { Lambda } from './lambda';
+import { Let } from './let';
 import { Makearray } from './makearray';
 import { Not } from './not';
 import { Or } from './or';
@@ -37,6 +38,7 @@ export const functionLogical = [
     [Ifna, FUNCTION_NAMES_LOGICAL.IFNA],
     [Ifs, FUNCTION_NAMES_LOGICAL.IFS],
     [Lambda, FUNCTION_NAMES_LOGICAL.LAMBDA],
+    [Let, FUNCTION_NAMES_LOGICAL.LET],
     [Makearray, FUNCTION_NAMES_LOGICAL.MAKEARRAY],
     [Not, FUNCTION_NAMES_LOGICAL.NOT],
     [Or, FUNCTION_NAMES_LOGICAL.OR],

@@ -163,8 +163,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            name1: { name: 'name1', detail: 'The first name to assign. Must start with a letter. Cannot be the output of a formula or conflict with range syntax.' },
+            nameValue1: { name: 'name_value1', detail: 'The value that is assigned to name1.' },
+            calculationOrName2: { name: 'calculation_or_name2', detail: 'One of the following:\n1.A calculation that uses all names within the LET function. This must be the last argument in the LET function.\n2.A second name to assign to a second name_value. If a name is specified, name_value2 and calculation_or_name3 become required.' },
+            nameValue2: { name: 'name_value2', detail: 'The value that is assigned to calculation_or_name2.' },
+            calculationOrName3: { name: 'calculation_or_name3', detail: 'One of the following:\n1.A calculation that uses all names within the LET function. The last argument in the LET function must be a calculation.\n2.A third name to assign to a third name_value. If a name is specified, name_value3 and calculation_or_name4 become required.' },
         },
     },
     MAKEARRAY: {

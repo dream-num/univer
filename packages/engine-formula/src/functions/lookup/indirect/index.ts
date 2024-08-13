@@ -59,7 +59,7 @@ export class Indirect extends BaseFunction {
             const columnCount = (refText as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
-                // TO DO...
+                // TODO
                 return refText.map(() => {
                     return ErrorValueObject.create(ErrorType.VALUE);
                 });
@@ -108,7 +108,7 @@ export class Indirect extends BaseFunction {
 
         const { range, sheetName, unitId } = gridRange;
 
-        if (Number.isNaN(range.startRow)) {
+        if (Number.isNaN(range.startRow) || range.endRow + 1 > 1048576 || Number.isNaN(range.startColumn) || range.endColumn + 1 > 16384) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 

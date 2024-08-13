@@ -158,8 +158,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            name1: { name: 'tên 1', detail: 'Tên đầu tiên cần phải gán. Phải bắt đầu bằng một chữ cái. Không thể là kết quả của công thức hoặc xung đột với cú pháp dải ô.' },
+            nameValue1: { name: 'giá trị 1', detail: 'Giá trị gán cho name1.' },
+            calculationOrName2: { name: 'tính toán hoặc tên 2', detail: 'Một trong những điều sau:\n1.Phép tính sử dụng tất cả các tên trong hàm LET. Đây phải là đối số cuối cùng trong hàm LET.\n2.Tên thứ hai cần gán cho name_value thứ hai. Nếu tên đã được xác định, name_value2 và calculation_or_name3 sẽ trở thành bắt buộc.' },
+            nameValue2: { name: 'giá trị 2', detail: 'Giá trị gán cho calculation_or_name2.' },
+            calculationOrName3: { name: 'tính toán hoặc tên 3', detail: 'Một trong những điều sau:\n1.Phép tính sử dụng tất cả các tên trong hàm LET. Đối số cuối cùng trong hàm LET phải là một phép tính.\n2.Tên thứ ba cần gán cho name_value thứ ba. Nếu tên đã được xác định, name_value3 và calculation_or_name4 sẽ trở thành bắt buộc.' },
         },
     },
     MAKEARRAY: {

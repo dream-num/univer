@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '関数に代入する値を指定します。' },
+            n: { name: 'N', detail: 'ベッセル関数の次数を指定します。n に整数以外の値を指定すると、小数点以下が切り捨てられます。' },
         },
     },
     BESSELJ: {
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '関数に代入する値を指定します。' },
+            n: { name: 'N', detail: 'ベッセル関数の次数を指定します。n に整数以外の値を指定すると、小数点以下が切り捨てられます。' },
         },
     },
     BESSELK: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '関数に代入する値を指定します。' },
+            n: { name: 'N', detail: 'ベッセル関数の次数を指定します。n に整数以外の値を指定すると、小数点以下が切り捨てられます。' },
         },
     },
     BESSELY: {
@@ -67,8 +67,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'X', detail: '関数に代入する値を指定します。' },
+            n: { name: 'N', detail: 'ベッセル関数の次数を指定します。n に整数以外の値を指定すると、小数点以下が切り捨てられます。' },
         },
     },
     BIN2DEC: {
@@ -81,8 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '2 進数', detail: '変換する 2 進数を指定します。' },
         },
     },
     BIN2HEX: {
@@ -95,8 +94,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '2 進数', detail: '変換する 2 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     BIN2OCT: {
@@ -109,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '2 進数', detail: '変換する 2 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     BITAND: {
@@ -123,8 +122,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
+            number2: { name: '数値2', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
         },
     },
     BITLSHIFT: {
@@ -137,8 +136,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値は、0 以上の整数である必要があります。' },
+            shiftAmount: { name: 'シフト量', detail: 'は整数である必要があります。' },
         },
     },
     BITOR: {
@@ -151,8 +150,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
+            number2: { name: '数値2', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
         },
     },
     BITRSHIFT: {
@@ -165,8 +164,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値は、0 以上の整数である必要があります。' },
+            shiftAmount: { name: 'シフト量', detail: 'は整数である必要があります。' },
         },
     },
     BITXOR: {
@@ -179,8 +178,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
+            number2: { name: '数値2', detail: '小数点の表示形式になっている必要があります。 0 以上の数値を指定します。' },
         },
     },
     COMPLEX: {
@@ -193,8 +192,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            realNum: { name: '実数', detail: '複素数の実数係数を指定します。' },
+            iNum: { name: '虚数', detail: '複素数の虚数係数を指定します。' },
+            suffix: { name: '虚数単位', detail: '複素数の虚数部分の単位を指定します。省略すると、"i" を指定したと見なされます。' },
         },
     },
     CONVERT: {
@@ -207,8 +207,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '変換する値を指定します。' },
+            fromUnit: { name: '変換前単位', detail: '数値の単位を指定します。' },
+            toUnit: { name: '変換後単位', detail: '結果の単位を指定します。' },
         },
     },
     DEC2BIN: {
@@ -221,8 +222,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '10 進数', detail: '変換する 10 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     DEC2HEX: {
@@ -235,8 +236,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '10 進数', detail: '変換する 10 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     DEC2OCT: {
@@ -249,8 +250,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '10 進数', detail: '変換する 10 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     DELTA: {
@@ -263,8 +264,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '一方の数値を指定します。' },
+            number2: { name: '数値2', detail: 'もう一方の数値を指定します。数値 2 を省略すると、0 を指定したと見なされます。' },
         },
     },
     ERF: {
@@ -277,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lowerLimit: { name: '下限', detail: '誤差関数を積分するときの下限値を指定します。' },
+            upperLimit: { name: '上限', detail: '誤差関数を積分するときの上限値を指定します。上限を省略すると、0 ～下限の範囲で積分が行われます。' },
         },
     },
     ERF_PRECISE: {
@@ -291,8 +292,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: '誤差関数を積分するときの下限値を指定します。' },
         },
     },
     ERFC: {
@@ -305,8 +305,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: '相補誤差関数を積分するときの下限値を指定します。' },
         },
     },
     ERFC_PRECISE: {
@@ -319,8 +318,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '下限', detail: '相補誤差関数を積分するときの下限値を指定します。' },
         },
     },
     GESTEP: {
@@ -347,8 +345,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '16 進数', detail: '変換する 16 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     HEX2DEC: {
@@ -361,8 +359,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '16 進数', detail: '変換する 16 進数を指定します。' },
         },
     },
     HEX2OCT: {
@@ -375,8 +372,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '16 進数', detail: '変換する 16 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     IMABS: {
@@ -739,8 +736,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '8 進数', detail: '変換する 8 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
     OCT2DEC: {
@@ -753,8 +750,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '8 進数', detail: '変換する 8 進数を指定します。' },
         },
     },
     OCT2HEX: {
@@ -767,8 +763,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '8 進数', detail: '変換する 8 進数を指定します。' },
+            places: { name: '桁数', detail: '使用する文字数を指定します。' },
         },
     },
 };

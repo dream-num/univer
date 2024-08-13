@@ -157,8 +157,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            name1: { name: '名前1', detail: '最初に割り当てる名前。文字で始まる必要があります。数式の出力であったり、範囲の構文と競合していたりしてはなりません。' },
+            nameValue1: { name: '値1', detail: 'name1 に割り当てられている値。' },
+            calculationOrName2: { name: '計算または名前2', detail: '以下のいずれかになります。\n1.LET 関数内のすべての名前を使用する計算。LET 関数の最後の引数でなければなりません。\n2.2 番目の name_value に割り当てる 2 番目の名前。名前が指定されている場合、name_value2 と calculation_or_name3 が必須です。' },
+            nameValue2: { name: '値2', detail: 'calculation_or_name2 に割り当てられている値。' },
+            calculationOrName3: { name: '計算または名前3', detail: '以下のいずれかになります。\n1.LET 関数内のすべての名前を使用する計算。LET 関数の最後の引数は計算でなければなりません。\n2.3 番目の name_value に割り当てる 3 番目の名前。名前が指定されている場合、name_value3 と calculation_or_name4 が必須です。' },
         },
     },
     MAKEARRAY: {

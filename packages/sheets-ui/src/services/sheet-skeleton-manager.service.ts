@@ -226,8 +226,17 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
 export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRange): IRangeWithCoord {
     const { startRow, startColumn, endRow, endColumn, rangeType } = range;
-    const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-    const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
+
+    // after the selection is moved, it may be stored endRow < startRow or endColumn < startColumn
+    // so startCell and endCell need get min value to draw the selection
+    const _startRow = endRow < startRow ? endRow : startRow;
+    const _endRow = endRow < startRow ? startRow : endRow;
+
+    const _startColumn = endColumn < startColumn ? endColumn : startColumn;
+    const _endColumn = endColumn < startColumn ? startColumn : endColumn;
+
+    const startCell = skeleton.getNoMergeCellPositionByIndex(_startRow, _startColumn);
+    const endCell = skeleton.getNoMergeCellPositionByIndex(_endRow, _endColumn);
 
     return {
         startRow,

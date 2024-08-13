@@ -147,11 +147,11 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     getSearchListByName(searchText: string) {
         const searchList: ISearchItem[] = [];
         const functionList = this._functionService.getDescriptions();
-        searchText = searchText.toLocaleUpperCase();
+        const _searchText = searchText.toLocaleUpperCase().trim();
         functionList.forEach((item) => {
             const { functionName, abstract, functionType } = item;
             // Exclude DefinedName
-            if ((functionName.toLocaleUpperCase().indexOf(searchText) > -1) && functionType !== FunctionType.DefinedName) {
+            if ((functionName.toLocaleUpperCase().indexOf(_searchText) > -1) && functionType !== FunctionType.DefinedName) {
                 searchList.push({ name: functionName, desc: abstract });
             }
         });
@@ -162,10 +162,10 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     getSearchListByNameFirstLetter(searchText: string) {
         const searchList: ISearchItem[] = [];
         const functionList = this._functionService.getDescriptions();
-        searchText = searchText.toLocaleUpperCase();
+        const _searchText = searchText.toLocaleUpperCase().trim();
         functionList.forEach((item) => {
             const { functionName, abstract } = item;
-            if (functionName.toLocaleUpperCase().indexOf(searchText) === 0) {
+            if (functionName.toLocaleUpperCase().indexOf(_searchText) === 0) {
                 searchList.push({ name: functionName, desc: abstract });
             }
         });

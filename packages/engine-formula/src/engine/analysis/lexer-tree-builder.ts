@@ -1060,7 +1060,7 @@ export class LexerTreeBuilder extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _nodeMaker(formulaStringRaw: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
-        let formulaString = formulaStringRaw;
+        let formulaString = formulaStringRaw.replace(/\r/g, ' ').replace(/\n/g, ' ');
 
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);

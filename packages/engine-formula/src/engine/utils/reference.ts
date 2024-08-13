@@ -292,8 +292,18 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
     };
 }
 
+/**
+ * LOG10 is a formula, google sheet support it on Log10:L
+ * EXCEL support it on Log10:Log10
+ */
+const EXCEPTION_REF_STRINGS = ['LOG10'];
+
 export function isReferenceStringWithEffectiveColumn(refString: string) {
     if (!isReferenceString(refString)) {
+        return false;
+    }
+
+    if (EXCEPTION_REF_STRINGS.includes(refString.toUpperCase().trim())) {
         return false;
     }
 

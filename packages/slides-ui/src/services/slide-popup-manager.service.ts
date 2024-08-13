@@ -156,6 +156,7 @@ export class SlideCanvasPopMangerService extends Disposable {
             subUnitId: 'default',
             anchorRect: position,
             anchorRect$: position$,
+            canvasElement: currentRender.engine.getCanvasElement(),
         });
 
         return {

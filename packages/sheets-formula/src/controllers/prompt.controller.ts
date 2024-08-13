@@ -809,7 +809,7 @@ export class PromptController extends Disposable {
             this._contextService.setContextValue(UNI_DISABLE_CHANGING_FOCUS_KEY, true);
 
             const lastSequenceNodes =
-                this._lexerTreeBuilder.sequenceNodesBuilder(config.dataStream.replace(/\r/g, '').replace(/\n/g, '')) ||
+                this._lexerTreeBuilder.sequenceNodesBuilder(config.dataStream.replace(/\r/g, ' ').replace(/\n/g, ' ')) ||
                 [];
 
             this._formulaPromptService.setSequenceNodes(lastSequenceNodes);

@@ -151,17 +151,17 @@ describe('Test clipboard', () => {
             expect(getValues(2, 2, 2, 2)?.[0]?.[0]?.v).toEqual('Univer');
             expect(getStyles(2, 2, 2, 2)?.[0]?.[0]).toStrictEqual({
                 bl: 1,
-                cl: {
-                    rgb: '#000',
-                },
+                // cl: {
+                //     rgb: '#000',
+                // },
                 ff: 'Arial',
                 fs: 10,
                 ht: 0,
                 it: 1,
                 ol: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 pd: {
@@ -171,9 +171,9 @@ describe('Test clipboard', () => {
                     t: 0,
                 },
                 st: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 tb: 0,
@@ -183,9 +183,9 @@ describe('Test clipboard', () => {
                     v: 0,
                 },
                 ul: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 vt: 3,

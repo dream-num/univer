@@ -32,6 +32,7 @@ export interface IPopup extends Pick<IRectPopupProps, 'closeOnSelfTarget' | 'dir
 
     offset?: [number, number];
     canvasElement: HTMLCanvasElement;
+    hideOnInvisible?: boolean;
 }
 
 export interface ICanvasPopupService {

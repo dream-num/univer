@@ -57,7 +57,7 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene) {
     };
 }
 
-export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside'> {
+export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
 }

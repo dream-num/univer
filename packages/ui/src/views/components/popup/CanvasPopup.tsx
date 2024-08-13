@@ -33,7 +33,7 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
     const anchorRect = useObservable(popup.anchorRect$, popup.anchorRect);
     const excludeRects = useObservable(popup.excludeRects$, popup.excludeRects);
     const { bottom, left, right, top } = anchorRect;
-    const { offset, canvasElement } = popup;
+    const { offset, canvasElement, hideOnInvisible = true } = popup;
 
     // We add an offset to the anchor rect to make the popup offset with the anchor.
     const rectWithOffset: IBoundRectNoAngle = useMemo(() => {
@@ -47,6 +47,9 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
     }, [bottom, left, right, top, offset]);
 
     useEffect(() => {
+        if (!hideOnInvisible) {
+            return;
+        }
         const rect = canvasElement.getBoundingClientRect();
         const { top, left, bottom, right } = rect;
         if (rectWithOffset.bottom < top || rectWithOffset.top > bottom || rectWithOffset.right < left || rectWithOffset.left > right) {
@@ -54,7 +57,7 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
         } else {
             setHidden(false);
         }
-    }, [rectWithOffset, canvasElement]);
+    }, [rectWithOffset, canvasElement, hideOnInvisible]);
 
     if (hidden) {
         return null;

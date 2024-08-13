@@ -140,6 +140,8 @@ export function getMoveRangeMutations(
             });
 
             const doMoveRangeMutation: IMoveRangeMutationParams = {
+                fromRange,
+                toRange,
                 from: {
                     value: newFromCellValue.getMatrix(),
                     subUnitId: fromSubUnitId,
@@ -151,6 +153,8 @@ export function getMoveRangeMutations(
                 unitId,
             };
             const undoMoveRangeMutation: IMoveRangeMutationParams = {
+                fromRange: toRange,
+                toRange: fromRange,
                 from: {
                     value: fromCellValue.getMatrix(),
                     subUnitId: fromSubUnitId,
@@ -184,60 +188,60 @@ export function getMoveRangeMutations(
                 id: string;
                 params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
             }> = [
-                {
-                    id: RemoveWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: fromSubUnitId,
-                        ranges: fromMergeRanges,
+                    {
+                        id: RemoveWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: fromSubUnitId,
+                            ranges: fromMergeRanges,
+                        },
                     },
-                },
-                {
-                    id: RemoveWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: fromSubUnitId,
-                        ranges: toMergeRanges,
+                    {
+                        id: RemoveWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: fromSubUnitId,
+                            ranges: toMergeRanges,
+                        },
                     },
-                },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: toSubUnitId,
-                        ranges: addMergeCellRanges,
+                    {
+                        id: AddWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: toSubUnitId,
+                            ranges: addMergeCellRanges,
+                        },
                     },
-                },
-            ];
+                ];
             const mergeUndos: Array<{
                 id: string;
                 params: IAddWorksheetMergeMutationParams | IRemoveWorksheetMergeMutationParams;
             }> = [
-                {
-                    id: RemoveWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: toSubUnitId,
-                        ranges: addMergeCellRanges,
+                    {
+                        id: RemoveWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: toSubUnitId,
+                            ranges: addMergeCellRanges,
+                        },
                     },
-                },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: toSubUnitId,
-                        ranges: toMergeRanges,
+                    {
+                        id: AddWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: toSubUnitId,
+                            ranges: toMergeRanges,
+                        },
                     },
-                },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId: fromSubUnitId,
-                        ranges: fromMergeRanges,
+                    {
+                        id: AddWorksheetMergeMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId: fromSubUnitId,
+                            ranges: fromMergeRanges,
+                        },
                     },
-                },
-            ];
+                ];
             // +++++++++++++++++++++
 
             redos = [

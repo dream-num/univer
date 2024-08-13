@@ -26,15 +26,8 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 
-import { ObjectProvider } from '@univerjs/slides';
-
-export enum SLIDE_KEY {
-    COMPONENT = '__slideRender__',
-    SCENE = '__mainScene__',
-    VIEW = '__mainView__',
-}
-
-export type PageID = string;
+import { ObjectProvider, SLIDE_KEY } from '@univerjs/slides';
+import type { PageID } from '../type';
 
 // export const ICanvasView = createIdentifier<IUniverInstanceService>('univer.slide.canvas-view');
 export class SlideRenderController extends RxDisposable implements IRenderModule {

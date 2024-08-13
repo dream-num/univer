@@ -15,7 +15,7 @@
  */
 
 import type { IPageElement, Nullable } from '@univerjs/core';
-import { Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type {
     BaseObject,
     IRenderModule,
@@ -24,15 +24,8 @@ import {
     IRenderManagerService,
 } from '@univerjs/engine-render';
 
+import type { PageID } from '../type';
 import { SlideRenderController } from './slide.render-controller';
-
-export enum SLIDE_KEY {
-    COMPONENT = '__slideRender__',
-    SCENE = '__mainScene__',
-    VIEW = '__mainView__',
-}
-
-export type PageID = string;
 
 // export const ICanvasView = createIdentifier<IUniverInstanceService>('univer.slide.canvas-view');
 @OnLifecycle(LifecycleStages.Ready, CanvasView)
@@ -41,8 +34,6 @@ export class CanvasView extends RxDisposable implements IRenderModule {
         // this controller needs by commands. root injector. T
         // That means this controller is not init by renderUnit ---> no renderContext.
         // private readonly _renderContext: IRenderContext<UnitModel>,
-        @Inject(Injector) private readonly _injector: Injector,
-        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();

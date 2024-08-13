@@ -25,7 +25,9 @@ export interface IAddHyperLinkCommandParams {
     subUnitId: string;
     link: ICellHyperLink;
 }
-
+/**
+ * Command for add hyperlink
+ */
 export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.add-hyper-link',

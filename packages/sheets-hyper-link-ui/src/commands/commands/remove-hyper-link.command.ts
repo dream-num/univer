@@ -23,6 +23,9 @@ import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@
 export interface IRemoveHyperLinkCommandParams {
     unitId: string;
     subUnitId: string;
+    /**
+     * id of link
+     */
     id: string;
 }
 

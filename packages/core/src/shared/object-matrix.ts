@@ -596,6 +596,34 @@ export class ObjectMatrix<T> {
         return objectMatrix.getData();
     }
 
+    /**
+     * the function can only be used in all the row and column are positive integer
+     * @description the positive integer in V8 Object is stored in a fast memory space and it is sorted  when we get the keys
+     * @returns {IRange} the start and end scope of the matrix
+     */
+    getStartEndScope(): IRange {
+        let startRow = Infinity;
+        let endRow = -Infinity;
+        let startColumn = Infinity;
+        let endColumn = -Infinity;
+
+        const rows = Object.keys(this._matrix);
+        if (rows.length > 0) {
+            startRow = +rows[0];
+            endRow = +rows[rows.length - 1];
+        }
+
+        for (const row of rows) {
+            const columns = Object.keys(this._matrix[row as unknown as number]);
+            if (columns.length > 0) {
+                startColumn = Math.min(startColumn, +columns[0]);
+                endColumn = Math.max(endColumn, +columns[columns.length - 1]);
+            }
+        }
+
+        return { startRow, endRow, startColumn, endColumn };
+    }
+
     getDataRange(): IRange {
         let startRow = 0;
         let startColumn = 0;

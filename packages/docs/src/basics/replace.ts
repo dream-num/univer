@@ -30,7 +30,8 @@ export function getRetainAndDeleteAndExcludeLineBreak(
     selection: ITextRange,
     body: IDocumentBody,
     segmentId: string = '',
-    memoryCursor: number = 0
+    memoryCursor: number = 0,
+    preserveLineBreak: boolean = true
 ): Array<IRetainAction | IDeleteAction> {
     const { startOffset, endOffset } = getDeleteSelection(selection, body);
     const dos: Array<IRetainAction | IDeleteAction> = [];
@@ -73,9 +74,11 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         });
     }
 
-    if (paragraphInRange && paragraphInRange.startIndex - memoryCursor > textStart) {
-        const paragraphIndex = paragraphInRange.startIndex - memoryCursor;
-        retainPoints.add(paragraphIndex);
+    if (preserveLineBreak) {
+        if (paragraphInRange && paragraphInRange.startIndex - memoryCursor > textStart) {
+            const paragraphIndex = paragraphInRange.startIndex - memoryCursor;
+            retainPoints.add(paragraphIndex);
+        }
     }
 
     const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);

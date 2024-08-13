@@ -209,7 +209,7 @@ function getCutActionsFromTextRanges(
                 segmentId,
             });
         } else {
-            textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor));
+            textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor, false));
         }
 
         memoryCursor.reset();
@@ -393,7 +393,6 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-
         const selections = params.selections ?? textSelectionManagerService.getCurrentTextRanges();
         const rectRanges = textSelectionManagerService.getCurrentRectRanges();
 
@@ -434,7 +433,6 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         if (Array.isArray(selections) && selections?.length !== 0) {
             doMutation.params.actions = getCutActionsFromTextRanges(selections, docDataModel, segmentId);
         }
-
         if (Array.isArray(rectRanges) && rectRanges?.length !== 0) {
             const actions = getCutActionsFromRectRanges(rectRanges, docDataModel, viewModel, segmentId);
             if (doMutation.params.actions?.length === 0 || doMutation.params.actions == null) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { numfmt } from '@univerjs/engine-numfmt';
+import { numfmt } from '@univerjs/core';
 
 /**
  * the function decimal just use positive,negative configuration ignored

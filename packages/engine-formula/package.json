@@ -65,11 +65,9 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "big.js": "^6.2.1",
         "numfmt": "^2.5.2"
     },
     "devDependencies": {
-        "@types/big.js": "^6.2.2",
         "@univerjs/core": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/shared": "workspace:*",

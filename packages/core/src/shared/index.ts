@@ -39,6 +39,7 @@ export * from './tools';
 export * from './types';
 export * from './debounce';
 export * from './clipboard';
+export { numfmt } from './numfmt';
 export { queryObjectMatrix } from './object-matrix-query';
 export { moveRangeByOffset } from './range';
 export { afterInitApply } from './after-init-apply';

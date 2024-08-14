@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
-export { DEFAULT_TEXT_FORMAT } from './const';
+// @ts-ignore
+import numfmt from 'numfmt';
+
+export { numfmt };

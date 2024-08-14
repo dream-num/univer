@@ -22,12 +22,12 @@ import {
     Injector,
     IUniverInstanceService,
     LifecycleStages,
+    numfmt,
     OnLifecycle,
     Optional,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { numfmt } from '@univerjs/engine-numfmt';
 import type {
     INumfmtItemWithCache,
     IRemoveNumfmtMutationParams,

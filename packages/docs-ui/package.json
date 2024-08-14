@@ -75,7 +75,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.72"
+        "@univerjs/icons": "^0.1.73"
     },
     "devDependencies": {
         "@types/react": "^18.3.3",

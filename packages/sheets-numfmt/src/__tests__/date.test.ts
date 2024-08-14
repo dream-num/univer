@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { numfmt } from '@univerjs/engine-numfmt';
+import { numfmt } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 
 describe('test numfmt date', () => {

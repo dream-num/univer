@@ -50,7 +50,7 @@ export class SheetsDataValidationValidatorService {
         }
 
         return new Promise<DataValidationStatus>((resolve) => {
-            manager.validator(getCellValueOrigin(cellRaw), rule, { unitId, subUnitId, row, col }, resolve);
+            manager.validator(getCellValueOrigin(cellRaw), rule, { unitId, subUnitId, row, col, worksheet, workbook }, resolve);
         });
     }
 

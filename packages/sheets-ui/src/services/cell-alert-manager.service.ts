@@ -61,7 +61,9 @@ export class CellAlertManagerService extends Disposable {
 
     showAlert(alert: ICellAlert) {
         let lastPopup = this._currentAlert.get(alert.key);
-        lastPopup && lastPopup.dispose.dispose();
+        if (lastPopup) {
+            lastPopup.dispose.dispose();
+        };
         if (lastPopup) {
             lastPopup.dispose.dispose();
         } else {

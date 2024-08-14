@@ -30,7 +30,16 @@ export interface ICellLinkContent {
 }
 
 export interface ICellHyperLink extends ICellLinkContent {
+    /**
+     * unique id
+     */
     id: string;
+    /**
+     * row of link
+     */
     row: number;
+    /**
+     * col of link
+     */
     column: number;
 }

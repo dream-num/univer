@@ -353,6 +353,7 @@ export function getSetCellStyleMutations(
                 ...DEFAULT_STYLES,
                 pd: DEFAULT_PADDING_DATA,
                 bg: null,
+                cl: null,
             }, value.s),
         };
         if (withRichFormat && value.p?.body) {

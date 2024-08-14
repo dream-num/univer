@@ -87,13 +87,19 @@ export class DateValidator extends BaseDataValidator<number> {
     }
 
     override async isValidType(info: IValidatorCellInfo): Promise<boolean> {
-        const { value } = info;
+        const { value, worksheet, row, column, workbook } = info;
         if (typeof value === 'string') {
             return dayjs(value, 'YYYY-MM-DD HH:mm:ss', true).isValid();
         }
 
         if (typeof value === 'number') {
-            return true;
+            const cell = worksheet.getCellRaw(row, column);
+            if (cell && cell.s) {
+                const style = workbook.getStyles().get(cell.s);
+                if (style?.n?.pattern.indexOf('yyyy-MM-dd') === 0) {
+                    return true;
+                }
+            }
         }
 
         return false;

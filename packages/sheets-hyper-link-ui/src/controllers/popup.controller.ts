@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
 import { HoverManagerService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { debounceTime } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookViewPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookViewPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPopupController)
@@ -28,11 +28,13 @@ export class SheetsHyperLinkPopupController extends Disposable {
         @Inject(SheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: SheetsHyperLinkPopupService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
         @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
+        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
         this._initHoverListener();
+        this._initCommandListener();
     }
 
     private _initHoverListener() {
@@ -92,5 +94,14 @@ export class SheetsHyperLinkPopupController extends Disposable {
                 });
             })
         );
+    }
+
+    private _initCommandListener() {
+        const HIDE_COMMAND_LIST = [ClearSelectionContentCommand.id, ClearSelectionAllCommand.id, ClearSelectionFormatCommand.id];
+        this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
+            if (HIDE_COMMAND_LIST.includes(command.id)) {
+                this._sheetsHyperLinkPopupService.hideCurrentPopup();
+            }
+        }));
     }
 }

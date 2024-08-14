@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { DataValidationOperator, Inject, Injector, LocaleService, Tools } from '@univerjs/core';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
 import type { IBaseDataValidationWidget } from './base-widget';
@@ -39,6 +39,8 @@ export interface IValidatorCellInfo<DataType = Nullable<CellValue>> {
     column: number;
     unitId: string;
     subUnitId: string;
+    worksheet: Worksheet;
+    workbook: Workbook;
 }
 
 export interface IFormulaResult<T = any> {
@@ -107,7 +109,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
     }
 
     getRuleFinalError(rule: IDataValidationRule) {
-        if (rule.showInputMessage && rule.error) {
+        if (rule.showErrorMessage && rule.error) {
             return rule.error;
         }
 

@@ -18,13 +18,9 @@ export type { Dependency } from '@univerjs/core';
 export { Inject, Injector } from '@univerjs/core';
 export { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
 export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-export { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 export { UniverSheetsThreadCommentPlugin } from './plugin';
 export { SHEETS_THREAD_COMMENT } from './types/const';
-export { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
-export { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
-export { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
 export { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 export { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
@@ -32,5 +28,19 @@ export { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 // #region - all commands
 
 export { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
+export {
+    AddCommentCommand,
+    DeleteCommentCommand,
+    UpdateCommentCommand,
+    ResolveCommentCommand,
+    DeleteCommentTreeCommand,
+} from '@univerjs/thread-comment';
+export type {
+    IAddCommentCommandParams,
+    IDeleteCommentCommandParams,
+    IResolveCommentCommandParams,
+    IUpdateCommentCommandParams,
+    IDeleteCommentTreeCommandParams,
+} from '@univerjs/thread-comment';
 
 // #endregion

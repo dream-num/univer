@@ -17,16 +17,17 @@
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import type { ICellHyperLink } from '../../types/interfaces/i-hyper-link';
-import { AddHyperLinkMutation } from '../mutations/add-hyper-link.mutation';
-import { RemoveHyperLinkMutation } from '../mutations/remove-hyper-link.mutation';
+import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 
 export interface IAddHyperLinkCommandParams {
     unitId: string;
     subUnitId: string;
     link: ICellHyperLink;
 }
-
+/**
+ * Command for add hyperlink
+ */
 export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.add-hyper-link',

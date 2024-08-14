@@ -164,17 +164,17 @@ describe('Test clipboard', () => {
                     rgb: 'rgb(255,0,0)',
                 },
                 bl: 0,
-                cl: {
-                    rgb: '#000',
-                },
+                // cl: {
+                //     rgb: '#000',
+                // },
                 ff: 'Arial',
                 fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 pd: {
@@ -184,9 +184,9 @@ describe('Test clipboard', () => {
                     t: 0,
                 },
                 st: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 tb: 0,
@@ -196,9 +196,9 @@ describe('Test clipboard', () => {
                     v: 0,
                 },
                 ul: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 vt: 2,
@@ -237,17 +237,17 @@ describe('Test clipboard', () => {
                     rgb: 'rgb(255,0,0)',
                 },
                 bl: 0,
-                cl: {
-                    rgb: '#000',
-                },
+                // cl: {
+                //     rgb: '#000',
+                // },
                 ff: 'Arial',
                 fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 pd: {
@@ -257,9 +257,9 @@ describe('Test clipboard', () => {
                     t: 0,
                 },
                 st: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 tb: 0,
@@ -269,9 +269,9 @@ describe('Test clipboard', () => {
                     v: 0,
                 },
                 ul: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 vt: 2,
@@ -310,17 +310,17 @@ describe('Test clipboard', () => {
                     rgb: 'rgb(255,0,0)',
                 },
                 bl: 0,
-                cl: {
-                    rgb: '#000',
-                },
+                // cl: {
+                //     rgb: '#000',
+                // },
                 ff: 'Arial',
                 fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 pd: {
@@ -330,9 +330,9 @@ describe('Test clipboard', () => {
                     t: 0,
                 },
                 st: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 tb: 0,
@@ -342,9 +342,9 @@ describe('Test clipboard', () => {
                     v: 0,
                 },
                 ul: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 vt: 2,
@@ -387,17 +387,17 @@ describe('Test clipboard', () => {
                     rgb: 'rgb(255,0,0)',
                 },
                 bl: 0,
-                cl: {
-                    rgb: '#000',
-                },
+                // cl: {
+                //     rgb: '#000',
+                // },
                 ff: 'Arial',
                 fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 pd: {
@@ -407,9 +407,9 @@ describe('Test clipboard', () => {
                     t: 0,
                 },
                 st: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 tb: 0,
@@ -419,9 +419,9 @@ describe('Test clipboard', () => {
                     v: 0,
                 },
                 ul: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 vt: 2,
@@ -431,17 +431,17 @@ describe('Test clipboard', () => {
                     rgb: 'rgb(255,0,0)',
                 },
                 bl: 0,
-                cl: {
-                    rgb: '#000',
-                },
+                // cl: {
+                //     rgb: '#000',
+                // },
                 ff: 'Arial',
                 fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 pd: {
@@ -451,9 +451,9 @@ describe('Test clipboard', () => {
                     t: 0,
                 },
                 st: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 tb: 0,
@@ -463,9 +463,9 @@ describe('Test clipboard', () => {
                     v: 0,
                 },
                 ul: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 vt: 2,
@@ -515,17 +515,17 @@ describe('Test clipboard', () => {
                         rgb: 'rgb(255,0,0)',
                     },
                     bl: 0,
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     ff: 'Arial',
                     fs: 10,
                     ht: 2,
                     it: 0,
                     ol: {
-                        cl: {
-                            rgb: '#000',
-                        },
+                        // cl: {
+                        //     rgb: '#000',
+                        // },
                         s: 0,
                     },
                     pd: {
@@ -535,9 +535,9 @@ describe('Test clipboard', () => {
                         t: 0,
                     },
                     st: {
-                        cl: {
-                            rgb: '#000',
-                        },
+                        // cl: {
+                        //     rgb: '#000',
+                        // },
                         s: 0,
                     },
                     tb: 0,
@@ -547,9 +547,9 @@ describe('Test clipboard', () => {
                         v: 0,
                     },
                     ul: {
-                        cl: {
-                            rgb: '#000',
-                        },
+                        // cl: {
+                        //     rgb: '#000',
+                        // },
                         s: 0,
                     },
                     vt: 2,
@@ -559,17 +559,17 @@ describe('Test clipboard', () => {
                         rgb: 'rgb(255,0,0)',
                     },
                     bl: 0,
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     ff: 'Arial',
                     fs: 10,
                     ht: 2,
                     it: 0,
                     ol: {
-                        cl: {
-                            rgb: '#000',
-                        },
+                        // cl: {
+                        //     rgb: '#000',
+                        // },
                         s: 0,
                     },
                     pd: {
@@ -579,9 +579,9 @@ describe('Test clipboard', () => {
                         t: 0,
                     },
                     st: {
-                        cl: {
-                            rgb: '#000',
-                        },
+                        // cl: {
+                        //     rgb: '#000',
+                        // },
                         s: 0,
                     },
                     tb: 0,
@@ -591,9 +591,9 @@ describe('Test clipboard', () => {
                         v: 0,
                     },
                     ul: {
-                        cl: {
-                            rgb: '#000',
-                        },
+                        // cl: {
+                        //     rgb: '#000',
+                        // },
                         s: 0,
                     },
                     vt: 2,
@@ -681,17 +681,17 @@ describe('Test clipboard', () => {
                     rgb: 'rgb(255,0,0)',
                 },
                 bl: 0,
-                cl: {
-                    rgb: '#000',
-                },
+                // cl: {
+                //     rgb: '#000',
+                // },
                 ff: 'Arial',
                 fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 pd: {
@@ -701,9 +701,9 @@ describe('Test clipboard', () => {
                     t: 0,
                 },
                 st: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 tb: 0,
@@ -713,9 +713,9 @@ describe('Test clipboard', () => {
                     v: 0,
                 },
                 ul: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 vt: 2,
@@ -819,17 +819,17 @@ describe('Test clipboard', () => {
                     rgb: 'rgb(255,0,0)',
                 },
                 bl: 0,
-                cl: {
-                    rgb: '#000',
-                },
+                // cl: {
+                //     rgb: '#000',
+                // },
                 ff: 'Arial',
                 fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 pd: {
@@ -839,9 +839,9 @@ describe('Test clipboard', () => {
                     t: 0,
                 },
                 st: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 tb: 0,
@@ -851,9 +851,9 @@ describe('Test clipboard', () => {
                     v: 0,
                 },
                 ul: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 vt: 2,
@@ -946,17 +946,17 @@ describe('Test clipboard', () => {
                     rgb: 'rgb(255,0,0)',
                 },
                 bl: 0,
-                cl: {
-                    rgb: '#000',
-                },
+                // cl: {
+                //     rgb: '#000',
+                // },
                 ff: 'Arial',
                 fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 pd: {
@@ -966,9 +966,9 @@ describe('Test clipboard', () => {
                     t: 0,
                 },
                 st: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 tb: 0,
@@ -978,9 +978,9 @@ describe('Test clipboard', () => {
                     v: 0,
                 },
                 ul: {
-                    cl: {
-                        rgb: '#000',
-                    },
+                    // cl: {
+                    //     rgb: '#000',
+                    // },
                     s: 0,
                 },
                 vt: 2,

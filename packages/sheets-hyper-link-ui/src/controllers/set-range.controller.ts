@@ -18,12 +18,15 @@ import type { IMutationInfo, Workbook } from '@univerjs/core';
 import { CellValueType, CustomRangeType, Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
-import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { DOC_HYPER_LINK_PLUGIN } from '@univerjs/docs-hyper-link';
 import { getPlainTextFormDocument } from '@univerjs/docs';
 import { isLegalLink, serializeUrl } from '../common/util';
+import type { IAddHyperLinkCommandParams } from '../commands/commands/add-hyper-link.command';
+import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
+import type { IUpdateHyperLinkCommandParams } from '../commands/commands/update-hyper-link.command';
+import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
 export class SheetHyperLinkSetRangeController extends Disposable {

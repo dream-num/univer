@@ -56,6 +56,7 @@ import { FDocument } from './docs/f-document';
 import { FWorkbook } from './sheets/f-workbook';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
 import { FHooks } from './f-hooks';
+import { FDataValidationBuilder } from './sheets/f-data-validation-builder';
 
 export class FUniver {
     static BorderStyle = BorderStyleTypes;
@@ -125,6 +126,10 @@ export class FUniver {
         const dependencies = FUniver.getDependencies(injector);
         dependencies.forEach((dependency) => injector.add(dependency));
         return injector.createInstance(FUniver);
+    }
+
+    static newDataValidation(): FDataValidationBuilder {
+        return new FDataValidationBuilder();
     }
 
     /**

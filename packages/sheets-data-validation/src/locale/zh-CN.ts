@@ -128,6 +128,7 @@ const locale = {
             customOptions: '自定义',
             refOptions: '引用数据',
             formulaError: '列表源必须是划定分界后的数据列表,或是对单一行或一列的引用。',
+            edit: '编辑',
         },
         listMultiple: {
             title: '下拉菜单-多选',

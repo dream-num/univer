@@ -128,6 +128,7 @@ const locale: typeof zhCN = {
             customOptions: 'Tùy chỉnh',
             refOptions: 'Tham chiếu dữ liệu',
             formulaError: 'Nguồn danh sách phải là danh sách dữ liệu đã được phân chia rõ ràng, hoặc là tham chiếu đến một hàng hoặc cột đơn.',
+            edit: 'Biên tập',
         },
         listMultiple: {
             title: 'Danh sách thả xuống - Chọn nhiều',

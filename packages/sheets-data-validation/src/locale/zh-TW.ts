@@ -130,6 +130,7 @@ const locale: typeof zhCN = {
             customOptions: '自訂',
             refOptions: '引用資料',
             formulaError: '列表來源必須是劃定分界後的資料列表,或是對單一行或一列的引用。 ',
+            edit: '編輯',
         },
         listMultiple: {
             title: '下拉式選單-多選',

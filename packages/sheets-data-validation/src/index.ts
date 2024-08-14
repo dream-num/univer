@@ -30,6 +30,7 @@ export { DataValidationCopyPasteController } from './controllers/dv-copy-paste.c
 export { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 export { DataValidationFormulaController } from './controllers/dv-formula.controller';
 export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
+export { DataValidationModel } from '@univerjs/data-validation';
 
 // #region - all commands
 export {
@@ -42,10 +43,12 @@ export {
     UpdateSheetDataValidationSettingCommand,
     AddSheetDataValidationCommand,
     AddSheetDataValidationAndOpenCommand,
+    ClearRangeDataValidationCommand,
     type IAddSheetDataValidationCommandParams,
     type IUpdateSheetDataValidationRangeCommandParams,
     type IUpdateSheetDataValidationOptionsCommandParams,
     type IUpdateSheetDataValidationSettingCommandParams,
+    type IClearRangeDataValidationCommandParams,
 } from './commands/commands/data-validation.command';
 
 export {

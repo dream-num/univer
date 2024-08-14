@@ -18,6 +18,7 @@ import type {
     CellValue,
     ICellData,
     IColorStyle,
+    IDataValidationRule,
     IObjectMatrixPrimitiveType,
     IRange,
     ISelectionCellWithMergeInfo,
@@ -47,8 +48,11 @@ import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, DataValidationModel } from '@univerjs/sheets-data-validation';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { covertCellValue,
+import {
+    covertCellValue,
     covertCellValues,
     isCellMerged,
     transformCoreHorizontalAlignment,
@@ -533,4 +537,35 @@ export class FRange {
 
         return copyContent?.html ?? '';
     }
+
+    setDataValidation(rule: Omit<IDataValidationRule, 'ranges'> | null) {
+        if (!rule) {
+            this._commandService.executeCommand(ClearRangeDataValidationCommand.id, {
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this._worksheet.getSheetId(),
+                ranges: [this._range],
+            } as IClearRangeDataValidationCommandParams);
+            return this;
+        }
+
+        const params: IAddSheetDataValidationCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            rule: {
+                ...rule,
+                ranges: [this._range],
+            },
+        };
+
+        this._commandService.executeCommand(AddSheetDataValidationCommand.id, params);
+        return this;
+    }
+
+    getDataValidation() {
+        const model = this._injector.get(DataValidationModel);
+    }
+
+    getDataValidations() {}
+
+    async getValidatorStatus() {}
 }

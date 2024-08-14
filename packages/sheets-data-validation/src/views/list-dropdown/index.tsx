@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, DataValidationType, ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import type { DocumentDataModel } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { KeyCode, useObservable } from '@univerjs/ui';
@@ -25,6 +26,8 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import { RectPopup, Scrollbar } from '@univerjs/design';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { debounceTime } from 'rxjs';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { getPlainTextFormDocument, RichTextEditingMutation } from '@univerjs/docs';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
@@ -40,11 +43,13 @@ interface ISelectListProps {
     title?: string;
     onEdit?: () => void;
     style?: React.CSSProperties;
+    filter?: string;
 }
 
 const SelectList = (props: ISelectListProps) => {
-    const { value, onChange, multiple, options, title, onEdit, style } = props;
+    const { value, onChange, multiple, options, title, onEdit, style, filter } = props;
     const localeService = useDependency(LocaleService);
+    const filteredOptions = options.filter((item) => filter ? item.label.includes(filter) : true);
 
     return (
         <div className={styles.dvListDropdown} style={style}>
@@ -52,9 +57,9 @@ const SelectList = (props: ISelectListProps) => {
                 {title}
             </div>
             <div className={styles.dvListDropdownList}>
-                <Scrollbar>
+                <Scrollbar key={filter}>
                     <div className={styles.dvListDropdownListContainer}>
-                        {options.map((item, i) => {
+                        {filteredOptions.map((item, i) => {
                             const selected = value.indexOf(item.value) > -1;
                             const handleClick = () => {
                                 let set: Set<string>;
@@ -96,14 +101,36 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const { location, hideFn } = props;
     const { worksheet, row, col, unitId, subUnitId } = location;
     const dataValidationModel = useDependency(DataValidationModel);
+    const [editingText, setEditingText] = useState('');
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [localValue, setLocalValue] = useState('');
     const editorBridgeService = useDependency(IEditorBridgeService);
+    const instanceService = useDependency(IUniverInstanceService);
     const ruleChange$ = useMemo(() => dataValidationModel.ruleChange$.pipe(debounceTime(16)), []);
     useObservable(ruleChange$);
     const anchorRect = RectPopup.useContext();
     const cellWidth = anchorRect.right - anchorRect.left;
+
+    useEffect(() => {
+        const dispose = commandService.onCommandExecuted((command) => {
+            if (command.id === RichTextEditingMutation.id) {
+                const params = command.params as IRichTextEditingMutationParams;
+                const { unitId } = params;
+                const unit = instanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+                if (!unit) {
+                    return;
+                }
+                const text = getPlainTextFormDocument(unit.getSnapshot());
+                setEditingText(text);
+            }
+        });
+
+        return () => {
+            dispose.dispose();
+        };
+    }, [commandService, instanceService]);
+
     if (!worksheet) {
         return null;
     }
@@ -128,6 +155,12 @@ export function ListDropDown(props: IDropdownComponentProps) {
         });
         hideFn();
     };
+
+    const options = list.map((item) => ({
+        label: item.label,
+        value: item.label,
+        color: showColor ? item.color : 'transparent',
+    }));
 
     return (
         <SelectList
@@ -172,12 +205,9 @@ export function ListDropDown(props: IDropdownComponentProps) {
                     hideFn();
                 }
             }}
-            options={list.map((item) => ({
-                label: item.label,
-                value: item.label,
-                color: showColor ? item.color : 'transparent',
-            }))}
+            options={options}
             onEdit={handleEdit}
+            filter={editingText}
         />
     );
 }

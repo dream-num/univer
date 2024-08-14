@@ -258,7 +258,7 @@ export class Tools {
                 return diffArrays(oneValue, towValue);
             }
             if (Tools.isObject(oneValue)) {
-                return diffObject(oneValue as Object, towValue);
+                return diffObject(oneValue as object, towValue);
             }
             if (Tools.isDate(oneValue)) {
                 return (oneValue as Date).getTime() === towValue.getTime();

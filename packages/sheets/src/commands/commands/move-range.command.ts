@@ -127,6 +127,7 @@ export interface IRangeUnit {
     range: IRange;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getMoveRangeUndoRedoMutations(
     accessor: IAccessor,
     from: IRangeUnit,
@@ -169,12 +170,12 @@ export function getMoveRangeUndoRedoMutations(
             const cellRange = cellToRange(row, col);
             const relativeRange = Rectangle.getRelativeRange(cellRange, fromRange);
             const range = Rectangle.getPositionRange(relativeRange, toRange);
-            newToCellValue.setValue(range.startRow, range.startColumn,Tools.deepClone(fromCellMatrix.getValue(row, col)));
+            newToCellValue.setValue(range.startRow, range.startColumn, Tools.deepClone(fromCellMatrix.getValue(row, col)));
         });
 
         const doMoveRangeMutation: IMoveRangeMutationParams = {
-            fromRange:from.range,
-            toRange:to.range,
+            fromRange: from.range,
+            toRange: to.range,
             from: {
                 value: newFromCellValue.getMatrix(),
                 subUnitId: fromSubUnitId,
@@ -186,8 +187,8 @@ export function getMoveRangeUndoRedoMutations(
             unitId,
         };
         const undoMoveRangeMutation: IMoveRangeMutationParams = {
-            fromRange:to.range,
-            toRange:from.range,
+            fromRange: to.range,
+            toRange: from.range,
             from: {
                 value: fromCellValue.getMatrix(),
                 subUnitId: fromSubUnitId,

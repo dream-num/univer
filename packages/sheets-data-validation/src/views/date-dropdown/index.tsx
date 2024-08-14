@@ -16,7 +16,7 @@
 
 import React, { useState } from 'react';
 import type { CellValue, Nullable } from '@univerjs/core';
-import { DataValidationErrorStyle, ICommandService, useDependency } from '@univerjs/core';
+import { DataValidationErrorStyle, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import dayjs from 'dayjs';
@@ -60,6 +60,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
     const [localDate, setLocalDate] = useState<dayjs.Dayjs | undefined>(originDate);
     const showTime = Boolean(rule?.bizInfo?.showTime);
     const date = localDate && localDate.isValid() ? localDate : dayjs();
+    const localeService = useDependency(LocaleService);
 
     if (!cellData || !rule || !validator) {
         return;
@@ -129,7 +130,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
             />
             <div className={styles.dvDateDropdownBtns}>
                 <Button size="small" type="primary" onClick={handleSave} disabled={!date.isValid()}>
-                    确定
+                    {localeService.t('dataValidation.alert.ok')}
                 </Button>
             </div>
         </div>

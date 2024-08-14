@@ -15,12 +15,13 @@
  */
 
 import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
-import { HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { DataValidationType, HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import type { FUniver } from '../../facade';
+import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
+import { FUniver } from '../../facade';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
 describe('Test FRange', () => {
@@ -53,6 +54,7 @@ describe('Test FRange', () => {
         commandService.registerCommand(SetVerticalTextAlignCommand);
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
+        commandService.registerCommand(AddSheetDataValidationCommand);
 
         getValueByPosition = (
             startRow: number,
@@ -551,5 +553,27 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(0, 0, 0, 0)?.tb).toBe(WrapStrategy.WRAP);
         await range!.setWrapStrategy(WrapStrategy.CLIP);
         expect(getStyleByPosition(0, 0, 0, 0)?.tb).toBe(WrapStrategy.CLIP);
+    });
+
+    it('Range set data validation', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0, 10, 10)!;
+        const range2 = activeSheet?.getRange(11, 11, 2, 2);
+        await range.setDataValidation(FUniver.newDataValidation().requireCheckbox().build());
+        await range2?.setDataValidation(FUniver.newDataValidation().requireNumberEqualTo(1).build());
+        const range3 = activeSheet?.getRange(0, 0, 100, 100);
+
+        expect(range.getDataValidation()).toBeTruthy();
+        expect(range.getDataValidation()?.rule.ranges).toEqual([{
+            startRow: 0,
+            endRow: 9,
+            startColumn: 0,
+            endColumn: 9,
+        }]);
+        expect(range.getDataValidation()?.getCriteriaType()).toEqual(DataValidationType.CHECKBOX);
+        expect(range.getDataValidations().length).toEqual(1);
+        expect(range3?.getDataValidations().length).toEqual(2);
+
+        expect(activeSheet?.getDataValidations().length).toEqual(2);
     });
 });

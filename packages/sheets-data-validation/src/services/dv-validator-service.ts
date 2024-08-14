@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
+import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import { DataValidationStatus, Inject, IUniverInstanceService, Range, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
@@ -54,6 +54,16 @@ export class SheetsDataValidationValidatorService {
         });
     }
 
+    validatorRanges(unitId: string, subUnitId: string, ranges: IRange[]) {
+        return Promise.all(ranges.map((range) => {
+            const promises: Promise<DataValidationStatus>[] = [];
+            Range.foreach(range, (row, col) => {
+                promises.push(this.validatorCell(unitId, subUnitId, row, col));
+            });
+            return promises;
+        }));
+    }
+
     async validatorWorksheet(unitId: string, subUnitId: string) {
         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
         const rules = manager.getDataValidations();
@@ -81,5 +91,26 @@ export class SheetsDataValidationValidatorService {
         });
 
         return map;
+    }
+
+    getDataValidations(unitId: string, subUnitId: string, ranges: IRange[]): IDataValidationRule[] {
+        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+        const ruleMatrix = manager.getRuleObjectMatrix();
+        const ruleIdSet = new Set<string>();
+        ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const ruleId = ruleMatrix.getValue(row, col);
+                if (ruleId) {
+                    ruleIdSet.add(ruleId);
+                }
+            });
+        });
+
+        const rules = Array.from(ruleIdSet).map((id) => manager.getRuleById(id)).filter(Boolean) as IDataValidationRule[];
+        return rules;
+    }
+
+    getDataValidation(unitId: string, subUnitId: string, ranges: IRange[]): Nullable<IDataValidationRule> {
+        return this.getDataValidations(unitId, subUnitId, ranges)[0];
     }
 }

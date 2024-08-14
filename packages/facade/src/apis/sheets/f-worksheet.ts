@@ -19,8 +19,10 @@ import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutatio
 import { SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { Inject, Injector } from '@univerjs/core';
 
+import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
+import { FDataValidation } from './f-data-validation';
 
 export class FWorksheet {
     constructor(
@@ -115,5 +117,26 @@ export class FWorksheet {
      */
     getMaxRows() {
         return this._worksheet.getMaxRows();
+    }
+
+     /**
+      * get all data validation rules in current sheet
+      * @returns {FDataValidation[]} all data validation rules
+      */
+    getDataValidations() {
+        const dataValidationModel = this._injector.get(DataValidationModel);
+        return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule));
+    }
+
+    /**
+     * get data validation validator status for current sheet
+     * @returns matrix of validator status
+     */
+    getValidatorStatus() {
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        return validatorService.validatorWorksheet(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId()
+        );
     }
 }

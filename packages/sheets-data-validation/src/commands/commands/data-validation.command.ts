@@ -501,3 +501,20 @@ export const UpdateSheetDataValidationOptionsCommand: ICommand<IUpdateSheetDataV
     },
 };
 
+export interface IClearRangeDataValidationCommandParams {
+    unitId: string;
+    subUnitId: string;
+    ranges: IRange[];
+}
+
+export const ClearRangeDataValidationCommand: ICommand<IClearRangeDataValidationCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheets.command.clear-range-data-validation',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const commandService = accessor.get(ICommandService);
+        return true;
+    },
+};

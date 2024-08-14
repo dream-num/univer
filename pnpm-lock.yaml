@@ -1504,6 +1504,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/data-validation':
+        specifier: workspace:*
+        version: link:../data-validation
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
@@ -1528,6 +1531,9 @@ importers:
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
+      '@univerjs/sheets-data-validation':
+        specifier: workspace:*
+        version: link:../sheets-data-validation
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula

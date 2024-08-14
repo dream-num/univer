@@ -23,6 +23,7 @@ import type {
     ISelectionCellWithMergeInfo,
     IStyleData,
     ITextDecoration,
+    Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
@@ -47,8 +48,11 @@ import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { covertCellValue,
+import {
+    covertCellValue,
     covertCellValues,
     isCellMerged,
     transformCoreHorizontalAlignment,
@@ -56,6 +60,7 @@ import { covertCellValue,
     transformFacadeHorizontalAlignment,
     transformFacadeVerticalAlignment,
 } from './utils';
+import { FDataValidation } from './f-data-validation';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
@@ -74,18 +79,65 @@ export class FRange {
         // empty
     }
 
+    /**
+     * Get the unit ID of the current workbook
+     *
+     * @return The unit ID of the workbook
+     */
+    getUnitId() {
+        return this._workbook.getUnitId();
+    }
+
+    /**
+     * Gets the name of the worksheet
+     *
+     * @return The name of the worksheet
+     */
+    getSheetName() {
+        return this._worksheet.getName();
+    }
+
+    /**
+     * Gets the area where the statement is applied
+     *
+     * @return The area where the statement is applied
+     */
+    getRange() {
+        return this._range;
+    }
+
+    /**
+     * Gets the starting row number of the applied area
+     *
+     * @return The starting row number of the area
+     */
     getRow(): number {
         return this._range.startRow;
     }
 
+    /**
+     * Gets the starting column number of the applied area
+     *
+     * @return The starting column number of the area
+     */
     getColumn(): number {
         return this._range.startColumn;
     }
 
+    /**
+     * Gets the width of the applied area
+     *
+     * @return The width of the area
+     */
     getWidth(): number {
         return this._range.endColumn - this._range.startColumn + 1;
     }
 
+    /**
+     * Gets the height of the applied area
+     *
+     * @return The height of the area
+     */
     getHeight(): number {
         return this._range.endRow - this._range.startRow + 1;
     }
@@ -532,5 +584,78 @@ export class FRange {
         );
 
         return copyContent?.html ?? '';
+    }
+
+    /**
+     * set a data validation rule to current range
+     * @param rule data validation rule, build by `FUniver.newDataValidation`
+     * @returns current range
+     */
+    async setDataValidation(rule: Nullable<FDataValidation>) {
+        if (!rule) {
+            this._commandService.executeCommand(ClearRangeDataValidationCommand.id, {
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this._worksheet.getSheetId(),
+                ranges: [this._range],
+            } as IClearRangeDataValidationCommandParams);
+            return this;
+        }
+
+        const params: IAddSheetDataValidationCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            rule: {
+                ...rule.rule,
+                ranges: [this._range],
+            },
+        };
+
+        await this._commandService.executeCommand(AddSheetDataValidationCommand.id, params);
+        return this;
+    }
+
+    /**
+     * get first data validation rule in current range
+     * @returns data validation rule
+     */
+    getDataValidation(): Nullable<FDataValidation> {
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        const rule = validatorService.getDataValidation(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId(),
+            [this._range]
+        );
+
+        if (rule) {
+            return new FDataValidation(rule);
+        }
+
+        return rule;
+    }
+
+    /**
+     * get all data validation rules in current range
+     * @returns {FDataValidation[]} all data validation rules
+     */
+    getDataValidations() {
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        return validatorService.getDataValidations(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId(),
+            [this._range]
+        ).map((rule) => new FDataValidation(rule));
+    }
+
+    /**
+     * get data validation validator status for current range
+     * @returns matrix of validator status
+     */
+    async getValidatorStatus() {
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        return validatorService.validatorRanges(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId(),
+            [this._range]
+        );
     }
 }

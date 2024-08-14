@@ -355,7 +355,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
      * @returns IRange
      */
     private _cellValueToRange(cellValue: Record<number, Record<number, object>>) {
-        // const rows = Object.keys(cellValue).map(Number);
         const columns = [];
 
         let minCol = 0;

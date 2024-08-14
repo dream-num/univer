@@ -27,6 +27,7 @@ import {
     Range,
     Rectangle,
     sequenceExecute,
+    Tools,
 } from '@univerjs/core';
 
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -153,25 +154,26 @@ export function getMoveRangeUndoRedoMutations(
         const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
 
         Range.foreach(fromRange, (row, col) => {
-            fromCellValue.setValue(row, col, fromCellMatrix.getValue(row, col));
+            fromCellValue.setValue(row, col, Tools.deepClone(fromCellMatrix.getValue(row, col)));
             newFromCellValue.setValue(row, col, null);
         });
         const toCellValue = new ObjectMatrix<Nullable<ICellData>>();
+        const newToCellValue = new ObjectMatrix<Nullable<ICellData>>();
 
         Range.foreach(toRange, (row, col) => {
-            toCellValue.setValue(row, col, toCellMatrix.getValue(row, col));
+            toCellValue.setValue(row, col, Tools.deepClone(toCellMatrix.getValue(row, col)));
         });
-
-        const newToCellValue = new ObjectMatrix<Nullable<ICellData>>();
 
         Range.foreach(fromRange, (row, col) => {
             const cellRange = cellToRange(row, col);
             const relativeRange = Rectangle.getRelativeRange(cellRange, fromRange);
             const range = Rectangle.getPositionRange(relativeRange, toRange);
-            newToCellValue.setValue(range.startRow, range.startColumn, fromCellMatrix.getValue(row, col));
+            newToCellValue.setValue(range.startRow, range.startColumn, Tools.deepClone(fromCellMatrix.getValue(row, col)));
         });
 
         const doMoveRangeMutation: IMoveRangeMutationParams = {
+            fromRange: from.range,
+            toRange: to.range,
             from: {
                 value: newFromCellValue.getMatrix(),
                 subUnitId: fromSubUnitId,
@@ -183,6 +185,8 @@ export function getMoveRangeUndoRedoMutations(
             unitId,
         };
         const undoMoveRangeMutation: IMoveRangeMutationParams = {
+            fromRange: to.range,
+            toRange: from.range,
             from: {
                 value: fromCellValue.getMatrix(),
                 subUnitId: fromSubUnitId,

@@ -140,6 +140,8 @@ export function getMoveRangeMutations(
             });
 
             const doMoveRangeMutation: IMoveRangeMutationParams = {
+                fromRange,
+                toRange,
                 from: {
                     value: newFromCellValue.getMatrix(),
                     subUnitId: fromSubUnitId,
@@ -151,6 +153,8 @@ export function getMoveRangeMutations(
                 unitId,
             };
             const undoMoveRangeMutation: IMoveRangeMutationParams = {
+                fromRange: toRange,
+                toRange: fromRange,
                 from: {
                     value: fromCellValue.getMatrix(),
                     subUnitId: fromSubUnitId,

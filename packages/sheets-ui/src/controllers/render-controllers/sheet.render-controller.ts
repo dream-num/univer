@@ -339,8 +339,9 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         }
 
         if (command.id === MoveRangeMutation.id && cmdParams.from && cmdParams.to) {
-            const fromRange = this._cellValueToRange(cmdParams.from.value);
-            const toRange = this._cellValueToRange(cmdParams.to.value);
+            // keep the get _cellValueToRange code to ensure the code can effect as before
+            const fromRange = cmdParams.fromRange || this._cellValueToRange(cmdParams.from.value);
+            const toRange = cmdParams.toRange || this._cellValueToRange(cmdParams.to.value);
             const dirtyBounds = this._rangeToBounds([fromRange, toRange]);
             this._markViewportDirty(viewports, dirtyBounds);
             (spreadsheet as unknown as Spreadsheet).setDirtyArea(dirtyBounds);

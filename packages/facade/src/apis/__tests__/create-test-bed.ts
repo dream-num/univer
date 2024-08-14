@@ -40,6 +40,7 @@ import {
     IDescriptionService,
     IRegisterFunctionService,
     RegisterFunctionService,
+    RegisterOtherFormulaService,
 } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets-formula/locale/en-US';
 import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
@@ -48,7 +49,9 @@ import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService }
 import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
-
+import { UniverDataValidationPlugin } from '@univerjs/data-validation';
+import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationModel, SheetDataValidationManager, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '@univerjs/engine-formula/services/active-dirty-manager.service.js';
 import { FUniver } from '../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -162,6 +165,13 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 [ConditionalFormattingFormulaService],
                 [ConditionalFormattingRuleModel],
                 [ConditionalFormattingViewModel],
+
+                [DataValidationCacheService],
+                [DataValidationFormulaService],
+                [DataValidationCustomFormulaService],
+                [RegisterOtherFormulaService],
+                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+                [SheetsDataValidationValidatorService],
             ] as Dependency[]).forEach((d) => {
                 injector.add(d);
             });
@@ -178,6 +188,8 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
     });
 
     univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(UniverDataValidationPlugin);
+
     const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
@@ -187,6 +199,15 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
 
     const univerAPI = FUniver.newAPI(injector);
+    const createSheetDataValidationManager = (unitId: string, subUnitId: string) => {
+        return new SheetDataValidationManager(
+            unitId,
+            subUnitId,
+            injector
+        );
+    };
+    const dataValidationModel = injector.get(DataValidationModel);
+    dataValidationModel.setManagerCreator(createSheetDataValidationManager);
 
     return {
         univer,

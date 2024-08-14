@@ -152,6 +152,7 @@ export const DEFAULT_STYLES = {
         b: 0,
         l: 0,
     },
+    n: null,
 };
 
 export const DEFAULT_SLIDE = {

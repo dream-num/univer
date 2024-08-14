@@ -119,11 +119,19 @@ export class FWorksheet {
         return this._worksheet.getMaxRows();
     }
 
+     /**
+      * get all data validation rules in current sheet
+      * @returns {FDataValidation[]} all data validation rules
+      */
     getDataValidations() {
         const dataValidationModel = this._injector.get(DataValidationModel);
         return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule));
     }
 
+    /**
+     * get data validation validator status for current sheet
+     * @returns matrix of validator status
+     */
     getValidatorStatus() {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorksheet(

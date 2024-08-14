@@ -551,6 +551,11 @@ export class FRange {
         return copyContent?.html ?? '';
     }
 
+    /**
+     * set a data validation rule to current range
+     * @param rule data validation rule, build by `FUniver.newDataValidation`
+     * @returns current range
+     */
     async setDataValidation(rule: Nullable<FDataValidation>) {
         if (!rule) {
             this._commandService.executeCommand(ClearRangeDataValidationCommand.id, {
@@ -574,6 +579,10 @@ export class FRange {
         return this;
     }
 
+    /**
+     * get first data validation rule in current range
+     * @returns data validation rule
+     */
     getDataValidation(): Nullable<FDataValidation> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         const rule = validatorService.getDataValidation(
@@ -589,6 +598,10 @@ export class FRange {
         return rule;
     }
 
+    /**
+     * get all data validation rules in current range
+     * @returns {FDataValidation[]} all data validation rules
+     */
     getDataValidations() {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.getDataValidations(
@@ -598,6 +611,10 @@ export class FRange {
         ).map((rule) => new FDataValidation(rule));
     }
 
+    /**
+     * get data validation validator status for current range
+     * @returns matrix of validator status
+     */
     async getValidatorStatus() {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorRanges(

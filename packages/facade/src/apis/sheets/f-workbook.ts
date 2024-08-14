@@ -277,6 +277,11 @@ export class FWorkbook {
     }
 
     // #region callbacks
+
+    /**
+     * get data validation validator status for current workbook
+     * @returns matrix of validator status
+     */
     getValidatorStatus() {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorkbook(

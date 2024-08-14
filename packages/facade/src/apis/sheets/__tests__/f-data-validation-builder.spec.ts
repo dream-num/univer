@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from 'vitest';
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { ICellData, Injector, IStyleData } from '@univerjs/core';
-import { DataValidationOperator, DataValidationType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { Injector } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, ICommandService } from '@univerjs/core';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { FDataValidationBuilder } from '../f-data-validation-builder';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';

@@ -18,7 +18,6 @@ import type {
     CellValue,
     ICellData,
     IColorStyle,
-    IDataValidationRule,
     IObjectMatrixPrimitiveType,
     IRange,
     ISelectionCellWithMergeInfo,
@@ -50,7 +49,7 @@ import { FormulaDataModel } from '@univerjs/engine-formula';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import {
     covertCellValue,

@@ -79,30 +79,65 @@ export class FRange {
         // empty
     }
 
+    /**
+     * Get the unit ID of the current workbook
+     *
+     * @return The unit ID of the workbook
+     */
     getUnitId() {
         return this._workbook.getUnitId();
     }
 
+    /**
+     * Gets the name of the worksheet
+     *
+     * @return The name of the worksheet
+     */
     getSheetName() {
         return this._worksheet.getName();
     }
 
+    /**
+     * Gets the area where the statement is applied
+     *
+     * @return The area where the statement is applied
+     */
     getRange() {
         return this._range;
     }
 
+    /**
+     * Gets the starting row number of the applied area
+     *
+     * @return The starting row number of the area
+     */
     getRow(): number {
         return this._range.startRow;
     }
 
+    /**
+     * Gets the starting column number of the applied area
+     *
+     * @return The starting column number of the area
+     */
     getColumn(): number {
         return this._range.startColumn;
     }
 
+    /**
+     * Gets the width of the applied area
+     *
+     * @return The width of the area
+     */
     getWidth(): number {
         return this._range.endColumn - this._range.startColumn + 1;
     }
 
+    /**
+     * Gets the height of the applied area
+     *
+     * @return The height of the area
+     */
     getHeight(): number {
         return this._range.endRow - this._range.startRow + 1;
     }

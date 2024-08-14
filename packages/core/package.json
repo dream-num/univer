@@ -71,6 +71,7 @@
         "lodash.mergewith": "^4.6.2",
         "nanoid": "5.0.7",
         "numeral": "^2.0.6",
+        "numfmt": "^2.5.2",
         "ot-json1": "^1.0.2"
     },
     "devDependencies": {

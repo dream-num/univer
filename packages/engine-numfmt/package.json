@@ -59,10 +59,8 @@
         "build": "tsc && vite build",
         "sync:cnpm": "cnpm sync"
     },
-    "dependencies": {
-        "numfmt": "^2.5.2"
-    },
     "devDependencies": {
+        "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "typescript": "^5.5.4",
         "vite": "^5.4.0",

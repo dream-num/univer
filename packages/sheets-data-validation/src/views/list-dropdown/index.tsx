@@ -49,7 +49,7 @@ interface ISelectListProps {
 const SelectList = (props: ISelectListProps) => {
     const { value, onChange, multiple, options, title, onEdit, style, filter } = props;
     const localeService = useDependency(LocaleService);
-    const filteredOptions = options.filter((item) => filter ? item.label.includes(filter) : true);
+    const filteredOptions = options.filter((item) => filter ? item.label.indexOf(filter) === 0 : true);
 
     return (
         <div className={styles.dvListDropdown} style={style}>
@@ -79,7 +79,16 @@ const SelectList = (props: ISelectListProps) => {
                             };
                             return (
                                 <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
-                                    <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
+                                    <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>
+                                        {filter && item.label.indexOf(filter) === 0
+                                            ? (
+                                                <>
+                                                    <span style={{ fontWeight: 'bold' }}>{filter}</span>
+                                                    <span>{item.label.slice(filter.length)}</span>
+                                                </>
+                                            )
+                                            : item.label}
+                                    </div>
                                     <div className={styles.dvListDropdownSelectedIcon}>
                                         {selected ? <CheckMarkSingle /> : null}
                                     </div>

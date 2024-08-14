@@ -24,6 +24,7 @@ import type {
     ISelectionCellWithMergeInfo,
     IStyleData,
     ITextDecoration,
+    Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
@@ -60,6 +61,7 @@ import {
     transformFacadeHorizontalAlignment,
     transformFacadeVerticalAlignment,
 } from './utils';
+import { FDataValidation } from './f-data-validation';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
@@ -76,6 +78,18 @@ export class FRange {
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         // empty
+    }
+
+    getUnitId() {
+        return this._workbook.getUnitId();
+    }
+
+    getSheetName() {
+        return this._worksheet.getName();
+    }
+
+    getRange() {
+        return this._range;
     }
 
     getRow(): number {
@@ -538,7 +552,7 @@ export class FRange {
         return copyContent?.html ?? '';
     }
 
-    setDataValidation(rule: Omit<IDataValidationRule, 'ranges'> | null) {
+    setDataValidation(rule: Nullable<FDataValidation>) {
         if (!rule) {
             this._commandService.executeCommand(ClearRangeDataValidationCommand.id, {
                 unitId: this._workbook.getUnitId(),
@@ -552,7 +566,7 @@ export class FRange {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             rule: {
-                ...rule,
+                ...rule.rule,
                 ranges: [this._range],
             },
         };
@@ -561,13 +575,19 @@ export class FRange {
         return this;
     }
 
-    getDataValidation() {
+    getDataValidation(): Nullable<FDataValidation> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
-        return validatorService.getDataValidation(
+        const rule = validatorService.getDataValidation(
             this._workbook.getUnitId(),
             this._worksheet.getSheetId(),
             [this._range]
         );
+
+        if (rule) {
+            return new FDataValidation(rule);
+        }
+
+        return rule;
     }
 
     getDataValidations() {
@@ -576,7 +596,7 @@ export class FRange {
             this._workbook.getUnitId(),
             this._worksheet.getSheetId(),
             [this._range]
-        );
+        ).map((rule) => new FDataValidation(rule));
     }
 
     async getValidatorStatus() {

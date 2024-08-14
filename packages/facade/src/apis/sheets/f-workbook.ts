@@ -33,6 +33,7 @@ import type {
 } from '@univerjs/sheets';
 import { InsertSheetCommand, RemoveSheetCommand, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 
+import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FWorksheet } from './f-worksheet';
 
 export class FWorkbook {
@@ -276,4 +277,10 @@ export class FWorkbook {
     }
 
     // #region callbacks
+    getValidatorStatus() {
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        return validatorService.validatorWorkbook(
+            this._workbook.getUnitId()
+        );
+    }
 }

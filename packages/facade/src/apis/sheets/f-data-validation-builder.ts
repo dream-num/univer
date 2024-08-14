@@ -16,58 +16,18 @@
 
 import type { IDataValidationRule } from '@univerjs/core';
 import { DataValidationErrorStyle, DataValidationOperator, DataValidationType, generateRandomId } from '@univerjs/core';
+import { serializeRangeToRefString } from '@univerjs/engine-formula';
+import type { FRange } from './f-range';
+import { FDataValidation } from './f-data-validation';
 
  /**
   * Builder for data validation rules.
   *
-  *     // Set the data validation for cell A1 to require a value from B1:B10.
-  *     var cell = SpreadsheetApp.getActive().getRange('A1');
-  *     var range = SpreadsheetApp.getActive().getRange('B1:B10');
-  *     var rule = SpreadsheetApp.newDataValidation().requireValueInRange(range).build();
+  *     Set the data validation for cell A1 to require a value from B1:B10.
+  *     var rule = FUniver.newDataValidation().requireValueInRange(range).build();
   *     cell.setDataValidation(rule);
   */
-interface IDataValidationBuilder {
-    build(): IDataValidationRule;
-    copy(): IDataValidationBuilder;
-    getAllowInvalid(): boolean;
-    getCriteriaType(): DataValidationType;
-    getCriteriaValues(): any[];
-    getHelpText(): string | undefined;
-    requireCheckbox(): IDataValidationBuilder;
-    requireCheckbox(checkedValue: any): IDataValidationBuilder;
-    requireCheckbox(checkedValue: any, uncheckedValue: any): IDataValidationBuilder;
-    // requireDate(): IDataValidationBuilder;
-    requireDateAfter(date: Date): IDataValidationBuilder;
-    requireDateBefore(date: Date): IDataValidationBuilder;
-    requireDateBetween(start: Date, end: Date): IDataValidationBuilder;
-    requireDateEqualTo(date: Date): IDataValidationBuilder;
-    requireDateNotBetween(start: Date, end: Date): IDataValidationBuilder;
-    requireDateOnOrAfter(date: Date): IDataValidationBuilder;
-    requireDateOnOrBefore(date: Date): IDataValidationBuilder;
-    requireFormulaSatisfied(formula: string): IDataValidationBuilder;
-    requireNumberBetween(start: number, end: number): IDataValidationBuilder;
-    requireNumberEqualTo(number: number): IDataValidationBuilder;
-    requireNumberGreaterThan(number: number): IDataValidationBuilder;
-    requireNumberGreaterThanOrEqualTo(number: number): IDataValidationBuilder;
-    requireNumberLessThan(number: number): IDataValidationBuilder;
-    requireNumberLessThanOrEqualTo(number: number): IDataValidationBuilder;
-    requireNumberNotBetween(start: number, end: number): IDataValidationBuilder;
-    requireNumberNotEqualTo(number: number): IDataValidationBuilder;
-    requireTextContains(text: string): IDataValidationBuilder;
-    requireTextDoesNotContain(text: string): IDataValidationBuilder;
-    requireTextEqualTo(text: string): IDataValidationBuilder;
-    requireTextIsEmail(): IDataValidationBuilder;
-    requireTextIsUrl(): IDataValidationBuilder;
-    requireValueInList(values: string[]): IDataValidationBuilder;
-    requireValueInList(values: string[], showDropdown: boolean): IDataValidationBuilder;
-    requireValueInRange(range: Range): IDataValidationBuilder;
-    requireValueInRange(range: Range, showDropdown: boolean): IDataValidationBuilder;
-    setAllowInvalid(allowInvalidData: boolean): IDataValidationBuilder;
-    setHelpText(helpText: string): IDataValidationBuilder;
-    withCriteria(criteria: DataValidationType, args: any[]): IDataValidationBuilder;
-}
-
-export class FDataValidationBuilder implements IDataValidationBuilder {
+export class FDataValidationBuilder {
     private _rule: IDataValidationRule;
 
     constructor(rule?: IDataValidationRule) {
@@ -78,11 +38,11 @@ export class FDataValidationBuilder implements IDataValidationBuilder {
         };
     }
 
-    build(): IDataValidationRule {
-        return this._rule;
+    build(): FDataValidation {
+        return new FDataValidation(this._rule);
     }
 
-    copy(): IDataValidationBuilder {
+    copy(): FDataValidationBuilder {
         return new FDataValidationBuilder({
             ...this._rule,
             uid: generateRandomId(),
@@ -98,17 +58,14 @@ export class FDataValidationBuilder implements IDataValidationBuilder {
     }
 
     getCriteriaValues(): any[] {
-        return [this._rule.formula1, this._rule.formula2];
+        return [this._rule.operator, this._rule.formula1, this._rule.formula2];
     }
 
     getHelpText(): string | undefined {
         return this._rule.error;
     }
 
-    requireCheckbox(): IDataValidationBuilder;
-    requireCheckbox(checkedValue: any): IDataValidationBuilder;
-    requireCheckbox(checkedValue: any, uncheckedValue: any): IDataValidationBuilder;
-    requireCheckbox(checkedValue?: string, uncheckedValue?: string): IDataValidationBuilder {
+    requireCheckbox(checkedValue?: string, uncheckedValue?: string): FDataValidationBuilder {
         this._rule.type = DataValidationType.CHECKBOX;
         this._rule.formula1 = checkedValue;
         this._rule.formula2 = uncheckedValue;
@@ -116,11 +73,7 @@ export class FDataValidationBuilder implements IDataValidationBuilder {
         return this;
     }
 
-    // requireDate(): IDataValidationBuilder {
-    //     throw new Error('Method not implemented.');
-    // }
-
-    requireDateAfter(date: Date): IDataValidationBuilder {
+    requireDateAfter(date: Date): FDataValidationBuilder {
         this._rule.type = DataValidationType.DATE;
         this._rule.formula1 = date.toLocaleDateString();
         this._rule.operator = DataValidationOperator.GREATER_THAN;
@@ -128,15 +81,16 @@ export class FDataValidationBuilder implements IDataValidationBuilder {
         return this;
     }
 
-    requireDateBefore(date: Date): IDataValidationBuilder {
+    requireDateBefore(date: Date): FDataValidationBuilder {
         this._rule.type = DataValidationType.DATE;
         this._rule.formula1 = date.toLocaleDateString();
+        this._rule.formula2 = undefined;
         this._rule.operator = DataValidationOperator.LESS_THAN;
 
         return this;
     }
 
-    requireDateBetween(start: Date, end: Date): IDataValidationBuilder {
+    requireDateBetween(start: Date, end: Date): FDataValidationBuilder {
         this._rule.type = DataValidationType.DATE;
         this._rule.formula1 = start.toLocaleDateString();
         this._rule.formula2 = end.toLocaleDateString();
@@ -145,15 +99,16 @@ export class FDataValidationBuilder implements IDataValidationBuilder {
         return this;
     }
 
-    requireDateEqualTo(date: Date): IDataValidationBuilder {
+    requireDateEqualTo(date: Date): FDataValidationBuilder {
         this._rule.type = DataValidationType.DATE;
         this._rule.formula1 = date.toLocaleDateString();
+        this._rule.formula2 = undefined;
         this._rule.operator = DataValidationOperator.EQUAL;
 
         return this;
     }
 
-    requireDateNotBetween(start: Date, end: Date): IDataValidationBuilder {
+    requireDateNotBetween(start: Date, end: Date): FDataValidationBuilder {
         this._rule.type = DataValidationType.DATE;
         this._rule.formula1 = start.toLocaleDateString();
         this._rule.formula2 = end.toLocaleDateString();
@@ -162,101 +117,135 @@ export class FDataValidationBuilder implements IDataValidationBuilder {
         return this;
     }
 
-    requireDateOnOrAfter(date: Date): IDataValidationBuilder {
+    requireDateOnOrAfter(date: Date): FDataValidationBuilder {
         this._rule.type = DataValidationType.DATE;
         this._rule.formula1 = date.toLocaleDateString();
+        this._rule.formula2 = undefined;
         this._rule.operator = DataValidationOperator.GREATER_THAN_OR_EQUAL;
 
         return this;
     }
 
-    requireDateOnOrBefore(date: Date): IDataValidationBuilder {
+    requireDateOnOrBefore(date: Date): FDataValidationBuilder {
         this._rule.type = DataValidationType.DATE;
         this._rule.formula1 = date.toLocaleDateString();
+        this._rule.formula2 = undefined;
         this._rule.operator = DataValidationOperator.LESS_THAN_OR_EQUAL;
 
         return this;
     }
 
-    requireFormulaSatisfied(formula: string): IDataValidationBuilder {
+    requireFormulaSatisfied(formula: string): FDataValidationBuilder {
         this._rule.type = DataValidationType.CUSTOM;
         this._rule.formula1 = formula;
+        this._rule.formula2 = undefined;
         return this;
     }
 
-    requireNumberBetween(start: number, end: number): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireNumberBetween(start: number, end: number, isInteger?: boolean): FDataValidationBuilder {
+        this._rule.formula1 = `${start}`;
+        this._rule.formula2 = `${end}`;
+        this._rule.operator = DataValidationOperator.BETWEEN;
+        this._rule.type = isInteger ? DataValidationType.WHOLE : DataValidationType.DECIMAL;
+
+        return this;
     }
 
-    requireNumberEqualTo(number: number): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireNumberEqualTo(num: number, isInteger?: boolean): FDataValidationBuilder {
+        this._rule.formula1 = `${num}`;
+        this._rule.formula2 = undefined;
+        this._rule.operator = DataValidationOperator.EQUAL;
+        this._rule.type = isInteger ? DataValidationType.WHOLE : DataValidationType.DECIMAL;
+        return this;
     }
 
-    requireNumberGreaterThan(number: number): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireNumberGreaterThan(num: number, isInteger?: boolean): FDataValidationBuilder {
+        this._rule.formula1 = `${num}`;
+        this._rule.formula2 = undefined;
+        this._rule.operator = DataValidationOperator.GREATER_THAN;
+        this._rule.type = isInteger ? DataValidationType.WHOLE : DataValidationType.DECIMAL;
+        return this;
     }
 
-    requireNumberGreaterThanOrEqualTo(number: number): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireNumberGreaterThanOrEqualTo(num: number, isInteger?: boolean): FDataValidationBuilder {
+        this._rule.formula1 = `${num}`;
+        this._rule.formula2 = undefined;
+        this._rule.operator = DataValidationOperator.GREATER_THAN_OR_EQUAL;
+        this._rule.type = isInteger ? DataValidationType.WHOLE : DataValidationType.DECIMAL;
+        return this;
     }
 
-    requireNumberLessThan(number: number): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireNumberLessThan(num: number, isInteger?: boolean): FDataValidationBuilder {
+        this._rule.formula1 = `${num}`;
+        this._rule.formula2 = undefined;
+        this._rule.operator = DataValidationOperator.LESS_THAN;
+        this._rule.type = isInteger ? DataValidationType.WHOLE : DataValidationType.DECIMAL;
+        return this;
     }
 
-    requireNumberLessThanOrEqualTo(number: number): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireNumberLessThanOrEqualTo(num: number, isInteger?: boolean): FDataValidationBuilder {
+        this._rule.formula1 = `${num}`;
+        this._rule.formula2 = undefined;
+        this._rule.operator = DataValidationOperator.LESS_THAN_OR_EQUAL;
+        this._rule.type = isInteger ? DataValidationType.WHOLE : DataValidationType.DECIMAL;
+        return this;
     }
 
-    requireNumberNotBetween(start: number, end: number): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireNumberNotBetween(start: number, end: number, isInteger?: boolean): FDataValidationBuilder {
+        this._rule.formula1 = `${start}`;
+        this._rule.formula2 = `${end}`;
+        this._rule.operator = DataValidationOperator.NOT_BETWEEN;
+        this._rule.type = isInteger ? DataValidationType.WHOLE : DataValidationType.DECIMAL;
+
+        return this;
     }
 
-    requireNumberNotEqualTo(number: number): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireNumberNotEqualTo(num: number, isInteger?: boolean): FDataValidationBuilder {
+        this._rule.formula1 = `${num}`;
+        this._rule.formula2 = undefined;
+        this._rule.operator = DataValidationOperator.NOT_EQUAL;
+        this._rule.type = isInteger ? DataValidationType.WHOLE : DataValidationType.DECIMAL;
+        return this;
     }
 
-    requireTextContains(text: string): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireValueInList(values: string[], multiple?: boolean, showDropdown?: boolean): FDataValidationBuilder {
+        this._rule.type = multiple ? DataValidationType.LIST_MULTIPLE : DataValidationType.LIST;
+        this._rule.formula1 = values.join(',');
+        this._rule.formula2 = undefined;
+        this._rule.showDropDown = showDropdown ?? true;
+
+        return this;
     }
 
-    requireTextDoesNotContain(text: string): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    requireValueInRange(range: FRange, multiple?: boolean, showDropdown?: boolean): FDataValidationBuilder {
+        this._rule.type = multiple ? DataValidationType.LIST_MULTIPLE : DataValidationType.LIST;
+        this._rule.formula1 = `=${serializeRangeToRefString({
+            unitId: range.getUnitId(),
+            sheetName: range.getSheetName(),
+            range: range.getRange(),
+        })}`;
+        this._rule.formula2 = undefined;
+        this._rule.showDropDown = showDropdown ?? true;
+
+        return this;
     }
 
-    requireTextEqualTo(text: string): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    setAllowInvalid(allowInvalidData: boolean): FDataValidationBuilder {
+        this._rule.errorStyle = !allowInvalidData ? DataValidationErrorStyle.STOP : DataValidationErrorStyle.WARNING;
+        return this;
     }
 
-    requireTextIsEmail(): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    setHelpText(helpText: string): FDataValidationBuilder {
+        this._rule.error = helpText;
+        this._rule.showErrorMessage = true;
+        return this;
     }
 
-    requireTextIsUrl(): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
-    }
-
-    requireValueInList(values: string[]): IDataValidationBuilder;
-    requireValueInList(values: string[], showDropdown: boolean): IDataValidationBuilder;
-    requireValueInList(values: unknown, showDropdown?: unknown): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
-    }
-
-    requireValueInRange(range: Range): IDataValidationBuilder;
-    requireValueInRange(range: Range, showDropdown: boolean): IDataValidationBuilder;
-    requireValueInRange(range: unknown, showDropdown?: unknown): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
-    }
-
-    setAllowInvalid(allowInvalidData: boolean): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
-    }
-
-    setHelpText(helpText: string): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
-    }
-
-    withCriteria(criteria: DataValidationType, args: any[]): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+    withCriteriaValues(type: DataValidationType, values: [DataValidationOperator, string, string]) {
+        this._rule.type = type;
+        this._rule.operator = values[0];
+        this._rule.formula1 = values[1];
+        this._rule.formula2 = values[2];
+        return this;
     }
 }

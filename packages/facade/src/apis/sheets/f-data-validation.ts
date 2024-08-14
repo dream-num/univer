@@ -15,6 +15,7 @@
  */
 
 import { DataValidationErrorStyle, type IDataValidationRule } from '@univerjs/core';
+import { FDataValidationBuilder } from './f-data-validation-builder';
 
 export class FDataValidation {
     rule: IDataValidationRule;
@@ -31,10 +32,14 @@ export class FDataValidation {
     };
 
     getCriteriaValues() {
-        return [this.rule.formula1, this.rule.formula2];
+        return [this.rule.operator, this.rule.formula1, this.rule.formula2];
     }
 
     getHelpText() {
         return this.rule.error;
     };
+
+    copy() {
+        return new FDataValidationBuilder(this.rule);
+    }
 }

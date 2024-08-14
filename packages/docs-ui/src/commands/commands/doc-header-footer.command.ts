@@ -66,7 +66,7 @@ function createHeaderFooterAction(segmentId: string, createType: HeaderFooterTyp
     // Also need to create an empty footer if you create a header, and vice versa. They  are always created in pairs.
     const secondSegmentId = Tools.generateRandomId(ID_LEN);
     const insertPairAction = jsonX.insertOp([isHeader ? 'footers' : 'headers', secondSegmentId], {
-        [isHeader ? 'footers' : 'headers']: secondSegmentId,
+        [isHeader ? 'footerId' : 'headerId']: secondSegmentId,
         body: getEmptyHeaderFooterBody(),
     });
     actions!.push(insertPairAction!);

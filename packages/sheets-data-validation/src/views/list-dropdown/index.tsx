@@ -149,7 +149,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const validator = cellData?.dataValidation?.validator as ListMultipleValidator | undefined;
     const showColor = rule?.renderMode === DataValidationRenderMode.CUSTOM || rule?.renderMode === undefined;
 
-    if (!cellData || !rule || !validator) {
+    if (!cellData || !rule || !validator || validator.id.indexOf(DataValidationType.LIST) !== 0) {
         return;
     }
 

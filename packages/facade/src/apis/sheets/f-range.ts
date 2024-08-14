@@ -552,7 +552,7 @@ export class FRange {
         return copyContent?.html ?? '';
     }
 
-    setDataValidation(rule: Nullable<FDataValidation>) {
+    async setDataValidation(rule: Nullable<FDataValidation>) {
         if (!rule) {
             this._commandService.executeCommand(ClearRangeDataValidationCommand.id, {
                 unitId: this._workbook.getUnitId(),
@@ -571,7 +571,7 @@ export class FRange {
             },
         };
 
-        this._commandService.executeCommand(AddSheetDataValidationCommand.id, params);
+        await this._commandService.executeCommand(AddSheetDataValidationCommand.id, params);
         return this;
     }
 

@@ -20,7 +20,8 @@ import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMut
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import type { FUniver } from '../../facade';
+import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
+import { FUniver } from '../../facade';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
 describe('Test FRange', () => {
@@ -53,6 +54,7 @@ describe('Test FRange', () => {
         commandService.registerCommand(SetVerticalTextAlignCommand);
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
+        commandService.registerCommand(AddSheetDataValidationCommand);
 
         getValueByPosition = (
             startRow: number,
@@ -551,5 +553,14 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(0, 0, 0, 0)?.tb).toBe(WrapStrategy.WRAP);
         await range!.setWrapStrategy(WrapStrategy.CLIP);
         expect(getStyleByPosition(0, 0, 0, 0)?.tb).toBe(WrapStrategy.CLIP);
+    });
+
+    it('Range set data validation', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0, 10, 10)!;
+
+        await range.setDataValidation(FUniver.newDataValidation().requireCheckbox().build());
+
+        expect(range.getDataValidation()).toBeTruthy();
     });
 });

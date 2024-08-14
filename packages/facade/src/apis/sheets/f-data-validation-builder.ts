@@ -15,7 +15,7 @@
  */
 
 import type { IDataValidationRule } from '@univerjs/core';
-import { DataValidationErrorStyle, DataValidationType, generateRandomId } from '@univerjs/core';
+import { DataValidationErrorStyle, DataValidationOperator, DataValidationType, generateRandomId } from '@univerjs/core';
 
  /**
   * Builder for data validation rules.
@@ -121,35 +121,67 @@ export class FDataValidationBuilder implements IDataValidationBuilder {
     // }
 
     requireDateAfter(date: Date): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+        this._rule.type = DataValidationType.DATE;
+        this._rule.formula1 = date.toLocaleDateString();
+        this._rule.operator = DataValidationOperator.GREATER_THAN;
+
+        return this;
     }
 
     requireDateBefore(date: Date): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+        this._rule.type = DataValidationType.DATE;
+        this._rule.formula1 = date.toLocaleDateString();
+        this._rule.operator = DataValidationOperator.LESS_THAN;
+
+        return this;
     }
 
     requireDateBetween(start: Date, end: Date): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+        this._rule.type = DataValidationType.DATE;
+        this._rule.formula1 = start.toLocaleDateString();
+        this._rule.formula2 = end.toLocaleDateString();
+        this._rule.operator = DataValidationOperator.BETWEEN;
+
+        return this;
     }
 
     requireDateEqualTo(date: Date): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+        this._rule.type = DataValidationType.DATE;
+        this._rule.formula1 = date.toLocaleDateString();
+        this._rule.operator = DataValidationOperator.EQUAL;
+
+        return this;
     }
 
     requireDateNotBetween(start: Date, end: Date): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+        this._rule.type = DataValidationType.DATE;
+        this._rule.formula1 = start.toLocaleDateString();
+        this._rule.formula2 = end.toLocaleDateString();
+        this._rule.operator = DataValidationOperator.NOT_BETWEEN;
+
+        return this;
     }
 
     requireDateOnOrAfter(date: Date): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+        this._rule.type = DataValidationType.DATE;
+        this._rule.formula1 = date.toLocaleDateString();
+        this._rule.operator = DataValidationOperator.GREATER_THAN_OR_EQUAL;
+
+        return this;
     }
 
     requireDateOnOrBefore(date: Date): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+        this._rule.type = DataValidationType.DATE;
+        this._rule.formula1 = date.toLocaleDateString();
+        this._rule.operator = DataValidationOperator.LESS_THAN_OR_EQUAL;
+
+        return this;
     }
 
     requireFormulaSatisfied(formula: string): IDataValidationBuilder {
-        throw new Error('Method not implemented.');
+        this._rule.type = DataValidationType.CUSTOM;
+        this._rule.formula1 = formula;
+        return this;
     }
 
     requireNumberBetween(start: number, end: number): IDataValidationBuilder {

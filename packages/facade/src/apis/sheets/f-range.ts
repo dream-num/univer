@@ -49,7 +49,7 @@ import { FormulaDataModel } from '@univerjs/engine-formula';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, DataValidationModel } from '@univerjs/sheets-data-validation';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import {
     covertCellValue,
@@ -562,10 +562,29 @@ export class FRange {
     }
 
     getDataValidation() {
-        const model = this._injector.get(DataValidationModel);
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        return validatorService.getDataValidation(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId(),
+            [this._range]
+        );
     }
 
-    getDataValidations() {}
+    getDataValidations() {
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        return validatorService.getDataValidations(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId(),
+            [this._range]
+        );
+    }
 
-    async getValidatorStatus() {}
+    async getValidatorStatus() {
+        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
+        return validatorService.validatorRanges(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId(),
+            [this._range]
+        );
+    }
 }

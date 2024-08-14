@@ -206,6 +206,12 @@ export const DEFAULT_PADDING_DATA = {
 
 export const RENDER_RAW_FORMULA_KEY = 'RENDER_RAW_FORMULA';
 
+export interface ICacheItem {
+    bg: boolean;
+    border: boolean;
+    // font: boolean;
+
+}
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[] = [];
     private _columnWidthAccumulation: number[] = [];
@@ -537,6 +543,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         return Math.min(height, MAXIMUM_ROW_HEIGHT);
     }
 
+    /**
+     * calc data for row col & cell position
+     * this._rowHeaderWidth & this._rowHeightAccumulation ...
+     * @returns this
+     */
     private _updateLayout() {
         if (!this.dirty) {
             return;
@@ -1580,7 +1591,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     // }
 
     private _calculateStylesCache() {
-        const dataMergeCache = this._dataMergeCache;
+        const dataMergeCaches = this._dataMergeCache;
         const rowColumnSegment = this._rowColumnSegment;
         const columnWidthAccumulation = this.columnWidthAccumulation;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
@@ -1589,18 +1600,20 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        for (const data of dataMergeCache) {
-            this._setCellCache(data.startRow, data.startColumn, false, data);
+        for (const mergeRange of dataMergeCaches) {
+            this._setCellStylesCache(mergeRange.startRow, mergeRange.startColumn, {
+                mergeRange,
+            });
         }
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                this._setCellCache(r, c, false);
+                this._setCellStylesCache(r, c);
             }
 
             // 针对溢出的情况计算文本长度，可视范围左侧列
             for (let c = 0; c < startColumn; c++) {
-                this._setCellCache(r, c, true);
+                this._setCellStylesCache(r, c, { cacheItem: { bg: false, border: false } });
             }
 
             if (endColumn === 0) {
@@ -1609,7 +1622,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             // 针对溢出的情况计算文本长度，可视范围右侧列
             for (let c = endColumn + 1; c < columnWidthAccumulation.length; c++) {
-                this._setCellCache(r, c, true);
+                this._setCellStylesCache(r, c, { cacheItem: { bg: false, border: false } });
             }
         }
 
@@ -1644,13 +1657,15 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     // eslint-disable-next-line complexity
-    private _setCellCache(r: number, c: number, skipBackgroundAndBorder: boolean, mergeRange?: IRange) {
-        const needsRendering = this._renderedCellCache.getValue(r, c);
-
+    private _setCellStylesCache(r: number, c: number, options?: {
+        mergeRange?: IRange;
+        cacheItem?: ICacheItem;
+    }) {
         if (r === -1 || c === -1) {
             return true;
         }
 
+        const needsRendering = this._renderedCellCache.getValue(r, c);
         if (needsRendering === false) {
             this._makeDocumentSkeletonDirty(r, c);
             return true;
@@ -1660,6 +1675,7 @@ export class SpreadsheetSkeleton extends Skeleton {
          * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
          */
         const cell = this.worksheet.getCell(r, c) || this.worksheet.getCellRaw(r, c);
+        // const cell = this.worksheet.getCellRaw(r, c);
         if (!cell) {
             return true;
         }
@@ -1688,7 +1704,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         // const style = getStyle(styles, cell);
         const style = this._styles.getStyleByCell(cell);
 
-        if (!skipBackgroundAndBorder && style && style.bg && style.bg.rgb) {
+        // by default, style cache should includes border and background info.
+        const cacheItem = options?.cacheItem || { bg: true, border: true };
+        if (cacheItem.bg && style && style.bg && style.bg.rgb) {
             const rgb = style.bg.rgb;
             if (!cache.background![rgb]) {
                 cache.background![rgb] = new ObjectMatrix();
@@ -1702,7 +1720,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             cache.backgroundPositions?.setValue(r, c, cellInfo);
         }
 
-        if (!skipBackgroundAndBorder && style && style.bd) {
+        if (cacheItem.border && style && style.bd) {
+            const mergeRange = options?.mergeRange;
             if (mergeRange) {
                 this._setMergeBorderProps(BORDER_TYPE.TOP, cache, mergeRange);
                 this._setMergeBorderProps(BORDER_TYPE.BOTTOM, cache, mergeRange);
@@ -1773,7 +1792,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._calculateOverflowCell(r, c, config);
         }
 
-        if (!skipBackgroundAndBorder) {
+        // if (!skipBackgroundAndBorder) {...}
+        if (cacheItem.bg || cacheItem.border) {
             this._renderedCellCache.setValue(r, c, false);
         } else {
             this._renderedCellCache.setValue(r, c, true);

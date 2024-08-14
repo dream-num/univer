@@ -15,19 +15,14 @@
  */
 
 export { HyperLinkModel } from './models/hyper-link.model';
-export { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 export { HyperLinkType } from './types/enums/hyper-link-type';
 export { UniverSheetsHyperLinkPlugin } from './plugin';
-export { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 export type { ICellHyperLink, ICellLinkContent } from './types/interfaces/i-hyper-link';
 
 export { ERROR_RANGE } from './types/const';
 
 // #region - all commands
 
-export { AddHyperLinkCommand, type IAddHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
-export { RemoveHyperLinkCommand, CancelHyperLinkCommand, type IRemoveHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
-export { UpdateHyperLinkCommand, type IUpdateHyperLinkCommandParams } from './commands/commands/update-hyper-link.command';
 export { AddHyperLinkMutation, type IAddHyperLinkMutationParams } from './commands/mutations/add-hyper-link.mutation';
 export { RemoveHyperLinkMutation, type IRemoveHyperLinkMutationParams } from './commands/mutations/remove-hyper-link.mutation';
 export { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation, type IUpdateHyperLinkMutationParams, type IUpdateHyperLinkRefMutationParams } from './commands/mutations/update-hyper-link.mutation';

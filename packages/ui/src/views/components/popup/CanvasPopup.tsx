@@ -15,19 +15,28 @@
  */
 
 import { useDependency } from '@univerjs/core';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RectPopup } from '@univerjs/design';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
+import { throttleTime } from 'rxjs';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
 import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
 import type { IPopup } from '../../../services/popup/canvas-popup.service';
 
-const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
-    const anchorRect = useObservable(popup.anchorRect$, popup.anchorRect);
-    const excludeRects = useObservable(popup.excludeRects$, popup.excludeRects);
+interface ISingleCanvasPopupProps {
+    popup: IPopup;
+    children?: React.ReactNode;
+}
+
+const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
+    const [hidden, setHidden] = useState(false);
+    const anchorRect$ = useMemo(() => popup.anchorRect$.pipe(throttleTime(16)), [popup.anchorRect$]);
+    const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(16)), [popup.excludeRects$]);
+    const anchorRect = useObservable(anchorRect$, popup.anchorRect);
+    const excludeRects = useObservable(excludeRects$, popup.excludeRects);
     const { bottom, left, right, top } = anchorRect;
-    const { offset } = popup;
+    const { offset, canvasElement, hideOnInvisible = true } = popup;
 
     // We add an offset to the anchor rect to make the popup offset with the anchor.
     const rectWithOffset: IBoundRectNoAngle = useMemo(() => {
@@ -39,6 +48,23 @@ const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: Reac
             bottom: bottom + y,
         };
     }, [bottom, left, right, top, offset]);
+
+    useEffect(() => {
+        if (!hideOnInvisible) {
+            return;
+        }
+        const rect = canvasElement.getBoundingClientRect();
+        const { top, left, bottom, right } = rect;
+        if (rectWithOffset.bottom < top || rectWithOffset.top > bottom || rectWithOffset.right < left || rectWithOffset.left > right) {
+            setHidden(true);
+        } else {
+            setHidden(false);
+        }
+    }, [rectWithOffset, canvasElement, hideOnInvisible]);
+
+    if (hidden) {
+        return null;
+    }
 
     return (
         <RectPopup

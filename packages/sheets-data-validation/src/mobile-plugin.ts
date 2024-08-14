@@ -22,7 +22,6 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import type { IUniverSheetsDataValidation } from './controllers/dv-render.controller';
 import { DefaultSheetsDataValidation, SheetsDataValidationMobileRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
-import { SheetDataValidationService } from './services/dv.service';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
 import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
 import { DataValidationCacheService } from './services/dv-cache.service';
@@ -58,7 +57,6 @@ export class UniverSheetsDataValidationMobilePlugin extends Plugin {
     override onStarting() {
         ([
             [DataValidationPanelService],
-            [SheetDataValidationService],
             [DataValidationCacheService],
             [DataValidationFormulaService],
             [DataValidationCustomFormulaService],

@@ -18,7 +18,7 @@ import type { CellValue, Injector, ISheetDataValidationRule, Nullable, Workbook 
 import { DataValidationManager, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { DataValidationStatus, DataValidationType, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { IUpdateRulePayload } from '@univerjs/data-validation';
-import type { ISheetLocationBase } from '@univerjs/sheets';
+import type { ISheetLocation } from '@univerjs/sheets';
 import { isReferenceString } from '@univerjs/engine-formula';
 import type { IDataValidationResCache } from '../services/dv-cache.service';
 import { DataValidationCacheService } from '../services/dv-cache.service';
@@ -128,7 +128,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         return this.getRuleById(ruleId);
     }
 
-    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocationBase, onCompete: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
+    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocation, onCompete: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId } = pos;
         const ruleId = rule.uid;
         const validator = this.getValidator(rule.type);
@@ -140,7 +140,18 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                     status: DataValidationStatus.VALIDATING,
                     ruleId,
                 });
-                validator.validator({ value: cellValue, unitId, subUnitId, row, column: col }, rule).then((status) => {
+                validator.validator(
+                    {
+                        value: cellValue,
+                        unitId,
+                        subUnitId,
+                        row,
+                        column: col,
+                        worksheet: pos.worksheet,
+                        workbook: pos.workbook,
+                    },
+                    rule
+                ).then((status) => {
                     const realStatus = status ? DataValidationStatus.VALID : DataValidationStatus.INVALID;
                     this._cache.setValue(row, col, {
                         value: cellValue,

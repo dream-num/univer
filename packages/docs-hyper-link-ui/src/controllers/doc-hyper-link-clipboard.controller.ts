@@ -49,8 +49,8 @@ export class DocHyperLinkClipboardController extends Disposable {
                     customRanges?.find(
                         (range) =>
                             range.rangeType === CustomRangeType.HYPERLINK &&
-                            range.startIndex <= activeRange.startOffset &&
-                            range.endIndex >= activeRange.endOffset - 1
+                            range.startIndex < activeRange.startOffset &&
+                            range.endIndex > activeRange.endOffset - 1
                     )
                     : null;
                 // insert into current link inside

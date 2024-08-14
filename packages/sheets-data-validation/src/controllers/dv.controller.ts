@@ -15,12 +15,11 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { DisposableCollection, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DataValidationSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
 import { ClearSelectionAllCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
 import { WholeValidator } from '../validators/whole-validator';
@@ -39,7 +38,6 @@ import { DataValidationIcon } from './dv.menu';
 export class DataValidationController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManger: ComponentManager,
@@ -53,7 +51,6 @@ export class DataValidationController extends RxDisposable {
 
     private _init() {
         this._registerValidators();
-        this._initInstanceChange();
         this._initCommandInterceptor();
         this._initComponents();
     }
@@ -79,33 +76,6 @@ export class DataValidationController extends RxDisposable {
                 },
             });
         });
-    }
-
-    private _initInstanceChange() {
-        const disposableCollection = new DisposableCollection();
-        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-            disposableCollection.dispose();
-            if (!workbook) {
-                return;
-            }
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) {
-                return;
-            }
-
-            this._sheetDataValidationService.switchCurrent(workbook.getUnitId(), worksheet.getSheetId());
-            disposableCollection.add(toDisposable(
-                workbook.activeSheet$.subscribe((worksheet) => {
-                    if (worksheet) {
-                        const unitId = workbook.getUnitId();
-                        const subUnitId = worksheet.getSheetId();
-                        this._sheetDataValidationService.switchCurrent(unitId, subUnitId);
-                    }
-                })
-            ));
-        }));
-
-        this.disposeWithMe(disposableCollection);
     }
 
     private _initCommandInterceptor() {

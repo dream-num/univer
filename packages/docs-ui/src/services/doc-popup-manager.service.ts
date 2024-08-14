@@ -57,9 +57,7 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene) {
     };
 }
 
-export interface IDocCanvasPopup extends Pick<IPopup,
-    'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside'
-> {
+export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
 }
@@ -223,6 +221,7 @@ export class DocCanvasPopManagerService extends Disposable {
             subUnitId: 'default',
             anchorRect: position,
             anchorRect$: position$,
+            canvasElement: currentRender.engine.getCanvasElement(),
         });
 
         return {
@@ -259,6 +258,7 @@ export class DocCanvasPopManagerService extends Disposable {
             excludeRects: bounds,
             excludeRects$: bounds$,
             direction: direction === 'top' ? 'top' : 'bottom',
+            canvasElement: currentRender.engine.getCanvasElement(),
         });
 
         return {

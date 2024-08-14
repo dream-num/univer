@@ -16,19 +16,10 @@
 
 export { UniverSheetsDataValidationPlugin } from './plugin';
 export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
-export { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
-export { DataValidationController } from './controllers/dv.controller';
-export { SheetDataValidationService } from './services/dv.service';
-export { DataValidationAlertController } from './controllers/dv-alert.controller';
 export { DataValidationCacheService } from './services/dv-cache.service';
 export { DataValidationFormulaService } from './services/dv-formula.service';
 export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
-export { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-export { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
-export { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
-export { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
-export { DataValidationFormulaController } from './controllers/dv-formula.controller';
 export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
 export { DataValidationModel } from '@univerjs/data-validation';
 

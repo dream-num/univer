@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-export { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
-export { SheetsHyperLinkRenderManagerController, SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 export { SheetsHyperLinkSidePanelService, type ICustomHyperLinkView } from './services/side-panel.service';
 export { SheetsHyperLinkPopupService } from './services/popup.service';
 export { SheetsHyperLinkResolverService } from './services/resolver.service';
-export { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
-export { SheetsHyperLinkPopupController } from './controllers/popup.controller';
-export { SheetsHyperLinkUIController } from './controllers/ui.controller';
-export { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
-export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
-export { SheetHyperLinkUrlController } from './controllers/url.controller';
 
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
 export { InsertLinkShortcut } from './controllers/menu';
 export type { IUrlHandler, IUniverSheetsHyperLinkUIConfig } from './types/interfaces/i-config';
 
 // #region - all commands
-
 export {
     OpenHyperLinkSidebarOperation,
     InsertHyperLinkOperation,
@@ -39,4 +30,7 @@ export {
     type IOpenHyperLinkSidebarOperationParams,
 } from './commands/operations/sidebar.operations';
 
+export { AddHyperLinkCommand, type IAddHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
+export { RemoveHyperLinkCommand, CancelHyperLinkCommand, type IRemoveHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
+export { UpdateHyperLinkCommand, type IUpdateHyperLinkCommandParams } from './commands/commands/update-hyper-link.command';
 // #endregion

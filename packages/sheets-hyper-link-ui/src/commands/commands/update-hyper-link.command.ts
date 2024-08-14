@@ -17,20 +17,24 @@
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import type { IAddHyperLinkMutationParams } from '../mutations/add-hyper-link.mutation';
-import { AddHyperLinkMutation } from '../mutations/add-hyper-link.mutation';
-import { RemoveHyperLinkMutation } from '../mutations/remove-hyper-link.mutation';
-import { HyperLinkModel } from '../../models/hyper-link.model';
+import type { ICellHyperLink, ICellLinkContent } from '@univerjs/sheets-hyper-link';
+import { HyperLinkModel, UpdateHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 
-export interface IRemoveHyperLinkCommandParams {
+export interface IUpdateHyperLinkCommandParams {
     unitId: string;
     subUnitId: string;
     id: string;
+    payload: ICellLinkContent;
 }
 
-export const RemoveHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
+function getHyperLinkContent(link: ICellHyperLink) {
+    const { row, column, id, ...content } = link;
+    return content;
+}
+
+export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.remove-hyper-link',
+    id: 'sheets.command.update-hyper-link',
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -41,22 +45,25 @@ export const RemoveHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
         const model = accessor.get(HyperLinkModel);
         const { unitId, subUnitId, id } = params;
         const link = model.getHyperLink(unitId, subUnitId, id);
+        if (!link) {
+            return false;
+        }
         const { redos, undos } = sheetInterceptorService.onCommandExecute({
-            id: RemoveHyperLinkCommand.id,
+            id: UpdateHyperLinkCommand.id,
             params,
         });
-
         const redo: IMutationInfo = {
-            id: RemoveHyperLinkMutation.id,
+            id: UpdateHyperLinkMutation.id,
             params,
         };
         const undo: IMutationInfo = {
-            id: AddHyperLinkMutation.id,
+            id: UpdateHyperLinkMutation.id,
             params: {
                 unitId,
                 subUnitId,
-                link,
-            } as IAddHyperLinkMutationParams,
+                id,
+                payload: getHyperLinkContent(link),
+            },
         };
 
         const res = await sequenceExecuteAsync([redo, ...redos], commandService);
@@ -64,46 +71,6 @@ export const RemoveHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
             undoRedoService.pushUndoRedo({
                 redoMutations: [redo, ...redos],
                 undoMutations: [undo, ...undos],
-                unitID: unitId,
-            });
-            return true;
-        }
-
-        return false;
-    },
-};
-
-export const CancelHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
-    type: CommandType.COMMAND,
-    id: 'sheets.command.cancel-hyper-link',
-    async handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const model = accessor.get(HyperLinkModel);
-        const { unitId, subUnitId, id } = params;
-        const link = model.getHyperLink(unitId, subUnitId, id);
-
-        const redo: IMutationInfo = {
-            id: RemoveHyperLinkMutation.id,
-            params,
-        };
-        const undo: IMutationInfo = {
-            id: AddHyperLinkMutation.id,
-            params: {
-                unitId,
-                subUnitId,
-                link,
-            } as IAddHyperLinkMutationParams,
-        };
-
-        const res = await sequenceExecuteAsync([redo], commandService);
-        if (res.result) {
-            undoRedoService.pushUndoRedo({
-                redoMutations: [redo],
-                undoMutations: [undo],
                 unitID: unitId,
             });
             return true;

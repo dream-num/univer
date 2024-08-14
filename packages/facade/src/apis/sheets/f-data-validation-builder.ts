@@ -78,7 +78,7 @@ export class FDataValidationBuilder {
     }
 
     /**
-     * Retrieves the values used for criteria evaluation
+     * Gets the values used for criteria evaluation
      *
      * @returns {any[]} An array containing the operator, formula1, and formula2 values
      */

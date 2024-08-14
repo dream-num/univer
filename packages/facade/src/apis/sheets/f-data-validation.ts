@@ -23,22 +23,48 @@ export class FDataValidation {
         this.rule = rule;
     }
 
+    /**
+     * Gets whether invalid data is allowed based on the error style value.
+     *
+     * @return true if invalid data is allowed, false otherwise.
+     */
     getAllowInvalid() {
         return this.rule.errorStyle !== DataValidationErrorStyle.STOP;
     };
 
+    /**
+     * Gets the data validation type of the rule
+     *
+     * @returns {DataValidationType} The data validation type
+     */
     getCriteriaType() {
         return this.rule.type;
     };
 
+    /**
+     * Gets the values used for criteria evaluation
+     *
+     * @returns {any[]} An array containing the operator, formula1, and formula2 values
+     */
     getCriteriaValues() {
         return [this.rule.operator, this.rule.formula1, this.rule.formula2];
     }
 
+    /**
+     * Gets the help text information, which is used to provide users with guidance and support
+     *
+     * @returns {string | undefined} Returns the help text information. If there is no error message, it returns an undefined value.
+     */
     getHelpText() {
         return this.rule.error;
     };
 
+    /**
+     * Creates a new instance of FDataValidationBuilder using the current rule object.
+     * This method is useful for copying an existing data validation rule configuration.
+     *
+     * @return A new FDataValidationBuilder instance with the same rule configuration.
+     */
     copy() {
         return new FDataValidationBuilder(this.rule);
     }

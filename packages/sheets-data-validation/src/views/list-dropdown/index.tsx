@@ -44,6 +44,8 @@ interface ISelectListProps {
 
 const SelectList = (props: ISelectListProps) => {
     const { value, onChange, multiple, options, title, onEdit, style } = props;
+    const localeService = useDependency(LocaleService);
+
     return (
         <div className={styles.dvListDropdown} style={style}>
             <div className={styles.dvListDropdownTitle}>
@@ -84,7 +86,7 @@ const SelectList = (props: ISelectListProps) => {
             </div>
             <div className={styles.dvListDropdownSplit} />
             <div className={styles.dvListDropdownEdit}>
-                <a onClick={onEdit}>编辑</a>
+                <a onClick={onEdit}>{localeService.t('dataValidation.list.edit')}</a>
             </div>
         </div>
     );

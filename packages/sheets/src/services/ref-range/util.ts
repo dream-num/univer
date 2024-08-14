@@ -1108,8 +1108,8 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
                 const fromRange = (params as IMoveRangeMutationParams).fromRange;
                 const toRange = (params as IMoveRangeMutationParams).toRange;
                 baseRangeOperator = handleBaseMoveRange(
-                    { ...fromRange },
-                    { ...toRange },
+                    fromRange,
+                    toRange,
                     range
                 );
             }

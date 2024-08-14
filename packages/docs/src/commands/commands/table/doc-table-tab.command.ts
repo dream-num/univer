@@ -14,29 +14,75 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { ICommand, Nullable } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
+import { getCommandSkeleton } from '../../util';
+import type { IOffsets } from './table';
+import { CellPosition, getCellOffsets, INSERT_ROW_POSITION } from './table';
+import { DocTableInsertRowCommand } from './doc-table-insert.command';
 
-export interface IDocTableTabCommandParams {}
+export interface IDocTableTabCommandParams {
+    shift: boolean;
+}
 
 export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
     id: 'doc.table.tab-in-table',
     type: CommandType.COMMAND,
 
-    handler: async () => {
-        // TODO: implement tab in table
-        return true;
-    },
-};
+    handler: async (accessor, params: IDocTableTabCommandParams) => {
+        const { shift } = params;
+        const textSelectionManager = accessor.get(TextSelectionManagerService);
+        const activeTextRange = textSelectionManager.getActiveTextRangeWithStyle();
+        const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-export interface IDocTableShiftTabCommandParams {}
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
+            return false;
+        }
 
-export const DocTableShiftTabCommand: ICommand<IDocTableShiftTabCommandParams> = {
-    id: 'doc.table.shift-tab-in-table',
-    type: CommandType.COMMAND,
+        const unitId = docDataModel.getUnitId();
+        const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
 
-    handler: async () => {
-        // TODO: implement tab in table
+        if (skeleton == null) {
+            return false;
+        }
+
+        if (activeTextRange == null) {
+            return false;
+        }
+
+        let offsets: Nullable<IOffsets> = null;
+
+        if (shift) {
+            offsets = getCellOffsets(skeleton, activeTextRange, CellPosition.PREV);
+        } else {
+            offsets = getCellOffsets(skeleton, activeTextRange, CellPosition.NEXT);
+        }
+
+        if (offsets) {
+            const { startOffset, endOffset } = offsets;
+
+            const textRanges = [{
+                startOffset,
+                endOffset,
+            }];
+
+            textSelectionManager.replaceTextRanges(textRanges);
+
+            return true;
+        }
+
+        if (shift === false) {
+            const result = await commandService.executeCommand(DocTableInsertRowCommand.id, {
+                position: INSERT_ROW_POSITION.BELLOW,
+            });
+
+            return result;
+        }
+
         return true;
     },
 };

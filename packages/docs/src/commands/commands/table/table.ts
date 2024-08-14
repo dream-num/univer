@@ -16,7 +16,8 @@
 
 import type { IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
-import type { DataStreamTreeNode, DocumentViewModel, RectRange, TextRange } from '@univerjs/engine-render';
+import type { DataStreamTreeNode, DocumentSkeleton, DocumentViewModel, IDocumentSkeletonRow, IDocumentSkeletonTable, RectRange, TextRange } from '@univerjs/engine-render';
+import type { ITextActiveRange } from '../../../services/text-selection-manager.service';
 
 export enum INSERT_ROW_POSITION {
     ABOVE,
@@ -688,4 +689,71 @@ export function getDeleteRowContentActionParams(rangeInfo: IRangeInfo, viewModel
         cursor,
         rowCount: table.children.length,
     };
+}
+
+export interface IOffsets {
+    startOffset: number;
+    endOffset: number;
+}
+
+export enum CellPosition {
+    NEXT,
+    PREV,
+}
+
+export function getCellOffsets(skeleton: DocumentSkeleton, range: ITextActiveRange, position: CellPosition): Nullable<IOffsets> {
+    const { startOffset } = range;
+    const glyph = skeleton.findNodeByCharIndex(startOffset);
+    const cell = glyph?.parent?.parent?.parent?.parent?.parent;
+
+    if (cell == null) {
+        return null;
+    }
+
+    const row = cell.parent as Nullable<IDocumentSkeletonRow>;
+
+    if (row == null) {
+        return null;
+    }
+
+    const table = row.parent as Nullable<IDocumentSkeletonTable>;
+
+    if (table == null) {
+        return;
+    }
+
+    const cellIndex = row.cells.indexOf(cell);
+    const rowIndex = table.rows.indexOf(row);
+    let newCell = null;
+
+    if (position === CellPosition.NEXT) {
+        newCell = row.cells[cellIndex + 1];
+
+        if (!newCell) {
+            const nextRow = table.rows[rowIndex + 1];
+
+            if (nextRow) {
+                newCell = nextRow.cells[0];
+            }
+        }
+    } else {
+        newCell = row.cells[cellIndex - 1];
+
+        if (!newCell) {
+            const prevRow = table.rows[rowIndex - 1];
+
+            if (prevRow) {
+                newCell = prevRow.cells[prevRow.cells.length - 1];
+            }
+        }
+    }
+
+    if (newCell) {
+        const { st, ed } = newCell;
+
+        return {
+            startOffset: st,
+            endOffset: ed - 1,
+        };
+    }
 }

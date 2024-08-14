@@ -118,10 +118,6 @@ export function findAboveCell(cell: IDocumentSkeletonPage) {
     return aboveRow.cells[col];
 }
 
-export function findNextCell(cell: IDocumentSkeletonPage) {}
-
-export function findPrevCell(cell: IDocumentSkeletonPage) {}
-
 export function findTableBeforeLine(line: IDocumentSkeletonLine, page: IDocumentSkeletonPage) {
     const { st } = line;
     const { skeTables } = page;

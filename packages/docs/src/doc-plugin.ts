@@ -64,7 +64,7 @@ import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from './commands/commands/table/doc-table-insert.command';
-import { DocTableShiftTabCommand, DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
+import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -138,7 +138,6 @@ export class UniverDocsPlugin extends Plugin {
                 DocTableDeleteColumnsCommand,
                 DocTableDeleteTableCommand,
                 DocTableTabCommand,
-                DocTableShiftTabCommand,
                 DocsRenameMutation,
                 TabCommand,
                 AfterSpaceCommand,

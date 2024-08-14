@@ -68,7 +68,6 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 import { DocTableController } from './controllers/doc-table.controller';
-import { DocShiftTabCommand, DocTabCommand } from './commands/commands/doc-tab.command';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -87,7 +86,6 @@ export class UniverDocsUIPlugin extends Plugin {
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
-        this._registerCommands();
     }
 
     override onReady(): void {
@@ -126,13 +124,6 @@ export class UniverDocsUIPlugin extends Plugin {
         ].forEach((shortcut) => {
             this._injector.get(IShortcutService).registerShortcut(shortcut);
         });
-    }
-
-    private _registerCommands() {
-        [
-            DocTabCommand,
-            DocShiftTabCommand,
-        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initDependencies(injector: Injector) {

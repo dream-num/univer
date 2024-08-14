@@ -204,6 +204,9 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
 
     useEffect(() => {
         if (!activeRule.permissionId) {
+            sheetPermissionPanelModel.setRule({
+                viewStatus: viewState.othersCanView,
+            });
             return;
         }
         const getViewPermission = async () => {
@@ -213,10 +216,14 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                 actions: [UnitAction.View],
             });
             const isAllCanView = res[0].scope === ObjectScope.AllCollaborator;
-            setViewGroupValue(isAllCanView ? viewState.othersCanView : viewState.noOneElseCanView);
+            const viewValue = isAllCanView ? viewState.othersCanView : viewState.noOneElseCanView;
+            setViewGroupValue(viewValue);
+            sheetPermissionPanelModel.setRule({
+                viewStatus: viewValue,
+            });
         };
         getViewPermission();
-    }, []);
+    }, [activeRule.permissionId]);
 
     useEffect(() => {
         const getListCollaborators = async () => {
@@ -235,12 +242,6 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
         };
         getListCollaborators();
     }, []);
-
-    useEffect(() => {
-        sheetPermissionPanelModel.setRule({
-            viewStatus: viewGroupValue,
-        });
-    }, [sheetPermissionPanelModel, viewGroupValue]);
 
     useEffect(() => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -391,7 +392,12 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.viewPermission')}>
                 <RadioGroup
                     value={viewGroupValue}
-                    onChange={(v) => setViewGroupValue(v as viewState)}
+                    onChange={(v) => {
+                        setViewGroupValue(v as viewState);
+                        sheetPermissionPanelModel.setRule({
+                            viewStatus: v as viewState,
+                        });
+                    }}
                     className={styles.radioGroupVertical}
                 >
                     <Radio value={viewState.othersCanView}>

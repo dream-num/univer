@@ -66,10 +66,10 @@ export function DateDropdown(props: IDropdownComponentProps) {
     }
 
     const handleSave = async () => {
-        if (!localDate) {
+        if (!date) {
             return;
         }
-        const newValue = localDate;
+        const newValue = date;
         // convert current date to utc date
         const dateStr = `${newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00').split(' ').join('T')}Z`;
         const serialTime = timestamp2SerialTime(dayjs(dateStr).unix());
@@ -117,8 +117,8 @@ export function DateDropdown(props: IDropdownComponentProps) {
     return (
         <div className={styles.dvDateDropdown}>
             <DatePanel
-                defaultValue={localDate}
-                pickerValue={localDate ?? date}
+                defaultValue={date}
+                pickerValue={date}
                 showTime={showTime || undefined}
                 onSelect={async (newValue) => {
                     setLocalDate(newValue);
@@ -128,7 +128,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 }}
             />
             <div className={styles.dvDateDropdownBtns}>
-                <Button size="small" type="primary" onClick={handleSave} disabled={!localDate}>
+                <Button size="small" type="primary" onClick={handleSave} disabled={!date.isValid()}>
                     确定
                 </Button>
             </div>

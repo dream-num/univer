@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
+import Decimal from 'decimal.js';
+
 // eslint-disable-next-line ts/no-namespace
 export namespace BESSEL {
+    interface IFunctionType {
+        (x: number): number;
+    }
+
     const W = 0.636619772;
 
     function _horner(arr: number[], v: number): number {
@@ -51,7 +57,7 @@ export namespace BESSEL {
         return f2;
     }
 
-    function _bessel_wrap(bessel0: Function, bessel1: Function, nonzero: number, sign: number) {
+    function _bessel_wrap(bessel0: IFunctionType, bessel1: IFunctionType, nonzero: number, sign: number) {
         return function bessel(x: number, n: number) {
             if (nonzero) {
                 if (x === 0) {
@@ -422,3 +428,416 @@ export function erf(x: number): number {
 
     return isneg ? res - 1 : 1 - res;
 };
+
+export class Complex {
+    static getComplex(realNum: number, iNum: number, suffix: string): number | string {
+        const _realNum = new Decimal(realNum).toSignificantDigits(15).toNumber();
+        const _iNum = new Decimal(iNum).toSignificantDigits(15).toNumber();
+
+        let result: number | string;
+
+        if (_realNum === 0 && _iNum === 0) {
+            result = 0;
+        } else if (_realNum === 0) {
+            result = _iNum === 1 ? suffix : `${_iNum}${suffix}`;
+        } else if (_iNum === 0) {
+            result = _realNum;
+        } else {
+            const sign = _iNum > 0 ? '+' : '';
+            const suffixStr = _iNum === 1 ? suffix : `${_iNum}${suffix}`;
+            result = `${_realNum}${sign}${suffixStr}`;
+        }
+
+        return result;
+    }
+
+    static createByComplexStr(realNum: number, iNum: number, suffix: string) {
+        const complexStr = Complex.getComplex(realNum, iNum, suffix);
+
+        return new Complex(complexStr);
+    }
+
+    private _inumber: string | number = '';
+
+    private _realNum: number = 0;
+
+    private _iNum: number = 0;
+
+    private _suffix: string = 'i';
+
+    private _isError: boolean = false;
+
+    constructor(inumber: number | string) {
+        this._inumber = inumber;
+        this.getImReal();
+        this.getImAginary();
+        this.getImSuffix();
+    }
+
+    getImReal() {
+        if (this._isError) {
+            return;
+        }
+
+        if (this._inumber === 0 || this._inumber === '0') {
+            this._realNum = 0;
+            return;
+        }
+
+        const inumberStr = `${this._inumber}`;
+
+        if (['i', '+i', '1i', '+1i', '-i', '-1i', 'j', '+j', '1j', '+1j', '-j', '-1j'].indexOf(inumberStr) >= 0) {
+            this._realNum = 0;
+            return;
+        }
+
+        let plus = inumberStr.indexOf('+');
+        let minus = inumberStr.indexOf('-');
+
+        if (plus === 0) {
+            plus = inumberStr.indexOf('+', 1);
+        }
+
+        if (minus === 0) {
+            minus = inumberStr.indexOf('-', 1);
+        }
+
+        const last = inumberStr.substring(inumberStr.length - 1, inumberStr.length);
+        const unit = last === 'i' || last === 'j';
+
+        if (plus >= 0 || minus >= 0) {
+            if (!unit) {
+                this._isError = true;
+                return;
+            }
+
+            if (plus >= 0) {
+                if (Number.isNaN(+inumberStr.substring(0, plus)) || Number.isNaN(+inumberStr.substring(plus + 1, inumberStr.length - 1))) {
+                    this._isError = true;
+                } else {
+                    this._realNum = +inumberStr.substring(0, plus);
+                }
+            } else {
+                if (Number.isNaN(+inumberStr.substring(0, minus)) || Number.isNaN(+inumberStr.substring(minus + 1, inumberStr.length - 1))) {
+                    this._isError = true;
+                } else {
+                    this._realNum = +inumberStr.substring(0, minus);
+                }
+            }
+        } else {
+            if (unit) {
+                if (Number.isNaN(+inumberStr.substring(0, inumberStr.length - 1))) {
+                    this._isError = true;
+                } else {
+                    this._realNum = 0;
+                }
+            } else {
+                if (Number.isNaN(+inumberStr)) {
+                    this._isError = true;
+                } else {
+                    this._realNum = +inumberStr;
+                }
+            }
+        }
+    }
+
+    getImAginary() {
+        if (this._isError) {
+            return;
+        }
+
+        if (this._inumber === 0 || this._inumber === '0') {
+            this._iNum = 0;
+            return;
+        }
+
+        let inumberStr = `${this._inumber}`;
+
+        if (['i', 'j'].indexOf(inumberStr) >= 0) {
+            this._iNum = 1;
+            return;
+        }
+
+        inumberStr = inumberStr.replace('+i', '+1i').replace('-i', '-1i').replace('+j', '+1j').replace('-j', '-1j');
+
+        let plus = inumberStr.indexOf('+');
+        let minus = inumberStr.indexOf('-');
+
+        if (plus === 0) {
+            plus = inumberStr.indexOf('+', 1);
+        }
+
+        if (minus === 0) {
+            minus = inumberStr.indexOf('-', 1);
+        }
+
+        const last = inumberStr.substring(inumberStr.length - 1, inumberStr.length);
+        const unit = last === 'i' || last === 'j';
+
+        if (plus >= 0 || minus >= 0) {
+            if (!unit) {
+                this._isError = true;
+                return;
+            }
+
+            if (plus >= 0) {
+                if (Number.isNaN(+inumberStr.substring(0, plus)) || Number.isNaN(+inumberStr.substring(plus + 1, inumberStr.length - 1))) {
+                    this._isError = true;
+                } else {
+                    this._iNum = +inumberStr.substring(plus + 1, inumberStr.length - 1);
+                }
+            } else {
+                if (Number.isNaN(+inumberStr.substring(0, minus)) || Number.isNaN(+inumberStr.substring(minus + 1, inumberStr.length - 1))) {
+                    this._isError = true;
+                } else {
+                    this._iNum = -(+inumberStr.substring(minus + 1, inumberStr.length - 1));
+                }
+            }
+        } else {
+            if (unit) {
+                if (Number.isNaN(+inumberStr.substring(0, inumberStr.length - 1))) {
+                    this._isError = true;
+                } else {
+                    this._iNum = +inumberStr.substring(0, inumberStr.length - 1);
+                }
+            } else {
+                if (Number.isNaN(+inumberStr)) {
+                    this._isError = true;
+                } else {
+                    this._iNum = 0;
+                }
+            }
+        }
+    }
+
+    getImSuffix() {
+        const inumberStr = `${this._inumber}`;
+
+        const suffix = inumberStr.substring(inumberStr.length - 1);
+
+        this._suffix = suffix === 'i' || suffix === 'j' ? suffix : 'i';
+    }
+
+    getRealNum() {
+        return this._realNum;
+    }
+
+    getINum() {
+        return this._iNum;
+    }
+
+    getSuffix() {
+        return this._suffix;
+    }
+
+    isError() {
+        return this._isError;
+    }
+
+    Abs() {
+        return Decimal.sqrt(Decimal.pow(this._realNum, 2).add(Decimal.pow(this._iNum, 2))).toSignificantDigits(16).toNumber();
+    }
+
+    Argument() {
+        let result = Decimal.acos(new Decimal(this._realNum).div(new Decimal(this.Abs()))).toSignificantDigits(16).toNumber();
+
+        if (this._iNum < 0) {
+            result = -result;
+        }
+
+        return result;
+    }
+
+    Conjugate() {
+        return Complex.getComplex(this._realNum, -this._iNum, this._suffix);
+    }
+
+    Cos() {
+        const realNum = Decimal.cos(this._realNum).mul(Decimal.cosh(this._iNum)).toNumber();
+        const iNum = Decimal.sin(this._realNum).mul(Decimal.sinh(this._iNum)).toNumber();
+
+        return Complex.getComplex(realNum, -iNum, this._suffix);
+    }
+
+    Cosh() {
+        const realNum = Decimal.cosh(this._realNum).mul(Decimal.cos(this._iNum)).toNumber();
+        const iNum = Decimal.sinh(this._realNum).mul(Decimal.sin(this._iNum)).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Cot() {
+        const den = Decimal.cosh(this._iNum * 2).sub(Decimal.cos(this._realNum * 2));
+        const realNum = Decimal.sin(this._realNum * 2).div(den).toNumber();
+        const iNum = Decimal.sinh(this._iNum * 2).div(den).toNumber();
+
+        return Complex.getComplex(realNum, -iNum, this._suffix);
+    }
+
+    Csc() {
+        const den = Decimal.cosh(this._iNum * 2).sub(Decimal.cos(this._realNum * 2));
+        const realNum = Decimal.sin(this._realNum).mul(Decimal.cosh(this._iNum)).mul(2).div(den).toNumber();
+        const iNum = Decimal.cos(this._realNum).mul(Decimal.sinh(this._iNum)).mul(-2).div(den).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Csch() {
+        const den = Decimal.cosh(this._realNum * 2).sub(Decimal.cos(this._iNum * 2));
+        const realNum = Decimal.sinh(this._realNum).mul(Decimal.cos(this._iNum)).mul(2).div(den).toNumber();
+        const iNum = Decimal.cosh(this._realNum).mul(Decimal.sin(this._iNum)).mul(-2).div(den).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Div(complex2: Complex) {
+        const Decimal_realNum1 = new Decimal(this._realNum);
+        const Decimal_iNum1 = new Decimal(this._iNum);
+        const Decimal_realNum2 = new Decimal(complex2.getRealNum());
+        const Decimal_iNum2 = new Decimal(complex2.getINum());
+
+        const den = Decimal_realNum2.mul(Decimal_realNum2).add(Decimal_iNum2.mul(Decimal_iNum2));
+        const realNum = Decimal_realNum1.mul(Decimal_realNum2).add(Decimal_iNum1.mul(Decimal_iNum2)).div(den).toNumber();
+        const iNum = Decimal_iNum1.mul(Decimal_realNum2).sub(Decimal_realNum1.mul(Decimal_iNum2)).div(den).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Exp() {
+        const realNum = Decimal.exp(this._realNum).mul(Decimal.cos(this._iNum)).toNumber();
+        const iNum = Decimal.exp(this._realNum).mul(Decimal.sin(this._iNum)).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Ln() {
+        const realNum = Decimal.ln(new Decimal(this.Abs())).toNumber();
+        const iNum = this.Argument();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Log10() {
+        const Decimal_realNum = new Decimal(this._realNum);
+        const Decimal_iNum = new Decimal(this._iNum);
+
+        const realNum = Decimal.log(Decimal.sqrt(Decimal_realNum.mul(Decimal_realNum).add(Decimal_iNum.mul(Decimal_iNum)))).div(Decimal.log(10)).toNumber();
+        const iNum = Decimal.atan(Decimal_iNum.div(Decimal_realNum)).div(Math.log(10)).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Log2() {
+        const Decimal_realNum = new Decimal(this._realNum);
+        const Decimal_iNum = new Decimal(this._iNum);
+
+        const realNum = Decimal.log(Decimal.sqrt(Decimal_realNum.mul(Decimal_realNum).add(Decimal_iNum.mul(Decimal_iNum)))).div(Decimal.log(2)).toNumber();
+        const iNum = Decimal.atan(Decimal_iNum.div(Decimal_realNum)).div(Math.log(2)).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Power(number: number) {
+        if (this._realNum === 0 && this._iNum === 0 && number > 0) {
+            return Complex.getComplex(this._realNum, this._iNum, this._suffix);
+        }
+
+        let power = new Decimal(this.Abs());
+        let phi = Decimal.acos(new Decimal(this._realNum).div(power));
+
+        if (this._iNum < 0) {
+            phi = phi.negated();
+        }
+
+        power = Decimal.pow(power, number);
+        phi = phi.mul(number);
+
+        const realNum = Decimal.cos(phi).mul(power).toNumber();
+        const iNum = Decimal.sin(phi).mul(power).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Product(complex2: Complex) {
+        const Decimal_realNum1 = new Decimal(this._realNum);
+        const Decimal_iNum1 = new Decimal(this._iNum);
+        const Decimal_realNum2 = new Decimal(complex2.getRealNum());
+        const Decimal_iNum2 = new Decimal(complex2.getINum());
+
+        const realNum = Decimal_realNum1.mul(Decimal_realNum2).sub(Decimal_iNum1.mul(Decimal_iNum2)).toNumber();
+        const iNum = Decimal_realNum1.mul(Decimal_iNum2).add(Decimal_iNum1.mul(Decimal_realNum2)).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Sec() {
+        const den = Decimal.cosh(this._iNum * 2).add(Decimal.cos(this._realNum * 2));
+        const realNum = Decimal.cos(this._realNum).mul(Decimal.cosh(this._iNum)).mul(2).div(den).toNumber();
+        const iNum = Decimal.sin(this._realNum).mul(Decimal.sinh(this._iNum)).mul(2).div(den).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Sech() {
+        const den = Decimal.cosh(this._realNum * 2).add(Decimal.cos(this._iNum * 2));
+        const realNum = Decimal.cosh(this._realNum).mul(Decimal.cos(this._iNum)).mul(2).div(den).toNumber();
+        const iNum = Decimal.sinh(this._realNum).mul(Decimal.sin(this._iNum)).mul(-2).div(den).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Sin() {
+        const realNum = Decimal.sin(this._realNum).mul(Decimal.cosh(this._iNum)).toNumber();
+        const iNum = Decimal.cos(this._realNum).mul(Decimal.sinh(this._iNum)).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Sinh() {
+        const realNum = Decimal.sinh(this._realNum).mul(Decimal.cos(this._iNum)).toNumber();
+        const iNum = Decimal.cosh(this._realNum).mul(Decimal.sin(this._iNum)).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Sqrt() {
+        const abs_sqrt = Decimal.sqrt(this.Abs());
+        const arg_2 = new Decimal(this.Argument()).div(2);
+        const realNum = abs_sqrt.mul(Decimal.cos(arg_2)).toNumber();
+        const iNum = abs_sqrt.mul(Decimal.sin(arg_2)).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Sub(complex2: Complex) {
+        const Decimal_realNum1 = new Decimal(this._realNum);
+        const Decimal_iNum1 = new Decimal(this._iNum);
+        const Decimal_realNum2 = new Decimal(complex2.getRealNum());
+        const Decimal_iNum2 = new Decimal(complex2.getINum());
+
+        const realNum = Decimal_realNum1.sub(Decimal_realNum2).toNumber();
+        const iNum = Decimal_iNum1.sub(Decimal_iNum2).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Sum(complex2: Complex) {
+        const Decimal_realNum1 = new Decimal(this._realNum);
+        const Decimal_iNum1 = new Decimal(this._iNum);
+        const Decimal_realNum2 = new Decimal(complex2.getRealNum());
+        const Decimal_iNum2 = new Decimal(complex2.getINum());
+
+        const realNum = Decimal_realNum1.add(Decimal_realNum2).toNumber();
+        const iNum = Decimal_iNum1.add(Decimal_iNum2).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+
+    Tan() {
+        const den = Decimal.cos(this._realNum * 2).add(Decimal.cosh(this._iNum * 2));
+        const realNum = Decimal.sin(this._realNum * 2).div(den).toNumber();
+        const iNum = Decimal.sinh(this._iNum * 2).div(den).toNumber();
+
+        return Complex.getComplex(realNum, iNum, this._suffix);
+    }
+}

@@ -331,8 +331,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The value to test against step.' },
+            step: { name: 'step', detail: 'The threshold value. If you omit a value for step, GESTEP uses zero.' },
         },
     },
     HEX2BIN: {
@@ -386,8 +386,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the absolute value.' },
         },
     },
     IMAGINARY: {
@@ -400,8 +399,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the imaginary coefficient.' },
         },
     },
     IMARGUMENT: {
@@ -414,8 +412,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the argument theta.' },
         },
     },
     IMCONJUGATE: {
@@ -428,8 +425,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the conjugate.' },
         },
     },
     IMCOS: {
@@ -442,8 +438,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the cosine.' },
         },
     },
     IMCOSH: {
@@ -456,8 +451,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic cosine.' },
         },
     },
     IMCOT: {
@@ -470,8 +464,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the cotangent.' },
         },
     },
     IMCSC: {
@@ -484,8 +477,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the cosecant.' },
         },
     },
     IMCSCH: {
@@ -498,8 +490,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic cosecant.' },
         },
     },
     IMDIV: {
@@ -512,8 +503,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: 'inumber1', detail: 'The complex numerator or dividend.' },
+            inumber2: { name: 'inumber2', detail: 'The complex denominator or divisor.' },
         },
     },
     IMEXP: {
@@ -526,8 +517,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the exponential.' },
         },
     },
     IMLN: {
@@ -540,8 +530,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the natural logarithm.' },
         },
     },
     IMLOG10: {
@@ -554,8 +543,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the common logarithm.' },
         },
     },
     IMLOG2: {
@@ -568,8 +556,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the base-2 logarithm.' },
         },
     },
     IMPOWER: {
@@ -582,8 +569,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number you want to raise to a power.' },
+            number: { name: 'number', detail: 'The power to which you want to raise the complex number.' },
         },
     },
     IMPRODUCT: {
@@ -596,8 +583,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: 'inumber1', detail: '1 to 255 complex numbers to multiply.' },
+            inumber2: { name: 'inumber2', detail: '1 to 255 complex numbers to multiply.' },
         },
     },
     IMREAL: {
@@ -610,8 +597,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the real coefficient.' },
         },
     },
     IMSEC: {
@@ -624,8 +610,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the secant.' },
         },
     },
     IMSECH: {
@@ -638,8 +623,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic secant.' },
         },
     },
     IMSIN: {
@@ -652,8 +636,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the sine.' },
         },
     },
     IMSINH: {
@@ -666,8 +649,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic sine.' },
         },
     },
     IMSQRT: {
@@ -680,8 +662,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the square root.' },
         },
     },
     IMSUB: {
@@ -694,8 +675,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: 'inumber1', detail: 'inumber1.' },
+            inumber2: { name: 'inumber2', detail: 'inumber2.' },
         },
     },
     IMSUM: {
@@ -708,8 +689,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: 'inumber1', detail: '1 to 255 complex numbers to add.' },
+            inumber2: { name: 'inumber2', detail: '1 to 255 complex numbers to add.' },
         },
     },
     IMTAN: {
@@ -722,8 +703,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the tangent.' },
         },
     },
     OCT2BIN: {

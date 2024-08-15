@@ -331,8 +331,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'しきい値に対して判定する値を指定します。' },
+            step: { name: 'しきい値', detail: 'しきい値にする値を指定します。しきい値を省略すると、0 が使用されます。' },
         },
     },
     HEX2BIN: {
@@ -386,8 +386,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '絶対値を求める複素数を指定します。' },
         },
     },
     IMAGINARY: {
@@ -400,8 +399,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '虚数係数を求める複素数を指定します。' },
         },
     },
     IMARGUMENT: {
@@ -414,8 +412,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '引数を theta する複素数。' },
         },
     },
     IMCONJUGATE: {
@@ -428,8 +425,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '共役を求める複素数を指定します。' },
         },
     },
     IMCOS: {
@@ -442,8 +438,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: 'コサインを求める複素数を指定します。' },
         },
     },
     IMCOSH: {
@@ -456,8 +451,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '双曲線余弦を求めたい複素数。' },
         },
     },
     IMCOT: {
@@ -470,8 +464,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '余接を求める複素数を指定します。' },
         },
     },
     IMCSC: {
@@ -484,8 +477,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '余割を求める複素数を指定します。' },
         },
     },
     IMCSCH: {
@@ -498,8 +490,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '双曲線余割を求める複素数を指定します。' },
         },
     },
     IMDIV: {
@@ -512,8 +503,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '複素数分子', detail: '割り算の分子または被除数となる複素数を指定します。' },
+            inumber2: { name: '複素数分母', detail: '割り算の分母または除数となる複素数を指定します。' },
         },
     },
     IMEXP: {
@@ -526,8 +517,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: 'べき乗を求める複素数を指定します。' },
         },
     },
     IMLN: {
@@ -540,8 +530,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '自然対数を求める複素数を指定します。' },
         },
     },
     IMLOG10: {
@@ -554,8 +543,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '常用対数を求める複素数を指定します。' },
         },
     },
     IMLOG2: {
@@ -568,8 +556,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '2 を底とする対数を求める複素数を指定します。' },
         },
     },
     IMPOWER: {
@@ -582,13 +569,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: 'べき乗を求める複素数を指定します。' },
+            number: { name: '数値', detail: '複素数を底とするべき乗の指数です。' },
         },
     },
     IMPRODUCT: {
-        description: '2 ～ 255 個の複素数の積を返します。',
-        abstract: '2 ～ 255 個の複素数の積を返します。',
+        description: '複素数の積を返します',
+        abstract: '複素数の積を返します',
         links: [
             {
                 title: '指導',
@@ -596,8 +583,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '複素数1', detail: '積を求める複素数を 1 ～ 255 個まで指定します。' },
+            inumber2: { name: '複素数2', detail: '積を求める複素数を 1 ～ 255 個まで指定します。' },
         },
     },
     IMREAL: {
@@ -610,8 +597,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '実数係数を求める複素数を指定します。' },
         },
     },
     IMSEC: {
@@ -624,8 +610,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '正割を求める複素数。' },
         },
     },
     IMSECH: {
@@ -638,8 +623,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '双曲線正割を求める複素数。' },
         },
     },
     IMSIN: {
@@ -652,8 +636,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: 'サインを求める複素数を指定します。' },
         },
     },
     IMSINH: {
@@ -666,8 +649,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '双曲線正弦を求める複素数を指定します。' },
         },
     },
     IMSQRT: {
@@ -680,8 +662,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '平方根を求める複素数を指定します。' },
         },
     },
     IMSUB: {
@@ -694,8 +675,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '複素数1', detail: '複素数1。' },
+            inumber2: { name: '複素数2', detail: '複素数2。' },
         },
     },
     IMSUM: {
@@ -708,8 +689,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '複素数1', detail: '和を求める複素数を 1 ～ 255 個まで指定します。' },
+            inumber2: { name: '複素数2', detail: '和を求める複素数を 1 ～ 255 個まで指定します。' },
         },
     },
     IMTAN: {
@@ -722,8 +703,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複素数', detail: '正接を求める接線を指定します。' },
         },
     },
     OCT2BIN: {

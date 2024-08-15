@@ -1414,6 +1414,12 @@ importers:
 
   packages/engine-formula:
     dependencies:
+      big.js:
+        specifier: ^6.2.1
+        version: 6.2.1
+      decimal.js:
+        specifier: ^10.4.3
+        version: 10.4.3
       numfmt:
         specifier: ^2.5.2
         version: 2.5.2
@@ -6043,6 +6049,9 @@ packages:
 
   before-after-hook@2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
+
+  big.js@6.2.1:
+    resolution: {integrity: sha512-bCtHMwL9LeDIozFn+oNhhFoq+yQ3BNdnsLSASUxLciOb1vgvpHsIO1dsENiGMgbb4SkP5TrzWzRiLddn8ahVOQ==}
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
@@ -14648,6 +14657,8 @@ snapshots:
   basic-ftp@5.0.5: {}
 
   before-after-hook@2.2.3: {}
+
+  big.js@6.2.1: {}
 
   binary-extensions@2.3.0: {}
 

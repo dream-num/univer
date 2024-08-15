@@ -380,5 +380,7 @@ export {
 export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
 export { SetSelectionsOperation, type ISetSelectionsOperationParams } from './commands/operations/selection.operation';
 export { SetWorksheetActiveOperation, type ISetWorksheetActiveOperationParams } from './commands/operations/set-worksheet-active.operation';
+export { InterceptCommunicationCommand } from './commands/commands/intercept-communication.command';
+export type { InterceptCommunicationCommandParams } from './commands/commands/intercept-communication.command';
 
 // #endregion

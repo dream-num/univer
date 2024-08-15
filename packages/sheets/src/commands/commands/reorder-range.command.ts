@@ -20,6 +20,7 @@ import type { ISheetCommandSharedParams } from '../utils/interface';
 import type { IReorderRangeMutationParams } from '../mutations/reorder-range.mutation';
 import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { InterceptCommunicationCommand } from './intercept-communication.command';
 
 export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
@@ -31,9 +32,23 @@ export const ReorderRangeCommandId = 'sheet.command.reorder-range' as const;
 export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
     id: ReorderRangeCommandId,
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor, params: IReorderRangeCommandParams) => {
+    handler: async (accessor: IAccessor, params: IReorderRangeCommandParams) => {
         const { subUnitId, unitId, range, order } = params;
         const commandService = accessor.get(ICommandService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
+        const canPerform = await sheetInterceptorService.beforeCommandExecute({
+            id: InterceptCommunicationCommand.id,
+            params: {
+                unitId,
+                subUnitId,
+                range,
+            },
+        });
+
+        if (!canPerform) {
+            return false;
+        }
 
         const reorderMutation = {
             id: ReorderRangeMutation.id,
@@ -49,7 +64,6 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
             id: ReorderRangeMutation.id,
             params: ReorderRangeUndoMutationFactory(reorderMutation.params),
         };
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: ReorderRangeCommand.id, params });
 
         const redos = [

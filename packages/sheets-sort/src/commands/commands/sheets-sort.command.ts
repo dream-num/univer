@@ -17,7 +17,7 @@
 // This file provides a ton of mutations to manipulate `FilterModel`.
 // These models would be held on `SheetsFilterService`.
 
-import { CommandType, ICommandService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import type { IAccessor, ICellData, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
 import type { IReorderRangeCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, ReorderRangeCommand } from '@univerjs/sheets';
@@ -49,7 +49,7 @@ export const SortRangeCommand: ICommand = {
     id: 'sheet.command.sort-range',
     type: CommandType.COMMAND,
 
-    handler: (accessor: IAccessor, params: ISortRangeCommandParams) => {
+    handler: async (accessor: IAccessor, params: ISortRangeCommandParams) => {
         const { range, orderRules, hasTitle, unitId, subUnitId } = params;
         const sortService = accessor.get(SheetsSortService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -110,8 +110,8 @@ export const SortRangeCommand: ICommand = {
         };
 
         const commandService = accessor.get(ICommandService);
-        const res = sequenceExecute([reorderRangeCommand], commandService);
-        return res.result;
+        const res = await commandService.executeCommand(reorderRangeCommand.id, reorderRangeCommand.params);
+        return res;
     },
 
 };

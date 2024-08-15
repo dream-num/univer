@@ -50,7 +50,7 @@ export class DocAutoFormatController extends Disposable {
                             return false;
                         }
                         return true;
-                    } else if (paragraphs.length > 1) {
+                    } else if (paragraphs.length > 1 && paragraphs.some((p) => p.bullet)) {
                         return true;
                     }
                     return false;

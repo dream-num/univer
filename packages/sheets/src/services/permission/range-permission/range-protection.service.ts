@@ -121,8 +121,8 @@ export class RangeProtectionService extends Disposable {
                         });
                     });
                 },
-                onUnLoad: () => {
-                    this._selectionProtectionRuleModel.deleteUnitModel();
+                onUnLoad: (unitId: string) => {
+                    this._selectionProtectionRuleModel.deleteUnitModel(unitId);
                 },
             })
         );

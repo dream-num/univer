@@ -146,8 +146,8 @@ export class RangeProtectionRuleModel {
         this._model = result;
     }
 
-    deleteUnitModel() {
-        this._model.clear();
+    deleteUnitModel(unitId: string) {
+        this._model.delete(unitId);
     }
 
     createRuleId(unitId: string, subUnitId: string) {

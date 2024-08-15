@@ -46,7 +46,7 @@ export class SheetPermissionInitController extends Disposable {
         this._initWorksheetPermissionFromSnapshot();
         this._initWorksheetPermissionChange();
         this._initWorksheetPermissionPointsChange();
-        this.initWorkbookPermissionChange();
+        this._initWorkbookPermissionFromSnapshot();
         this._initUserChange();
         this._initViewModelByRangeInterceptor();
         this._initViewModelBySheetInterceptor();
@@ -100,12 +100,6 @@ export class SheetPermissionInitController extends Disposable {
         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
             initRangePermissionFunc(workbook);
         });
-
-        this.disposeWithMe(
-            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-                initRangePermissionFunc(workbook);
-            })
-        );
     }
 
     private _initRangePermissionChange() {
@@ -150,7 +144,10 @@ export class SheetPermissionInitController extends Disposable {
     }
 
     public initWorkbookPermissionChange(_unitId?: string) {
-        const unitId = _unitId || this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+        const unitId = _unitId || this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+        if (!unitId) {
+            return;
+        }
         this._authzIoService.allowed({
             objectID: unitId,
             objectType: UnitObject.Workbook,
@@ -165,6 +162,12 @@ export class SheetPermissionInitController extends Disposable {
                     this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                 }
             });
+        });
+    }
+
+    private _initWorkbookPermissionFromSnapshot() {
+        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
+            this.initWorkbookPermissionChange(workbook.getUnitId());
         });
     }
 
@@ -280,12 +283,6 @@ export class SheetPermissionInitController extends Disposable {
         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
             initSheetPermissionFunc(workbook);
         });
-
-        this.disposeWithMe(
-            this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-                initSheetPermissionFunc(workbook);
-            })
-        );
     }
 
     private _initUserChange() {
@@ -333,7 +330,7 @@ export class SheetPermissionInitController extends Disposable {
                         });
                     });
 
-                    this.initWorkbookPermissionChange();
+                    this._initWorkbookPermissionFromSnapshot();
                     this._initWorksheetPermissionFromSnapshot();
                     this._initRangePermissionFromSnapshot();
                 });

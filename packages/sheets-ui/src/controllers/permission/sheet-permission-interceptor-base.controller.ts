@@ -34,9 +34,10 @@ import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-pa
 import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
-type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams;
+type ICheckPermissionCommandParams = IEditorBridgeServiceVisibleParam | IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams;
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
@@ -94,8 +95,18 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         switch (id) {
             case InsertCommand.id:
             case IMEInputCommand.id:
-            case SetCellEditVisibleOperation.id:
                 if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true) {
+                    break;
+                }
+                permission = this.permissionCheckWithoutRange({
+                    workbookTypes: [WorkbookEditablePermission],
+                    rangeTypes: [RangeProtectionPermissionEditPoint],
+                    worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
+                });
+                errorMsg = this._localeService.t('permission.dialog.editErr');
+                break;
+            case SetCellEditVisibleOperation.id:
+                if ((params as IEditorBridgeServiceVisibleParam).visible === false) {
                     break;
                 }
                 permission = this.permissionCheckWithoutRange({

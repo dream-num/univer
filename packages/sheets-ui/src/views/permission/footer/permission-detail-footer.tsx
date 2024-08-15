@@ -46,6 +46,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                     if (!activeRule.name || rangeErrMsg) return;
                     const collaborators = sheetPermissionUserManagerService.selectUserList;
                     if (activeRule.viewStatus === viewState.othersCanView) {
+                        // If it is readable by everyone, then all the users not in the original collaboration list will be set as readers from all the user information pulled back and added to the collaborators array
                         sheetPermissionUserManagerService.allUserList.forEach((user) => {
                             const hasInCollaborators = collaborators.some((collaborator) => collaborator.id === user.id);
                             if (!hasInCollaborators) {
@@ -57,19 +58,23 @@ export const SheetPermissionPanelDetailFooter = () => {
                             }
                         });
                     }
-                    // edit rule
-
                     const isSameCollaborators = getUserListEqual(collaborators, sheetPermissionUserManagerService.oldCollaboratorList);
+
+                    // If modify existing permission information, need to determine whether the collaborators have changed. If so, create a new permissionId. If not, modify the rendering information stored in the memory.
                     if (activeRule.permissionId) {
                         const oldRule = sheetPermissionPanelModel.oldRule;
                         if (activeRule.unitType === oldRule?.unitType && activeRule.name === oldRule.name && activeRule.description === oldRule.description && activeRule.ranges === oldRule.ranges && !isSameCollaborators) {
+                            // collaborators is changed and rendering info is not change, so call the interface to update the list of collaborators
                             await authzIoService.putCollaborators({
                                 objectID: activeRule.permissionId,
                                 unitID: activeRule.unitId,
                                 collaborators,
                             });
                         } else {
+                            // create new permissionId, broadcast to other collaborators
                             let newPermissionId = activeRule.permissionId;
+
+                            // If the collaborator does not change, there is no need to create a new permissionId
                             if (!isSameCollaborators) {
                                 if (activeRule.unitType === UnitObject.Worksheet) {
                                     newPermissionId = await authzIoService.create({
@@ -95,6 +100,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                     });
                                 }
                             }
+
                             commandService.executeCommand(SetProtectionCommand.id, {
                                 rule: {
                                     ...activeRule,

@@ -386,7 +386,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
             const { height: fontHeight } = textLayout;
 
-            return fontHeight;
+            return fontHeight + (MARGIN_V * 2);
         } else {
             const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
             const { documentSkeleton, docModel } = createDocSkeleton(valueStr, this._localeService, style);

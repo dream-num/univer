@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
+import { LocaleService, numfmt, useDependency } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
-import { numfmt } from '@univerjs/engine-numfmt';
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 

@@ -30,6 +30,7 @@ import type { BaseReferenceObject, FunctionVariantType } from '../engine/referen
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { objectValueToCellValue } from '../engine/utils/value-object';
+import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
 /**
@@ -668,10 +669,13 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 );
                 const currentCell = unitData?.[formulaUnitId]?.[formulaSheetId]?.cellData?.getValue(r, c);
 
+                const featureCell = this._getRuntimeFeatureCellValue(r, c, formulaSheetId, formulaUnitId);
+
                 if (
                     !isNullCell(cell) ||
                     (!isNullCell(arrayDataCell) && !this._isInArrayFormulaRange(unitArrayFormulaRange, r, c)) ||
-                    !isNullCell(currentCell)
+                    !isNullCell(currentCell) ||
+                    !isNullCell(featureCell)
                 ) {
                     return true;
                 }
@@ -679,6 +683,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         }
 
         return false;
+    }
+
+    private _getRuntimeFeatureCellValue(row: number, column: number, sheetId: string, unitId: string) {
+        return getRuntimeFeatureCell(row, column, sheetId, unitId, this._runtimeFeatureCellData);
     }
 
     private _isInArrayFormulaRange(range: Nullable<IRange>, r: number, c: number) {

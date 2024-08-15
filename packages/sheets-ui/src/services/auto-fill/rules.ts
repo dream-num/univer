@@ -15,8 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { CellValueType, Direction, IUniverInstanceService } from '@univerjs/core';
-import { numfmt } from '@univerjs/engine-numfmt';
+import { CellValueType, Direction, IUniverInstanceService, numfmt } from '@univerjs/core';
 
 import {
     chineseToNumber,

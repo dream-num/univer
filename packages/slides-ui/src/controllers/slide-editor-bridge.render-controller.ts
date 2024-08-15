@@ -15,12 +15,10 @@
  */
 
 import type { IDisposable, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
-import { DisposableCollection, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import {
-    TextSelectionManagerService,
-} from '@univerjs/docs';
+import { DisposableCollection, ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+
 import type { BaseObject, IRenderContext, IRenderModule, RichText, Scene, Slide } from '@univerjs/engine-render';
-import { DeviceInputEventType, ITextSelectionRenderManager, ObjectType } from '@univerjs/engine-render';
+import { DeviceInputEventType, ObjectType } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
 import type { ISetEditorInfo } from '../services/slide-editor-bridge.service';
@@ -50,31 +48,35 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
     setSlideTextEditor$: Subject<ISlideRichTextProps> = new Subject();
 
     private _curRichText = null as RichText | null;
+
+    private _d: Nullable<IDisposable>;
+
     constructor(
         private readonly _renderContext: IRenderContext<UnitModel>,
-        @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ISlideEditorBridgeService private readonly _editorBridgeService: ISlideEditorBridgeService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+        @ISlideEditorBridgeService private readonly _editorBridgeService: ISlideEditorBridgeService
     ) {
         super();
-        //wait for sceneMap
-        Promise.resolve().then(() => this._init());
+
+        this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).subscribe((slideDataModel) => {
+            if (slideDataModel && slideDataModel.getUnitId() === this._renderContext.unitId) {
+                this._d = this._init();
+            } else {
+                this._disposeCurrent();
+            }
+        }));
     }
 
     private _init(): IDisposable {
         const d = new DisposableCollection();
-        this._initSubjectListener(d);
         this._initEventListener(d);
         return d;
     }
 
-    private _initSubjectListener(d: DisposableCollection) {
-        // d.add(this.setSlideTextEditor$.subscribe((param: ISlideTextEditorParam) => {
-        //     this._updateEditor(param);
-        // }));
+    private _disposeCurrent(): void {
+        this._d?.dispose();
+        this._d = null;
     }
 
     private _setEditorRect(pageId: string, targetObject: RichText) {

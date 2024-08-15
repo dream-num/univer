@@ -47,7 +47,6 @@ export function SlideSideBar() {
     // );
     const pages = currentSlide?.getPages();
     const pageOrder = currentSlide?.getPageOrder();
-
     if (!pages || !pageOrder) {
         return null;
     }
@@ -83,9 +82,9 @@ export function SlideSideBar() {
         });
 
         if (divRefs.length > 0) {
-            commandService.syncExecuteCommand(SetSlidePageThumbOperation.id);
+            commandService.syncExecuteCommand(SetSlidePageThumbOperation.id, { unitId: currentSlide?.getUnitId() });
         }
-    }, [divRefs]); // 依赖于divRefs数组的变化
+    }, [divRefs, slideList, renderManagerService, commandService, currentSlide]); // 依赖于divRefs数组的变化
 
     const activatePage = useCallback((page: string) => {
         commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page, unitId: currentSlide?.getUnitId() });
@@ -93,7 +92,7 @@ export function SlideSideBar() {
 
     const handleAppendSlide = useCallback(() => {
         commandService.syncExecuteCommand(AppendSlideOperation.id, { unitId: currentSlide?.getUnitId() });
-    }, [commandService]);
+    }, [commandService, currentSlide]);
 
     return (
         <aside className={styles.slideBar} ref={slideBarRef}>

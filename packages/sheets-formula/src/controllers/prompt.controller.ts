@@ -234,6 +234,8 @@ export class PromptController extends Disposable {
 
         this._cursorStateListener();
 
+        this._inputFormulaListener();
+
         this._userMouseListener();
 
         this._initialChangeEditor();
@@ -1806,6 +1808,36 @@ export class PromptController extends Disposable {
         }
     }
 
+    private _inputFormulaListener() {
+        this.disposeWithMe(
+            this._editorService.inputFormula$.subscribe((param) => {
+                const { formulaString, editorUnitId } = param;
+
+                if (formulaString.substring(0, 1) !== compareToken.EQUALS) {
+                    return;
+                }
+                const { unitId } = this._getCurrentUnitIdAndSheetId();
+                const visibleState = this._editorBridgeService.isVisible();
+                if (visibleState.visible === false) {
+                    this._editorBridgeService.changeVisible({
+                        visible: true,
+                        eventType: DeviceInputEventType.Dblclick,
+                        unitId,
+                    });
+                }
+
+                const lastSequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
+
+                this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
+
+                this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId, true, false);
+            })
+        );
+    }
+
+    /**
+     * Absolute range, triggered by F4
+     */
     private _changeRefString() {
         const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 

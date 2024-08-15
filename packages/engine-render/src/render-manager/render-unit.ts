@@ -44,7 +44,7 @@ export interface IRenderContext<T extends UnitModel = UnitModel> extends Omit<IR
 }
 
 /**
- * This class is responsible
+ * RenderUnit impl IRender
  */
 export class RenderUnit extends Disposable implements IRender {
     readonly isRenderUnit: boolean = true;

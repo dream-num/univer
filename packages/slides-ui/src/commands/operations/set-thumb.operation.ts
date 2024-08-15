@@ -18,12 +18,16 @@ import type { IAccessor, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { CanvasView } from '../../controllers/canvas-view';
 
+export interface ISlideSetThumbParam {
+    unitId: string;
+}
+
 export const SetSlidePageThumbOperation: IOperation = {
     id: 'slide.operation.set-slide-page-thumb',
     type: CommandType.OPERATION,
-    handler: (accessor: IAccessor) => {
+    handler: (accessor: IAccessor, params: ISlideSetThumbParam) => {
         const canvasView = accessor.get(CanvasView);
-        canvasView.createThumbs();
+        canvasView.createThumbs(params.unitId);
         return true;
     },
 };

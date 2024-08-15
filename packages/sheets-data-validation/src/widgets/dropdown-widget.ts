@@ -29,6 +29,7 @@ const ICON_SIZE = 4;
 const ICON_PLACE = 14;
 const MARGIN_H = 6;
 const MARGIN_V = 4;
+const MINIMAL_GAP = 1;
 const DROP_DOWN_ICON_COLOR = '#565656';
 
 const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.67799 4.84556L0.134292 1.90016C-0.152586 1.56798 0.0505937 1 0.456301 1L5.5437 1C5.94941 1 6.15259 1.56798 5.86571 1.90016L3.32201 4.84556Z');
@@ -115,16 +116,19 @@ function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, f
     const realMargin = margin ? MARGIN_V : 0;
     switch (vt) {
         case VerticalAlign.BOTTOM:
-            paddingTop = (cellHeight - (realMargin * 2) - fontHeight) + realMargin;
+            paddingTop = cellHeight - fontHeight - MINIMAL_GAP;
             break;
         case VerticalAlign.MIDDLE:
-            paddingTop = ((cellHeight - (realMargin * 2) - fontHeight) / 2) + realMargin;
+            paddingTop = (cellHeight - fontHeight) / 2;
             break;
-
+        case VerticalAlign.TOP:
+            paddingTop = MINIMAL_GAP;
+            break;
         default:
             paddingTop = realMargin;
             break;
     }
+    paddingTop = Math.max(0, paddingTop);
 
     let paddingLeft = 0;
     switch (ht) {
@@ -138,6 +142,7 @@ function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, f
         default:
             break;
     }
+    paddingLeft = Math.max(0, paddingLeft);
 
     return {
         paddingLeft,

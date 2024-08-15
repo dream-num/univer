@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, SlideDataModel } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { CanvasView } from '../../controllers/canvas-view';
 
 export interface IDeleteElementOperationParams {
@@ -29,8 +29,11 @@ export const DeleteSlideElementOperation: ICommand<IDeleteElementOperationParams
     handler: (accessor, params) => {
         if (!params?.id) return false;
 
+        const unitId = params.unitId;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+        // const slideData = univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
+
+        const slideData = univerInstanceService.getUnit<SlideDataModel>(unitId);
 
         if (!slideData) return false;
 
@@ -41,7 +44,7 @@ export const DeleteSlideElementOperation: ICommand<IDeleteElementOperationParams
         slideData.updatePage(activePage.id, activePage);
 
         const canvasview = accessor.get(CanvasView);
-        canvasview.removeObjectById(params.id, activePage.id);
+        canvasview.removeObjectById(params.id, activePage.id, unitId);
 
         return true;
     },

@@ -352,22 +352,39 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
      * cellValue data structure:
      * {[row]: { [col]: value}}
      * @param cellValue
-     * @returns
+     * @returns IRange
      */
     private _cellValueToRange(cellValue: Record<number, Record<number, object>>) {
-        const rows = Object.keys(cellValue).map(Number);
+        // const rows = Object.keys(cellValue).map(Number);
         const columns = [];
 
+        let minCol = 0;
+        let maxCol = 0;
+        let minRow = 0;
+        let maxRow = 0;
         for (const [_row, columnObj] of Object.entries(cellValue)) {
             for (const column in columnObj) {
                 columns.push(Number(column));
+                if (minCol > Number(column)) {
+                    minCol = Number(column);
+                }
+                if (maxCol < Number(column)) {
+                    maxCol = Number(column);
+                }
+            }
+            if (minRow > Number(_row)) {
+                minRow = Number(_row);
+            }
+            if (maxRow < Number(_row)) {
+                maxRow = Number(_row);
             }
         }
 
-        const startRow = Math.min(...rows);
-        const endRow = Math.max(...rows);
-        const startColumn = Math.min(...columns);
-        const endColumn = Math.max(...columns);
+        // Chrome would give 'Maximum call stack size exceeded' error when calling Math.min(...arr) if array length is over 1572864
+        const startRow = minRow; // Math.min(...rows);
+        const endRow = maxRow; // Math.max(...rows);
+        const startColumn = minCol; // Math.min(...columns);
+        const endColumn = maxCol; // Math.max(...columns);
 
         return {
             startRow,

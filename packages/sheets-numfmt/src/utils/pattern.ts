@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { numfmt } from '@univerjs/engine-numfmt';
-import { LocaleType } from '@univerjs/core';
+import { LocaleType, numfmt } from '@univerjs/core';
 import type { FormatType } from '@univerjs/sheets';
 
 export const getPatternType = (pattern: string): FormatType => numfmt.getInfo(pattern).type || 'unknown';

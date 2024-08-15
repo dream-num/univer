@@ -81,12 +81,14 @@ export class SlidePopupMenuController extends RxDisposable {
         // return false;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _popupMenuListener(unitId: string) {
         const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE);
         const pages = model?.getPages() ?? {};
 
+        // eslint-disable-next-line max-lines-per-function
         Object.keys(pages).forEach((pageId) => {
-            const page = this._canvasView.getRenderUnitByPageId(pageId);
+            const page = this._canvasView.getRenderUnitByPageId(pageId, unitId);
             const transformer = page.scene?.getTransformer();
 
             if (!transformer) return;

@@ -20,8 +20,8 @@ import type {
     IDocumentBody,
     IPosition,
     Nullable,
-    UnitModel,
-} from '@univerjs/core';
+    SlideDataModel,
+    UnitModel } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
@@ -35,11 +35,11 @@ import {
     ICommandService,
     IContextService,
     Inject,
-    IResourceLoaderService,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
     toDisposable,
+    UniverInstanceType,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -54,7 +54,6 @@ import {
     RichTextEditingMutation,
     TextSelectionManagerService,
 } from '@univerjs/docs';
-// import { IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import type {
     DocBackground,
     Documents,
@@ -80,7 +79,6 @@ import { filter } from 'rxjs';
 import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import { ISlideEditorManagerService } from '../services/slide-editor-manager.service';
-
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { CursorChange } from '../type';
 import { SLIDE_EDITOR_ID } from '../const';
@@ -105,8 +103,6 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     /** If the corresponding unit is active and prepared for editing. */
     private _isUnitEditing = false;
 
-    // private _workbookSelections: WorkbookSelections;
-
     private _d: Nullable<IDisposable>;
 
     constructor(
@@ -124,41 +120,36 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
-        @IEditorService private readonly _editorService: IEditorService,
-        @IResourceLoaderService private readonly _resourceLoaderService: IResourceLoaderService
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
-        // this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
-
         // EditingRenderController is per unit. It should only handle keyboard events when the unit is
         // the current of its type.
-        // this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-        //     if (workbook?.getUnitId() === this._context.unitId) {
-        //         this._d = this._init();
-        //     } else {
-        //         this._disposeCurrent();
+        this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).subscribe((slideDataModel) => {
+            if (slideDataModel && slideDataModel.getUnitId() === this._renderContext.unitId) {
+                this._d = this._init();
+            } else {
+                this._disposeCurrent();
 
-        //         // Force ending editor when he switch to another workbook.
-        //         if (this._isUnitEditing) {
-        //             this._handleEditorInvisible({
-        //                 visible: false,
-        //                 eventType: DeviceInputEventType.Keyboard,
-        //                 keycode: KeyCode.ESC,
-        //                 unitId: this._context.unitId,
-        //             });
+                // Force ending editor when he switch to another workbook.
+                if (this._isUnitEditing) {
+                    this._handleEditorInvisible({
+                        visible: false,
+                        eventType: DeviceInputEventType.Keyboard,
+                        keycode: KeyCode.ESC,
+                        unitId: this._renderContext.unitId,
+                    });
 
-        //             this._isUnitEditing = false;
-        //         }
-        //     }
-        // }));
-        this._d = this._init();
+                    this._isUnitEditing = false;
+                }
+            }
+        }));
         this._initEditorVisibilityListener();
     }
 
     override dispose(): void {
         super.dispose();
-
         this._disposeCurrent();
     }
 

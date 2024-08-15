@@ -31,7 +31,7 @@ export class UniverSheetsFilterUIWorkerPlugin extends Plugin {
         super();
     }
 
-    override onStarting(_injector?: Injector): void {
+    override onStarting() {
         ([
             [ISheetsGenerateFilterValuesService, { useClass: SheetsGenerateFilterValuesService }],
         ] as Dependency[]).forEach((d) => this._injector.add(d));

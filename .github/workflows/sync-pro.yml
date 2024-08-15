@@ -27,9 +27,11 @@ jobs:
                   cd submodules/univer
                   git checkout dev
                   git pull
+                  commit_hash=$(git log -1 --pretty=format:"%h")
+
                   cd ../../
                   pnpm install --no-frozen-lockfile
 
                   git add -A
-                  git commit -m "chore(submodules): update submodules" || exit 0
+                  git commit -m "chore(submodules): update submodules($commit_hash)" || exit 0
                   git push

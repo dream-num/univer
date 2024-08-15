@@ -38,7 +38,7 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
         super();
     }
 
-    override onStarting(injector: Injector): void {
+    override onStarting() {
         ([
             [UniFormulaUniController],
             [DocUniFormulaInputController],
@@ -46,7 +46,7 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
             [SlideUIFormulaCacheService],
             [UniFormulaPopupService],
             [IUniFormulaService, { useClass: UniFormulaService }],
-        ] as Dependency[]).forEach((d) => injector.add(d));
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 
     override onReady(): void {

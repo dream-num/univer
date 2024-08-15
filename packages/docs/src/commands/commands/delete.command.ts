@@ -173,8 +173,8 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         }
 
         const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
-        const endIndex = originBody.paragraphs
-            ?.find((p) => p.startIndex >= startIndex)?.startIndex!;
+        const endIndex = originBody.paragraphs!
+            .find((p) => p.startIndex >= startIndex)!.startIndex!;
         const body = getParagraphBody(accessor, unitId, originBody, startIndex, endIndex);
         const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
 
@@ -510,7 +510,7 @@ export const DeleteRightCommand: ICommand = {
     id: 'doc.command.delete-right',
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -652,7 +652,13 @@ export const DeleteRightCommand: ICommand = {
     },
 };
 
-function getParagraphBody(accessor: IAccessor, unitId: string, body: IDocumentBody, start: number, end: number): IDocumentBody {
+function getParagraphBody(
+    accessor: IAccessor,
+    unitId: string,
+    body: IDocumentBody,
+    start: number,
+    end: number
+): IDocumentBody {
     const { textRuns: originTextRuns = [], customBlocks: originCustomBlocks = [] } = body;
     const dataStream = body.dataStream.substring(start, end);
     const customRangeService = accessor.get(DocCustomRangeService);

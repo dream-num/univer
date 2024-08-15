@@ -218,8 +218,6 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
 
-            // If there is no initial selection, add one by default in the top left corner.
-            // const firstSelection = this._workbookSelections.getCurrentLastSelection();
             // Dont do that above! Ref selection also need syncExecCmd to reset selection.
             // TODO @lumixraku why use such weird a way to clear existing selection? subscribe to currentSkeleton$ is much better?
 
@@ -229,6 +227,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
             if (prevSheetId !== skeleton.worksheet.getSheetId()) {
                 const firstSelection = this._workbookSelections.getCurrentLastSelection();
+                // If there is no initial selection, add one by default in the top left corner.
+                // const firstSelection = this._workbookSelections.getCurrentLastSelection();
                 if (!firstSelection) {
                     this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                         unitId,

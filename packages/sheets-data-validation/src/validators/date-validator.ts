@@ -27,6 +27,7 @@ import { getFormulaResult } from '../utils/formula';
 import { DATE_DROPDOWN_KEY } from '../views';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DateShowTimeOption } from '../views/show-time';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -87,19 +88,11 @@ export class DateValidator extends BaseDataValidator<number> {
     }
 
     override async isValidType(info: IValidatorCellInfo): Promise<boolean> {
-        const { value, worksheet, row, column, workbook } = info;
-        if (typeof value === 'string') {
-            return dayjs(value, 'YYYY-MM-DD HH:mm:ss', true).isValid();
-        }
-
-        if (typeof value === 'number') {
-            const cell = worksheet.getCellRaw(row, column);
-            if (cell && cell.s) {
-                const style = workbook.getStyles().get(cell.s);
-                if (style?.n?.pattern.indexOf('yyyy-MM-dd') === 0) {
-                    return true;
-                }
-            }
+        const { value, worksheet, row, column } = info;
+        const cell = worksheet.getCell(row, column);
+        const interceptValue = getCellValueOrigin(cell);
+        if (typeof interceptValue === 'string' && typeof value === 'number') {
+            return dayjs(interceptValue).isValid();
         }
 
         return false;

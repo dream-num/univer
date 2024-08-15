@@ -124,9 +124,11 @@ export class AuthzIoLocalService implements IAuthzIoService {
                     shareOn: false,
                     shareRole: UnitRole.Owner,
                     shareScope: -1,
-                    scope: ObjectScope.AllCollaborator,
+                    scope: {
+                        read: ObjectScope.AllCollaborator,
+                        edit: ObjectScope.AllCollaborator,
+                    },
                     creator: createDefaultUser(UnitRole.Owner),
-                    // mock data
                     strategies: [
                         {
                             action: 6,
@@ -178,10 +180,6 @@ export class AuthzIoLocalService implements IAuthzIoService {
                         },
                         {
                             action: 40,
-                            role: 1,
-                        },
-                        {
-                            action: 41,
                             role: 1,
                         },
                     ],

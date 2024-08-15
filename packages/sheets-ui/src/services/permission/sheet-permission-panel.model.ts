@@ -33,12 +33,16 @@ const DEFAULT_RANGE_RULE: IRangeProtectionRule = {
 export enum viewState {
     othersCanView = 'othersCanView',
     noOneElseCanView = 'noOneElseCanView',
+}
 
+export enum editState {
+    designedUserCanEdit = 'designedUserCanEdit',
+    onlyMe = 'onlyMe',
 }
 
 type IPermissionPanelBaseRule = IRangeProtectionRule | IWorksheetProtectionRule;
 
-export type IPermissionPanelRule = IPermissionPanelBaseRule & { viewStatus?: viewState; ranges: IRange[] };
+export type IPermissionPanelRule = IPermissionPanelBaseRule & { viewStatus?: viewState; editStatus?: editState; ranges: IRange[] };
 
 @OnLifecycle(LifecycleStages.Starting, SheetPermissionPanelModel)
 export class SheetPermissionPanelModel {

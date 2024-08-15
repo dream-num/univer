@@ -20,7 +20,7 @@ import React from 'react';
 import { ISidebarService, useObservable } from '@univerjs/ui';
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { AddRangeProtectionCommand } from '@univerjs/sheets';
-import { SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
+import { editState, SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { getUserListEqual } from '../../../common/utils';
 import { SetProtectionCommand } from '../../../commands/commands/range-protection.command';
@@ -45,15 +45,23 @@ export const SheetPermissionPanelDetailFooter = () => {
                 onClick={async () => {
                     if (!activeRule.name || rangeErrMsg) return;
                     const collaborators = sheetPermissionUserManagerService.selectUserList;
+                    const scopeObj = {
+                        read: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
+                        edit: activeRule.editStatus === editState.designedUserCanEdit ? ObjectScope.SomeCollaborator : ObjectScope.OneSelf,
+                    };
 
                     // Editing existing permission rules
                     if (activeRule.permissionId) {
                         const oldRule = sheetPermissionPanelModel.oldRule;
                         // Collaborators only need to consider people with editing permissions
                         const isSameCollaborators = getUserListEqual(collaborators.filter((user) => user.role === UnitRole.Editor), sheetPermissionUserManagerService.oldCollaboratorList.filter((user) => user.role === UnitRole.Editor));
-                        const isSameReader = oldRule?.viewStatus === activeRule.viewStatus;
-                        if (activeRule.unitType === oldRule?.unitType && activeRule.name === oldRule.name && activeRule.description === oldRule.description && activeRule.ranges === oldRule.ranges && (!isSameCollaborators || !isSameReader)) {
-                            // When only collaborators or readers change, the update interface is called. Here is the agreement strategies = [];
+                        const isSameReadStatus = oldRule?.viewStatus === activeRule.viewStatus;
+                        const isSameEditStatus = oldRule?.editStatus === activeRule.editStatus;
+                        const ruleConfigIsOrigin = activeRule.unitType === oldRule?.unitType && activeRule.name === oldRule.name && activeRule.description === oldRule.description && activeRule.ranges === oldRule.ranges;
+                        const collaboratorsIsChange = !isSameCollaborators || !isSameReadStatus || !isSameEditStatus;
+
+                        if (ruleConfigIsOrigin && collaboratorsIsChange) {
+                            // When only collaborators or read status change or edit status change, the update interface is called. Here is the agreement strategies = [];
                             await authzIoService.update({
                                 objectType: activeRule.unitType,
                                 objectID: activeRule.permissionId,
@@ -61,14 +69,14 @@ export const SheetPermissionPanelDetailFooter = () => {
                                 share: undefined,
                                 name: '',
                                 strategies: [],
-                                scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
+                                scope: scopeObj,
                             });
                         } else {
                             // If the description of the permission is modified, it needs to be synchronized to other collaborators, so the create logic needs to be followed.
                             let newPermissionId = activeRule.permissionId;
 
                             // If the collaborator or reader information is modified, a new permissionId is required,
-                            if (!isSameCollaborators || !isSameReader) {
+                            if (collaboratorsIsChange) {
                                 if (activeRule.unitType === UnitObject.Worksheet) {
                                     newPermissionId = await authzIoService.create({
                                         worksheetObject: {
@@ -76,7 +84,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                             unitID: activeRule.unitId,
                                             name: activeRule.name,
                                             strategies: [{ role: UnitRole.Editor, action: UnitAction.Edit }, { role: UnitRole.Reader, action: UnitAction.View }],
-                                            scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
+                                            scope: scopeObj,
                                         },
                                         objectType: UnitObject.Worksheet,
                                     });
@@ -86,7 +94,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                             collaborators,
                                             unitID: activeRule.unitId,
                                             name: activeRule.name,
-                                            scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
+                                            scope: scopeObj,
                                         },
                                         objectType: UnitObject.SelectRange,
                                     });
@@ -102,6 +110,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                         }
                     } else {
                         //  Create new rule
+
                         if (activeRule.unitType === UnitObject.Worksheet) {
                             const permissionId = await authzIoService.create({
                                 worksheetObject: {
@@ -109,7 +118,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                     unitID: activeRule.unitId,
                                     name: activeRule.name,
                                     strategies: [{ role: UnitRole.Editor, action: UnitAction.Edit }, { role: UnitRole.Reader, action: UnitAction.View }],
-                                    scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
+                                    scope: scopeObj,
                                 },
                                 objectType: UnitObject.Worksheet,
                             });
@@ -125,7 +134,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                     collaborators,
                                     unitID: activeRule.unitId,
                                     name: activeRule.name,
-                                    scope: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
+                                    scope: scopeObj,
                                 },
                                 objectType: UnitObject.SelectRange,
                             });

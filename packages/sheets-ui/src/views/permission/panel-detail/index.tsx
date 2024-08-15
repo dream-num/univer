@@ -26,7 +26,7 @@ import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protoco
 import clsx from 'clsx';
 import { UserEmptyBase64 } from '../user-dialog/constant';
 import Spin from '../spin';
-import { SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
+import { editState, SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../basics/const/permission';
 import styles from './index.module.less';
@@ -53,7 +53,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
 
     const selectUserList = useObservable(sheetPermissionUserManagerService.selectUserList$, sheetPermissionUserManagerService.selectUserList);
 
-    const [editorGroupValue, setEditorGroupValue] = React.useState(selectUserList.length ? 'designedUserCanEdit' : 'onlyMe');
+    const [editorGroupValue, setEditorGroupValue] = React.useState<editState>(selectUserList.length ? editState.designedUserCanEdit : editState.onlyMe);
     const [viewGroupValue, setViewGroupValue] = React.useState(viewState.othersCanView);
     const [loading, setLoading] = useState(false);
 
@@ -190,15 +190,11 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             });
             sheetPermissionUserManagerService.setSelectUserList(selectUserList);
             setLoading(false);
-            if (selectUserList?.length > 0) {
-                setEditorGroupValue('designedUserCanEdit');
-            }
         };
         if (activeRule?.permissionId) {
             getSelectUserList();
         } else {
             sheetPermissionUserManagerService.setSelectUserList([]);
-            setEditorGroupValue('onlyMe');
         }
     }, [activeRule?.permissionId]);
 
@@ -209,20 +205,24 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             });
             return;
         }
-        const getViewPermission = async () => {
+        const getCollaboratorInit = async () => {
             const res = await authzIoService.list({
                 unitID: unitId,
                 objectIDs: [activeRule?.permissionId],
                 actions: [UnitAction.View],
             });
-            const isAllCanView = res[0].scope === ObjectScope.AllCollaborator;
+            const isAllCanView = res[0].scope?.read === ObjectScope.AllCollaborator;
+            const isSomeCanEdit = res[0].scope?.edit === ObjectScope.SomeCollaborator;
             const viewValue = isAllCanView ? viewState.othersCanView : viewState.noOneElseCanView;
+            const editValue = isSomeCanEdit ? editState.designedUserCanEdit : editState.onlyMe;
             setViewGroupValue(viewValue);
+            setEditorGroupValue(editValue);
             sheetPermissionPanelModel.setRule({
                 viewStatus: viewValue,
+                editStatus: editValue,
             });
         };
-        getViewPermission();
+        getCollaboratorInit();
     }, [activeRule.permissionId]);
 
     useEffect(() => {
@@ -331,17 +331,17 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                 <RadioGroup
                     value={editorGroupValue}
                     onChange={(v) => {
-                        setEditorGroupValue(v as string);
-                        if (v === 'onlyMe') {
+                        setEditorGroupValue(v as editState);
+                        if (v === editState.onlyMe) {
                             sheetPermissionUserManagerService.setSelectUserList([]);
                         }
                     }}
                     className={styles.radioGroupVertical}
                 >
-                    <Radio value="onlyMe">
+                    <Radio value={editState.onlyMe}>
                         <span className={styles.text}>{localeService.t('permission.panel.onlyICanEdit')}</span>
                     </Radio>
-                    <Radio value="designedUserCanEdit">
+                    <Radio value={editState.designedUserCanEdit}>
                         <span className={styles.text}>{localeService.t('permission.panel.designedUserCanEdit')}</span>
                     </Radio>
                 </RadioGroup>

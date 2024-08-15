@@ -135,7 +135,10 @@ export const SheetPermissionDialog = () => {
                     collaborators,
                     name: '',
                     strategies: actions,
-                    scope: ObjectScope.AllCollaborator,
+                    scope: {
+                        read: ObjectScope.AllCollaborator,
+                        edit: ObjectScope.AllCollaborator,
+                    },
                 },
             });
 
@@ -154,7 +157,10 @@ export const SheetPermissionDialog = () => {
                 strategies: [],
                 share: undefined,
                 name: '',
-                scope: ObjectScope.AllCollaborator,
+                scope: {
+                    read: ObjectScope.AllCollaborator,
+                    edit: ObjectScope.AllCollaborator,
+                },
             }).then(() => {
                 getAllWorksheetPermissionPoint().forEach((F) => {
                     const instance = new F(unitId, subUnitId);

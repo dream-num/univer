@@ -284,7 +284,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.rect(0, 0, cellWidth - l - r, cellHeight - t - b);
             ctx.clip();
 
-            ctx.translate(0, paddingTop);
+            ctx.translateWithPrecision(0, paddingTop);
             ctx.save();
             ctx.translateWithPrecision(PADDING_H, 0);
             ctx.beginPath();
@@ -321,7 +321,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             const { height: fontHeight, width: fontWidth } = textLayout;
             const { paddingTop, paddingLeft } = calcPadding(realWidth, cellHeight, fontWidth, fontHeight, vt, ht);
 
-            ctx.translate(MARGIN_H, paddingTop);
+            ctx.translateWithPrecision(MARGIN_H, paddingTop);
             const rectWidth = Math.max(cellWidth - MARGIN_H * 2, 1);
             const rectHeight = fontHeight;
             Rect.drawWith(ctx as UniverRenderingContext, {
@@ -338,7 +338,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.translateWithPrecision(paddingLeft, 0);
             documents.render(ctx as UniverRenderingContext);
             ctx.restore();
-            ctx.translate(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
+            ctx.translateWithPrecision(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
             ctx.fillStyle = DROP_DOWN_ICON_COLOR;
             ctx.fill(downPath);
             ctx.restore();

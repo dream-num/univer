@@ -67,16 +67,18 @@ class WatchRange extends Disposable {
 
     onMutation(mutation: IMutationInfo<ISheetCommandSharedParams>) {
         if (mutation.params?.unitId !== this._unitId) {
-            // move range don't have subUnitId on params
-            if (mutation.id === MoveRangeMutation.id) {
-                const params = mutation.params as unknown as IMoveRangeMutationParams;
-                if (params.from.subUnitId !== this._subUnitId && params.to.subUnitId !== this._subUnitId) {
-                    return;
-                }
-            } else if (mutation.params?.subUnitId !== this._subUnitId) {
+            return;
+        }
+        // move range don't have subUnitId on params
+        if (mutation.id === MoveRangeMutation.id) {
+            const params = mutation.params as unknown as IMoveRangeMutationParams;
+            if (params.from.subUnitId !== this._subUnitId && params.to.subUnitId !== this._subUnitId) {
                 return;
             }
+        } else if (mutation.params?.subUnitId !== this._subUnitId) {
+            return;
         }
+
         if (!this._range) {
             return;
         }

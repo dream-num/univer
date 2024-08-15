@@ -37,3 +37,5 @@ export enum CursorChange {
     StartEditor,
     CursorChange,
 }
+
+export type PageID = string;

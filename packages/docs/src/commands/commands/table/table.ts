@@ -16,7 +16,7 @@
 
 import type { IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
-import type { DataStreamTreeNode, DocumentSkeleton, DocumentViewModel, IDocumentSkeletonRow, IDocumentSkeletonTable, RectRange, TextRange } from '@univerjs/engine-render';
+import type { DataStreamTreeNode, DocumentViewModel, RectRange, TextRange } from '@univerjs/engine-render';
 import type { ITextActiveRange } from '../../../services/text-selection-manager.service';
 
 export enum INSERT_ROW_POSITION {
@@ -701,59 +701,85 @@ export enum CellPosition {
     PREV,
 }
 
-export function getCellOffsets(skeleton: DocumentSkeleton, range: ITextActiveRange, position: CellPosition): Nullable<IOffsets> {
+// eslint-disable-next-line complexity, max-lines-per-function
+export function getCellOffsets(viewModel: DocumentViewModel, range: ITextActiveRange, position: CellPosition): Nullable<IOffsets> {
     const { startOffset } = range;
-    const glyph = skeleton.findNodeByCharIndex(startOffset);
-    const cell = glyph?.parent?.parent?.parent?.parent?.parent;
 
-    if (cell == null) {
+    let targetTable = null;
+
+    for (const section of viewModel.children) {
+        for (const paragraph of section.children) {
+            const table = paragraph.children[0];
+            if (table) {
+                if (startOffset > table.startIndex && startOffset < table.endIndex) {
+                    targetTable = table;
+                    break;
+                }
+            }
+        }
+
+        if (targetTable) {
+            break;
+        }
+    }
+
+    if (targetTable == null) {
         return null;
     }
 
-    const row = cell.parent as Nullable<IDocumentSkeletonRow>;
+    let cellIndex = -1;
+    let rowIndex = -1;
+    let targetRow = null;
 
-    if (row == null) {
+    for (const row of targetTable.children) {
+        for (const cell of row.children) {
+            if (startOffset > cell.startIndex && startOffset < cell.endIndex) {
+                cellIndex = row.children.indexOf(cell);
+                rowIndex = targetTable.children.indexOf(row);
+                targetRow = row;
+                break;
+            }
+        }
+
+        if (cellIndex > -1) {
+            break;
+        }
+    }
+
+    if (cellIndex === -1 || rowIndex === -1 || targetRow == null) {
         return null;
     }
 
-    const table = row.parent as Nullable<IDocumentSkeletonTable>;
-
-    if (table == null) {
-        return;
-    }
-
-    const cellIndex = row.cells.indexOf(cell);
-    const rowIndex = table.rows.indexOf(row);
     let newCell = null;
 
     if (position === CellPosition.NEXT) {
-        newCell = row.cells[cellIndex + 1];
+        newCell = targetRow.children[cellIndex + 1];
 
         if (!newCell) {
-            const nextRow = table.rows[rowIndex + 1];
+            const nextRow = targetTable.children[rowIndex + 1];
 
             if (nextRow) {
-                newCell = nextRow.cells[0];
+                newCell = nextRow.children[0];
             }
         }
     } else {
-        newCell = row.cells[cellIndex - 1];
+        newCell = targetRow.children[cellIndex - 1];
 
         if (!newCell) {
-            const prevRow = table.rows[rowIndex - 1];
+            const prevRow = targetTable.children[rowIndex - 1];
 
             if (prevRow) {
-                newCell = prevRow.cells[prevRow.cells.length - 1];
+                newCell = prevRow.children[prevRow.children.length - 1];
             }
         }
     }
 
     if (newCell) {
-        const { st, ed } = newCell;
+        const { startIndex, endIndex } = newCell;
 
         return {
-            startOffset: st,
-            endOffset: ed - 1,
+            startOffset: startIndex + 1,
+            endOffset: endIndex - 2,
         };
     }
 }

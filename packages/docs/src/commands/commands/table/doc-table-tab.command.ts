@@ -29,7 +29,6 @@ export interface IDocTableTabCommandParams {
 export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
     id: 'doc.table.tab-in-table',
     type: CommandType.COMMAND,
-
     handler: async (accessor, params: IDocTableTabCommandParams) => {
         const { shift } = params;
         const textSelectionManager = accessor.get(TextSelectionManagerService);
@@ -45,8 +44,9 @@ export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
         const unitId = docDataModel.getUnitId();
         const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
         const skeleton = docSkeletonManagerService?.getSkeleton();
+        const viewModel = skeleton?.getViewModel().getSelfOrHeaderFooterViewModel(activeTextRange?.segmentId);
 
-        if (skeleton == null) {
+        if (viewModel == null) {
             return false;
         }
 
@@ -57,9 +57,9 @@ export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
         let offsets: Nullable<IOffsets> = null;
 
         if (shift) {
-            offsets = getCellOffsets(skeleton, activeTextRange, CellPosition.PREV);
+            offsets = getCellOffsets(viewModel, activeTextRange, CellPosition.PREV);
         } else {
-            offsets = getCellOffsets(skeleton, activeTextRange, CellPosition.NEXT);
+            offsets = getCellOffsets(viewModel, activeTextRange, CellPosition.NEXT);
         }
 
         if (offsets) {

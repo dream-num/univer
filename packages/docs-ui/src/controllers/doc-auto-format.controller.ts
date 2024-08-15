@@ -65,7 +65,7 @@ export class DocAutoFormatController extends Disposable {
                         },
                     }];
                 },
-                priority: 100,
+                priority: 99,
             })
         );
 
@@ -97,7 +97,7 @@ export class DocAutoFormatController extends Disposable {
                         },
                     }];
                 },
-                priority: 99,
+                priority: 100,
             })
         );
     }

@@ -86,9 +86,9 @@ const SelectList = (props: ISelectListProps) => {
                                         {lowerFilter && item.label.toLowerCase().includes(lowerFilter)
                                             ? (
                                                 <>
-                                                    <span>{item.label.slice(0, index)}</span>
-                                                    <span style={{ fontWeight: 'bold' }}>{item.label.slice(index, index + lowerFilter.length)}</span>
-                                                    <span>{item.label.slice(index + lowerFilter.length)}</span>
+                                                    <span>{item.label.substring(0, index)}</span>
+                                                    <span style={{ fontWeight: 'bold' }}>{item.label.substring(index, index + lowerFilter.length)}</span>
+                                                    <span>{item.label.substring(index + lowerFilter.length)}</span>
                                                 </>
                                             )
                                             : item.label}

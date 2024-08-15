@@ -20,6 +20,7 @@ export * from './components';
 export { t } from './components/hooks/locale';
 export { useObservable } from './components/hooks/observable';
 export { useEvent } from './components/hooks/event';
+export { useVirtualList } from './components/hooks/virtual-list';
 export {
     CopyShortcutItem,
     CutShortcutItem,

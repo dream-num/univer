@@ -15,10 +15,10 @@
  */
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import {
-    ColorKit,
+import { ColorKit,
     Disposable,
     ICommandService,
+    ILogService,
     Inject,
     ObjectMatrix,
     Rectangle,
@@ -61,14 +61,28 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
+        this._initSkeletonChangeListener();
         this._initInterceptorEditorStart();
-
         this._commandExecutedListener();
 
         // Do not intercept v:null and add t: CellValueType.NUMBER. When the cell =TODAY() is automatically filled, the number format will recognize the Number type and parse it as 1900-01-00 date format.
+    }
+
+    private _initSkeletonChangeListener() {
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                    if (param == null) {
+                        this._logService.error('[FormulaEditorShowController]: should not receive currentSkeleton$ as null!');
+                    }
+                    this._removeArrayFormulaRangeShape();
+                })
+            )
+        );
     }
 
     private _initInterceptorEditorStart() {

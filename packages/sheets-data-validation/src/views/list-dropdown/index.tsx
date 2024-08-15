@@ -79,7 +79,7 @@ const SelectList = (props: ISelectListProps) => {
                                 onChange(newValue);
                             };
 
-                            const index = item.label.indexOf(lowerFilter!);
+                            const index = item.label.toLocaleLowerCase().indexOf(lowerFilter!);
                             return (
                                 <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
                                     <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>

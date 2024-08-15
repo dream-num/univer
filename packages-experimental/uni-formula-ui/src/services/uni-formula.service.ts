@@ -79,7 +79,7 @@ export const UpdateSlideUniFormulaCacheCommand: ICommand<IUpdateSlideUniFormulaC
             // TODO@wzhudev: we should get the slide's rendering modules to update the formula results.
             // Note that this is very hacky because Univer Slide hasn't provide any mutations to
             // modify its content. This is just for POC of uni formula.
-            const scene = slideCanvasView.getRenderUnitByPageId(position.pageId).scene;
+            const scene = slideCanvasView.getRenderUnitByPageId(position.pageId, unitId).scene;
             if (!scene) return false;
 
             const element = scene.getObject(position.elementId);

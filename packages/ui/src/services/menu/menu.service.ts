@@ -120,6 +120,12 @@ export class MenuService extends Disposable implements IMenuService {
 
     setMenuItem(item: IMenuItem): void {
         this._menuItemMap.set(item.id, item);
+        if (Array.isArray(item.positions)) {
+            item.positions.forEach((menu) => this._updateMenuItems(item, menu));
+        } else {
+            this._updateMenuItems(item, item.positions);
+        }
+
         this._menuChanged$.next();
     }
 
@@ -166,5 +172,19 @@ export class MenuService extends Disposable implements IMenuService {
         }
 
         menuList.push([menu.id, menu]);
+    }
+
+    private _updateMenuItems(menu: IMenuItem, position: MenuPosition | string) {
+        if (!this._menuByPositions.has(position)) {
+            this._menuByPositions.set(position, []);
+        }
+
+        const menuList = this._menuByPositions.get(position)!;
+        const index = menuList.findIndex((m) => m[0] === menu.id);
+        if (index > -1) {
+            menuList[index] = [menu.id, menu];
+        } else {
+            menuList.push([menu.id, menu]);
+        }
     }
 }

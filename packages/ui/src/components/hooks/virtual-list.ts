@@ -22,7 +22,7 @@ type ItemHeight<T> = (index: number, data: T) => number;
 
 const isNumber = (value: unknown): value is number => typeof value === 'number';
 
-export interface IOptions<T> {
+export interface IVirtualListOptions<T> {
     containerTarget: React.RefObject<HTMLElement>;
     itemHeight: number | ItemHeight<T>;
     overscan?: number;
@@ -35,7 +35,7 @@ function useLatest<T>(value: T) {
 }
 
 // eslint-disable-next-line max-lines-per-function
-const useVirtualList = <T>(list: T[], options: IOptions<T>) => {
+const useVirtualList = <T>(list: T[], options: IVirtualListOptions<T>) => {
     const { containerTarget, itemHeight, overscan = 5 } = options;
 
     const itemHeightRef = useLatest(itemHeight);

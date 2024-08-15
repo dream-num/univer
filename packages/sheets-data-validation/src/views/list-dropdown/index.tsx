@@ -50,7 +50,7 @@ const SelectList = (props: ISelectListProps) => {
     const { value, onChange, multiple, options, title, onEdit, style, filter } = props;
     const localeService = useDependency(LocaleService);
     const lowerFilter = filter?.toLowerCase();
-    const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().indexOf(lowerFilter) === 0 : true);
+    const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
 
     return (
         <div className={styles.dvListDropdown} style={style}>
@@ -78,14 +78,17 @@ const SelectList = (props: ISelectListProps) => {
 
                                 onChange(newValue);
                             };
+
+                            const index = item.label.indexOf(lowerFilter!);
                             return (
                                 <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
                                     <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>
-                                        {lowerFilter && item.label.toLowerCase().indexOf(lowerFilter) === 0
+                                        {lowerFilter && item.label.toLowerCase().includes(lowerFilter)
                                             ? (
                                                 <>
-                                                    <span style={{ fontWeight: 'bold' }}>{item.label.slice(0, lowerFilter.length)}</span>
-                                                    <span>{item.label.slice(lowerFilter.length)}</span>
+                                                    <span>{item.label.slice(0, index)}</span>
+                                                    <span style={{ fontWeight: 'bold' }}>{item.label.slice(index, index + lowerFilter.length)}</span>
+                                                    <span>{item.label.slice(index + lowerFilter.length)}</span>
                                                 </>
                                             )
                                             : item.label}

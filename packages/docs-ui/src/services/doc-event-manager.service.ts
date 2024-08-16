@@ -48,7 +48,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private _hoverCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string }[]>();
     readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId)));
 
-    private _clickCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string }[]>();
+    private _clickCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string }>();
     readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();
 
     private _dirty = true;
@@ -64,8 +64,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @ILogService private readonly _logService: ILogService
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
 
@@ -94,7 +93,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this.disposeWithMe(this._context.scene.onPointerUp$.subscribeEvent((evt) => {
             const ranges = this._calcActiveRanges(evt);
             if (ranges.length) {
-                this._clickCustomRanges$.next(ranges);
+                this._clickCustomRanges$.next(ranges.pop()!);
             }
         }));
     }

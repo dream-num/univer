@@ -68,14 +68,14 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
 
     private _initClick() {
         this.disposeWithMe(
-            this._docEventManagerService.clickCustomRanges$.subscribe((ranges) => {
-                const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
+            this._docEventManagerService.clickCustomRanges$.subscribe((range) => {
+                const link = range.range;
                 if (link) {
                     this._commandService.executeCommand(
                         ClickDocHyperLinkOperation.id,
                         {
                             unitId: this._context.unitId,
-                            linkId: link.range.rangeId,
+                            linkId: link.rangeId,
                         }
                     );
                 }

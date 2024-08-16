@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import { DataValidationType, isFormulaString } from '@univerjs/core';
+import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import { ERROR_TYPE_SET, ErrorType } from '@univerjs/engine-formula';
 import { CUSTOM_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
-import { getFormulaResult } from '../utils/formula';
+import { getFormulaCellData, getFormulaResult } from '../utils/formula';
+
+function isLegalFormulaResult(res: string) {
+    return !(ERROR_TYPE_SET as Set<string>).has(res);
+}
 
 export class CustomFormulaValidator extends BaseDataValidator {
     override id: string = DataValidationType.CUSTOM;
@@ -49,8 +54,30 @@ export class CustomFormulaValidator extends BaseDataValidator {
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule): Promise<boolean> {
         const { column, row, unitId, subUnitId } = cellInfo;
         const result = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, row, column);
+        const cellData = getFormulaCellData(result?.result);
+        const formulaResult = cellData?.v;
 
-        return Boolean(getFormulaResult(result?.result));
+        if (Tools.isDefine(formulaResult) && formulaResult !== '') {
+            if (cellData!.t === CellValueType.BOOLEAN) {
+                return Boolean(formulaResult);
+            }
+
+            if (typeof formulaResult === 'boolean') {
+                return formulaResult;
+            }
+
+            if (typeof formulaResult === 'number') {
+                return Boolean(formulaResult);
+            }
+
+            if (typeof formulaResult === 'string') {
+                return isLegalFormulaResult(formulaResult);
+            }
+
+            return Boolean(formulaResult);
+        }
+
+        return false;
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {

@@ -38,6 +38,7 @@ import { serializeDocRange, TextSelectionManagerService } from '../../services/t
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getRichTextEditPath } from '../util';
+import { isParagraphInTable } from '../../basics/paragraph';
 
 interface IListOperationCommandParams {
     listType: PresetListType;
@@ -375,7 +376,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
         }
 
         const { segmentId } = activeRange;
-
+        const tables = docDataModel.getBody()?.tables ?? [];
         const selections = textSelectionManagerService.getDocRanges() ?? [];
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
         const serializedSelections = selections.map(serializeDocRange);
@@ -413,6 +414,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
 
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {}, bullet } = paragraph;
+            const isInTable = isParagraphInTable(paragraph, tables);
 
             textX.push({
                 t: TextXActionType.RETAIN,
@@ -422,7 +424,10 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
 
             if (bullet) {
                 const listType = bullet.listType as keyof typeof lists;
-                const maxLevel = lists[listType].nestingLevel.length - 1;
+                let maxLevel = lists[listType].nestingLevel.length - 1;
+                if (isInTable) {
+                    maxLevel = Math.min(maxLevel, 3);
+                }
 
                 textX.push({
                     t: TextXActionType.RETAIN,

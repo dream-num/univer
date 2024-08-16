@@ -873,6 +873,7 @@ export class PromptController extends Disposable {
             const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
             bodyList.forEach((body) => (body!.textRuns = textRuns));
             this._allSelectionRenderServices.forEach((r) => this._refreshSelectionForReference(r, refSelections));
+            this._allSelectionRenderServices.forEach((r) => this._updateRefSelectionStyle(r, this._isSelectionMovingRefSelections));
         }
 
         this._refreshFormulaAndCellEditor(unitIds);

@@ -64,7 +64,10 @@ export class SheetsSelectionsService extends RxDisposable {
         });
     }
 
-    /** Clear all selections in all workbooks. */
+    /**
+     * Clear all selections in all workbooks.
+     * invoked by prompt.controller
+     */
     clear(): void {
         this._workbookSelections.forEach((wbSelection) => wbSelection.clear());
     }
@@ -286,6 +289,10 @@ export class WorkbookSelections extends Disposable {
         return worksheetSelection;
     }
 
+    /**
+     * _selectionMoveEnd$ not same as base-selection-render.service.ts@_selectionMoveEnd$
+     * @param selections
+     */
     private _emitOnEnd(selections: ISelectionWithStyle[]): void {
         this._beforeSelectionMoveEnd$.next(selections);
         this._selectionMoveEnd$.next(selections);

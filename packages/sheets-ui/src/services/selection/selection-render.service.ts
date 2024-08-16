@@ -60,6 +60,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
         this._workbookSelections = _selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
+
+        window.srs = this;
     }
 
     private _init() {
@@ -134,7 +136,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _initThemeChangeListener() {
         this.disposeWithMe(this._themeService.currentTheme$.subscribe(() => {
-            this._resetStyle();
+            this._resetSelectionStyle();
             const param = this._workbookSelections.getCurrentSelections();
             if (!param) return;
 

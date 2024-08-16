@@ -1678,8 +1678,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         /**
          * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
          */
+        // const cell = this.worksheet.getCellRaw(r, c); // getCellRaw would be faster but doesn't contain condition format info.
         const cell = this.worksheet.getCell(r, c) || this.worksheet.getCellRaw(r, c);
-        // const cell = this.worksheet.getCellRaw(r, c);
         if (!cell) {
             return true;
         }
@@ -1796,7 +1796,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._calculateOverflowCell(r, c, config);
         }
 
-        // if (!skipBackgroundAndBorder) {...}
+        // same as: if (!skipBackgroundAndBorder) {...}
         if (cacheItem.bg || cacheItem.border) {
             this._renderedCellCache.setValue(r, c, false);
         } else {

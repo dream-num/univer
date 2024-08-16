@@ -111,7 +111,10 @@ export class SelectionControl extends Disposable {
 
     protected _selectionModel!: SelectionRenderModel;
 
-    protected _selectionStyle: Nullable<ISelectionStyle>;
+    // why three style prop? what's diff between _selectionStyle & _currentStyle?
+    // protected _selectionStyle: Nullable<ISelectionStyle>;
+    private _defaultStyle!: ISelectionStyle;
+    private _currentStyle: ISelectionStyle;
 
     protected _rowHeaderWidth: number = 0;
     protected _columnHeaderHeight: number = 0;
@@ -130,10 +133,6 @@ export class SelectionControl extends Disposable {
     private readonly _selectionFilled$ = new Subject<Nullable<IRangeWithCoord>>();
 
     readonly selectionFilled$ = this._selectionFilled$.asObservable();
-
-    private _defaultStyle!: ISelectionStyle;
-
-    private _currentStyle: ISelectionStyle;
 
     private _isHelperSelection: boolean = true;
 
@@ -243,13 +242,13 @@ export class SelectionControl extends Disposable {
         return this._themeService;
     }
 
-    get selectionStyle() {
-        return this._selectionStyle;
-    }
+    // get selectionStyle() {
+    //     return this._selectionStyle;
+    // }
 
-    set selectionStyle(style: Nullable<ISelectionStyle>) {
-        this._selectionStyle = style;
-    }
+    // set selectionStyle(style: Nullable<ISelectionStyle>) {
+    //     this._selectionStyle = style;
+    // }
 
     get selectionModel() {
         return this._selectionModel;
@@ -316,10 +315,10 @@ export class SelectionControl extends Disposable {
      * invoked when update selection style & range change, invoked by updateStyle, updateRange, update
      */
     // eslint-disable-next-line max-lines-per-function
-    protected _updateControl(selectionStyle: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
-        if (selectionStyle && window.fsrs && window.fsrs._selectionControls[0] == this) {
-            console.log('selectionStyle.stroke', selectionStyle.stroke);
-        }
+    protected _updateControlStyleAndLayout(selectionStyle: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+        // this._selectionStyle = selectionStyle;
+        this._rowHeaderWidth = rowHeaderWidth || 0;
+        this._columnHeaderHeight = columnHeaderHeight || 0;
 
         // startX startY shares same coordinate with viewport.(include row & colheader)
         const { startX, startY, endX, endY } = this._selectionModel;
@@ -462,53 +461,44 @@ export class SelectionControl extends Disposable {
         this.selectionShape.show();
         this.selectionShape.translate(startX, startY);
 
-        this._selectionStyle = selectionStyle;
+        // this._selectionStyle = selectionStyle;
 
-        this._rowHeaderWidth = rowHeaderWidth || 0;
+        // this._rowHeaderWidth = rowHeaderWidth || 0;
 
-        this._columnHeaderHeight = columnHeaderHeight || 0;
+        // this._columnHeaderHeight = columnHeaderHeight || 0;
 
         this.selectionShape.makeDirtyNoDebounce(true);
     }
 
-    private _updateRangeOnly(range: IRangeWithCoord) {
-        this._selectionModel.setValue(range);
-    }
-
     updateStyle(style: ISelectionStyle) {
-        this._updateControl(style, this._rowHeaderWidth, this._columnHeaderHeight);
+        this._updateControlStyleAndLayout(style, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
-    updateRange(range: IRangeWithCoord) {
-        this._selectionModel.setValue(range);
+    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithMergeInfo>) {
+        this._selectionModel.setValue(range, primaryCell);
         // TODO @lumixraku
         // why update rowHeaderWidth and columnHeaderHeight at the same time? Did they change when update range?
-        this._updateControl(null, this._rowHeaderWidth, this._columnHeaderHeight);
+        this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
     /**
-     * update seleciton model (new range & primary cell(highlight))
+     * update selection model with new range & primary cell(aka: highlight/current), also update row/col selection size & style.
+     *
      * @param newSelectionRange
      * @param rowHeaderWidth
      * @param columnHeaderHeight
      * @param style
-     * @param highlight primary cell
+     * @param primaryCell primary cell
      */
     update(
         newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number = 0,
         columnHeaderHeight: number = 0,
         style?: Nullable<ISelectionStyle>,
-        highlight?: Nullable<ISelectionCellWithMergeInfo>
+        primaryCell?: Nullable<ISelectionCellWithMergeInfo>
     ) {
-        if (highlight) {
-            if (highlight.actualRow < newSelectionRange.startRow || highlight.actualRow > newSelectionRange.endRow) {
-                // debugger;
-            }
-        }
-
-        this._selectionModel.setValue(newSelectionRange, highlight);
-        this._updateControl(style || this._selectionStyle, rowHeaderWidth, columnHeaderHeight);
+        this._selectionModel.setValue(newSelectionRange, primaryCell);
+        this._updateControlStyleAndLayout(style || this._currentStyle, rowHeaderWidth, columnHeaderHeight);
     }
 
     /**
@@ -516,15 +506,12 @@ export class SelectionControl extends Disposable {
      * @param highlight primary cell
      */
     updateCurrCell(highlight?: Nullable<ISelectionCellWithMergeInfo>) {
-        if (highlight && (highlight.actualRow < this._selectionModel.startRow || highlight.actualRow > this._selectionModel.endRow)) {
-            // debugger;
-        }
         this._selectionModel.setCurrentCell(highlight);
     }
 
     clearHighlight() {
         this._selectionModel.clearCurrentCell();
-        this._updateControl(this._selectionStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+        this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
     getScene() {
@@ -610,7 +597,7 @@ export class SelectionControl extends Disposable {
     getValue(): ISelectionWithCoordAndStyle {
         return {
             ...this._selectionModel.getValue(),
-            style: this._selectionStyle,
+            style: this._currentStyle,
         };
     }
 
@@ -626,12 +613,12 @@ export class SelectionControl extends Disposable {
         this._isHelperSelection = false;
     }
 
-    updateStyleId(id: string) {
-        if (this._selectionStyle == null) {
-            return;
-        }
-        this._selectionStyle.id = id;
-    }
+    // updateStyleId(id: string) {
+    //     if (this._selectionStyle == null) {
+    //         return;
+    //     }
+    //     this._selectionStyle.id = id;
+    // }
 
     // eslint-disable-next-line max-lines-per-function
     private _initialize() {
@@ -712,7 +699,7 @@ export class SelectionControl extends Disposable {
                         return;
                     }
 
-                    this._updateControl(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+                    this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
                 })
             )
         );

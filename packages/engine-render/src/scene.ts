@@ -377,7 +377,7 @@ export class Scene extends ThinScene {
     }
 
     /**
-     * add objecct to layer
+     * add object to layer (layer by zIndex))
      * @param o
      * @param zIndex layer index
      * @returns scene

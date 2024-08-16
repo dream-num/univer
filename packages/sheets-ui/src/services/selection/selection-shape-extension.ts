@@ -317,7 +317,7 @@ export class SelectionShapeExtension {
 
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
 
-        const style = this._control.selectionStyle!;
+        const style = this._control.currentStyle!;
         const scale = this._getScale();
 
         if (this.isHelperSelection) {
@@ -517,7 +517,7 @@ export class SelectionShapeExtension {
             endColumn,
         };
 
-        this._control.update(this._targetSelection, rowHeaderWidth, columnHeaderHeight, this._control.selectionStyle);
+        this._control.update(this._targetSelection, rowHeaderWidth, columnHeaderHeight, this._control.currentStyle);
         this._control.clearHighlight();
         this._control.selectionScaling$.next(this._targetSelection);
     }
@@ -800,7 +800,7 @@ export class SelectionShapeExtension {
 
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
 
-        const style = this._control.selectionStyle;
+        const style = this._control.currentStyle;
         let stroke = style?.stroke;
         let strokeWidth = style?.strokeWidth;
         const defaultStyle = getNormalSelectionStyle(this._themeService);

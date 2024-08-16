@@ -61,8 +61,6 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         this._setSelectionStyle(getDefaultRefSelectionStyle(this._themeService));
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
-
-        window.fsrs = this;
     }
 
     getLocation(): [string, string] {
@@ -157,10 +155,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initUserActionSyncListener() {
-        // this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
         this.disposeWithMe(this.selectionMoveStart$.subscribe((selectionDataWithStyle) => this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVE_START)));
         this.disposeWithMe(this.selectionMoving$.subscribe((selectionDataWithStyle) => this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVING)));
-
         // prompt.controller _initSelectionsEndListener --> selectionMoveEnd$ --> _updateRefSelectionStyle --> change theme color!
         this.disposeWithMe(this.selectionMoveEnd$.subscribe((selectionDataWithStyle) => this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVE_END)));
     }
@@ -242,16 +238,9 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
  */
 function getDefaultRefSelectionStyle(themeService: ThemeService) {
     const style = getNormalSelectionStyle(themeService);
-    // style.strokeDash = 8;
     style.hasAutoFill = false;
     style.hasRowHeader = false;
     style.hasColumnHeader = false;
     style.widgets = { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true };
-    // widgetSize: 6,
-    // widgetStrokeWidth: 1,
-    // widgetStroke: style.colorWhite,
-    // hasAutoFill: false,
-    // hasRowHeader: false,
-    // hasColumnHeader: false,
     return style;
 }

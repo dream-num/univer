@@ -26,6 +26,6 @@ export function createCopyPasteSelectionStyle(
         fill: 'rgba(178, 178, 178, 0.10)',
         widgets: {},
         hasAutoFill: false,
-        strokeDash: 12,
+        strokeDash: 8,
     };
 }

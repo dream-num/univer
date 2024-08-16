@@ -31,7 +31,7 @@ import {
     SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
 import { SetColHiddenMutation, SetColVisibleMutation, SetRowHiddenMutation, SetRowVisibleMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation } from '@univerjs/sheets';
@@ -53,6 +53,7 @@ const REFRESH_ARRAY_SHAPE_MUTATIONS = [
 
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
     private _previousShape: Nullable<SelectionShape>;
+    private _skeleton: SpreadsheetSkeleton;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -78,11 +79,23 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                 this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
                     if (param == null) {
                         this._logService.error('[FormulaEditorShowController]: should not receive currentSkeleton$ as null!');
+                    } else {
+                        const { skeleton } = param;
+                        const prevSheetId = this._skeleton?.worksheet?.getSheetId();
+                        this._changeRuntime(skeleton);
+
+                        // change to another sheet
+                        if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+                            this._removeArrayFormulaRangeShape();
+                        }
                     }
-                    this._removeArrayFormulaRangeShape();
                 })
             )
         );
+    }
+
+    protected _changeRuntime(skeleton: SpreadsheetSkeleton) {
+        this._skeleton = skeleton;
     }
 
     private _initInterceptorEditorStart() {

@@ -31,7 +31,7 @@ import {
 import type { IMouseEvent, IPointerEvent, IRenderManagerService, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
-import { getNormalSelectionStyle, transformCellDataToSelectionData } from '@univerjs/sheets';
+import { getNormalSelectionStyle as getDefaultNormalSelectionStyle, transformCellDataToSelectionData } from '@univerjs/sheets';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -192,8 +192,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._selectionStyle = style;
     }
 
+    /**
+     * reset _selectionStyle to default normal selection style
+     */
     protected _resetSelectionStyle() {
-        this._setSelectionStyle(getNormalSelectionStyle(this._themeService));
+        this._setSelectionStyle(getDefaultNormalSelectionStyle(this._themeService));
     }
 
     /** @deprecated This should not be provided by the selection render service. */
@@ -233,7 +236,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const { rangeWithCoord, primaryWithCoord } = selection;
         const { rangeType } = rangeWithCoord;
         const skeleton = this._skeleton;
-        const style = selection.style ?? getNormalSelectionStyle(this._themeService);
+        const style = selection.style ?? getDefaultNormalSelectionStyle(this._themeService);
 
         const scene = this._scene;
         if (!scene || !skeleton) {
@@ -281,16 +284,19 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             return;
         }
 
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        // const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         // TODO @lumixraku This is awful!
         // selectionControls should create & remove base on selections.
+        // if selections is more than selectionControls, create new selectionControl, if selections is less than selectionControls, remove the last one.
         for (let i = 0, len = selections.length; i < len; i++) {
-            const { rangeWithCoord, primaryWithCoord, style } = selections[i];
+            const { rangeWithCoord, primaryWithCoord } = selections[i];
 
             const control = selectionControls[i];
-
-            control && control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+            if (control) {
+                control.updateRange(rangeWithCoord, primaryWithCoord);
+            }
+            // control && control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
         }
     }
 
@@ -317,10 +323,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const [unitId, sheetId] = this._skeleton.getLocation();
         return selectionControls.map((control) => {
             const v = control.getValue();
-            if (v.primaryWithCoord && (v.primaryWithCoord.actualRow < v.rangeWithCoord.startRow || v.primaryWithCoord.actualRow > v.rangeWithCoord.endRow)) {
-                // debugger;
-            }
-
             v.rangeWithCoord.sheetId = sheetId;
             v.rangeWithCoord.unitId = unitId;
             return v;
@@ -835,12 +837,20 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
     }
 
+    /**
+     * pointerDown & pointerMove --> _updateSelectionControlRange
+     * @param control
+     * @param newSelectionRange
+     * @param highlight
+     */
     protected _updateSelectionControlRange(control: SelectionControl, newSelectionRange: IRangeWithCoord, highlight: Nullable<ISelectionCellWithMergeInfo>) {
-        const skeleton = this._skeleton;
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        // const skeleton = this._skeleton;
+        // const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         // prompt controller get activeControls and then control.updateStyle, there are multiple style datas!!!   this._selectionStyle
-        control.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight, null, !highlight ? null : highlight);
+        // control.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight, null, !highlight ? null : highlight);
+
+        control.updateRange(newSelectionRange, highlight);
     }
 
     protected _clearUpdatingListeners() {
@@ -1018,10 +1028,15 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._updateSelectionControlRange(activeControl, newSelectionRange, currentCell);
     }
 
+    /**
+     * invoked when currentSkeleton$ change & theme change
+     * mainly for col width & row height resize
+     * @param selectionsData
+     */
     protected _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]) {
         const selections = selectionsData.map((selectionWithStyle) => {
             const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-            selectionData.style = getNormalSelectionStyle(this._themeService);
+            selectionData.style = getDefaultNormalSelectionStyle(this._themeService);
             return selectionData;
         });
         this.updateControlForCurrentByRangeData(selections);

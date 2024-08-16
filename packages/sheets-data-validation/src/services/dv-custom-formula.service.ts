@@ -15,7 +15,7 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
+import { DataValidationType, Disposable, ILogService, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
@@ -67,7 +67,8 @@ export class DataValidationCustomFormulaService extends Disposable {
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -192,6 +193,7 @@ export class DataValidationCustomFormulaService extends Disposable {
                     row,
                     column
                 );
+                this._logService.log('Data-validation custom-formula', { row, column, formula: relativeFormula });
                 const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeFormula);
                 formulaMap.setValue(row, column, {
                     formulaId,
@@ -249,6 +251,7 @@ export class DataValidationCustomFormulaService extends Disposable {
 
                     if (isTransformable) {
                         const relativeText = transformFormula(this._lexerTreeBuilder, formula, originRow, originCol, row, col);
+                        this._logService.log('Data-validation custom-formula', { row, column: col, formula: relativeText });
                         const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeText);
                         formulaMap.setValue(row, col, {
                             // formulaText: relativeText,

@@ -307,7 +307,7 @@ export class TextSelectionManagerService extends RxDisposable {
         const docRanges = [...textRanges, ...rectRanges];
 
         if (docRanges.length > 0) {
-            this._textSelectionRenderManager.addDocRanges(docRanges.map(serializeDocRange));
+            this._textSelectionRenderManager.addDocRanges(docRanges.map(serializeDocRange), false);
         }
     }
 

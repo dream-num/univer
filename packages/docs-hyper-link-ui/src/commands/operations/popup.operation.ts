@@ -18,6 +18,7 @@ import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
@@ -100,6 +101,24 @@ export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IShowDocHyperLinkInf
         }
 
         hyperLinkService.showInfoPopup(params);
+        return true;
+    },
+};
+
+export const ClickDocHyperLinkOperation: ICommand<{ unitId: string; linkId: string }> = {
+    type: CommandType.OPERATION,
+    id: 'docs.operation.click-hyper-link',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { unitId, linkId } = params;
+        const docLinkModel = accessor.get(DocHyperLinkModel);
+        const link = docLinkModel.getLink(unitId, linkId);
+        if (!link) {
+            return false;
+        }
+        window.open(link.payload, '_blank', 'noopener noreferrer');
         return true;
     },
 };

@@ -22,7 +22,7 @@ import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.command';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
-import { ShowDocHyperLinkEditPopupOperation, ToggleDocHyperLinkInfoPopupOperation } from '../commands/operations/popup.operation';
+import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation, ToggleDocHyperLinkInfoPopupOperation } from '../commands/operations/popup.operation';
 import { DocLinkPopup } from '../views/hyper-link-popup';
 import { AddHyperLinkMenuItemFactory, addLinkShortcut, DOC_LINK_ICON } from './menu';
 
@@ -65,6 +65,7 @@ export class DocHyperLinkUIController extends Disposable {
             DeleteDocHyperLinkCommand,
             ShowDocHyperLinkEditPopupOperation,
             ToggleDocHyperLinkInfoPopupOperation,
+            ClickDocHyperLinkOperation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

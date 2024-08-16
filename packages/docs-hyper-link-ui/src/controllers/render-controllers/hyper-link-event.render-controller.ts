@@ -18,10 +18,10 @@ import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DocEventManagerService } from '@univerjs/docs-ui';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { ToggleDocHyperLinkInfoPopupOperation } from '../../commands/operations/popup.operation';
+import { ClickDocHyperLinkOperation, ToggleDocHyperLinkInfoPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
-export class DocHyperLinkHoverRenderController extends Disposable implements IRenderModule {
+export class DocHyperLinkEventRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
@@ -30,10 +30,11 @@ export class DocHyperLinkHoverRenderController extends Disposable implements IRe
     ) {
         super();
 
-        this._init();
+        this._initHover();
+        this._initClick();
     }
 
-    private _init() {
+    private _initHover() {
         this.disposeWithMe(
             this._docEventManagerService.hoverCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
@@ -60,6 +61,23 @@ export class DocHyperLinkHoverRenderController extends Disposable implements IRe
                             ToggleDocHyperLinkInfoPopupOperation.id
                         );
                     }
+                }
+            })
+        );
+    }
+
+    private _initClick() {
+        this.disposeWithMe(
+            this._docEventManagerService.clickCustomRanges$.subscribe((ranges) => {
+                const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
+                if (link) {
+                    this._commandService.executeCommand(
+                        ClickDocHyperLinkOperation.id,
+                        {
+                            unitId: this._context.unitId,
+                            linkId: link.range.rangeId,
+                        }
+                    );
                 }
             })
         );

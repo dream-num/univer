@@ -48,6 +48,9 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private _hoverCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string }[]>();
     readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId)));
 
+    private _clickCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string }[]>();
+    readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();
+
     private _dirty = true;
     private _customRangeLayouts: ICustomRangeLayout[] = [];
 
@@ -86,6 +89,13 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             this._hoverCustomRanges$.next(
                 this._calcActiveRanges(evt)
             );
+        }));
+
+        this.disposeWithMe(this._context.scene.onPointerUp$.subscribeEvent((evt) => {
+            const ranges = this._calcActiveRanges(evt);
+            if (ranges.length) {
+                this._clickCustomRanges$.next(ranges);
+            }
         }));
     }
 

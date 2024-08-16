@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, IWorkbookData } from '@univerjs/core';
+import type { IDataValidationRule, IDocumentData, IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
@@ -102,7 +102,7 @@ const richTextDemo1: IDocumentData = {
     },
 };
 
-const dataValidation = [
+const dataValidation: IDataValidationRule[] = [
     {
         uid: 'xxx-1',
         type: DataValidationType.DECIMAL,
@@ -150,6 +150,7 @@ const dataValidation = [
             endColumn: 5,
         }],
         formula1: '1,2,3,hahaha,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18',
+        renderMode: 1,
     },
     {
         uid: 'xxx-4',

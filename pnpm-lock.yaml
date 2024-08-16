@@ -1832,6 +1832,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula

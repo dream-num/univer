@@ -117,7 +117,7 @@ const orderListFactory = (options: { glyphFormat: string; glyphType: GlyphType }
     }));
 };
 
-const checkListFactory = (symbol: string, textStyle: ITextStyle): INestingLevel[] => {
+const checkListFactory = (symbol: string, textStyle?: ITextStyle): INestingLevel[] => {
     return Array(9).fill(0).map((_, i) => ({
         glyphFormat: ` %${i + 1}`,
         glyphSymbol: symbol,
@@ -245,10 +245,7 @@ export const PRESET_LIST_TYPE: Record<string, IListData> = {
 
     [PresetListType.CHECK_LIST]: {
         listType: PresetListType.CHECK_LIST,
-        nestingLevel: checkListFactory(
-            '\u2610',
-            {}
-        ),
+        nestingLevel: checkListFactory('\u2610'),
     } as IListData,
     [PresetListType.CHECK_LIST_CHECKED]: {
         listType: PresetListType.CHECK_LIST_CHECKED,

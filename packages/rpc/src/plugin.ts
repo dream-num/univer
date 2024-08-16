@@ -42,6 +42,8 @@ export interface IUniverRPCMainThreadConfig {
 export class UniverRPCMainThreadPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_MAIN_THREAD_PLUGIN';
 
+    private _internalWorker: Worker | null = null;
+
     constructor(
         private readonly _config: IUniverRPCMainThreadConfig,
         @Inject(Injector) protected readonly _injector: Injector
@@ -49,9 +51,20 @@ export class UniverRPCMainThreadPlugin extends Plugin {
         super();
     }
 
+    override dispose(): void {
+        super.dispose();
+
+        if (this._internalWorker) {
+            this._internalWorker.terminate();
+            this._internalWorker = null;
+        }
+    }
+
     override onStarting(): void {
         const { workerURL } = this._config;
         const worker = workerURL instanceof Worker ? workerURL : new Worker(workerURL);
+        this._internalWorker = workerURL instanceof Worker ? null : worker;
+
         const messageProtocol = createWebWorkerMessagePortOnMain(worker);
         const dependencies: Dependency[] = [
             [

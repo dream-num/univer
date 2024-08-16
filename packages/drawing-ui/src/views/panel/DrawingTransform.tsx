@@ -177,64 +177,65 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     };
 
     useEffect(() => {
-        const changeStartSub = transformer.changeStart$.subscribe((state) => {
-            changeObs(state);
-        });
+        const subscriptions = [
+            transformer.changeStart$.subscribe((state) => {
+                changeObs(state);
+            }),
+            transformer.changing$.subscribe((state) => {
+                changeObs(state);
+            }),
+            transformer.changeEnd$.subscribe((state) => {
+                changeObs(state);
+            }),
+            drawingManagerService.focus$.subscribe((drawings) => {
+                if (drawings.length !== 1) {
+                    return;
+                }
 
-        const changingSub = transformer.changing$.subscribe((state) => {
-            changeObs(state);
-        });
+                const drawingParam = drawingManagerService.getDrawingByParam(drawings[0]);
 
-        const focusSub = drawingManagerService.focus$.subscribe((drawings) => {
-            if (drawings.length !== 1) {
-                return;
-            }
+                if (drawingParam == null) {
+                    return;
+                }
 
-            const drawingParam = drawingManagerService.getDrawingByParam(drawings[0]);
+                const transform = drawingParam.transform;
 
-            if (drawingParam == null) {
-                return;
-            }
+                if (transform == null) {
+                    return;
+                }
 
-            const transform = drawingParam.transform;
+                const {
+                    width: originWidth,
+                    height: originHeight,
+                    left: originX,
+                    top: originY,
+                    angle: originRotation,
+                } = transform;
 
-            if (transform == null) {
-                return;
-            }
+                if (originWidth != null) {
+                    setWidth(originWidth);
+                }
 
-            const {
-                width: originWidth,
-                height: originHeight,
-                left: originX,
-                top: originY,
-                angle: originRotation,
-            } = transform;
+                if (originHeight != null) {
+                    setHeight(originHeight);
+                }
 
-            if (originWidth != null) {
-                setWidth(originWidth);
-            }
+                if (originX != null) {
+                    setXPosition(originX);
+                }
 
-            if (originHeight != null) {
-                setHeight(originHeight);
-            }
+                if (originY != null) {
+                    setYPosition(originY);
+                }
 
-            if (originX != null) {
-                setXPosition(originX);
-            }
-
-            if (originY != null) {
-                setYPosition(originY);
-            }
-
-            if (originRotation != null) {
-                setRotation(originRotation);
-            }
-        });
+                if (originRotation != null) {
+                    setRotation(originRotation);
+                }
+            }),
+        ];
 
         return () => {
-            changingSub.unsubscribe();
-            changeStartSub.unsubscribe();
-            focusSub.unsubscribe();
+            subscriptions.forEach((sub) => sub.unsubscribe());
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

@@ -1629,7 +1629,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._overflowCache.reset();
     }
 
-    resetCache(){
+    resetCache() {
         this._resetCache();
     }
 

@@ -313,7 +313,7 @@ export class Documents extends DocComponent {
 
                     for (let i = 0; i < linesCount; i++) {
                         const line = lines[i];
-                        const { divides, asc = 0, type, lineHeight = 0 } = line;
+                        const { divides, asc = 0, type, lineHeight = 0, paddingTop } = line;
 
                         const maxLineAsc = asc;
 
@@ -360,7 +360,7 @@ export class Documents extends DocComponent {
                                     const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                     const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(spanLeft, 0),
+                                        originTranslate.addByPoint(spanLeft, paddingTop),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,
@@ -392,7 +392,7 @@ export class Documents extends DocComponent {
                                     const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                     const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(spanLeft + xOffset, 0),
+                                        originTranslate.addByPoint(spanLeft + xOffset, paddingTop),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,
@@ -402,7 +402,7 @@ export class Documents extends DocComponent {
                                     const spanPointWithFont = calculateRectRotate(
                                         originTranslate.addByPoint(
                                             spanLeft + maxLineAscSin + xOffset,
-                                            maxLineAscCos
+                                            maxLineAscCos + paddingTop
                                         ),
                                         centerPoint,
                                         centerAngle,
@@ -571,7 +571,7 @@ export class Documents extends DocComponent {
 
                 for (let i = 0; i < linesCount; i++) {
                     const line = lines[i];
-                    const { divides, asc = 0, type, lineHeight = 0 } = line;
+                    const { divides, asc = 0, type, lineHeight = 0, paddingTop } = line;
 
                     const maxLineAsc = asc;
 
@@ -616,7 +616,7 @@ export class Documents extends DocComponent {
                                 const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                 const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft, 0),
+                                    originTranslate.addByPoint(spanLeft, paddingTop),
                                     centerPoint,
                                     centerAngle,
                                     vertexAngle,
@@ -648,7 +648,7 @@ export class Documents extends DocComponent {
                                 const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                 const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft + xOffset, 0),
+                                    originTranslate.addByPoint(spanLeft + xOffset, paddingTop),
                                     centerPoint,
                                     centerAngle,
                                     vertexAngle,
@@ -658,7 +658,7 @@ export class Documents extends DocComponent {
                                 const spanPointWithFont = calculateRectRotate(
                                     originTranslate.addByPoint(
                                         spanLeft + maxLineAscSin + xOffset,
-                                        maxLineAscCos
+                                        maxLineAscCos + paddingTop
                                     ),
                                     centerPoint,
                                     centerAngle,
@@ -777,7 +777,7 @@ export class Documents extends DocComponent {
 
                 for (let i = 0; i < linesCount; i++) {
                     const line = lines[i];
-                    const { divides, asc = 0, type, lineHeight = 0 } = line;
+                    const { divides, asc = 0, type, lineHeight = 0, paddingTop } = line;
 
                     const maxLineAsc = asc;
 
@@ -835,7 +835,7 @@ export class Documents extends DocComponent {
                                 const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                 const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft, 0),
+                                    originTranslate.addByPoint(spanLeft, paddingTop),
                                     centerPoint,
                                     centerAngle,
                                     vertexAngle,
@@ -867,7 +867,7 @@ export class Documents extends DocComponent {
                                 const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                 const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft + xOffset, 0),
+                                    originTranslate.addByPoint(spanLeft + xOffset, paddingTop),
                                     centerPoint,
                                     centerAngle,
                                     vertexAngle,
@@ -877,7 +877,7 @@ export class Documents extends DocComponent {
                                 const spanPointWithFont = calculateRectRotate(
                                     originTranslate.addByPoint(
                                         spanLeft + maxLineAscSin + xOffset,
-                                        maxLineAscCos
+                                        maxLineAscCos + paddingTop
                                     ),
                                     centerPoint,
                                     centerAngle,

@@ -281,13 +281,16 @@ export class NodePositionConvertToCursor {
         const isValid = this._isValidPosition(startOrigin, endOrigin);
 
         if (!isValid) {
-            throw new Error('Invalid positions in NodePositionConvertToCursor, they are not in the same segment page when in header or footer.');
+            throw new Error(`
+                Invalid positions in NodePositionConvertToCursor,
+                they are not in the same segment page when in header or footer.`
+            );
         }
 
         const { start, end } = compareNodePosition(startOrigin, endOrigin);
 
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight, marginTop, asc } = line;
+            const { lineHeight, marginTop, asc, paddingTop } = line;
             const { glyphGroup, st } = divide;
             if (glyphGroup.length === 0) {
                 // The divide is empty, and no need to set selection.
@@ -330,9 +333,9 @@ export class NodePositionConvertToCursor {
 
                 contentBoxPosition = {
                     startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
-                    startY: startY + marginTop + asc - anchorGlyph.bBox.ba,
+                    startY: startY + marginTop + paddingTop + asc - anchorGlyph.bBox.ba,
                     endX: startX + lastGlyphLeft + lastGlyphWidth,
-                    endY: startY + marginTop + asc + anchorGlyph.bBox.bd,
+                    endY: startY + marginTop + paddingTop + asc + anchorGlyph.bBox.bd,
                 };
             } else {
                 const isStartBackFin = isStartBack && !isCurrentList;
@@ -346,9 +349,9 @@ export class NodePositionConvertToCursor {
 
                 contentBoxPosition = {
                     startX: startX + firstGlyphLeft + (isStartBackFin ? 0 : firstGlyphWidth),
-                    startY: startY + marginTop + asc - anchorGlyph.bBox.ba,
+                    startY: startY + marginTop + paddingTop + asc - anchorGlyph.bBox.ba,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + marginTop + asc + anchorGlyph.bBox.bd,
+                    endY: startY + marginTop + paddingTop + asc + anchorGlyph.bBox.bd,
                 };
             }
 

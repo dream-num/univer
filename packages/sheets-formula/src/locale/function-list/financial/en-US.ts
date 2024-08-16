@@ -498,8 +498,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The rate of discount over the length of one period.' },
+            value1: { name: 'value1', detail: '1 to 254 arguments representing the payments and income.' },
+            value2: { name: 'value2', detail: '1 to 254 arguments representing the payments and income.' },
         },
     },
     ODDFPRICE: {
@@ -568,8 +569,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'Rate is the interest rate per period.' },
+            pv: { name: 'pv', detail: 'Pv is the present value of the investment.' },
+            fv: { name: 'fv', detail: 'Fv is the desired future value of the investment.' },
         },
     },
     PMT: {

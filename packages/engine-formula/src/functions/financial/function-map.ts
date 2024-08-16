@@ -43,6 +43,8 @@ import { Mduration } from './mduration';
 import { Mirr } from './mirr';
 import { Nominal } from './nominal';
 import { Nper } from './nper';
+import { Npv } from './npv';
+import { Pduration } from './pduration';
 import { Pmt } from './pmt';
 import { Ppmt } from './ppmt';
 import { Pv } from './pv';
@@ -78,6 +80,8 @@ export const functionFinancial = [
     [Mirr, FUNCTION_NAMES_FINANCIAL.MIRR],
     [Nominal, FUNCTION_NAMES_FINANCIAL.NOMINAL],
     [Nper, FUNCTION_NAMES_FINANCIAL.NPER],
+    [Npv, FUNCTION_NAMES_FINANCIAL.NPV],
+    [Pduration, FUNCTION_NAMES_FINANCIAL.PDURATION],
     [Pmt, FUNCTION_NAMES_FINANCIAL.PMT],
     [Ppmt, FUNCTION_NAMES_FINANCIAL.PPMT],
     [Pv, FUNCTION_NAMES_FINANCIAL.PV],

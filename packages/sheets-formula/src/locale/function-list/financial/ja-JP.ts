@@ -498,8 +498,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '割引率', detail: '投資期間を通じて一定の利率を指定します。' },
+            value1: { name: 'キャッシュフロー1', detail: '支払いと収入を表す 1 から 254 の引数。' },
+            value2: { name: 'キャッシュフロー2', detail: '支払いと収入を表す 1 から 254 の引数。' },
         },
     },
     ODDFPRICE: {
@@ -568,8 +569,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '利率は投資の利率を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値を指定します。' },
+            fv: { name: '将来価値', detail: '投資の目標とする将来価値を指定します。' },
         },
     },
     PMT: {

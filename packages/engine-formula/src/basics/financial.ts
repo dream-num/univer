@@ -179,3 +179,7 @@ export function calculateNpv(rate: number, values: number[]): number {
 
     return res;
 }
+
+export function calculateOddFPrice() {
+
+}

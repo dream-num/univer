@@ -498,8 +498,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '贴现率', detail: '某一期间的贴现率。' },
+            value1: { name: '现金流1', detail: '这些是代表支出及收入的 1 到 254 个参数。' },
+            value2: { name: '现金流2', detail: '这些是代表支出及收入的 1 到 254 个参数。' },
         },
     },
     ODDFPRICE: {
@@ -568,8 +569,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '每个周期的利率。' },
+            pv: { name: '现值', detail: '投资的现值。' },
+            fv: { name: '未来价值', detail: '投资的预期未来价值。' },
         },
     },
     PMT: {

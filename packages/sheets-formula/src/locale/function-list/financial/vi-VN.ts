@@ -498,8 +498,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'tỷ lệ chiết khấu', detail: 'Tỷ lệ chiết khấu trong một thời gian nhất định.' },
+            value1: { name: 'dòng tiền 1', detail: 'Đây là các tham số từ 1 đến 254 thể hiện chi phí và thu nhập.' },
+            value2: { name: 'dòng tiền 2', detail: 'Đây là các tham số từ 1 đến 254 thể hiện chi phí và thu nhập.' },
         },
     },
     ODDFPRICE: {
@@ -556,6 +557,21 @@ export default {
         functionParameter: {
             number1: { name: 'number1', detail: 'first' },
             number2: { name: 'number2', detail: 'second' },
+        },
+    },
+    PDURATION: {
+        description: 'Trả về số kỳ hạn cần thiết để một khoản đầu tư đạt đến giá trị đã xác định.',
+        abstract: 'Trả về số kỳ hạn cần thiết để một khoản đầu tư đạt đến giá trị đã xác định.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/pduration-%E5%87%BD%E6%95%B0-44f33460-5be5-4c90-b857-22308892adaf',
+            },
+        ],
+        functionParameter: {
+            rate: { name: 'lãi suất', detail: 'lãi suất của mỗi kỳ hạn.' },
+            pv: { name: 'giá trị hiện tại', detail: 'giá trị hiện tại của khoản đầu tư.' },
+            fv: { name: 'giá trị tương lai', detail: 'giá trị tương lai được kỳ vọng của khoản đầu tư.' },
         },
     },
     PMT: {

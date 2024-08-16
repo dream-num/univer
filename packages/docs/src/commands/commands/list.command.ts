@@ -37,7 +37,7 @@ import { serializeDocRange, TextSelectionManagerService } from '../../services/t
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getRichTextEditPath } from '../util';
-import { isParagraphInTable } from '../../basics/paragraph';
+import { hasParagraphInTable } from '../../basics/paragraph';
 
 interface IListOperationCommandParams {
     listType: PresetListType;
@@ -381,7 +381,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
 
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {}, bullet } = paragraph;
-            const isInTable = isParagraphInTable(paragraph, tables);
+            const isInTable = hasParagraphInTable(paragraph, tables);
 
             textX.push({
                 t: TextXActionType.RETAIN,

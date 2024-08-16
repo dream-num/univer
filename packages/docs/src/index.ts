@@ -17,7 +17,7 @@
 export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';
 export { replaceSelectionFactory } from './basics/replace';
 export { makeSelection, getSelectionText, getDeleteSelection, getInsertSelection, isSegmentIntersects } from './basics/selection';
-export { isParagraphInTable } from './basics/paragraph';
+export { hasParagraphInTable } from './basics/paragraph';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';

@@ -16,6 +16,6 @@
 
 import type { ICustomTable, IParagraph } from '@univerjs/core';
 
-export function isParagraphInTable(paragraph: IParagraph, tables: ICustomTable[]) {
+export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[]) {
     return tables.some((table) => paragraph.startIndex > table.startIndex && paragraph.startIndex < table.endIndex);
 }

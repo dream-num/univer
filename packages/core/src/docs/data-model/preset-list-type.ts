@@ -247,11 +247,7 @@ export const PRESET_LIST_TYPE: Record<string, IListData> = {
         listType: PresetListType.CHECK_LIST,
         nestingLevel: checkListFactory(
             '\u2610',
-            {
-                st: {
-                    s: BooleanNumber.FALSE,
-                },
-            }
+            {}
         ),
     } as IListData,
     [PresetListType.CHECK_LIST_CHECKED]: {

@@ -122,7 +122,8 @@ export function shaping(
     const shapedTextList: IShapedText[] = [];
     let breaker = new LineBreaker(content);
     const { endIndex } = paragraphNode;
-    const { paragraphStyle = {} } = viewModel.getParagraph(endIndex) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
+    const { paragraphStyle = {} } = paragraph;
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
     let last = 0;
     let bk;
@@ -182,7 +183,7 @@ export function shaping(
 
             for (const glyphInfo of glyphInfosInWord) {
                 const { start, char } = glyphInfo;
-                const config = getFontCreateConfig(start, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                const config = getFontCreateConfig(start, viewModel, paragraphNode, sectionBreakConfig, paragraph);
 
                 if (char === DataStreamTreeTokenType.TAB) {
                     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
@@ -207,7 +208,7 @@ export function shaping(
                 }
 
                 if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-                    const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                    const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
                     let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
                     const customBlock = viewModel.getCustomBlockWithoutSetCurrentIndex(paragraphNode.startIndex + i);
 
@@ -235,7 +236,7 @@ export function shaping(
                     i += char.length;
                     src = src.substring(char.length);
                 } else if (/\s/.test(char) || hasCJK(char)) {
-                    const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                    const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
                     let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
 
                     if (char === DataStreamTreeTokenType.TAB) {
@@ -255,7 +256,7 @@ export function shaping(
                         viewModel,
                         paragraphNode,
                         sectionBreakConfig,
-                        paragraphStyle
+                        paragraph
                     );
                     shapedGlyphs.push(...glyphGroup);
                     i += step;
@@ -268,7 +269,7 @@ export function shaping(
                         viewModel,
                         paragraphNode,
                         sectionBreakConfig,
-                        paragraphStyle
+                        paragraph
                     );
                     shapedGlyphs.push(...glyphGroup);
                     i += step;
@@ -281,7 +282,7 @@ export function shaping(
                         viewModel,
                         paragraphNode,
                         sectionBreakConfig,
-                        paragraphStyle
+                        paragraph
                     );
                     shapedGlyphs.push(...glyphGroup);
                     i += step;
@@ -295,7 +296,7 @@ export function shaping(
                         viewModel,
                         paragraphNode,
                         sectionBreakConfig,
-                        paragraphStyle
+                        paragraph
                     );
                     shapedGlyphs.push(...glyphGroup);
                     i += step;

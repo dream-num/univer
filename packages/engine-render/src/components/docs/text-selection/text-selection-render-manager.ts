@@ -313,10 +313,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             position.isBack = true;
         }
 
-        // TODO: @Jocs It's better to create a new textRange after remove all text ranges? because segment id will change.
-        this._updateTextRangeAnchorPosition(position);
-
-        this._activeSelectionRefresh();
+        this._createTextRangeByAnchorPosition(position);
 
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
@@ -856,22 +853,16 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._rectRangeList.push(...rectRanges);
     }
 
-    private _updateTextRangeAnchorPosition(position: INodePosition) {
+    private _createTextRangeByAnchorPosition(position: INodePosition) {
         if (!this._scene) {
             return;
         }
 
-        let lastRange = this._rangeList.pop();
+        this._removeAllRanges();
 
-        if (!lastRange) {
-            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle, this._currentSegmentId);
-        }
+        const lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle, this._currentSegmentId);
 
-        this._removeAllTextRanges();
-        lastRange.activate();
-        lastRange.anchorNodePosition = position;
-        lastRange.focusNodePosition = null;
-        this._rangeList = [lastRange];
+        this._addTextRange(lastRange);
     }
 
     private _updateActiveRangePosition(position: INodePosition) {

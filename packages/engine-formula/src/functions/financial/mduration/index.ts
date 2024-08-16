@@ -16,27 +16,31 @@
 
 import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateCoupnum, calculateCouppcd } from '../../../basics/financial';
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { calculateDuration } from '../../../basics/financial';
+import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Coupnum extends BaseFunction {
-    override minParams = 3;
+export class Mduration extends BaseFunction {
+    override minParams = 5;
 
-    override maxParams = 4;
+    override maxParams = 6;
 
-    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject) {
-        const _basis = basis ?? NumberValueObject.create(0);
+    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, coupon: BaseValueObject, yld: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject) {
+        let _basis = basis ?? NumberValueObject.create(0);
 
-        const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, frequency, _basis);
+        if (_basis.isNull()) {
+            _basis = NumberValueObject.create(0);
+        }
+
+        const { isError, errorObject, variants } = checkVariantsErrorIsNullorArrayOrBoolean(settlement, maturity, coupon, yld, frequency, _basis);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        const [settlementObject, maturityObject, frequencyObject, basisObject] = variants as BaseValueObject[];
+        const [settlementObject, maturityObject, couponObject, yldObject, frequencyObject, basisObject] = variants as BaseValueObject[];
 
         const settlementSerialNumber = getDateSerialNumberByObject(settlementObject);
 
@@ -50,14 +54,18 @@ export class Coupnum extends BaseFunction {
             return maturitySerialNumber;
         }
 
+        const couponValue = +couponObject.getValue();
+        const yldValue = +yldObject.getValue();
         const frequencyValue = Math.floor(+frequencyObject.getValue());
         const basisValue = Math.floor(+basisObject.getValue());
 
-        if (Number.isNaN(frequencyValue) || Number.isNaN(basisValue)) {
+        if (Number.isNaN(couponValue) || Number.isNaN(yldValue) || Number.isNaN(frequencyValue) || Number.isNaN(basisValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (
+            couponValue < 0 ||
+            yldValue < 0 ||
             ![1, 2, 4].includes(frequencyValue) ||
             basisValue < 0 ||
             basisValue > 4 ||
@@ -66,14 +74,9 @@ export class Coupnum extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const coupDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue);
+        let result = calculateDuration(settlementSerialNumber, maturitySerialNumber, couponValue, yldValue, frequencyValue, basisValue);
 
-        // special handle for excel
-        if (coupDateSerialNumber < 0) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        const result = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequencyValue);
+        result /= 1 + yldValue / frequencyValue;
 
         return NumberValueObject.create(result);
     }

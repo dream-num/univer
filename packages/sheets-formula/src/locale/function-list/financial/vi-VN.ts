@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            coupon: { name: 'lãi suất coupon hàng năm.', detail: 'Lãi suất coupon hàng năm của một chứng khoán.' },
+            yld: { name: 'tỷ suất lợi nhuận hàng năm.', detail: 'Tỷ suất lợi nhuận hàng năm của một chứng khoán có thể bán được.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'dòng tiền', detail: 'Tham chiếu đến một mảng hoặc ô chứa các số dùng để tính tỷ suất hoàn vốn nội bộ.\n1.Các giá trị phải chứa ít nhất một giá trị dương và một giá trị âm để tính tỷ suất hoàn vốn nội bộ được trả về.\n2.IRR sử dụng chuỗi giá trị để minh họa chuỗi dòng tiền. Đảm bảo nhập các giá trị chi phí và lợi ích theo thứ tự bạn yêu cầu.\n3.Nếu mảng hoặc tham chiếu chứa văn bản, giá trị logic hoặc ô trống thì các giá trị này sẽ bị bỏ qua.' },
+            guess: { name: 'giá trị ước tính', detail: 'Ước tính tính toán IRR của hàm.' },
         },
     },
     ISPMT: {
@@ -418,6 +422,24 @@ export default {
             per: { name: 'kỳ', detail: 'Số kỳ dùng để tính số tiền lãi phải nằm trong khoảng từ 1 đến nper.' },
             nper: { name: 'tổng số kỳ', detail: 'Tổng số kỳ thanh toán.' },
             pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
+        },
+    },
+    MDURATION: {
+        description: 'Trả về thời hạn đã sửa đổi của Macauley cho một chứng khoán có mệnh giá giả định là 100 đô la',
+        abstract: 'Trả về thời hạn đã sửa đổi của Macauley cho một chứng khoán có mệnh giá giả định là 100 đô la',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/mduration-%E5%87%BD%E6%95%B0-7c5ae5c5-e22a-4c6e-bfc5-43c7b41f1974',
+            },
+        ],
+        functionParameter: {
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            coupon: { name: 'lãi suất coupon hàng năm.', detail: 'Lãi suất coupon hàng năm của một chứng khoán.' },
+            yld: { name: 'tỷ suất lợi nhuận hàng năm.', detail: 'Tỷ suất lợi nhuận hàng năm của một chứng khoán có thể bán được.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     MIRR: {

@@ -31,12 +31,15 @@ import { Ddb } from './ddb';
 import { Disc } from './disc';
 import { Dollarde } from './dollarde';
 import { Dollarfr } from './dollarfr';
+import { Duration } from './duration';
 import { Effect } from './effect';
 import { Fv } from './fv';
 import { Fvschedule } from './fvschedule';
 import { Intrate } from './intrate';
 import { Ipmt } from './ipmt';
+import { Irr } from './irr';
 import { Ispmt } from './ispmt';
+import { Mduration } from './mduration';
 import { Nominal } from './nominal';
 import { Nper } from './nper';
 import { Pmt } from './pmt';
@@ -61,12 +64,15 @@ export const functionFinancial = [
     [Disc, FUNCTION_NAMES_FINANCIAL.DISC],
     [Dollarde, FUNCTION_NAMES_FINANCIAL.DOLLARDE],
     [Dollarfr, FUNCTION_NAMES_FINANCIAL.DOLLARFR],
+    [Duration, FUNCTION_NAMES_FINANCIAL.DURATION],
     [Effect, FUNCTION_NAMES_FINANCIAL.EFFECT],
     [Fv, FUNCTION_NAMES_FINANCIAL.FV],
     [Fvschedule, FUNCTION_NAMES_FINANCIAL.FVSCHEDULE],
     [Intrate, FUNCTION_NAMES_FINANCIAL.INTRATE],
     [Ipmt, FUNCTION_NAMES_FINANCIAL.IPMT],
+    [Irr, FUNCTION_NAMES_FINANCIAL.IRR],
     [Ispmt, FUNCTION_NAMES_FINANCIAL.ISPMT],
+    [Mduration, FUNCTION_NAMES_FINANCIAL.MDURATION],
     [Nominal, FUNCTION_NAMES_FINANCIAL.NOMINAL],
     [Nper, FUNCTION_NAMES_FINANCIAL.NPER],
     [Pmt, FUNCTION_NAMES_FINANCIAL.PMT],

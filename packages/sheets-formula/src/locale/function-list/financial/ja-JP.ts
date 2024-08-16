@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            coupon: { name: '年利率', detail: '証券の年利を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'キャッシュフロー', detail: '内部収益率を計算する数値を含む配列またはセルへの参照。\n1.内部利益率を計算するには、正の値と負の値が範囲に少なくとも 1 つずつ含まれている必要があります。\n2.IRR 関数では、値の順序がキャッシュ フローの順序であると見なされます。 支払額と収益額を入力する際は、その順序に注意してください。\n3.範囲に文字列、論理値、または空白セルが含まれる場合、これらは無視されます。' },
+            guess: { name: '推測値', detail: 'IRR 関数の計算結果に近いと思われる数値を指定します。' },
         },
     },
     ISPMT: {
@@ -430,8 +434,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            coupon: { name: '年利率', detail: '証券の年利を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     MIRR: {

@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            coupon: { name: '年息票利率', detail: '有价证券的年息票利率。' },
+            yld: { name: '年收益率', detail: '有价证券的年收益率。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '现金流', detail: '数组或单元格的引用，这些单元格包含用来计算内部收益率的数字。\n1.Values 必须包含至少一个正值和一个负值，以计算返回的内部收益率。\n2.IRR 使用值的顺序来说明现金流的顺序。 一定要按您需要的顺序输入支出值和收益值。\n3.如果数组或引用包含文本、逻辑值或空白单元格，这些数值将被忽略。' },
+            guess: { name: '估计值', detail: '对函数 IRR 计算结果的估计值。' },
         },
     },
     ISPMT: {
@@ -430,8 +434,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            coupon: { name: '年息票利率', detail: '有价证券的年息票利率。' },
+            yld: { name: '年收益率', detail: '有价证券的年收益率。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     MIRR: {

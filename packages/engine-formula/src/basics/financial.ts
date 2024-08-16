@@ -14,6 +14,114 @@
  * limitations under the License.
  */
 
+import { excelDateSerial, excelSerialToDate, getTwoDateDaysByBasis } from './date';
+
+export function calculateCoupdaybs(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number): number {
+    const coupDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequency);
+
+    const { days } = getTwoDateDaysByBasis(coupDateSerialNumber, settlementSerialNumber, basis);
+
+    return days;
+}
+
+export function calculateCoupdays(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number): number {
+    let result;
+
+    if (basis === 1) {
+        const beforeSettlementDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequency);
+
+        const coupDate = excelSerialToDate(beforeSettlementDateSerialNumber);
+        coupDate.setUTCMonth(coupDate.getUTCMonth() + 12 / frequency);
+
+        const afterSettlementDateSerialNumber = excelDateSerial(coupDate);
+
+        // special handle for excel
+        if (beforeSettlementDateSerialNumber < 0 && frequency === 1) {
+            result = 365;
+        } else {
+            result = afterSettlementDateSerialNumber - beforeSettlementDateSerialNumber;
+        }
+    } else if (basis === 3) {
+        result = 365 / frequency;
+    } else {
+        result = 360 / frequency;
+    }
+
+    return result;
+}
+
+export function calculateCoupnum(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number): number {
+    let result = 0;
+
+    const settlementDate = excelSerialToDate(settlementSerialNumber);
+    const coupDate = excelSerialToDate(maturitySerialNumber);
+
+    // eslint-disable-next-line
+    while (coupDate > settlementDate) {
+        coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequency);
+        result++;
+    }
+
+    return result;
+}
+
+export function calculateCouppcd(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number): number {
+    const settlementDate = excelSerialToDate(settlementSerialNumber);
+    const coupDate = excelSerialToDate(maturitySerialNumber);
+
+    coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
+
+    if (coupDate < settlementDate) {
+        coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
+    }
+
+    // eslint-disable-next-line
+    while (coupDate > settlementDate) {
+        coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequency);
+    }
+
+    let coupDateSerialNumber = excelDateSerial(coupDate);
+
+    // special handle for excel
+    if (coupDateSerialNumber < 0) {
+        coupDateSerialNumber = 0;
+    }
+
+    return coupDateSerialNumber;
+}
+
+export function calculateDuration(settlementSerialNumber: number, maturitySerialNumber: number, coupon: number, yld: number, frequency: number, basis: number) {
+    const daybs = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequency, basis);
+    const days = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequency, basis);
+    const num = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency);
+
+    let duration = 0;
+    let p = 0;
+
+    const dsc = days - daybs;
+    const diff = dsc / days - 1;
+    const _yld = yld / frequency + 1;
+
+    const _coupon = coupon * 100 / frequency;
+
+    for (let index = 1; index <= num; index++) {
+        const di = index + diff;
+
+        const yldPOW = _yld ** di;
+
+        duration += di * _coupon / yldPOW;
+
+        p += _coupon / yldPOW;
+    }
+
+    const yldDiffPow = 100 / (_yld ** (diff + num));
+
+    duration += (diff + num) * yldDiffPow;
+    p += yldDiffPow;
+
+    return duration / p / frequency;
+}
+
 export function calculatePMT(rate: number, nper: number, pv: number, fv: number, type: number): number {
     // type = 0  Payment at the end of the period
     // type = 1  Payment at the beginning of the period

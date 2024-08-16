@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            coupon: { name: '年度票息率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '現金流', detail: '這是陣列或儲存格參照，其中包含要計算內部報酬率的數字。\n1.Values 必須至少包含一個正數和一個負數，以計算內部報酬率。\n2.IRR 使用 values 的順序來表示現金流量的順序。 請務必依所要的順序輸入支出及收入的值。\n3.如果陣列或參照引數中包含文字、邏輯值或空白儲存格，則這些值將會略過。' },
+            guess: { name: '猜測值', detail: '這是您猜測接近 IRR 結果的數字。' },
         },
     },
     ISPMT: {
@@ -430,8 +434,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            coupon: { name: '年度票息率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     MIRR: {

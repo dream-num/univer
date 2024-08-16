@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
+import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { calculateCouppcd } from '../../../basics/financial';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -65,27 +66,8 @@ export class Couppcd extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const settlementDate = excelSerialToDate(settlementSerialNumber);
-        const coupDate = excelSerialToDate(maturitySerialNumber);
+        const result = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue);
 
-        coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
-
-        if (coupDate < settlementDate) {
-            coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
-        }
-
-        // eslint-disable-next-line
-        while (coupDate > settlementDate) {
-            coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequencyValue);
-        }
-
-        let coupDateSerialNumber = excelDateSerial(coupDate);
-
-        // special handle for excel
-        if (coupDateSerialNumber < 0) {
-            coupDateSerialNumber = 0;
-        }
-
-        return NumberValueObject.create(coupDateSerialNumber);
+        return NumberValueObject.create(result);
     }
 }

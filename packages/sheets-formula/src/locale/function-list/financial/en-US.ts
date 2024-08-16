@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            coupon: { name: 'coupon', detail: "The security's annual coupon rate." },
+            yld: { name: 'yld', detail: "The security's annual yield." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'values', detail: 'An array or a reference to cells that contain numbers for which you want to calculate the internal rate of return.\n1.Values must contain at least one positive value and one negative value to calculate the internal rate of return.\n2.IRR uses the order of values to interpret the order of cash flows. Be sure to enter your payment and income values in the sequence you want.\n3.If an array or reference argument contains text, logical values, or empty cells, those values are ignored.' },
+            guess: { name: 'guess', detail: 'A number that you guess is close to the result of IRR.' },
         },
     },
     ISPMT: {
@@ -430,8 +434,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            coupon: { name: 'coupon', detail: "The security's annual coupon rate." },
+            yld: { name: 'yld', detail: "The security's annual yield." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     MIRR: {

@@ -542,6 +542,9 @@ export class ObjectMatrix<T> {
         }
 
         this.forValue((row, col, value) => {
+            if (row < 0 || col < 0) {
+                return;
+            }
             array[row][col] = value;
         });
 

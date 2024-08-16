@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import { type Nullable, Tools } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph, INodePosition, ITextSelectionStyle } from '../../../basics';
 import { RANGE_DIRECTION } from '../../../basics';
 import { getOffsetRectForDom } from '../../../basics/position';
@@ -193,9 +193,9 @@ export function getRangeListFromSelection(
                     tableStartPosition = skeleton.findNodePositionByCharIndex(tableStart + 3, true, segmentId, segmentPage);
                     tableEndPosition = skeleton.findNodePositionByCharIndex(tableEnd - 4, true, segmentId, segmentPage);
 
-                    if (start < tableStart - 1) {
+                    if (start <= tableStart - 1) {
                         const sp = skeleton.findNodePositionByCharIndex(start, true, segmentId, segmentPage);
-                        const ep = skeleton.findNodePositionByCharIndex(tableStart - 1, true, segmentId, segmentPage);
+                        const ep = skeleton.findNodePositionByCharIndex(tableStart - 1, false, segmentId, segmentPage);
                         const ap = direction ? sp : ep;
                         const fp = direction ? ep : sp;
 
@@ -222,12 +222,12 @@ export function getRangeListFromSelection(
 
             if ((end >= startIndex && end <= endIndex) || endInTable) {
                 const sp = skeleton.findNodePositionByCharIndex(start, true, segmentId, segmentPage);
-                const ep = skeleton.findNodePositionByCharIndex(end, true, segmentId, segmentPage);
+                const ep = skeleton.findNodePositionByCharIndex(end, !endInTable, segmentId, segmentPage);
                 const ap = direction ? sp : ep;
                 const fp = direction ? ep : sp;
 
                 // Can not create cursor(startOffset === endOffset) and rect range at the same time.
-                if (rectRanges.length && start === end) {
+                if (rectRanges.length && Tools.diffValue(ap, fp)) {
                     continue;
                 }
 

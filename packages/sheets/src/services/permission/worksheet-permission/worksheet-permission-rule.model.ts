@@ -24,7 +24,7 @@ type IRuleChangeType = 'add' | 'set' | 'delete';
 export class WorksheetProtectionRuleModel {
     /**
      *
-     * Map<unitId, Map<subUnitId, Map<ruleId, IWorksheetProtectionRule>>>
+     * Map<unitId, Map<subUnitId, Map<subUnitId, IWorksheetProtectionRule>>>
      */
     private _model: IModel = new Map();
 
@@ -131,5 +131,15 @@ export class WorksheetProtectionRuleModel {
 
     resetOrder() {
         this._resetOrder.next(Math.random());
+    }
+
+    getTargetByPermissionId(unitId: string, permissionId: string) {
+        const subUnitMap = this._model.get(unitId);
+        if (!subUnitMap) return null;
+        for (const [subUnitId, rule] of subUnitMap) {
+            if (rule.permissionId === permissionId) {
+                return [unitId, subUnitId];
+            }
+        }
     }
 }

@@ -154,7 +154,7 @@ export const SheetPermissionDialog = () => {
                 objectType: UnitObject.Worksheet,
                 objectID: permissionId,
                 unitID: unitId,
-                strategies: [],
+                strategies: actions,
                 share: undefined,
                 name: '',
                 scope: {

@@ -158,4 +158,17 @@ export class RangeProtectionRuleModel {
         }
         return id;
     }
+
+    getTargetByPermissionId(unitId: string, permissionId: string) {
+        const subUnitMap = this._model.get(unitId);
+        if (!subUnitMap) return null;
+        for (const [subUnitId, ruleMap] of subUnitMap) {
+            for (const rule of ruleMap.values()) {
+                if (rule.permissionId === permissionId) {
+                    return [unitId, subUnitId];
+                }
+            }
+        }
+        return null;
+    }
 }

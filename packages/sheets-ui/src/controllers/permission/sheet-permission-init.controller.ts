@@ -399,4 +399,64 @@ export class SheetPermissionInitController extends Disposable {
         }
         ));
     }
+
+    public refreshPermission(unitId: string, permissionId: string) {
+        const sheetRuleItem = this._worksheetProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
+        if (sheetRuleItem) {
+            const [_, subUnitId] = sheetRuleItem;
+            this._authzIoService.allowed({
+                objectID: permissionId,
+                unitID: unitId,
+                objectType: UnitObject.Worksheet,
+                actions: [UnitAction.Edit, UnitAction.View],
+            }).then((actionList) => {
+                getAllWorksheetPermissionPoint().forEach((F) => {
+                    const instance = new F(unitId, subUnitId);
+                    const unitActionName = instance.subType;
+                    const action = actionList.find((item) => item.action === unitActionName);
+                    if (action) {
+                        this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+                    }
+                });
+            });
+        }
+        const sheetPointItem = this._worksheetProtectionPointRuleModel.getTargetByPermissionId(unitId, permissionId);
+        if (sheetPointItem) {
+            const [_, subUnitId] = sheetPointItem;
+            this._authzIoService.allowed({
+                objectID: permissionId,
+                unitID: unitId,
+                objectType: UnitObject.Worksheet,
+                actions: defaultWorksheetPermissionPoint,
+            }).then((actionList) => {
+                getAllWorksheetPermissionPointByPointPanel().forEach((F) => {
+                    const instance = new F(unitId, subUnitId);
+                    const unitActionName = instance.subType;
+                    const action = actionList.find((item) => item.action === unitActionName);
+                    if (action) {
+                        this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+                    }
+                });
+            });
+        }
+        const rangeRuleItem = this._rangeProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
+        if (rangeRuleItem) {
+            const [_, subUnitId] = rangeRuleItem;
+            this._authzIoService.allowed({
+                objectID: permissionId,
+                unitID: unitId,
+                objectType: UnitObject.SelectRange,
+                actions: [UnitAction.Edit, UnitAction.View],
+            }).then((actionList) => {
+                getAllRangePermissionPoint().forEach((F) => {
+                    const instance = new F(unitId, subUnitId, permissionId);
+                    const unitActionName = instance.subType;
+                    const action = actionList.find((item) => item.action === unitActionName);
+                    if (action) {
+                        this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+                    }
+                });
+            });
+        }
+    }
 }

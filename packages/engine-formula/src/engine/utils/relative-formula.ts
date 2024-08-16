@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Rectangle, Tools } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { AbsoluteRefType, Rectangle, Tools } from '@univerjs/core';
 
 import type { LexerTreeBuilder } from '../analysis/lexer-tree-builder';
 import { generateStringWithSequence, sequenceNodeType } from './sequence';
@@ -33,6 +34,16 @@ export function isFormulaTransformable(lexerTreeBuilder: LexerTreeBuilder, formu
     return true;
 }
 
+const getPositionRange = (relativeRange: IRange, originRange: IRange) => {
+    return ({
+        ...(originRange || {}),
+        startRow: ([AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(originRange.startAbsoluteRefType || 0) ? originRange.startRow : relativeRange.startRow + originRange.startRow),
+        endRow: ([AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(originRange.endAbsoluteRefType || 0) ? originRange.endRow : relativeRange.endRow + relativeRange.startRow + originRange.startRow),
+        startColumn: ([AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(originRange.startAbsoluteRefType || 0) ? originRange.startColumn : relativeRange.startColumn + originRange.startColumn),
+        endColumn: ([AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(originRange.endAbsoluteRefType || 0) ? originRange.endColumn : relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn),
+    }) as IRange;
+};
+
 export function transformFormula(lexerTreeBuilder: LexerTreeBuilder, formula: string, originRow: number, originCol: number, targetRow: number, targetCol: number) {
     if (!isFormulaTransformable(lexerTreeBuilder, formula)) {
         return formula;
@@ -48,7 +59,7 @@ export function transformFormula(lexerTreeBuilder: LexerTreeBuilder, formula: st
         ? sequenceNodes.map((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const gridRangeName = deserializeRangeWithSheet(node.token);
-                const newRange = Rectangle.getPositionRange(relativeRange, gridRangeName.range);
+                const newRange = getPositionRange(relativeRange, gridRangeName.range);
                 const newToken = serializeRange(newRange);
                 return {
                     ...node, token: newToken,

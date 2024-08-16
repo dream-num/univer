@@ -18,7 +18,7 @@ import { CustomRangeType, Disposable, ICommandService, ILogService, Inject, IUni
 import type { IInsertCommandParams } from '@univerjs/docs';
 import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/ui';
-import { DocHoverManagerService } from '@univerjs/docs-ui';
+import { DocEventManagerService } from '@univerjs/docs-ui';
 
 import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/commands/doc.command';
 import type { IShowFormulaPopupOperationParams } from '../commands/operations/operation';
@@ -35,7 +35,7 @@ export class DocUniFormulaInputController extends Disposable {
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService,
         @ILogService private readonly _logService: ILogService,
-        @Inject(DocHoverManagerService) private readonly _docHoverManagerSrv: DocHoverManagerService,
+        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
         @Inject(UniFormulaPopupService) private readonly _formulaPopupSrv: UniFormulaPopupService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
@@ -43,7 +43,7 @@ export class DocUniFormulaInputController extends Disposable {
 
         this._initKeyboardListeners();
         this._initCommands();
-        this._initHoverListener();
+        // this._initHoverListener();
     }
 
     private _initCommands(): void {
@@ -91,7 +91,7 @@ export class DocUniFormulaInputController extends Disposable {
     }
 
     private _initHoverListener(): void {
-        this.disposeWithMe(this._docHoverManagerSrv.activeCustomRanges$.subscribe((customRanges) => {
+        this.disposeWithMe(this._docEventManagerService.hoverCustomRanges$.subscribe((customRanges) => {
             const focusedUnit = this._instanceSrv.getFocusedUnit();
 
             if (
@@ -102,7 +102,7 @@ export class DocUniFormulaInputController extends Disposable {
                 return;
             }
 
-            const formulaCustomRange = customRanges.find((range) => range.rangeType === CustomRangeType.UNI_FORMULA);
+            const formulaCustomRange = customRanges.find((range) => range.range.rangeType === CustomRangeType.UNI_FORMULA)?.range;
             if (formulaCustomRange) {
                 const { startIndex, rangeId } = formulaCustomRange;
                 this._logService.debug('[DocUniFormulaController]: activeCustomRanges', customRanges);

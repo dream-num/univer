@@ -16,6 +16,7 @@
 
 import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
 import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
@@ -112,6 +113,9 @@ function getPagePath(page: IDocumentSkeletonPage) {
 }
 
 export class DocumentSkeleton extends Skeleton {
+    private _dirty$ = new Subject<boolean>();
+    readonly dirty$ = this._dirty$.asObservable();
+
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
     private _findLiquid: Liquid = new Liquid();
@@ -156,6 +160,7 @@ export class DocumentSkeleton extends Skeleton {
         // const start = +new Date();
         this._skeletonData = this._createSkeleton(ctx, bounds);
         // console.log('skeleton calculate cost', +new Date() - start);
+        this._dirty$.next(true);
     }
 
     getSkeletonData() {

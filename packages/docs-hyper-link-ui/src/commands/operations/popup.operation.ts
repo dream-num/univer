@@ -81,3 +81,25 @@ export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditP
         return true;
     },
 };
+
+export interface IShowDocHyperLinkInfoPopupOperationParams {
+    linkId: string;
+    segmentId?: string;
+    unitId: string;
+    rangeIndex: number;
+}
+
+export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IShowDocHyperLinkInfoPopupOperationParams> = {
+    type: CommandType.OPERATION,
+    id: 'docs.operation.show-hyper-link-info-popup',
+    handler(accessor, params) {
+        const hyperLinkService = accessor.get(DocHyperLinkPopupService);
+        if (!params) {
+            hyperLinkService.hideInfoPopup();
+            return true;
+        }
+
+        hyperLinkService.showInfoPopup(params);
+        return true;
+    },
+};

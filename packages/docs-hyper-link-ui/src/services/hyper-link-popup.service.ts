@@ -29,7 +29,9 @@ import { DocLinkPopup } from '../views/hyper-link-popup';
 const SKIT_PLACEHOLDER = 2;
 
 export interface ILinkInfo {
-    unitId: string; linkId: string; rangeIndex: number;
+    unitId: string;
+    linkId: string;
+    rangeIndex: number;
 }
 
 export class DocHyperLinkPopupService extends Disposable {

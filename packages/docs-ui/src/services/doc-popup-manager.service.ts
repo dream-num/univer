@@ -57,10 +57,66 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene) {
     };
 }
 
+// write a revert function for transformPosition2Offset
+export function transformOffset2Bound(offsetX: number, offsetY: number, scene: Scene) {
+    const { scaleX, scaleY } = scene.getAncestorScale();
+    const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    if (!viewMain) {
+        return {
+            x: offsetX,
+            y: offsetY,
+        };
+    }
+
+    const { viewportScrollX: actualScrollX, viewportScrollY: actualScrollY } = viewMain;
+
+    const x = offsetX / scaleX + actualScrollX;
+
+    const y = offsetY / scaleY + actualScrollY;
+
+    return {
+        x,
+        y,
+    };
+}
+
 export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
 }
+
+export const calcDocRangePositions = (range: ITextRange, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
+    const { scene, mainComponent, engine } = currentRender;
+    const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
+    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset);
+    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset);
+    const document = mainComponent as Documents;
+
+    if (!endPosition || !startPosition) {
+        return;
+    }
+
+    const documentOffsetConfig = document.getOffsetConfig();
+    const { docsLeft, docsTop } = documentOffsetConfig;
+    const canvasElement = engine.getCanvasElement();
+    const canvasClientRect = canvasElement.getBoundingClientRect();
+    const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+    const { top, left, width } = canvasClientRect; // real width affected by scale
+    const scaleAdjust = width / widthOfCanvas;
+
+    const { scaleX, scaleY } = scene.getAncestorScale();
+    const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
+    const { contentBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
+    const bounds = getLineBounding(contentBoxPointGroup);
+    const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
+        left: (i.left + docsLeft * scaleX) * scaleAdjust + left,
+        right: (i.right + docsLeft * scaleX) * scaleAdjust + left,
+        top: (i.top + docsTop * scaleY) * scaleAdjust + top,
+        bottom: (i.bottom + docsTop * scaleY) * scaleAdjust + top,
+    }));
+
+    return res;
+};
 
 export class DocCanvasPopManagerService extends Disposable {
     constructor(
@@ -130,46 +186,13 @@ export class DocCanvasPopManagerService extends Disposable {
     }
 
     private _createRangePositionObserver(range: ITextRange, currentRender: IRender) {
-        const calc = (): IBoundRectNoAngle[] | undefined => {
-            const { scene, mainComponent, engine } = currentRender;
-            const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
-            const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset);
-            const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset);
-            const document = mainComponent as Documents;
-
-            if (!endPosition || !startPosition) {
-                return;
-            }
-
-            const documentOffsetConfig = document.getOffsetConfig();
-            const { docsLeft, docsTop } = documentOffsetConfig;
-            const canvasElement = engine.getCanvasElement();
-            const canvasClientRect = canvasElement.getBoundingClientRect();
-            const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
-            const { top, left, width } = canvasClientRect; // real width affected by scale
-            const scaleAdjust = width / widthOfCanvas;
-
-            const { scaleX, scaleY } = scene.getAncestorScale();
-            const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-            const { contentBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
-            const bounds = getLineBounding(contentBoxPointGroup);
-            const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
-                left: (i.left + docsLeft * scaleX) * scaleAdjust + left,
-                right: (i.right + docsLeft * scaleX) * scaleAdjust + left,
-                top: (i.top + docsTop * scaleY) * scaleAdjust + top,
-                bottom: (i.bottom + docsTop * scaleY) * scaleAdjust + top,
-            }));
-
-            return res;
-        };
-
-        const positions = calc() ?? [];
+        const positions = calcDocRangePositions(range, currentRender) ?? [];
         const positions$ = new BehaviorSubject(positions);
         const disposable = new DisposableCollection();
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetDocZoomRatioOperation.id) {
-                const position = calc();
+                const position = calcDocRangePositions(range, currentRender);
                 if (position) {
                     positions$.next(position);
                 }
@@ -179,7 +202,7 @@ export class DocCanvasPopManagerService extends Disposable {
         const viewMain = currentRender.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (viewMain) {
             disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => {
-                const position = calc();
+                const position = calcDocRangePositions(range, currentRender);
                 if (position) {
                     positions$.next(position);
                 }

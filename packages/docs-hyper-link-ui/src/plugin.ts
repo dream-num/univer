@@ -26,6 +26,7 @@ import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-se
 import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { DocHyperLinkClipboardController } from './controllers/doc-hyper-link-clipboard.controller';
 import { DocHyperLinkCustomRangeController } from './controllers/doc-hyper-link-custom-range.controller';
+import { DocHyperLinkHoverRenderController } from './controllers/render-controllers/hyper-link-hover.render-controller';
 
 @DependentOn(UniverDocsHyperLinkPlugin)
 export class UniverDocsHyperLinkUIPlugin extends Plugin {
@@ -63,8 +64,11 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
     }
 
     private _initRenderModule() {
-        [DocHyperLinkRenderController].forEach((dep) => {
-            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep as unknown as Dependency);
+        ([
+            [DocHyperLinkRenderController],
+            [DocHyperLinkHoverRenderController],
+        ] as Dependency[]).forEach((dep) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep);
         });
     }
 }

@@ -452,8 +452,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'dòng tiền', detail: 'Một mảng hoặc tham chiếu đến một ô chứa số. Các giá trị này đại diện cho một loạt chi phí định kỳ (giá trị âm) và lợi ích (giá trị dương).\n1.Các giá trị phải chứa ít nhất một giá trị dương và một giá trị âm để tính tỷ suất hoàn vốn nội bộ được sửa đổi. Ngược lại, MIRR trả về #DIV/0! .\n2.Tuy nhiên, nếu mảng hoặc tham số tham chiếu chứa văn bản, giá trị logic hoặc ô trống thì các giá trị đó sẽ bị bỏ qua; tuy nhiên, các ô chứa giá trị 0 sẽ được tính.' },
+            financeRate: { name: 'Lãi suất tài trợ', detail: 'Lãi suất trả cho các khoản tiền được sử dụng trong dòng tiền.' },
+            reinvestRate: { name: 'tỷ suất sinh lợi tái đầu tư', detail: 'Tỷ suất lợi nhuận của dòng tiền tái đầu tư.' },
         },
     },
     NOMINAL: {
@@ -777,8 +778,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'dòng tiền', detail: 'Một chuỗi các dòng tiền tương ứng với thời điểm thanh toán theo ngày. Khoản trả trước là tùy chọn và liên quan đến chi phí hoặc khoản thanh toán khi bắt đầu đầu tư. Nếu giá trị đầu tiên là chi phí hoặc khoản thanh toán thì giá trị đó phải âm. Tất cả các khoản thanh toán tiếp theo được chiết khấu trên cơ sở 365 ngày/năm. Chuỗi giá trị phải chứa ít nhất một giá trị dương và một giá trị âm.' },
+            dates: { name: 'bảng ngày tháng', detail: 'Lịch trình ngày thanh toán tương ứng với các khoản thanh toán dòng tiền. Ngày tháng có thể xuất hiện theo bất kỳ thứ tự nào.' },
+            guess: { name: 'giá trị ước tính', detail: 'Ước tính kết quả của phép tính hàm XIRR.' },
         },
     },
     XNPV: {

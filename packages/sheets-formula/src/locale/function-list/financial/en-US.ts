@@ -452,8 +452,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'values', detail: 'An array or a reference to cells that contain numbers. These numbers represent a series of payments (negative values) and income (positive values) occurring at regular periods.\n1.Values must contain at least one positive value and one negative value to calculate the modified internal rate of return. Otherwise, MIRR returns the #DIV/0! error value.\n2.If an array or reference argument contains text, logical values, or empty cells, those values are ignored; however, cells with the value zero are included.' },
+            financeRate: { name: 'finance_rate', detail: 'The interest rate you pay on the money used in the cash flows.' },
+            reinvestRate: { name: 'reinvest_rate', detail: 'The interest rate you receive on the cash flows as you reinvest them.' },
         },
     },
     NOMINAL: {
@@ -805,8 +806,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'values', detail: 'A series of cash flows that corresponds to a schedule of payments in dates. The first payment is optional and corresponds to a cost or payment that occurs at the beginning of the investment. If the first value is a cost or payment, it must be a negative value. All succeeding payments are discounted based on a 365-day year. The series of values must contain at least one positive and one negative value.' },
+            dates: { name: 'dates', detail: 'A schedule of payment dates that corresponds to the cash flow payments. Dates may occur in any order.' },
+            guess: { name: 'guess', detail: 'A number that you guess is close to the result of XIRR.' },
         },
     },
     XNPV: {

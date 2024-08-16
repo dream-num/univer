@@ -40,12 +40,14 @@ import { Ipmt } from './ipmt';
 import { Irr } from './irr';
 import { Ispmt } from './ispmt';
 import { Mduration } from './mduration';
+import { Mirr } from './mirr';
 import { Nominal } from './nominal';
 import { Nper } from './nper';
 import { Pmt } from './pmt';
 import { Ppmt } from './ppmt';
 import { Pv } from './pv';
 import { Rate } from './rate';
+import { Xirr } from './xirr';
 
 export const functionFinancial = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
@@ -73,10 +75,12 @@ export const functionFinancial = [
     [Irr, FUNCTION_NAMES_FINANCIAL.IRR],
     [Ispmt, FUNCTION_NAMES_FINANCIAL.ISPMT],
     [Mduration, FUNCTION_NAMES_FINANCIAL.MDURATION],
+    [Mirr, FUNCTION_NAMES_FINANCIAL.MIRR],
     [Nominal, FUNCTION_NAMES_FINANCIAL.NOMINAL],
     [Nper, FUNCTION_NAMES_FINANCIAL.NPER],
     [Pmt, FUNCTION_NAMES_FINANCIAL.PMT],
     [Ppmt, FUNCTION_NAMES_FINANCIAL.PPMT],
     [Pv, FUNCTION_NAMES_FINANCIAL.PV],
     [Rate, FUNCTION_NAMES_FINANCIAL.RATE],
+    [Xirr, FUNCTION_NAMES_FINANCIAL.XIRR],
 ];

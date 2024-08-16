@@ -169,3 +169,13 @@ export function calculateIPMT(rate: number, per: number, nper: number, pv: numbe
 
     return result * rate;
 }
+
+export function calculateNpv(rate: number, values: number[]): number {
+    let res = 0;
+
+    for (let i = 1; i <= values.length; i++) {
+        res += values[i - 1] / ((1 + rate) ** i);
+    }
+
+    return res;
+}

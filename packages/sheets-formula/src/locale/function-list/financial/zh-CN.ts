@@ -452,8 +452,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '现金流', detail: '数组或对包含数字的单元格的引用。 这些数值代表一系列定期支出（负值）和收益（正值）。\n1.Values 必须至少包含一个正值和一个负值，才能计算修改后的内部回报率。 否则，MIRR 返回 #DIV/0！ 。\n2.如果数组或引用参数包含文本、逻辑值或空白单元格，则这些值将被忽略；但包含零值的单元格将计算在内。' },
+            financeRate: { name: '融资利率', detail: '现金流中使用的资金支付的利率。' },
+            reinvestRate: { name: '再投资收益率', detail: '将现金流再投资的收益率。' },
         },
     },
     NOMINAL: {
@@ -805,8 +806,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '现金流', detail: '与 dates 中的支付时间相对应的一系列现金流。 首期支付是可选的，并与投资开始时的成本或支付有关。 如果第一个值是成本或支付，则它必须是负值。 所有后续支付都基于 365 天/年贴现。 值系列中必须至少包含一个正值和一个负值。' },
+            dates: { name: '日期表', detail: '与现金流支付相对应的支付日期表。 日期可以按任意顺序出现。' },
+            guess: { name: '估计值', detail: '对函数 XIRR 计算结果的估计值。' },
         },
     },
     XNPV: {

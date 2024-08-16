@@ -20,6 +20,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { calculateNpv } from '../../../basics/financial';
 
 export class Irr extends BaseFunction {
     override minParams = 1;
@@ -81,7 +82,7 @@ export class Irr extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = this._irrResult(_values, guessValue);
+        const result = this._getResult(_values, guessValue);
 
         if (typeof result !== 'number') {
             return result as ErrorValueObject;
@@ -144,17 +145,7 @@ export class Irr extends BaseFunction {
         };
     }
 
-    private _npv(values: number[], guess: number): number {
-        let res = 0;
-
-        for (let i = 1; i <= values.length; i++) {
-            res += values[i - 1] / ((1 + guess) ** i);
-        }
-
-        return res;
-    }
-
-    private _irrResult(values: number[], guess: number): number | ErrorValueObject {
+    private _getResult(values: number[], guess: number): number | ErrorValueObject {
         const g_Eps = 1e-7;
         const nIM = 500;
 
@@ -164,7 +155,7 @@ export class Irr extends BaseFunction {
         let _guess = guess;
 
         while (eps > g_Eps && nMC < nIM) {
-            xN = _guess - this._npv(values, _guess) / ((this._npv(values, _guess + g_Eps) - this._npv(values, _guess - g_Eps)) / (2 * g_Eps));
+            xN = _guess - calculateNpv(_guess, values) / ((calculateNpv(_guess + g_Eps, values) - calculateNpv(_guess - g_Eps, values)) / (2 * g_Eps));
             nMC++;
             eps = Math.abs(xN - _guess);
             _guess = xN;
@@ -201,8 +192,8 @@ export class Irr extends BaseFunction {
         for (i = 0; i < nIM; i++) {
             xBegin = low <= min ? min + g_Eps : low;
             xEnd = high >= max ? max - g_Eps : high;
-            x = this._npv(values, xBegin);
-            y = this._npv(values, xEnd);
+            x = calculateNpv(xBegin, values);
+            y = calculateNpv(xEnd, values);
 
             if (x * y <= 0) {
                 break;
@@ -221,8 +212,8 @@ export class Irr extends BaseFunction {
         xBegin = xBegin as number;
         xEnd = xEnd as number;
 
-        let fXbegin = this._npv(values, xBegin);
-        const fXend = this._npv(values, xEnd);
+        let fXbegin = calculateNpv(xBegin, values);
+        const fXend = calculateNpv(xEnd, values);
         let fXi;
         let xI;
 
@@ -236,7 +227,7 @@ export class Irr extends BaseFunction {
 
         do {
             xI = xBegin + (xEnd - xBegin) / 2;
-            fXi = this._npv(values, xI);
+            fXi = calculateNpv(xI, values);
 
             if (fXbegin * fXi < 0) {
                 xEnd = xI;
@@ -244,7 +235,7 @@ export class Irr extends BaseFunction {
                 xBegin = xI;
             }
 
-            fXbegin = this._npv(values, xBegin);
+            fXbegin = calculateNpv(xBegin, values);
             currentIter++;
         } while (Math.abs(fXi) > g_Eps && currentIter < nIM);
 

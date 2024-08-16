@@ -452,8 +452,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '現金流', detail: '這是陣列或儲存格參照，其中包含數字。 這些數字代表定期發生的一系列支出 (負值) 和收入 (正值)。\n1.Values 必須至少包含一個正值和一個負值，以計算經修改的內部報酬率。 否則，MIRR 會傳回 #DIV/0! 的錯誤值。\n2.如果陣列或參照引數包含文字、邏輯值或空白儲存格，則忽略這些數值；但包含零值儲存格。' },
+            financeRate: { name: '融資利率', detail: '這是投入資金的融資利率。' },
+            reinvestRate: { name: '轉投資報酬率', detail: '這是各期收入淨額的轉投資報酬率。' },
         },
     },
     NOMINAL: {
@@ -804,8 +805,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '現金流', detail: '這是一系列與 dates 的付款日期對應的現金流。第一次付款是選擇性的，而且與投資開始時的成本和付款對應。如果第一個值是成本或付款，則它必須是負值。而之後的付款都會以一年 365 天為基礎來折算。序列值必須至少包括一個正值和一個負值。' },
+            dates: { name: '日期表', detail: '這是一系列與現金流對應的付款日期。日期可能會以任何順序發生。' },
+            guess: { name: '猜測值', detail: '這是您所猜測接近 XIRR 結果的數字。' },
         },
     },
     XNPV: {

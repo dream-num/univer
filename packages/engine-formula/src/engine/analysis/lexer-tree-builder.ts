@@ -1192,7 +1192,6 @@ export class LexerTreeBuilder extends Disposable {
             } else if (
                 currentString === matchToken.DOUBLE_QUOTATION &&
                 this.isSingleQuotationClose() &&
-                this.isBracesClose() &&
                 this.isSquareBracketClose()
             ) {
                 if (this.isDoubleQuotationClose()) {
@@ -1373,7 +1372,8 @@ export class LexerTreeBuilder extends Disposable {
                 this._checkSimilarErrorToken(currentString, cur, formulaStringArray) &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose() &&
-                this.isSquareBracketClose()
+                this.isSquareBracketClose() &&
+                this.isBracesClose()
             ) {
                 this._pushNodeToChildren(this._segment);
 
@@ -1398,7 +1398,8 @@ export class LexerTreeBuilder extends Disposable {
                 OPERATOR_TOKEN_SET.has(currentString) &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose() &&
-                this.isSquareBracketClose()
+                this.isSquareBracketClose() &&
+                this.isBracesClose()
             ) {
                 let trimSegment = this._segment.trim();
 

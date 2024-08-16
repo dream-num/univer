@@ -72,7 +72,7 @@ class WatchRange extends Disposable {
         // move range don't have subUnitId on params
         if (mutation.id === MoveRangeMutation.id) {
             const params = mutation.params as unknown as IMoveRangeMutationParams;
-            if (params.from.subUnitId !== this._subUnitId && params.to.subUnitId !== this._subUnitId) {
+            if (params.from.subUnitId !== this._subUnitId || params.to.subUnitId !== this._subUnitId) {
                 return;
             }
         } else if (mutation.params?.subUnitId !== this._subUnitId) {

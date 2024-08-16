@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType, DocumentDataModel, ICustomRange, ITextRange } from '@univerjs/core';
-import { Disposable, fromEventSubject, ILogService, Inject } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IParagraph, ITextRange } from '@univerjs/core';
+import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IMouseEvent, IPointerEvent, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { getLineBounding, NodePositionConvertToCursor, pxToNum, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { distinctUntilChanged, filter, Subject, throttleTime } from 'rxjs';
 import { transformOffset2Bound } from './doc-popup-manager.service';
 
-interface ICustomRangeLayout {
+interface ICustomRangeBound {
     customRange: ICustomRange;
     rects: IBoundRectNoAngle[];
     segmentId?: string;
+}
+
+interface IBulletBound {
+    rect: IBoundRectNoAngle;
+    segmentId?: string;
+    paragraph: IParagraph;
 }
 
 const calcDocRangePositions = (range: ITextRange, documents: Documents, skeleton: DocumentSkeleton): IBoundRectNoAngle[] | undefined => {
@@ -51,8 +57,19 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private _clickCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string }>();
     readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();
 
-    private _dirty = true;
-    private _customRangeLayouts: ICustomRangeLayout[] = [];
+    private _customRangeDirty = true;
+    private _bulletDirty = true;
+
+    /**
+     * cache the bounding of custom ranges,
+     * it will be updated when the doc-skeleton is recalculated
+     */
+    private _customRangeBounds: ICustomRangeBound[] = [];
+    /**
+     * cache the bounding of bullets,
+     * it will be updated when the doc-skeleton is recalculated
+     */
+    private _bulletBounds: IBulletBound[] = [];
 
     private get _skeleton() {
         return this._docSkeletonManagerService.getSkeleton();
@@ -68,22 +85,27 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     ) {
         super();
 
+        this._initResetDirty();
         this._initCustomRanges();
     }
 
-    private _initCustomRanges() {
+    private _initResetDirty() {
         this.disposeWithMe(this._skeleton.dirty$.subscribe(() => {
-            this._dirty = true;
+            this._customRangeDirty = true;
+            this._bulletDirty = true;
         }));
 
         this.disposeWithMe(
             fromEventSubject(this._context.engine.onTransformChange$).pipe(
                 filter((evt) => evt.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize)
             ).subscribe(() => {
-                this._dirty = true;
+                this._customRangeDirty = true;
+                this._bulletDirty = true;
             })
         );
+    }
 
+    private _initCustomRanges() {
         this.disposeWithMe(fromEventSubject(this._context.scene.onPointerMove$).pipe(throttleTime(16)).subscribe((evt) => {
             this._hoverCustomRanges$.next(
                 this._calcActiveRanges(evt)
@@ -98,9 +120,9 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         }));
     }
 
-    private _buildCustomRangeLayoutsBySegment(segmentId?: string) {
+    private _buildCustomRangeBoundsBySegment(segmentId?: string) {
         const customRanges = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
-        const layouts: ICustomRangeLayout[] = [];
+        const layouts: ICustomRangeBound[] = [];
         customRanges.forEach((range) => {
             const textRange = {
                 startOffset: range.startIndex,
@@ -128,27 +150,28 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         return layouts;
     }
 
-    private _buildCustomRangeLayouts() {
-        if (!this._dirty) {
+    private _buildCustomRangeBounds() {
+        if (!this._customRangeDirty) {
             return;
         }
+        this._customRangeDirty = false;
 
         const headerKeys = this._context.unit.headerModelMap.keys();
         const footerKeys = this._context.unit.footerModelMap.keys();
 
-        this._customRangeLayouts = [
-            ...this._buildCustomRangeLayoutsBySegment(),
-            ...Array.from(headerKeys).flatMap((key) => this._buildCustomRangeLayoutsBySegment(key)),
-            ...Array.from(footerKeys).flatMap((key) => this._buildCustomRangeLayoutsBySegment(key)),
+        this._customRangeBounds = [
+            ...this._buildCustomRangeBoundsBySegment(),
+            ...Array.from(headerKeys).flatMap((key) => this._buildCustomRangeBoundsBySegment(key)),
+            ...Array.from(footerKeys).flatMap((key) => this._buildCustomRangeBoundsBySegment(key)),
         ];
     }
 
     private _calcActiveRanges(evt: IPointerEvent | IMouseEvent) {
-        this._buildCustomRangeLayouts();
+        this._buildCustomRangeBounds();
 
         const { offsetX, offsetY } = evt;
         const { x, y } = transformOffset2Bound(offsetX, offsetY, this._context.scene);
-        const matchedRanges = this._customRangeLayouts.filter((layout) => {
+        const matchedRanges = this._customRangeBounds.filter((layout) => {
             return layout.rects.some((rect) => {
                 const { left, right, top, bottom } = rect;
                 if (x >= left && x <= right && y >= top && y <= bottom) {

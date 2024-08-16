@@ -174,7 +174,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         protected readonly _renderManagerService: IRenderManagerService
     ) {
         super();
-        this._resetStyle();
+        this._resetSelectionStyle();
         this._initMoving();
     }
 
@@ -188,12 +188,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }));
     }
 
-    protected _setStyle(style: ISelectionStyle) {
+    protected _setSelectionStyle(style: ISelectionStyle) {
         this._selectionStyle = style;
     }
 
-    protected _resetStyle() {
-        this._setStyle(getNormalSelectionStyle(this._themeService));
+    protected _resetSelectionStyle() {
+        this._setSelectionStyle(getNormalSelectionStyle(this._themeService));
     }
 
     /** @deprecated This should not be provided by the selection render service. */
@@ -212,19 +212,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      *
      * init
      * selectionController@_initSkeletonChangeListener --> selectionManagerService.add --> selectionManagerService._selectionMoveEnd$ --> this.addControlToCurrentByRangeData
-     *
      * selectionMoveEnd$ --> this.addSelectionControlBySelectionData
      *
      *
-     *
-     * pointer
+     * pointer event
      * engine@_pointerDownEvent --> spreadsheet?.onPointerDownObserve --> eventTrigger --> scene@disableEvent() --> then scene.input-manager currentObject is always scene until scene@enableEvent.
      * engine@_pointerUpEvent --> scene.input-manager@_onPointerUp --> this._selectionMoveEnd$ --> _selectionManagerService.selectionMoveEnd$ --> this.addControlToCurrentByRangeData
      *
-     * but in mobile, we do not call disableEvent() in eventTrigger,
+     * but in mobile version, we do not call disableEvent() in eventTrigger,
      * so pointerup --> scene.input-manager currentObject is spreadsheet --> this.eventTrigger
      *
-     *
+     * for row/col selection.
      * columnHeader pointerup$ --> selectionMoveEnd$ --> selectionManagerService@setSelections -->
      * selectionManagerService@_emitOnEnd -->
      * _workbookSelections.selectionMoveEnd$ --> _addSelectionControlBySelectionData
@@ -310,11 +308,19 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         return this._skeleton;
     }
 
+    /**
+     * generate selectionData from this._selectionControls.model
+     * @returns ISelectionWithCoordAndStyle{range, primary, style}
+     */
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[] {
         const selectionControls = this._selectionControls;
         const [unitId, sheetId] = this._skeleton.getLocation();
         return selectionControls.map((control) => {
             const v = control.getValue();
+            if (v.primaryWithCoord && (v.primaryWithCoord.actualRow < v.rangeWithCoord.startRow || v.primaryWithCoord.actualRow > v.rangeWithCoord.endRow)) {
+                // debugger;
+            }
+
             v.rangeWithCoord.sheetId = sheetId;
             v.rangeWithCoord.unitId = unitId;
             return v;
@@ -551,6 +557,15 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         });
     }
 
+    /**
+     * init pointer move listener, bind in each pointer down, unbind in each pointer up
+     * @param viewportMain
+     * @param activeSelectionControl
+     * @param rangeType
+     * @param scrollTimerType
+     * @param moveStartPosX
+     * @param moveStartPosY
+     */
     // eslint-disable-next-line max-lines-per-function
     protected _setupPointerMoveListener(
         viewportMain: Nullable<Viewport>,
@@ -732,7 +747,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     /**
      * When mousedown and mouseup need to go to the coordination and undo stack, when mousemove does not need to go to the coordination and undo stack
      */
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     protected _moving(
         offsetX: number,
         offsetY: number,
@@ -823,7 +838,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected _updateSelectionControlRange(control: SelectionControl, newSelectionRange: IRangeWithCoord, highlight: Nullable<ISelectionCellWithMergeInfo>) {
         const skeleton = this._skeleton;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        control.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight, this._selectionStyle, !highlight ? null : highlight);
+
+        // prompt controller get activeControls and then control.updateStyle, there are multiple style datas!!!   this._selectionStyle
+        control.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight, null, !highlight ? null : highlight);
     }
 
     protected _clearUpdatingListeners() {

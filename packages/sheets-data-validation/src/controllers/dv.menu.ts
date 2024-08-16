@@ -30,7 +30,7 @@ export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem {
         id: DATA_VALIDATION_MENU_ID,
         type: MenuItemType.SUBITEMS,
         positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        group: MenuGroup.TOOLBAR_FORMAT,
         icon: DataValidationIcon,
         tooltip: 'dataValidation.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),

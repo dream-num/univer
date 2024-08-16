@@ -153,12 +153,23 @@ export class SelectionRenderModel implements IRangeWithCoord {
         if (rangeType) {
             this._rangeType = rangeType;
         }
-
+        if (currentCell) {
+            if (currentCell.actualRow < startRow || currentCell.actualRow > endRow) {
+                // debugger;
+            }
+        }
         this.setCurrentCell(currentCell);
     }
 
+    /**
+     * set primary cell
+     * @param currentCell
+     */
     setCurrentCell(currentCell: Nullable<ISelectionCellWithMergeInfo>) {
         if (currentCell) {
+            if (currentCell.actualRow < this._startRow || currentCell.actualRow > this._endRow) {
+                // debugger;
+            }
             this._primary = currentCell;
         }
     }

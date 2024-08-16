@@ -25,6 +25,8 @@ import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/r
 import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
 import type { SheetsSelectionsService } from '../selections/selection-manager.service';
+import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
+import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import type {
     EffectRefRangeParams,
     IDeleteRangeMoveLeftCommand,
@@ -966,6 +968,11 @@ export const handleDefaultRangeChangeWithEffectRefCommands = (range: IRange, com
 };
 
 export const handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SheetsSelectionsService }) => {
+    const skipCommands = [DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id];
+    if (skipCommands.includes(commandInfo.id)) {
+        return handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
+    }
+
     const effectRanges = getEffectedRangesOnCommand(commandInfo as EffectRefRangeParams, deps);
     if (effectRanges.some((effectRange) => Rectangle.intersects(effectRange, range))) {
         return handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
@@ -1124,7 +1131,7 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
     }
 }
 
-// eslint-disable-next-line max-lines-per-function
+// eslint-disable-next-line max-lines-per-function, complexity
 export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: { selectionManagerService: SheetsSelectionsService }) {
     const { selectionManagerService } = deps;
     switch (command.id) {
@@ -1250,7 +1257,7 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
 
         case MoveRangeMutation.id: {
             const params = mutation.params as IMoveRangeMutationParams;
-            return [new ObjectMatrix(params.from).getRange(), new ObjectMatrix(params.to).getRange()];
+            return [new ObjectMatrix(params.from.value).getRange(), new ObjectMatrix(params.to.value).getRange()];
         }
         case InsertColMutation.id: {
             const params = mutation.params as IInsertColMutationParams;

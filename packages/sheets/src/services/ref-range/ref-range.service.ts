@@ -34,6 +34,8 @@ import {
 import { SheetsSelectionsService } from '../selections/selection-manager.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
+import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
+import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import type { EffectRefRangeParams } from './type';
 import { EffectRefRangId } from './type';
 import { adjustRangeOnMutation, getEffectedRangesOnMutation } from './util';
@@ -64,12 +66,23 @@ class WatchRange extends Disposable {
     }
 
     onMutation(mutation: IMutationInfo<ISheetCommandSharedParams>) {
-        if (mutation.params?.unitId !== this._unitId || mutation.params?.subUnitId !== this._subUnitId) {
+        if (mutation.params?.unitId !== this._unitId) {
             return;
         }
+        // move range don't have subUnitId on params
+        if (mutation.id === MoveRangeMutation.id) {
+            const params = mutation.params as unknown as IMoveRangeMutationParams;
+            if (params.from.subUnitId !== this._subUnitId || params.to.subUnitId !== this._subUnitId) {
+                return;
+            }
+        } else if (mutation.params?.subUnitId !== this._subUnitId) {
+            return;
+        }
+
         if (!this._range) {
             return;
         }
+
         if (this._skipIntersects) {
             const effectRanges = getEffectedRangesOnMutation(mutation);
             if (effectRanges?.some((effectRange) => Rectangle.intersects(effectRange, this._range!))) {

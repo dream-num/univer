@@ -18,10 +18,10 @@ import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univ
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { ERROR_TYPE_SET, ErrorType } from '@univerjs/engine-formula';
+import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 import { CUSTOM_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
-import { getFormulaCellData, getFormulaResult } from '../utils/formula';
+import { getFormulaCellData } from '../utils/formula';
 
 function isLegalFormulaResult(res: string) {
     return !(ERROR_TYPE_SET as Set<string>).has(res);

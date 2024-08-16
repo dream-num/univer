@@ -29,6 +29,7 @@ export const TabCommand: ICommand<ITabCommandParams> = {
     async handler(accessor, params) {
         const autoFormatService = accessor.get(DocAutoFormatService);
         const mutations = autoFormatService.onAutoFormat(TabCommand.id, params);
+
         return (await sequenceExecuteAsync(mutations, accessor.get(ICommandService))).result;
     },
 };

@@ -16,7 +16,8 @@
 
 import { Disposable, Inject, LifecycleStages, OnLifecycle, QuickListTypeMap } from '@univerjs/core';
 import type { ITabCommandParams } from '@univerjs/docs';
-import { AfterSpaceCommand, BreakLineCommand, ChangeListNestingLevelCommand, ChangeListNestingLevelType, DocAutoFormatService, EnterCommand, ListOperationCommand, QuickListCommand, TabCommand } from '@univerjs/docs';
+import { AfterSpaceCommand, BreakLineCommand, ChangeListNestingLevelCommand, ChangeListNestingLevelType, DocAutoFormatService, DocTableTabCommand, EnterCommand, ListOperationCommand, QuickListCommand, TabCommand } from '@univerjs/docs';
+import { isInSameTableCell } from '@univerjs/engine-render';
 import type { Nullable } from 'vitest';
 
 @OnLifecycle(LifecycleStages.Rendered, DocAutoFormatController)
@@ -49,7 +50,7 @@ export class DocAutoFormatController extends Disposable {
                             return false;
                         }
                         return true;
-                    } else if (paragraphs.length > 1) {
+                    } else if (paragraphs.length > 1 && paragraphs.some((p) => p.bullet)) {
                         return true;
                     }
                     return false;
@@ -64,6 +65,39 @@ export class DocAutoFormatController extends Disposable {
                         },
                     }];
                 },
+                priority: 100,
+            })
+        );
+
+        this.disposeWithMe(
+            this._docAutoFormatService.registerAutoFormat({
+                id: TabCommand.id,
+                match: (context) => {
+                    const { selection } = context;
+
+                    const { startNodePosition, endNodePosition } = selection;
+
+                    if (startNodePosition && endNodePosition && isInSameTableCell(startNodePosition, endNodePosition)) {
+                        return true;
+                    }
+
+                    if (startNodePosition && !endNodePosition && startNodePosition.path.indexOf('cells') > -1) {
+                        return true;
+                    }
+
+                    return false;
+                },
+
+                getMutations(context) {
+                    const params = context.commandParams as Nullable<ITabCommandParams>;
+                    return [{
+                        id: DocTableTabCommand.id,
+                        params: {
+                            shift: !!params?.shift,
+                        },
+                    }];
+                },
+                priority: 99,
             })
         );
     }

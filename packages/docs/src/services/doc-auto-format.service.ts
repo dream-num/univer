@@ -17,11 +17,12 @@
 import type { DocumentDataModel, ICommandInfo, ICustomRange, IDisposable, IParagraph, IParagraphRange, ITextRange, Nullable } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { getCustomRangesIntesetsWithRange } from '../basics/custom-range';
+import type { ITextActiveRange } from './text-selection-manager.service';
 import { TextSelectionManagerService } from './text-selection-manager.service';
 
 export interface IAutoFormatContext {
     unit: DocumentDataModel;
-    selection: ITextRange;
+    selection: ITextActiveRange;
     /**
      * is selection at doc body
      */
@@ -78,7 +79,7 @@ function getParagraphsInRange(activeRange: ITextRange, paragraphs: IParagraph[])
 }
 
 /**
- * service for auto-formating, handle shortcut like `Space` or `Tab`
+ * service for auto-formatting, handle shortcut like `Space` or `Tab`.
  */
 export class DocAutoFormatService extends Disposable {
     private _matches: Map<string, IAutoFormat[]> = new Map();
@@ -110,7 +111,7 @@ export class DocAutoFormatService extends Disposable {
     }
 
     onAutoFormat(id: string, params: Nullable<object>): ICommandInfo[] {
-        const autoForamts = this._matches.get(id) ?? [];
+        const autoFormats = this._matches.get(id) ?? [];
         const unit = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const selection = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
@@ -126,7 +127,7 @@ export class DocAutoFormatService extends Disposable {
                 commandParams: params,
             };
 
-            const matched = autoForamts.find((i) => i.match(context));
+            const matched = autoFormats.find((i) => i.match(context));
             return matched?.getMutations(context) ?? [];
         }
 

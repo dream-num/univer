@@ -180,6 +180,30 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
     });
 }
 
+function disableMenuWhenNoDocRange(accessor: IAccessor): Observable<boolean> {
+    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+    return new Observable((subscriber) => {
+        const subscription = textSelectionManagerService.textSelection$.subscribe((selection) => {
+            if (selection == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            const { textRanges, rectRanges } = selection;
+
+            if (textRanges.length === 0 && rectRanges.length === 0) {
+                subscriber.next(true);
+                return;
+            }
+
+            subscriber.next(false);
+        });
+
+        return () => subscription.unsubscribe();
+    });
+}
+
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
 
@@ -212,6 +236,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -248,6 +273,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -284,6 +310,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -320,6 +347,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -355,6 +383,7 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -390,6 +419,7 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -434,6 +464,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             subscriber.next(defaultValue);
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -479,6 +510,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -515,6 +547,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             subscriber.next(defaultColor);
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         // disabled$: getCurrentSheetDisabled$(accessor),
     };
@@ -573,6 +606,7 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'LeftJustifyingSingle',
         tooltip: 'toolbar.alignLeft',
         positions: [MenuPosition.TOOLBAR_START],
+        disabled$: disableMenuWhenNoDocRange(accessor),
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -629,6 +663,7 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -664,6 +699,7 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -699,6 +735,7 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -765,7 +802,7 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         tooltip: 'toolbar.order',
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-
+        disabled$: disableMenuWhenNoDocRange(accessor),
         activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('ORDER_LIST') === 0)),
     };
 }
@@ -787,6 +824,7 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         icon: 'UnorderSingle',
         tooltip: 'toolbar.unorder',
         positions: [MenuPosition.TOOLBAR_START],
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('BULLET_LIST') === 0)),
     };
@@ -800,6 +838,7 @@ export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'TodoList',
         tooltip: 'toolbar.checklist',
         positions: [MenuPosition.TOOLBAR_START],
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('CHECK_LIST') === 0)),
     };
@@ -846,6 +885,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             subscriber.next(defaultColor);
             return disposable.dispose;
         }),
+        disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

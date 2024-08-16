@@ -1629,6 +1629,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._overflowCache.reset();
     }
 
+    resetCache(){
+        this._resetCache();
+    }
+
     private _makeDocumentSkeletonDirty(r: number, c: number) {
         if (this._stylesCache.font == null) {
             return;

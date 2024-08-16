@@ -426,7 +426,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
                 const listType = bullet.listType as keyof typeof lists;
                 let maxLevel = lists[listType].nestingLevel.length - 1;
                 if (isInTable) {
-                    maxLevel = Math.min(maxLevel, 3);
+                    maxLevel = Math.min(maxLevel, 2);
                 }
 
                 textX.push({

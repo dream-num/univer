@@ -193,7 +193,7 @@ export class DataValidationCustomFormulaService extends Disposable {
                     row,
                     column
                 );
-                this._logService.log('Data-validation custom-formula', { row, column, formula: relativeFormula });
+                this._logService.log('Data-validation custom-formula', { row, column, formula: relativeFormula, originRow, originCol, originFormula: formula });
                 const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeFormula);
                 formulaMap.setValue(row, column, {
                     formulaId,
@@ -251,10 +251,9 @@ export class DataValidationCustomFormulaService extends Disposable {
 
                     if (isTransformable) {
                         const relativeText = transformFormula(this._lexerTreeBuilder, formula, originRow, originCol, row, col);
-                        this._logService.log('Data-validation custom-formula', { row, column: col, formula: relativeText });
+                        this._logService.log('Data-validation custom-formula', { row, column: col, formula: relativeText, originRow, originCol, originFormula: formula });
                         const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeText);
                         formulaMap.setValue(row, col, {
-                            // formulaText: relativeText,
                             ruleId,
                             formulaId,
                         });

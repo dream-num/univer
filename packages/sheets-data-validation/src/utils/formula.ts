@@ -19,3 +19,7 @@ import type { ICellData, Nullable } from '@univerjs/core';
 export function getFormulaResult(result: Nullable<Nullable<ICellData>[][]>) {
     return result?.[0]?.[0]?.v;
 }
+
+export function getFormulaCellData(result: Nullable<Nullable<ICellData>[][]>) {
+    return result?.[0]?.[0];
+}

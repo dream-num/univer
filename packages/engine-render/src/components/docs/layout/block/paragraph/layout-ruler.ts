@@ -354,16 +354,16 @@ function _divideOperator(
                     // If the height of the new content exceeds the height of the added row,
                     // the entire row needs to be recalculated according to the new height
                     // in order to handle the mixing of graphics and text
-                    const spanGroupCached = __getSpanGroupByLine(currentLine);
+                    const spanGroupCached = __getGlyphGroupByLine(currentLine);
                     const spanGroupCachedLen = spanGroupCached.length;
-                    let newSpanGroup = [];
+                    let newGlyphGroup = [];
                     let startIndex = 1;
 
                     if (spanGroupCachedLen > 2 && spanGroupCached[0].glyphType === GlyphType.LIST) {
-                        newSpanGroup = [spanGroupCached[0], spanGroupCached[1]];
+                        newGlyphGroup = [spanGroupCached[0], spanGroupCached[1]];
                         startIndex = 2;
                     } else {
-                        newSpanGroup = [spanGroupCached[0]];
+                        newGlyphGroup = [spanGroupCached[0]];
                     }
                     const column = currentLine.parent;
 
@@ -372,7 +372,7 @@ function _divideOperator(
 
                     _lineOperator(
                         ctx,
-                        newSpanGroup,
+                        newGlyphGroup,
                         pages,
                         sectionBreakConfig,
                         paragraphConfig,
@@ -415,7 +415,7 @@ function _lineOperator(
     paragraphConfig: IParagraphConfig,
     paragraphStart: boolean = false,
     breakPointType: BreakPointType = BreakPointType.Normal,
-    defaultSpanLineHeight?: number
+    defaultGlyphLineHeight?: number
 ) {
     let lastPage = getLastPage(pages);
     let columnInfo = getLastNotFullColumnInfo(lastPage);
@@ -441,7 +441,7 @@ function _lineOperator(
 
     const ascent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.ba));
     const descent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.bd));
-    const spanLineHeight = defaultSpanLineHeight || ascent + descent;
+    const glyphLineHeight = defaultGlyphLineHeight || (ascent + descent);
 
     const {
         paragraphStyle = {},
@@ -463,13 +463,15 @@ function _lineOperator(
         indentEnd,
     } = paragraphStyle;
 
-    const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } = getLineHeightConfig(
+    const {
+        paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType,
+    } = getLineHeightConfig(
         sectionBreakConfig,
         paragraphConfig
     );
 
     const { paddingTop, paddingBottom, contentHeight, lineSpacingApply } = __getLineHeight(
-        spanLineHeight,
+        glyphLineHeight,
         paragraphLineGapDefault,
         linePitch,
         gridType,
@@ -542,7 +544,7 @@ function _lineOperator(
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
-        _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
+        _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultGlyphLineHeight);
 
         if (paragraphStart && paragraphAffectSkeDrawings && paragraphAffectSkeDrawings.size > 0) {
             for (const drawing of paragraphAffectSkeDrawings.values()) {
@@ -607,7 +609,7 @@ function _lineOperator(
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, pDrawingAnchor);
-    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
+    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultGlyphLineHeight);
 }
 
 function __updateAndPositionDrawings(
@@ -1004,6 +1006,7 @@ function __getParagraphSpace(
 
     if (paragraphStart) {
         let marginTop = getNumberUnitValue(spaceAbove, lineSpacing);
+
         if (preLine) {
             const { spaceBelowApply: preSpaceBelowApply } = preLine;
             if (marginTop < preSpaceBelowApply) {
@@ -1021,6 +1024,7 @@ function __getParagraphSpace(
             spaceBelowApply,
         };
     }
+
     return {
         marginTop: 0,
         spaceBelowApply,
@@ -1036,7 +1040,7 @@ function __makeColumnsFull(columns: IDocumentSkeletonColumn[] = []) {
 }
 
 function __getLineHeight(
-    spanLineHeight: number,
+    glyphLineHeight: number,
     paragraphLineGapDefault: number,
     linePitch: number,
     gridType: GridType,
@@ -1054,15 +1058,15 @@ function __getLineHeight(
             return {
                 paddingTop,
                 paddingBottom,
-                contentHeight: lineSpacing * spanLineHeight,
-                lineSpacingApply: spanLineHeight,
+                contentHeight: lineSpacing * glyphLineHeight,
+                lineSpacingApply: glyphLineHeight,
             };
         }
 
         return {
             paddingTop,
             paddingBottom,
-            contentHeight: Math.max(lineSpacing, spanLineHeight),
+            contentHeight: Math.max(lineSpacing, glyphLineHeight),
             lineSpacingApply: lineSpacing,
         };
     }
@@ -1070,20 +1074,22 @@ function __getLineHeight(
     // open xml $17.18.14 ST_DocGrid (Document Grid Types)
     let lineSpacingApply = 0;
     if (spacingRule === SpacingRule.AUTO) {
-        // auto的情况下，lineSpacing代表行数
+        // auto 的情况下，lineSpacing代表行数
         lineSpacingApply = lineSpacing * linePitch;
     } else {
         lineSpacingApply = lineSpacing;
     }
 
-    if (spanLineHeight + paragraphLineGapDefault * 2 < lineSpacingApply) {
-        paddingTop = paddingBottom = (lineSpacingApply - spanLineHeight) / 2;
+    if (glyphLineHeight + paragraphLineGapDefault * 2 < lineSpacingApply) {
+        paddingTop = paddingBottom = (lineSpacingApply - glyphLineHeight) / 2;
+    } else {
+        lineSpacingApply = glyphLineHeight;
     }
 
     return {
         paddingTop,
         paddingBottom,
-        contentHeight: spanLineHeight,
+        contentHeight: glyphLineHeight,
         lineSpacingApply,
     };
 }
@@ -1129,7 +1135,7 @@ export function updateInlineDrawingPosition(
                 const glyphHeight = glyph.bBox.bd + glyph.bBox.ba;
 
                 drawing.aLeft = divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
-                drawing.aTop = top + lineHeight - 0.5 * glyphHeight - 0.5 * height || 0;
+                drawing.aTop = top + lineHeight - 0.5 * glyphHeight - 0.5 * height;
                 drawing.width = width;
                 drawing.height = height;
                 drawing.angle = angle;
@@ -1298,7 +1304,7 @@ function __maxFontBoundingBoxByGlyphGroup(glyphGroup: IDocumentSkeletonGlyph[]) 
     return maxBox;
 }
 
-function __getSpanGroupByLine({ divides }: IDocumentSkeletonLine) {
+function __getGlyphGroupByLine({ divides }: IDocumentSkeletonLine) {
     return divides.flatMap((divide) => divide.glyphGroup);
 }
 

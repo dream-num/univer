@@ -114,7 +114,6 @@ export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runti
 export { isReferenceString } from './basics/regex';
 export { matchRefDrawToken } from './basics/match-token';
 export { IDefinedNamesService, DefinedNamesService, type IDefinedNamesServiceParam, type IDefinedNameMapItem } from './services/defined-names.service';
-export { isFormulaTransformable, transformFormula } from './engine/utils/relative-formula';
 export { IFormulaRuntimeService, FormulaRuntimeService } from './services/runtime.service';
 export { IFormulaCurrentConfigService, FormulaCurrentConfigService, type IFormulaDirtyData } from './services/current-data.service';
 

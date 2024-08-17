@@ -43,3 +43,20 @@ export const currencySymbols = [
     '₾',
     '₿',
 ];
+
+export const countryCurrencyMap = {
+    US: '$', // United States Dollar
+    CA: 'C$', // Canadian Dollar
+    GB: '£', // British Pound Sterling
+    JP: '¥', // Japanese Yen
+    IN: '₹', // Indian Rupee
+    AU: 'A$', // Australian Dollar
+    CN: '¥', // Chinese Yuan
+    KR: '₩', // South Korean Won
+    RU: '₽', // Russian Ruble
+    // Euro countries
+    AT: '€', BE: '€', CY: '€', EE: '€', FI: '€', FR: '€',
+    DE: '€', GR: '€', IE: '€', IT: '€', LV: '€', LT: '€',
+    LU: '€', MT: '€', NL: '€', PT: '€', SK: '€', SI: '€', ES: '€',
+    // Add more mappings as needed
+};

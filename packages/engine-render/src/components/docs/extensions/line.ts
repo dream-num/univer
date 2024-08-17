@@ -45,25 +45,25 @@ export class Line extends docExtension {
             return;
         }
 
-        const { asc, dsc, paddingTop } = line;
+        const { asc, dsc } = line;
         const { sp: strikeoutPosition, spo, sbo, bd } = bBox;
         const scale = getScale(parentScale);
         const DELTA = 0.5;
         const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset, bbl: bottomBorderLine } = textStyle;
 
         if (underline) {
-            const startY = asc + dsc + paddingTop;
+            const startY = asc + dsc;
             this._drawLine(ctx, glyph, underline, startY, scale);
         }
 
         if (bottomBorderLine) {
-            const startY = asc + dsc + 3 + paddingTop;
+            const startY = asc + dsc + 3;
             this._drawLine(ctx, glyph, bottomBorderLine, startY, scale, 2);
         }
 
         if (strikethrough) {
             // strikethrough position is the middle of bounding box ascent and descent.
-            let startY = asc + bd - strikeoutPosition - DELTA + paddingTop;
+            let startY = asc + bd - strikeoutPosition - DELTA;
 
             /**
              * --------- superscript strikethrough position -------
@@ -82,7 +82,7 @@ export class Line extends docExtension {
         }
 
         if (overline) {
-            const startY = -DEFAULT_OFFSET_SPACING - DELTA + paddingTop;
+            const startY = -DEFAULT_OFFSET_SPACING - DELTA;
 
             this._drawLine(ctx, glyph, overline, startY, scale);
         }

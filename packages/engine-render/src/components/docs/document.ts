@@ -313,7 +313,7 @@ export class Documents extends DocComponent {
 
                     for (let i = 0; i < linesCount; i++) {
                         const line = lines[i];
-                        const { divides, asc = 0, type, lineHeight = 0, paddingTop } = line;
+                        const { divides, asc = 0, type, lineHeight = 0 } = line;
 
                         const maxLineAsc = asc;
 
@@ -331,9 +331,22 @@ export class Documents extends DocComponent {
                                 }
                             }
                         } else {
-                            this._drawLiquid.translateSave();
+                            // let { x, y } = this._drawLiquid;
+                            // x += horizontalOffsetNoAngle;
+                            // y += verticalOffsetNoAngle + line.top;
+                            // ctx.save();
+                            // ctx.strokeStyle = 'rgb(245, 90, 34)';
+                            // ctx.moveTo(x, y);
+                            // ctx.lineTo(line.width ?? 0 + x, y);
+                            // ctx.lineTo(line.width ?? 0 + x, lineHeight + y);
+                            // ctx.lineTo(x, lineHeight + y);
+                            // ctx.lineTo(x, y);
+                            // ctx.stroke();
+                            // ctx.restore();
 
-                            this._drawLiquid.translateLine(line, true);
+                            this._drawLiquid.translateSave();
+                            this._drawLiquid.translateLine(line, true, true);
+
                             rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
 
                             const divideLength = divides.length;
@@ -360,7 +373,7 @@ export class Documents extends DocComponent {
                                     const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                     const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(spanLeft, paddingTop),
+                                        originTranslate.addByPoint(spanLeft, 0),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,
@@ -392,7 +405,7 @@ export class Documents extends DocComponent {
                                     const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                     const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(spanLeft + xOffset, paddingTop),
+                                        originTranslate.addByPoint(spanLeft + xOffset, 0),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,
@@ -402,7 +415,7 @@ export class Documents extends DocComponent {
                                     const spanPointWithFont = calculateRectRotate(
                                         originTranslate.addByPoint(
                                             spanLeft + maxLineAscSin + xOffset,
-                                            maxLineAscCos + paddingTop
+                                            maxLineAscCos
                                         ),
                                         centerPoint,
                                         centerAngle,
@@ -571,7 +584,7 @@ export class Documents extends DocComponent {
 
                 for (let i = 0; i < linesCount; i++) {
                     const line = lines[i];
-                    const { divides, asc = 0, type, lineHeight = 0, paddingTop } = line;
+                    const { divides, asc = 0, type, lineHeight = 0 } = line;
 
                     const maxLineAsc = asc;
 
@@ -590,7 +603,7 @@ export class Documents extends DocComponent {
                         }
                     } else {
                         this._drawLiquid.translateSave();
-                        this._drawLiquid.translateLine(line, true);
+                        this._drawLiquid.translateLine(line, true, true);
 
                         const divideLength = divides.length;
 
@@ -616,7 +629,7 @@ export class Documents extends DocComponent {
                                 const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                 const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft, paddingTop),
+                                    originTranslate.addByPoint(spanLeft, 0),
                                     centerPoint,
                                     centerAngle,
                                     vertexAngle,
@@ -648,7 +661,7 @@ export class Documents extends DocComponent {
                                 const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                 const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft + xOffset, paddingTop),
+                                    originTranslate.addByPoint(spanLeft + xOffset, 0),
                                     centerPoint,
                                     centerAngle,
                                     vertexAngle,
@@ -658,7 +671,7 @@ export class Documents extends DocComponent {
                                 const spanPointWithFont = calculateRectRotate(
                                     originTranslate.addByPoint(
                                         spanLeft + maxLineAscSin + xOffset,
-                                        maxLineAscCos + paddingTop
+                                        maxLineAscCos
                                     ),
                                     centerPoint,
                                     centerAngle,
@@ -777,7 +790,7 @@ export class Documents extends DocComponent {
 
                 for (let i = 0; i < linesCount; i++) {
                     const line = lines[i];
-                    const { divides, asc = 0, type, lineHeight = 0, paddingTop } = line;
+                    const { divides, asc = 0, type, lineHeight = 0 } = line;
 
                     const maxLineAsc = asc;
 
@@ -796,7 +809,7 @@ export class Documents extends DocComponent {
                         }
                     } else {
                         this._drawLiquid.translateSave();
-                        this._drawLiquid.translateLine(line, true);
+                        this._drawLiquid.translateLine(line, true, true);
                         const { y } = this._drawLiquid;
 
                         if (isHeader) {
@@ -835,7 +848,7 @@ export class Documents extends DocComponent {
                                 const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                 const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft, paddingTop),
+                                    originTranslate.addByPoint(spanLeft, 0),
                                     centerPoint,
                                     centerAngle,
                                     vertexAngle,
@@ -867,7 +880,7 @@ export class Documents extends DocComponent {
                                 const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                 const spanStartPoint = calculateRectRotate(
-                                    originTranslate.addByPoint(spanLeft + xOffset, paddingTop),
+                                    originTranslate.addByPoint(spanLeft + xOffset, 0),
                                     centerPoint,
                                     centerAngle,
                                     vertexAngle,
@@ -877,7 +890,7 @@ export class Documents extends DocComponent {
                                 const spanPointWithFont = calculateRectRotate(
                                     originTranslate.addByPoint(
                                         spanLeft + maxLineAscSin + xOffset,
-                                        maxLineAscCos + paddingTop
+                                        maxLineAscCos
                                     ),
                                     centerPoint,
                                     centerAngle,

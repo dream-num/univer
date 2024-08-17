@@ -53,6 +53,10 @@ export const SheetPermissionPanelDetailFooter = () => {
                         read: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
                         edit: activeRule.editStatus === editState.designedUserCanEdit ? ObjectScope.SomeCollaborator : ObjectScope.OneSelf,
                     };
+                    if (activeRule.editStatus === editState.designedUserCanEdit && collaborators.length === 0) {
+                        collaborators = [];
+                        scopeObj.edit = ObjectScope.OneSelf;
+                    }
 
                     // Editing existing permission rules
                     if (activeRule.permissionId) {

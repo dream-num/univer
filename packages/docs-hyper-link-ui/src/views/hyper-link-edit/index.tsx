@@ -22,6 +22,7 @@ import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { DocumentDataModel } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { TextSelectionManagerService } from '@univerjs/docs';
+import { KeyCode } from '@univerjs/ui';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
@@ -122,7 +123,16 @@ export const DocHyperLinkEdit = () => {
                     label={localeService.t('docLink.edit.address')}
                     error={showError && !isLegal ? localeService.t('docLink.edit.addressError') : ''}
                 >
-                    <Input value={link} onChange={setLink} autoFocus />
+                    <Input
+                        value={link}
+                        onChange={setLink}
+                        autoFocus
+                        onKeyDown={(evt) => {
+                            if (evt.keyCode === KeyCode.ENTER) {
+                                handleConfirm();
+                            }
+                        }}
+                    />
                 </FormLayout>
             </div>
             <div className={styles.docsLinkEditButtons}>

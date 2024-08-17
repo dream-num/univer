@@ -44,7 +44,11 @@ export const SheetPermissionPanelDetailFooter = () => {
                 type="primary"
                 onClick={async () => {
                     if (!activeRule.name || rangeErrMsg) return;
-                    const collaborators = sheetPermissionUserManagerService.selectUserList;
+                    let collaborators = sheetPermissionUserManagerService.selectUserList;
+                    if (activeRule.editStatus === editState.onlyMe) {
+                        collaborators = [];
+                        sheetPermissionUserManagerService.setSelectUserList([]);
+                    }
                     const scopeObj = {
                         read: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
                         edit: activeRule.editStatus === editState.designedUserCanEdit ? ObjectScope.SomeCollaborator : ObjectScope.OneSelf,

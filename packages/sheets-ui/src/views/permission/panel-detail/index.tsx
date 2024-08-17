@@ -209,7 +209,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             const res = await authzIoService.list({
                 unitID: unitId,
                 objectIDs: [activeRule?.permissionId],
-                actions: [UnitAction.View],
+                actions: [UnitAction.View, UnitAction.Edit],
             });
             const isAllCanView = res[0].scope?.read === ObjectScope.AllCollaborator;
             const isSomeCanEdit = res[0].scope?.edit === ObjectScope.SomeCollaborator;
@@ -332,9 +332,9 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                     value={editorGroupValue}
                     onChange={(v) => {
                         setEditorGroupValue(v as editState);
-                        if (v === editState.onlyMe) {
-                            sheetPermissionUserManagerService.setSelectUserList([]);
-                        }
+                        sheetPermissionPanelModel.setRule({
+                            editStatus: v as editState,
+                        });
                     }}
                     className={styles.radioGroupVertical}
                 >

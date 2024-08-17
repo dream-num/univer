@@ -164,10 +164,12 @@ export const SheetPermissionPanelList = () => {
         sheetPermissionPanelModel.setRule(rule);
         sheetPermissionPanelModel.setOldRule(rule);
 
-        commandService.executeCommand(SetWorksheetActiveOperation.id, {
-            unitId: rule.unitId,
-            subUnitId: rule.subUnitId,
-        });
+        if (rule.subUnitId !== workbook.getActiveSheet().getSheetId()) {
+            commandService.executeCommand(SetWorksheetActiveOperation.id, {
+                unitId: rule.unitId,
+                subUnitId: rule.subUnitId,
+            });
+        }
 
         const sidebarProps = {
             header: { title: 'permission.panel.title' },

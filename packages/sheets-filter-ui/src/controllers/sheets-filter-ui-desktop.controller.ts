@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { ICommandService, IContextService, Inject, Injector, LocaleService } from '@univerjs/core';
 import { ComponentManager, IMenuService, IMessageService, IShortcutService } from '@univerjs/ui';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 
@@ -47,7 +47,6 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 /**
  * This controller controls the UI of "filter" features. Menus, commands and filter panel etc. Except for the rendering.
  */
-@OnLifecycle(LifecycleStages.Rendered, SheetsFilterUIDesktopController)
 export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileController {
     constructor(
         private readonly _config: Partial<IUniverSheetsFilterUIConfig>,

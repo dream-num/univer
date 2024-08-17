@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-// This file provides a ton of mutations to manipulate `FilterModel`.
-// These models would be held on `SheetsFilterService`.
-
 import { CommandType } from '@univerjs/core';
 import type { IMutation, IRange, Nullable } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
@@ -75,11 +72,7 @@ export const SetSheetsFilterCriteriaMutation: IMutation<ISetSheetsFilterCriteria
         const sheetsFilterService = accessor.get(SheetsFilterService);
 
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
-        if (!filterModel) {
-            return false;
-        }
-
-        // TODO@wzhudev: check criteria out of bound.
+        if (!filterModel) return false;
 
         filterModel.setCriteria(col, criteria, reCalc);
         return true;

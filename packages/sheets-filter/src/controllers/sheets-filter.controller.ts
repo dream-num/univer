@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, LifecycleStages, moveMatrixArray, OnLifecycle, Rectangle } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, moveMatrixArray, Rectangle } from '@univerjs/core';
 import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
 
@@ -25,7 +25,6 @@ import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilter
 import type { FilterColumn } from '../models/filter-model';
 import { mergeSetFilterCriteria } from '../utils';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsFilterController)
 export class SheetsFilterController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

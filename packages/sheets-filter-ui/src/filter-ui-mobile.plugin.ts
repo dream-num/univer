@@ -45,4 +45,12 @@ export class UniverSheetsFilterMobileUIPlugin extends Plugin {
             [SheetsFilterUIMobileController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
+
+    override onReady(): void {
+        this._injector.get(SheetsFilterPermissionController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsFilterUIMobileController);
+    }
 }

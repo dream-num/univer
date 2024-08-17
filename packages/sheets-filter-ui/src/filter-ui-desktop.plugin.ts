@@ -63,4 +63,12 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
             ]);
         }
     }
+
+    override onReady(): void {
+        this._injector.get(SheetsFilterPermissionController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsFilterUIDesktopController);
+    }
 }

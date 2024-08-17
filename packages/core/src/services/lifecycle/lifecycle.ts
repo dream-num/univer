@@ -58,6 +58,8 @@ export const LifecycleToModules = new Map<LifecycleStages, Array<DependencyIdent
  * @param identifier The dependency identifier of the class. Usually, it is the class itself unless you bind this class
  * with another injection identifier.
  *
+ * @deprecated This API does not work as expected and will be removed in future versions. Please call
+ * `this._injector.get(YourDependency)` in plugins' lifecycle hooks instead.
  *
  * @example
  * // Ignore the `\` below. This is JSDoc's bug.
@@ -85,6 +87,9 @@ export function OnLifecycle(lifecycleStage: LifecycleStages, identifier: Depende
  * @param lifecycleStage The lifecycle stage to instantiate this dependency.
  * @param identifier The dependencies' identifier. **Beware** that if the dependency (e.g. a class) is bound to an
  * identifier, you should register the identifier instead of the dependency itself.
+ *
+ * @deprecated This API does not work as expected and will be removed in future versions. Please call
+ * `this._injector.get(YourDependency)` in plugins' lifecycle hooks instead.
  *
  * @example
  * runOnLifecycle(LifecycleStages.Ready, MyService);

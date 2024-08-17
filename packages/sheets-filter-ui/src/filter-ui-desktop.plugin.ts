@@ -18,8 +18,8 @@ import { DependentOn, Inject, Injector, Optional, Plugin, Tools, UniverInstanceT
 import type { Dependency } from '@univerjs/core';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { IRPCChannelService, toModule } from '@univerjs/rpc';
-import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui.controller';
-import { DefaultSheetFilterUiConfig, SheetsFilterUIController } from './controllers/sheets-filter-ui.controller';
+import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui-desktop.controller';
+import { DefaultSheetFilterUiConfig, SheetsFilterUIDesktopController } from './controllers/sheets-filter-ui-desktop.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { ISheetsGenerateFilterValuesService, SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME } from './worker/generate-filter-values.service';
@@ -46,9 +46,9 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
             [SheetsFilterPanelService],
             [SheetsFilterPermissionController],
             [
-                SheetsFilterUIController,
+                SheetsFilterUIDesktopController,
                 {
-                    useFactory: () => this._injector.createInstance(SheetsFilterUIController, this._config),
+                    useFactory: () => this._injector.createInstance(SheetsFilterUIDesktopController, this._config),
                 },
             ],
         ] as Dependency[]).forEach((d) => this._injector.add(d));

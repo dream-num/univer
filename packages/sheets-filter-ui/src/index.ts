@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { UniverSheetsFilterUIPlugin } from './plugin';
-export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
+export { UniverSheetsFilterUIPlugin } from './filter-ui-desktop.plugin';
+export { UniverSheetsFilterMobileUIPlugin } from './filter-ui-mobile.plugin';
 export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
 
 // #region - all commands

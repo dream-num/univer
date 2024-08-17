@@ -70,7 +70,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
         const newValue = date;
         // convert current date to utc date
         const dateStr = newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00');
-        const serialTime = numfmt.parseDate(dateStr).v;
+        const serialTime = numfmt.parseDate(dateStr)?.v;
 
         if (
             rule.errorStyle !== DataValidationErrorStyle.STOP ||
@@ -106,7 +106,6 @@ export function DateDropdown(props: IDropdownComponentProps) {
                             pattern: showTime ? 'yyyy-MM-dd hh:mm:ss' : 'yyyy-MM-dd',
                         },
                     },
-
                 },
             });
             hideFn();
@@ -127,6 +126,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 onPanelChange={(value) => {
                     setLocalDate(value);
                 }}
+                disabledDate={(current) => !numfmt.parseDate(current.format('YYYY-MM-DD'))}
             />
             <div className={styles.dvDateDropdownBtns}>
                 <Button size="small" type="primary" onClick={handleSave} disabled={!date.isValid()}>

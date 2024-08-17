@@ -135,12 +135,14 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         const validator = this.getValidator(rule.type);
         const cellRaw = worksheet.getCellRaw(row, col);
         const cellValue = getCellValueOrigin(cellRaw);
+        const interceptValue = getCellValueOrigin(cell);
 
         if (validator) {
             const current = this._cache.getValue(row, col);
-            if (!current || current.value !== cellValue) {
+            if (!current || current.value !== cellValue || current.interceptValue !== interceptValue || current.ruleId !== ruleId) {
                 this._cache.setValue(row, col, {
                     value: cellValue,
+                    interceptValue,
                     status: DataValidationStatus.VALIDATING,
                     ruleId,
                 });
@@ -163,6 +165,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                         value: cellValue,
                         status: realStatus,
                         ruleId,
+                        interceptValue,
                     });
                     onCompete(realStatus, true);
                 });

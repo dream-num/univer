@@ -22,7 +22,7 @@ import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { bufferTime, debounceTime, filter } from 'rxjs';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { ListValidator } from '../validators';
@@ -184,7 +184,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     // must be after numfmt
-                    priority: 9,
+                    priority: InterceptCellContentPriority.DATA_VALIDATION,
                     // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
@@ -389,7 +389,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
-                    priority: 9,
+                    priority: InterceptCellContentPriority.DATA_VALIDATION,
                     // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;

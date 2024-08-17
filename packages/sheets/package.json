@@ -70,7 +70,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "0.1.39-alpha.7"
+        "@univerjs/protocol": "0.1.39-alpha.8"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

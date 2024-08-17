@@ -74,6 +74,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                 name: '',
                                 strategies: [],
                                 scope: scopeObj,
+                                collaborators,
                             });
                         } else {
                             // If the description of the permission is modified, it needs to be synchronized to other collaborators, so the create logic needs to be followed.

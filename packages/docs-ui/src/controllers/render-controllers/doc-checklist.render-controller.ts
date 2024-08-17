@@ -18,7 +18,7 @@ import type { Documents, IRenderContext, IRenderModule, Viewport } from '@univer
 import { CURSOR_TYPE, getParagraphByGlyph, GlyphType, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, PresetListType } from '@univerjs/core';
-import { DocSkeletonManagerService, ToggleCheckListCommand, VIEWPORT_KEY } from '@univerjs/docs';
+import { DocSkeletonManagerService, TextSelectionManagerService, ToggleCheckListCommand, VIEWPORT_KEY } from '@univerjs/docs';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 export class DocChecklistRenderController extends Disposable implements IRenderModule {
@@ -26,7 +26,8 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
         private _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService
+        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -49,8 +50,10 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
                 if (!coord) {
                     return;
                 }
+
                 const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop } = documentComponent.getOffsetConfig();
                 const skeleton = this._docSkeletonManagerService.getSkeleton();
+                const segmentId = this._textSelectionManagerService.getActiveTextRange()?.segmentId;
                 const node = skeleton.findNodeByCoord(
                     coord,
                     pageLayoutType,
@@ -60,7 +63,7 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
                 if (!node) {
                     return;
                 }
-                const paragraph = getParagraphByGlyph(node.node, this._context.unit.getBody());
+                const paragraph = getParagraphByGlyph(node.node, this._context.unit.getSelfOrHeaderFooterModel(segmentId).getBody());
                 if (paragraph && paragraph.bullet && node.node.glyphType === GlyphType.LIST) {
                     if (
                         paragraph.bullet.listType === PresetListType.CHECK_LIST ||
@@ -68,6 +71,7 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
                     ) {
                         this._commandService.executeCommand(ToggleCheckListCommand.id, {
                             index: paragraph.startIndex,
+                            segmentId,
                         });
                     }
                 }

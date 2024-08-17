@@ -65,7 +65,6 @@ interface IDistance {
 interface INearestCache {
     nearestNodeList: INodeInfo[];
     nearestNodeDistanceList: IDistance[];
-    nearestNodeDistanceY: number;
 }
 
 export interface IFindNodeRestrictions {
@@ -505,7 +504,6 @@ export class DocumentSkeleton extends Skeleton {
         const cache: INearestCache = {
             nearestNodeList: [],
             nearestNodeDistanceList: [],
-            nearestNodeDistanceY: Number.POSITIVE_INFINITY,
         };
 
         const { pages, skeHeaders, skeFooters } = skeletonData;
@@ -726,6 +724,8 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         if (pointInPage) {
+            let nearestNodeDistanceY = Number.POSITIVE_INFINITY;
+
             for (const section of sections) {
                 const { columns } = section;
 
@@ -789,7 +789,7 @@ export class DocumentSkeleton extends Skeleton {
                                             };
                                         }
 
-                                        if (cache.nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
+                                        if (nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
                                             cache.nearestNodeList = [];
                                             cache.nearestNodeDistanceList = [];
                                         }
@@ -807,17 +807,17 @@ export class DocumentSkeleton extends Skeleton {
                                             nestLevel,
                                         });
 
-                                        cache.nearestNodeDistanceY = Number.NEGATIVE_INFINITY;
+                                        nearestNodeDistanceY = Number.NEGATIVE_INFINITY;
                                         continue;
                                     }
 
-                                    if (distanceY < cache.nearestNodeDistanceY) {
-                                        cache.nearestNodeDistanceY = distanceY;
+                                    if (distanceY < nearestNodeDistanceY) {
+                                        nearestNodeDistanceY = distanceY;
                                         cache.nearestNodeList = [];
                                         cache.nearestNodeDistanceList = [];
                                     }
 
-                                    if (distanceY === cache.nearestNodeDistanceY) {
+                                    if (distanceY === nearestNodeDistanceY) {
                                         cache.nearestNodeList.push({
                                             node: glyph,
                                             segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IMouseEvent, IPointerEvent, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
@@ -52,12 +52,26 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
     return bounds;
 };
 
+interface ICustomRangeActive {
+    range: ICustomRange; segmentId?: string; segmentPageIndex: number;
+}
+
+interface IBulletActive {
+    paragraph: IParagraph; segmentId?: string; segmentPageIndex: number;
+}
+
 export class DocEventManagerService extends Disposable implements IRenderModule {
-    private _hoverCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string; segmentPageIndex: number }[]>();
+    private _hoverCustomRanges$ = new Subject<ICustomRangeActive[]>();
     readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex)));
 
-    private _clickCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string; segmentPageIndex: number }>();
+    private _clickCustomRanges$ = new Subject<ICustomRangeActive>();
     readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();
+
+    private _hoverBullet$ = new Subject<Nullable<IBulletActive>>();
+    readonly hoverBullet$ = this._hoverBullet$.pipe(distinctUntilChanged((pre, aft) => pre?.paragraph.startIndex === aft?.paragraph.startIndex && pre?.segmentId === aft?.segmentId && pre?.segmentPageIndex === aft?.segmentPageIndex));
+
+    private _clickBullet$ = new Subject<IBulletActive>();
+    readonly clickBullets$ = this._clickBullet$.asObservable();
 
     private _customRangeDirty = true;
     private _bulletDirty = true;
@@ -91,6 +105,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this._initCustomRanges();
     }
 
+    override dispose() {
+        this._hoverCustomRanges$.complete();
+        this._clickCustomRanges$.complete();
+        super.dispose();
+    }
+
     private _initResetDirty() {
         this.disposeWithMe(this._skeleton.dirty$.subscribe(() => {
             this._customRangeDirty = true;
@@ -112,12 +132,20 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             this._hoverCustomRanges$.next(
                 this._calcActiveRanges(evt)
             );
+            this._hoverBullet$.next(
+                this._calcActiveBullet(evt)
+            );
         }));
 
         this.disposeWithMe(this._context.scene.onPointerUp$.subscribeEvent((evt) => {
             const ranges = this._calcActiveRanges(evt);
             if (ranges.length) {
                 this._clickCustomRanges$.next(ranges.pop()!);
+            }
+
+            const bullet = this._calcActiveBullet(evt);
+            if (bullet) {
+                this._clickBullet$.next(bullet);
             }
         }));
     }
@@ -205,5 +233,90 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 segmentPageIndex: range.segmentPageIndex,
             })
         );
+    }
+
+    private _buildBulletBoundsBySegment(segmentId?: string) {
+        const paragraphs = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs ?? [];
+        const bounds: IBulletBound[] = [];
+        const paragraphRanges = paragraphs.map((paragraph, i) => ({
+            ...paragraph,
+            paragraphStart: (paragraphs[i - 1]?.startIndex ?? -1) + 1,
+            paragraphEnd: paragraph.startIndex,
+        }));
+
+        paragraphRanges.forEach((paragraph) => {
+            if (paragraph.bullet && paragraph.bullet.listType === 'CHECK_LIST') {
+                const node = this._skeleton.findNodeByCharIndex(paragraph.paragraphStart, segmentId);
+                if (!node) {
+                    return;
+                }
+                const bulletNode = node.parent?.glyphGroup[0];
+                const { pageMarginLeft, pageMarginTop, docsLeft, docsTop } = this._documents.getOffsetConfig();
+                if (!bulletNode) {
+                    return;
+                }
+
+                const left = node.left + pageMarginLeft + docsLeft;
+                const right = node.left + node.width + pageMarginLeft;
+                let top = pageMarginTop + docsTop;
+
+                let p = bulletNode.parent;
+                while (p) {
+                    //@ts-ignore
+                    top += p.top ?? 0;
+                    // @ts-ignore
+                    p = p.parent;
+                }
+
+                const height = bulletNode.bBox.aba + bulletNode.bBox.abd;
+                const bottom = top + height;
+
+                bounds.push({
+                    rect: {
+                        left,
+                        right,
+                        top,
+                        bottom,
+                    },
+                    segmentId,
+                    segmentPageIndex: 0,
+                    paragraph,
+                });
+            }
+        });
+        // console.log('===bounds', bounds);
+        return bounds;
+    }
+
+    private _buildBulletBounds() {
+        if (!this._bulletDirty) {
+            return;
+        }
+        this._bulletDirty = false;
+
+        const headerKeys = Array.from(this._context.unit.headerModelMap.keys());
+        const footerKeys = Array.from(this._context.unit.footerModelMap.keys());
+
+        this._bulletBounds = [
+            ...this._buildBulletBoundsBySegment(),
+            ...(headerKeys.map((key) => this._buildBulletBoundsBySegment(key)).flat()),
+            ...(footerKeys.map((key) => this._buildBulletBoundsBySegment(key)).flat()),
+        ];
+    }
+
+    private _calcActiveBullet(evt: IPointerEvent | IMouseEvent) {
+        this._buildBulletBounds();
+
+        const { offsetX, offsetY } = evt;
+        const { x, y } = transformOffset2Bound(offsetX, offsetY, this._context.scene);
+        const bullet = this._bulletBounds.find((layout) => {
+            const { left, right, top, bottom } = layout.rect;
+            if (x >= left && x <= right && y >= top && y <= bottom) {
+                return true;
+            }
+            return false;
+        });
+        // console.log('===bullet', bullet);
+        return bullet;
     }
 }

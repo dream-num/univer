@@ -15,17 +15,18 @@
  */
 
 import type { Documents, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import { getParagraphByGlyph, GlyphType, PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, getParagraphByGlyph, GlyphType, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, PresetListType } from '@univerjs/core';
 import { DocSkeletonManagerService, ToggleCheckListCommand, VIEWPORT_KEY } from '@univerjs/docs';
-// import { DocEventManagerService } from '../../services/doc-event-manager.service';
+import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 export class DocChecklistRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService
     ) {
         super();
 
@@ -75,15 +76,15 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
     }
 
     private _initHoverCursor() {
-        // this.disposeWithMe(
-        //     this._docHoverManagerService.bullet$.subscribe((paragraph) => {
-        //         if (paragraph) {
-        //             this._context.mainComponent!.setCursor(CURSOR_TYPE.POINTER);
-        //         } else {
-        //             this._context.mainComponent!.setCursor(CURSOR_TYPE.TEXT);
-        //         }
-        //     })
-        // );
+        this.disposeWithMe(
+            this._docEventManagerService.hoverBullet$.subscribe((paragraph) => {
+                if (paragraph) {
+                    this._context.mainComponent!.setCursor(CURSOR_TYPE.POINTER);
+                } else {
+                    this._context.mainComponent!.setCursor(CURSOR_TYPE.TEXT);
+                }
+            })
+        );
     }
 
     private _getTransformCoordForDocumentOffset(document: Documents, viewport: Viewport, evtOffsetX: number, evtOffsetY: number) {

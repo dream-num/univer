@@ -20,7 +20,7 @@ import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertCol
 import { EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
 
 import { SheetsFilterService } from '../services/sheet-filter.service';
-import type { IRemoveSheetsFilterMutationParams, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../commands/mutations/sheets-filter.mutation';
+import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../commands/mutations/sheets-filter.mutation';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../commands/mutations/sheets-filter.mutation';
 import type { FilterColumn } from '../models/filter-model';
 import { mergeSetFilterCriteria } from '../utils';
@@ -282,7 +282,7 @@ export class SheetsFilterController extends Disposable {
         }
 
         if (rangeRemoveCount === endColumn - startColumn + 1) {
-            const removeFilterRangeMutationParams: IRemoveSheetsFilterMutationParams = {
+            const removeFilterRangeMutationParams: ISheetCommandSharedParams = {
                 unitId,
                 subUnitId,
             };
@@ -342,7 +342,7 @@ export class SheetsFilterController extends Disposable {
 
         const count = Math.min(removeEndRow, endRow) - Math.max(removeStartRow, startRow) + 1;
         if (count === endRow - startRow + 1 || filterHeaderIsRemoved) {
-            const removeFilterRangeMutationParams: IRemoveSheetsFilterMutationParams = {
+            const removeFilterRangeMutationParams: ISheetCommandSharedParams = {
                 unitId,
                 subUnitId,
             };

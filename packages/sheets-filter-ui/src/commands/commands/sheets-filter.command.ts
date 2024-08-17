@@ -19,7 +19,7 @@ import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService,
 import { MessageType } from '@univerjs/design';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import { expandToContinuousRange, getSheetCommandTarget, isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
-import type { FilterColumn, IAutoFilter, IFilterColumn, IReCalcSheetsFilterMutationParams, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
+import type { FilterColumn, IAutoFilter, IFilterColumn, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
 import { IMessageService } from '@univerjs/ui';
 
@@ -265,7 +265,7 @@ export const ReCalcSheetsFilterCommand: ICommand<ISheetCommandSharedParams> = {
         if (!filterModel) return false;
 
         // No need to handle undo redo for this command.
-        return commandService.executeCommand(ReCalcSheetsFilterMutation.id, { unitId, subUnitId } as IReCalcSheetsFilterMutationParams);
+        return commandService.executeCommand(ReCalcSheetsFilterMutation.id, { unitId, subUnitId } as ISheetCommandSharedParams);
     },
 };
 

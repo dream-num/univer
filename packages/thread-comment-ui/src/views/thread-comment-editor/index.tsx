@@ -22,6 +22,7 @@ import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import type { IDocumentBody } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { TextSelectionManagerService } from '@univerjs/docs';
+import { KeyCode } from '@univerjs/ui';
 import { IThreadCommentMentionDataService } from '../../services/thread-comment-mention-data.service';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import styles from './index.module.less';
@@ -75,6 +76,17 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
         },
     }));
 
+    const handleSave = () => {
+        if (localComment.text) {
+            onSave?.({
+                ...localComment,
+                text: localComment.text,
+            });
+            setEditing(false);
+            setLocalComment({ text: undefined });
+        }
+    };
+
     return (
         <div className={styles.threadCommentEditor} onClick={(e) => e.preventDefault()}>
             <Mentions
@@ -98,6 +110,11 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     textSelectionRenderManager.blur();
                     setEditing(true);
                 }}
+                onKeyDown={(e) => {
+                    if (e.keyCode === KeyCode.ENTER) {
+                        handleSave();
+                    }
+                }}
             >
                 <Mention
                     key={mentionDataService.trigger}
@@ -106,6 +123,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                         .then((res) => res.map(transformMention)).then(callback) as any}
                     displayTransform={(id, label) => `@${label} `}
                     renderSuggestion={mentionDataService.renderSuggestion ?? defaultRenderSuggestion}
+
                 />
             </Mentions>
             {editing
@@ -125,16 +143,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                         <Button
                             type="primary"
                             disabled={!localComment.text}
-                            onClick={() => {
-                                if (localComment.text) {
-                                    onSave?.({
-                                        ...localComment,
-                                        text: localComment.text,
-                                    });
-                                    setEditing(false);
-                                    setLocalComment({ text: undefined });
-                                }
-                            }}
+                            onClick={handleSave}
                         >
                             {localeService.t(id ? 'threadCommentUI.editor.save' : 'threadCommentUI.editor.reply')}
                         </Button>

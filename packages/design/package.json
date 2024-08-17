@@ -74,7 +74,7 @@
         "@rc-component/color-picker": "^2.0.1",
         "@rc-component/trigger": "^2.2.1",
         "@types/react-mentions": "^4.1.13",
-        "@univerjs/icons": "^0.1.73",
+        "@univerjs/icons": "^0.1.74",
         "rc-dialog": "^9.5.2",
         "rc-dropdown": "^4.2.0",
         "rc-input": "^1.6.3",

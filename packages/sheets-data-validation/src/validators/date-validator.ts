@@ -21,7 +21,6 @@ import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@u
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
-import { timestamp2SerialTime } from '../utils/date';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { DATE_DROPDOWN_KEY } from '../views';
@@ -40,9 +39,9 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
         return +value;
     }
 
-    // transform date to utc
-    const dateStr = `${dayjs(value).format('YYYY-MM-DD HH:mm:ss').split(' ').join('T')}Z`;
-    return timestamp2SerialTime(dayjs(dateStr).unix());
+    // transform date string to serial number
+    const dateStr = `${dayjs(value).format('YYYY-MM-DD HH:mm:ss')}`;
+    return numfmt.parseDate(dateStr)?.v;
 };
 
 export class DateValidator extends BaseDataValidator<number> {
@@ -203,7 +202,6 @@ export class DateValidator extends BaseDataValidator<number> {
         if (Number.isNaN(formula1)) {
             return true;
         }
-
         return cellInfo.value <= formula1;
     }
 

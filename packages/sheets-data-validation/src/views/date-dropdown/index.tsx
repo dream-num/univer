@@ -16,7 +16,7 @@
 
 import React, { useState } from 'react';
 import type { CellValue, Nullable } from '@univerjs/core';
-import { CellValueType, DataValidationErrorStyle, ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { CellValueType, DataValidationErrorStyle, ICommandService, LocaleService, numfmt, useDependency } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import dayjs from 'dayjs';
@@ -25,7 +25,6 @@ import type { IDropdownComponentProps } from '../../services/dropdown-manager.se
 import type { DateValidator } from '../../validators';
 import { getCellValueOrigin } from '../../utils/get-cell-data-origin';
 import { DataValidationRejectInputController } from '../../controllers/dv-reject-input.controller';
-import { excelSerialToUnixTimestamp, timestamp2SerialTime } from '../../utils/date';
 import styles from './index.module.less';
 
 dayjs.extend(utc);
@@ -36,8 +35,7 @@ const transformDate = (value: Nullable<CellValue>) => {
     }
 
     if (typeof value === 'number' || !Number.isNaN(+value)) {
-        const date = dayjs.unix(excelSerialToUnixTimestamp(+value)).utc().format().slice(0, -1);
-        return dayjs(date);
+        return dayjs(numfmt.format('yyyy-MM-dd HH:mm:ss', value));
     }
 
     const date = dayjs(value);
@@ -61,7 +59,6 @@ export function DateDropdown(props: IDropdownComponentProps) {
     const showTime = Boolean(rule?.bizInfo?.showTime);
     const date = localDate && localDate.isValid() ? localDate : dayjs();
     const localeService = useDependency(LocaleService);
-
     if (!cellData || !rule || !validator) {
         return;
     }
@@ -72,8 +69,8 @@ export function DateDropdown(props: IDropdownComponentProps) {
         }
         const newValue = date;
         // convert current date to utc date
-        const dateStr = `${newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00').split(' ').join('T')}Z`;
-        const serialTime = timestamp2SerialTime(dayjs(dateStr).unix());
+        const dateStr = newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00');
+        const serialTime = numfmt.parseDate(dateStr).v;
 
         if (
             rule.errorStyle !== DataValidationErrorStyle.STOP ||
@@ -85,7 +82,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 column: col,
                 worksheet,
                 workbook,
-                interceptValue: dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss'),
+                interceptValue: dateStr.replace('Z', '').replace('T', ' '),
                 t: CellValueType.NUMBER,
             }, rule))
         ) {

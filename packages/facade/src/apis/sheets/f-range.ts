@@ -673,7 +673,9 @@ export class FRange {
     /**
      * Create a filter for the current range. If the worksheet already has a filter, this method would return `null`.
      *
-     * @returns The interface class to handle the filter. If the worksheet already has a filter,
+     * @async
+     *
+     * @return The interface class to handle the filter. If the worksheet already has a filter,
      * this method would return `null`.
      */
     async createFilter(): Promise<FFilter | null> {
@@ -693,7 +695,7 @@ export class FRange {
     /**
      * Get the filter for the current range's worksheet.
      *
-     * @returns The interface class to handle the filter. If the worksheet does not have a filter,
+     * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
      * this method would return `null`.
      */
     getFilter(): FFilter | null {

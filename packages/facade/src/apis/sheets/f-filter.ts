@@ -38,7 +38,8 @@ export class FFilter {
 
     /**
      * Get the filter criteria of a column.
-     * @param col The column number.
+     * @param {number} col The column number.
+     * @returns {Nullable<IFilterColumn>} The filter criteria of the column.
      */
     getColumnFilterCriteria(col: number): Nullable<IFilterColumn> {
         return this._filterModel.getFilterColumn(col)?.getColumnData();
@@ -46,8 +47,8 @@ export class FFilter {
 
     /**
      * Clear the filter criteria of a column.
-     * @param col The column number.
-     * @returns If the filter criteria is cleared.
+     * @param {number} col The column number.
+     * @returns {Promise<boolean>} If the filter criteria is cleared.
      */
     removeColumnFilterCriteria(col: number): Promise<boolean> {
         return this._commandSrv.executeCommand(SetSheetsFilterCriteriaCommand.id, {
@@ -60,9 +61,9 @@ export class FFilter {
 
     /**
      * Set the filter criteria of a column.
-     * @param col The column number.
-     * @param criteria The new filter criteria.
-     * @returns If the filter criteria is set.
+     * @param {number} col  The column number.
+     * @param {ISetSheetsFilterCriteriaCommandParams['criteria']} criteria The new filter criteria.
+     * @returns {Promise<boolean>} If the filter criteria is set.
      */
     setColumnFilterCriteria(col: number, criteria: ISetSheetsFilterCriteriaCommandParams['criteria']): Promise<boolean> {
         return this._commandSrv.executeCommand(SetSheetsFilterCriteriaCommand.id, {
@@ -75,7 +76,7 @@ export class FFilter {
 
     /**
      * Get the range of the filter.
-     * @returns The range of the filter.
+     * @returns {FRange} The range of the filter.
      */
     getRange(): FRange {
         const range = this._filterModel.getRange();
@@ -84,6 +85,7 @@ export class FFilter {
 
     /**
      * Remove the filter criteria of all columns.
+     * @returns {Promise<boolean>} If the filter criteria is removed.
      */
     removeFilterCriteria(): Promise<boolean> {
         return this._commandSrv.executeCommand(ClearSheetsFilterCriteriaCommand.id);
@@ -91,7 +93,7 @@ export class FFilter {
 
     /**
      * Remove the filter from the worksheet.
-     * @returns If the filter is removed.
+     * @returns {Promise<boolean>} If the filter is removed.
      */
     remove(): Promise<boolean> {
         return this._commandSrv.executeCommand(RemoveSheetFilterCommand.id, {

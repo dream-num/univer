@@ -23,10 +23,18 @@ import type { FilterColumn, IAutoFilter, IFilterColumn, IReCalcSheetsFilterMutat
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
 import { IMessageService } from '@univerjs/ui';
 
+/**
+ * Parameters of command {@link SetSheetFilterRangeCommand}.
+ * @property {IRange} range - the range to be set as filter range.
+ */
 export interface ISetSheetFilterRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
 }
 
+/**
+ * A {@link CommandType.COMMAND} to set filter range in a Worksheet. Its params {@link ISetSheetFilterRangeCommandParams}
+ * is required. If the {@link FilterModel} does not exist, it will be created.
+ */
 export const SetSheetFilterRangeCommand: ICommand<ISetSheetFilterRangeCommandParams> = {
     id: 'sheet.command.set-filter-range',
     type: CommandType.COMMAND,
@@ -42,7 +50,7 @@ export const SetSheetFilterRangeCommand: ICommand<ISetSheetFilterRangeCommandPar
         if (!commandTarget) return false;
 
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
-        if (!filterModel) return false;
+        if (filterModel) return false;
 
         if (range.endRow === range.startRow) {
             const messageService = accessor.get(IMessageService, Quantity.OPTIONAL);
@@ -66,6 +74,10 @@ export const SetSheetFilterRangeCommand: ICommand<ISetSheetFilterRangeCommandPar
     },
 };
 
+/**
+ * A {@link CommandType.COMMAND} to remove filter in a Worksheet. Its params {@link ISheetCommandSharedParams} is
+ * required. If the {@link FilterModel} does not exist, it will fail to execute.
+ */
 export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
     id: 'sheet.command.remove-sheet-filter',
     type: CommandType.COMMAND,
@@ -99,7 +111,7 @@ export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
 };
 
 /**
- * This command is for toggling filter in the currently active Worksheet.
+ * A {@link CommandType.COMMAND} to toggle filter in the current {@link Worksheet}.
  */
 export const SmartToggleSheetsFilterCommand: ICommand = {
     id: 'sheet.command.smart-toggle-filter',
@@ -140,13 +152,19 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
     },
 };
 
+/**
+ * Parameters of command {@link SetSheetsFilterCriteriaCommand}.
+ * @property {number} col - the column index of the filter criteria
+ * @property {Nullable<IFilterColumn>} criteria - the filter criteria to be set
+ */
 export interface ISetSheetsFilterCriteriaCommandParams extends ISheetCommandSharedParams {
     col: number;
     criteria: Nullable<IFilterColumn>;
 }
 
 /**
- * This command is for setting filter criteria to a column in the targeting `FilterModel`.
+ * A {@link CommandType.COMMAND} to set filter criteria to a column in the targeting {@link FilterModel}. Its params
+ * {@link ISetSheetsFilterCriteriaCommandParams} is required.
  */
 export const SetSheetsFilterCriteriaCommand: ICommand<ISetSheetsFilterCriteriaCommandParams> = {
     id: 'sheet.command.set-filter-criteria',
@@ -189,7 +207,8 @@ export const SetSheetsFilterCriteriaCommand: ICommand<ISetSheetsFilterCriteriaCo
 };
 
 /**
- * This command is for clearing all filter criteria in the currently active `FilterModel`.
+ * A {@link CommandType.COMMAND} to clear all filter criteria in the targeting {@link FilterModel}. Its params
+ * {@link ISheetCommandSharedParams} is required.
  */
 export const ClearSheetsFilterCriteriaCommand: ICommand<ISheetCommandSharedParams> = {
     id: 'sheet.command.clear-filter-criteria',
@@ -227,7 +246,8 @@ export const ClearSheetsFilterCriteriaCommand: ICommand<ISheetCommandSharedParam
 };
 
 /**
- * This command force the currently active `FilterModel` to re-calculate all filter criteria.
+ * A {@link CommandType.COMMAND} forcing the currently active {@link FilterModel} to re-calculate all filter criteria.
+ * Its params {@link ISheetCommandSharedParams} is required.
  */
 export const ReCalcSheetsFilterCommand: ICommand<ISheetCommandSharedParams> = {
     id: 'sheet.command.re-calc-filter',
@@ -251,9 +271,9 @@ export const ReCalcSheetsFilterCommand: ICommand<ISheetCommandSharedParams> = {
 
 /**
  * Destruct a `FilterModel` to a list of mutations.
- * @param unitId the unit id of the Workbook
- * @param subUnitId the sub unit id of the Worksheet
- * @param autoFilter the to be destructed FilterModel
+ * @param {string} unitId - the unit id of the Workbook
+ * @param {string} subUnitId - the sub unit id of the Worksheet
+ * @param {IAutoFilter} autoFilter - the to be destructed FilterModel
  * @returns a list of mutations those can be used to reconstruct the FilterModel
  */
 function destructFilterModel(
@@ -279,12 +299,20 @@ function destructFilterModel(
     return mutations;
 }
 
+/**
+ * Transform a {@link FilterModel} to a list of mutations to set the filter criteria.
+ * @param unitId - the unit id of the {@link Workbook}
+ * @param subUnitId - the sub unit id of the {@link Worksheet}
+ * @param autoFilter - the to be destructed {@link FilterModel}
+ * @returns {IMutationInfo<ISetSheetsFilterCriteriaMutationParams>} a list of mutations those can be used to
+ * reconstruct the {@link FilterModel}
+ */
 export function destructFilterCriteria(
     unitId: string,
     subUnitId: string,
     autoFilter: IAutoFilter
-): IMutationInfo[] {
-    const mutations: IMutationInfo[] = [];
+): IMutationInfo<ISetSheetsFilterCriteriaMutationParams>[] {
+    const mutations: IMutationInfo<ISetSheetsFilterCriteriaMutationParams>[] = [];
 
     autoFilter.filterColumns?.forEach((filterColumn) => {
         const setFilterCriteriaMutation: IMutationInfo<ISetSheetsFilterCriteriaMutationParams> = {
@@ -329,11 +357,11 @@ function generateRemoveCriteriaMutations(
 /**
  * Prepare the undo mutation, it should rollback to the old criteria if there's already a `FilterColumn`,
  * or remove the filter criteria when there is no `FilterColumn`.
- * @param unitId
- * @param subUnitId
- * @param colId
- * @param filterColumn
- * @returns the undo mutation
+ * @param {string} unitId
+ * @param {string} subUnitId
+ * @param {number} colId
+ * @param {Nullable<FilterColumn>} filterColumn
+ * @returns {IMutationInfo<ISetSheetsFilterCriteriaMutationParams>} the undo mutation
  */
 function destructFilterColumn(
     unitId: string,

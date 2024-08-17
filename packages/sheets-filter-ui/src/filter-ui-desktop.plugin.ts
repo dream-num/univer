@@ -26,6 +26,9 @@ import { ISheetsGenerateFilterValuesService, SHEETS_GENERATE_FILTER_VALUES_SERVI
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
+/**
+ * The plugin for the desktop version of the sheets filter UI. Its type is {@link UniverInstanceType.UNIVER_SHEET}.
+ */
 @DependentOn(UniverSheetsFilterPlugin)
 export class UniverSheetsFilterUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;

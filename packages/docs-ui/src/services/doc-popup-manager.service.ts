@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, ITextRange } from '@univerjs/core';
+import type { IDisposable, ITextRangeParam } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor, pxToNum } from '@univerjs/engine-render';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
@@ -85,11 +85,11 @@ export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOuts
     extraProps?: Record<string, any>;
 }
 
-export const calcDocRangePositions = (range: ITextRange, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
+export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
     const { scene, mainComponent, engine } = currentRender;
     const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset);
-    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset);
+    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, false, range.segmentId, range.segmentPage);
+    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, false, range.segmentId, range.segmentPage);
     const document = mainComponent as Documents;
 
     if (!endPosition || !startPosition) {
@@ -185,7 +185,7 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
-    private _createRangePositionObserver(range: ITextRange, currentRender: IRender) {
+    private _createRangePositionObserver(range: ITextRangeParam, currentRender: IRender) {
         const positions = calcDocRangePositions(range, currentRender) ?? [];
         const positions$ = new BehaviorSubject(positions);
         const disposable = new DisposableCollection();
@@ -256,7 +256,7 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
-    attachPopupToRange(range: ITextRange, popup: IDocCanvasPopup): IDisposable {
+    attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup): IDisposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
         const unitId = workbook.getUnitId();
         const { direction = 'top' } = popup;

@@ -32,6 +32,8 @@ export interface ILinkInfo {
     unitId: string;
     linkId: string;
     rangeIndex: number;
+    segmentId?: string;
+    segmentPage?: number;
 }
 
 export class DocHyperLinkPopupService extends Disposable {
@@ -127,7 +129,7 @@ export class DocHyperLinkPopupService extends Disposable {
         if (!doc || !link) {
             return;
         }
-        const range = doc.getBody()?.customRanges?.[rangeIndex];
+        const range = doc.getSelfOrHeaderFooterModel(info.segmentId).getBody()?.customRanges?.[rangeIndex];
         this._showingLink$.next({ unitId, linkId, rangeIndex });
         if (!range) {
             return;
@@ -138,6 +140,8 @@ export class DocHyperLinkPopupService extends Disposable {
                 collapsed: false,
                 startOffset: range.startIndex + SKIT_PLACEHOLDER,
                 endOffset: range.endIndex + 1,
+                segmentId: info.segmentId,
+                segmentPage: info.segmentPage,
             },
             {
                 componentKey: DocLinkPopup.componentKey,

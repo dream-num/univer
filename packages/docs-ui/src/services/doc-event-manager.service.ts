@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, IParagraph, ITextRange } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam } from '@univerjs/core';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IMouseEvent, IPointerEvent, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
@@ -26,18 +26,20 @@ interface ICustomRangeBound {
     customRange: ICustomRange;
     rects: IBoundRectNoAngle[];
     segmentId?: string;
+    segmentPageIndex: number;
 }
 
 interface IBulletBound {
     rect: IBoundRectNoAngle;
     segmentId?: string;
+    segmentPageIndex: number;
     paragraph: IParagraph;
 }
 
-const calcDocRangePositions = (range: ITextRange, documents: Documents, skeleton: DocumentSkeleton): IBoundRectNoAngle[] | undefined => {
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset);
-    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset);
-
+const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, skeleton: DocumentSkeleton, pageIndex: number): IBoundRectNoAngle[] | undefined => {
+    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, pageIndex);
+    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, true, range.segmentId, pageIndex);
+    // console.log('===startPosition', range, startPosition, endPosition);
     if (!endPosition || !startPosition) {
         return;
     }
@@ -123,28 +125,43 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private _buildCustomRangeBoundsBySegment(segmentId?: string) {
         const customRanges = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
         const layouts: ICustomRangeBound[] = [];
+
         customRanges.forEach((range) => {
-            const textRange = {
+            const textRange: ITextRangeParam = {
                 startOffset: range.startIndex,
                 endOffset: range.endIndex,
                 collapsed: false,
-            };
-            const rects = calcDocRangePositions(textRange, this._documents, this._skeleton);
-            if (!rects) {
-                return null;
-            }
-            const documentOffsetConfig = this._documents.getOffsetConfig();
-
-            layouts.push({
-                customRange: range,
-                rects: rects.map((rect) => ({
-                    top: rect.top + documentOffsetConfig.docsTop,
-                    bottom: rect.bottom + documentOffsetConfig.docsTop,
-                    left: rect.left + documentOffsetConfig.docsLeft,
-                    right: rect.right + documentOffsetConfig.docsLeft,
-                })),
                 segmentId,
-            });
+            };
+
+            const calcRect = (pageIndex: number) => {
+                const rects = calcDocRangePositions(textRange, this._documents, this._skeleton, pageIndex);
+                if (!rects) {
+                    return null;
+                }
+                const documentOffsetConfig = this._documents.getOffsetConfig();
+
+                layouts.push({
+                    customRange: range,
+                    rects: rects.map((rect) => ({
+                        top: rect.top + documentOffsetConfig.docsTop,
+                        bottom: rect.bottom + documentOffsetConfig.docsTop,
+                        left: rect.left + documentOffsetConfig.docsLeft,
+                        right: rect.right + documentOffsetConfig.docsLeft,
+                    })),
+                    segmentId,
+                    segmentPageIndex: pageIndex,
+                });
+            };
+
+            if (segmentId) {
+                const pageSize = (this._skeleton.getSkeletonData()?.pages.length ?? 0);
+                for (let i = 0; i < pageSize; i++) {
+                    calcRect(i);
+                }
+            } else {
+                calcRect(-1);
+            }
         });
 
         return layouts;
@@ -156,13 +173,13 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         }
         this._customRangeDirty = false;
 
-        const headerKeys = this._context.unit.headerModelMap.keys();
-        const footerKeys = this._context.unit.footerModelMap.keys();
+        const headerKeys = Array.from(this._context.unit.headerModelMap.keys());
+        const footerKeys = Array.from(this._context.unit.footerModelMap.keys());
 
         this._customRangeBounds = [
             ...this._buildCustomRangeBoundsBySegment(),
-            ...Array.from(headerKeys).flatMap((key) => this._buildCustomRangeBoundsBySegment(key)),
-            ...Array.from(footerKeys).flatMap((key) => this._buildCustomRangeBoundsBySegment(key)),
+            ...(headerKeys.map((key) => this._buildCustomRangeBoundsBySegment(key)).flat()),
+            ...(footerKeys.map((key) => this._buildCustomRangeBoundsBySegment(key)).flat()),
         ];
     }
 

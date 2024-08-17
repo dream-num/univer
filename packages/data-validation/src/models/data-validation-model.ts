@@ -161,10 +161,10 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         return manager.getDataValidations();
     }
 
-    validator(content: Nullable<CellValue>, rule: T, pos: any) {
+    validator(rule: T, pos: any, value: any) {
         const { unitId, subUnitId } = pos;
         const manager = this.ensureManager(unitId, subUnitId);
-        return manager.validator(content, rule, pos, (status, changed) => {
+        return manager.validator(value, rule, pos, (status, changed) => {
             if (changed) {
                 this._validStatusChange$.next({
                     unitId,

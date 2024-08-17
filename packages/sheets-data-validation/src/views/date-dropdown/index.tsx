@@ -16,7 +16,7 @@
 
 import React, { useState } from 'react';
 import type { CellValue, Nullable } from '@univerjs/core';
-import { DataValidationErrorStyle, ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { CellValueType, DataValidationErrorStyle, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import dayjs from 'dayjs';
@@ -74,6 +74,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
         // convert current date to utc date
         const dateStr = `${newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00').split(' ').join('T')}Z`;
         const serialTime = timestamp2SerialTime(dayjs(dateStr).unix());
+
         if (
             rule.errorStyle !== DataValidationErrorStyle.STOP ||
             (await validator.validator({
@@ -84,6 +85,8 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 column: col,
                 worksheet,
                 workbook,
+                interceptValue: dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss'),
+                t: CellValueType.NUMBER,
             }, rule))
         ) {
             commandService.executeCommand(SetRangeValuesCommand.id, {

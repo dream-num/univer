@@ -183,7 +183,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
-                    priority: 200,
+                    // must be after numfmt
+                    priority: 9,
                     // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
@@ -210,8 +211,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-                        const cellRaw = worksheet.getCellRaw(pos.row, pos.col);
-                        const validStatus = this._dataValidationModel.validator(getCellValueOrigin(cellRaw), rule, pos);
+                        const validStatus = this._dataValidationModel.validator(rule, pos, cell);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellValue = getCellValueOrigin(cell);
 
@@ -389,7 +389,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
-                    priority: 200,
+                    priority: 9,
                     // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
@@ -416,8 +416,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-                        const cellRaw = pos.worksheet.getCellRaw(pos.row, pos.col);
-                        const validStatus = this._dataValidationModel.validator(getCellValueOrigin(cellRaw), rule, pos);
+                        const validStatus = this._dataValidationModel.validator(rule, pos, cell);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellValue = getCellValueOrigin(cell);
 

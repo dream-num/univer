@@ -42,15 +42,15 @@ export class SheetsDataValidationValidatorService {
             throw new Error(`cannot find current worksheet, sheetId: ${subUnitId}`);
         }
 
-        const cellRaw = worksheet.getCellRaw(row, col);
         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+        const cell = worksheet.getCell(row, col);
         const rule = manager.getRuleByLocation(row, col);
         if (!rule) {
             return DataValidationStatus.VALID;
         }
 
         return new Promise<DataValidationStatus>((resolve) => {
-            manager.validator(getCellValueOrigin(cellRaw), rule, { unitId, subUnitId, row, col, worksheet, workbook }, resolve);
+            manager.validator(cell, rule, { unitId, subUnitId, row, col, worksheet, workbook }, resolve);
         });
     }
 

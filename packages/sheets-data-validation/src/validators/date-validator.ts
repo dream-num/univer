@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, isFormulaString, numfmt, Tools } from '@univerjs/core';
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import dayjs from 'dayjs';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
@@ -88,11 +88,9 @@ export class DateValidator extends BaseDataValidator<number> {
     }
 
     override async isValidType(info: IValidatorCellInfo): Promise<boolean> {
-        const { value, worksheet, row, column } = info;
-        const cell = worksheet.getCell(row, column);
-        const interceptValue = getCellValueOrigin(cell);
-        if (typeof interceptValue === 'string' && typeof value === 'number') {
-            return dayjs(interceptValue).isValid();
+        const { interceptValue } = info;
+        if (typeof interceptValue === 'string') {
+            return Boolean(numfmt.parseDate(interceptValue));
         }
 
         return false;

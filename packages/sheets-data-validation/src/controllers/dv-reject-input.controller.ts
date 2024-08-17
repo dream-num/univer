@@ -58,12 +58,14 @@ export class DataValidationRejectInputController extends Disposable {
                     const success = await validator.validator(
                         {
                             value: getCellValueOrigin(cell),
+                            interceptValue: getCellValueOrigin(cell),
                             row,
                             column: col,
                             unitId,
                             subUnitId,
                             worksheet,
                             workbook,
+                            t: cell?.t,
                         }, rule
                     );
 

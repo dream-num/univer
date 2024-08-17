@@ -123,7 +123,7 @@ export class DataValidationManager<T extends IDataValidationRule> extends Dispos
         return this._dataValidations;
     }
 
-    validator(_content: Nullable<CellValue>, _rule: IDataValidationRule, _pos: any, _onComplete: (status: DataValidationStatus, changed: boolean) => void) {
+    validator(_value: any, _rule: IDataValidationRule, _pos: any, _onComplete: (status: DataValidationStatus, changed: boolean) => void) {
         return DataValidationStatus.VALID;
     }
 }

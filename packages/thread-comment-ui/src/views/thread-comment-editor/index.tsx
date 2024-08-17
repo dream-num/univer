@@ -84,6 +84,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
             });
             setEditing(false);
             setLocalComment({ text: undefined });
+            (inputRef.current as any)?.inputElement.blur();
         }
     };
 

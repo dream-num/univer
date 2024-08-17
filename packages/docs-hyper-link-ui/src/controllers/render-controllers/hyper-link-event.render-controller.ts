@@ -51,6 +51,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                                     linkId: link.range.rangeId,
                                     segmentId: link.segmentId,
                                     rangeIndex: linkIndex,
+                                    segmentPage: link.segmentPageIndex,
                                 }
                             );
                         }

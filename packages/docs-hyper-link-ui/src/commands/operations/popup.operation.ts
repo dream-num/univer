@@ -88,6 +88,7 @@ export interface IShowDocHyperLinkInfoPopupOperationParams {
     segmentId?: string;
     unitId: string;
     rangeIndex: number;
+    segmentPage?: number;
 }
 
 export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IShowDocHyperLinkInfoPopupOperationParams> = {

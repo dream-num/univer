@@ -106,8 +106,8 @@ export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRe
 
     const { scaleX, scaleY } = scene.getAncestorScale();
     const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-    const { contentBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
-    const bounds = getLineBounding(contentBoxPointGroup);
+    const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
+    const bounds = getLineBounding(borderBoxPointGroup);
     const res = bounds.map((bound) => transformBound2OffsetBound(bound, scene)).map((i) => ({
         left: (i.left + docsLeft * scaleX) * scaleAdjust + left,
         right: (i.right + docsLeft * scaleX) * scaleAdjust + left,

@@ -53,10 +53,10 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
 };
 
 export class DocEventManagerService extends Disposable implements IRenderModule {
-    private _hoverCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string }[]>();
-    readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId)));
+    private _hoverCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string; segmentPageIndex: number }[]>();
+    readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex)));
 
-    private _clickCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string }>();
+    private _clickCustomRanges$ = new Subject<{ range: ICustomRange; segmentId?: string; segmentPageIndex: number }>();
     readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();
 
     private _customRangeDirty = true;
@@ -202,6 +202,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             (range) => ({
                 segmentId: range.segmentId,
                 range: range.customRange,
+                segmentPageIndex: range.segmentPageIndex,
             })
         );
     }

@@ -18,7 +18,6 @@ import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } fr
 import { DataValidationStatus, Inject, IUniverInstanceService, Range, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
-import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { IDataValidationResCache } from './dv-cache.service';
 import { DataValidationCacheService } from './dv-cache.service';
 

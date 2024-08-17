@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
+import type { IDataValidationRule } from '@univerjs/core';
 import { DataValidationStatus, Disposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';

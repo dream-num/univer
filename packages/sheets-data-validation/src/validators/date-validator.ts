@@ -27,7 +27,6 @@ import { getFormulaResult } from '../utils/formula';
 import { DATE_DROPDOWN_KEY } from '../views';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DateShowTimeOption } from '../views/show-time';
-import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';

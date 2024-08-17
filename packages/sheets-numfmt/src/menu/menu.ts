@@ -16,7 +16,6 @@
 
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import {
-    INumfmtService,
     RangeProtectionPermissionEditPoint,
     RemoveNumfmtMutation,
     SetNumfmtMutation,
@@ -29,8 +28,9 @@ import type { IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { merge, Observable } from 'rxjs';
-
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
+import { countryCurrencyMap } from '../base/const/CURRENCY-SYMBOLS';
+
 import { MENU_OPTIONS } from '../base/const/MENU-OPTIONS';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set-currency.command';
@@ -39,10 +39,28 @@ import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.pane
 import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../components/more-numfmt-type/MoreNumfmtType';
 import { isPatternEqualWithoutDecimal } from '../utils/decimal';
 import { SetPercentCommand } from '../commands/commands/set-percent.command';
+import { NumfmtMenuController } from '../controllers/numfmt.menu.controller';
 
 export const CurrencyMenuItem = (accessor: IAccessor) => {
     return {
-        icon: 'RmbSingle',
+        icon: new Observable<string>((subscribe) => {
+            const numfmtMenuController = accessor.get(NumfmtMenuController);
+            function getIconKey(symbol: string) {
+                const iconMap: Record<string, string> = {
+                    [countryCurrencyMap.US]: 'DollarSingle',
+                    [countryCurrencyMap.RU]: 'RoubleSingle',
+                    [countryCurrencyMap.CN]: 'RmbSingle',
+                    [countryCurrencyMap.AT]: 'EuroSingle',
+                };
+                return iconMap[symbol] || 'DollarSingle';
+            }
+            const symbol = countryCurrencyMap[numfmtMenuController.getCurrencySymbol()] || '$';
+            subscribe.next(getIconKey(symbol));
+            return numfmtMenuController.currencySymbol$.subscribe((code) => {
+                const symbol = countryCurrencyMap[code] || '$';
+                subscribe.next(getIconKey(symbol));
+            });
+        }),
         id: SetCurrencyCommand.id,
         title: 'sheet.numfmt.currency',
         tooltip: 'sheet.numfmt.currency',
@@ -99,7 +117,6 @@ export const PercentMenuItem = (accessor: IAccessor) => {
 };
 
 export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => {
-    const numfmtService = accessor.get(INumfmtService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
     const localeService = accessor.get(LocaleService);

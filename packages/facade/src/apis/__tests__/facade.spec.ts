@@ -290,6 +290,10 @@ describe('Test FUniver', () => {
             },
             {
                 data: '{}',
+                name: 'SHEET_FILTER_PLUGIN',
+            },
+            {
+                data: '{}',
                 name: 'SHEET_DATA_VALIDATION_PLUGIN',
             },
         ]);

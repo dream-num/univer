@@ -63,7 +63,7 @@ export class FWorksheet {
         return this._injector.createInstance(FSelection, this._workbook, this._worksheet, selections);
     }
 
-    getRange(row: number, col: number, height?: number, width?: number): FRange | null {
+    getRange(row: number, col: number, height?: number, width?: number): FRange {
         const range: IRange = {
             startRow: row,
             endRow: row + (height ?? 1) - 1,

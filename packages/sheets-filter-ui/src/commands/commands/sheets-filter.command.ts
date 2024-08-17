@@ -14,61 +14,37 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, Quantity, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-import { expandToContinuousRange, isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
+import { expandToContinuousRange, getSheetCommandTarget, isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
 import type { FilterColumn, IAutoFilter, IFilterColumn, IReCalcSheetsFilterMutationParams, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
 import { IMessageService } from '@univerjs/ui';
 
-/**
- * This command is for toggling filter in the currently active Worksheet.
- */
-export const SmartToggleSheetsFilterCommand: ICommand = {
-    id: 'sheet.command.smart-toggle-filter',
+export interface ISetSheetFilterRangeCommandParams extends ISheetCommandSharedParams {
+    range: IRange;
+}
+
+export const SetSheetFilterRangeCommand: ICommand<ISetSheetFilterRangeCommandParams> = {
+    id: 'sheet.command.set-filter-range',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
+    handler: (accessor, params: ISetSheetFilterRangeCommandParams) => {
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const instanceSrv = accessor.get(IUniverInstanceService);
 
-        const currentWorkbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        const currentWorksheet = currentWorkbook?.getActiveSheet();
-        if (!currentWorksheet || !currentWorkbook) return false;
+        const { unitId, subUnitId, range } = params;
 
-        const unitId = currentWorkbook.getUnitId();
-        const subUnitId = currentWorksheet.getSheetId();
+        const commandTarget = getSheetCommandTarget(instanceSrv, params);
+        if (!commandTarget) return false;
 
-        // If there is a filter model, we should remove it and prepare undo redo.
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
-        if (filterModel) {
-            const autoFilter = filterModel?.serialize();
-            const undoMutations = destructFilterModel(unitId, subUnitId, autoFilter);
-            const result = commandService.syncExecuteCommand(RemoveSheetsFilterMutation.id, { unitId, subUnitId });
-            if (result) {
-                undoRedoService.pushUndoRedo({
-                    unitID: unitId,
-                    undoMutations,
-                    redoMutations: [{ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } }],
-                });
-            }
+        if (!filterModel) return false;
 
-            return result;
-        }
-
-        const selectionManager = accessor.get(SheetsSelectionsService);
-        const lastSelection = selectionManager.getCurrentLastSelection();
-        if (!lastSelection) return false;
-
-        const startRange = lastSelection.range;
-        const targetFilterRange = isSingleCellSelection(lastSelection)
-            ? expandToContinuousRange(startRange, { left: true, right: true, up: true, down: true }, currentWorksheet)
-            : startRange;
-
-        if (targetFilterRange.endRow === targetFilterRange.startRow) {
+        if (range.endRow === range.startRow) {
             const messageService = accessor.get(IMessageService, Quantity.OPTIONAL);
             const localeService = accessor.get(LocaleService);
             messageService?.show({ type: MessageType.Warning, content: localeService.t('sheets-filter.command.not-valid-filter-range') });
@@ -76,7 +52,7 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
         }
 
         // Execute the command to set filter range and prepare undo redo.
-        const redoMutation = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: targetFilterRange } };
+        const redoMutation = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range } };
         const result = commandService.syncExecuteCommand(redoMutation.id, redoMutation.params);
         if (result) {
             undoRedoService.pushUndoRedo({
@@ -90,10 +66,85 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
     },
 };
 
+export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
+    id: 'sheet.command.remove-sheet-filter',
+    type: CommandType.COMMAND,
+    handler: (accessor, params: ISheetCommandSharedParams) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetsFilterService = accessor.get(SheetsFilterService);
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+
+        const commandTarget = getSheetCommandTarget(univerInstanceService, params);
+        if (!commandTarget) return false;
+
+        // If there is a filter model, we should remove it and prepare undo redo.
+        const { unitId, subUnitId } = commandTarget;
+        const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
+        if (!filterModel) return false;
+
+        const autoFilter = filterModel?.serialize();
+        const undoMutations = destructFilterModel(unitId, subUnitId, autoFilter);
+        const result = commandService.syncExecuteCommand(RemoveSheetsFilterMutation.id, { unitId, subUnitId });
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations,
+                redoMutations: [{ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId } }],
+            });
+        }
+
+        return result;
+    },
+};
+
+/**
+ * This command is for toggling filter in the currently active Worksheet.
+ */
+export const SmartToggleSheetsFilterCommand: ICommand = {
+    id: 'sheet.command.smart-toggle-filter',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetsFilterService = accessor.get(SheetsFilterService);
+        const commandService = accessor.get(ICommandService);
+
+        const currentWorkbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const currentWorksheet = currentWorkbook?.getActiveSheet();
+        if (!currentWorksheet || !currentWorkbook) return false;
+
+        const unitId = currentWorkbook.getUnitId();
+        const subUnitId = currentWorksheet.getSheetId();
+
+        // If there is a filter model, we should remove it and prepare undo redo.
+        const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
+        if (filterModel) {
+            return commandService.executeCommand(RemoveSheetFilterCommand.id, { unitId, subUnitId });
+        }
+
+        // Other wise we should set the filter range to the current selection.
+        const selectionManager = accessor.get(SheetsSelectionsService);
+        const lastSelection = selectionManager.getCurrentLastSelection();
+        if (!lastSelection) return false;
+
+        const startRange = lastSelection.range;
+        const targetFilterRange = isSingleCellSelection(lastSelection)
+            ? expandToContinuousRange(startRange, { left: true, right: true, up: true, down: true }, currentWorksheet)
+            : startRange;
+
+        return commandService.executeCommand(SetSheetFilterRangeCommand.id, {
+            unitId,
+            subUnitId,
+            range: targetFilterRange,
+        } as ISetSheetFilterRangeCommandParams);
+    },
+};
+
 export interface ISetSheetsFilterCriteriaCommandParams extends ISheetCommandSharedParams {
     col: number;
     criteria: Nullable<IFilterColumn>;
 }
+
 /**
  * This command is for setting filter criteria to a column in the targeting `FilterModel`.
  */
@@ -107,14 +158,10 @@ export const SetSheetsFilterCriteriaCommand: ICommand<ISetSheetsFilterCriteriaCo
 
         const { unitId, subUnitId, col, criteria } = params;
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
-        if (!filterModel) {
-            return false;
-        }
+        if (!filterModel) return false;
 
         const range = filterModel.getRange();
-        if (!range || col < range.startColumn || col > range.endColumn) {
-            return false;
-        }
+        if (!range || col < range.startColumn || col > range.endColumn) return false;
 
         const filterColumn = filterModel.getFilterColumn(col);
         const undoMutation = destructFilterColumn(unitId, subUnitId, col, filterColumn);
@@ -144,56 +191,60 @@ export const SetSheetsFilterCriteriaCommand: ICommand<ISetSheetsFilterCriteriaCo
 /**
  * This command is for clearing all filter criteria in the currently active `FilterModel`.
  */
-export const ClearSheetsFilterCriteriaCommand: ICommand = {
+export const ClearSheetsFilterCriteriaCommand: ICommand<ISheetCommandSharedParams> = {
     id: 'sheet.command.clear-filter-criteria',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor) => {
+    handler: (accessor: IAccessor, params) => {
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
+        const instanceSrv = accessor.get(IUniverInstanceService);
 
-        const currentFilterModel = sheetsFilterService.activeFilterModel;
-        if (!currentFilterModel) {
-            return false;
-        }
+        const commandTarget = getSheetCommandTarget(instanceSrv, params);
+        if (!commandTarget) return false;
 
-        // TODO@wzhudev: should also return when no filter criteria is set
+        const { unitId, subUnitId } = commandTarget;
+        const filterModel = sheetsFilterService.getFilterModel(commandTarget.unitId, commandTarget.subUnitId);
+        if (!filterModel) return false;
 
-        const { unitId, subUnitId } = currentFilterModel;
-        const autoFilter = currentFilterModel.serialize();
+        const autoFilter = filterModel.serialize();
         const undoMutations = destructFilterCriteria(unitId, subUnitId, autoFilter);
         const redoMutations = generateRemoveCriteriaMutations(unitId, subUnitId, autoFilter);
 
         const result = sequenceExecute(redoMutations, commandService);
-        if (result) {
+        if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations,
                 redoMutations,
             });
+
+            return true;
         }
 
-        return true;
+        return false;
     },
 };
 
 /**
  * This command force the currently active `FilterModel` to re-calculate all filter criteria.
  */
-export const ReCalcSheetsFilterCommand: ICommand = {
+export const ReCalcSheetsFilterCommand: ICommand<ISheetCommandSharedParams> = {
     id: 'sheet.command.re-calc-filter',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor) => {
+    handler: (accessor, params) => {
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const commandService = accessor.get(ICommandService);
+        const instanceSrv = accessor.get(IUniverInstanceService);
 
-        const currentFilterModel = sheetsFilterService.activeFilterModel;
-        if (!currentFilterModel) {
-            return false;
-        }
+        const commandTarget = getSheetCommandTarget(instanceSrv, params);
+        if (!commandTarget) return false;
+
+        const { unitId, subUnitId } = commandTarget;
+        const filterModel = sheetsFilterService.getFilterModel(commandTarget.unitId, commandTarget.subUnitId);
+        if (!filterModel) return false;
 
         // No need to handle undo redo for this command.
-        const { unitId, subUnitId } = currentFilterModel;
         return commandService.executeCommand(ReCalcSheetsFilterMutation.id, { unitId, subUnitId } as IReCalcSheetsFilterMutationParams);
     },
 };

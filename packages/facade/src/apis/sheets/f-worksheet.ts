@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import { ICommandService, type IRange, type Workbook, type Worksheet } from '@univerjs/core';
+import { ICommandService, type IRange, type Nullable, type Workbook, type Worksheet } from '@univerjs/core';
 import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
 import { SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { Inject, Injector } from '@univerjs/core';
 
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import type { FilterModel } from '@univerjs/sheets-filter';
+import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { FDataValidation } from './f-data-validation';
+import { FFilter } from './f-filter';
 
 export class FWorksheet {
     constructor(
@@ -139,4 +142,22 @@ export class FWorksheet {
             this._worksheet.getSheetId()
         );
     }
+
+    // #region Filter
+
+    getFilter(): FFilter | null {
+        const filterModel = this._getFilterModel();
+        if (!filterModel) return null;
+
+        return this._injector.createInstance(FFilter, this._workbook, this._worksheet, filterModel);
+    }
+
+    private _getFilterModel(): Nullable<FilterModel> {
+        return this._injector.get(SheetsFilterService).getFilterModel(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId()
+        );
+    }
+
+    // #endregion
 }

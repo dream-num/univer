@@ -24,7 +24,11 @@ export {
     SmartToggleSheetsFilterCommand,
     SetSheetsFilterCriteriaCommand,
     ClearSheetsFilterCriteriaCommand,
+    SetSheetFilterRangeCommand,
+    RemoveSheetFilterCommand,
+    type ISetSheetFilterRangeCommandParams,
     ReCalcSheetsFilterCommand,
+    type ISetSheetsFilterCriteriaCommandParams,
 } from './commands/commands/sheets-filter.command';
 export {
     OpenFilterPanelOperation,

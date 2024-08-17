@@ -50,6 +50,10 @@ import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/s
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
 import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import type { FilterModel } from '@univerjs/sheets-filter';
+import { SheetsFilterService } from '@univerjs/sheets-filter';
+import type { ISetSheetFilterRangeCommandParams } from '@univerjs/sheets-filter-ui';
+import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import {
     covertCellValue,
@@ -61,6 +65,7 @@ import {
     transformFacadeVerticalAlignment,
 } from './utils';
 import { FDataValidation } from './f-data-validation';
+import { FFilter } from './f-filter';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
@@ -586,6 +591,8 @@ export class FRange {
         return copyContent?.html ?? '';
     }
 
+    // #region DataValidation
+
     /**
      * set a data validation rule to current range
      * @param rule data validation rule, build by `FUniver.newDataValidation`
@@ -658,4 +665,50 @@ export class FRange {
             [this._range]
         );
     }
+
+    // #endregion
+
+    // #region Filter
+
+    /**
+     * Create a filter for the current range. If the worksheet already has a filter, this method would return `null`.
+     *
+     * @returns The interface class to handle the filter. If the worksheet already has a filter,
+     * this method would return `null`.
+     */
+    async createFilter(): Promise<FFilter | null> {
+        if (this._getFilterModel()) return null;
+
+        const success = await this._commandService.executeCommand(SetSheetFilterRangeCommand.id, <ISetSheetFilterRangeCommandParams>{
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+        });
+
+        if (!success) return null;
+
+        return this.getFilter();
+    }
+
+    /**
+     * Get the filter for the current range's worksheet.
+     *
+     * @returns The interface class to handle the filter. If the worksheet does not have a filter,
+     * this method would return `null`.
+     */
+    getFilter(): FFilter | null {
+        const filterModel = this._getFilterModel();
+        if (!filterModel) return null;
+
+        return this._injector.createInstance(FFilter, this._workbook, this._worksheet, filterModel);
+    }
+
+    private _getFilterModel(): Nullable<FilterModel> {
+        return this._injector.get(SheetsFilterService).getFilterModel(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId()
+        );
+    }
+
+    // #endregion
 }

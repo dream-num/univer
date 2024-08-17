@@ -26,7 +26,7 @@ import { FilterSingle } from '@univerjs/icons';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { MessageType } from '@univerjs/design';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
@@ -88,6 +88,8 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     private _initCommands(): void {
         [
             SmartToggleSheetsFilterCommand,
+            RemoveSheetFilterCommand,
+            SetSheetFilterRangeCommand,
             SetSheetsFilterCriteriaCommand,
             ClearSheetsFilterCriteriaCommand,
             ReCalcSheetsFilterCommand,

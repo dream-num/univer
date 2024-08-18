@@ -14,5 +14,9 @@
  * limitations under the License.
  */
 
-export * from './plugin-name';
-export * from './ui-name.ts';
+import { Disposable } from '@univerjs/core';
+import type { IRenderModule } from '@univerjs/engine-render';
+
+export class SheetCrosshairHighlightRenderController extends Disposable implements IRenderModule {
+
+}

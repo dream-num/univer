@@ -19,7 +19,7 @@ import { CommandType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import { SheetPermissionPanelModel } from '../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
-import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../basics/const/permission';
+import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../consts/permission';
 
 export interface IPermissionOpenPanelParam {
     fromSheetBar?: boolean;

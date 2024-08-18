@@ -25,7 +25,7 @@ import { SheetPermissionUserManagerService } from '../../../services/permission/
 import { getUserListEqual } from '../../../common/utils';
 import { SetProtectionCommand } from '../../../commands/commands/range-protection.command';
 import { AddWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
-import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../basics/const/permission';
+import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../consts/permission';
 import styles from './index.module.less';
 
 export const SheetPermissionPanelDetailFooter = () => {

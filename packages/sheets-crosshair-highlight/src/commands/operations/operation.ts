@@ -1,0 +1,67 @@
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { CommandType, type IOperation } from '@univerjs/core';
+import { SheetsCrosshairHighlightService } from '../../services/ch.service';
+
+export const ToggleCrosshairHighlightOperation: IOperation = {
+    id: 'sheet.operation.toggle-crosshair-highlight',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const service = accessor.get(SheetsCrosshairHighlightService);
+        const turnedOn = service.turnedOn;
+        service.setTurnedOn(!turnedOn);
+        return true;
+    },
+};
+
+export const SetCrosshairHighlightColor: IOperation<{ color: string }> = {
+    id: 'sheet.operation.set-crosshair-highlight-color',
+    type: CommandType.OPERATION,
+    handler(accessor, { color }) {
+        const service = accessor.get(SheetsCrosshairHighlightService);
+        service.setColor(color);
+        return true;
+    },
+};
+
+export const TurnOnCrosshairHighlightOperation: IOperation = {
+    id: 'sheet.operation.turn-on-crosshair-highlight',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const service = accessor.get(SheetsCrosshairHighlightService);
+        if (service.turnedOn) {
+            return false;
+        }
+
+        service.setTurnedOn(true);
+        return true;
+    },
+};
+
+export const TurnOffCrosshairHighlightOperation: IOperation = {
+    id: 'sheet.operation.turn-off-crosshair-highlight',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const service = accessor.get(SheetsCrosshairHighlightService);
+        if (!service.turnedOn) {
+            return false;
+        }
+
+        service.setTurnedOn(false);
+        return true;
+    },
+};

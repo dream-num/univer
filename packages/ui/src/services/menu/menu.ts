@@ -28,6 +28,7 @@ export enum MenuPosition {
     TOOLBAR_VIEW = 'uiToolbar.view',
     TOOLBAR_OTHERS = 'uiToolbar.others',
     CONTEXT_MENU = 'contextMenu',
+    FOOTER = 'footer',
 }
 
 export enum MenuGroup {

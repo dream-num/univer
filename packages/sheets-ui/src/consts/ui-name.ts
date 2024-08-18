@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
-export * from './const';
+export enum SheetsUIPart {
+    FILTER_PANEL_EMBED_POINT = 'filter-panel-embed-point',
+    SHEETS_FOOTER = 'sheets-footer',
+}

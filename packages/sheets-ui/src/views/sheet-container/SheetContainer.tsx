@@ -17,7 +17,7 @@
 import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
 import React, { useMemo } from 'react';
-import { useObservable } from '@univerjs/ui';
+import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
 
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
@@ -26,15 +26,19 @@ import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
 import { useActiveWorkbook } from '../../components/hook';
+import { SheetsUIPart } from '../../consts/ui-name';
 import styles from './index.module.less';
 
 export function RenderSheetFooter() {
     const workbook = useActiveWorkbook();
     if (!workbook) return null;
 
+    const sheetsFooterComponents = useComponentsOfPart(SheetsUIPart.SHEETS_FOOTER);
+
     return (
         <section className={styles.sheetContainer} data-range-selector>
             <SheetBar />
+            <ComponentContainer components={sheetsFooterComponents} key="sheets-footer" />
             <StatusBar />
             <CountBar />
         </section>
@@ -68,5 +72,9 @@ export function RenderSheetContent() {
 function useHasWorkbook(): boolean {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
-    return useMemo(() => univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0, [univerInstanceService, workbook]);
+    return useMemo(
+        () => univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0,
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [univerInstanceService, workbook]
+    );
 }

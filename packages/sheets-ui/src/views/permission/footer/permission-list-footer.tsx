@@ -21,7 +21,7 @@ import { ISidebarService, useObservable } from '@univerjs/ui';
 import type { Workbook } from '@univerjs/core';
 import { WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
-import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../basics/const/permission';
+import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../consts/permission';
 import styles from './index.module.less';
 
 export const SheetPermissionPanelAddFooter = () => {

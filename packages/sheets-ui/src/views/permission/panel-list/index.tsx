@@ -32,7 +32,7 @@ import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
-import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../basics/const/permission';
+import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../consts/permission';
 import { useHighlightRange } from '../../../hooks/useHighlightRange';
 import { panelListEmptyBase64 } from './constant';
 import styles from './index.module.less';

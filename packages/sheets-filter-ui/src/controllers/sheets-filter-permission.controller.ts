@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LocaleService, Tools } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
@@ -36,14 +36,13 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 /**
  * This controller controls the UI of "filter" features. Menus, commands and filter panel etc. Except for the rendering.
  */
-@OnLifecycle(LifecycleStages.Ready, SheetsFilterPermissionController)
 export class SheetsFilterPermissionController extends Disposable {
     constructor(
         @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
         @Inject(LocaleService) private _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
-
+        @Inject(SheetPermissionInterceptorBaseController)
+        private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
     ) {
         super();
 

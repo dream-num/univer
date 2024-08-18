@@ -207,6 +207,10 @@ function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWor
             injector.add([RefRangeService]);
             injector.add([SheetsFilterController]);
         }
+
+        override onReady(): void {
+            this._injector.get(SheetsFilterController);
+        }
     }
 
     univer.registerPlugin(TestPlugin);

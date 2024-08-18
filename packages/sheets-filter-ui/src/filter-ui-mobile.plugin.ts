@@ -18,10 +18,10 @@ import { DependentOn, Inject, Injector, Plugin, Tools, UniverInstanceType } from
 import type { Dependency } from '@univerjs/core';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 
-import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui.controller';
-import { DefaultSheetFilterUiConfig } from './controllers/sheets-filter-ui.controller';
+import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui-desktop.controller';
+import { DefaultSheetFilterUiConfig } from './controllers/sheets-filter-ui-desktop.controller';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
-import { SheetsFilterMobileUIController } from './controllers/sheets-filter-mobile-ui.controller';
+import { SheetsFilterUIMobileController } from './controllers/sheets-filter-ui-mobile.controller';
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
@@ -42,7 +42,15 @@ export class UniverSheetsFilterMobileUIPlugin extends Plugin {
     override onStarting(): void {
         ([
             [SheetsFilterPermissionController],
-            [SheetsFilterMobileUIController],
+            [SheetsFilterUIMobileController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
+    }
+
+    override onReady(): void {
+        this._injector.get(SheetsFilterPermissionController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsFilterUIMobileController);
     }
 }

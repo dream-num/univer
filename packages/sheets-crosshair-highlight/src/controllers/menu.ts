@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { type IAccessor, IContextService } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
 import { type IMenuButtonItem, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { startWith } from 'rxjs';
-import { CROSSHAIR_HIGHLIGHT_TURNED_ON, ToggleCrosshairHighlightOperation } from '../commands/operations/operation';
+import { ToggleCrosshairHighlightOperation } from '../commands/operations/operation';
+import { SheetsCrosshairHighlightService } from '../services/ch.service';
 
 export function CrosshairMenuItemFactory(accessor: IAccessor): IMenuButtonItem<boolean> {
-    const contextService = accessor.get(IContextService);
+    const service = accessor.get(SheetsCrosshairHighlightService);
 
     return {
         id: ToggleCrosshairHighlightOperation.id,
@@ -29,6 +29,6 @@ export function CrosshairMenuItemFactory(accessor: IAccessor): IMenuButtonItem<b
         title: 'Crosshair Highlight',
         tooltip: 'Toggle crosshair highlight',
         positions: [MenuPosition.FOOTER],
-        activated$: contextService.subscribeContextValue$(CROSSHAIR_HIGHLIGHT_TURNED_ON).pipe(startWith(false)),
+        activated$: service.turnedOn$,
     };
 }

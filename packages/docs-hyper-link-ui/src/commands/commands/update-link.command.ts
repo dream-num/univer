@@ -63,6 +63,9 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
             return false;
         }
 
+        // doc don't support undo now
+        // so use an new id to replace the old link
+        // in case of undo or redo
         const addLinkMutation = {
             id: AddDocHyperLinkMutation.id,
             params: {

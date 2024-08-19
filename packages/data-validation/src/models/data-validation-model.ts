@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { type DataValidationStatus, Disposable, ICellDataForSheetInterceptor, type IDataValidationRule, ILogService, Nullable } from '@univerjs/core';
+import type { DataValidationStatus, ICellDataForSheetInterceptor, IDataValidationRule, Nullable } from '@univerjs/core';
+import { Disposable, ILogService } from '@univerjs/core';
 import { debounceTime, Subject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 import type { IDataValidationPos } from './data-validation-manager';

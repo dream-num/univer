@@ -19,7 +19,7 @@ import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { getLineBounding, NodePositionConvertToCursor, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { distinctUntilChanged, filter, Subject, throttleTime } from 'rxjs';
+import { animationFrameScheduler, distinctUntilChanged, filter, Subject, throttleTime } from 'rxjs';
 import { transformOffset2Bound } from './doc-popup-manager.service';
 
 interface ICustomRangeBound {
@@ -152,7 +152,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     }
 
     private _initEvents() {
-        this.disposeWithMe(fromEventSubject(this._context.scene.onPointerMove$).pipe(throttleTime(16)).subscribe((evt) => {
+        this.disposeWithMe(fromEventSubject(this._context.scene.onPointerMove$).pipe(throttleTime(0, animationFrameScheduler)).subscribe((evt) => {
             this._hoverCustomRanges$.next(
                 this._calcActiveRanges(evt)
             );

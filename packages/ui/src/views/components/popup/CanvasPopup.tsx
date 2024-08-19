@@ -18,7 +18,7 @@ import { useDependency } from '@univerjs/core';
 import React, { useEffect, useMemo, useState } from 'react';
 import { RectPopup } from '@univerjs/design';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
-import { throttleTime } from 'rxjs';
+import { animationFrameScheduler, throttleTime } from 'rxjs';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
 import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
@@ -31,8 +31,8 @@ interface ISingleCanvasPopupProps {
 
 const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
     const [hidden, setHidden] = useState(false);
-    const anchorRect$ = useMemo(() => popup.anchorRect$.pipe(throttleTime(16)), [popup.anchorRect$]);
-    const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(16)), [popup.excludeRects$]);
+    const anchorRect$ = useMemo(() => popup.anchorRect$.pipe(throttleTime(0, animationFrameScheduler)), [popup.anchorRect$]);
+    const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(0, animationFrameScheduler)), [popup.excludeRects$]);
     const anchorRect = useObservable(anchorRect$, popup.anchorRect);
     const excludeRects = useObservable(excludeRects$, popup.excludeRects);
     const { bottom, left, right, top } = anchorRect;

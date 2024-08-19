@@ -17,6 +17,7 @@
 import { useDependency, useObservable } from '@univerjs/core';
 import React from 'react';
 
+import { Dropdown } from '@univerjs/design';
 import { SheetsCrosshairHighlightService } from '../../services/ch.service';
 
 export const CROSSHAIR_HIGHLIGHT_COLORS = [];
@@ -27,18 +28,24 @@ export function CrosshairHighlight() {
     const crosshairHighlightColor = useObservable(service.color$);
 
     return (
-        <div>
-            Crosshair
-            {' '}
-            <span>
-                {crosshairHighlightColor}
-                -
-                {crosshairHighlightTurnedOn}
-            </span>
-        </div>
+        <Dropdown trigger="click" overlay={<CrosshairOverlay />} placement="top">
+            <div>
+                Crosshair
+                {' '}
+                <span>
+                    {crosshairHighlightColor}
+                    -
+                    {crosshairHighlightTurnedOn}
+                </span>
+            </div>
+        </Dropdown>
     );
 }
 
 function CrosshairOverlay() {
-    return <div></div>;
+    return (
+        <div>
+            Overlay Here
+        </div>
+    );
 }

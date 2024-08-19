@@ -25,7 +25,7 @@ import { IMessageService } from '@univerjs/ui';
 import { MockMessageService } from '@univerjs/ui/services/message/__testing__/mock-message.service.js';
 
 import type { ISetSheetsFilterCriteriaCommandParams } from '../sheets-filter.command';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../sheets-filter.command';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../sheets-filter.command';
 
 function testWorkbookDataFactory(): IWorkbookData {
     return {
@@ -112,6 +112,8 @@ function createFilterCommandTestBed() {
     [
         SetRangeValuesCommand,
         SetRangeValuesMutation,
+        RemoveSheetFilterCommand,
+        SetSheetFilterRangeCommand,
         SmartToggleSheetsFilterCommand,
         SetSheetsFilterCriteriaCommand,
         ClearSheetsFilterCriteriaCommand,

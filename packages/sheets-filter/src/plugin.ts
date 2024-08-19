@@ -34,4 +34,8 @@ export class UniverSheetsFilterPlugin extends Plugin {
             [SheetsFilterController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
+
+    override onReady(): void {
+        this._injector.get(SheetsFilterController);
+    }
 }

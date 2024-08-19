@@ -72,12 +72,8 @@ export class FWorkbook {
      * Get the active sheet of the workbook.
      * @returns The active sheet of the workbook
      */
-    getActiveSheet(): FWorksheet | null {
+    getActiveSheet(): FWorksheet {
         const activeSheet = this._workbook.getActiveSheet();
-        if (!activeSheet) {
-            return null;
-        }
-
         return this._injector.createInstance(FWorksheet, this._workbook, activeSheet);
     }
 

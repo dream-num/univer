@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, Injector, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, Injector, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
 import { DataValidationManager, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { DataValidationStatus, DataValidationType, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { IUpdateRulePayload } from '@univerjs/data-validation';
@@ -24,6 +24,7 @@ import type { IDataValidationResCache } from '../services/dv-cache.service';
 import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { RuleMatrix } from './rule-matrix';
 
 export class SheetDataValidationManager extends DataValidationManager<ISheetDataValidationRule> {
@@ -128,15 +129,20 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         return this.getRuleById(ruleId);
     }
 
-    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocation, onCompete: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
-        const { col, row, unitId, subUnitId } = pos;
+    override validator(cell: Nullable<ICellDataForSheetInterceptor>, rule: ISheetDataValidationRule, pos: ISheetLocation, onCompete: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
+        const { col, row, unitId, subUnitId, worksheet } = pos;
         const ruleId = rule.uid;
         const validator = this.getValidator(rule.type);
+        const cellRaw = worksheet.getCellRaw(row, col);
+        const cellValue = getCellValueOrigin(cellRaw);
+        const interceptValue = getCellValueOrigin(cell);
+
         if (validator) {
             const current = this._cache.getValue(row, col);
-            if (!current || current.value !== cellValue) {
+            if (!current || current.value !== cellValue || current.interceptValue !== interceptValue || current.ruleId !== ruleId) {
                 this._cache.setValue(row, col, {
                     value: cellValue,
+                    interceptValue,
                     status: DataValidationStatus.VALIDATING,
                     ruleId,
                 });
@@ -149,6 +155,8 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                         column: col,
                         worksheet: pos.worksheet,
                         workbook: pos.workbook,
+                        interceptValue: getCellValueOrigin(cell),
+                        t: cellRaw?.t,
                     },
                     rule
                 ).then((status) => {
@@ -157,6 +165,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                         value: cellValue,
                         status: realStatus,
                         ruleId,
+                        interceptValue,
                     });
                     onCompete(realStatus, true);
                 });

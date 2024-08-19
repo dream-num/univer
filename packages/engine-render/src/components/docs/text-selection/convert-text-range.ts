@@ -290,7 +290,7 @@ export class NodePositionConvertToCursor {
         const { start, end } = compareNodePosition(startOrigin, endOrigin);
 
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight, asc, paddingTop, marginTop } = line;
+            const { lineHeight, asc, paddingTop, marginTop, marginBottom } = line;
             const { glyphGroup, st } = divide;
             if (glyphGroup.length === 0) {
                 // The divide is empty, and no need to set selection.
@@ -328,7 +328,7 @@ export class NodePositionConvertToCursor {
                     startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
                     startY,
                     endX: startX + lastGlyphLeft + lastGlyphWidth,
-                    endY: startY + lineHeight - marginTop,
+                    endY: startY + lineHeight - marginTop - marginBottom,
                 };
 
                 contentBoxPosition = {
@@ -344,7 +344,7 @@ export class NodePositionConvertToCursor {
                     startX: startX + firstGlyphLeft + (isStartBackFin ? 0 : firstGlyphWidth),
                     startY,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + lineHeight - marginTop,
+                    endY: startY + lineHeight - marginTop - marginBottom,
                 };
 
                 contentBoxPosition = {

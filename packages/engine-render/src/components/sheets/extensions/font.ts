@@ -306,8 +306,9 @@ export class Font extends SheetExtension {
         }
 
         const { documentSkeleton, vertexAngle = 0, wrapStrategy } = docsConfig;
-        const cellWidth = endX - startX;
-        const cellHeight = endY - startY;
+        // Expect 1px for border. When set vertial align to bottom, underline would be invisible when cellHeight = endY - startY
+        const cellHeight = endY - startY - 1;
+        const cellWidth = endX - startX - 1;
 
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
@@ -336,9 +337,7 @@ export class Font extends SheetExtension {
         }
 
         documentSkeleton.makeDirty(false);
-
         documents.resize(cellWidth, cellHeight);
-
         documents.changeSkeleton(documentSkeleton).render(ctx);
     }
 

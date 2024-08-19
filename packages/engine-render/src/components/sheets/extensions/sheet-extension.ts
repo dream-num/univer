@@ -27,6 +27,16 @@ export enum SHEET_EXTENSION_TYPE {
 export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     override type = SHEET_EXTENSION_TYPE.GRID;
 
+    /**
+     * Get ISelectionCellWithMergeInfo by cell rowIndex and cell columnIndex.
+     * The startXY in return value does not include rowHeader and columnHeader.
+     * @param rowIndex
+     * @param columnIndex
+     * @param rowHeightAccumulation
+     * @param columnWidthAccumulation
+     * @param dataMergeCache
+     * @returns ISelectionCellWithMergeInfo
+     */
     getCellIndex(
         rowIndex: number,
         columnIndex: number,
@@ -34,6 +44,7 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         columnWidthAccumulation: number[],
         dataMergeCache: IRange[]
     ) {
+        // TODO @lumixraku: there are two coords in sheet!! This one does not include rowHeader and columnHeader. Should keep coord to be only one.
         return getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
     }
 

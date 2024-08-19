@@ -281,7 +281,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             }
             documentLayoutObject = blankModel;
         }
-
+        // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
+        documentLayoutObject.fill = documentLayoutObject.fill || '#fff';
         documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
 
         if (cell?.isInArrayFormulaRange === true) {

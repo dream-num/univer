@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IDataValidationRule, Nullable } from '@univerjs/core';
 import { DataValidationStatus, Disposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 import { UpdateRuleType } from '../types/enum/update-rule-type';
 import { getRuleOptions, getRuleSetting } from '../common/util';
+
+export interface IDataValidationPos {
+    row: number;
+    col: number;
+    unitId: string;
+    subUnitId: string;
+}
 
 export class DataValidationManager<T extends IDataValidationRule> extends Disposable {
     private _dataValidations: T[] = [];
@@ -123,7 +130,7 @@ export class DataValidationManager<T extends IDataValidationRule> extends Dispos
         return this._dataValidations;
     }
 
-    validator(_content: Nullable<CellValue>, _rule: IDataValidationRule, _pos: any, _onComplete: (status: DataValidationStatus, changed: boolean) => void) {
+    validator(_value: Nullable<ICellDataForSheetInterceptor>, _rule: IDataValidationRule, _pos: IDataValidationPos, _onComplete: (status: DataValidationStatus, changed: boolean) => void) {
         return DataValidationStatus.VALID;
     }
 }

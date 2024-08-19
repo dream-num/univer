@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, isFormulaString, numfmt, Tools } from '@univerjs/core';
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import dayjs from 'dayjs';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
-import { timestamp2SerialTime } from '../utils/date';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { DATE_DROPDOWN_KEY } from '../views';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DateShowTimeOption } from '../views/show-time';
-import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -41,9 +39,9 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
         return +value;
     }
 
-    // transform date to utc
-    const dateStr = `${dayjs(value).format('YYYY-MM-DD HH:mm:ss').split(' ').join('T')}Z`;
-    return timestamp2SerialTime(dayjs(dateStr).unix());
+    // transform date string to serial number
+    const dateStr = `${dayjs(value).format('YYYY-MM-DD HH:mm:ss')}`;
+    return numfmt.parseDate(dateStr)?.v;
 };
 
 export class DateValidator extends BaseDataValidator<number> {
@@ -88,11 +86,9 @@ export class DateValidator extends BaseDataValidator<number> {
     }
 
     override async isValidType(info: IValidatorCellInfo): Promise<boolean> {
-        const { value, worksheet, row, column } = info;
-        const cell = worksheet.getCell(row, column);
-        const interceptValue = getCellValueOrigin(cell);
-        if (typeof interceptValue === 'string' && typeof value === 'number') {
-            return dayjs(interceptValue).isValid();
+        const { interceptValue } = info;
+        if (typeof interceptValue === 'string') {
+            return Boolean(numfmt.parseDate(interceptValue));
         }
 
         return false;
@@ -206,7 +202,6 @@ export class DateValidator extends BaseDataValidator<number> {
         if (Number.isNaN(formula1)) {
             return true;
         }
-
         return cellInfo.value <= formula1;
     }
 

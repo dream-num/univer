@@ -21,8 +21,6 @@ import {
     ICommandService,
     IResourceManagerService,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     UniverInstanceType,
 } from '@univerjs/core';
 import { BehaviorSubject, filter, merge, of, switchMap } from 'rxjs';
@@ -53,7 +51,6 @@ export const SHEET_FILTER_SNAPSHOT_ID = 'SHEET_FILTER_PLUGIN';
 /**
  * This service is responsible for managing filter models, especially their lifecycle.
  */
-@OnLifecycle(LifecycleStages.Ready, SheetsFilterService)
 export class SheetsFilterService extends Disposable {
     private readonly _filterModels = new Map<string, Map<string, FilterModel>>();
 

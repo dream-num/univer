@@ -16,8 +16,8 @@
 
 import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, type ICommand, ICommandService, sequenceExecute } from '@univerjs/core';
 import { replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
+import type { IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
 import { AddDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
-import type { IAddDocHyperLinkMutationParams } from '../../../../docs-hyper-link/lib/types';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;

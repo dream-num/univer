@@ -23,6 +23,8 @@ const locale: typeof zhCN = {
             cancel: '取消',
             title: '連結',
             address: '連結地址',
+            label: '文本',
+            LabelError: '请输入链接文本',
             placeholder: '請輸入合法的連結',
             addressError: '請輸入合法的連結',
         },

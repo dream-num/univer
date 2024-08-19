@@ -23,6 +23,8 @@ const ruRU: typeof zhCN = {
             cancel: 'Отменить',
             title: 'Ссылка',
             address: 'Адрес ссылки',
+            label: 'Текст',
+            LabelError: 'Введите текст ссылки',
             placeholder: 'Пожалуйста, введите URL ссылки',
             addressError: 'URL некорректен!',
         },

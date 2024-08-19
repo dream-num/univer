@@ -54,7 +54,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         if (!previousActiveRange) {
             return false;
         }
-        const { startOffset, style, segmentId } = previousActiveRange;
+        const { style, segmentId } = previousActiveRange;
         const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
         if (body == null) {
@@ -63,6 +63,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         const insertRange = getInsertSelection(previousActiveRange, body);
         Object.assign(previousActiveRange, insertRange);
+        const { startOffset } = previousActiveRange;
 
         const len = newText.length;
 

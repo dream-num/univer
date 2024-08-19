@@ -197,9 +197,8 @@ export function lineBreaking(
     }
 
     let allPages = [curPage];
-    let paragraphStart = true;
-
-    for (const { text, glyphs, breakPointType } of shapedTextList) {
+    let isParagraphFirstShapedText = true; // 第一个分词
+    for (const [_index, { text, glyphs, breakPointType }] of shapedTextList.entries()) {
         const pushPending = () => {
             if (glyphs.length === 0) {
                 return;
@@ -211,11 +210,11 @@ export function lineBreaking(
                 allPages,
                 sectionBreakConfig,
                 paragraphConfig,
-                paragraphStart,
+                isParagraphFirstShapedText,
                 breakPointType
             );
 
-            paragraphStart = false;
+            isParagraphFirstShapedText = false;
         };
 
         if (text.endsWith(DataStreamTreeTokenType.PAGE_BREAK)) {

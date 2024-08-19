@@ -161,7 +161,7 @@ export const SheetPermissionDialog = () => {
                     read: ObjectScope.AllCollaborator,
                     edit: ObjectScope.AllCollaborator,
                 },
-                collaborators: [],
+                collaborators: undefined,
             }).then(() => {
                 getAllWorksheetPermissionPoint().forEach((F) => {
                     const instance = new F(unitId, subUnitId);

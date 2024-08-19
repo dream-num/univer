@@ -67,7 +67,7 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.8",
+        "@univerjs/protocol": "0.1.39-alpha.9",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "rxjs": "^7.8.1",

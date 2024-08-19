@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-// @ts-ignore
-import numfmt from 'numfmt';
+import { numfmt } from '@univerjs/core';
 
 /**
  * covert number to preview string by pattern

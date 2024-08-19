@@ -99,7 +99,7 @@ import {
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
  * service. You can create a similar clipboard controller to add logic for your own features.
  */
-@OnLifecycle(LifecycleStages.Steady, SheetClipboardController)
+@OnLifecycle(LifecycleStages.Rendered, SheetClipboardController)
 export class SheetClipboardController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -114,7 +114,6 @@ export class SheetClipboardController extends RxDisposable {
         @Optional(ITextSelectionRenderManager) private readonly _textSelectionRenderManager?: ITextSelectionRenderManager
     ) {
         super();
-
         this._init();
 
         this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
@@ -155,6 +154,7 @@ export class SheetClipboardController extends RxDisposable {
         this.disposeWithMe({ dispose: () => disposables.forEach((d) => d.dispose()) });
     }
 
+    //eslint-disable-next-line max-lines-per-function
     private _initCopyingHooks(): ISheetClipboardHook {
         const self = this;
         let currentSheet: Worksheet | null = null;
@@ -278,6 +278,7 @@ export class SheetClipboardController extends RxDisposable {
         };
     }
 
+    //eslint-disable-next-line max-lines-per-function
     private _initPastingHook(): ISheetClipboardHook {
         const self = this;
 
@@ -603,6 +604,7 @@ export class SheetClipboardController extends RxDisposable {
         });
     }
 
+    //eslint-disable-next-line max-lines-per-function
     private _initSpecialPasteHooks() {
         const self = this;
 

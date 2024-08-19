@@ -126,7 +126,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         super();
 
         this._initResetDirty();
-        this._initCustomRanges();
+        this._initEvents();
     }
 
     override dispose() {
@@ -151,7 +151,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         );
     }
 
-    private _initCustomRanges() {
+    private _initEvents() {
         this.disposeWithMe(fromEventSubject(this._context.scene.onPointerMove$).pipe(throttleTime(16)).subscribe((evt) => {
             this._hoverCustomRanges$.next(
                 this._calcActiveRanges(evt)
@@ -161,7 +161,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             );
         }));
 
-        this.disposeWithMe(this._context.scene.onPointerUp$.subscribeEvent((evt) => {
+        this.disposeWithMe(this._context.mainComponent!.onPointerDown$.subscribeEvent((evt) => {
             const ranges = this._calcActiveRanges(evt);
             if (ranges.length) {
                 this._clickCustomRanges$.next(ranges.pop()!);

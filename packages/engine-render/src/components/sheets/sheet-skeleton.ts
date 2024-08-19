@@ -1851,7 +1851,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             paddingData = {
                 t: 0,
                 r: 2,
-                b: 1,
+                b: 2, // must over 1, see https://github.com/dream-num/univer/issues/2727
                 l: 2,
             },
             horizontalAlign = HorizontalAlign.UNSPECIFIED,

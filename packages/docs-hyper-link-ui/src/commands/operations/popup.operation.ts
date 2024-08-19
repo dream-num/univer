@@ -51,9 +51,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const p = paragraphs[i];
         if (activeRange.startOffset <= p.startIndex && activeRange.endOffset > p.startIndex) {
-            const insertCustomRanges = getCustomRangesInterestsWithRange(activeRange, body.customRanges ?? []);
-            // can't insert hyperlink in range contains other custom ranges
-            return insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
+            return true;
         }
 
         if (p.startIndex > activeRange.endOffset!) {
@@ -61,7 +59,9 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         }
     }
 
-    return false;
+    const insertCustomRanges = getCustomRangesInterestsWithRange(activeRange, body.customRanges ?? []);
+    // can't insert hyperlink in range contains other custom ranges
+    return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
 };
 
 export interface IShowDocHyperLinkEditPopupOperationParams {

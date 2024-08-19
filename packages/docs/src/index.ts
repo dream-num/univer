@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { getCustomRangesInterestsWithRange } from './basics/custom-range';
 export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';
 export { replaceSelectionFactory } from './basics/replace';
 export { makeSelection, getSelectionText, getDeleteSelection, getInsertSelection, isSegmentIntersects } from './basics/selection';

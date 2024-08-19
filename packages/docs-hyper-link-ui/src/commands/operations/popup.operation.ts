@@ -15,8 +15,8 @@
  */
 
 import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
+import { CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSkeletonManagerService, getCustomRangesInterestsWithRange, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
@@ -42,7 +42,8 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         return true;
     }
 
-    const paragraphs = doc.getBody()?.paragraphs;
+    const body = doc.getBody();
+    const paragraphs = body?.paragraphs;
     if (!paragraphs) {
         return true;
     }
@@ -50,7 +51,9 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const p = paragraphs[i];
         if (activeRange.startOffset <= p.startIndex && activeRange.endOffset > p.startIndex) {
-            return true;
+            const insertCustomRanges = getCustomRangesInterestsWithRange(activeRange, body.customRanges ?? []);
+            // can't insert hyperlink in range contains other custom ranges
+            return insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
         }
 
         if (p.startIndex > activeRange.endOffset!) {

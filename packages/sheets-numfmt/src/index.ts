@@ -16,6 +16,8 @@
 
 export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
 export { getPatternPreview } from './utils/pattern';
+export { NumfmtMenuController } from './controllers/numfmt.menu.controller';
+export { countryCurrencyMap } from './base/const/CURRENCY-SYMBOLS';
 
 // #region - all commands
 

@@ -18,8 +18,10 @@ import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@uni
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 
+import { BehaviorSubject } from 'rxjs';
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
 import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../components/more-numfmt-type/MoreNumfmtType';
+import type { countryCurrencyMap } from '../base/const/CURRENCY-SYMBOLS';
 
 export interface IUniverSheetsNumfmtConfig {
     menu: MenuConfig;
@@ -29,6 +31,9 @@ export const DefaultSheetNumfmtConfig = {};
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtMenuController)
 export class NumfmtMenuController extends Disposable {
+    private _currencySymbol$ = new BehaviorSubject<keyof typeof countryCurrencyMap>('US');
+    public readonly currencySymbol$ = this._currencySymbol$.asObservable();
+
     constructor(
         private readonly _config: Partial<IUniverSheetsNumfmtConfig>,
         @Inject(Injector) private _injector: Injector,
@@ -49,5 +54,16 @@ export class NumfmtMenuController extends Disposable {
 
         this.disposeWithMe((this._componentManager.register(MORE_NUMFMT_TYPE_KEY, MoreNumfmtType)));
         this.disposeWithMe((this._componentManager.register(OPTIONS_KEY, Options)));
+    }
+
+    /**
+     * Set the currency symbol by setting the country code.
+     */
+    public setCurrencySymbolByCountryCode(symbol: keyof typeof countryCurrencyMap) {
+        this._currencySymbol$.next(symbol);
+    }
+
+    public getCurrencySymbol() {
+        return this._currencySymbol$.getValue();
     }
 }

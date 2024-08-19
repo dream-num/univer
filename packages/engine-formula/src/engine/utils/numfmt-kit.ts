@@ -15,8 +15,7 @@
  */
 
 import type { ICellData, Nullable, Styles } from '@univerjs/core';
-// @ts-ignore
-import numfmt from 'numfmt';
+import { numfmt } from '@univerjs/core';
 import { operatorToken } from '../../basics/token';
 
 const currencySymbols = [

@@ -34,8 +34,6 @@ export { CustomFilterOperator } from './models/types';
 export {
     type ISetSheetsFilterRangeMutationParams,
     type ISetSheetsFilterCriteriaMutationParams,
-    type IRemoveSheetsFilterMutationParams,
-    type IReCalcSheetsFilterMutationParams,
     SetSheetsFilterRangeMutation,
     SetSheetsFilterCriteriaMutation,
     RemoveSheetsFilterMutation,

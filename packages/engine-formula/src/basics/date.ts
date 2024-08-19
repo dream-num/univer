@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-// @ts-ignore
-import numfmt from 'numfmt';
-import { isRealNum } from '@univerjs/core';
+import { isRealNum, numfmt } from '@univerjs/core';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { ErrorType } from './error-type';

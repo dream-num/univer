@@ -25,8 +25,8 @@ import { FILTER_MUTATIONS, ReCalcSheetsFilterMutation, RemoveSheetsFilterMutatio
 import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
-import type { ISheetsFilterButtonShapeProps } from '../views/widgets/filter-button.shape';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../views/widgets/filter-button.shape';
+import type { ISheetsFilterButtonShapeProps } from '../filter-button.shape';
+import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../filter-button.shape';
 
 const DEFAULT_Z_INDEX = 1000;
 

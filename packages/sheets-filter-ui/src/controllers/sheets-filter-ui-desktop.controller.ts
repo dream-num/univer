@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { ICommandService, IContextService, Inject, Injector, LocaleService } from '@univerjs/core';
 import { ComponentManager, IMenuService, IMessageService, IShortcutService } from '@univerjs/ui';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 
@@ -26,13 +26,13 @@ import { FilterSingle } from '@univerjs/icons';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { MessageType } from '@univerjs/design';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory, SmartToggleFilterMenuItemFactory } from './sheets-filter.menu';
-import { SheetsFilterMobileUIController } from './sheets-filter-mobile-ui.controller';
+import { SheetsFilterUIMobileController } from './sheets-filter-ui-mobile.controller';
 
 export interface IUniverSheetsFilterUIConfig {
     menu: MenuConfig;
@@ -47,8 +47,7 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 /**
  * This controller controls the UI of "filter" features. Menus, commands and filter panel etc. Except for the rendering.
  */
-@OnLifecycle(LifecycleStages.Rendered, SheetsFilterUIController)
-export class SheetsFilterUIController extends SheetsFilterMobileUIController {
+export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileController {
     constructor(
         private readonly _config: Partial<IUniverSheetsFilterUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
@@ -89,6 +88,8 @@ export class SheetsFilterUIController extends SheetsFilterMobileUIController {
     private _initCommands(): void {
         [
             SmartToggleSheetsFilterCommand,
+            RemoveSheetFilterCommand,
+            SetSheetFilterRangeCommand,
             SetSheetsFilterCriteriaCommand,
             ClearSheetsFilterCriteriaCommand,
             ReCalcSheetsFilterCommand,

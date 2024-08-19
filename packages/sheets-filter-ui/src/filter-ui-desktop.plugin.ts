@@ -18,14 +18,17 @@ import { DependentOn, Inject, Injector, Optional, Plugin, Tools, UniverInstanceT
 import type { Dependency } from '@univerjs/core';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { IRPCChannelService, toModule } from '@univerjs/rpc';
-import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui.controller';
-import { DefaultSheetFilterUiConfig, SheetsFilterUIController } from './controllers/sheets-filter-ui.controller';
+import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui-desktop.controller';
+import { DefaultSheetFilterUiConfig, SheetsFilterUIDesktopController } from './controllers/sheets-filter-ui-desktop.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { ISheetsGenerateFilterValuesService, SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME } from './worker/generate-filter-values.service';
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
+/**
+ * The plugin for the desktop version of the sheets filter UI. Its type is {@link UniverInstanceType.UNIVER_SHEET}.
+ */
 @DependentOn(UniverSheetsFilterPlugin)
 export class UniverSheetsFilterUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -45,22 +48,25 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
         ([
             [SheetsFilterPanelService],
             [SheetsFilterPermissionController],
-            [
-                SheetsFilterUIController,
-                {
-                    useFactory: () => this._injector.createInstance(SheetsFilterUIController, this._config),
-                },
-            ],
+            [SheetsFilterUIDesktopController, {
+                useFactory: () => this._injector.createInstance(SheetsFilterUIDesktopController, this._config),
+            }],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
 
         if (this._config.useRemoteFilterValuesGenerator && this._rpcChannelService) {
-            this._injector.add([
-                ISheetsGenerateFilterValuesService, {
-                    useFactory: () => toModule<ISheetsGenerateFilterValuesService>(
-                        this._rpcChannelService!.requestChannel(SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME)
-                    ),
-                },
-            ]);
+            this._injector.add([ISheetsGenerateFilterValuesService, {
+                useFactory: () => toModule<ISheetsGenerateFilterValuesService>(
+                    this._rpcChannelService!.requestChannel(SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME)
+                ),
+            }]);
         }
+    }
+
+    override onReady(): void {
+        this._injector.get(SheetsFilterPermissionController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsFilterUIDesktopController);
     }
 }

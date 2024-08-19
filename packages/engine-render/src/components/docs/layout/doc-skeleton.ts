@@ -31,7 +31,6 @@ import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import { DocumentEditArea } from '../view-model/document-view-model';
 import { getPageFromPath } from '../text-selection/convert-text-range';
-import type { IDocumentOffsetConfig } from '../document';
 import type { ILayoutContext } from './tools';
 import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 import { createSkeletonSection } from './model/section';

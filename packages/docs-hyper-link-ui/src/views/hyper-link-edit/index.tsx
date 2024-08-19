@@ -16,7 +16,6 @@
 
 import { Button, FormLayout, Input } from '@univerjs/design';
 import React, { useEffect, useState } from 'react';
-import { CloseSingle } from '@univerjs/icons';
 import { getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { DocumentDataModel } from '@univerjs/core';

@@ -39,29 +39,24 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
             this._docEventManagerService.hoverCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
                 if (link) {
-                    // const linkIndex
-                    const customRanges = this._context.unit.getSelfOrHeaderFooterModel(link.segmentId).getBody()?.customRanges;
-                    if (customRanges) {
-                        const linkIndex = customRanges.findIndex((range) => range.rangeId === link.range.rangeId);
-                        if (linkIndex !== -1) {
-                            this._commandService.executeCommand(
-                                ToggleDocHyperLinkInfoPopupOperation.id,
-                                {
-                                    unitId: this._context.unitId,
-                                    linkId: link.range.rangeId,
-                                    segmentId: link.segmentId,
-                                    rangeIndex: linkIndex,
-                                    segmentPage: link.segmentPageIndex,
-                                }
-                            );
-                        }
-                    }
-                } else {
-                    if (this._hyperLinkPopupService.showing) {
+                    const customRanges = this._context.unit.getSelfOrHeaderFooterModel(link.segmentId).getBody()?.customRanges ?? [];
+                    const linkIndex = customRanges.findIndex((range) => range.rangeId === link.range.rangeId);
+                    if (linkIndex !== -1) {
                         this._commandService.executeCommand(
-                            ToggleDocHyperLinkInfoPopupOperation.id
+                            ToggleDocHyperLinkInfoPopupOperation.id,
+                            {
+                                unitId: this._context.unitId,
+                                linkId: link.range.rangeId,
+                                segmentId: link.segmentId,
+                                rangeIndex: linkIndex,
+                                segmentPage: link.segmentPageIndex,
+                            }
                         );
                     }
+                } else if (this._hyperLinkPopupService.showing) {
+                    this._commandService.executeCommand(
+                        ToggleDocHyperLinkInfoPopupOperation.id
+                    );
                 }
             })
         );

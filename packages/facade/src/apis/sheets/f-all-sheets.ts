@@ -14,16 +14,3 @@
  * limitations under the License.
  */
 
-export { UniverSheetsCrosshairHighlightPlugin } from './plugin';
-
-// #region commands
-
-export {
-    ToggleCrosshairHighlightOperation,
-    DisableCrosshairHighlightOperation,
-    EnableCrosshairHighlightOperation,
-    SetCrosshairHighlightColorOperation,
-    type ISetCrosshairHighlightColorOperationParams,
-} from './commands/operations/operation';
-
-// #endregion

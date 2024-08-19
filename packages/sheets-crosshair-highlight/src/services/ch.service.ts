@@ -18,20 +18,20 @@ import { Disposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export class SheetsCrosshairHighlightService extends Disposable {
-    private readonly _turnedOn$ = new BehaviorSubject<boolean>(false);
-    readonly turnedOn$ = this._turnedOn$.asObservable();
-    get turnedOn(): boolean { return this._turnedOn$.getValue(); }
+    private readonly _enabled$ = new BehaviorSubject<boolean>(false);
+    readonly enabled$ = this._enabled$.asObservable();
+    get enabled(): boolean { return this._enabled$.getValue(); }
 
     private readonly _color$ = new BehaviorSubject<string>('red');
     readonly color$ = this._color$.asObservable();
     get color(): string { return this._color$.getValue(); }
 
     override dispose(): void {
-        this._turnedOn$.complete();
+        this._enabled$.complete();
     }
 
     setTurnedOn(value: boolean): void {
-        this._turnedOn$.next(value);
+        this._enabled$.next(value);
     }
 
     setColor(value: string): void {

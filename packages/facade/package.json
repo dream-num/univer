@@ -85,6 +85,7 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
+        "@univerjs/sheets-crosshair-highlight": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-filter-ui": "workspace:*",

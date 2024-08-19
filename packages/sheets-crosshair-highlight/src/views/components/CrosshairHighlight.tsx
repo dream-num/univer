@@ -24,8 +24,8 @@ export const CROSSHAIR_HIGHLIGHT_COLORS = [];
 
 export function CrosshairHighlight() {
     const service = useDependency(SheetsCrosshairHighlightService);
-    const crosshairHighlightTurnedOn = useObservable(service.turnedOn$);
-    const crosshairHighlightColor = useObservable(service.color$);
+    const enabled = useObservable(service.enabled$);
+    const color = useObservable(service.color$);
 
     return (
         <Dropdown trigger="click" overlay={<CrosshairOverlay />} placement="top">
@@ -33,9 +33,9 @@ export function CrosshairHighlight() {
                 Crosshair
                 {' '}
                 <span>
-                    {crosshairHighlightColor}
+                    {color}
                     -
-                    {crosshairHighlightTurnedOn}
+                    {enabled}
                 </span>
             </div>
         </Dropdown>

@@ -1530,6 +1530,9 @@ importers:
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
+      '@univerjs/sheets-crosshair-highlight':
+        specifier: workspace:*
+        version: link:../sheets-crosshair-highlight
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
@@ -1835,6 +1838,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared

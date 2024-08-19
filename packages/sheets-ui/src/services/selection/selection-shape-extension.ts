@@ -258,7 +258,7 @@ export class SelectionShapeExtension {
     }
 
     /**
-     * drag move whole selectionShape, when cusor is crosshair.
+     * Drag move whole selectionControl when cusor turns to crosshair. Not for dragging 8 control points.
      * @param evt
      */
     private _controlEvent(evt: IMouseEvent | IPointerEvent) {
@@ -283,7 +283,6 @@ export class SelectionShapeExtension {
         );
 
         this._startOffsetX = newEvtOffsetX;
-
         this._startOffsetY = newEvtOffsetY;
 
         const { row, column } = actualSelection;
@@ -296,7 +295,6 @@ export class SelectionShapeExtension {
         } = this._control.model;
 
         let fixRow = 0;
-
         let fixColumn = 0;
 
         if (row < originStartRow) {
@@ -312,11 +310,8 @@ export class SelectionShapeExtension {
         }
 
         this._relativeSelectionPositionRow = originStartRow - row + fixRow;
-
         this._relativeSelectionPositionColumn = originStartColumn - column + fixColumn;
-
         this._relativeSelectionRowLength = originEndRow - originStartRow;
-
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
 
         const style = this._control.currentStyle!;
@@ -331,15 +326,11 @@ export class SelectionShapeExtension {
         }
 
         // const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
-
         // const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
         const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
-
         const scrollTimer = ScrollTimer.create(scene);
-
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
-
         this._scrollTimer = scrollTimer;
+        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
 
         scene.disableEvent();
 
@@ -372,10 +363,9 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
-            // selectionScaled$  -->  disableLockedSelectionChange
             this._control.selectionMoved$.next(this._targetSelection);
-            // this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-            // this function should placed after this._control.selectionMoved$,
+
+            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoved$,
             // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
             this._selectionHooks.selectionMoveEnd?.();
         });
@@ -423,7 +413,7 @@ export class SelectionShapeExtension {
             });
 
             control.onPointerDown$.subscribeEvent((evt: IMouseEvent | IPointerEvent) => {
-                this._widgetEvent(evt, cursors[index]);
+                this._widgetPointerDownEvent(evt, cursors[index]);
             });
         });
     }
@@ -524,7 +514,6 @@ export class SelectionShapeExtension {
 
         const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
         const { scaleX, scaleY } = scene.getAncestorScale();
-
         const moveActualSelection = this._skeleton.getCellPositionByOffset(
             moveOffsetX,
             moveOffsetY,

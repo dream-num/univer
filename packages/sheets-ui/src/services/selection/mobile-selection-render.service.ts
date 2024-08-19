@@ -355,7 +355,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             activeSelectionControl = this.newSelectionControl(scene, rangeType);
         }
 
-        this._updateSelectionControlRange(
+        this._updateSelectionControlByRange(
             activeSelectionControl,
             cursorCellRangeWithRangeType,
             primaryCursorCellRange
@@ -681,7 +681,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             currSelectionRange.endColumn !== newSelectionRange.endColumn;
         if (rangeChanged) {
             if (activeSelectionControl) {
-                this._updateSelectionControlRange(activeSelectionControl, newSelectionRangeWithCoord);
+                this._updateSelectionControlByRange(activeSelectionControl, newSelectionRangeWithCoord);
                 this._selectionMoving$.next(this.getSelectionDataWithStyle());
             }
         }

@@ -142,12 +142,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // #endregion
 
     protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
-
-    /**
-     * trigger when selection move end(pointerup)
-     * and then update selection model in selectionManagerService
-     * selectionMoveEnd$ ---> _updateSelections --> selectionOperation@selectionManagerService.setSelections
-     */
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
     protected readonly _selectionMoving$ = new Subject<ISelectionWithCoordAndStyle[]>();
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
@@ -191,7 +185,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * reset _selectionStyle to default normal selection style
+     * Reset this._selectionStyle to default normal selection style
      */
     protected _resetSelectionStyle() {
         this._setSelectionStyle(getDefaultNormalSelectionStyle(this._themeService));
@@ -207,40 +201,19 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * add a selection
-     *
-     * in PC:init & pointerup would call this function.
-     *
-     * init
-     * selectionController@_initSkeletonChangeListener --> selectionManagerService.add --> selectionManagerService._selectionMoveEnd$ --> this.addControlToCurrentByRangeData
-     * selectionMoveEnd$ --> this.addSelectionControlBySelectionData
-     *
-     *
-     * pointer event
-     * engine@_pointerDownEvent --> spreadsheet?.onPointerDownObserve --> eventTrigger --> scene@disableEvent() --> then scene.input-manager currentObject is always scene until scene@enableEvent.
-     * engine@_pointerUpEvent --> scene.input-manager@_onPointerUp --> this._selectionMoveEnd$ --> _selectionManagerService.selectionMoveEnd$ --> this.addControlToCurrentByRangeData
-     *
-     * but in mobile version, we do not call disableEvent() in eventTrigger,
-     * so pointerup --> scene.input-manager currentObject is spreadsheet --> this.eventTrigger
-     *
-     * for row/col selection.
-     * columnHeader pointerup$ --> selectionMoveEnd$ --> selectionManagerService@setSelections -->
-     * selectionManagerService@_emitOnEnd -->
-     * _workbookSelections.selectionMoveEnd$ --> _addSelectionControlBySelectionData
-     *
-     * @param selectionData
+     * Add a selection in spreadsheet, create a new SelectionControl and then update this control by range derives from selection.
+     * @param {ISelectionWithCoordAndStyle} selection
      */
     protected _addSelectionControlBySelectionData(selection: ISelectionWithCoordAndStyle) {
-        const { rangeWithCoord, primaryWithCoord } = selection;
-        const { rangeType } = rangeWithCoord;
         const skeleton = this._skeleton;
         const style = selection.style ?? getDefaultNormalSelectionStyle(this._themeService);
-
         const scene = this._scene;
         if (!scene || !skeleton) {
             return;
         }
 
+        const { rangeWithCoord, primaryWithCoord } = selection;
+        const { rangeType } = rangeWithCoord;
         const control = this.newSelectionControl(scene, rangeType || RANGE_TYPE.NORMAL);
 
         // TODO: memory leak? This extension seems never released.
@@ -267,7 +240,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     /**
      * Update the corresponding selectionControl based on selectionsData.
-     * selectionData[i] ---- selectionControls[i]
+     * selectionData[i] syncs selectionControls[i]
      * @param selections
      */
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
@@ -285,8 +258,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         // const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         // TODO @lumixraku This is awful!
-        // selectionControls should create & remove base on selections.
-        // if selections is more than selectionControls, create new selectionControl, if selections is less than selectionControls, remove the last one.
+        // SelectionControls should create & remove base on selections.
+        // If selections is more than selectionControls, create new selectionControl, if selections is less than selectionControls, remove the last one.
         for (let i = 0, len = selections.length; i < len; i++) {
             const { rangeWithCoord, primaryWithCoord } = selections[i];
 
@@ -313,8 +286,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * generate selectionData from this._selectionControls.model
-     * @returns ISelectionWithCoordAndStyle{range, primary, style}
+     * Generate selectionData from this._selectionControls.model .
+     * @returns {ISelectionWithCoordAndStyle[]} {range, primary, style}[]
      */
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[] {
         const selectionControls = this._selectionControls;
@@ -400,10 +373,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     endSelection() {
         this._clearUpdatingListeners();
-
-        // ---> _updateSelections --> executeCommand(SetSelectionsOperation.id --> selectionManager.setSelections
-        // ---> _selectionMoveEnd$.next --> _initSelectionChangeListener _reset --> _clearSelectionControls
-
         this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
         // when selection mouse up, enable the short cut service
         this._shortcutService.setDisable(false);
@@ -513,7 +482,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         } else if (remainLastEnable && activeSelectionControl) {
             // Supports the formula ref text selection feature,
             // under the condition of preserving all previous selections, it modifies the position of the latest selection.
-            this._updateSelectionControlRange(
+            this._updateSelectionControlByRange(
                 activeSelectionControl,
                 cursorCellRangeWithRangeType,
                 primaryCursorCellRange
@@ -521,7 +490,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         } else {
             // Create new control as default
             activeSelectionControl = this.newSelectionControl(scene, rangeType);
-            this._updateSelectionControlRange(
+            this._updateSelectionControlByRange(
                 activeSelectionControl,
                 cursorCellRangeWithRangeType,
                 primaryCursorCellRange
@@ -559,7 +528,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * init pointer move listener, bind in each pointer down, unbind in each pointer up
+     * Init pointer move listener, bind in each pointer down, unbind in each pointer up
      * @param viewportMain
      * @param activeSelectionControl
      * @param rangeType
@@ -831,18 +800,18 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             currSelectionRange.endRow !== newSelectionRange.endRow ||
             currSelectionRange.endColumn !== newSelectionRange.endColumn;
         if (activeSelectionControl != null && rangeChanged) {
-            this._updateSelectionControlRange(activeSelectionControl, newSelectionRangeWithCoord);
+            this._updateSelectionControlByRange(activeSelectionControl, newSelectionRangeWithCoord);
             this._selectionMoving$.next(this.getSelectionDataWithStyle());
         }
     }
 
     /**
-     * pointerDown & pointerMove --> _updateSelectionControlRange
+     * Update the selection control by range.
      * @param control
      * @param newSelectionRange
      * @param highlight
      */
-    protected _updateSelectionControlRange(control: SelectionControl, newSelectionRange: IRangeWithCoord, highlight: Nullable<ISelectionCellWithMergeInfo>) {
+    protected _updateSelectionControlByRange(control: SelectionControl, newSelectionRange: IRangeWithCoord, highlight: Nullable<ISelectionCellWithMergeInfo>) {
         // const skeleton = this._skeleton;
         // const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
@@ -1024,12 +993,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             endX: activeCell.mergeInfo.endX || 0,
             rangeType,
         };
-        this._updateSelectionControlRange(activeControl, newSelectionRange, currentCell);
+        this._updateSelectionControlByRange(activeControl, newSelectionRange, currentCell);
     }
 
     /**
-     * invoked when currentSkeleton$ change & theme change
-     * mainly for col width & row height resize
+     * Reset all this.selectionControls by selectionsData.
      * @param selectionsData
      */
     protected _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]) {

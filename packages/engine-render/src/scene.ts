@@ -34,6 +34,7 @@ import type { ThinEngine } from './thin-engine';
 import { ThinScene } from './thin-scene';
 import type { Viewport } from './viewport';
 import type { ITransformerConfig } from './basics/transformer-config';
+import type { Engine } from './engine';
 
 export class Scene extends ThinScene {
     private _layers: Layer[] = [];
@@ -240,8 +241,10 @@ export class Scene extends ThinScene {
     }
 
     /**
-     * scale to value, absolute
-     * setTransform ---> viewport._updateScrollBarPosByViewportScroll --->  scrollTo
+     * Set scale, and then emit event to update Viewport scroll state.
+     * @param scaleX
+     * @param scaleY
+     * @returns Scene
      */
     scale(scaleX?: number, scaleY?: number) {
         const preScaleX = this.scaleX;
@@ -295,9 +298,7 @@ export class Scene extends ThinScene {
     }
 
     /**
-     * This sequence will initiate a series of updates:
-     * scene._setTransForm --> viewport@resetCanvasSizeAndUpdateScrollBar ---> scrollTo ---> limitedScroll ---> onScrollBeforeObserver ---> setScrollInfo
-     * scrollInfo needs accurate scene width & height, limitedScroll depends on scene & engine's width & height
+     * Reset canvas size and update scroll
      * @param state
      */
     transformByState(state: ISceneTransformState) {
@@ -327,9 +328,9 @@ export class Scene extends ThinScene {
         return this._parent;
     }
 
-    override getEngine(): Nullable<ThinEngine<Scene>> {
+    override getEngine(): Nullable<Engine> {
         if (this._parent.classType === RENDER_CLASS_TYPE.ENGINE) {
-            return this._parent as ThinEngine<Scene>;
+            return this._parent as Engine;
         }
 
         let parent: any = this._parent; // type:  SceneViewer | Engine | BaseObject | Scene
@@ -377,7 +378,7 @@ export class Scene extends ThinScene {
     }
 
     /**
-     * add object to layer (layer by zIndex))
+     * Add object to Layer (Layer is specified by zIndex).
      * @param o
      * @param zIndex layer index
      * @returns scene

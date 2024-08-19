@@ -65,29 +65,22 @@ export class HeaderMenuResizeShape<
     }
 
     protected override _draw(ctx: UniverRenderingContext) {
-        let { width, height } = this;
-
-        let left = 0;
-
-        let top = 0;
-
         const scene = this.getScene();
+        if (!scene) return;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
-
         const scale = Math.max(scaleX, scaleY);
-
         const HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE = HEADER_MENU_SHAPE_SIZE / scale;
-
         const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
 
+        let { width, height } = this;
+        let left = 0;
+        let top = 0;
         if (this.mode === HEADER_RESIZE_SHAPE_TYPE.VERTICAL) {
             width = HEADER_MENU_SHAPE_THUMB_SIZE_SCALE;
-
             left = HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE;
         } else {
             height = HEADER_MENU_SHAPE_THUMB_SIZE_SCALE;
-
             top = HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE;
         }
 

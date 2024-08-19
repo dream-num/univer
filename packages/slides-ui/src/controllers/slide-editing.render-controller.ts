@@ -176,7 +176,6 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     private _initEditorVisibilityListener(): void {
-        // startEditing --> slide-editor-bridge.render-controller.ts@changeVisible --> _editorBridgeService.changeVisible
         this.disposeWithMe(this._editorBridgeService.visible$
             // .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
             .subscribe((param) => {
@@ -263,16 +262,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     /**
-     * set size and pos of editing area
-     * invoked by _handleEditorVisible
-     *
-     * size & pos derives from slide-editor-bridge.service.ts@getEditRectState.position
-     *
-     * set pos of editing area
-     * EditorContainer.tsx cellEditorManagerService.setFocus(true) -->
-     * _focus$.next --> editingRenderController -->
-     * _textSelectionRenderManager.sync() --> _updateInputPosition --> activate(left, top)
-     *
+     * Set size and pos of editing area.
      * @param positionFromEditRectState
      * @param canvasOffset
      * @param documentSkeleton
@@ -288,6 +278,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         scaleX: number = 1,
         scaleY: number = 1
     ) {
+        //size & pos derives from slide-editor-bridge.service.ts@getEditRectState.position
         const { startX, startY, endX, endY } = positionFromEditRectState;
         const documentDataModel = documentLayoutObject.documentModel;
 
@@ -559,14 +550,13 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
     }
 
     /**
-     * show input area, resize input area and then place input to right place.
-     * invoked when this._editorBridgeService.visible$ param.visible = true
-     *
-     * handleVisible is the 2nd part of editing.
-     * startEditing --> _updateEditor
-     * startEditing --> changeVisible --> slide-editor-bridge.render-controller.ts@changeVisible --> _editorBridgeService.changeVisible
+     * Show input area, resize input area and then place input to right place.
+     * @TODO why do resize in show input area?
      * @param param
      */
+    // handleVisible is the 2nd part of editing.
+    // first part: startEditing --> _updateEditor
+    // 2nd part: startEditing --> changeVisible --> slide-editor-bridge.render-controller.ts@changeVisible --> _editorBridgeService.changeVisible
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
         const { eventType } = param;
 

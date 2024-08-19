@@ -239,15 +239,14 @@ export class Worksheet {
     }
 
     /**
-     * get cellData
+     * Get cellData, includes cellData, customRender, markers, dataValidate, etc.
      *
-     * All sheet CELL_CONTENT interceptor will be called in this method.
-     * this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT
+     * WARNING: All sheet CELL_CONTENT interceptors will be called in this method, cause performance issue.
+     * example: this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT);
      *
-     * ex: cf.render.controller@_initViewModelInterceptor
      * @param row
      * @param col
-     * @returns ICellDataForSheetInterceptor extends ICellData
+     * @returns ICellDataForSheetInterceptor
      */
     getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
         if (row < 0 || col < 0) {

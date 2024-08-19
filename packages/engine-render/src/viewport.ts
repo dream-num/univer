@@ -463,10 +463,6 @@ export class Viewport {
         this._active = false;
     }
 
-    /**
-     * invoked when canvas element size change
-     * engineResizeObserver --> engine.resizeBySize --> scene._setTransForm
-     */
     resetCanvasSizeAndUpdateScroll() {
         this._resizeCacheCanvas();
         this._updateScrollByViewportScrollValue();
@@ -527,33 +523,18 @@ export class Viewport {
     }
 
     /**
-     * There are serval cases to call this method.
-     * the most common case is scrolling. Other situations include:
-     * 1. changing the frozen row & col settings
-     * 2. changing curr skeleton
-     * 3. changing selection which cross viewport
-     * 4. changing the viewport size (also include change window size)
-     * 5. changing the scroll bar position
-     *
-     * when scrolling by trackpad:
-     * scene.input-manager@_onMouseWheel --> scene@triggerMouseWheel --> sheet-render.controller@scene.onMouseWheel$.add -->
-     * set-scroll.command.ts --> scroll.operation.ts -->
-     * scrollManagerService.setScrollInfoAndEmitEvent
-     *
-     * when change skelenton:
-     * _currentSkeletonBefore$ ---> scroll.render-controller@_updateSceneSize --> setSearchParam --> scene@_setTransForm ---> viewport.resetCanvasSizeAndUpdateScrollBar ---> scrollToXX
-     * --> onScrollAfterObserver.notifyObservers --> scroll.render-controller@onScrollAfterObserver ---> setScrollInfoToCurrSheetWithoutNotify  ---> sms._setScrollInfo
-     *
-     * _currentSkeleton$ ---> selection.render-controller ---> formula@_autoScroll ---> viewport.resize ---> get scrollXY by viewportScrollXY ---> scrollTo
-     * _currentSkeleton$ ---> selection.render-controller ---> setCurrentSelection ---> formula@_autoScroll ---> scrollTo
-     * _currentSkeleton$ ---> freeze.render-controller@_refreshFreeze --> viewport.resize ---> scrollTo  ---> _scroll
-     *
-     * Debug
-     * window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
-     *
-     * @param pos
-     *
+     * ScrollBar scroll to certain position.
+     * @param pos position of scrollBar
      */
+    // There are serval cases to call this method.
+    // the most common case is scrolling. Other situations include:
+    // 1. changing the frozen row & col settings
+    // 2. changing curr skeleton
+    // 3. changing selection which cross viewport
+    // 4. changing the viewport size (also include change window size)
+    // 5. changing the scroll bar position
+    // Debug
+    // window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
     scrollToBarPos(pos: Partial<IScrollBarPosition>) {
         return this._scrollToBarPosCore(pos);
     }
@@ -587,6 +568,12 @@ export class Viewport {
         });
     }
 
+    /**
+     * Viewport scroll to certain position.
+     * @param pos
+     * @param isTrigger
+     * @returns IViewportScrollPosition
+     */
     scrollToViewportPos(pos: Partial<IViewportScrollPosition>, isTrigger = true) {
         if (!this._scrollBar || this.isActive === false) {
             return;
@@ -710,10 +697,12 @@ export class Viewport {
         return this._scrollBar;
     }
 
-    // scrollTo ---> _scroll ---> onScrollAfter$.next ---> scroll.render-controller@updateScroll
-    // scrollTo ---> _scroll ---> onScrollAfter$.next ---> freeze.render-controller@updateScroll
+    /**
+     * Just record state of scroll. This method won't scroll viewport and scrollbar.
+     * @param current
+     * @returns Viewport
+     */
     updateScrollVal(current: Partial<IScrollObserverParam>) {
-        // scrollvalue for scrollbar, when rows over 5000(big sheet), deltaScrollY always 0 when scrolling. Do not use this value to judge scrolling
         // this._deltaScrollX = this.scrollX - this._preScrollX;
         // this._deltaScrollY = this.scrollY - this._preScrollY;
         this._preScrollX = this.scrollX;
@@ -763,8 +752,7 @@ export class Viewport {
     }
 
     /**
-     * call stack: engine.renderLoop ---> scene.render ---> layer.render ---> viewport.render
-     * that means each layer call all viewports to render
+     * Render function in each render loop.
      * @param parentCtx parentCtx is cacheCtx from layer when layer._allowCache is true
      * @param objects
      * @param isMaxLayer
@@ -1252,7 +1240,7 @@ export class Viewport {
     }
 
     /**
-     * This method will be invoked when viewport is resizing and removing rol & col
+     * Update scroll when viewport is resizing and removing rol & col
      */
     private _updateScrollByViewportScrollValue() {
         // zoom.render-controller ---> scene._setTransform --> _updateScrollBarPosByViewportScroll

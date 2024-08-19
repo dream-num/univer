@@ -350,8 +350,9 @@ export class ImageCropperController extends Disposable {
     private _getApplyObjectByCropObject(cropObject: ImageCropperObject): Nullable<Image> {
         const cropOKey = cropObject.oKey;
         const applyOKey = cropOKey.slice(0, cropOKey.length - 5);
-
-        const applyObject = cropObject.getScene().getObject(applyOKey) as Image;
+        const scene = cropObject.getScene();
+        if (!scene) return null;
+        const applyObject = scene.getObject(applyOKey) as Image;
         if (applyObject == null) {
             return null;
         }

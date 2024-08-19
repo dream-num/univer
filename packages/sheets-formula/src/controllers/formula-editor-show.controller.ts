@@ -75,22 +75,20 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
 
     private _initSkeletonChangeListener() {
         this.disposeWithMe(
-            toDisposable(
-                this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                    if (param == null) {
-                        this._logService.error('[FormulaEditorShowController]: should not receive currentSkeleton$ as null!');
-                    } else {
-                        const { skeleton } = param;
-                        const prevSheetId = this._skeleton?.worksheet?.getSheetId();
-                        this._changeRuntime(skeleton);
+            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                if (param == null) {
+                    this._logService.error('[FormulaEditorShowController]: should not receive currentSkeleton$ as null!');
+                } else {
+                    const { skeleton } = param;
+                    const prevSheetId = this._skeleton?.worksheet?.getSheetId();
+                    this._changeRuntime(skeleton);
 
-                        // change to another sheet
-                        if (prevSheetId !== skeleton.worksheet.getSheetId()) {
-                            this._removeArrayFormulaRangeShape();
-                        }
+                    // change to another sheet
+                    if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+                        this._removeArrayFormulaRangeShape();
                     }
-                })
-            )
+                }
+            })
         );
     }
 

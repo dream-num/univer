@@ -176,8 +176,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     }
 
     /**
-     * set new selection range in seletion model
-     * selectionMoveEnd$ ---> _updateSelections --> selectionOperation@selectionManagerService.setSelections
+     * Update selectionData to current sheet.
      * @param selectionDataWithStyleList
      * @param type
      */
@@ -223,7 +222,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                 // If there is no initial selection, add one by default in the top left corner.
                 const firstSelection = this._workbookSelections.getCurrentLastSelection();
                 if (!firstSelection) {
-                    // SetSelectionsOperation with type=null would clear all exists selections
+                    // WARNING: SetSelectionsOperation with type=null would clear all exists selections
                     // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
                     // TODO @lumixraku why use such weird a way to clear existing selection? subscribe to currentSkeleton$ is much better?
                     this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {

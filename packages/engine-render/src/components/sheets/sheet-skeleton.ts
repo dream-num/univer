@@ -209,9 +209,8 @@ export const RENDER_RAW_FORMULA_KEY = 'RENDER_RAW_FORMULA';
 export interface ICacheItem {
     bg: boolean;
     border: boolean;
-    // font: boolean;
-
 }
+
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[] = [];
     private _columnWidthAccumulation: number[] = [];
@@ -544,8 +543,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * calc data for row col & cell position
-     * this._rowHeaderWidth & this._rowHeightAccumulation ...
+     * Calculate data for row col & cell position, then update position value to this._rowHeaderWidth & this._rowHeightAccumulation & this._columnHeaderHeight & this._columnWidthAccumulation.
      * @returns this
      */
     private _updateLayout() {

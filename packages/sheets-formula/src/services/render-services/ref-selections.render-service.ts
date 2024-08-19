@@ -30,7 +30,7 @@ import { IShortcutService } from '@univerjs/ui';
  * and handle selections on them, though each at a time.
  *
  *
- * dv render controller would cause row auto height, this._autoHeightController.getUndoRedoParamsOfAutoHeight ---> currentSKelenton$ change.
+ *
  */
 export class RefSelectionsRenderService extends BaseSelectionRenderService implements IRenderModule {
     private readonly _workbookSelections: WorkbookSelections;
@@ -137,7 +137,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         }));
 
         listenerDisposables.add(spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            this._reset(); // remove all other selections
+            // remove all other selections
+            this._reset();
 
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
             const selectionWithStyle = getAllSelection(skeleton);
@@ -153,15 +154,16 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         return listenerDisposables;
     }
 
+    /**
+     * Update selectionModel in this._workbookSelections by user action in spreadsheet area.
+     */
     private _initUserActionSyncListener() {
-        // this._pointerDown --> this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
         this.disposeWithMe(this.selectionMoveStart$.subscribe((selectionDataWithStyle) => {
             this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVE_START);
         }));
         this.disposeWithMe(this.selectionMoving$.subscribe((selectionDataWithStyle) => {
             this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVING);
         }));
-        // prompt.controller _initSelectionsEndListener --> selectionMoveEnd$ --> _updateRefSelectionStyle --> change theme color!
         this.disposeWithMe(this.selectionMoveEnd$.subscribe((selectionDataWithStyle) => {
             this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVE_END);
         }));
@@ -199,6 +201,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
         // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
         // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE
+        // dv render controller would cause row auto height, this._autoHeightController.getUndoRedoParamsOfAutoHeight
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (!param) {
                 return;
@@ -208,7 +211,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const { scene } = this._context;
             const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
-            // change sheet ---> currentSkeleton$ change
+            // changing sheet
             if (this._skeleton && this._skeleton.worksheet.getSheetId() !== skeleton.worksheet.getSheetId()) {
                 this._reset();
             }

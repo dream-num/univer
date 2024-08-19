@@ -101,8 +101,8 @@ export class SheetsSelectionsService extends RxDisposable {
     setSelections(selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
     setSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
     /**
-     * SetSelectionsOperation with type=null would clear all exists selections
-     * SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
+     * Set seleciton data to WorkbookSelections.
+     * If type is not specfied, this method would clear all existing selections.
      * @param unitIdOrSelections
      * @param worksheetIdOrType
      * @param selectionDatas
@@ -238,8 +238,8 @@ export class WorkbookSelections extends Disposable {
     }
 
     /**
-     * setSelections and emit selectionDatas by type.
-     * SetSelectionsOperation with type=null would clear all exists selections
+     * Set selectionDatas to _worksheetSelections, and emit selectionDatas by type.
+     * If type is not specfied, this method would clear all existing selections.
      * @param sheetId
      * @param selectionDatas
      * @param type
@@ -251,7 +251,6 @@ export class WorkbookSelections extends Disposable {
         this._ensureSheetSelection(sheetId).length = 0;
         this._ensureSheetSelection(sheetId).push(...selectionDatas);
 
-        // WTF: why we would not refresh in add but in replace?
         switch (type) {
             case SelectionMoveType.MOVE_START:
                 this._selectionMoveStart$.next(selectionDatas);
@@ -292,7 +291,7 @@ export class WorkbookSelections extends Disposable {
     private _worksheetSelections = new Map<string, ISelectionWithStyle[]>();
 
     /**
-     * same as _getCurrentSelections(which return this._worksheetSelections), but would set [] if no selection.
+     * Same as _getCurrentSelections(which return this._worksheetSelections), but this method would set [] if no selection.
      * @param sheetId
      * @returns this._worksheetSelections
      */
@@ -306,10 +305,6 @@ export class WorkbookSelections extends Disposable {
         return worksheetSelection;
     }
 
-    /**
-     * _selectionMoveEnd$ not same as base-selection-render.service.ts@_selectionMoveEnd$
-     * @param selections
-     */
     private _emitOnEnd(selections: ISelectionWithStyle[]): void {
         this._beforeSelectionMoveEnd$.next(selections);
         this._selectionMoveEnd$.next(selections);

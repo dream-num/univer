@@ -72,7 +72,7 @@ export enum SELECTION_MANAGER_KEY {
 const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
 
 /**
- * The main selection canvas component
+ * The main selection canvas component, includes leftControl,rightControl,topControl,bottomControl,backgroundControlTop,backgroundControlMiddleLeft,backgroundControlMiddleRight,backgroundControlBottom,fillControl
  */
 export class SelectionControl extends Disposable {
     private _leftControl!: Rect;
@@ -666,6 +666,8 @@ export class SelectionControl extends Disposable {
             evented: false,
         });
 
+        // size of fillControl is set in _updateControlStyleAndLayout(), because control size(visual size) stays same when zoom change.
+        // The size of control is not a const value, so it was handled by _updateWidgets() & _updateControlStyleAndLayout()
         this._fillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
             zIndex: zIndex + 1,
         });

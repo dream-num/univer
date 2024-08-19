@@ -16,6 +16,7 @@
 
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { DataValidationOperator, Inject, Injector, LocaleService, Tools } from '@univerjs/core';
+import type { CellValueType } from '@univerjs/protocol';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
 import type { IBaseDataValidationWidget } from './base-widget';
 
@@ -35,12 +36,14 @@ const operatorNameMap: Record<DataValidationOperator, string> = {
 
 export interface IValidatorCellInfo<DataType = Nullable<CellValue>> {
     value: DataType;
+    interceptValue: Nullable<CellValue>;
     row: number;
     column: number;
     unitId: string;
     subUnitId: string;
     worksheet: Worksheet;
     workbook: Workbook;
+    t: Nullable<CellValueType>;
 }
 
 export interface IFormulaResult<T = any> {

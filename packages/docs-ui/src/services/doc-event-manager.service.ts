@@ -245,46 +245,44 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         }));
 
         paragraphRanges.forEach((paragraph) => {
-            if (paragraph.bullet && paragraph.bullet.listType === 'CHECK_LIST') {
-                const node = this._skeleton.findNodeByCharIndex(paragraph.paragraphStart, segmentId);
-                if (!node) {
-                    return;
+            if (paragraph.bullet && paragraph.bullet.listType.indexOf('CHECK_LIST') === 0) {
+                const calcRect = (pageIndex: number) => {
+                    const node = this._skeleton.findNodeByCharIndex(paragraph.paragraphStart, segmentId, pageIndex);
+
+                    if (!node) {
+                        return;
+                    }
+                    const bulletNode = node.parent?.glyphGroup[0];
+                    const offsetConfig = this._documents.getOffsetConfig();
+
+                    if (!bulletNode) {
+                        return;
+                    }
+                    const rect = this._skeleton.getGlyphBounding(bulletNode, offsetConfig);
+
+                    bounds.push({
+                        rect: {
+                            ...rect,
+                            left: segmentId ? rect.left + offsetConfig.pageMarginLeft : rect.left,
+                            right: segmentId ? rect.right + offsetConfig.pageMarginLeft : rect.right,
+                        },
+                        segmentId,
+                        segmentPageIndex: pageIndex,
+                        paragraph,
+                    });
+                };
+
+                if (segmentId) {
+                    const pageSize = (this._skeleton.getSkeletonData()?.pages.length ?? 0);
+                    for (let i = 0; i < pageSize; i++) {
+                        calcRect(i);
+                    }
+                } else {
+                    calcRect(-1);
                 }
-                const bulletNode = node.parent?.glyphGroup[0];
-                const { pageMarginLeft, pageMarginTop, docsLeft, docsTop } = this._documents.getOffsetConfig();
-                if (!bulletNode) {
-                    return;
-                }
-
-                const left = node.left + pageMarginLeft + docsLeft;
-                const right = node.left + node.width + pageMarginLeft;
-                let top = pageMarginTop + docsTop;
-
-                let p = bulletNode.parent;
-                while (p) {
-                    //@ts-ignore
-                    top += p.top ?? 0;
-                    // @ts-ignore
-                    p = p.parent;
-                }
-
-                const height = bulletNode.bBox.aba + bulletNode.bBox.abd;
-                const bottom = top + height;
-
-                bounds.push({
-                    rect: {
-                        left,
-                        right,
-                        top,
-                        bottom,
-                    },
-                    segmentId,
-                    segmentPageIndex: 0,
-                    paragraph,
-                });
             }
         });
-        // console.log('===bounds', bounds);
+
         return bounds;
     }
 
@@ -316,7 +314,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             }
             return false;
         });
-        // console.log('===bullet', bullet);
         return bullet;
     }
 }

@@ -31,6 +31,7 @@ import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import { DocumentEditArea } from '../view-model/document-view-model';
 import { getPageFromPath } from '../text-selection/convert-text-range';
+import type { IDocumentOffsetConfig } from '../document';
 import type { ILayoutContext } from './tools';
 import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 import { createSkeletonSection } from './model/section';
@@ -682,6 +683,36 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         return this._getNearestNode(cache.nearestNodeList, cache.nearestNodeDistanceList);
+    }
+
+    getGlyphBounding(glyph: IDocumentSkeletonGlyph, offset: IDocumentOffsetConfig) {
+        const { docsLeft, docsTop } = offset;
+        const divide = glyph.parent!;
+        const line = divide?.parent!;
+        const column = line?.parent!;
+        const section = column?.parent!;
+        const page = section?.parent!;
+        const doc = page?.parent as IDocumentSkeletonCached | undefined;
+
+        const pageIndex = doc?.pages.indexOf(page) ?? 0;
+        const pageTop = (doc?.pages.slice(0, pageIndex).reduce((acc, cur) => acc + cur.pageHeight + docsTop, 0) ?? 0) + docsTop;
+        const sectionIndex = page.sections.indexOf(section);
+        const sectionTop = page.sections.slice(0, sectionIndex).reduce((acc, cur) => acc + cur.height, 0);
+        const lineTop = line.top;
+        const top = pageTop + sectionTop + lineTop + page.marginTop;
+        const bottom = top + line.lineHeight;
+
+        const columnIndex = section.columns.indexOf(column);
+        const columnLeft = section.columns.slice(0, columnIndex).reduce((acc, cur) => acc + cur.width, 0);
+        const left = docsLeft + (doc?.left ?? 0) + page.marginLeft + columnLeft + glyph.left + divide.left;
+        const right = left + glyph.width;
+
+        return {
+            left,
+            right,
+            top,
+            bottom,
+        };
     }
 
     private _collectNearestNode(

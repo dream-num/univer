@@ -36,47 +36,12 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
     }
 
     private _initPointerDownObserver() {
-        this.disposeWithMe(
-            this._context.mainComponent!.onPointerDown$.subscribeEvent((evt) => {
-                const { offsetX, offsetY } = evt;
-
-                const documentComponent = this._context.mainComponent as Documents;
-                const coord = this._getTransformCoordForDocumentOffset(
-                    documentComponent,
-                    this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!,
-                    offsetX,
-                    offsetY
-                );
-                if (!coord) {
-                    return;
-                }
-
-                const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop } = documentComponent.getOffsetConfig();
-                const skeleton = this._docSkeletonManagerService.getSkeleton();
-                const segmentId = this._textSelectionManagerService.getActiveTextRange()?.segmentId;
-                const node = skeleton.findNodeByCoord(
-                    coord,
-                    pageLayoutType,
-                    pageMarginLeft,
-                    pageMarginTop
-                );
-                if (!node) {
-                    return;
-                }
-                const paragraph = getParagraphByGlyph(node.node, this._context.unit.getSelfOrHeaderFooterModel(segmentId).getBody());
-                if (paragraph && paragraph.bullet && node.node.glyphType === GlyphType.LIST) {
-                    if (
-                        paragraph.bullet.listType === PresetListType.CHECK_LIST ||
-                        paragraph.bullet.listType === PresetListType.CHECK_LIST_CHECKED
-                    ) {
-                        this._commandService.executeCommand(ToggleCheckListCommand.id, {
-                            index: paragraph.startIndex,
-                            segmentId,
-                        });
-                    }
-                }
-            })
-        );
+        this._docEventManagerService.clickBullets$.subscribe((paragraph) => {
+            this._commandService.executeCommand(ToggleCheckListCommand.id, {
+                index: paragraph.paragraph.startIndex,
+                segmentId: paragraph.segmentId,
+            });
+        });
     }
 
     private _initHoverCursor() {

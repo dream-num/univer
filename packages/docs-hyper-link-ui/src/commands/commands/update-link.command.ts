@@ -15,12 +15,14 @@
  */
 
 import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
+import { replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
 import { UpdateDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;
     linkId: string;
     payload: string;
+    label: string;
 }
 
 export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParams> = {
@@ -32,6 +34,28 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         }
 
         const commandService = accessor.get(ICommandService);
+        const selectionService = accessor.get(TextSelectionManagerService);
+        const currentSelection = selectionService.getActiveTextRange();
+        if (!currentSelection) {
+            return false;
+        }
+
+        const replaceSelection = replaceSelectionFactory(accessor, {
+            unitId: params.unitId,
+            body: {
+                dataStream: params.label,
+            },
+            selection: {
+                startOffset: currentSelection.startOffset! + 1,
+                endOffset: currentSelection.endOffset! - 1,
+                collapsed: false,
+
+            },
+        });
+        if (!replaceSelection) {
+            return false;
+        }
+
         return commandService.syncExecuteCommand(UpdateDocHyperLinkMutation.id, params);
     },
 };

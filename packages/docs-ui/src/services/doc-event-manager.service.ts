@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { getLineBounding, NodePositionConvertToCursor, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { distinctUntilChanged, filter, Subject, throttleTime } from 'rxjs';
 import { transformOffset2Bound } from './doc-popup-manager.service';
@@ -48,7 +48,32 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
     const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
     const bounds = getLineBounding(borderBoxPointGroup);
 
-    return bounds;
+    return bounds.map((rect) => ({
+        top: rect.top + documentOffsetConfig.docsTop,
+        bottom: rect.bottom + documentOffsetConfig.docsTop,
+        left: rect.left + documentOffsetConfig.docsLeft,
+        right: rect.right + documentOffsetConfig.docsLeft,
+    }));
+};
+export const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, documents: Documents, skeleton: DocumentSkeleton, pageIndex = -1): IBoundRectNoAngle | undefined => {
+    const start = skeleton.findPositionByGlyph(glyph, pageIndex);
+    if (!start) {
+        return;
+    }
+
+    const documentOffsetConfig = documents.getOffsetConfig();
+    const startPosition = { ...start, isBack: true };
+    const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
+    const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, startPosition);
+    const bounds = getLineBounding(borderBoxPointGroup);
+    const rect = bounds[0];
+
+    return {
+        top: rect.top + documentOffsetConfig.docsTop,
+        bottom: rect.bottom + documentOffsetConfig.docsTop,
+        left: rect.left + documentOffsetConfig.docsLeft,
+        right: rect.left + documentOffsetConfig.docsLeft + glyph.width,
+    };
 };
 
 interface ICustomRangeActive {
@@ -166,16 +191,10 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 if (!rects) {
                     return null;
                 }
-                const documentOffsetConfig = this._documents.getOffsetConfig();
 
                 layouts.push({
                     customRange: range,
-                    rects: rects.map((rect) => ({
-                        top: rect.top + documentOffsetConfig.docsTop,
-                        bottom: rect.bottom + documentOffsetConfig.docsTop,
-                        left: rect.left + documentOffsetConfig.docsLeft,
-                        right: rect.right + documentOffsetConfig.docsLeft,
-                    })),
+                    rects,
                     segmentId,
                     segmentPageIndex: pageIndex,
                 });
@@ -252,19 +271,18 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                         return;
                     }
                     const bulletNode = node.parent?.glyphGroup[0];
-                    const offsetConfig = this._documents.getOffsetConfig();
 
                     if (!bulletNode) {
                         return;
                     }
-                    const rect = this._skeleton.getGlyphBounding(bulletNode, offsetConfig);
+                    const rect = calcDocGlyphPosition(bulletNode, this._documents, this._skeleton, pageIndex);
+
+                    if (!rect) {
+                        return;
+                    }
 
                     bounds.push({
-                        rect: {
-                            ...rect,
-                            left: segmentId ? rect.left + offsetConfig.pageMarginLeft : rect.left,
-                            right: segmentId ? rect.right + offsetConfig.pageMarginLeft : rect.right,
-                        },
+                        rect,
                         segmentId,
                         segmentPageIndex: pageIndex,
                         paragraph,
@@ -293,7 +311,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
 
         const headerKeys = Array.from(this._context.unit.headerModelMap.keys());
         const footerKeys = Array.from(this._context.unit.footerModelMap.keys());
-
         this._bulletBounds = [
             ...this._buildBulletBoundsBySegment(),
             ...(headerKeys.map((key) => this._buildBulletBoundsBySegment(key)).flat()),

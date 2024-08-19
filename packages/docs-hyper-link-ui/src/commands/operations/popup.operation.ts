@@ -71,7 +71,7 @@ export interface IShowDocHyperLinkEditPopupOperationParams {
 
 export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditPopupOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'docs.operation.show-hyper-link-edit-popup',
+    id: 'doc.operation.show-hyper-link-edit-popup',
     handler(accessor, params) {
         const linkInfo = params?.link;
         if (shouldDisableAddLink(accessor) && !linkInfo) {
@@ -93,7 +93,7 @@ export interface IShowDocHyperLinkInfoPopupOperationParams {
 
 export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IShowDocHyperLinkInfoPopupOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'docs.operation.show-hyper-link-info-popup',
+    id: 'doc.operation.show-hyper-link-info-popup',
     handler(accessor, params) {
         const hyperLinkService = accessor.get(DocHyperLinkPopupService);
         if (!params) {
@@ -108,7 +108,7 @@ export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IShowDocHyperLinkInf
 
 export const ClickDocHyperLinkOperation: ICommand<{ unitId: string; linkId: string }> = {
     type: CommandType.OPERATION,
-    id: 'docs.operation.click-hyper-link',
+    id: 'doc.operation.click-hyper-link',
     handler(accessor, params) {
         if (!params) {
             return false;

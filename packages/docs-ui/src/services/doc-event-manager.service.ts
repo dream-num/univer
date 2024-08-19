@@ -39,7 +39,6 @@ interface IBulletBound {
 const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, skeleton: DocumentSkeleton, pageIndex: number): IBoundRectNoAngle[] | undefined => {
     const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, pageIndex);
     const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, true, range.segmentId, pageIndex);
-    // console.log('===startPosition', range, startPosition, endPosition);
     if (!endPosition || !startPosition) {
         return;
     }
@@ -61,16 +60,16 @@ interface IBulletActive {
 }
 
 export class DocEventManagerService extends Disposable implements IRenderModule {
-    private _hoverCustomRanges$ = new Subject<ICustomRangeActive[]>();
+    private readonly _hoverCustomRanges$ = new Subject<ICustomRangeActive[]>();
     readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex)));
 
-    private _clickCustomRanges$ = new Subject<ICustomRangeActive>();
+    private readonly _clickCustomRanges$ = new Subject<ICustomRangeActive>();
     readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();
 
-    private _hoverBullet$ = new Subject<Nullable<IBulletActive>>();
+    private readonly _hoverBullet$ = new Subject<Nullable<IBulletActive>>();
     readonly hoverBullet$ = this._hoverBullet$.pipe(distinctUntilChanged((pre, aft) => pre?.paragraph.startIndex === aft?.paragraph.startIndex && pre?.segmentId === aft?.segmentId && pre?.segmentPageIndex === aft?.segmentPageIndex));
 
-    private _clickBullet$ = new Subject<IBulletActive>();
+    private readonly _clickBullet$ = new Subject<IBulletActive>();
     readonly clickBullets$ = this._clickBullet$.asObservable();
 
     private _customRangeDirty = true;

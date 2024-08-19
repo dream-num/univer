@@ -57,7 +57,6 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene) {
     };
 }
 
-// write a revert function for transformPosition2Offset
 export function transformOffset2Bound(offsetX: number, offsetY: number, scene: Scene) {
     const { scaleX, scaleY } = scene.getAncestorScale();
     const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);

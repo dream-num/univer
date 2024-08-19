@@ -65,7 +65,6 @@ export interface IShowDocHyperLinkEditPopupOperationParams {
     link?: {
         unitId: string;
         linkId: string;
-        rangeIndex: number;
     };
 }
 
@@ -87,13 +86,12 @@ export interface IShowDocHyperLinkInfoPopupOperationParams {
     linkId: string;
     segmentId?: string;
     unitId: string;
-    rangeIndex: number;
     segmentPage?: number;
 }
 
 export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IShowDocHyperLinkInfoPopupOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'doc.operation.show-hyper-link-info-popup',
+    id: 'doc.operation.toggle-hyper-link-info-popup',
     handler(accessor, params) {
         const hyperLinkService = accessor.get(DocHyperLinkPopupService);
         if (!params) {

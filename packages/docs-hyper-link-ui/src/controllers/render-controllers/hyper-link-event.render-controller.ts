@@ -39,20 +39,16 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
             this._docEventManagerService.hoverCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
                 if (link) {
-                    const customRanges = this._context.unit.getSelfOrHeaderFooterModel(link.segmentId).getBody()?.customRanges ?? [];
-                    const linkIndex = customRanges.findIndex((range) => range.rangeId === link.range.rangeId);
-                    if (linkIndex !== -1) {
-                        this._commandService.executeCommand(
-                            ToggleDocHyperLinkInfoPopupOperation.id,
-                            {
-                                unitId: this._context.unitId,
-                                linkId: link.range.rangeId,
-                                segmentId: link.segmentId,
-                                rangeIndex: linkIndex,
-                                segmentPage: link.segmentPageIndex,
-                            }
-                        );
-                    }
+                    this._commandService.executeCommand(
+                        ToggleDocHyperLinkInfoPopupOperation.id,
+                        {
+                            unitId: this._context.unitId,
+                            linkId: link.range.rangeId,
+                            segmentId: link.segmentId,
+                            segmentPage: link.segmentPageIndex,
+                            rangeId: link.range.rangeId,
+                        }
+                    );
                 } else if (this._hyperLinkPopupService.showing) {
                     this._commandService.executeCommand(
                         ToggleDocHyperLinkInfoPopupOperation.id

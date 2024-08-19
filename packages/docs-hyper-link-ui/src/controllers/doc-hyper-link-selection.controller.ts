@@ -58,7 +58,7 @@ export class DocHyperLinkSelectionController extends Disposable {
                             const index = customRanges?.findIndex((value) => (value.startIndex) < startOffset && value.endIndex > endOffset - 1) ?? -1;
                             if (index > -1) {
                                 const customRange = customRanges![index];
-                                this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId, rangeIndex: index });
+                                this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId });
                                 return;
                             }
                         } else { // range

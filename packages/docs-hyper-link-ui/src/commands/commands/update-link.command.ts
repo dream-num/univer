@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, type ICommand, ICommandService, sequenceExecute } from '@univerjs/core';
 import { replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
-import { UpdateDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
+import { AddDocHyperLinkMutation, UpdateDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
+import type { IAddDocHyperLinkMutationParams } from '../../../../docs-hyper-link/lib/types';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;
@@ -32,30 +33,49 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         if (!params) {
             return false;
         }
-
+        const { unitId, payload } = params;
         const commandService = accessor.get(ICommandService);
         const selectionService = accessor.get(TextSelectionManagerService);
         const currentSelection = selectionService.getActiveTextRange();
         if (!currentSelection) {
             return false;
         }
-
+        const newId = generateRandomId();
         const replaceSelection = replaceSelectionFactory(accessor, {
             unitId: params.unitId,
             body: {
-                dataStream: params.label,
+                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${params.label}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                customRanges: [{
+                    rangeId: newId,
+                    rangeType: CustomRangeType.HYPERLINK,
+                    startIndex: 0,
+                    endIndex: params.label.length + 1,
+                }],
             },
             selection: {
-                startOffset: currentSelection.startOffset! + 1,
-                endOffset: currentSelection.endOffset! - 1,
+                startOffset: currentSelection.startOffset!,
+                endOffset: currentSelection.endOffset!,
                 collapsed: false,
-
             },
         });
+
         if (!replaceSelection) {
             return false;
         }
 
-        return commandService.syncExecuteCommand(UpdateDocHyperLinkMutation.id, params);
+        const addLinkMutation = {
+            id: AddDocHyperLinkMutation.id,
+            params: {
+                unitId,
+                link: {
+                    id: newId,
+                    payload,
+                },
+            } as IAddDocHyperLinkMutationParams,
+        };
+
+        const result = sequenceExecute([addLinkMutation, replaceSelection], commandService);
+
+        return result.result;
     },
 };

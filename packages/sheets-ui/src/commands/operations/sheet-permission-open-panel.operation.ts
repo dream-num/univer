@@ -49,15 +49,12 @@ export const SheetPermissionOpenPanelOperation: ICommand<IPermissionOpenPanelPar
                 showDetail,
             },
             onClose: () => {
-                sheetPermissionPanelModel.setRangeErrorMsg('');
-                sheetPermissionPanelModel.resetRule();
-                sheetPermissionUserManagerService.setUserList([]);
-                sheetPermissionUserManagerService.setSelectUserList([]);
-                sheetPermissionUserManagerService.setOldCollaboratorList([]);
-                sheetPermissionUserManagerService.setAllUserList([]);
+                sheetPermissionPanelModel.reset();
+                sheetPermissionUserManagerService.reset();
             },
         };
 
+        sheetPermissionPanelModel.setVisible(true);
         sidebarService.open(sidebarProps);
 
         return true;

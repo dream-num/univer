@@ -57,8 +57,8 @@ export const SheetPermissionPanelList = () => {
     const currentUser = usesManagerService.getCurrentUser();
     const [currentRuleRanges, currentRuleRangesSet] = useState<IRange[]>([]);
 
-    useObservable(worksheetProtectionModel.ruleRefresh$);
-    useObservable(rangeProtectionRuleModel.ruleRefresh$);
+    const _sheetRuleRefresh = useObservable(worksheetProtectionModel.ruleRefresh$, '');
+    const _rangeRuleRefresh = useObservable(rangeProtectionRuleModel.ruleRefresh$, '');
 
     const getRuleList = useCallback(async (isCurrentSheet: boolean) => {
         const worksheet = workbook.getActiveSheet()!;
@@ -126,6 +126,16 @@ export const SheetPermissionPanelList = () => {
             subscribe.unsubscribe();
         };
     }, []);
+
+    useEffect(() => {
+        const getRuleListByRefresh = async () => {
+            if (_sheetRuleRefresh || _rangeRuleRefresh) {
+                const ruleList = await getRuleList(true);
+                setRuleList(ruleList);
+            };
+        };
+        getRuleListByRefresh();
+    }, [_sheetRuleRefresh, _rangeRuleRefresh]);
 
     const handleDelete = (rule: IRuleItem) => {
         const { unitId, subUnitId, unitType } = rule;

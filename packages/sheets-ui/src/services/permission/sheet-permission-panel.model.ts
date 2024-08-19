@@ -51,6 +51,16 @@ export class SheetPermissionPanelModel {
     private _oldRule: Nullable<IPermissionPanelRule>;
     private _rangeErrorMsg$ = new BehaviorSubject('');
 
+    private _visible = false;
+
+    setVisible(v: boolean) {
+        this._visible = v;
+    }
+
+    getVisible() {
+        return this._visible;
+    }
+
     rangeErrorMsg$ = this._rangeErrorMsg$.asObservable();
 
     setRangeErrorMsg(msg: string) {
@@ -71,6 +81,13 @@ export class SheetPermissionPanelModel {
     resetRule() {
         this._rule = DEFAULT_RANGE_RULE;
         this._rule$.next(this._rule);
+    }
+
+    reset() {
+        this.setVisible(false);
+        this.resetRule();
+        this.setRangeErrorMsg('');
+        this.setOldRule(null);
     }
 
     get oldRule() {

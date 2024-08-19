@@ -190,11 +190,13 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                 return user.role === UnitRole.Editor;
             });
             sheetPermissionUserManagerService.setSelectUserList(selectUserList);
+            sheetPermissionUserManagerService.setOldCollaboratorList(selectUserList);
         };
         if (activeRule?.permissionId) {
             getSelectUserList();
         } else {
             sheetPermissionUserManagerService.setSelectUserList([]);
+            sheetPermissionUserManagerService.setOldCollaboratorList([]);
         }
     }, [activeRule?.permissionId]);
 

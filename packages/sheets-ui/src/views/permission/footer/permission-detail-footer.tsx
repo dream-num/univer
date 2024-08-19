@@ -156,7 +156,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                         }
                     }
                     sheetPermissionPanelModel.resetRule();
-                    sheetPermissionUserManagerService.setSelectUserList([]);
+                    sheetPermissionUserManagerService.reset();
                     const sidebarProps = {
                         header: { title: `${localeService.t('permission.panel.title')}` },
                         children: {
@@ -177,8 +177,8 @@ export const SheetPermissionPanelDetailFooter = () => {
             <Button
                 className={styles.sheetPermissionPanelFooterCancel}
                 onClick={() => {
-                    sheetPermissionPanelModel.resetRule();
-                    sheetPermissionUserManagerService.setSelectUserList([]);
+                    sheetPermissionPanelModel.reset();
+                    sheetPermissionUserManagerService.reset();
                     sidebarService.close();
                 }}
             >

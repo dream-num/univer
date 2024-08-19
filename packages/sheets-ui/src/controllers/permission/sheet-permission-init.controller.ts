@@ -410,14 +410,17 @@ export class SheetPermissionInitController extends Disposable {
                 objectType: UnitObject.Worksheet,
                 actions: [UnitAction.Edit, UnitAction.View],
             }).then((actionList) => {
+                let key = '';
                 getAllWorksheetPermissionPoint().forEach((F) => {
                     const instance = new F(unitId, subUnitId);
                     const unitActionName = instance.subType;
                     const action = actionList.find((item) => item.action === unitActionName);
                     if (action) {
                         this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+                        key += `${action.action}_${action.allowed}`;
                     }
                 });
+                this._worksheetProtectionRuleModel.ruleRefresh(`${permissionId}_${key}`);
             });
         }
         const sheetPointItem = this._worksheetProtectionPointRuleModel.getTargetByPermissionId(unitId, permissionId);
@@ -448,14 +451,17 @@ export class SheetPermissionInitController extends Disposable {
                 objectType: UnitObject.SelectRange,
                 actions: [UnitAction.Edit, UnitAction.View],
             }).then((actionList) => {
+                let key = '';
                 getAllRangePermissionPoint().forEach((F) => {
                     const instance = new F(unitId, subUnitId, permissionId);
                     const unitActionName = instance.subType;
                     const action = actionList.find((item) => item.action === unitActionName);
                     if (action) {
                         this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+                        key += `${action.action}_${action.allowed}`;
                     }
                 });
+                this._rangeProtectionRuleModel.ruleRefresh(`${permissionId}_${key}`);
             });
         }
     }

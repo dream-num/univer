@@ -125,10 +125,6 @@ export const DocHyperLinkEdit = () => {
 
     return (
         <div className={styles.docsLinkEdit}>
-            <div className={styles.docsLinkEditTitle}>
-                <span>{localeService.t('docLink.edit.title')}</span>
-                <CloseSingle className={styles.docsLinkEditClose} onClick={handleCancel} />
-            </div>
             <div>
                 {editingId
                     ? (

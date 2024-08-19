@@ -22,7 +22,7 @@ const locale: typeof zhCN = {
             confirm: 'Xác nhận',
             cancel: 'Hủy',
             title: 'Liên kết',
-            address: 'Địa chỉ liên kết',
+            address: 'Liên kết',
             label: 'Nhãn',
             LabelError: 'Vui lòng nhập nhãn liên kết',
             placeholder: 'Vui lòng nhập liên kết hợp lệ',

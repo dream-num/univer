@@ -22,7 +22,7 @@ const enUS: typeof zhCN = {
             confirm: 'Confirm',
             cancel: 'Cancel',
             title: 'Link',
-            address: 'Link address',
+            address: 'Link',
             placeholder: 'Please input a link url',
             addressError: 'Url is illegal!',
             label: 'Label',

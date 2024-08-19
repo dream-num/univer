@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { type DataValidationStatus, Disposable, type IDataValidationRule, ILogService } from '@univerjs/core';
+import type { type DataValidationStatus, Disposable, ICellDataForSheetInterceptor, type IDataValidationRule, ILogService, Nullable } from '@univerjs/core';
 import { debounceTime, Subject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
+import type { IDataValidationPos } from './data-validation-manager';
 import { DataValidationManager } from './data-validation-manager';
 
 type ManagerCreator<T extends IDataValidationRule> = (unitId: string, subUnitId: string) => DataValidationManager<T>;
@@ -161,7 +162,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         return manager.getDataValidations();
     }
 
-    validator(rule: T, pos: any, value: any) {
+    validator(rule: T, pos: IDataValidationPos, value: Nullable<ICellDataForSheetInterceptor>) {
         const { unitId, subUnitId } = pos;
         const manager = this.ensureManager(unitId, subUnitId);
         return manager.validator(value, rule, pos, (status, changed) => {

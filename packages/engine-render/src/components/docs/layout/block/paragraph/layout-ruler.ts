@@ -67,10 +67,10 @@ export function layoutParagraph(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    paragraphStart: boolean = false,
+    isParagraphFirstShapedText: boolean,
     breakPointType = BreakPointType.Normal
 ) {
-    if (paragraphStart) {
+    if (isParagraphFirstShapedText) {
         // elementIndex === 0 表示段落开始的第一个字符，需要新起一行，与之前的段落区分开
         if (paragraphConfig.bulletSkeleton) {
             const { bulletSkeleton, paragraphStyle = {} } = paragraphConfig;
@@ -86,12 +86,12 @@ export function layoutParagraph(
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
-            _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
+            _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
         } else {
-            _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
+            _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
         }
     } else {
-        _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
+        _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
     }
 
     return [...pages];
@@ -197,13 +197,12 @@ function _divideOperator(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    paragraphStart = false,
+    isParagraphFirstShapedText: boolean,
     breakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
     const divideInfo = getLastNotFullDivideInfo(lastPage); // 取得最新一行里内容未满的第一个 divide.
-
     if (divideInfo) {
         const width = __getGlyphGroupWidth(glyphGroup);
         const { divide, isLast } = divideInfo;
@@ -270,6 +269,7 @@ function _divideOperator(
                         sectionBreakConfig,
                         paragraphConfig,
                         false,
+
                         breakPointType,
                         defaultSpanLineHeight
                     );
@@ -282,7 +282,7 @@ function _divideOperator(
                         breakType: BreakPointType.Normal,
                     });
 
-                    _divideOperator(ctx, hyphenSliceGlyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, BreakPointType.Hyphen);
+                    _divideOperator(ctx, hyphenSliceGlyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, BreakPointType.Hyphen);
                 }
 
                 _divideOperator(
@@ -291,7 +291,8 @@ function _divideOperator(
                     pages,
                     sectionBreakConfig,
                     paragraphConfig,
-                    paragraphStart,
+                    isParagraphFirstShapedText,
+
                     breakPointType,
                     defaultSpanLineHeight
                 );
@@ -302,7 +303,8 @@ function _divideOperator(
                     pages,
                     sectionBreakConfig,
                     paragraphConfig,
-                    paragraphStart,
+                    isParagraphFirstShapedText,
+
                     breakPointType,
                     defaultSpanLineHeight
                 );
@@ -325,7 +327,8 @@ function _divideOperator(
                 pages,
                 sectionBreakConfig,
                 paragraphConfig,
-                paragraphStart,
+                isParagraphFirstShapedText,
+
                 breakPointType,
                 defaultSpanLineHeight
             );
@@ -377,6 +380,7 @@ function _divideOperator(
                         sectionBreakConfig,
                         paragraphConfig,
                         lineIsStart,
+
                         breakPointType,
                         boundingBoxAscent + boundingBoxDescent
                     );
@@ -389,21 +393,35 @@ function _divideOperator(
                             pages,
                             sectionBreakConfig,
                             paragraphConfig,
-                            paragraphStart
+                            isParagraphFirstShapedText
                         );
                     }
 
-                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
+                    _divideOperator(ctx,
+                        glyphGroup,
+                        pages,
+                        sectionBreakConfig,
+                        paragraphConfig,
+                        isParagraphFirstShapedText,
+
+                        breakPointType);
 
                     return;
                 }
             }
-
             addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
             updateDivideInfo(divide, { breakType: breakPointType });
         }
     } else {
-        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
+        _lineOperator(ctx,
+            glyphGroup,
+            pages,
+            sectionBreakConfig,
+            paragraphConfig,
+            isParagraphFirstShapedText,
+
+            breakPointType,
+            defaultSpanLineHeight);
     }
 }
 
@@ -413,7 +431,7 @@ function _lineOperator(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    paragraphStart: boolean = false,
+    isParagraphFirstShapedText: boolean,
     breakPointType: BreakPointType = BreakPointType.Normal,
     defaultGlyphLineHeight?: number
 ) {
@@ -421,7 +439,7 @@ function _lineOperator(
     let columnInfo = getLastNotFullColumnInfo(lastPage);
     if (!columnInfo || !columnInfo.column) {
         // 如果列不存在，则做一个兜底策略，新增一页。
-        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, undefined, breakPointType);
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, true, breakPointType);
         lastPage = getLastPage(pages);
         columnInfo = getLastNotFullColumnInfo(lastPage);
     }
@@ -481,10 +499,11 @@ function _lineOperator(
     );
 
     const { marginTop, spaceBelowApply } = __getParagraphSpace(
+        ctx,
         lineSpacingApply,
         spaceAbove,
         spaceBelow,
-        paragraphStart,
+        isParagraphFirstShapedText,
         preLine
     );
 
@@ -516,7 +535,7 @@ function _lineOperator(
                 .filter((drawing) => drawingsInLine.includes(drawing.drawingId));
 
             if (relativeLineDrawings.length > 0) {
-                __updateAndPositionDrawings(ctx, preLine.top, preLine.lineHeight, column, relativeLineDrawings, preLine.paragraphIndex, paragraphStart);
+                __updateAndPositionDrawings(ctx, preLine.top, preLine.lineHeight, column, relativeLineDrawings, preLine.paragraphIndex, isParagraphFirstShapedText);
             }
         }
     }
@@ -525,7 +544,7 @@ function _lineOperator(
         const targetDrawings = [...paragraphAffectSkeDrawings.values()]
             .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
 
-        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, paragraphStart, pDrawingAnchor?.get(paragraphIndex)?.top);
+        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, isParagraphFirstShapedText, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
@@ -544,9 +563,17 @@ function _lineOperator(
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
-        _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultGlyphLineHeight);
+        _columnOperator(ctx,
+            glyphGroup,
+            pages,
+            sectionBreakConfig,
+            paragraphConfig,
+            isParagraphFirstShapedText,
 
-        if (paragraphStart && paragraphAffectSkeDrawings && paragraphAffectSkeDrawings.size > 0) {
+            breakPointType,
+            defaultGlyphLineHeight);
+
+        if (isParagraphFirstShapedText && paragraphAffectSkeDrawings && paragraphAffectSkeDrawings.size > 0) {
             for (const drawing of paragraphAffectSkeDrawings.values()) {
                 if (lastPage.skeDrawings.has(drawing.drawingId)) {
                     lastPage.skeDrawings.delete(drawing.drawingId);
@@ -573,7 +600,7 @@ function _lineOperator(
         indentStart,
         indentEnd,
         charSpaceApply,
-        paragraphStart
+        isParagraphFirstShapedText
     );
 
     // 如果宽度不足以容纳边距,这里留 1px 的宽度进行占位.
@@ -599,7 +626,7 @@ function _lineOperator(
         },
         column.width,
         lineIndex,
-        paragraphStart,
+        isParagraphFirstShapedText,
         paragraphConfig,
         lastPage,
         headerPage,
@@ -609,7 +636,15 @@ function _lineOperator(
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, pDrawingAnchor);
-    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultGlyphLineHeight);
+    _divideOperator(ctx,
+        glyphGroup,
+        pages,
+        sectionBreakConfig,
+        paragraphConfig,
+        isParagraphFirstShapedText,
+
+        breakPointType,
+        defaultGlyphLineHeight);
 }
 
 function __updateAndPositionDrawings(
@@ -619,7 +654,7 @@ function __updateAndPositionDrawings(
     column: IDocumentSkeletonColumn,
     targetDrawings: IDocumentSkeletonDrawing[],
     paragraphIndex: number,
-    paragraphStart: boolean,
+    isParagraphFirstShapedText: boolean,
     drawingAnchorTop?: number
 ) {
     if (targetDrawings.length === 0) {
@@ -630,7 +665,7 @@ function __updateAndPositionDrawings(
         lineTop,
         lineHeight,
         column,
-        paragraphStart,
+        isParagraphFirstShapedText,
         drawingAnchorTop,
         targetDrawings
     );
@@ -928,7 +963,7 @@ function _columnOperator(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    paragraphStart: boolean = false,
+    isParagraphFirstShapedText: boolean,
     breakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
@@ -936,9 +971,18 @@ function _columnOperator(
     const columnIsFull = isColumnFull(lastPage);
 
     if (columnIsFull === true) {
-        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
+        _pageOperator(ctx,
+            glyphGroup,
+            pages,
+            sectionBreakConfig,
+            paragraphConfig,
+            isParagraphFirstShapedText,
+
+            breakPointType, defaultSpanLineHeight);
     } else {
-        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig,
+            isParagraphFirstShapedText,
+            breakPointType, defaultSpanLineHeight);
     }
 }
 
@@ -948,7 +992,7 @@ function _pageOperator(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    paragraphStart: boolean = false,
+    isParagraphFirstShapedText: boolean,
     breakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
@@ -956,7 +1000,14 @@ function _pageOperator(
     const { skeHeaders, skeFooters } = paragraphConfig;
 
     pages.push(createSkeletonPage(ctx, sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber + 1));
-    _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
+    _columnOperator(ctx, glyphGroup,
+        pages,
+        sectionBreakConfig,
+        paragraphConfig,
+        isParagraphFirstShapedText,
+
+        breakPointType,
+        defaultSpanLineHeight);
 }
 
 /**
@@ -968,7 +1019,7 @@ function __getIndentPadding(
     indentStart: Nullable<INumberUnit>,
     indentEnd: Nullable<INumberUnit>,
     charSpaceApply: number,
-    paragraphStart = false
+    isParagraphFirstShapedText = false
 ) {
     const indentFirstLineNumber = getNumberUnitValue(indentFirstLine, charSpaceApply);
     const hangingNumber = getNumberUnitValue(hanging, charSpaceApply);
@@ -978,11 +1029,11 @@ function __getIndentPadding(
     let paddingLeft = indentStartNumber;
     const paddingRight = indentEndNumber;
 
-    if (indentFirstLineNumber > 0 && paragraphStart) {
+    if (indentFirstLineNumber > 0 && isParagraphFirstShapedText) {
         paddingLeft += indentFirstLineNumber;
     }
 
-    if (hangingNumber > 0 && !paragraphStart) {
+    if (hangingNumber > 0 && !isParagraphFirstShapedText) {
         paddingLeft += hangingNumber;
     }
 
@@ -993,10 +1044,11 @@ function __getIndentPadding(
 }
 
 function __getParagraphSpace(
+    ctx: ILayoutContext,
     lineSpacing: number = 0,
     spaceAbove: Nullable<INumberUnit>,
     spaceBelow: Nullable<INumberUnit>,
-    paragraphStart: boolean,
+    isParagraphFirstShapedText: boolean,
     preLine?: IDocumentSkeletonLine
 ) {
     // Unable to read the paragraph information from the previous line,
@@ -1004,7 +1056,7 @@ function __getParagraphSpace(
     // `SpaceBelowApply` will not participate in the current line height calculation.
     const spaceBelowApply = getNumberUnitValue(spaceBelow, lineSpacing);
 
-    if (paragraphStart) {
+    if (isParagraphFirstShapedText) {
         let marginTop = getNumberUnitValue(spaceAbove, lineSpacing);
 
         if (preLine) {
@@ -1109,7 +1161,7 @@ export function updateInlineDrawingPosition(
     const isPageBreak = __checkPageBreak(column);
 
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
-    const { top, lineHeight } = line;
+    const { top, lineHeight, marginBottom = 0 } = line;
 
     for (const divide of line.divides) {
         for (const glyph of divide.glyphGroup) {
@@ -1135,7 +1187,7 @@ export function updateInlineDrawingPosition(
                 const glyphHeight = glyph.bBox.bd + glyph.bBox.ba;
 
                 drawing.aLeft = divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
-                drawing.aTop = top + lineHeight - 0.5 * glyphHeight - 0.5 * height;
+                drawing.aTop = top + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
                 drawing.width = width;
                 drawing.height = height;
                 drawing.angle = angle;
@@ -1157,7 +1209,7 @@ function __getDrawingPosition(
     lineTop: number,
     lineHeight: number,
     column: IDocumentSkeletonColumn,
-    paragraphStart: boolean,
+    isParagraphFirstShapedText: boolean,
     blockAnchorTop?: number,
     needPositionDrawings: IDocumentSkeletonDrawing[] = []
 ) {
@@ -1173,7 +1225,7 @@ function __getDrawingPosition(
     const isPageBreak = __checkPageBreak(column);
 
     // TODO: @jocs 在段落跨页场景(一个段落在两页)，默认将 drawing 放到上一页，下一页不处理 drawing?
-    if (isPageBreak && !paragraphStart) {
+    if (isPageBreak && !isParagraphFirstShapedText) {
         return;
     }
 

@@ -43,6 +43,7 @@ exports.baseRules = {
     'command/command': 'off',
 
     // TODO: debatable rules
+    'ts/explicit-function-return-type': 'warn',
     'test/prefer-lowercase-title': 'off',
     'antfu/top-level-function': 'off',
     'style/operator-linebreak': 'off',
@@ -100,7 +101,7 @@ exports.baseRules = {
     'react/no-create-ref': 'warn',
 };
 
-exports.typescriptPreset = function typescriptPreset() {
+exports.typescriptPreset = () => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
         rules: {
@@ -126,6 +127,15 @@ exports.typescriptPreset = function typescriptPreset() {
         },
         languageOptions: {
             parser: require('@typescript-eslint/parser'),
+        },
+    };
+};
+
+exports.facadePreset = () => {
+    return {
+        files: ['**/facade/src/**/*.ts'],
+        rules: {
+            'ts/explicit-function-return-type': 'error',
         },
     };
 };

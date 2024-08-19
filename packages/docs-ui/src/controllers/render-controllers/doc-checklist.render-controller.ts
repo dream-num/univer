@@ -15,10 +15,10 @@
  */
 
 import type { Documents, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, getParagraphByGlyph, GlyphType, PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, Vector2 } from '@univerjs/engine-render';
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, PresetListType } from '@univerjs/core';
-import { DocSkeletonManagerService, TextSelectionManagerService, ToggleCheckListCommand, VIEWPORT_KEY } from '@univerjs/docs';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { DocSkeletonManagerService, TextSelectionManagerService, ToggleCheckListCommand } from '@univerjs/docs';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 export class DocChecklistRenderController extends Disposable implements IRenderModule {

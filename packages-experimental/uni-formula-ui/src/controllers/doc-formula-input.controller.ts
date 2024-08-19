@@ -43,7 +43,7 @@ export class DocUniFormulaInputController extends Disposable {
 
         this._initKeyboardListeners();
         this._initCommands();
-        // this._initHoverListener();
+        this._initHoverListener();
     }
 
     private _initCommands(): void {

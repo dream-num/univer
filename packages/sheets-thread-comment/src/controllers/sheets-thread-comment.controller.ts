@@ -15,7 +15,7 @@
  */
 
 import type { DependencyOverride, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { CommentSingle } from '@univerjs/icons';
@@ -89,30 +89,33 @@ export class SheetsThreadCommentController extends Disposable {
                 }
                 const params = commandInfo.params as ISetSelectionsOperationParams;
                 const { unitId, subUnitId, selections, type } = params;
-                if ((type === SelectionMoveType.MOVE_END || type === undefined) && selections[0]?.primary) {
+                if ((type === SelectionMoveType.MOVE_END || type === undefined)) {
                     const range = selections[0].range;
-                    if (range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) {
+                    const rangeType = range.rangeType ?? RANGE_TYPE.NORMAL;
+                    if (rangeType !== RANGE_TYPE.NORMAL || range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) {
                         if (this._threadCommentPanelService.activeCommentId) {
                             this._commandService.executeCommand(SetActiveCommentOperation.id);
                         }
                         return;
                     }
-                    const row = selections[0].primary.actualRow;
-                    const col = selections[0].primary.actualColumn;
-                    if (!this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
-                        if (this._threadCommentPanelService.activeCommentId) {
-                            this._commandService.executeCommand(SetActiveCommentOperation.id);
+                    if (selections[0]?.primary) {
+                        const row = selections[0].primary.actualRow;
+                        const col = selections[0].primary.actualColumn;
+                        if (!this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
+                            if (this._threadCommentPanelService.activeCommentId) {
+                                this._commandService.executeCommand(SetActiveCommentOperation.id);
+                            }
+                            return;
                         }
-                        return;
-                    }
 
-                    const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
-                    if (commentId) {
-                        this._commandService.executeCommand(SetActiveCommentOperation.id, {
-                            unitId,
-                            subUnitId,
-                            commentId,
-                        });
+                        const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
+                        if (commentId) {
+                            this._commandService.executeCommand(SetActiveCommentOperation.id, {
+                                unitId,
+                                subUnitId,
+                                commentId,
+                            });
+                        }
                     }
                 }
             }

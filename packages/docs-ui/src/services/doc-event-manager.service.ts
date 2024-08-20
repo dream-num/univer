@@ -267,22 +267,19 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     }
 
     private _buildBulletBoundsBySegment(segmentId?: string) {
-        const paragraphs = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.paragraphs ?? [];
+        const body = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+        const paragraphs = body?.paragraphs ?? [];
         const bounds: IBulletBound[] = [];
-        const paragraphRanges = paragraphs.map((paragraph, i) => ({
-            ...paragraph,
-            paragraphStart: (paragraphs[i - 1]?.startIndex ?? -1) + 1,
-            paragraphEnd: paragraph.startIndex,
-        }));
 
-        paragraphRanges.forEach((paragraph) => {
+        paragraphs.forEach((paragraph) => {
             if (paragraph.bullet && paragraph.bullet.listType.indexOf('CHECK_LIST') === 0) {
                 const calcRect = (pageIndex: number) => {
-                    const node = this._skeleton.findNodeByCharIndex(paragraph.paragraphEnd, segmentId, pageIndex);
+                    const node = this._skeleton.findNodeByCharIndex(paragraph.startIndex, segmentId, pageIndex);
                     const divide = node?.parent;
                     const line = divide?.parent;
-
-                    const bulletNode = line?.divides?.[0]?.glyphGroup?.[0];
+                    const column = line?.parent;
+                    const targetLine = column?.lines.find((l) => l.paragraphStart && l.paragraphIndex === paragraph.startIndex);
+                    const bulletNode = targetLine?.divides?.[0]?.glyphGroup?.[0];
 
                     if (!bulletNode) {
                         return;

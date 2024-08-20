@@ -17,16 +17,22 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DocEventManagerService } from '@univerjs/docs-ui';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { DocumentEditArea, type IRenderContext, type IRenderModule } from '@univerjs/engine-render';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { ClickDocHyperLinkOperation, ToggleDocHyperLinkInfoPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export class DocHyperLinkEventRenderController extends Disposable implements IRenderModule {
+    get _skeleton() {
+        return this._docSkeletonManagerService.getSkeleton();
+    }
+
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocHyperLinkPopupService) private readonly _hyperLinkPopupService: DocHyperLinkPopupService
+        @Inject(DocHyperLinkPopupService) private readonly _hyperLinkPopupService: DocHyperLinkPopupService,
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
 
@@ -34,10 +40,24 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         this._initClick();
     }
 
+    private _hideInfoPopup() {
+        if (this._hyperLinkPopupService.showing) {
+            this._commandService.executeCommand(
+                ToggleDocHyperLinkInfoPopupOperation.id
+            );
+        }
+    }
+
     private _initHover() {
         this.disposeWithMe(
             this._docEventManagerService.hoverCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
+                const editArea = this._skeleton.getViewModel().getEditArea();
+                if ((link?.segmentId && editArea === DocumentEditArea.BODY) || (!link?.segmentId && editArea !== DocumentEditArea.BODY)) {
+                    this._hideInfoPopup();
+                    return;
+                }
+
                 if (link) {
                     this._commandService.executeCommand(
                         ToggleDocHyperLinkInfoPopupOperation.id,
@@ -49,10 +69,8 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                             rangeId: link.range.rangeId,
                         }
                     );
-                } else if (this._hyperLinkPopupService.showing) {
-                    this._commandService.executeCommand(
-                        ToggleDocHyperLinkInfoPopupOperation.id
-                    );
+                } else {
+                    this._hideInfoPopup();
                 }
             })
         );

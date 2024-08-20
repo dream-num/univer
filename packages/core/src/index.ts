@@ -198,5 +198,6 @@ export { normalizeBody, getCustomRangeSlice, getCustomDecorationSlice } from './
 export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
 export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
 export { nameCharacterCheck } from './shared/name';
+export { mixinClass } from './common/mixin';
 
 export * from './common/di';

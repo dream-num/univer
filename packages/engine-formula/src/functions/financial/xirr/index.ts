@@ -20,6 +20,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { getResultByGuessIterF } from '../../../basics/financial';
 
 export class Xirr extends BaseFunction {
     override minParams = 2;
@@ -55,7 +56,7 @@ export class Xirr extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = this._getResult(_values as number[], _dates as number[], guessValue);
+        const result = getResultByGuessIterF(guessValue, (rate: number) => this._iterF(_values as number[], _dates as number[], rate));
 
         if (typeof result !== 'number') {
             return result as ErrorValueObject;
@@ -255,7 +256,7 @@ export class Xirr extends BaseFunction {
         };
     }
 
-    private _xirrFunction(values: number[], dates: number[], rate: number): number {
+    private _iterF(values: number[], dates: number[], rate: number): number {
         const D_0 = dates[0];
         const r = rate + 1;
 
@@ -266,103 +267,5 @@ export class Xirr extends BaseFunction {
         }
 
         return res;
-    }
-
-    private _getResult(values: number[], dates: number[], guess: number): number | ErrorValueObject {
-        const g_Eps = 1e-7;
-        const g_Eps2 = g_Eps * 2;
-        const nIM = 500;
-
-        let eps = 1;
-        let nMC = 0;
-        let xN;
-        let _guess = guess;
-
-        while (eps > g_Eps && nMC < nIM) {
-            const den = (this._xirrFunction(values, dates, _guess + g_Eps) - this._xirrFunction(values, dates, _guess - g_Eps)) / g_Eps2;
-            xN = _guess - this._xirrFunction(values, dates, _guess) / den;
-            nMC++;
-            eps = Math.abs(xN - _guess);
-            _guess = xN;
-        }
-
-        if (Number.isNaN(_guess) || Infinity === Math.abs(_guess)) {
-            return this._guessIsNaNorInfinity(values, dates, guess);
-        }
-
-        return _guess;
-    }
-
-    private _guessIsNaNorInfinity(values: number[], dates: number[], guess: number): number | ErrorValueObject {
-        const g_Eps = 1e-7;
-        const nIM = 500;
-        const max = Number.MAX_VALUE;
-        const min = -Number.MAX_VALUE;
-        const step = 1.6;
-
-        let low = guess - 0.01 <= min ? min + g_Eps : guess - 0.01;
-        let high = guess + 0.01 >= max ? max - g_Eps : guess + 0.01;
-        let i;
-        let xBegin;
-        let xEnd;
-        let x;
-        let y;
-        let currentIter = 0;
-
-        if (guess <= min || guess >= max) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        for (i = 0; i < nIM; i++) {
-            xBegin = low <= min ? min + g_Eps : low;
-            xEnd = high >= max ? max - g_Eps : high;
-            x = this._xirrFunction(values, dates, xBegin);
-            y = this._xirrFunction(values, dates, xEnd);
-
-            if (x * y <= 0) {
-                break;
-            } else if (x * y > 0) {
-                low = (xBegin + step * (xBegin - xEnd));
-                high = (xEnd + step * (xEnd - xBegin));
-            } else {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-        }
-
-        if (i === nIM) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        xBegin = xBegin as number;
-        xEnd = xEnd as number;
-
-        let fXbegin = this._xirrFunction(values, dates, xBegin);
-        const fXend = this._xirrFunction(values, dates, xEnd);
-        let fXi;
-        let xI;
-
-        if (Math.abs(fXbegin) < g_Eps) {
-            return fXbegin;
-        }
-
-        if (Math.abs(fXend) < g_Eps) {
-            return fXend;
-        }
-
-        do {
-            xI = xBegin + (xEnd - xBegin) / 2;
-            fXi = this._xirrFunction(values, dates, xI);
-
-            if (fXbegin * fXi < 0) {
-                xEnd = xI;
-            } else {
-                xBegin = xI;
-            }
-
-            fXbegin = this._xirrFunction(values, dates, xBegin);
-            currentIter++;
-        } while (Math.abs(fXi) > g_Eps && currentIter < nIM);
-
-        return xI;
     }
 }

@@ -20,7 +20,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { calculateNpv } from '../../../basics/financial';
+import { calculateNpv, getResultByGuessIterF } from '../../../basics/financial';
 
 export class Irr extends BaseFunction {
     override minParams = 1;
@@ -82,7 +82,7 @@ export class Irr extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = this._getResult(_values, guessValue);
+        const result = getResultByGuessIterF(guessValue, (rate: number) => calculateNpv(rate, _values));
 
         if (typeof result !== 'number') {
             return result as ErrorValueObject;
@@ -143,102 +143,5 @@ export class Irr extends BaseFunction {
             positive,
             negative,
         };
-    }
-
-    private _getResult(values: number[], guess: number): number | ErrorValueObject {
-        const g_Eps = 1e-7;
-        const nIM = 500;
-
-        let eps = 1;
-        let nMC = 0;
-        let xN;
-        let _guess = guess;
-
-        while (eps > g_Eps && nMC < nIM) {
-            xN = _guess - calculateNpv(_guess, values) / ((calculateNpv(_guess + g_Eps, values) - calculateNpv(_guess - g_Eps, values)) / (2 * g_Eps));
-            nMC++;
-            eps = Math.abs(xN - _guess);
-            _guess = xN;
-        }
-
-        if (Number.isNaN(_guess) || Infinity === Math.abs(_guess)) {
-            return this._guessIsNaNorInfinity(values, guess);
-        }
-
-        return _guess;
-    }
-
-    private _guessIsNaNorInfinity(values: number[], guess: number): number | ErrorValueObject {
-        const g_Eps = 1e-7;
-        const nIM = 500;
-
-        const max = Number.MAX_VALUE;
-        const min = -Number.MAX_VALUE;
-        const step = 1.6;
-
-        let low = guess - 0.01 <= min ? min + g_Eps : guess - 0.01;
-        let high = guess + 0.01 >= max ? max - g_Eps : guess + 0.01;
-        let i;
-        let xBegin;
-        let xEnd;
-        let x;
-        let y;
-        let currentIter = 0;
-
-        if (guess <= min || guess >= max) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        for (i = 0; i < nIM; i++) {
-            xBegin = low <= min ? min + g_Eps : low;
-            xEnd = high >= max ? max - g_Eps : high;
-            x = calculateNpv(xBegin, values);
-            y = calculateNpv(xEnd, values);
-
-            if (x * y <= 0) {
-                break;
-            } else if (x * y > 0) {
-                low = (xBegin + step * (xBegin - xEnd));
-                high = (xEnd + step * (xEnd - xBegin));
-            } else {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-        }
-
-        if (i === nIM) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        xBegin = xBegin as number;
-        xEnd = xEnd as number;
-
-        let fXbegin = calculateNpv(xBegin, values);
-        const fXend = calculateNpv(xEnd, values);
-        let fXi;
-        let xI;
-
-        if (Math.abs(fXbegin) < g_Eps) {
-            return fXbegin;
-        }
-
-        if (Math.abs(fXend) < g_Eps) {
-            return fXend;
-        }
-
-        do {
-            xI = xBegin + (xEnd - xBegin) / 2;
-            fXi = calculateNpv(xI, values);
-
-            if (fXbegin * fXi < 0) {
-                xEnd = xI;
-            } else {
-                xBegin = xI;
-            }
-
-            fXbegin = calculateNpv(xBegin, values);
-            currentIter++;
-        } while (Math.abs(fXi) > g_Eps && currentIter < nIM);
-
-        return xI;
     }
 }

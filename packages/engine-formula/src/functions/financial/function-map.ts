@@ -44,6 +44,10 @@ import { Mirr } from './mirr';
 import { Nominal } from './nominal';
 import { Nper } from './nper';
 import { Npv } from './npv';
+import { Oddfprice } from './oddfprice';
+import { Oddfyield } from './oddfyield';
+import { Oddlprice } from './oddlprice';
+import { Oddlyield } from './oddlyield';
 import { Pduration } from './pduration';
 import { Pmt } from './pmt';
 import { Ppmt } from './ppmt';
@@ -81,6 +85,10 @@ export const functionFinancial = [
     [Nominal, FUNCTION_NAMES_FINANCIAL.NOMINAL],
     [Nper, FUNCTION_NAMES_FINANCIAL.NPER],
     [Npv, FUNCTION_NAMES_FINANCIAL.NPV],
+    [Oddfprice, FUNCTION_NAMES_FINANCIAL.ODDFPRICE],
+    [Oddfyield, FUNCTION_NAMES_FINANCIAL.ODDFYIELD],
+    [Oddlprice, FUNCTION_NAMES_FINANCIAL.ODDLPRICE],
+    [Oddlyield, FUNCTION_NAMES_FINANCIAL.ODDLYIELD],
     [Pduration, FUNCTION_NAMES_FINANCIAL.PDURATION],
     [Pmt, FUNCTION_NAMES_FINANCIAL.PMT],
     [Ppmt, FUNCTION_NAMES_FINANCIAL.PPMT],

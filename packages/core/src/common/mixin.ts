@@ -21,15 +21,15 @@ interface IMixinProperty<T> {
 
 /**
  * Mixin some methods to targetObject as prototype, the static methods will not be mixed in
- * @param {T} targetClass The target class to mixin
+ * @param {T} targetClassPrototype The target class to mixin
  * @param {IMixinProperty<T>} mixin The mixin object which contains the methods to mixin.
  */
-export function mixinClass<T>(targetClass: T, mixin: IMixinProperty<T>): void {
+export function mixinClass<T>(targetClassPrototype: T, mixin: IMixinProperty<T>): void {
     for (const key in mixin) {
         // eslint-disable-next-line no-prototype-builtins
         if (mixin.hasOwnProperty(key)) {
             // @ts-ignore
-            targetClass.prototype[key] = mixin[key];
+            targetClassPrototype[key] = mixin[key];
         }
     }
 }

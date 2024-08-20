@@ -35,7 +35,8 @@ import {
     Quantity,
     toDisposable,
     UndoCommand,
-    Univer, UniverInstanceType, WrapStrategy } from '@univerjs/core';
+    Univer, UniverInstanceType, WrapStrategy,
+} from '@univerjs/core';
 import type { ISocket } from '@univerjs/network';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
@@ -57,6 +58,7 @@ import { FWorkbook } from './sheets/f-workbook';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
 import { FHooks } from './f-hooks';
 import { FDataValidationBuilder } from './sheets/f-data-validation-builder';
+import { FPermission } from './sheets/f-permission';
 
 export class FUniver {
     static BorderStyle = BorderStyleTypes;
@@ -467,5 +469,12 @@ export class FUniver {
         const unitId = wb?.getId();
         const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
         sheetRow.setCustomHeader(cfg);
+    }
+
+    /**
+     * Get the PermissionInstance.
+     */
+    getPermission() {
+        return this._injector.createInstance(FPermission);
     }
 }

@@ -26,7 +26,7 @@ export interface IAddRangeProtectionMutationParams {
     rules: IRangeProtectionRule[];
     unitId: string;
     subUnitId: string;
-    name: string;
+    name?: string;
     description?: string;
 };
 

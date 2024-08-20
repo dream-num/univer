@@ -380,7 +380,7 @@ export class SheetPermissionInitController extends Disposable {
             handler: (cell = {}, context, next) => {
                 const { unitId, subUnitId } = context;
                 const worksheetRule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-                if (worksheetRule?.permissionId && worksheetRule.name) {
+                if (worksheetRule?.permissionId) {
                     const selectionProtection = [{
                         [UnitAction.View]: this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? false,
                         [UnitAction.Edit]: this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false,

@@ -18,7 +18,7 @@ import type { UnitObject } from '@univerjs/protocol';
 
 export interface IWorksheetProtectionRule {
     permissionId: string;
-    name: string;
+    name?: string;
     description?: string;
     unitType: UnitObject;
     unitId: string;

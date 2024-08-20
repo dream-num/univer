@@ -16,6 +16,7 @@
 
 import type {
     CellValue,
+    DataValidationStatus,
     ICellData,
     IColorStyle,
     IObjectMatrixPrimitiveType,
@@ -89,7 +90,7 @@ export class FRange {
      *
      * @return The unit ID of the workbook
      */
-    getUnitId() {
+    getUnitId(): string {
         return this._workbook.getUnitId();
     }
 
@@ -98,7 +99,7 @@ export class FRange {
      *
      * @return The name of the worksheet
      */
-    getSheetName() {
+    getSheetName(): string {
         return this._worksheet.getName();
     }
 
@@ -107,7 +108,7 @@ export class FRange {
      *
      * @return The area where the statement is applied
      */
-    getRange() {
+    getRange(): IRange {
         return this._range;
     }
 
@@ -171,7 +172,7 @@ export class FRange {
      * Return range whether this range is merged
      * @returns if true is merged
      */
-    isMerged() {
+    isMerged(): boolean {
         return isCellMerged(this.getCell().mergeInfo, this._range);
     }
 
@@ -464,7 +465,7 @@ export class FRange {
     /**
      * Sets the font underline style of the given ITextDecoration
      */
-    private _setFontUnderline(value: ITextDecoration | null) {
+    private _setFontUnderline(value: ITextDecoration | null): void {
         const style: IStyleTypeValue<ITextDecoration | null> = {
             type: 'ul',
             value,
@@ -482,7 +483,7 @@ export class FRange {
     /**
      * Sets the font strikethrough style of the given ITextDecoration
      */
-    private _setFontStrikethrough(value: ITextDecoration | null) {
+    private _setFontStrikethrough(value: ITextDecoration | null): void {
         const style: IStyleTypeValue<ITextDecoration | null> = {
             type: 'st',
             value,
@@ -598,7 +599,7 @@ export class FRange {
      * @param rule data validation rule, build by `FUniver.newDataValidation`
      * @returns current range
      */
-    async setDataValidation(rule: Nullable<FDataValidation>) {
+    async setDataValidation(rule: Nullable<FDataValidation>): Promise<this> {
         if (!rule) {
             this._commandService.executeCommand(ClearRangeDataValidationCommand.id, {
                 unitId: this._workbook.getUnitId(),
@@ -642,9 +643,9 @@ export class FRange {
 
     /**
      * get all data validation rules in current range
-     * @returns {FDataValidation[]} all data validation rules
+     * @returns all data validation rules
      */
-    getDataValidations() {
+    getDataValidations(): FDataValidation[] {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.getDataValidations(
             this._workbook.getUnitId(),
@@ -657,7 +658,7 @@ export class FRange {
      * get data validation validator status for current range
      * @returns matrix of validator status
      */
-    async getValidatorStatus() {
+    async getValidatorStatus(): Promise<Promise<DataValidationStatus>[][]> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorRanges(
             this._workbook.getUnitId(),

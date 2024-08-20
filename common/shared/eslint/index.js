@@ -139,3 +139,15 @@ exports.facadePreset = () => {
         },
     };
 };
+
+exports.specPreset = () => {
+    return {
+        files: [
+            '**/*.spec.ts',
+            '**/__tests__/**/*.ts',
+        ],
+        rules: {
+            'ts/explicit-function-return-type': 'off',
+        },
+    };
+};

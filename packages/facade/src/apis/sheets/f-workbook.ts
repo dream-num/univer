@@ -41,7 +41,7 @@ export class FWorkbook {
 
     constructor(
         private readonly _workbook: Workbook,
-        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(Injector) private readonly _injector: Injector,
         @Inject(IResourceLoaderService) private readonly _resourceLoaderService: IResourceLoaderService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

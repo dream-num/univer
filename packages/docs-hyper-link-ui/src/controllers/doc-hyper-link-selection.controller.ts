@@ -17,8 +17,8 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkSelectionController)

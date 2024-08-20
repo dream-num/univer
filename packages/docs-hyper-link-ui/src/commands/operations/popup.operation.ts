@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand, ITextRange } from '@univerjs/core';
 import { CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService, getCustomRangesInterestsWithRange, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { getCustomRangesInterestsWithRange, TextSelectionManagerService } from '@univerjs/docs';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textRanges = textSelectionService.getCurrentTextRanges()?.map(serializeDocRange);
-    const renderManagerService = accessor.get(IRenderManagerService);
-    const render = renderManagerService.getCurrent();
-    const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
-    const editArea = skeleton?.getViewModel().getEditArea();
-    if (editArea === DocumentEditArea.FOOTER || editArea === DocumentEditArea.HEADER) {
-        return true;
-    }
-    if (!textRanges || textRanges.length > 1) {
+    const textRanges = textSelectionService.getDocRanges();
+    if (!textRanges.length || textRanges.length > 1) {
         return true;
     }
 
@@ -42,7 +34,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         return true;
     }
 
-    const body = doc.getBody();
+    const body = doc.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody();
     const paragraphs = body?.paragraphs;
     if (!paragraphs) {
         return true;
@@ -50,7 +42,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
 
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const p = paragraphs[i];
-        if (activeRange.startOffset <= p.startIndex && activeRange.endOffset > p.startIndex) {
+        if (activeRange.startOffset! <= p.startIndex && activeRange.endOffset! > p.startIndex) {
             return true;
         }
 
@@ -59,7 +51,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         }
     }
 
-    const insertCustomRanges = getCustomRangesInterestsWithRange(activeRange, body.customRanges ?? []);
+    const insertCustomRanges = getCustomRangesInterestsWithRange(activeRange as ITextRange, body.customRanges ?? []);
     // can't insert hyperlink in range contains other custom ranges
     return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
 };

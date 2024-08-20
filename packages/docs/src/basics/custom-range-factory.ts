@@ -19,6 +19,7 @@ import { DataStreamTreeTokenType, IUniverInstanceService, JSONX, TextX, TextXAct
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
+import { getRichTextEditPath } from '../commands/util';
 import { getSelectionForAddCustomRange, normalizeSelection } from './selection';
 
 interface IAddCustomRangeParam {
@@ -105,7 +106,6 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam, body: IDocume
 }
 
 interface IAddCustomRangeFactoryParam {
-    segmentId?: string;
     rangeId: string;
     rangeType: CustomRangeType;
     wholeEntity?: boolean;
@@ -113,11 +113,12 @@ interface IAddCustomRangeFactoryParam {
 
 // eslint-disable-next-line max-lines-per-function
 export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAddCustomRangeFactoryParam) {
-    const { segmentId, rangeId, rangeType, wholeEntity } = param;
+    const { rangeId, rangeType, wholeEntity } = param;
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     const selection = textSelectionManagerService.getActiveTextRangeWithStyle();
+    const segmentId = selection?.segmentId;
     if (!selection) {
         return false;
     }
@@ -126,7 +127,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     if (!documentDataModel) {
         return false;
     }
-    const body = documentDataModel.getBody();
+    const body = documentDataModel.getSelfOrHeaderFooterModel(selection.segmentId).getBody();
     const unitId = documentDataModel.getUnitId();
     if (!body) {
         return false;
@@ -232,7 +233,8 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
             textRanges: undefined,
         },
     };
-    doMutation.params.actions = jsonX.editOp(textX.serialize());
+    const path = getRichTextEditPath(documentDataModel, segmentId);
+    doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
     return doMutation;
 }
 

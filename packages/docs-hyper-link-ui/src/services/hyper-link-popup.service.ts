@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, ITextRange, ITextRangeParam, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject } from 'rxjs';

@@ -68,6 +68,8 @@ export interface IShowDocHyperLinkEditPopupOperationParams {
     link?: {
         unitId: string;
         linkId: string;
+        segmentId?: string;
+        segmentPage?: number;
     };
 }
 

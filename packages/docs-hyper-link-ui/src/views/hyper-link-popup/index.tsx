@@ -37,7 +37,7 @@ export const DocLinkPopup = () => {
         return null;
     }
 
-    const { unitId, linkId } = currentPopup;
+    const { unitId, linkId, segmentId, segmentPage } = currentPopup;
     const link = hyperLinkModel.getLink(unitId, linkId);
     if (!link) {
         return null;

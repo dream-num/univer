@@ -45,7 +45,7 @@ export const DocHyperLinkEdit = () => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const localeService = useDependency(LocaleService);
     const hyperLinkModel = useDependency(DocHyperLinkModel);
-    const editingId = useObservable(hyperLinkService.editingLink$);
+    const editing = useObservable(hyperLinkService.editingLink$);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const textSelectionRenderManager = useDependency(ITextSelectionRenderManager);
@@ -54,8 +54,8 @@ export const DocHyperLinkEdit = () => {
     const [label, setLabel] = useState('');
     const [showError, setShowError] = useState(false);
     const isLegal = Tools.isLegalUrl(link);
-    const doc = editingId
-        ? univerInstanceService.getUnit<DocumentDataModel>(editingId.unitId, UniverInstanceType.UNIVER_DOC) :
+    const doc = editing
+        ? univerInstanceService.getUnit<DocumentDataModel>(editing.unitId, UniverInstanceType.UNIVER_DOC) :
         univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
     useEffect(() => {
@@ -64,10 +64,10 @@ export const DocHyperLinkEdit = () => {
             return;
         }
 
-        if (editingId) {
-            const linkDetail = editingId ? hyperLinkModel.getLink(editingId.unitId, editingId.linkId) : null;
+        if (editing) {
+            const linkDetail = editing ? hyperLinkModel.getLink(editing.unitId, editing.linkId) : null;
             setLink(linkDetail?.payload ?? '');
-            const matchedRange = doc?.getBody()?.customRanges?.find((i) => linkDetail?.id === i.rangeId);
+            const matchedRange = doc?.getSelfOrHeaderFooterModel(editing.segmentId)?.getBody()?.customRanges?.find((i) => linkDetail?.id === i.rangeId);
             if (doc && matchedRange) {
                 setLabel(getPlainTextFormBody(getBodySlice(doc.getBody()!, matchedRange.startIndex, matchedRange.endIndex)));
             }
@@ -79,7 +79,7 @@ export const DocHyperLinkEdit = () => {
             const linkDetail = hyperLinkModel.getLink(doc.getUnitId(), matchedRange.rangeId);
             setLink(linkDetail?.payload ?? '');
         }
-    }, [doc, editingId, hyperLinkModel, textSelectionManagerService, univerInstanceService]);
+    }, [doc, editing, hyperLinkModel, textSelectionManagerService, univerInstanceService]);
 
     useEffect(() => {
         textSelectionRenderManager.blurEditor();
@@ -98,7 +98,7 @@ export const DocHyperLinkEdit = () => {
         }
         const linkFinal = transformUrl(link);
 
-        if (!editingId) {
+        if (!editing) {
             commandService.executeCommand(AddDocHyperLinkCommand.id, {
                 unitId: doc.getUnitId(),
                 payload: linkFinal,
@@ -111,7 +111,7 @@ export const DocHyperLinkEdit = () => {
             commandService.executeCommand(UpdateDocHyperLinkCommand.id, {
                 unitId: doc.getUnitId(),
                 payload: linkFinal,
-                linkId: editingId.linkId,
+                linkId: editing.linkId,
                 label,
             });
         }
@@ -125,7 +125,7 @@ export const DocHyperLinkEdit = () => {
     return (
         <div className={styles.docsLinkEdit}>
             <div>
-                {editingId
+                {editing
                     ? (
                         <FormLayout
                             label={localeService.t('docLink.edit.label')}

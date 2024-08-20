@@ -259,7 +259,6 @@ export class DocCanvasPopManagerService extends Disposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
         const unitId = workbook.getUnitId();
         const { direction = 'top' } = popup;
-
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             return {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, ITextRange, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, ITextRange, ITextRangeParam, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
@@ -48,8 +48,7 @@ export class DocHyperLinkPopupService extends Disposable {
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -72,17 +71,20 @@ export class DocHyperLinkPopupService extends Disposable {
             this._editPopup.dispose();
         }
         this._editingLink$.next(linkInfo);
-        let activeRange: Nullable<ITextRange> = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+        let activeRange: Nullable<ITextRangeParam> = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         if (linkInfo) {
-            const { unitId, linkId } = linkInfo;
+            const { unitId, linkId, segmentId, segmentPage } = linkInfo;
             const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-            const range = doc?.getBody()?.customRanges?.find((i) => i.rangeId === linkId);
+            const range = doc?.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.find((i) => i.rangeId === linkId);
             if (range) {
                 activeRange = {
                     collapsed: false,
                     startOffset: range.startIndex,
                     endOffset: range.endIndex + 1,
+                    segmentId,
+                    segmentPage,
                 };
+
                 this._textSelectionManagerService.replaceTextRanges([{
                     startOffset: range.startIndex,
                     endOffset: range.endIndex + 1,
@@ -111,10 +113,12 @@ export class DocHyperLinkPopupService extends Disposable {
     }
 
     showInfoPopup(info: ILinkInfo): Nullable<IDisposable> {
-        const { linkId, unitId } = info;
+        const { linkId, unitId, segmentId, segmentPage } = info;
         if (
             this.showing?.linkId === linkId &&
-            this.showing?.unitId === unitId
+            this.showing?.unitId === unitId &&
+            this.showing?.segmentId === segmentId &&
+            this.showing?.segmentPage === segmentPage
         ) {
             return;
         }
@@ -128,7 +132,7 @@ export class DocHyperLinkPopupService extends Disposable {
             return;
         }
         const range = doc.getSelfOrHeaderFooterModel(info.segmentId).getBody()?.customRanges?.find((i) => i.rangeId === linkId);
-        this._showingLink$.next({ unitId, linkId });
+        this._showingLink$.next({ unitId, linkId, segmentId, segmentPage });
         if (!range) {
             return;
         }

@@ -216,7 +216,7 @@ import {
     SetStrikeThroughShortcutItem,
     SetUnderlineShortcutItem,
 } from './shortcuts/style.shortcut';
-import { ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
+import { ClearSelectionValueBackspaceShortcutItem, ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
 import {
     PreventDefaultResetZoomShortcutItem,
     PreventDefaultZoomInShortcutItem,
@@ -493,6 +493,7 @@ export class SheetUIController extends Disposable {
 
             // cell content editing shortcuts
             ClearSelectionValueShortcutItem,
+            ClearSelectionValueBackspaceShortcutItem,
             ...generateArrowSelectionShortCutItem(),
             EditorCursorEnterShortcut,
             StartEditWithF2Shortcut,

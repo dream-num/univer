@@ -19,7 +19,7 @@ import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CURSOR_TYPE, getLineBounding, NodePositionConvertToCursor, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { animationFrameScheduler, distinctUntilChanged, filter, Subject, throttleTime } from 'rxjs';
+import { animationFrameScheduler, distinctUntilChanged, filter, map, mergeMap, Subject, take, throttleTime } from 'rxjs';
 import { transformOffset2Bound } from './doc-popup-manager.service';
 
 interface ICustomRangeBound {
@@ -174,13 +174,22 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             );
         }));
 
-        this.disposeWithMe(this._context.mainComponent!.onPointerDown$.subscribeEvent((evt) => {
-            const ranges = this._calcActiveRanges(evt);
+        const onPointerDown$ = fromEventSubject(this._context.mainComponent!.onPointerDown$);
+        const onPointerUp$ = fromEventSubject(this._context.scene!.onPointerUp$);
+        this.disposeWithMe(onPointerDown$.pipe(
+            mergeMap((down) => onPointerUp$.pipe(take(1), map((up) => ({ down, up })))),
+            filter(({ down, up }) => down.target === up.target && up.timeStamp - down.timeStamp < 300)
+            // filter(({ down, up }) => down.offsetX === up.offsetX && down.offsetY === up.offsetY)
+        ).subscribe(({ down }) => {
+            if (down.button === 2) {
+                return;
+            }
+            const ranges = this._calcActiveRanges(down);
             if (ranges.length) {
                 this._clickCustomRanges$.next(ranges.pop()!);
             }
 
-            const bullet = this._calcActiveBullet(evt);
+            const bullet = this._calcActiveBullet(down);
             if (bullet) {
                 this._clickBullet$.next(bullet);
             }

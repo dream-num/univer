@@ -16,10 +16,7 @@
 
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 
-import type { ICommandInfo, IRange, Workbook } from '@univerjs/core';
-import { AddRangeProtectionCommand } from '../../../commands/commands/add-range-protection.command';
-import { SetRangeProtectionCommand } from '../../../commands/commands/set-range-protection.command';
-import type { IRangeProtectionRule } from '../../../model/range-protection-rule.model';
+import type { ICommandInfo, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 import { RangeProtectionRenderModel } from '../../../model/range-protection-render.model';
 import type { ISetRangeProtectionMutationParams } from '../../../commands/mutations/set-range-protection.mutation';
@@ -38,7 +35,8 @@ import type { EffectRefRangeParams } from '../../../services/ref-range/type';
 
 import type {
     IMoveColsCommandParams,
-    IMoveRowsCommandParams } from '../../../commands/commands/move-rows-cols.command';
+    IMoveRowsCommandParams,
+} from '../../../commands/commands/move-rows-cols.command';
 import {
     MoveColsCommand,
     MoveRowsCommand,
@@ -49,13 +47,16 @@ import {
 } from '../../../commands/commands/set-worksheet-activate.command';
 import { RemoveColCommand, RemoveRowCommand } from '../../../commands/commands/remove-row-col.command';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
+import { DeleteRangeProtectionMutation } from '../../../commands/mutations/delete-range-protection.mutation';
+import { AddRangeProtectionMutation } from '../../../commands/mutations/add-range-protection.mutation';
+import type { IAddRangeProtectionMutationParams } from '../../../../lib/types';
 
 const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
 const mutationIdArrByMove = [MoveRowsMutation.id, MoveColsMutation.id];
 
 type IMoveRowsOrColsMutationParams = IMoveRowsMutationParams;
 
-@OnLifecycle(LifecycleStages.Starting, RangeProtectionRefRangeService)
+@OnLifecycle(LifecycleStages.Steady, RangeProtectionRefRangeService)
 export class RangeProtectionRefRangeService extends Disposable {
     disposableCollection = new DisposableCollection();
 
@@ -108,13 +109,10 @@ export class RangeProtectionRefRangeService extends Disposable {
                     }
                     registerRefRange(unitId, sheetId);
                 }
-                if (commandInfo.id === AddRangeProtectionCommand.id || commandInfo.id === SetRangeProtectionCommand.id) {
-                    const params = commandInfo.params as {
-                        permissionId: string;
-                        rule: IRangeProtectionRule;
-                    };
-                    const subUnitId = params.rule.subUnitId;
-                    const unitId = params.rule.unitId;
+                if (commandInfo.id === SetRangeProtectionMutation.id || commandInfo.id === AddRangeProtectionMutation.id) {
+                    const params = commandInfo.params as ISetRangeProtectionMutationParams | IAddRangeProtectionMutationParams;
+                    const subUnitId = params.subUnitId;
+                    const unitId = params.unitId;
                     if (!subUnitId || !unitId) {
                         return;
                     }
@@ -161,8 +159,8 @@ export class RangeProtectionRefRangeService extends Disposable {
 
         const removeRange = params.range;
         if (permissionRangeLapRules.length) {
-            const redoMutations: { id: string; params: ISetRangeProtectionMutationParams }[] = [];
-            const undoMutations: { id: string; params: ISetRangeProtectionMutationParams }[] = [];
+            const redoMutations: IMutationInfo[] = [];
+            const undoMutations: IMutationInfo[] = [];
             permissionRangeLapRules.forEach((rule) => {
                 const cloneRule = Tools.deepClone(rule);
                 const rangesByRemove = cloneRule.ranges.reduce((p, c) => {
@@ -186,8 +184,13 @@ export class RangeProtectionRefRangeService extends Disposable {
                     return p;
                 }, [] as IRange[]);
                 cloneRule.ranges = rangesByRemove;
-                redoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, rule: cloneRule, ruleId: rule.id } });
-                undoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, rule, ruleId: rule.id } });
+                if (cloneRule.ranges.length) {
+                    redoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, rule: cloneRule, ruleId: rule.id } });
+                    undoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, rule, ruleId: rule.id } });
+                } else {
+                    redoMutations.push({ id: DeleteRangeProtectionMutation.id, params: { unitId, subUnitId, ruleIds: [rule.id] } });
+                    undoMutations.push({ id: AddRangeProtectionMutation.id, params: { unitId, subUnitId, name: '', rules: [rule] } });
+                }
             });
 
             return { redos: redoMutations, undos: undoMutations };

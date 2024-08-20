@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IAuthzIoService, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, IAuthzIoService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 
 import type { IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
 import { defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
@@ -38,7 +38,8 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(UserManagerService) private _userManagerService: UserManagerService,
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel
+        @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel,
+        @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService
     ) {
         super();
         this._initRangePermissionFromSnapshot();
@@ -402,6 +403,7 @@ export class SheetPermissionInitController extends Disposable {
 
     public refreshPermission(unitId: string, permissionId: string) {
         const sheetRuleItem = this._worksheetProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
+        let needClearUndoRedo = false;
         if (sheetRuleItem) {
             const [_, subUnitId] = sheetRuleItem;
             this._authzIoService.allowed({
@@ -416,11 +418,18 @@ export class SheetPermissionInitController extends Disposable {
                     const unitActionName = instance.subType;
                     const action = actionList.find((item) => item.action === unitActionName);
                     if (action) {
+                        const originValue = this._permissionService.getPermissionPoint(instance.id)?.value;
+                        if (originValue !== action.allowed) {
+                            needClearUndoRedo = true;
+                        }
                         this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                         key += `${action.action}_${action.allowed}`;
                     }
                 });
                 this._worksheetProtectionRuleModel.ruleRefresh(`${permissionId}_${key}`);
+                if (needClearUndoRedo) {
+                    this._undoRedoService.clearUndoRedo(unitId);
+                }
             });
         }
         const sheetPointItem = this._worksheetProtectionPointRuleModel.getTargetByPermissionId(unitId, permissionId);
@@ -437,9 +446,16 @@ export class SheetPermissionInitController extends Disposable {
                     const unitActionName = instance.subType;
                     const action = actionList.find((item) => item.action === unitActionName);
                     if (action) {
+                        const originValue = this._permissionService.getPermissionPoint(instance.id)?.value;
+                        if (originValue !== action.allowed) {
+                            needClearUndoRedo = true;
+                        }
                         this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                     }
                 });
+                if (needClearUndoRedo) {
+                    this._undoRedoService.clearUndoRedo(unitId);
+                }
             });
         }
         const rangeRuleItem = this._rangeProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
@@ -457,11 +473,18 @@ export class SheetPermissionInitController extends Disposable {
                     const unitActionName = instance.subType;
                     const action = actionList.find((item) => item.action === unitActionName);
                     if (action) {
+                        const originValue = this._permissionService.getPermissionPoint(instance.id)?.value;
+                        if (originValue !== action.allowed) {
+                            needClearUndoRedo = true;
+                        }
                         this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                         key += `${action.action}_${action.allowed}`;
                     }
                 });
                 this._rangeProtectionRuleModel.ruleRefresh(`${permissionId}_${key}`);
+                if (needClearUndoRedo) {
+                    this._undoRedoService.clearUndoRedo(unitId);
+                }
             });
         }
     }

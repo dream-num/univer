@@ -340,15 +340,18 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         if (!selectionRange) {
             return false;
         };
-        if (direction === 'top') {
-            selectionRange.startRow = 0;
-        } else if (direction === 'left') {
-            selectionRange.startColumn = 0;
-        } else if (direction === 'right') {
-            selectionRange.endColumn = worksheet.getColumnCount() - 1;
-        } else if (direction === 'bottom') {
+        if (direction === 'top' || direction === 'bottom') {
+            // selectionRange.startRow = 0;
             selectionRange.endRow = worksheet.getRowCount() - 1;
+        } else if (direction === 'left' || direction === 'right') {
+            // selectionRange.startColumn = 0;
+            selectionRange.endColumn = worksheet.getColumnCount() - 1;
         }
+        // } else if (direction === 'right') {
+        //     selectionRange.endColumn = worksheet.getColumnCount() - 1;
+        // } else if (direction === 'bottom') {
+        //     selectionRange.endRow = worksheet.getRowCount() - 1;
+        // }
 
         const selectionRuleRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).map((rule) => rule.ranges).flat();
         const hasLap = selectionRuleRanges.some((range) => {

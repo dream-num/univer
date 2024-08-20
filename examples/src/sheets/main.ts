@@ -40,7 +40,6 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
-import type { FPermission } from '@univerjs/facade/apis/sheets/f-permission.js';
 import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
@@ -147,19 +146,6 @@ setTimeout(() => {
 
 window.univer = univer;
 window.univerAPI = FUniver.newAPI(univer);
-
-{
-    const permission = univerAPI.getPermission() as FPermission;
-    const unitId = 'workbook-01';
-    const subUnitId = 'sheet-0011';
-    // permission.setWorkbookEditPermission('workbook-01', false);
-    // permission.setPermissionDialogVisible(false);
-    const a = permission.addRangeBaseProtection(unitId, subUnitId, [{ startRow: 5, endRow: 10, startColumn: 0, endColumn: 5 }]);
-
-    setTimeout(() => {
-        permission.addWorksheetBasePermission(unitId, subUnitId);
-    }, 5000);
-}
 
 declare global {
     // eslint-disable-next-line ts/naming-convention

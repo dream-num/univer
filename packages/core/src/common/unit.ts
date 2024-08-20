@@ -29,3 +29,23 @@ export abstract class UnitModel<_D = object, T extends UnitType = UnitType> exte
     abstract name$: Observable<string>;
     abstract setName(name: string): void;
 }
+
+interface IMixinProperty<T> {
+    // eslint-disable-next-line ts/no-explicit-any
+    [fnName: string]: (this: T, ...args: any[]) => any;
+}
+
+/**
+ * Mixin some methods to targetObject as prototype, the static methods will not be mixed in
+ * @param {T} targetClass The target class to mixin
+ * @param {IMixinProperty<T>} mixin The mixin object which contains the methods to mixin.
+ */
+export function mixinClass<T>(targetClass: T, mixin: IMixinProperty<T>): void {
+    for (const key in mixin) {
+        // eslint-disable-next-line no-prototype-builtins
+        if (mixin.hasOwnProperty(key)) {
+            // @ts-ignore
+            targetClass.prototype[key] = mixin[key];
+        }
+    }
+}

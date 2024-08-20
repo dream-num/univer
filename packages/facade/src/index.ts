@@ -18,5 +18,5 @@ export type { FontLine, FontStyle, FontWeight } from './apis/sheets/f-range';
 export { FUniver } from './apis/facade';
 export { FRange } from './apis/sheets/f-range';
 export { FSelection } from './apis/sheets/f-selection';
-export { FWorkbook } from './apis/sheets/f-workbook';
+export { FWorkbook, mixinToFWorkbook } from './apis/sheets/f-workbook';
 export { FWorksheet } from './apis/sheets/f-worksheet';

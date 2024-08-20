@@ -36,12 +36,29 @@ import { InsertSheetCommand, RemoveSheetCommand, SetWorksheetActiveOperation, Sh
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FWorksheet } from './f-worksheet';
 
+interface IFWorkbookMixin {
+    [fnName: string]: (this: FWorkbook, ...args: any[]) => any;
+}
+
+/**
+ *  Mixin the given mixin into the FWorkbook class.
+ * @param {IFWorkbookMixin} mixin The mixin to apply to FWorkbook.
+ */
+export function mixinToFWorkbook(mixin: IFWorkbookMixin) {
+    for (const key in mixin) {
+        if (mixin.hasOwnProperty(key)) {
+            // @ts-ignore
+            FWorkbook.prototype[key] = mixin[key];
+        }
+    }
+}
+
 export class FWorkbook {
     readonly id: string;
 
     constructor(
         private readonly _workbook: Workbook,
-        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(Injector) protected readonly _injector: Injector,
         @Inject(IResourceLoaderService) private readonly _resourceLoaderService: IResourceLoaderService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -50,6 +67,9 @@ export class FWorkbook {
 
     ) {
         this.id = this._workbook.getUnitId();
+    }
+    getInjector() {
+        return this._injector;
     }
 
     getId(): string {

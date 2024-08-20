@@ -79,7 +79,7 @@ export class DocHyperLinkPopupService extends Disposable {
             if (range) {
                 activeRange = {
                     collapsed: false,
-                    startOffset: range.startIndex,
+                    startOffset: range.startIndex + SKIT_PLACEHOLDER,
                     endOffset: range.endIndex + 1,
                     segmentId,
                     segmentPage,
@@ -91,9 +91,7 @@ export class DocHyperLinkPopupService extends Disposable {
                 }]);
             }
         }
-
         if (activeRange) {
-            activeRange.startOffset += SKIT_PLACEHOLDER;
             this._editPopup = this._docCanvasPopupManagerService.attachPopupToRange(
                 activeRange,
                 {

@@ -24,6 +24,7 @@ export interface IUpdateDocHyperLinkCommandParams {
     linkId: string;
     payload: string;
     label: string;
+    segmentId: string;
 }
 
 export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParams> = {
@@ -33,13 +34,14 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         if (!params) {
             return false;
         }
-        const { unitId, payload } = params;
+        const { unitId, payload, segmentId } = params;
         const commandService = accessor.get(ICommandService);
         const selectionService = accessor.get(TextSelectionManagerService);
         const currentSelection = selectionService.getActiveTextRange();
         if (!currentSelection) {
             return false;
         }
+
         const newId = generateRandomId();
         const replaceSelection = replaceSelectionFactory(accessor, {
             unitId: params.unitId,
@@ -56,6 +58,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
                 startOffset: currentSelection.startOffset!,
                 endOffset: currentSelection.endOffset!,
                 collapsed: false,
+                segmentId,
             },
         });
 

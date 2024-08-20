@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, IDeleteAction, IDocumentBody, IMutationInfo, IRetainAction, ITextRange } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, IDeleteAction, IDocumentBody, IMutationInfo, IRetainAction, ITextRange, ITextRangeParam } from '@univerjs/core';
 import { IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
+import { getRichTextEditPath } from '../commands/util';
 import { isIntersecting, shouldDeleteCustomRange } from './custom-range';
 import { getDeleteSelection } from './selection';
 
@@ -48,7 +49,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
     const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset));
     const toDeleteRanges = new Set(relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(startOffset, endOffset - startOffset, customRange, dataStream)));
     const retainPoints = new Set<number>();
-
     relativeCustomRanges?.forEach((range) => {
         if (toDeleteRanges.has(range)) {
             return;
@@ -115,7 +115,7 @@ export function getRetainAndDeleteAndExcludeLineBreak(
 
 export interface IReplaceSelectionFactoryParams {
     unitId: string;
-    selection?: ITextRange;
+    selection?: ITextRangeParam;
 
     originBody?: IDocumentBody;
 
@@ -128,11 +128,15 @@ export interface IReplaceSelectionFactoryParams {
 export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSelectionFactoryParams) {
     const { unitId, originBody, body: insertBody } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
+    const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
 
+    if (!docDataModel) {
+        return false;
+    }
+    const segmentId = params.selection?.segmentId;
     let body: IDocumentBody | undefined;
     if (!params.originBody) {
-        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
-        body = docDataModel?.getBody();
+        body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     } else {
         body = originBody;
     }
@@ -148,6 +152,7 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
         startOffset: selection.startOffset + insertBody.dataStream.length,
         endOffset: selection.startOffset + insertBody.dataStream.length,
         collapsed: true,
+        segmentId,
     }];
 
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -157,20 +162,23 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
             actions: [],
             textRanges,
             debounce: true,
+            segmentId,
         },
     };
 
     const textX = new TextX();
     const jsonX = JSONX.getInstance();
         // delete
-    textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, body));
+    textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, body, segmentId));
         // insert
     textX.push({
         t: TextXActionType.INSERT,
         body: insertBody,
         len: insertBody.dataStream.length,
         line: 0,
+        segmentId,
     });
-    doMutation.params.actions = jsonX.editOp(textX.serialize());
+    const path = getRichTextEditPath(docDataModel, segmentId);
+    doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
     return doMutation;
 }

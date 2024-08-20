@@ -17,7 +17,6 @@
 import { useDependency } from '@univerjs/core';
 import React, { useEffect, useMemo, useState } from 'react';
 import { RectPopup } from '@univerjs/design';
-import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { animationFrameScheduler, throttleTime } from 'rxjs';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
 import { useObservable } from '../../../components/hooks/observable';
@@ -35,11 +34,15 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
     const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(0, animationFrameScheduler)), [popup.excludeRects$]);
     const anchorRect = useObservable(anchorRect$, popup.anchorRect);
     const excludeRects = useObservable(excludeRects$, popup.excludeRects);
-    const { bottom, left, right, top } = anchorRect;
     const { offset, canvasElement, hideOnInvisible = true } = popup;
 
     // We add an offset to the anchor rect to make the popup offset with the anchor.
-    const rectWithOffset: IBoundRectNoAngle = useMemo(() => {
+    const rectWithOffset = useMemo(() => {
+        if (!anchorRect) {
+            return null;
+        }
+
+        const { bottom, left, right, top } = anchorRect;
         const [x = 0, y = 0] = offset ?? [];
         return {
             left: left - x,
@@ -47,10 +50,10 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
             top: top - y,
             bottom: bottom + y,
         };
-    }, [bottom, left, right, top, offset]);
+    }, [anchorRect, offset]);
 
     useEffect(() => {
-        if (!hideOnInvisible) {
+        if (!hideOnInvisible || !rectWithOffset) {
             return;
         }
         const rect = canvasElement.getBoundingClientRect();
@@ -62,7 +65,7 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
         }
     }, [rectWithOffset, canvasElement, hideOnInvisible]);
 
-    if (hidden) {
+    if (hidden || !rectWithOffset) {
         return null;
     }
 

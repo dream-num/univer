@@ -67,9 +67,10 @@ export const DocHyperLinkEdit = () => {
         if (editing) {
             const linkDetail = editing ? hyperLinkModel.getLink(editing.unitId, editing.linkId) : null;
             setLink(linkDetail?.payload ?? '');
-            const matchedRange = doc?.getSelfOrHeaderFooterModel(editing.segmentId)?.getBody()?.customRanges?.find((i) => linkDetail?.id === i.rangeId);
+            const body = doc?.getSelfOrHeaderFooterModel(editing.segmentId)?.getBody();
+            const matchedRange = body?.customRanges?.find((i) => linkDetail?.id === i.rangeId);
             if (doc && matchedRange) {
-                setLabel(getPlainTextFormBody(getBodySlice(doc.getBody()!, matchedRange.startIndex, matchedRange.endIndex)));
+                setLabel(getPlainTextFormBody(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex)));
             }
             return;
         }
@@ -113,6 +114,7 @@ export const DocHyperLinkEdit = () => {
                 payload: linkFinal,
                 linkId: editing.linkId,
                 label,
+                segmentId: editing.segmentId,
             });
         }
         hyperLinkService.hideEditPopup();

@@ -208,24 +208,38 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             return;
         }
         const getCollaboratorInit = async () => {
-            const res = await authzIoService.list({
-                unitID: unitId,
-                objectIDs: [activeRule?.permissionId],
-                actions: [UnitAction.View, UnitAction.Edit],
-            });
-            const isAllCanView = res[0].scope?.read === ObjectScope.AllCollaborator;
-            const isSomeCanEdit = res[0].scope?.edit === ObjectScope.SomeCollaborator;
-            const viewValue = isAllCanView ? viewState.othersCanView : viewState.noOneElseCanView;
-            const editValue = isSomeCanEdit ? editState.designedUserCanEdit : editState.onlyMe;
-            setViewGroupValue(viewValue);
-            setEditorGroupValue(editValue);
-            sheetPermissionPanelModel.setRule({
-                viewStatus: viewValue,
-                editStatus: editValue,
-            });
-            setTimeout(() => {
-                setLoading(false);
-            }, 100);
+            try {
+                const res = await authzIoService.list({
+                    unitID: unitId,
+                    objectIDs: [activeRule?.permissionId],
+                    actions: [UnitAction.View, UnitAction.Edit],
+                });
+                if (!res.length) {
+                    setViewGroupValue(viewState.othersCanView);
+                    setEditorGroupValue(editState.onlyMe);
+                    sheetPermissionPanelModel.setRule({
+                        viewStatus: viewState.othersCanView,
+                        editStatus: editState.onlyMe,
+                    });
+                } else {
+                    const isAllCanView = res[0].scope?.read === ObjectScope.AllCollaborator;
+                    const isSomeCanEdit = res[0].scope?.edit === ObjectScope.SomeCollaborator;
+                    const viewValue = isAllCanView ? viewState.othersCanView : viewState.noOneElseCanView;
+                    const editValue = isSomeCanEdit ? editState.designedUserCanEdit : editState.onlyMe;
+                    setViewGroupValue(viewValue);
+                    setEditorGroupValue(editValue);
+                    sheetPermissionPanelModel.setRule({
+                        viewStatus: viewValue,
+                        editStatus: editValue,
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setTimeout(() => {
+                    setLoading(false);
+                }, 100);
+            }
         };
         getCollaboratorInit();
     }, [activeRule.permissionId]);

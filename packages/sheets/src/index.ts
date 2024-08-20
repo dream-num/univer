@@ -205,7 +205,7 @@ export {
     type IMoveColsCommandParams,
 } from './commands/commands/move-rows-cols.command';
 export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-name.command';
-export { RemoveRowCommand, RemoveColCommand, type IRemoveRowColCommandParams } from './commands/commands/remove-row-col.command';
+export { RemoveRowCommand, RemoveColCommand, type IRemoveRowColCommandParams, type IRemoveRowColCommandInterceptParams } from './commands/commands/remove-row-col.command';
 export { RemoveSheetCommand, type IRemoveSheetCommandParams } from './commands/commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
 export { ReorderRangeCommand, type IReorderRangeCommandParams } from './commands/commands/reorder-range.command';

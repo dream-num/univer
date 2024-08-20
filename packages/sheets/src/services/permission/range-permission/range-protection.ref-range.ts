@@ -48,8 +48,8 @@ import {
 import { RemoveColCommand, RemoveRowCommand } from '../../../commands/commands/remove-row-col.command';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { DeleteRangeProtectionMutation } from '../../../commands/mutations/delete-range-protection.mutation';
+import type { IAddRangeProtectionMutationParams } from '../../../commands/mutations/add-range-protection.mutation';
 import { AddRangeProtectionMutation } from '../../../commands/mutations/add-range-protection.mutation';
-import type { IAddRangeProtectionMutationParams } from '../../../../lib/types';
 
 const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
 const mutationIdArrByMove = [MoveRowsMutation.id, MoveColsMutation.id];

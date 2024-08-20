@@ -15,11 +15,11 @@
  */
 
 import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
-import { generateRandomId, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
-import { MessageType } from '@univerjs/design';
+import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
-import { IMessageService } from '@univerjs/ui';
+
+// TODO ybzky permissionId should generate by authzIoService;
 
 export class FPermission {
     constructor(
@@ -29,7 +29,7 @@ export class FPermission {
         @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionPointModel) private readonly _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
-        @Inject(IMessageService) private readonly _messageService: IMessageService
+        @Inject(IAuthzIoService) private readonly _authzIoService: IAuthzIoService
     ) {
         // empty
     }
@@ -73,7 +73,11 @@ export class FPermission {
      *
      * @returns {string | undefined} - The permission id of the added permission, or undefined if the permission was add failed.
      */
-    addWorksheetBasePermission(unitId: string, subUnitId: string) {
+    async addWorksheetBasePermission(unitId: string, subUnitId: string) {
+        const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
+        if (hasRangeProtection) {
+            throw new Error('sheet protection cannot intersect with range protection');
+        }
         const permissionId = `permissionId_${generateRandomId(8)}`;
         const res = this._commandService.syncExecuteCommand(AddWorksheetProtectionMutation.id, {
             unitId,
@@ -128,11 +132,7 @@ export class FPermission {
             if (!hasBasePermission) {
                 const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
                 if (hasRangeProtection) {
-                    this._messageService.show({
-                        type: MessageType.Error,
-                        content: 'sheet protection cannot intersect with range protection',
-                    });
-                    return;
+                    throw new Error('sheet protection cannot intersect with range protection');
                 }
                 permissionId = this.addWorksheetBasePermission(unitId, subUnitId);
             } else {
@@ -162,11 +162,7 @@ export class FPermission {
         const ruleId = `ruleId_${generateRandomId(6)}`;
         const worksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
         if (worksheetProtection) {
-            this._messageService.show({
-                type: MessageType.Error,
-                content: 'sheet protection cannot intersect with range protection',
-            });
-            return;
+            throw new Error('sheet protection cannot intersect with range protection');
         }
         const subunitRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
         const overlap = subunitRuleList.some((rule) => {
@@ -177,11 +173,7 @@ export class FPermission {
             });
         });
         if (overlap) {
-            this._messageService.show({
-                type: MessageType.Error,
-                content: 'range protection cannot intersect',
-            });
-            return;
+            throw new Error('range protection cannot intersect');
         }
         const res = this._commandService.syncExecuteCommand(AddRangeProtectionMutation.id, {
             unitId,
@@ -249,12 +241,18 @@ export class FPermission {
     }
 
     /**
+     * Sets the ranges for range protection in a worksheet.
      *
-     * @param unitId
-     * @param subUnitId
-     * @param ruleId
-     * @param ranges
-     * @returns
+     * This method finds the rule by unitId, subUnitId, and ruleId, and updates the rule with the provided ranges.
+     * It checks for overlaps with existing ranges in the same subunit and shows an error message if any overlap is detected.
+     * If no overlap is found, it executes the command to update the range protection with the new ranges.
+     *
+     * @param {string} unitId - The unique identifier of the workbook.
+     * @param {string} subUnitId - The unique identifier of the worksheet within the workbook.
+     * @param {string} ruleId - The ruleId of the range protection rule that is being updated.
+     * @param {IRange[]} ranges - The array of new ranges to be set for the range protection rule.
+     *
+     * @returns {void} - Returns nothing. If there is an overlap, the function will return early after showing an error message.
      */
     setRangeProtectionRanges(unitId: string, subUnitId: string, ruleId: string, ranges: IRange[]) {
         const rule = this._rangeProtectionRuleModel.getRule(unitId, subUnitId, ruleId);
@@ -268,11 +266,7 @@ export class FPermission {
                 });
             });
             if (overlap) {
-                this._messageService.show({
-                    type: MessageType.Error,
-                    content: 'range protection cannot intersect',
-                });
-                return;
+                throw new Error('range protection cannot intersect');
             }
             this._commandService.syncExecuteCommand(SetRangeProtectionMutation.id, {
                 unitId,

@@ -498,3 +498,37 @@ function getDaysByEuropean(startDateSerialNumber: number, endDateSerialNumber: n
         yearDays: 360,
     };
 }
+
+export function isLeapYear(year: number): boolean {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+}
+
+export function isLeapYear1900(year: number): boolean {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 || year === 1900;
+}
+
+const daysInMonthL = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const daysInMonthR = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+export function getDaysInMonth(year: number, month: number): number {
+    return isLeapYear(year) ? daysInMonthL[month] : daysInMonthR[month];
+}
+
+export function getDaysInYear(year: number): number {
+    return isLeapYear1900(year) ? 366 : 365;
+}
+
+export function getNormalYearDaysByBasis(dateSerialNumber: number, basis: number): number {
+    switch (basis) {
+        case 0:
+        case 2:
+        case 4:
+            return 360;
+        case 1:
+            return getDaysInYear(excelSerialToDate(dateSerialNumber).getUTCFullYear());
+        case 3:
+            return 365;
+        default:
+            return -1;
+    }
+}

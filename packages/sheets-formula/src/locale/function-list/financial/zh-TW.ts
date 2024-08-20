@@ -645,8 +645,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     PRICEDISC: {
@@ -659,8 +664,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            discount: { name: '貼現率', detail: '這是證券的貼現率。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     PRICEMAT: {
@@ -673,8 +681,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            issue: { name: '發行日期', detail: '這是證券的發行日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     PV: {

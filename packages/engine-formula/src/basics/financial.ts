@@ -15,7 +15,7 @@
  */
 
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
-import { excelDateSerial, excelSerialToDate, getTwoDateDaysByBasis } from './date';
+import { excelDateSerial, excelSerialToDate, getDaysInMonth, getTwoDateDaysByBasis } from './date';
 import { ErrorType } from './error-type';
 
 export function calculateCoupdaybs(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number): number {
@@ -260,7 +260,7 @@ function calculateOddShortFirstCoupon(
     basis: number,
     DFC: number,
     E: number
-) {
+): number {
     // calculate method from
     // https://support.microsoft.com/en-us/office/oddfprice-function-d7d664a8-34df-4233-8d2b-922bcf6a69e1
     // Odd short first coupon:
@@ -299,7 +299,7 @@ function calculateOddLongFirstCoupon(
     frequency: number,
     basis: number,
     E: number
-) {
+): number {
     // calculate method from
     // https://support.microsoft.com/en-us/office/oddfprice-function-d7d664a8-34df-4233-8d2b-922bcf6a69e1
     // Odd long first coupon:
@@ -365,18 +365,8 @@ function getPositiveDaysBetween(startDateSerialNumber: number, endDateSerialNumb
     return startDateSerialNumber < endDateSerialNumber ? days : 0;
 }
 
-const daysInMonthL = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-const daysInMonthR = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-function getDaysInMonth(year: number, month: number): number {
-    const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    const dayInMonth = isLeapYear ? daysInMonthL[month] : daysInMonthR[month];
-    return dayInMonth;
-}
-
 function lastDayOfMonth(year: number, month: number, day: number): boolean {
-    const daysInMonth = getDaysInMonth(year, month);
-    return daysInMonth === day;
+    return getDaysInMonth(year, month) === day;
 }
 
 function getDateSerialNumberByMonths(serialNumber: number, months: number, returnLastDay: boolean): number {
@@ -525,4 +515,36 @@ function guessIsNaNorInfinity(guess: number, iterF: IIterFFunctionType): number 
     } while (Math.abs(fXi) > g_Eps && currentIter < nIM);
 
     return xI;
+}
+
+export function calculatePrice(settlementSerialNumber: number, maturitySerialNumber: number, rate: number, yld: number, redemption: number, frequency: number, basis: number) {
+    // N is the number of coupons payable between the settlement date and redemption date
+    const N = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency);
+
+    // E = number of days in coupon period in which the settlement date falls.
+    const E = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequency, basis);
+
+    // A = number of days from beginning of coupon period to settlement date.
+    const A = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequency, basis);
+
+    if (N === 1) {
+        const DSR = E - A;
+        const T1 = 100 * rate / frequency + redemption;
+        const T2 = yld / frequency * DSR / E + 1;
+        const T3 = 100 * rate / frequency * A / E;
+
+        return T1 / T2 - T3;
+    }
+
+    const DSC = E - A;
+
+    let result = redemption / ((1 + yld / frequency) ** (N - 1 + DSC / E));
+
+    for (let k = 1; k <= N; k++) {
+        result += (100 * rate / frequency) / ((1 + yld / frequency) ** (k - 1 + DSC / E));
+    }
+
+    result -= 100 * rate / frequency * A / E;
+
+    return result;
 }

@@ -645,8 +645,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。 年 1 回の場合は頻度 = 1、年 2 回の場合は頻度 = 2、四半期ごとの場合は頻度 = 4 を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     PRICEDISC: {
@@ -659,8 +664,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            discount: { name: '割引率', detail: '証券の割引率を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     PRICEMAT: {
@@ -673,8 +681,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            issue: { name: '発行日', detail: '証券の発行日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     PV: {

@@ -51,6 +51,9 @@ import { Oddlyield } from './oddlyield';
 import { Pduration } from './pduration';
 import { Pmt } from './pmt';
 import { Ppmt } from './ppmt';
+import { Price } from './price';
+import { Pricedisc } from './pricedisc';
+import { Pricemat } from './pricemat';
 import { Pv } from './pv';
 import { Rate } from './rate';
 import { Xirr } from './xirr';
@@ -92,6 +95,9 @@ export const functionFinancial = [
     [Pduration, FUNCTION_NAMES_FINANCIAL.PDURATION],
     [Pmt, FUNCTION_NAMES_FINANCIAL.PMT],
     [Ppmt, FUNCTION_NAMES_FINANCIAL.PPMT],
+    [Price, FUNCTION_NAMES_FINANCIAL.PRICE],
+    [Pricedisc, FUNCTION_NAMES_FINANCIAL.PRICEDISC],
+    [Pricemat, FUNCTION_NAMES_FINANCIAL.PRICEMAT],
     [Pv, FUNCTION_NAMES_FINANCIAL.PV],
     [Rate, FUNCTION_NAMES_FINANCIAL.RATE],
     [Xirr, FUNCTION_NAMES_FINANCIAL.XIRR],

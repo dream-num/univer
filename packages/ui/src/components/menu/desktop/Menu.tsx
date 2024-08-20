@@ -25,7 +25,7 @@ import {
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useMemo, useState } from 'react';
-import { combineLatest, isObservable, map } from 'rxjs';
+import { combineLatest, isObservable, map, Observable } from 'rxjs';
 
 import type {
     IDisplayMenuItem,
@@ -91,7 +91,7 @@ function MenuWrapper(props: IBaseMenuProps) {
                 const filteredGroup: Record<string, IDisplayMenuItem<IMenuItem>[]> = {};
 
                 Object.entries(group).forEach(([key, items]) => {
-                    const hiddenObservables = items.map((item) => item.hidden$).filter((item) => !!item);
+                    const hiddenObservables = items.map((item) => item.hidden$ ?? new Observable<boolean>((subscriber) => subscriber.next(false)));
 
                     combineLatest(hiddenObservables)
                         .pipe(

@@ -657,7 +657,8 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                     if (sequenceGrid.sheetName) {
                         const targetSheet = workbook.getSheetBySheetName(sequenceGrid.sheetName);
                         if (!targetSheet) {
-                            return false;
+                            // Formula errors need to be handled by the formula system, and permissions will not be blocked
+                            return true;
                         }
                         const { startRow, endRow, startColumn, endColumn } = sequenceGrid.range;
                         for (let i = startRow; i <= endRow; i++) {

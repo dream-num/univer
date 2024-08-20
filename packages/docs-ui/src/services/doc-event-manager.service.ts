@@ -278,16 +278,20 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         paragraphRanges.forEach((paragraph) => {
             if (paragraph.bullet && paragraph.bullet.listType.indexOf('CHECK_LIST') === 0) {
                 const calcRect = (pageIndex: number) => {
-                    const node = this._skeleton.findNodeByCharIndex(paragraph.paragraphStart, segmentId, pageIndex);
+                    const node = this._skeleton.findNodeByCharIndex(paragraph.paragraphEnd, segmentId, pageIndex);
+                    const divide = node?.parent;
+                    const line = divide?.parent;
 
-                    if (!node) {
-                        return;
-                    }
-                    const bulletNode = node.parent?.glyphGroup[0];
+                    const bulletNode = line?.divides?.[0]?.glyphGroup?.[0];
 
                     if (!bulletNode) {
                         return;
                     }
+
+                    if (!bulletNode) {
+                        return;
+                    }
+
                     const rect = calcDocGlyphPosition(bulletNode, this._documents, this._skeleton, pageIndex);
 
                     if (!rect) {

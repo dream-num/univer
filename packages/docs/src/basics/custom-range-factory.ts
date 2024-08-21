@@ -253,7 +253,7 @@ function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeP
         return false;
     }
 
-    const range = documentDataModel.getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
+    const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
     if (!range) {
         return false;
     }
@@ -297,12 +297,20 @@ function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeP
 }
 
 export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeParam) {
+    const { unitId, segmentId } = params;
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+    if (!documentDataModel) {
+        return false;
+    }
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
             unitId: params.unitId,
             actions: [],
             textRanges: undefined,
+            segmentId,
         },
     };
 
@@ -312,6 +320,7 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
         return false;
     }
 
-    doMutation.params.actions = jsonX.editOp(textX.serialize());
+    const path = getRichTextEditPath(documentDataModel, segmentId);
+    doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
     return doMutation;
 }

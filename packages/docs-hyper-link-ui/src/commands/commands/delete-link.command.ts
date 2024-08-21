@@ -22,6 +22,7 @@ import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 export interface IDeleteDocHyperLinkMutationParams {
     unitId: string;
     linkId: string;
+    segmentId?: string;
 }
 
 export const DeleteDocHyperLinkCommand: ICommand<IDeleteDocHyperLinkMutationParams> = {
@@ -31,7 +32,7 @@ export const DeleteDocHyperLinkCommand: ICommand<IDeleteDocHyperLinkMutationPara
         if (!params) {
             return false;
         }
-        const { unitId, linkId } = params;
+        const { unitId, linkId, segmentId } = params;
         const commandService = accessor.get(ICommandService);
         const hyperLinkModel = accessor.get(DocHyperLinkModel);
         const link = hyperLinkModel.getLink(unitId, linkId);
@@ -39,7 +40,7 @@ export const DeleteDocHyperLinkCommand: ICommand<IDeleteDocHyperLinkMutationPara
             return false;
         }
 
-        const doMutation = deleteCustomRangeFactory(accessor, { unitId, rangeId: linkId });
+        const doMutation = deleteCustomRangeFactory(accessor, { unitId, rangeId: linkId, segmentId });
         if (!doMutation) {
             return false;
         }

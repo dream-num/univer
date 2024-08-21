@@ -37,7 +37,7 @@ export const DocLinkPopup = () => {
         return null;
     }
 
-    const { unitId, linkId, segmentId, segmentPage } = currentPopup;
+    const { unitId, linkId, segmentId } = currentPopup;
     const link = hyperLinkModel.getLink(unitId, linkId);
     if (!link) {
         return null;
@@ -92,6 +92,7 @@ export const DocLinkPopup = () => {
                         commandService.executeCommand(DeleteDocHyperLinkCommand.id, {
                             unitId,
                             linkId: link.id,
+                            segmentId,
                         });
                     }}
                 >

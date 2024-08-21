@@ -695,7 +695,7 @@ export class DocumentSkeleton extends Skeleton {
         this._findLiquid.translateSave();
 
         const pageLeft = this._findLiquid.x;
-        const pageRight = pageLeft + segmentPage.pageWidth;
+        const pageRight = pageLeft + page.pageWidth; // Use page.pageWidth instead of segmentPage.pageWidth, because the segmentPage not include the margin left and right.
         const pageTop = this._findLiquid.y + (pageType === DocumentSkeletonPageType.FOOTER ? page.pageHeight - segmentPage.pageHeight : 0);
         const pageBottom = pageTop + segmentPage.pageHeight;
 

@@ -512,6 +512,7 @@ export const CheckListCommand: ICommand<IBulletListCommandParams> = {
 
 export interface IToggleCheckListCommandParams {
     index: number;
+    segmentId?: string;
 }
 
 export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
@@ -524,14 +525,14 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const { index } = params;
+        const { index, segmentId } = params;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (docDataModel == null) {
             return false;
         }
 
-        const paragraphs = docDataModel.getBody()?.paragraphs;
+        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
         if (paragraphs == null) {
             return false;
         }
@@ -547,6 +548,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
                 unitId,
                 actions: [],
                 textRanges: [],
+                segmentId,
             },
         };
 
@@ -573,6 +575,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         textX.push({
             t: TextXActionType.RETAIN,
             len: startIndex - memoryCursor.cursor,
+            segmentId,
         });
 
         textX.push({
@@ -599,11 +602,12 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
                 ],
             },
             coverType: UpdateDocsAttributeType.REPLACE,
+            segmentId,
         });
 
         memoryCursor.moveCursorTo(startIndex + 1);
 
-        const path = getRichTextEditPath(docDataModel);
+        const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

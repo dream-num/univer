@@ -21,6 +21,7 @@ import { deleteCustomRangeFactory } from '@univerjs/docs';
 export interface IDeleteDocHyperLinkMutationParams {
     unitId: string;
     linkId: string;
+    segmentId?: string;
 }
 
 export const DeleteDocHyperLinkCommand: ICommand<IDeleteDocHyperLinkMutationParams> = {
@@ -30,10 +31,10 @@ export const DeleteDocHyperLinkCommand: ICommand<IDeleteDocHyperLinkMutationPara
         if (!params) {
             return false;
         }
-        const { unitId, linkId } = params;
+        const { unitId, linkId, segmentId } = params;
         const commandService = accessor.get(ICommandService);
 
-        const doMutation = deleteCustomRangeFactory(accessor, { unitId, rangeId: linkId });
+        const doMutation = deleteCustomRangeFactory(accessor, { unitId, rangeId: linkId, segmentId });
         if (!doMutation) {
             return false;
         }

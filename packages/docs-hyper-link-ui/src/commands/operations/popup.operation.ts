@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import type { DocumentDataModel, IAccessor, ICommand, ITextRange } from '@univerjs/core';
+import { CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { getCustomRangesInterestsWithRange, TextSelectionManagerService } from '@univerjs/docs';
+import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textRanges = textSelectionService.getCurrentTextRanges()?.map(serializeDocRange);
-    const renderManagerService = accessor.get(IRenderManagerService);
-    const render = renderManagerService.getCurrent();
-    const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
-    const editArea = skeleton?.getViewModel().getEditArea();
-    if (editArea === DocumentEditArea.FOOTER || editArea === DocumentEditArea.HEADER) {
-        return true;
-    }
-    if (!textRanges || textRanges.length > 1) {
+    const textRanges = textSelectionService.getDocRanges();
+    if (!textRanges.length || textRanges.length > 1) {
         return true;
     }
 
@@ -41,14 +34,15 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         return true;
     }
 
-    const paragraphs = doc.getBody()?.paragraphs;
+    const body = doc.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody();
+    const paragraphs = body?.paragraphs;
     if (!paragraphs) {
         return true;
     }
 
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const p = paragraphs[i];
-        if (activeRange.startOffset <= p.startIndex && activeRange.endOffset > p.startIndex) {
+        if (activeRange.startOffset! <= p.startIndex && activeRange.endOffset! > p.startIndex) {
             return true;
         }
 
@@ -57,20 +51,23 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         }
     }
 
-    return false;
+    const insertCustomRanges = getCustomRangesInterestsWithRange(activeRange as ITextRange, body.customRanges ?? []);
+    // can't insert hyperlink in range contains other custom ranges
+    return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
 };
 
 export interface IShowDocHyperLinkEditPopupOperationParams {
     link?: {
         unitId: string;
         linkId: string;
-        rangeIndex: number;
+        segmentId?: string;
+        segmentPage?: number;
     };
 }
 
 export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditPopupOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'docs.operation.show-hyper-link-edit-popup',
+    id: 'doc.operation.show-hyper-link-edit-popup',
     handler(accessor, params) {
         const linkInfo = params?.link;
         if (shouldDisableAddLink(accessor) && !linkInfo) {
@@ -78,6 +75,46 @@ export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditP
         }
         const hyperLinkService = accessor.get(DocHyperLinkPopupService);
         hyperLinkService.showEditPopup(linkInfo);
+        return true;
+    },
+};
+
+export interface IShowDocHyperLinkInfoPopupOperationParams {
+    linkId: string;
+    segmentId?: string;
+    unitId: string;
+    segmentPage?: number;
+}
+
+export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IShowDocHyperLinkInfoPopupOperationParams> = {
+    type: CommandType.OPERATION,
+    id: 'doc.operation.toggle-hyper-link-info-popup',
+    handler(accessor, params) {
+        const hyperLinkService = accessor.get(DocHyperLinkPopupService);
+        if (!params) {
+            hyperLinkService.hideInfoPopup();
+            return true;
+        }
+
+        hyperLinkService.showInfoPopup(params);
+        return true;
+    },
+};
+
+export const ClickDocHyperLinkOperation: ICommand<{ unitId: string; linkId: string }> = {
+    type: CommandType.OPERATION,
+    id: 'doc.operation.click-hyper-link',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { unitId, linkId } = params;
+        const docLinkModel = accessor.get(DocHyperLinkModel);
+        const link = docLinkModel.getLink(unitId, linkId);
+        if (!link) {
+            return false;
+        }
+        window.open(link.payload, '_blank', 'noopener noreferrer');
         return true;
     },
 };

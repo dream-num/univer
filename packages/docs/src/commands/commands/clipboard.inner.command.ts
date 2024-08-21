@@ -88,6 +88,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 unitId,
                 actions: [],
                 textRanges,
+                segmentId,
             },
         };
 

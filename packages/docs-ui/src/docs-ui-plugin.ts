@@ -58,8 +58,7 @@ import { DocHeaderFooterController } from './controllers/doc-header-footer.contr
 import { DocContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
-import { DocHoverManagerService } from './services/doc-hover-manager.service';
-import { DocHoverRenderController } from './controllers/render-controllers/doc-hover.render-controller';
+import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
@@ -138,7 +137,6 @@ export class UniverDocsUIPlugin extends Plugin {
             [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
-            [DocHoverManagerService],
             [DocParagraphSettingController],
         ];
 
@@ -181,11 +179,11 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initRenderModules(): void {
         ([
+            [DocEventManagerService],
             [DocBackScrollRenderController],
             [DocTextSelectionRenderController],
             [DocHeaderFooterController],
             [DocResizeRenderController],
-            [DocHoverRenderController],
             [DocContextMenuRenderController],
             [DocChecklistRenderController],
         ] as Dependency[]).forEach((m) => {

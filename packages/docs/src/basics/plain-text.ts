@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, type IDocumentData } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData } from '@univerjs/core';
+import { DataStreamTreeTokenType } from '@univerjs/core';
+
+/**
+ * get plain text from rich-text
+ */
+export const getPlainTextFormBody = (body: IDocumentBody) => {
+    let str = body.dataStream;
+    if (body.dataStream.endsWith('\r\n')) {
+        str = body.dataStream.slice(0, -2);
+    }
+
+    return str.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
+};
 
 /**
  * get plain text from rich-text
@@ -23,6 +36,5 @@ export const getPlainTextFormDocument = (data: IDocumentData) => {
     if (!data.body) {
         return '';
     }
-    const str = data.body.dataStream.slice(0, -2);
-    return str.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
+    return getPlainTextFormBody(data.body);
 };

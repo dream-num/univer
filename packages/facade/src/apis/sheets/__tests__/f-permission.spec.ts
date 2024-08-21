@@ -16,7 +16,7 @@
 
 import type { Injector } from '@univerjs/core';
 import { ICommandService, IPermissionService } from '@univerjs/core';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, RangeProtectionPermissionEditPoint, SetRangeProtectionMutation, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SetRangeProtectionMutation, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { FUniver } from '../../facade';
@@ -27,6 +27,7 @@ describe('Test FPermission', () => {
     let commandService: ICommandService;
     let univerAPI: FUniver;
     let permissionService: IPermissionService;
+    let rangeProtectionRuleModel: RangeProtectionRuleModel;
 
     beforeEach(() => {
         const testBed = createFacadeTestBed();
@@ -41,6 +42,7 @@ describe('Test FPermission', () => {
         commandService.registerCommand(DeleteRangeProtectionMutation);
 
         permissionService = get(IPermissionService);
+        rangeProtectionRuleModel = get(RangeProtectionRuleModel);
     });
 
     it('set workbook edit point false', () => {
@@ -82,6 +84,7 @@ describe('Test FPermission', () => {
         const unitId = univerAPI.getActiveWorkbook()?.getId();
         const subUnitId = univerAPI.getActiveWorkbook()?.getActiveSheet().getSheetId();
         const ranges = [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }];
+        const newRanges = [{ startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 }];
 
         if (unitId && subUnitId) {
             const res = await permission.addRangeBaseProtection(unitId, subUnitId, ranges);
@@ -101,6 +104,12 @@ describe('Test FPermission', () => {
                 catchErr = true;
             }
             expect(catchErr).toBe(true);
+            permission.setRangeProtectionRanges(unitId, subUnitId, res.ruleId, newRanges);
+            let rule = rangeProtectionRuleModel.getRule(unitId, subUnitId, res.ruleId);
+            expect(rule?.ranges).toStrictEqual(newRanges);
+            permission.removeRangeProtection(unitId, subUnitId, [res.ruleId]);
+            rule = rangeProtectionRuleModel.getRule(unitId, subUnitId, res.ruleId);
+            expect(rule).toBeUndefined();
         }
     });
 });

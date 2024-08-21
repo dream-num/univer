@@ -437,7 +437,7 @@ export class FUniver {
      * customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
      * ```
      */
-    customizeColumnHeader(cfg: IColumnsHeaderCfgParam) {
+    customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
         const wb = this.getActiveWorkbook();
         if (!wb) {
             console.error('WorkBook not exist');
@@ -458,7 +458,7 @@ export class FUniver {
      * customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
      * ```
      */
-    customizeRowHeader(cfg: IRowsHeaderCfgParam) {
+    customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
         const wb = this.getActiveWorkbook();
         if (!wb) {
             console.error('WorkBook not exist');

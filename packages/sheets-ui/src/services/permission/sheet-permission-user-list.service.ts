@@ -47,6 +47,7 @@ export class SheetPermissionUserManagerService {
         this._userList = [];
         this._oldCollaboratorList = [];
         this._selectUserList = [];
+        this._selectUserList$.next([]);
         this._allUserList = [];
     }
 

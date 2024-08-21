@@ -50,13 +50,14 @@ import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { DeleteRangeProtectionMutation } from '../../../commands/mutations/delete-range-protection.mutation';
 import type { IAddRangeProtectionMutationParams } from '../../../commands/mutations/add-range-protection.mutation';
 import { AddRangeProtectionMutation } from '../../../commands/mutations/add-range-protection.mutation';
+import type { IDeleteSelectionProtectionMutationParams } from '../../../../lib/types';
 
 const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
 const mutationIdArrByMove = [MoveRowsMutation.id, MoveColsMutation.id];
 
 type IMoveRowsOrColsMutationParams = IMoveRowsMutationParams;
 
-@OnLifecycle(LifecycleStages.Steady, RangeProtectionRefRangeService)
+@OnLifecycle(LifecycleStages.Ready, RangeProtectionRefRangeService)
 export class RangeProtectionRefRangeService extends Disposable {
     disposableCollection = new DisposableCollection();
 
@@ -159,8 +160,8 @@ export class RangeProtectionRefRangeService extends Disposable {
 
         const removeRange = params.range;
         if (permissionRangeLapRules.length) {
-            const redoMutations: IMutationInfo[] = [];
-            const undoMutations: IMutationInfo[] = [];
+            const redoMutations: IMutationInfo<ISetRangeProtectionMutationParams | IAddRangeProtectionMutationParams | IDeleteSelectionProtectionMutationParams>[] = [];
+            const undoMutations: IMutationInfo<ISetRangeProtectionMutationParams | IAddRangeProtectionMutationParams | IDeleteSelectionProtectionMutationParams>[] = [];
             permissionRangeLapRules.forEach((rule) => {
                 const cloneRule = Tools.deepClone(rule);
                 const rangesByRemove = cloneRule.ranges.reduce((p, c) => {

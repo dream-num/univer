@@ -14,9 +14,4 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-import type { IRenderModule } from '@univerjs/engine-render';
-
-export class SheetCrosshairHighlightRenderController extends Disposable implements IRenderModule {
-
-}
+export const SHEETS_CROSSHAIR_HIGHLIGHT_Z_INDEX = 1;

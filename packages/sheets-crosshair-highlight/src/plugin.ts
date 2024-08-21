@@ -15,13 +15,16 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { Inject, Injector, Plugin } from '@univerjs/core';
-import { SheetsCrosshairHighlightController } from './controllers/ch.controller';
-import { SheetsCrosshairHighlightService } from './services/ch.service';
+import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SheetsCrosshairHighlightController } from './controllers/cross-hair.controller';
+import { SheetsCrosshairHighlightService } from './services/cross-hair.service';
+import { SheetCrosshairHighlightRenderController } from './views/widgets/cross-hair.render-controller';
 
 export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
     constructor(
-        @Inject(Injector) protected readonly _injector: Injector
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
     }
@@ -33,7 +36,11 @@ export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 
-    override onRendered(): void {
+    override onReady(): void {
+        ([
+            [SheetCrosshairHighlightRenderController],
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
         this._injector.get(SheetsCrosshairHighlightController);
+        this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetCrosshairHighlightRenderController] as Dependency);
     }
 }

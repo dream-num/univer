@@ -24,7 +24,7 @@ import {
     ToggleCrosshairHighlightOperation,
 } from '../commands/operations/operation';
 import { CrosshairOverlay } from '../views/components/CrosshairHighlight';
-import { CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairHighlightMenuItemFactory } from './ch.menu';
+import { CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairHighlightMenuItemFactory } from './cross-hair.menu';
 
 export class SheetsCrosshairHighlightController extends Disposable {
     constructor(

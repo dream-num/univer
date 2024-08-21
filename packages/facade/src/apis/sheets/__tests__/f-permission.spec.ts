@@ -56,19 +56,19 @@ describe('Test FPermission', () => {
         }
     });
 
-    it('set worksheet edit point false', () => {
+    it('set worksheet edit point false', async () => {
         const permission = univerAPI.getPermission();
         const unitId = univerAPI.getActiveWorkbook()?.getId();
         const subUnitId = univerAPI.getActiveWorkbook()?.getActiveSheet().getSheetId();
         if (unitId && subUnitId) {
-            permission.addWorksheetBasePermission(unitId, subUnitId);
-            permission.setWorksheetPermissionPoint(unitId, subUnitId, WorksheetEditPermission, false);
+            await permission.addWorksheetBasePermission(unitId, subUnitId);
+            await permission.setWorksheetPermissionPoint(unitId, subUnitId, WorksheetEditPermission, false);
             let editValue = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value;
             expect(editValue).toBe(false);
-            permission.setWorksheetPermissionPoint(unitId, subUnitId, WorksheetEditPermission, true);
+            await permission.setWorksheetPermissionPoint(unitId, subUnitId, WorksheetEditPermission, true);
             editValue = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value;
             expect(editValue).toBe(true);
-            permission.setWorksheetPermissionPoint(unitId, subUnitId, WorksheetEditPermission, false);
+            await permission.setWorksheetPermissionPoint(unitId, subUnitId, WorksheetEditPermission, false);
             editValue = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value;
             expect(editValue).toBe(false);
             permission.removeWorksheetPermission(unitId, subUnitId);
@@ -77,14 +77,14 @@ describe('Test FPermission', () => {
         }
     });
 
-    it('set range protection point false', () => {
+    it('set range protection point false', async () => {
         const permission = univerAPI.getPermission();
         const unitId = univerAPI.getActiveWorkbook()?.getId();
         const subUnitId = univerAPI.getActiveWorkbook()?.getActiveSheet().getSheetId();
         const ranges = [{ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }];
 
         if (unitId && subUnitId) {
-            const res = permission.addRangeBaseProtection(unitId, subUnitId, ranges);
+            const res = await permission.addRangeBaseProtection(unitId, subUnitId, ranges);
             if (!res?.permissionId || !res?.ruleId) {
                 return;
             }
@@ -96,7 +96,7 @@ describe('Test FPermission', () => {
             expect(editValue).toBe(true);
             let catchErr = false;
             try {
-                permission.addWorksheetBasePermission(unitId, subUnitId);
+                await permission.addWorksheetBasePermission(unitId, subUnitId);
             } catch (e) {
                 catchErr = true;
             }

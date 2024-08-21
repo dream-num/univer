@@ -473,8 +473,10 @@ export class FUniver {
 
     /**
      * Get the PermissionInstance.
+     *
+     * @returns {FPermission} - The PermissionInstance.
      */
-    getPermission() {
+    getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
     }
 }

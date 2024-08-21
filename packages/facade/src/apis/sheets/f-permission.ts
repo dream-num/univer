@@ -43,7 +43,7 @@ export class FPermission {
      * @param {boolean} value - The boolean value to determine whether the permission point is enabled or disabled.
      *
      */
-    setWorkbookPermissionPoint(unitId: string, FPointClass: WorkbookPermissionPointConstructor, value: boolean) {
+    setWorkbookPermissionPoint(unitId: string, FPointClass: WorkbookPermissionPointConstructor, value: boolean): void {
         const instance = new FPointClass(unitId);
         const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
         if (!permissionPoint) {
@@ -59,7 +59,7 @@ export class FPermission {
      * @param {boolean} value - A value that controls whether the workbook can be edited
      *
      */
-    setWorkbookEditPermission(unitId: string, value: boolean) {
+    setWorkbookEditPermission(unitId: string, value: boolean): void {
         this.setWorkbookPermissionPoint(unitId, WorkbookEditablePermission, value);
     }
 
@@ -69,7 +69,7 @@ export class FPermission {
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {string} subUnitId - The unique identifier of the worksheet for which the permission is being set.
      */
-    async addWorksheetBasePermission(unitId: string, subUnitId: string) {
+    async addWorksheetBasePermission(unitId: string, subUnitId: string): Promise<string | undefined> {
         const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
         if (hasRangeProtection) {
             throw new Error('sheet protection cannot intersect with range protection');
@@ -96,7 +96,7 @@ export class FPermission {
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {string} subUnitId - The unique identifier of the worksheet for which the permission is being set.
      */
-    removeWorksheetPermission(unitId: string, subUnitId: string) {
+    removeWorksheetPermission(unitId: string, subUnitId: string): void {
         this._commandService.syncExecuteCommand(DeleteWorksheetProtectionMutation.id, {
             unitId,
             subUnitId,
@@ -119,7 +119,7 @@ export class FPermission {
      *    See the [permission-point documentation](https://github.com/dream-num/univer/tree/dev/packages/sheets/src/services/permission/permission-point) for more details.
      * @param {boolean} value - The new permission value to be set for the worksheet.
      */
-    async setWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor, value: boolean) {
+    async setWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor, value: boolean): Promise<string | undefined> {
         const hasBasePermission = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
         let permissionId;
         const isBasePoint = FPointClass === WorksheetEditPermission || FPointClass === WorksheetViewPermission;
@@ -152,7 +152,10 @@ export class FPermission {
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {IRange[]} ranges - The ranges to be protected.
      */
-    async addRangeBaseProtection(unitId: string, subUnitId: string, ranges: IRange[]) {
+    async addRangeBaseProtection(unitId: string, subUnitId: string, ranges: IRange[]): Promise<{
+        permissionId: string;
+        ruleId: string;
+    } | undefined> {
         // The permission ID generation here only provides the most basic permission type. If need collaborators later, need to expand this
         const permissionId = await this._authzIoService.create({ objectType: 3 });
         const ruleId = `ruleId_${generateRandomId(6)}`;
@@ -198,7 +201,7 @@ export class FPermission {
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {string[]} ruleIds - The rule IDs of the range protection to be removed.
      */
-    removeRangeProtection(unitId: string, subUnitId: string, ruleIds: string[]) {
+    removeRangeProtection(unitId: string, subUnitId: string, ruleIds: string[]): void {
         const res = this._commandService.syncExecuteCommand(DeleteRangeProtectionMutation.id, {
             unitId,
             subUnitId,
@@ -227,7 +230,7 @@ export class FPermission {
      *    See the [permission-point documentation](https://github.com/dream-num/univer/tree/dev/packages/sheets/src/services/permission/permission-point) for more details.
      * @param {boolean} value - The new permission value to be set for the range (e.g., true for allowing access, false for restricting access).
      */
-    setRangeProtectionPermissionPoint(unitId: string, subUnitId: string, permissionId: string, FPointClass: RangePermissionPointConstructor, value: boolean) {
+    setRangeProtectionPermissionPoint(unitId: string, subUnitId: string, permissionId: string, FPointClass: RangePermissionPointConstructor, value: boolean): void {
         const instance = new FPointClass(unitId, subUnitId, permissionId);
         const permissionPoint = this._permissionService.getPermissionPoint(instance.id);
         if (!permissionPoint) {
@@ -248,7 +251,7 @@ export class FPermission {
      * @param {string} ruleId - The ruleId of the range protection rule that is being updated.
      * @param {IRange[]} ranges - The array of new ranges to be set for the range protection rule.
      */
-    setRangeProtectionRanges(unitId: string, subUnitId: string, ruleId: string, ranges: IRange[]) {
+    setRangeProtectionRanges(unitId: string, subUnitId: string, ruleId: string, ranges: IRange[]): void {
         const rule = this._rangeProtectionRuleModel.getRule(unitId, subUnitId, ruleId);
         if (rule) {
             const subunitRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((r) => r.id !== ruleId);
@@ -279,7 +282,7 @@ export class FPermission {
      *
      * @param {boolean} visible
      */
-    setPermissionDialogVisible(visible: boolean) {
+    setPermissionDialogVisible(visible: boolean): void {
         const sheetPermissionInterceptorBaseController = this._injector.get(SheetPermissionInterceptorBaseController);
         sheetPermissionInterceptorBaseController.setShowPermissionDialog(visible);
     }

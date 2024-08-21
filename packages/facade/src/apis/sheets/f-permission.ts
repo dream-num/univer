@@ -68,8 +68,6 @@ export class FPermission {
      *
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {string} subUnitId - The unique identifier of the worksheet for which the permission is being set.
-     *
-     * @returns {string | undefined} - The permission id of the added permission, or undefined if the permission was add failed.
      */
     async addWorksheetBasePermission(unitId: string, subUnitId: string) {
         const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
@@ -120,9 +118,8 @@ export class FPermission {
      * @param {WorkSheetPermissionPointConstructor} FPointClass - The constructor for the permission point class.
      *    See the [permission-point documentation](https://github.com/dream-num/univer/tree/dev/packages/sheets/src/services/permission/permission-point) for more details.
      * @param {boolean} value - The new permission value to be set for the worksheet.
-     * @returns {string | undefined} permissionId - The permission ID for the worksheet. If a new base permission was added, it returns the newly created permission ID.
      */
-    async setWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor, value: boolean): string | undefined {
+    async setWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor, value: boolean) {
         const hasBasePermission = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
         let permissionId;
         const isBasePoint = FPointClass === WorksheetEditPermission || FPointClass === WorksheetViewPermission;
@@ -250,8 +247,6 @@ export class FPermission {
      * @param {string} subUnitId - The unique identifier of the worksheet within the workbook.
      * @param {string} ruleId - The ruleId of the range protection rule that is being updated.
      * @param {IRange[]} ranges - The array of new ranges to be set for the range protection rule.
-     *
-     * @returns {void} - Returns nothing. If there is an overlap, the function will return early after showing an error message.
      */
     setRangeProtectionRanges(unitId: string, subUnitId: string, ruleId: string, ranges: IRange[]) {
         const rule = this._rangeProtectionRuleModel.getRule(unitId, subUnitId, ruleId);

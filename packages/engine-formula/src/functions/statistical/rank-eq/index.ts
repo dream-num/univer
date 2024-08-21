@@ -36,21 +36,13 @@ export class RankEq extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(number: FunctionVariantType, ref: FunctionVariantType, order?: FunctionVariantType): BaseValueObject {
-        if (!number.isReferenceObject() && (number as BaseValueObject).isNull()) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        if (!ref.isReferenceObject()) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         let _number = number;
 
         if (_number.isReferenceObject()) {
             _number = (_number as BaseReferenceObject).toArrayValueObject();
         }
 
-        const { refHasError, refErrorObject, refNumbers } = this._checkRefReferenceObject(ref as BaseReferenceObject);
+        const { refHasError, refErrorObject, refNumbers } = this._checkRefReferenceObject(ref);
 
         let _order = order ?? NumberValueObject.create(0);
 
@@ -60,12 +52,12 @@ export class RankEq extends BaseFunction {
 
         const maxRowLength = Math.max(
             _number.isArray() ? (_number as ArrayValueObject).getRowCount() : 1,
-            _order.isArray() ? (_number as ArrayValueObject).getRowCount() : 1
+            _order.isArray() ? (_order as ArrayValueObject).getRowCount() : 1
         );
 
         const maxColumnLength = Math.max(
             _number.isArray() ? (_number as ArrayValueObject).getColumnCount() : 1,
-            _order.isArray() ? (_number as ArrayValueObject).getColumnCount() : 1
+            _order.isArray() ? (_order as ArrayValueObject).getColumnCount() : 1
         );
 
         const numberArray = expandArrayValueObject(maxRowLength, maxColumnLength, _number as BaseValueObject, ErrorValueObject.create(ErrorType.NA));
@@ -73,6 +65,10 @@ export class RankEq extends BaseFunction {
 
         const resultArray = numberArray.map((numberObject, rowIndex, columnIndex) => {
             const orderObject = orderArray.get(rowIndex, columnIndex) as BaseValueObject;
+
+            if (!number.isReferenceObject() && (number as BaseValueObject).isNull()) {
+                return ErrorValueObject.create(ErrorType.NA);
+            }
 
             if (refHasError) {
                 return refErrorObject;
@@ -107,12 +103,20 @@ export class RankEq extends BaseFunction {
         return resultArray;
     }
 
-    private _checkRefReferenceObject(ref: BaseReferenceObject): IRefType {
+    private _checkRefReferenceObject(ref: FunctionVariantType): IRefType {
         let refHasError = false;
         let refErrorObject = ErrorValueObject.create(ErrorType.NA);
         const refNumbers: number[] = [];
 
-        const _ref = ref.toArrayValueObject();
+        if (!ref.isReferenceObject()) {
+            return {
+                refHasError: true,
+                refErrorObject,
+                refNumbers,
+            };
+        }
+
+        const _ref = (ref as BaseReferenceObject).toArrayValueObject();
 
         _ref.iterator((refObject) => {
             const _refObject = refObject as BaseValueObject;

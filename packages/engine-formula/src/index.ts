@@ -118,13 +118,32 @@ export { IFormulaRuntimeService, FormulaRuntimeService } from './services/runtim
 export { IFormulaCurrentConfigService, FormulaCurrentConfigService, type IFormulaDirtyData } from './services/current-data.service';
 
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
+export { ActiveDirtyManagerService } from './services/active-dirty-manager.service';
 
 export type { IRangeChange } from './models/formula-data.model';
 export { handleNumfmtInCell } from './engine/utils/numfmt-kit';
 export { AsyncArrayObject } from './engine/reference-object/base-reference-object';
 export { strip, stripErrorMargin } from './engine/utils/math-kit';
 export { AsyncObject } from './engine/reference-object/base-reference-object';
-
+export { Lexer } from './engine/analysis/lexer';
+export { FormulaDependencyGenerator } from './engine/dependency/formula-dependency';
+export { ISuperTableService } from './services/super-table.service';
+export { SuperTableService } from './services/super-table.service';
+export { Interpreter } from './engine/interpreter/interpreter';
+export { AstTreeBuilder } from './engine/analysis/parser';
+export { AstRootNodeFactory } from './engine/ast-node/ast-root-node';
+export { FunctionNodeFactory } from './engine/ast-node/function-node';
+export { LambdaNodeFactory } from './engine/ast-node/lambda-node';
+export { LambdaParameterNodeFactory } from './engine/ast-node/lambda-parameter-node';
+export { OperatorNodeFactory } from './engine/ast-node/operator-node';
+export { PrefixNodeFactory } from './engine/ast-node/prefix-node';
+export { ReferenceNodeFactory } from './engine/ast-node/reference-node';
+export { SuffixNodeFactory } from './engine/ast-node/suffix-node';
+export { UnionNodeFactory } from './engine/ast-node/union-node';
+export { ValueNodeFactory } from './engine/ast-node/value-node';
+export { IDependencyManagerService } from './services/dependency-manager.service';
+export { DependencyManagerService } from './services/dependency-manager.service';
+export { CalculateController } from './controller/calculate.controller';
 // #region - all commands
 
 export { RegisterFunctionMutation } from './commands/mutations/register-function.mutation';

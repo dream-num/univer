@@ -19,8 +19,6 @@ import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, I
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 
-// TODO ybzky permissionId should generate by authzIoService;
-
 export class FPermission {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -78,7 +76,7 @@ export class FPermission {
         if (hasRangeProtection) {
             throw new Error('sheet protection cannot intersect with range protection');
         }
-        const permissionId = `permissionId_${generateRandomId(8)}`;
+        const permissionId = await this._authzIoService.create({ objectType: 2 });
         const res = this._commandService.syncExecuteCommand(AddWorksheetProtectionMutation.id, {
             unitId,
             subUnitId,
@@ -124,7 +122,7 @@ export class FPermission {
      * @param {boolean} value - The new permission value to be set for the worksheet.
      * @returns {string | undefined} permissionId - The permission ID for the worksheet. If a new base permission was added, it returns the newly created permission ID.
      */
-    setWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor, value: boolean): string | undefined {
+    async setWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor, value: boolean): string | undefined {
         const hasBasePermission = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
         let permissionId;
         const isBasePoint = FPointClass === WorksheetEditPermission || FPointClass === WorksheetViewPermission;
@@ -134,7 +132,7 @@ export class FPermission {
                 if (hasRangeProtection) {
                     throw new Error('sheet protection cannot intersect with range protection');
                 }
-                permissionId = this.addWorksheetBasePermission(unitId, subUnitId);
+                permissionId = await this.addWorksheetBasePermission(unitId, subUnitId);
             } else {
                 permissionId = hasBasePermission.permissionId;
             }
@@ -157,8 +155,9 @@ export class FPermission {
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {IRange[]} ranges - The ranges to be protected.
      */
-    addRangeBaseProtection(unitId: string, subUnitId: string, ranges: IRange[]) {
-        const permissionId = `permissionId_${generateRandomId(8)}`;
+    async addRangeBaseProtection(unitId: string, subUnitId: string, ranges: IRange[]) {
+        // The permission ID generation here only provides the most basic permission type. If need collaborators later, need to expand this
+        const permissionId = await this._authzIoService.create({ objectType: 3 });
         const ruleId = `ruleId_${generateRandomId(6)}`;
         const worksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
         if (worksheetProtection) {

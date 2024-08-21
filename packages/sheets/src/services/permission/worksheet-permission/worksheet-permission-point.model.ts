@@ -94,4 +94,14 @@ export class WorksheetProtectionPointModel {
         }
         return subUnitMap;
     }
+
+    getTargetByPermissionId(unitId: string, permissionId: string) {
+        const subUnitMap = this._model.get(unitId);
+        if (!subUnitMap) return null;
+        for (const [subUnitId, rule] of subUnitMap) {
+            if (rule.permissionId === permissionId) {
+                return [unitId, subUnitId];
+            }
+        }
+    }
 }

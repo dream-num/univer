@@ -2,7 +2,7 @@ import antfu from '@antfu/eslint-config';
 import header from 'eslint-plugin-header';
 import barrel from 'eslint-plugin-no-barrel-import';
 import penetrating from 'eslint-plugin-no-penetrating-import';
-import { baseRules, typescriptPreset } from '@univerjs/shared/eslint';
+import { baseRules, facadePreset, specPreset, typescriptPreset } from '@univerjs/shared/eslint';
 
 header.rules.header.meta.schema = false;
 
@@ -89,4 +89,7 @@ export default antfu({
         'penetrating/no-penetrating-import': 2,
     },
 },
-typescriptPreset());
+typescriptPreset(),
+facadePreset(),
+specPreset()
+);

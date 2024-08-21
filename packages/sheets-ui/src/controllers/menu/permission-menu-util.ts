@@ -384,13 +384,15 @@ export function getRemovePermissionDisable$(accessor: IAccessor) {
                     }
                     const unitId = workbook.getUnitId();
                     const subUnitId = worksheet.getSheetId();
+                    const sheetSelectionsService = accessor.get(SheetsSelectionsService);
                     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
                     const permission$ = permissionService.composePermission$([new WorkbookManageCollaboratorPermission(unitId).id, new WorkbookEditablePermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
 
                     const changes$ = merge(
                         selectionProtectionRuleModel.ruleChange$,
-                        worksheetProtectionRuleModel.ruleChange$
+                        worksheetProtectionRuleModel.ruleChange$,
+                        sheetSelectionsService.selectionMoveEnd$
                     ).pipe(startWith(null));
                     return combineLatest([changes$, permission$]).pipe(
                         map(([_, permission]) => {

@@ -17,6 +17,7 @@
 export { UniverSheetsDataValidationPlugin } from './plugin';
 export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
 export { DataValidationCacheService } from './services/dv-cache.service';
+export type { IDataValidationResCache } from './services/dv-cache.service';
 export { DataValidationFormulaService } from './services/dv-formula.service';
 export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';

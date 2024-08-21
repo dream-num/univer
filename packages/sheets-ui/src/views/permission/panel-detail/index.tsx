@@ -22,11 +22,11 @@ import { IDialogService, ISidebarService, RangeSelector, useObservable } from '@
 import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import type { ICollaborator, IUser } from '@univerjs/protocol';
-import { UnitObject, UnitRole } from '@univerjs/protocol';
+import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import clsx from 'clsx';
 import { UserEmptyBase64 } from '../user-dialog/constant';
 import Spin from '../spin';
-import { SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
+import { editState, SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import styles from './index.module.less';
@@ -53,9 +53,10 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
 
     const selectUserList = useObservable(sheetPermissionUserManagerService.selectUserList$, sheetPermissionUserManagerService.selectUserList);
 
-    const [editorGroupValue, setEditorGroupValue] = React.useState(selectUserList.length ? 'designedUserCanEdit' : 'onlyMe');
+    // The status of these two collaborators is updated directly by calling the interface, and will not be written to the snapshot or undoredo, so they are pulled in real time when they need to be displayed.
+    const [editorGroupValue, setEditorGroupValue] = React.useState<editState>(selectUserList.length ? editState.designedUserCanEdit : editState.onlyMe);
     const [viewGroupValue, setViewGroupValue] = React.useState(viewState.othersCanView);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(!!activeRule?.permissionId);
 
     const handleAddPerson = async () => {
         const userList = await authzIoService.listCollaborators({
@@ -180,7 +181,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
     useEffect(() => {
         const getSelectUserList = async () => {
             const permissionId = activeRule?.permissionId;
-            setLoading(true);
+
             const collaborators = await authzIoService.listCollaborators({
                 objectID: permissionId!,
                 unitID: unitId,
@@ -189,27 +190,59 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                 return user.role === UnitRole.Editor;
             });
             sheetPermissionUserManagerService.setSelectUserList(selectUserList);
-            setLoading(false);
-            if (selectUserList?.length > 0) {
-                setEditorGroupValue('designedUserCanEdit');
-            }
-            const readerList = collaborators.filter((user) => {
-                return user.role === UnitRole.Reader;
-            });
-
-            if (readerList.length === 0) {
-                setViewGroupValue(viewState.noOneElseCanView);
-            }
-
-            sheetPermissionUserManagerService.setOldCollaboratorList(selectUserList.concat(readerList));
+            sheetPermissionUserManagerService.setOldCollaboratorList(selectUserList);
         };
         if (activeRule?.permissionId) {
             getSelectUserList();
         } else {
             sheetPermissionUserManagerService.setSelectUserList([]);
-            setEditorGroupValue('onlyMe');
+            sheetPermissionUserManagerService.setOldCollaboratorList([]);
         }
     }, [activeRule?.permissionId]);
+
+    useEffect(() => {
+        if (!activeRule.permissionId) {
+            sheetPermissionPanelModel.setRule({
+                viewStatus: viewState.othersCanView,
+            });
+            return;
+        }
+        const getCollaboratorInit = async () => {
+            try {
+                const res = await authzIoService.list({
+                    unitID: unitId,
+                    objectIDs: [activeRule?.permissionId],
+                    actions: [UnitAction.View, UnitAction.Edit],
+                });
+                if (!res.length) {
+                    setViewGroupValue(viewState.othersCanView);
+                    setEditorGroupValue(editState.onlyMe);
+                    sheetPermissionPanelModel.setRule({
+                        viewStatus: viewState.othersCanView,
+                        editStatus: editState.onlyMe,
+                    });
+                } else {
+                    const isAllCanView = res[0].scope?.read === ObjectScope.AllCollaborator;
+                    const isSomeCanEdit = res[0].scope?.edit === ObjectScope.SomeCollaborator;
+                    const viewValue = isAllCanView ? viewState.othersCanView : viewState.noOneElseCanView;
+                    const editValue = isSomeCanEdit ? editState.designedUserCanEdit : editState.onlyMe;
+                    setViewGroupValue(viewValue);
+                    setEditorGroupValue(editValue);
+                    sheetPermissionPanelModel.setRule({
+                        viewStatus: viewValue,
+                        editStatus: editValue,
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setTimeout(() => {
+                    setLoading(false);
+                }, 100);
+            }
+        };
+        getCollaboratorInit();
+    }, [activeRule.permissionId]);
 
     useEffect(() => {
         const getListCollaborators = async () => {
@@ -230,12 +263,6 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
     }, []);
 
     useEffect(() => {
-        sheetPermissionPanelModel.setRule({
-            viewStatus: viewGroupValue,
-        });
-    }, [sheetPermissionPanelModel, viewGroupValue]);
-
-    useEffect(() => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return;
         const activeSheetSubscribe = workbook.activeSheet$.subscribe((sheet) => {
@@ -248,8 +275,6 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
         };
     }, [sidebarService, subUnitId, univerInstanceService]);
 
-    const tmp = activeRule?.ranges?.map((i) => serializeRange(i)).join(',');
-
     return (
         <div className={styles.permissionPanelDetailWrapper}>
             {/* <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.name')}>
@@ -260,89 +285,89 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                 />
                 {!activeRule?.name && <span className={styles.sheetPermissionPanelNameInputErrorText}>{localeService.t('permission.panel.nameError')}</span>}
             </FormLayout> */}
-            <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.protectedRange')}>
-                <RangeSelector
-                    className={clsx(styles.permissionRangeSelector)}
-                    textEditorClassName={clsx({ [styles.permissionRangeSelectorError]: rangeErrorMsg })}
-                    value={activeRule?.ranges?.map((i) => serializeRange(i)).join(',')}
-                    id={createInternalEditorID('sheet-permission-panel')}
-                    openForSheetUnitId={unitId}
-                    openForSheetSubUnitId={subUnitId}
-                    onChange={(newRange) => {
-                        if (newRange.some((i) => !isValidRange(i.range) || i.range.endColumn < i.range.startColumn || i.range.endRow < i.range.startRow)) {
-                            return;
-                        }
-
-                        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                        const worksheet = workbook.getActiveSheet()!;
-                        const unitId = workbook.getUnitId();
-                        const subUnitId = worksheet.getSheetId();
-                        const transformedRange = newRange.map((i) => {
-                            const range = { ...i.range };
-                            const rowCount = worksheet.getRowCount();
-                            const colCount = worksheet.getColumnCount();
-                            setEndForRange(range, rowCount, colCount);
-                            return range;
-                        });
-                        const rangeErrorString = checkRangeValid(transformedRange);
-                        sheetPermissionPanelModel.setRangeErrorMsg(rangeErrorString);
-                        if (rangeErrorString) return;
-
-                        const sheetName = worksheet.getName();
-                        const rangeStr = transformedRange.map((range) => {
-                            const v = serializeRange(range);
-                            return v === 'NaN' ? '' : v;
-                        }).filter((r) => !!r).join(',');
-
-                        const rule = {
-                            ranges: transformedRange,
-                            unitId,
-                            subUnitId,
-                            unitType: UnitObject.SelectRange,
-                            name: `${sheetName}(${rangeStr})`,
-                        };
-                        if (rule.ranges.length === 1) {
-                            const { startRow, endRow, startColumn, endColumn } = rule.ranges[0];
-                            if (startRow === 0 && endRow === worksheet.getRowCount() - 1 && startColumn === 0 && worksheet.getColumnCount() - 1 === endColumn) {
-                                rule.unitType = UnitObject.Worksheet;
-                                rule.name = `${sheetName}`;
+            <Spin loading={loading}>
+                <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.protectedRange')}>
+                    <RangeSelector
+                        className={clsx(styles.permissionRangeSelector)}
+                        textEditorClassName={clsx({ [styles.permissionRangeSelectorError]: rangeErrorMsg })}
+                        value={activeRule?.ranges?.map((i) => serializeRange(i)).join(',')}
+                        id={createInternalEditorID('sheet-permission-panel')}
+                        openForSheetUnitId={unitId}
+                        openForSheetSubUnitId={subUnitId}
+                        onChange={(newRange) => {
+                            if (newRange.some((i) => !isValidRange(i.range) || i.range.endColumn < i.range.startColumn || i.range.endRow < i.range.startRow)) {
+                                return;
                             }
-                        }
 
-                        sheetPermissionPanelModel.setRule(rule);
-                    }}
-                />
-                {rangeErrorMsg && <span className={styles.sheetPermissionPanelNameInputErrorText}>{rangeErrorMsg}</span>}
-            </FormLayout>
-            <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.permissionDirection')}>
-                <Input
-                    value={activeRule?.description ?? ''}
-                    onChange={(v) => sheetPermissionPanelModel.setRule({ description: v })}
-                    placeholder={localeService.t('permission.panel.permissionDirectionPlaceholder')}
-                />
-            </FormLayout>
-            <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.editPermission')}>
-                <RadioGroup
-                    value={editorGroupValue}
-                    onChange={(v) => {
-                        setEditorGroupValue(v as string);
-                        if (v === 'onlyMe') {
-                            sheetPermissionUserManagerService.setSelectUserList([]);
-                        }
-                    }}
-                    className={styles.radioGroupVertical}
-                >
-                    <Radio value="onlyMe">
-                        <span className={styles.text}>{localeService.t('permission.panel.onlyICanEdit')}</span>
-                    </Radio>
-                    <Radio value="designedUserCanEdit">
-                        <span className={styles.text}>{localeService.t('permission.panel.designedUserCanEdit')}</span>
-                    </Radio>
-                </RadioGroup>
-            </FormLayout>
-            {editorGroupValue === 'designedUserCanEdit' && (
-                <div className={styles.sheetPermissionDesignPersonPanel}>
-                    <Spin loading={loading}>
+                            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                            const worksheet = workbook.getActiveSheet()!;
+                            const unitId = workbook.getUnitId();
+                            const subUnitId = worksheet.getSheetId();
+                            const transformedRange = newRange.map((i) => {
+                                const range = { ...i.range };
+                                const rowCount = worksheet.getRowCount();
+                                const colCount = worksheet.getColumnCount();
+                                setEndForRange(range, rowCount, colCount);
+                                return range;
+                            });
+                            const rangeErrorString = checkRangeValid(transformedRange);
+                            sheetPermissionPanelModel.setRangeErrorMsg(rangeErrorString);
+                            if (rangeErrorString) return;
+
+                            const sheetName = worksheet.getName();
+                            const rangeStr = transformedRange.map((range) => {
+                                const v = serializeRange(range);
+                                return v === 'NaN' ? '' : v;
+                            }).filter((r) => !!r).join(',');
+
+                            const rule = {
+                                ranges: transformedRange,
+                                unitId,
+                                subUnitId,
+                                unitType: UnitObject.SelectRange,
+                                name: `${sheetName}(${rangeStr})`,
+                            };
+                            if (rule.ranges.length === 1) {
+                                const { startRow, endRow, startColumn, endColumn } = rule.ranges[0];
+                                if (startRow === 0 && endRow === worksheet.getRowCount() - 1 && startColumn === 0 && worksheet.getColumnCount() - 1 === endColumn) {
+                                    rule.unitType = UnitObject.Worksheet;
+                                    rule.name = `${sheetName}`;
+                                }
+                            }
+
+                            sheetPermissionPanelModel.setRule(rule);
+                        }}
+                    />
+                    {rangeErrorMsg && <span className={styles.sheetPermissionPanelNameInputErrorText}>{rangeErrorMsg}</span>}
+                </FormLayout>
+                <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.permissionDirection')}>
+                    <Input
+                        value={activeRule?.description ?? ''}
+                        onChange={(v) => sheetPermissionPanelModel.setRule({ description: v })}
+                        placeholder={localeService.t('permission.panel.permissionDirectionPlaceholder')}
+                    />
+                </FormLayout>
+                <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.editPermission')}>
+                    <RadioGroup
+                        value={editorGroupValue}
+                        onChange={(v) => {
+                            setEditorGroupValue(v as editState);
+                            sheetPermissionPanelModel.setRule({
+                                editStatus: v as editState,
+                            });
+                        }}
+                        className={styles.radioGroupVertical}
+                    >
+                        <Radio value={editState.onlyMe}>
+                            <span className={styles.text}>{localeService.t('permission.panel.onlyICanEdit')}</span>
+                        </Radio>
+                        <Radio value={editState.designedUserCanEdit}>
+                            <span className={styles.text}>{localeService.t('permission.panel.designedUserCanEdit')}</span>
+                        </Radio>
+                    </RadioGroup>
+                </FormLayout>
+                {editorGroupValue === 'designedUserCanEdit' && (
+                    <div className={styles.sheetPermissionDesignPersonPanel}>
 
                         <div className={styles.sheetPermissionDesignPersonPanelHeader}>
                             <span>{localeService.t('permission.panel.designedPerson')}</span>
@@ -380,23 +405,28 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                                 )}
                         </div>
 
-                    </Spin>
-                </div>
-            )}
-            <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.viewPermission')}>
-                <RadioGroup
-                    value={viewGroupValue}
-                    onChange={(v) => setViewGroupValue(v as viewState)}
-                    className={styles.radioGroupVertical}
-                >
-                    <Radio value={viewState.othersCanView}>
-                        <span className={styles.text}>{localeService.t('permission.panel.othersCanView')}</span>
-                    </Radio>
-                    <Radio value={viewState.noOneElseCanView}>
-                        <span className={styles.text}>{localeService.t('permission.panel.noOneElseCanView')}</span>
-                    </Radio>
-                </RadioGroup>
-            </FormLayout>
+                    </div>
+                )}
+                <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.viewPermission')}>
+                    <RadioGroup
+                        value={viewGroupValue}
+                        onChange={(v) => {
+                            setViewGroupValue(v as viewState);
+                            sheetPermissionPanelModel.setRule({
+                                viewStatus: v as viewState,
+                            });
+                        }}
+                        className={styles.radioGroupVertical}
+                    >
+                        <Radio value={viewState.othersCanView}>
+                            <span className={styles.text}>{localeService.t('permission.panel.othersCanView')}</span>
+                        </Radio>
+                        <Radio value={viewState.noOneElseCanView}>
+                            <span className={styles.text}>{localeService.t('permission.panel.noOneElseCanView')}</span>
+                        </Radio>
+                    </RadioGroup>
+                </FormLayout>
+            </Spin>
         </div>
     );
 };

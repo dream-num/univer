@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { DataValidationErrorStyle, type IDataValidationRule } from '@univerjs/core';
+import type { DataValidationType, IDataValidationRule } from '@univerjs/core';
+import { DataValidationErrorStyle } from '@univerjs/core';
+
 import { FDataValidationBuilder } from './f-data-validation-builder';
 
 export class FDataValidation {
@@ -28,34 +30,34 @@ export class FDataValidation {
      *
      * @return true if invalid data is allowed, false otherwise.
      */
-    getAllowInvalid() {
+    getAllowInvalid(): boolean {
         return this.rule.errorStyle !== DataValidationErrorStyle.STOP;
     };
 
     /**
      * Gets the data validation type of the rule
      *
-     * @returns {DataValidationType} The data validation type
+     * @returns The data validation type
      */
-    getCriteriaType() {
+    getCriteriaType(): DataValidationType {
         return this.rule.type;
     };
 
     /**
      * Gets the values used for criteria evaluation
      *
-     * @returns {any[]} An array containing the operator, formula1, and formula2 values
+     * @returns An array containing the operator, formula1, and formula2 values
      */
-    getCriteriaValues() {
+    getCriteriaValues(): (string | undefined)[] {
         return [this.rule.operator, this.rule.formula1, this.rule.formula2];
     }
 
     /**
      * Gets the help text information, which is used to provide users with guidance and support
      *
-     * @returns {string | undefined} Returns the help text information. If there is no error message, it returns an undefined value.
+     * @returns Returns the help text information. If there is no error message, it returns an undefined value.
      */
-    getHelpText() {
+    getHelpText(): string | undefined {
         return this.rule.error;
     };
 
@@ -65,7 +67,7 @@ export class FDataValidation {
      *
      * @return A new FDataValidationBuilder instance with the same rule configuration.
      */
-    copy() {
+    copy(): FDataValidationBuilder {
         return new FDataValidationBuilder(this.rule);
     }
 }

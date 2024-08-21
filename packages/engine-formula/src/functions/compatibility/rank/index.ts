@@ -74,10 +74,6 @@ export class Rank extends BaseFunction {
         const resultArray = numberArray.map((numberObject, rowIndex, columnIndex) => {
             const orderObject = orderArray.get(rowIndex, columnIndex) as BaseValueObject;
 
-            if (numberObject.isError()) {
-                return numberObject;
-            }
-
             if (refHasError) {
                 return refErrorObject;
             }

@@ -19,7 +19,6 @@ import type { IShapeProps, UniverRenderingContext } from '@univerjs/engine-rende
 import { Rect, Shape } from '@univerjs/engine-render';
 
 export interface ISheetCrossHairHighlightShapeProps extends IShapeProps {
-    // showHighLight: boolean;
     color: IRgbColor;
 }
 
@@ -36,10 +35,6 @@ export class SheetCrossHairHighlightShape extends Shape<ISheetCrossHairHighlight
     }
 
     setShapeProps(props: Partial<ISheetCrossHairHighlightShapeProps>): void {
-        // if (typeof props.showHighLight !== 'undefined') {
-        //     this._showHighLight = props.showHighLight;
-        // }
-
         if (typeof props.color !== 'undefined') {
             this._color = props.color;
         }

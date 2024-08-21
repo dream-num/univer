@@ -19,7 +19,7 @@ import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsCrosshairHighlightController } from './controllers/cross-hair.controller';
 import { SheetsCrosshairHighlightService } from './services/cross-hair.service';
-import { SheetCrosshairHighlightRenderController } from './views/widgets/cross-hair.render-controller';
+import { SheetCrosshairHighlightRenderController } from './views/widgets/crosshair-highlight.render-controller';
 
 export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
     constructor(

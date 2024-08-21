@@ -25,12 +25,13 @@ import { combineLatest, merge, tap } from 'rxjs';
 import { SHEETS_CROSSHAIR_HIGHLIGHT_Z_INDEX } from '../../const';
 import { CrossHairRangeCollection } from '../../util';
 import { SheetsCrosshairHighlightService } from '../../services/cross-hair.service';
-import { SheetCrossHairHighlightShape } from './cross-hair-high-light-shape';
+import { SheetCrossHairHighlightShape } from './crosshair-highlight-shape';
 
 export class SheetCrosshairHighlightRenderController extends Disposable implements IRenderModule {
     private _shapes: SheetCrossHairHighlightShape[] = [];
     private _rangeCollection = new CrossHairRangeCollection();
     private _color: string = 'rgba(255,0,0,0.5)';
+
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -38,11 +39,8 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         @Inject(SheetsCrosshairHighlightService) private readonly _sheetsCrosshairHighlightService: SheetsCrosshairHighlightService
     ) {
         super();
-        this._init();
-    }
 
-    private _init() {
-        this._handlerSelections();
+        this._initRenderListener();
     }
 
     private _transformSelection(selectionData: Nullable<ISelectionWithStyle[]>, sheet: Worksheet) {
@@ -56,9 +54,9 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         }
     }
 
-    private _handlerSelections() {
+    private _initRenderListener() {
         const workbook = this._context.unit;
-        combineLatest([
+        this.disposeWithMe(combineLatest([
             this._sheetSkeletonManagerService.currentSkeleton$,
             this._sheetsCrosshairHighlightService.enabled$,
             this._sheetsCrosshairHighlightService.color$.pipe(tap((color) => (this._color = color))),
@@ -71,7 +69,7 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
             this._rangeCollection.reset();
             this._transformSelection(selections, workbook.getActiveSheet());
             this.render(this._rangeCollection.getRanges());
-        });
+        }));
     }
 
     addSelection(range: IRange, sheet: Worksheet) {
@@ -112,12 +110,8 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
                 this._rangeCollection.addRange(range);
             }
         }
-        // this._rangeCollection.addSelectedRange(range);
     }
 
-    /**
-     * Clear all shapes
-     */
     private _clear() {
         this._shapes.forEach((shape) => {
             shape.dispose();
@@ -125,13 +119,6 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         this._shapes = [];
     }
 
-    /**
-     *
-     * @param range the range to draw
-     * @param index
-     * @param scene
-     * @param skeleton
-     */
     private _addShapes(range: IRange, index: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
         const { startRow, endRow, startColumn, endColumn } = range;
         const startPosition = getCoordByCell(startRow, startColumn, scene, skeleton);

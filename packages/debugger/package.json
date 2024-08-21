@@ -65,7 +65,7 @@
         "rxjs": ">=7.0.0"
     },
     "optionalDependencies": {
-        "vue": "^3.4.37"
+        "vue": ">=3.0.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

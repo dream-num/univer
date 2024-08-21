@@ -15,37 +15,43 @@
  */
 
 import { useDependency, useObservable } from '@univerjs/core';
-import React from 'react';
+import React, { useCallback } from 'react';
+import clsx from 'clsx';
 
-import { Dropdown } from '@univerjs/design';
-import { SheetsCrosshairHighlightService } from '../../services/ch.service';
+import { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from '../../services/ch.service';
 
-export const CROSSHAIR_HIGHLIGHT_COLORS = [];
+import styles from './index.module.less';
 
-export function CrosshairHighlight() {
-    const service = useDependency(SheetsCrosshairHighlightService);
-    const enabled = useObservable(service.enabled$);
-    const color = useObservable(service.color$);
-
-    return (
-        <Dropdown trigger="click" overlay={<CrosshairOverlay />} placement="top">
-            <div>
-                Crosshair
-                {' '}
-                <span>
-                    {color}
-                    -
-                    {enabled}
-                </span>
-            </div>
-        </Dropdown>
-    );
+export interface ICrosshairOverlayProps {
+    onChange?: (value: string) => void;
 }
 
-function CrosshairOverlay() {
+export function CrosshairOverlay(props: ICrosshairOverlayProps) {
+    const { onChange } = props;
+
+    const crosshairSrv = useDependency(SheetsCrosshairHighlightService);
+
+    const currentColor = useObservable(crosshairSrv.color$);
+
+    const handleColorPicked = useCallback((color: string) => {
+        onChange?.(color);
+    }, [onChange]);
+
     return (
-        <div>
-            Overlay Here
+        <div className={styles.crosshairHighlightOverlay}>
+            {CROSSHAIR_HIGHLIGHT_COLORS.map((color: string) => {
+                return (
+                    <div
+                        key={color}
+                        className={clsx(styles.crosshairHighlightItem, {
+                            [styles.crosshairHighlightItemSelected]: color === currentColor,
+                        })}
+                        style={{ backgroundColor: color }}
+                        onClick={() => handleColorPicked(color)}
+                    >
+                    </div>
+                );
+            })}
         </div>
     );
 }

@@ -43,6 +43,22 @@ export interface IToolbarRenderHookHandler {
     groupsByKey: Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>;
 }
 
+export function useSimpleToolbarGroups(category: MenuPositionWithCustom): IDisplayMenuItem<IMenuItem>[] {
+    const menuService = useDependency(IMenuService);
+    const [visibleItems, setVisibleItems] = useState<IDisplayMenuItem<IMenuItem>[]>([]);
+
+    useEffect(() => {
+        const s = menuService.menuChanged$.subscribe(() => {
+            const menuItems = menuService.getMenuItems(category);
+            setVisibleItems(menuItems);
+        });
+
+        return () => s.unsubscribe();
+    }, [menuService, category]);
+
+    return visibleItems;
+}
+
 /**
  * If your custom toolbar component need to render menu items by their category,
  * you can use this hook to get the toolbar status.

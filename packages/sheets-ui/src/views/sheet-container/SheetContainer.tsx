@@ -17,7 +17,7 @@
 import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
 import React, { useMemo } from 'react';
-import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
+import { ToolbarItem, useObservable, useSimpleToolbarGroups } from '@univerjs/ui';
 
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
@@ -26,19 +26,19 @@ import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
 import { useActiveWorkbook } from '../../components/hook';
-import { SheetsUIPart } from '../../consts/ui-name';
+import { SheetMenuPosition } from '../../controllers/menu/menu';
 import styles from './index.module.less';
 
 export function RenderSheetFooter() {
     const workbook = useActiveWorkbook();
     if (!workbook) return null;
 
-    const sheetsFooterComponents = useComponentsOfPart(SheetsUIPart.SHEETS_FOOTER);
+    const footerMenus = useSimpleToolbarGroups(SheetMenuPosition.SHEET_FOOTER);
 
     return (
         <section className={styles.sheetContainer} data-range-selector>
             <SheetBar />
-            <ComponentContainer components={sheetsFooterComponents} key="sheets-footer" />
+            {footerMenus.map((item) => <ToolbarItem key={item.id} {...item} />)}
             <StatusBar />
             <CountBar />
         </section>

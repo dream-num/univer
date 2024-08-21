@@ -14,26 +14,47 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import { connectInjector, Disposable, Inject, Injector } from '@univerjs/core';
-import { IUIPartsService } from '@univerjs/ui';
-import { SheetsUIPart } from '@univerjs/sheets-ui';
-import { CrosshairHighlight } from '../views/components/CrosshairHighlight';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { CrossHighlighting } from '@univerjs/icons';
+import {
+    DisableCrosshairHighlightOperation,
+    EnableCrosshairHighlightOperation,
+    SetCrosshairHighlightColorOperation,
+    ToggleCrosshairHighlightOperation,
+} from '../commands/operations/operation';
+import { CrosshairOverlay } from '../views/components/CrosshairHighlight';
+import { CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairHighlightMenuItemFactory } from './ch.menu';
 
 export class SheetsCrosshairHighlightController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService
+        @Inject(ComponentManager) private readonly _componentMgr: ComponentManager,
+        @IMenuService private readonly _menuService: IMenuService,
+        @ICommandService private readonly _cmdSrv: ICommandService
     ) {
         super();
 
-        this._init();
+        this._initCommands();
+        this._initMenus();
+        this._initComponents();
     }
 
-    private _init() {
-        this.disposeWithMe(this._uiPartsService.registerComponent(
-            SheetsUIPart.SHEETS_FOOTER,
-            () => connectInjector(() => <CrosshairHighlight />, this._injector)
-        ));
+    private _initCommands(): void {
+        ([
+            ToggleCrosshairHighlightOperation,
+            SetCrosshairHighlightColorOperation,
+            EnableCrosshairHighlightOperation,
+            DisableCrosshairHighlightOperation,
+        ]).forEach((c) => this._cmdSrv.registerCommand(c));
+    }
+
+    private _initMenus(): void {
+        this._menuService.addMenuItem(this._injector.invoke(CrosshairHighlightMenuItemFactory), {});
+    }
+
+    private _initComponents(): void {
+        this._componentMgr.register(CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT, CrosshairOverlay);
+        this._componentMgr.register('CrossHighlighting', CrossHighlighting);
     }
 }

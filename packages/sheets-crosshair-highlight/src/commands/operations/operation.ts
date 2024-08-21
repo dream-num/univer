@@ -23,20 +23,22 @@ export const ToggleCrosshairHighlightOperation: IOperation = {
     handler(accessor) {
         const service = accessor.get(SheetsCrosshairHighlightService);
         const turnedOn = service.enabled;
-        service.setTurnedOn(!turnedOn);
+        service.setEnabled(!turnedOn);
         return true;
     },
 };
 
 export interface ISetCrosshairHighlightColorOperationParams {
-    color: string;
+    value: string;
 }
+
 export const SetCrosshairHighlightColorOperation: IOperation<ISetCrosshairHighlightColorOperationParams> = {
     id: 'sheet.operation.set-crosshair-highlight-color',
     type: CommandType.OPERATION,
-    handler(accessor, { color }) {
+    handler(accessor, { value }) {
         const service = accessor.get(SheetsCrosshairHighlightService);
-        service.setColor(color);
+        if (!service.enabled) service.setEnabled(true);
+        service.setColor(value);
         return true;
     },
 };
@@ -50,7 +52,7 @@ export const EnableCrosshairHighlightOperation: IOperation = {
             return false;
         }
 
-        service.setTurnedOn(true);
+        service.setEnabled(true);
         return true;
     },
 };
@@ -64,7 +66,7 @@ export const DisableCrosshairHighlightOperation: IOperation = {
             return false;
         }
 
-        service.setTurnedOn(false);
+        service.setEnabled(false);
         return true;
     },
 };

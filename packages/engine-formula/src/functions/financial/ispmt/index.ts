@@ -28,7 +28,7 @@ export class Ispmt extends BaseFunction {
 
     override maxParams = 4;
 
-    override calculate(rate: BaseValueObject, per: BaseValueObject, nper: BaseValueObject, pv: BaseValueObject) {
+    override calculate(rate: BaseValueObject, per: BaseValueObject, nper: BaseValueObject, pv: BaseValueObject): BaseValueObject {
         const maxRowLength = Math.max(
             rate.isArray() ? (rate as ArrayValueObject).getRowCount() : 1,
             per.isArray() ? (per as ArrayValueObject).getRowCount() : 1,

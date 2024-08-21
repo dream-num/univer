@@ -35,7 +35,7 @@ export class Accrint extends BaseFunction {
         frequency: BaseValueObject,
         basis?: BaseValueObject,
         calcMethod?: BaseValueObject
-    ) {
+    ): BaseValueObject {
         const _basis = basis ?? NumberValueObject.create(0);
         const _calcMethod = calcMethod ?? BooleanValueObject.create(true);
 

@@ -22,12 +22,22 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 import { calculateNpv, getResultByGuessIterF } from '../../../basics/financial';
 
+interface IValuesType {
+    _values: number[];
+    valuesHasError: boolean;
+}
+
+interface ICheckValuesType {
+    positive: boolean;
+    negative: boolean;
+}
+
 export class Irr extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 2;
 
-    override calculate(values: BaseValueObject, guess?: BaseValueObject) {
+    override calculate(values: BaseValueObject, guess?: BaseValueObject): BaseValueObject {
         let _guess = guess ?? NumberValueObject.create(0.1);
 
         if (_guess.isNull()) {
@@ -41,7 +51,7 @@ export class Irr extends BaseFunction {
         return this._handleSingleObject(values, _guess);
     }
 
-    private _handleSingleObject(values: BaseValueObject, guess: BaseValueObject, rowIndex: number = 0, columnIndex: number = 0) {
+    private _handleSingleObject(values: BaseValueObject, guess: BaseValueObject, rowIndex: number = 0, columnIndex: number = 0): BaseValueObject {
         if (values.isError()) {
             return values;
         }
@@ -95,7 +105,7 @@ export class Irr extends BaseFunction {
         return NumberValueObject.create(result);
     }
 
-    private _getValues(values: ArrayValueObject) {
+    private _getValues(values: ArrayValueObject): IValuesType {
         const _values: number[] = [];
 
         let valuesHasError = false;
@@ -125,7 +135,7 @@ export class Irr extends BaseFunction {
         };
     }
 
-    private _checkValues(values: number[]) {
+    private _checkValues(values: number[]): ICheckValuesType {
         let positive = false;
         let negative = false;
 

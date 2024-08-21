@@ -22,12 +22,18 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 import { calculateNpv } from '../../../basics/financial';
 
+interface IValuesType {
+    isError: boolean;
+    errorObject?: ErrorValueObject;
+    values?: number[];
+}
+
 export class Npv extends BaseFunction {
     override minParams = 2;
 
     override maxParams = 255;
 
-    override calculate(rate: BaseValueObject, ...variants: BaseValueObject[]) {
+    override calculate(rate: BaseValueObject, ...variants: BaseValueObject[]): BaseValueObject {
         if (rate.isError()) {
             return rate;
         }
@@ -48,7 +54,7 @@ export class Npv extends BaseFunction {
         values: number[] | undefined,
         rowIndex: number = 0,
         columnIndex: number = 0
-    ) {
+    ): BaseValueObject {
         let _rate = rate;
 
         if (_rate.isString()) {
@@ -78,7 +84,7 @@ export class Npv extends BaseFunction {
         return NumberValueObject.create(result);
     }
 
-    private _getValues(variants: BaseValueObject[]) {
+    private _getValues(variants: BaseValueObject[]): IValuesType {
         const values: number[] = [];
 
         for (let i = 0; i < variants.length; i++) {

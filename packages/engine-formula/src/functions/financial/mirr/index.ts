@@ -23,12 +23,27 @@ import { BaseFunction } from '../../base-function';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { calculateNpv } from '../../../basics/financial';
 
+interface INumberValues {
+    numberValues: number[];
+    positive: boolean;
+    negative: boolean;
+}
+
+interface IValuesType extends INumberValues {
+    _values: BaseValueObject;
+}
+
+interface ICheckValuesType extends INumberValues {
+    valuesHasError: boolean;
+    errorObject: ErrorValueObject;
+}
+
 export class Mirr extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
 
-    override calculate(values: BaseValueObject, financeRate: BaseValueObject, reinvestRate: BaseValueObject) {
+    override calculate(values: BaseValueObject, financeRate: BaseValueObject, reinvestRate: BaseValueObject): BaseValueObject {
         const { _values, numberValues, positive, negative } = this._getValues(values);
 
         const maxRowLength = Math.max(
@@ -90,7 +105,7 @@ export class Mirr extends BaseFunction {
         return resultArray;
     }
 
-    private _getValues(values: BaseValueObject) {
+    private _getValues(values: BaseValueObject): IValuesType {
         let _values = values;
         let _numberValues: number[] = [];
         let _positive = false;
@@ -122,7 +137,7 @@ export class Mirr extends BaseFunction {
         };
     }
 
-    private _checkValues(values: ArrayValueObject) {
+    private _checkValues(values: ArrayValueObject): ICheckValuesType {
         const numberValues: number[] = [];
 
         let valuesHasError = false;
@@ -185,34 +200,5 @@ export class Mirr extends BaseFunction {
         const den = calculateNpv(financeRate, negatives) * (1 + financeRate);
 
         return (num / den) ** (1 / (n - 1)) - 1;
-    }
-
-    private _getResult2(values: number[], financeRate: number, reinvestRate: number): number {
-        const _financeRate = financeRate + 1;
-        const _reinvestRate = reinvestRate + 1;
-
-        let NPVinvest = 0;
-        let POWinvest = 1;
-        let NPVreinvest = 0;
-        let POWreinvest = 1;
-
-        for (let i = 0; i < values.length; i++) {
-            const value = values[i];
-
-            if (value > 0) { // reinvestments
-                NPVreinvest += value * POWreinvest;
-            } else if (value < 0) { // investments
-                NPVinvest += value * POWinvest;
-            }
-
-            POWreinvest /= _reinvestRate;
-            POWinvest /= _financeRate;
-        }
-
-        let result = -NPVreinvest / NPVinvest;
-        result *= _reinvestRate ** (values.length - 1);
-        result = result ** (1 / (values.length - 1));
-
-        return result - 1;
     }
 }

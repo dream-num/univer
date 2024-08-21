@@ -27,7 +27,7 @@ export class Ddb extends BaseFunction {
 
     override maxParams = 5;
 
-    override calculate(cost: BaseValueObject, salvage: BaseValueObject, life: BaseValueObject, period: BaseValueObject, factor?: BaseValueObject) {
+    override calculate(cost: BaseValueObject, salvage: BaseValueObject, life: BaseValueObject, period: BaseValueObject, factor?: BaseValueObject): BaseValueObject {
         let _factor = factor ?? NumberValueObject.create(2);
 
         if (_factor.isNull()) {

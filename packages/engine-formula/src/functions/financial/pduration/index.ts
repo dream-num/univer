@@ -28,7 +28,7 @@ export class Pduration extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(rate: BaseValueObject, pv: BaseValueObject, fv: BaseValueObject) {
+    override calculate(rate: BaseValueObject, pv: BaseValueObject, fv: BaseValueObject): BaseValueObject {
         const maxRowLength = Math.max(
             rate.isArray() ? (rate as ArrayValueObject).getRowCount() : 1,
             pv.isArray() ? (pv as ArrayValueObject).getRowCount() : 1,

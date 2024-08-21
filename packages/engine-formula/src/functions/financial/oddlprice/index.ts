@@ -36,7 +36,7 @@ export class Oddlprice extends BaseFunction {
         redemption: BaseValueObject,
         frequency: BaseValueObject,
         basis?: BaseValueObject
-    ) {
+    ): BaseValueObject {
         let _basis = basis ?? NumberValueObject.create(0);
 
         if (_basis.isNull()) {
@@ -112,7 +112,7 @@ export class Oddlprice extends BaseFunction {
         redemption: number,
         frequency: number,
         basis: number
-    ) {
+    ): number {
         const coupDateSerialNumber = this._getCoupDate(maturitySerialNumber, lastInterestSerialNumber, frequency);
 
         const fAi = this._getFrac(lastInterestSerialNumber, settlementSerialNumber, coupDateSerialNumber, frequency, basis);
@@ -124,7 +124,7 @@ export class Oddlprice extends BaseFunction {
         return result;
     }
 
-    private _getCoupDate(maturitySerialNumber: number, lastInterestSerialNumber: number, frequency: number) {
+    private _getCoupDate(maturitySerialNumber: number, lastInterestSerialNumber: number, frequency: number): number {
         const maturityDate = excelSerialToDate(maturitySerialNumber);
         const coupDate = excelSerialToDate(lastInterestSerialNumber);
 
@@ -142,7 +142,7 @@ export class Oddlprice extends BaseFunction {
         return excelDateSerial(coupDate);
     }
 
-    private _getFrac(startDateSerialNumber: number, endDateSerialNumber: number, coupDateSerialNumber: number, frequency: number, basis: number) {
+    private _getFrac(startDateSerialNumber: number, endDateSerialNumber: number, coupDateSerialNumber: number, frequency: number, basis: number): number {
         const startDate = excelSerialToDate(startDateSerialNumber);
         const endDate = excelSerialToDate(endDateSerialNumber);
         const coupDate = excelSerialToDate(coupDateSerialNumber);

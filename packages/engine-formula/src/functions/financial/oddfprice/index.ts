@@ -37,7 +37,7 @@ export class Oddfprice extends BaseFunction {
         redemption: BaseValueObject,
         frequency: BaseValueObject,
         basis?: BaseValueObject
-    ) {
+    ): BaseValueObject {
         let _basis = basis ?? NumberValueObject.create(0);
 
         if (_basis.isNull()) {

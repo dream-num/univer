@@ -32,7 +32,7 @@ export class Pricedisc extends BaseFunction {
         discount: BaseValueObject,
         redemption: BaseValueObject,
         basis?: BaseValueObject
-    ) {
+    ): BaseValueObject {
         let _basis = basis ?? NumberValueObject.create(0);
 
         if (_basis.isNull()) {

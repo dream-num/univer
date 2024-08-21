@@ -22,12 +22,30 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 import { getResultByGuessIterF } from '../../../basics/financial';
 
+interface ICheckErrorType {
+    isError: boolean;
+    errorObejct?: ErrorValueObject;
+}
+
+interface ICheckErrorValues extends ICheckErrorType {
+    _values?: number[];
+}
+
+interface ICheckErrorDates extends ICheckErrorType {
+    _dates?: number[];
+}
+
+interface ICheckNumber {
+    positive: boolean;
+    negative: boolean;
+}
+
 export class Xirr extends BaseFunction {
     override minParams = 2;
 
     override maxParams = 3;
 
-    override calculate(values: BaseValueObject, dates: BaseValueObject, guess?: BaseValueObject) {
+    override calculate(values: BaseValueObject, dates: BaseValueObject, guess?: BaseValueObject): BaseValueObject {
         if (values.isNull() || dates.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
@@ -65,18 +83,18 @@ export class Xirr extends BaseFunction {
         return NumberValueObject.create(result);
     }
 
-    private _checkErrors(values: BaseValueObject, dates: BaseValueObject) {
+    private _checkErrors(values: BaseValueObject, dates: BaseValueObject): ICheckErrorValues & ICheckErrorDates {
         if (values.isError()) {
             return {
                 isError: true,
-                errorObejct: values,
+                errorObejct: values as ErrorValueObject,
             };
         }
 
         if (dates.isError()) {
             return {
                 isError: true,
-                errorObejct: dates,
+                errorObejct: dates as ErrorValueObject,
             };
         }
 
@@ -105,7 +123,7 @@ export class Xirr extends BaseFunction {
         };
     }
 
-    private _checkErrorValues(values: BaseValueObject) {
+    private _checkErrorValues(values: BaseValueObject): ICheckErrorValues {
         const _values: number[] = [];
 
         if (values.isArray()) {
@@ -164,7 +182,7 @@ export class Xirr extends BaseFunction {
         }
     }
 
-    private _checkErrorDates(dates: BaseValueObject) {
+    private _checkErrorDates(dates: BaseValueObject): ICheckErrorDates {
         const _dates: number[] = [];
 
         if (dates.isArray()) {
@@ -236,7 +254,7 @@ export class Xirr extends BaseFunction {
         }
     }
 
-    private _checkValues(values: number[]) {
+    private _checkValues(values: number[]): ICheckNumber {
         let positive = false;
         let negative = false;
 

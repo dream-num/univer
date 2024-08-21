@@ -33,7 +33,7 @@ export class Pricemat extends BaseFunction {
         rate: BaseValueObject,
         yld: BaseValueObject,
         basis?: BaseValueObject
-    ) {
+    ): BaseValueObject {
         let _basis = basis ?? NumberValueObject.create(0);
 
         if (_basis.isNull()) {

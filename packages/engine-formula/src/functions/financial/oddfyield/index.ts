@@ -37,7 +37,7 @@ export class Oddfyield extends BaseFunction {
         redemption: BaseValueObject,
         frequency: BaseValueObject,
         basis?: BaseValueObject
-    ) {
+    ): BaseValueObject {
         let _basis = basis ?? NumberValueObject.create(0);
 
         if (_basis.isNull()) {
@@ -124,7 +124,7 @@ export class Oddfyield extends BaseFunction {
         redemption: number,
         frequency: number,
         basis: number
-    ) {
+    ): number | ErrorValueObject {
         const { days } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basis);
         const guess = (rate * days * 100 - (pr - 100)) / ((pr - 100) * 0.25 * (1 + 2 * days) + days * 100);
 

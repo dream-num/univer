@@ -27,7 +27,14 @@ export class Duration extends BaseFunction {
 
     override maxParams = 6;
 
-    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, coupon: BaseValueObject, yld: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject) {
+    override calculate(
+        settlement: BaseValueObject,
+        maturity: BaseValueObject,
+        coupon: BaseValueObject,
+        yld: BaseValueObject,
+        frequency: BaseValueObject,
+        basis?: BaseValueObject
+    ): BaseValueObject {
         let _basis = basis ?? NumberValueObject.create(0);
 
         if (_basis.isNull()) {

@@ -25,7 +25,7 @@ export class Fvschedule extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(principal: BaseValueObject, schedule: BaseValueObject) {
+    override calculate(principal: BaseValueObject, schedule: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(principal);
 
         if (isError) {

@@ -37,8 +37,16 @@ interface IBulletBound {
 }
 
 const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, skeleton: DocumentSkeleton, pageIndex: number): IBoundRectNoAngle[] | undefined => {
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, pageIndex);
-    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, true, range.segmentId, pageIndex);
+    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, false, range.segmentId, pageIndex);
+    const skeletonData = skeleton.getSkeletonData();
+    let end = range.endOffset;
+    if (range.segmentId) {
+        const root = Array.from(skeletonData?.skeFooters.get(range.segmentId)?.values() ?? [])[0] ?? Array.from(skeletonData?.skeHeaders.get(range.segmentId)?.values() ?? [])[0];
+        if (root) {
+            end = Math.min(root.ed, end);
+        }
+    }
+    const endPosition = skeleton.findNodePositionByCharIndex(end, false, range.segmentId, pageIndex);
     if (!endPosition || !startPosition) {
         return;
     }

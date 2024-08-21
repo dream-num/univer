@@ -30,16 +30,14 @@ export class DocInterceptorService extends Disposable implements IRenderModule {
     ) {
         super();
 
-        this.disposeWithMe(this._docSkeletonManagerService.currentViewModel$.subscribe((viewModel) => {
-            if (viewModel) {
-                const unitId = viewModel.getDataModel().getUnitId();
-                if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY || unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-                    return;
-                }
+        const viewModel = this._docSkeletonManagerService.getViewModel();
 
-                this.interceptDocumentViewModel(viewModel);
-            }
-        }));
+        const unitId = viewModel.getDataModel().getUnitId();
+        if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY || unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            return;
+        }
+
+        this.disposeWithMe(this.interceptDocumentViewModel(viewModel));
 
         this.disposeWithMe(this.intercept(DOC_INTERCEPTOR_POINT.CUSTOM_RANGE, {
             priority: -1,
@@ -47,6 +45,17 @@ export class DocInterceptorService extends Disposable implements IRenderModule {
                 return next(data);
             },
         }));
+
+        let disposableCollection = new DisposableCollection();
+        viewModel.segmentViewModels$.subscribe((segmentViewModels) => {
+            disposableCollection.dispose();
+            disposableCollection = new DisposableCollection();
+            segmentViewModels.forEach((segmentViewModel) => {
+                disposableCollection.add(this.interceptDocumentViewModel(segmentViewModel));
+            });
+        });
+
+        this.disposeWithMe(disposableCollection);
     }
 
     intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T) {

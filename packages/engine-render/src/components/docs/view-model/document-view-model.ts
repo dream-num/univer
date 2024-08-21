@@ -175,6 +175,9 @@ export class DocumentViewModel implements IDisposable {
     headerTreeMap: Map<string, DocumentViewModel> = new Map();
     footerTreeMap: Map<string, DocumentViewModel> = new Map();
 
+    private readonly _segmentViewModels$ = new BehaviorSubject<DocumentViewModel[]>([]);
+    readonly segmentViewModels$ = this._segmentViewModels$.asObservable();
+
     constructor(private _documentDataModel: DocumentDataModel) {
         if (_documentDataModel.getBody() == null) {
             return;
@@ -607,14 +610,18 @@ export class DocumentViewModel implements IDisposable {
 
     private _buildHeaderFooterViewModel() {
         const { headerModelMap, footerModelMap } = this._documentDataModel;
-
+        const viewModels = [];
         for (const [headerId, headerModel] of headerModelMap) {
             this.headerTreeMap.set(headerId, new DocumentViewModel(headerModel));
+            viewModels.push(this.headerTreeMap.get(headerId)!);
         }
 
         for (const [footerId, footerModel] of footerModelMap) {
             this.footerTreeMap.set(footerId, new DocumentViewModel(footerModel));
+            viewModels.push(this.footerTreeMap.get(footerId)!);
         }
+
+        this._segmentViewModels$.next(viewModels);
     }
 
     private _getParagraphByIndex(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {

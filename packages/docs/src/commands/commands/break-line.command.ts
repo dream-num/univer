@@ -15,11 +15,10 @@
  */
 
 import type { ICommand, IParagraph } from '@univerjs/core';
-import { BooleanNumber, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
+import { BooleanNumber, CommandType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { getInsertSelection } from '../../basics/selection';
-import { DocCustomRangeService } from '../../services/doc-custom-range.service';
 import { InsertCommand } from './core-editing.command';
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
@@ -65,11 +64,11 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const customRangeService = accessor.get(DocCustomRangeService);
 
         const activeTextRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         const rectRanges = textSelectionManagerService.getCurrentRectRanges();
@@ -104,7 +103,10 @@ export const BreakLineCommand: ICommand = {
         if (prevParagraph && prevParagraph.startIndex > endOffset) {
             const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex + 1));
 
-            bodyAfter.customRanges = bodyAfter.customRanges?.map((range) => customRangeService.copyCustomRange(unitId, range));
+            bodyAfter.customRanges = bodyAfter.customRanges?.map((range) => ({
+                ...Tools.deepClone(range),
+                rangeId: generateRandomId(),
+            }));
 
             const deleteRange = {
                 startOffset,

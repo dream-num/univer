@@ -39,7 +39,6 @@ import { FUniver } from '@univerjs/facade';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
-import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
@@ -70,7 +69,6 @@ univer.registerPlugin(UniverDocsPlugin, { hasScroll: false });
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, { container: 'app' });
 univer.registerPlugin(UniverDocsUIPlugin);
-univer.registerPlugin(UniverDocsHyperLinkPlugin);
 univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsUIPlugin);
 

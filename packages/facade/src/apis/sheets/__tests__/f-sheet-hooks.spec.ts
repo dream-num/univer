@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type { ICellData, Injector, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -22,7 +22,6 @@ import { Subject } from 'rxjs';
 
 import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
 import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';
-import type { FUniver } from '../../facade';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { FSheetHooks } from '../f-sheet-hooks';
 
@@ -53,8 +52,6 @@ describe('Test FSheetHooks', () => {
     let get: Injector['get'];
     let injector: Injector;
     let commandService: ICommandService;
-    let univerAPI: FUniver;
-    let sheet: UnitModel<Workbook>;
     let getValueByPosition: (
         startRow: number,
         startColumn: number,
@@ -101,8 +98,6 @@ describe('Test FSheetHooks', () => {
         ]);
         get = testBed.get;
         injector = testBed.injector;
-        univerAPI = testBed.univerAPI;
-        sheet = testBed.sheet;
         workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
         commandService = get(ICommandService);

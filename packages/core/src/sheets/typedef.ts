@@ -16,7 +16,7 @@
 
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IStyleData } from '../types/interfaces/i-style-data';
-import type { Resources } from '../types/interfaces/resource';
+import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import { type BooleanNumber, CellValueType } from '../types/enum';
 import type { IDocumentData } from '../types/interfaces';
@@ -69,7 +69,7 @@ export interface IWorkbookData {
     /**
      * Resources of the Univer Sheet. It is used to store the data of other plugins.
      */
-    resources?: Resources;
+    resources?: IResources;
 }
 
 /**

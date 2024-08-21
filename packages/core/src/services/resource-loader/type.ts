@@ -15,15 +15,11 @@
  */
 
 import { createIdentifier } from '../../common/di';
-import type { Workbook } from '../../sheets/workbook';
 import { LifecycleStages, runOnLifecycle } from '../lifecycle/lifecycle';
-import type { IDocumentData } from '../../types/interfaces';
-import type { DocumentDataModel } from '../../docs';
-import type { IWorkbookData } from '../../sheets/typedef';
+import type { IResources } from '../resource-manager/type';
 
 export interface IResourceLoaderService {
-    saveWorkbook: (workbook: Workbook) => IWorkbookData;
-    saveDoc: (doc: DocumentDataModel) => IDocumentData;
+    saveUnit<T = object>(unitId: string): T & { resources: IResources } | null;
 }
 export const IResourceLoaderService = createIdentifier<IResourceLoaderService>('resource-loader-service');
 runOnLifecycle(LifecycleStages.Ready, IResourceLoaderService);

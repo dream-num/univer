@@ -65,7 +65,7 @@ export class FWorkbook {
      * Returns workbook snapshot data, including conditional formatting, data validation, and other plugin data.
      */
     getSnapshot(): IWorkbookData {
-        const snapshot = this._resourceLoaderService.saveWorkbook(this._workbook);
+        const snapshot = this._resourceLoaderService.saveUnit<IWorkbookData>(this._workbook.getUnitId())!;
         return snapshot;
     }
 

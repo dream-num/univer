@@ -75,7 +75,7 @@ export const DocHyperLinkEdit = () => {
             return;
         }
 
-        const matchedRange = doc?.getBody()?.customRanges?.find((i) => Math.max(activeRange.startOffset, i.startIndex) <= Math.min(activeRange.endOffset - 1, i.endIndex));
+        const matchedRange = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody()?.customRanges?.find((i) => Math.max(activeRange.startOffset, i.startIndex) <= Math.min(activeRange.endOffset - 1, i.endIndex));
         if (doc && matchedRange) {
             const linkDetail = hyperLinkModel.getLink(doc.getUnitId(), matchedRange.rangeId);
             setLink(linkDetail?.payload ?? '');

@@ -734,8 +734,26 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            investment: { name: 'số tiền đầu tư', detail: 'Số tiền đầu tư vào chứng khoán có thể bán được.' },
+            discount: { name: 'lãi suất chiết', detail: 'Lãi suất chiết khấu đối với chứng khoán.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
+        },
+    },
+    RRI: {
+        description: 'Trả về một lãi suất tương đương cho sự tăng trưởng của một khoản đầu tư.',
+        abstract: 'Trả về một lãi suất tương đương cho sự tăng trưởng của một khoản đầu tư.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/rri-%E5%87%BD%E6%95%B0-6f5822d8-7ef1-4233-944c-79e8172930f4',
+            },
+        ],
+        functionParameter: {
+            nper: { name: 'số kỳ hạn của khoản đầu tư.', detail: 'Nper là số kỳ hạn của khoản đầu tư.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Pv là giá trị hiện tại của khoản đầu tư.' },
+            fv: { name: 'giá trị tương lai', detail: 'Fv là giá trị tương lai của khoản đầu tư.' },
         },
     },
     SLN: {

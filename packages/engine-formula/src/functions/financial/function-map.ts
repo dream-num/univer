@@ -56,6 +56,8 @@ import { Pricedisc } from './pricedisc';
 import { Pricemat } from './pricemat';
 import { Pv } from './pv';
 import { Rate } from './rate';
+import { Received } from './received';
+import { Rri } from './rri';
 import { Xirr } from './xirr';
 
 export const functionFinancial = [
@@ -100,5 +102,7 @@ export const functionFinancial = [
     [Pricemat, FUNCTION_NAMES_FINANCIAL.PRICEMAT],
     [Pv, FUNCTION_NAMES_FINANCIAL.PV],
     [Rate, FUNCTION_NAMES_FINANCIAL.RATE],
+    [Received, FUNCTION_NAMES_FINANCIAL.RECEIVED],
+    [Rri, FUNCTION_NAMES_FINANCIAL.RRI],
     [Xirr, FUNCTION_NAMES_FINANCIAL.XIRR],
 ];

@@ -734,8 +734,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            investment: { name: 'investment', detail: 'The amount invested in the security.' },
+            discount: { name: 'discount', detail: "The security's discount rate." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     RRI: {
@@ -748,8 +751,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: 'nper', detail: 'Nper is the number of periods for the investment.' },
+            pv: { name: 'pv', detail: 'Pv is the present value of the investment.' },
+            fv: { name: 'fv', detail: 'Fv is the future value of the investment.' },
         },
     },
     SLN: {

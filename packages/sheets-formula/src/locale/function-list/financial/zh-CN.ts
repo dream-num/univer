@@ -734,8 +734,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            investment: { name: '投资额', detail: '有价证券的投资额。' },
+            discount: { name: '贴现率', detail: '有价证券的贴现率。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     RRI: {
@@ -748,8 +751,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '总期数', detail: '投资的周期数。' },
+            pv: { name: '现值', detail: '投资的现值。' },
+            fv: { name: '未来价值', detail: '投资的未来价值。' },
         },
     },
     SLN: {

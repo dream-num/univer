@@ -734,8 +734,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            investment: { name: '投資額', detail: '証券への投資額を指定します。' },
+            discount: { name: '割引率', detail: '証券の割引率を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     RRI: {
@@ -748,8 +751,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '期間', detail: '投資期間の期間数を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値を指定します。' },
+            fv: { name: '将来価値', detail: 'Fvは投資の将来価値です。' },
         },
     },
     SLN: {

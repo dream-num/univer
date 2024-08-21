@@ -734,8 +734,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            investment: { name: '投資額', detail: '這是證券的投資額。' },
+            discount: { name: '貼現率', detail: '這是證券的貼現率。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     RRI: {
@@ -748,8 +751,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '總期數', detail: '投資的期數。' },
+            pv: { name: '現值', detail: '投資的現值。' },
+            fv: { name: '未來值', detail: '投資的未來值。' },
         },
     },
     SLN: {

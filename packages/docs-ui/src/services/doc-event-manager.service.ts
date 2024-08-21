@@ -196,7 +196,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         }));
     }
 
-    private _buildCustomRangeBoundsBySegment(segmentId?: string) {
+    private _buildCustomRangeBoundsBySegment(segmentId?: string, segmentPage = -1) {
         const customRanges = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges ?? [];
         const layouts: ICustomRangeBound[] = [];
 
@@ -208,28 +208,17 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 segmentId,
             };
 
-            const calcRect = (pageIndex: number) => {
-                const rects = calcDocRangePositions(textRange, this._documents, this._skeleton, pageIndex);
-                if (!rects) {
-                    return null;
-                }
-
-                layouts.push({
-                    customRange: range,
-                    rects,
-                    segmentId,
-                    segmentPageIndex: pageIndex,
-                });
-            };
-
-            if (segmentId) {
-                const pageSize = (this._skeleton.getSkeletonData()?.pages.length ?? 0);
-                for (let i = 0; i < pageSize; i++) {
-                    calcRect(i);
-                }
-            } else {
-                calcRect(-1);
+            const rects = calcDocRangePositions(textRange, this._documents, this._skeleton, segmentPage);
+            if (!rects) {
+                return null;
             }
+
+            layouts.push({
+                customRange: range,
+                rects,
+                segmentId,
+                segmentPageIndex: segmentPage,
+            });
         });
 
         return layouts;
@@ -240,15 +229,15 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             return;
         }
         this._customRangeDirty = false;
+        const customRangeBounds: ICustomRangeBound[] = [];
 
-        const headerKeys = Array.from(this._context.unit.headerModelMap.keys());
-        const footerKeys = Array.from(this._context.unit.footerModelMap.keys());
+        customRangeBounds.concat(this._buildCustomRangeBoundsBySegment());
+        this._skeleton.getSkeletonData()?.pages.forEach((page, pageIndex) => {
+            customRangeBounds.concat(this._buildCustomRangeBoundsBySegment(page.headerId, pageIndex));
+            customRangeBounds.concat(this._buildCustomRangeBoundsBySegment(page.footerId, pageIndex));
+        });
 
-        this._customRangeBounds = [
-            ...this._buildCustomRangeBoundsBySegment(),
-            ...(headerKeys.map((key) => this._buildCustomRangeBoundsBySegment(key)).flat()),
-            ...(footerKeys.map((key) => this._buildCustomRangeBoundsBySegment(key)).flat()),
-        ];
+        this._customRangeBounds = customRangeBounds;
     }
 
     private _calcActiveRanges(evt: IPointerEvent | IMouseEvent) {

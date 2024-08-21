@@ -1249,8 +1249,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要找出其排名的數字。' },
+            ref: { name: '數位清單', detail: '數位清單的參照。會忽略 ref 中的非數值。' },
+            order: { name: '排列方式', detail: '這是指定排列數值方式的數字。0 或省略為遞減順序排序，非 0 為遞增順序排序。' },
         },
     },
     RANK_EQ: {
@@ -1263,8 +1264,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要找出其排名的數字。' },
+            ref: { name: '數位清單', detail: '數位清單的參照。會忽略 ref 中的非數值。' },
+            order: { name: '排列方式', detail: '這是指定排列數值方式的數字。0 或省略為遞減順序排序，非 0 為遞增順序排序。' },
         },
     },
     RSQ: {

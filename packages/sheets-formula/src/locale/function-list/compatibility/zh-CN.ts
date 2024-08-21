@@ -417,8 +417,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要找到其排位的数字。' },
+            ref: { name: '数字列表', detail: '对数字列表的引用。Ref 中的非数字值会被忽略。' },
+            order: { name: '排位方式', detail: '一个指定数字排位方式的数字。0 或省略为降序，非 0 为升序。' },
         },
     },
     STDEV: {

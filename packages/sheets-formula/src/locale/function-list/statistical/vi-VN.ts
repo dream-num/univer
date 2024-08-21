@@ -457,6 +457,36 @@ export default {
             criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
         },
     },
+    RANK_AVG: {
+        description: 'Trả về thứ hạng của một số trong một danh sách các số',
+        abstract: 'Trả về thứ hạng của một số trong một danh sách các số',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/rank-avg-%E5%87%BD%E6%95%B0-bd406a6f-eb38-4d73-aa8e-6d1c3c72e83a',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Số mà bạn muốn tìm thứ hạng của nó.' },
+            ref: { name: 'danh sách các số', detail: 'Tham chiếu tới danh sách các số. Các giá trị không phải là số trong tham chiếu sẽ được bỏ qua.' },
+            order: { name: 'xếp hạng số', detail: 'Một con số chỉ rõ cách xếp hạng số. 0 hoặc bị bỏ qua đối với thứ tự giảm dần, khác 0 đối với thứ tự tăng dần.' },
+        },
+    },
+    RANK_EQ: {
+        description: 'Trả về thứ hạng của một số trong một danh sách các số',
+        abstract: 'Trả về thứ hạng của một số trong một danh sách các số',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/rank-eq-%E5%87%BD%E6%95%B0-284858ce-8ef6-450e-b662-26245be04a40',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Số mà bạn muốn tìm thứ hạng của nó.' },
+            ref: { name: 'danh sách các số', detail: 'Tham chiếu tới danh sách các số. Các giá trị không phải là số trong tham chiếu sẽ được bỏ qua.' },
+            order: { name: 'xếp hạng số', detail: 'Một con số chỉ rõ cách xếp hạng số. 0 hoặc bị bỏ qua đối với thứ tự giảm dần, khác 0 đối với thứ tự tăng dần.' },
+        },
+    },
     STDEV_P: {
         description: 'Tính toán độ lệch chuẩn dựa trên toàn bộ tổng thể được cung cấp ở dạng đối số (bỏ qua giá trị lô-gic và văn bản).',
         abstract: 'Tính độ lệch chuẩn dựa trên toàn bộ quần thể mẫu',

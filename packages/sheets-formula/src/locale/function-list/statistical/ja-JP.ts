@@ -1212,8 +1212,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '範囲内での順位 (位置) を調べる数値を指定します。' },
+            ref: { name: '数値範囲', detail: '数値の一覧への参照。 参照に含まれる数値以外の値は無視されます。' },
+            order: { name: '順序', detail: '範囲内の数値を並べる方法を指定します。降順の場合は 0 または省略され、昇順の場合は 0 以外です。' },
         },
     },
     RANK_EQ: {
@@ -1226,8 +1227,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '範囲内での順位 (位置) を調べる数値を指定します。' },
+            ref: { name: '数値範囲', detail: '数値の一覧への参照。 参照に含まれる数値以外の値は無視されます。' },
+            order: { name: '順序', detail: '範囲内の数値を並べる方法を指定します。降順の場合は 0 または省略され、昇順の場合は 0 以外です。' },
         },
     },
     RSQ: {

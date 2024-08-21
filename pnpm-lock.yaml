@@ -1116,9 +1116,6 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
-      '@univerjs/docs-hyper-link':
-        specifier: workspace:*
-        version: link:../docs-hyper-link
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render

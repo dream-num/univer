@@ -120,12 +120,15 @@ export class HtmlToUDMService {
                                 endIndex: body.dataStream.length + text.length - 1,
                                 rangeId: id,
                                 rangeType: CustomRangeType.HYPERLINK,
+                                properties: {
+                                    url: (parent as HTMLAnchorElement).href,
+                                },
                             },
                         ];
-                        body.payloads = {
-                            ...body.payloads,
-                            [id]: (parent as HTMLAnchorElement).href,
-                        };
+                        // body.payloads = {
+                        //     ...body.payloads,
+                        //     [id]: (parent as HTMLAnchorElement).href,
+                        // };
                     }
                 }
 

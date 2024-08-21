@@ -16,7 +16,6 @@
 
 import { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService, sequenceExecute } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
-import { AddDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
 
 export interface IAddDocHyperLinkCommandParams {
     payload: string;
@@ -39,15 +38,13 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
             {
                 rangeId: id,
                 rangeType: CustomRangeType.HYPERLINK,
+                properties: {
+                    url: payload,
+                },
             }
         );
         if (doMutation) {
-            const hyperLinkMutation = {
-                id: AddDocHyperLinkMutation.id,
-                params: { unitId, link: { payload, id } },
-            };
-
-            return (await sequenceExecute([hyperLinkMutation, doMutation], commandService)).result;
+            return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
         }
 
         return false;

@@ -16,8 +16,6 @@
 
 import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, type ICommand, ICommandService, sequenceExecute } from '@univerjs/core';
 import { replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
-import type { IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
-import { AddDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;
@@ -34,7 +32,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         if (!params) {
             return false;
         }
-        const { unitId, payload, segmentId } = params;
+        const { payload, segmentId } = params;
         const commandService = accessor.get(ICommandService);
         const selectionService = accessor.get(TextSelectionManagerService);
         const currentSelection = selectionService.getActiveTextRange();
@@ -52,6 +50,9 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
                     rangeType: CustomRangeType.HYPERLINK,
                     startIndex: 0,
                     endIndex: params.label.length + 1,
+                    properties: {
+                        url: payload,
+                    },
                 }],
             },
             selection: {
@@ -66,22 +67,6 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
             return false;
         }
 
-        // doc don't support undo now
-        // so use an new id to replace the old link
-        // in case of undo or redo
-        const addLinkMutation = {
-            id: AddDocHyperLinkMutation.id,
-            params: {
-                unitId,
-                link: {
-                    id: newId,
-                    payload,
-                },
-            } as IAddDocHyperLinkMutationParams,
-        };
-
-        const result = sequenceExecute([addLinkMutation, replaceSelection], commandService);
-
-        return result.result;
+        return commandService.syncExecuteCommand(replaceSelection.id, replaceSelection.params);
     },
 };

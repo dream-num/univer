@@ -231,10 +231,15 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this._customRangeDirty = false;
         const customRangeBounds: ICustomRangeBound[] = [];
 
-        customRangeBounds.concat(this._buildCustomRangeBoundsBySegment());
+        customRangeBounds.push(...this._buildCustomRangeBoundsBySegment());
         this._skeleton.getSkeletonData()?.pages.forEach((page, pageIndex) => {
-            customRangeBounds.concat(this._buildCustomRangeBoundsBySegment(page.headerId, pageIndex));
-            customRangeBounds.concat(this._buildCustomRangeBoundsBySegment(page.footerId, pageIndex));
+            if (page.headerId) {
+                customRangeBounds.push(...this._buildCustomRangeBoundsBySegment(page.headerId, pageIndex));
+            }
+
+            if (page.footerId) {
+                customRangeBounds.push(...this._buildCustomRangeBoundsBySegment(page.footerId, pageIndex));
+            }
         });
 
         this._customRangeBounds = customRangeBounds;
@@ -264,7 +269,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         );
     }
 
-    private _buildBulletBoundsBySegment(segmentId?: string) {
+    private _buildBulletBoundsBySegment(segmentId?: string, segmentPage = -1) {
         const body = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         const paragraphs = body?.paragraphs ?? [];
         const bounds: IBulletBound[] = [];
@@ -301,14 +306,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                     });
                 };
 
-                if (segmentId) {
-                    const pageSize = (this._skeleton.getSkeletonData()?.pages.length ?? 0);
-                    for (let i = 0; i < pageSize; i++) {
-                        calcRect(i);
-                    }
-                } else {
-                    calcRect(-1);
-                }
+                calcRect(segmentPage);
             }
         });
 
@@ -321,13 +319,18 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         }
         this._bulletDirty = false;
 
-        const headerKeys = Array.from(this._context.unit.headerModelMap.keys());
-        const footerKeys = Array.from(this._context.unit.footerModelMap.keys());
-        this._bulletBounds = [
-            ...this._buildBulletBoundsBySegment(),
-            ...(headerKeys.map((key) => this._buildBulletBoundsBySegment(key)).flat()),
-            ...(footerKeys.map((key) => this._buildBulletBoundsBySegment(key)).flat()),
-        ];
+        this._bulletBounds = [];
+        this._bulletBounds.push(...this._buildBulletBoundsBySegment());
+
+        this._skeleton.getSkeletonData()?.pages.forEach((page, pageIndex) => {
+            if (page.headerId) {
+                this._bulletBounds.push(...this._buildBulletBoundsBySegment(page.headerId, pageIndex));
+            }
+
+            if (page.footerId) {
+                this._bulletBounds.push(...this._buildBulletBoundsBySegment(page.footerId, pageIndex));
+            }
+        });
     }
 
     private _calcActiveBullet(evt: IPointerEvent | IMouseEvent) {

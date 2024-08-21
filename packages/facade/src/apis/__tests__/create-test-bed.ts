@@ -18,8 +18,6 @@
 
 import type { Dependency, IWorkbookData, UnitModel, Workbook } from '@univerjs/core';
 import {
-    AuthzIoLocalService,
-    IAuthzIoService,
     ILogService,
     Inject,
     Injector,
@@ -164,7 +162,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
-            injector.add([IAuthzIoService, { useClass: AuthzIoLocalService }]);
             injector.add([WorksheetProtectionRuleModel]);
 
             const renderManagerService = injector.get(IRenderManagerService);

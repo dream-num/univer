@@ -31,10 +31,9 @@ import styles from './index.module.less';
 
 export function RenderSheetFooter() {
     const workbook = useActiveWorkbook();
-    if (!workbook) return null;
-
     const footerMenus = useSimpleToolbarGroups(SheetMenuPosition.SHEET_FOOTER);
 
+    if (!workbook) return null;
     return (
         <section className={styles.sheetContainer} data-range-selector>
             <SheetBar />

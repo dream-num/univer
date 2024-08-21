@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction } from '@univerjs/protocol';
-import { ObjectScope, UnitObject, UnitRole, UniverType } from '@univerjs/protocol';
+import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction, UnitObject } from '@univerjs/protocol';
+import { ObjectScope, UnitRole, UniverType } from '@univerjs/protocol';
 import { Inject } from '../../common/di';
-import { Tools } from '../../shared/tools';
+import { generateRandomId } from '../../shared/tools';
 import { IResourceManagerService } from '../resource-manager/type';
 import { UserManagerService } from '../user-manager/user-manager.service';
 import { createDefaultUser, isDevRole } from '../user-manager/const';
@@ -83,21 +83,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
     }
 
     async create(config: ICreateRequest): Promise<string> {
-        const id = Tools.generateRandomId(8);
-        switch (config.objectType) {
-            case UnitObject.SelectRange: {
-                const params = config.selectRangeObject!;
-                this._permissionMap.set(id, { ...params, objectType: config.objectType });
-                break;
-            }
-            case UnitObject.Worksheet: {
-                const params = config.worksheetObject!;
-
-                this._permissionMap.set(id, { ...params, objectType: config.objectType });
-            }
-        }
-
-        return id;
+        return generateRandomId(8);
     }
 
     async allowed(_config: IAllowedRequest): Promise<IActionInfo[]> {

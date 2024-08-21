@@ -15,7 +15,7 @@
  */
 
 import type { IActionInfo, IAllowedRequest, IBatchAllowedResponse, ICollaborator, ICreateRequest, ICreateRequest_SelectRangeObject, IListPermPointRequest, IPermissionPoint, IPutCollaboratorsRequest, IUnitRoleKV, IUpdatePermPointRequest, UnitAction } from '@univerjs/protocol';
-import { CreateRequest_WorkSheetObjectScope, UnitObject, UnitRole, UniverType } from '@univerjs/protocol';
+import { ObjectScope, UnitObject, UnitRole, UniverType } from '@univerjs/protocol';
 import { Inject } from '../../common/di';
 import { Tools } from '../../shared/tools';
 import { IResourceManagerService } from '../resource-manager/type';
@@ -93,7 +93,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
             case UnitObject.Worksheet: {
                 const params = config.worksheetObject!;
 
-                this._permissionMap.set(id, { ...params, objectType: config.objectType, readScope: CreateRequest_WorkSheetObjectScope.SomeCollaborator });
+                this._permissionMap.set(id, { ...params, objectType: config.objectType });
             }
         }
 
@@ -124,8 +124,11 @@ export class AuthzIoLocalService implements IAuthzIoService {
                     shareOn: false,
                     shareRole: UnitRole.Owner,
                     shareScope: -1,
+                    scope: {
+                        read: ObjectScope.AllCollaborator,
+                        edit: ObjectScope.AllCollaborator,
+                    },
                     creator: createDefaultUser(UnitRole.Owner),
-                    // mock data
                     strategies: [
                         {
                             action: 6,
@@ -177,10 +180,6 @@ export class AuthzIoLocalService implements IAuthzIoService {
                         },
                         {
                             action: 40,
-                            role: 1,
-                        },
-                        {
-                            action: 41,
                             role: 1,
                         },
                     ],

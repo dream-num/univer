@@ -341,23 +341,20 @@ export interface ITextRun {
     // tab?: BooleanNumber; // if tab，default is false
 }
 
-export interface ICustomRange {
+export interface ICustomRange<T extends Record<string, any> = Record<string, any>> {
     startIndex: number;
     endIndex: number;
     rangeId: string;
-    rangeType: CustomRangeType;
+    rangeType: CustomRangeType | number;
     /**
      * display as a whole-entity
      */
     wholeEntity?: boolean;
+    properties?: T;
 }
 
-// TODO: @weird94 this range should not be built-in. It makes custom ranges not
-// extensible for community users.
+export type IHyperLinkCustomRange = ICustomRange<{ url: string }>;
 
-/**
- * @deprecated
- */
 export enum CustomRangeType {
     HYPERLINK,
     FIELD, // 17.16 Fields and Hyperlinks

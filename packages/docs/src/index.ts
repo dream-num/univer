@@ -27,7 +27,6 @@ export { DocSkeletonManagerService } from './services/doc-skeleton-manager.servi
 export { TextSelectionManagerService, serializeDocRange } from './services/text-selection-manager.service';
 export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';
 export { IMEInputManagerService } from './services/ime-input-manager.service';
-export { DocCustomRangeService, type ICustomRangeHook } from './services/doc-custom-range.service';
 
 // #region - all commands
 

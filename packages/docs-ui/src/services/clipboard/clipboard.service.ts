@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph } from '@univerjs/core';
+import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph } from '@univerjs/core';
 import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
-import { CutContentCommand, DocCustomRangeService, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
+import { CutContentCommand, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
 import type { RectRange, TextRange } from '@univerjs/engine-render';
 import { DOC_RANGE_TYPE } from '@univerjs/engine-render';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
@@ -93,8 +93,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocCustomRangeService) private readonly _docCustomRangeService: DocCustomRangeService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
     }

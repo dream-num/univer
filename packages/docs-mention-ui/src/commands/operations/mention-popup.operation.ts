@@ -15,7 +15,7 @@
  */
 
 import { CommandType, type ICommand } from '@univerjs/core';
-import { DocMentionService } from '@univerjs/docs-mention';
+import { DocMentionService } from '../../services/doc-mention.service';
 
 export interface IShowMentionInfoPopupOperationParams {
     unitId: string;

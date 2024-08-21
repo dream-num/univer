@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { UniverDocsMentionPlugin } from '@univerjs/docs-mention';
 import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
 import { DocMentionPopupService } from './services/doc-mention-popup.service';
 import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
 import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
+import { DocMentionService } from './services/doc-mention.service';
 
 export class UniverDocsMentionUIPlugin extends Plugin {
     static override pluginName = DOC_MENTION_UI_PLUGIN;
@@ -35,6 +35,7 @@ export class UniverDocsMentionUIPlugin extends Plugin {
 
     override onStarting(): void {
         const deps: Dependency[] = [
+            [DocMentionService],
             [DocMentionPopupService],
             [DocMentionUIController],
             [DocMentionTriggerController],

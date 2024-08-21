@@ -210,7 +210,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         // copy custom ranges
         body.customRanges = body.customRanges?.map((range) => ({
-            ...range,
+            ...Tools.deepClone(range),
             rangeId: generateRandomId(),
         }));
 

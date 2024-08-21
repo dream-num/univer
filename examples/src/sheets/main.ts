@@ -24,7 +24,9 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
+
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
@@ -86,7 +88,9 @@ univer.registerPlugin(UniverSheetsDataValidationPlugin);
 // sort
 univer.registerPlugin(UniverSheetsSortUIPlugin);
 // condition formatting
+univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
+
 // drawing
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 // univer.registerPlugin(UniverDocsDrawingUIPlugin);

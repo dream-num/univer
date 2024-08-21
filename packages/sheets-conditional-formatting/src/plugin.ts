@@ -38,9 +38,6 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
-    }
-
-    override onStarting(): void {
         ([
             [ConditionalFormattingService],
             [ConditionalFormattingFormulaService],

@@ -24,7 +24,7 @@ import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMo
 import { IDialogService } from '@univerjs/ui';
 import { IMEInputCommand, InsertCommand } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
-import { deserializeRangeWithSheet, IDefinedNamesService, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, LexerTreeBuilder, operatorToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../../views/permission/error-msg-dialog/interface';
 import type { ISheetPasteParams } from '../../commands/commands/clipboard.command';
 import { SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand } from '../../commands/commands/clipboard.command';
@@ -682,7 +682,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                 }
                 for (let i = 0; i < sequenceNodes.length; i++) {
                     const node = sequenceNodes[i];
-                    if (typeof node === 'string') {
+                    if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
                         continue;
                     }
                     const { token } = node;
@@ -713,6 +713,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                         }
                     }
                 }
+                return true;
             }
         }
         if (range) {

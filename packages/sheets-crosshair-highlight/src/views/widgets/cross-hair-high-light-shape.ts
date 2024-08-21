@@ -51,7 +51,7 @@ export class SheetCrossHairHighlightShape extends Shape<ISheetCrossHairHighlight
     }
 
     protected override _draw(ctx: CanvasRenderingContext2D): void {
-        const color = `rgba(${this._color!.r}, ${this._color!.g}, ${this._color!.b}, 0.35)`;
+        const color = `rgba(${this._color!.r}, ${this._color!.g}, ${this._color!.b}, ${this._color!.a})`;
 
         Rect.drawWith(ctx as UniverRenderingContext, {
             width: this.width,

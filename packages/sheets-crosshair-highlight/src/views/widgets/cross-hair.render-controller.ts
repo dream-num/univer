@@ -59,10 +59,11 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
     private _handlerSelections() {
         const workbook = this._context.unit;
         combineLatest([
+            this._sheetSkeletonManagerService.currentSkeleton$,
             this._sheetsCrosshairHighlightService.enabled$,
             this._sheetsCrosshairHighlightService.color$.pipe(tap((color) => (this._color = color))),
-            merge(this._sheetsSelectionsService.selectionMoveStart$, this._sheetsSelectionsService.selectionMoving$),
-        ]).subscribe(([enabled, _color, selections]) => {
+            merge(this._sheetsSelectionsService.selectionMoveStart$, this._sheetsSelectionsService.selectionMoving$, this._sheetsSelectionsService.selectionMoveEnd$),
+        ]).subscribe(([_, enabled, _color, selections]) => {
             this._clear();
 
             if (!enabled) return;

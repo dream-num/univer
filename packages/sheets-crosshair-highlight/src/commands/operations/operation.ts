@@ -17,6 +17,9 @@
 import { CommandType, type IOperation } from '@univerjs/core';
 import { SheetsCrosshairHighlightService } from '../../services/ch.service';
 
+/**
+ * A {@link CommandType.OPERATION} to toggle the crosshair highlight.
+ */
 export const ToggleCrosshairHighlightOperation: IOperation = {
     id: 'sheet.operation.toggle-crosshair-highlight',
     type: CommandType.OPERATION,
@@ -28,10 +31,20 @@ export const ToggleCrosshairHighlightOperation: IOperation = {
     },
 };
 
+/**
+ * A {@link CommandType.OPERATION} to set the crosshair highlight color.
+ * @property {string} value - The color value to set.
+ */
 export interface ISetCrosshairHighlightColorOperationParams {
     value: string;
 }
 
+/**
+ * A {@link CommandType.OPERATION} to set the crosshair highlight color. It the crosshair highlight is not enabled,
+ * it will be enabled.
+ *
+ * Its params {@link ISetCrosshairHighlightColorOperationParams} contains the color value to set as and is required.
+ */
 export const SetCrosshairHighlightColorOperation: IOperation<ISetCrosshairHighlightColorOperationParams> = {
     id: 'sheet.operation.set-crosshair-highlight-color',
     type: CommandType.OPERATION,
@@ -43,6 +56,9 @@ export const SetCrosshairHighlightColorOperation: IOperation<ISetCrosshairHighli
     },
 };
 
+/**
+ * A {@link CommandType.OPERATION} to enable the crosshair highlight.
+ */
 export const EnableCrosshairHighlightOperation: IOperation = {
     id: 'sheet.operation.enable-crosshair-highlight',
     type: CommandType.OPERATION,
@@ -57,6 +73,9 @@ export const EnableCrosshairHighlightOperation: IOperation = {
     },
 };
 
+/**
+ * A {@link CommandType.OPERATION} to disable the crosshair highlight.
+ */
 export const DisableCrosshairHighlightOperation: IOperation = {
     id: 'sheet.operation.disable-crosshair-highlight',
     type: CommandType.OPERATION,

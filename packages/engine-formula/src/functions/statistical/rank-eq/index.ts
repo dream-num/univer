@@ -22,6 +22,12 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
+interface IRefType {
+    refHasError: boolean;
+    refErrorObject: ErrorValueObject;
+    refNumbers: number[];
+}
+
 export class RankEq extends BaseFunction {
     override minParams = 2;
 
@@ -29,7 +35,7 @@ export class RankEq extends BaseFunction {
 
     override needsReferenceObject = true;
 
-    override calculate(number: FunctionVariantType, ref: FunctionVariantType, order?: FunctionVariantType) {
+    override calculate(number: FunctionVariantType, ref: FunctionVariantType, order?: FunctionVariantType): BaseValueObject {
         if (!number.isReferenceObject() && (number as BaseValueObject).isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
@@ -105,7 +111,7 @@ export class RankEq extends BaseFunction {
         return resultArray;
     }
 
-    private _checkRefReferenceObject(ref: BaseReferenceObject) {
+    private _checkRefReferenceObject(ref: BaseReferenceObject): IRefType {
         let refHasError = false;
         let refErrorObject = ErrorValueObject.create(ErrorType.NA);
         const refNumbers: number[] = [];

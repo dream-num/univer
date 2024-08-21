@@ -156,7 +156,7 @@ describe('Test rank function', () => {
             expect(result).toStrictEqual(4.5);
         });
 
-        it('Number value test, string/true/false/blankCell/error', async () => {
+        it('Number value test, string/true/false/blankCell/error/null', async () => {
             const result = await calculate('=RANK.AVG("test",A1:H1,0)');
             expect(result).toStrictEqual(ErrorType.VALUE);
 
@@ -171,6 +171,9 @@ describe('Test rank function', () => {
 
             const result5 = await calculate('=RANK.AVG(#NAME?,A1:H1,0)');
             expect(result5).toStrictEqual(ErrorType.NAME);
+
+            const result6 = await calculate('=RANK.AVG(,A1:H1,0)');
+            expect(result6).toStrictEqual(ErrorType.NA);
         });
 
         it('Ref value test, notReferenceObject/hasError', async () => {
@@ -202,6 +205,13 @@ describe('Test rank function', () => {
 
             const result6 = await calculate('=RANK.AVG(A1,A1:H1,1)');
             expect(result6).toStrictEqual(2.5);
+        });
+
+        it('Value is array', async () => {
+            const result = await calculate('=RANK.AVG({1,2,121,#NAME?},A1:H1,0)');
+            expect(result).toStrictEqual([
+                [4.5, 2.5, ErrorType.NA, ErrorType.NAME],
+            ]);
         });
     });
 });

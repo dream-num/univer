@@ -22,6 +22,12 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
+interface IRefType {
+    refHasError: boolean;
+    refErrorObject: ErrorValueObject;
+    refNumbers: number[];
+}
+
 export class RankAvg extends BaseFunction {
     override minParams = 2;
 
@@ -29,7 +35,7 @@ export class RankAvg extends BaseFunction {
 
     override needsReferenceObject = true;
 
-    override calculate(number: FunctionVariantType, ref: FunctionVariantType, order?: FunctionVariantType) {
+    override calculate(number: FunctionVariantType, ref: FunctionVariantType, order?: FunctionVariantType): BaseValueObject {
         if (!number.isReferenceObject() && (number as BaseValueObject).isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
@@ -87,24 +93,7 @@ export class RankAvg extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            const refOrderNumbers = refNumbers.sort((a, b) => !orderValue ? b - a : a - b);
-
-            let index = refOrderNumbers.indexOf(numberValue);
-            const results = [];
-
-            while (index >= 0) {
-                const start = index + 1;
-                results.push(start);
-                index = refOrderNumbers.indexOf(numberValue, start);
-            }
-
-            if (results.length === 0) {
-                return ErrorValueObject.create(ErrorType.NA);
-            }
-
-            const result = results.reduce((acc, cur) => acc + cur, 0) / results.length;
-
-            return NumberValueObject.create(result);
+            return this._getResult(numberValue, orderValue, refNumbers);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -114,7 +103,28 @@ export class RankAvg extends BaseFunction {
         return resultArray;
     }
 
-    private _checkRefReferenceObject(ref: BaseReferenceObject) {
+    private _getResult(numberValue: number, orderValue: number, refNumbers: number[]): BaseValueObject {
+        const refOrderNumbers = refNumbers.sort((a, b) => !orderValue ? b - a : a - b);
+
+        let index = refOrderNumbers.indexOf(numberValue);
+        const results = [];
+
+        while (index >= 0) {
+            const start = index + 1;
+            results.push(start);
+            index = refOrderNumbers.indexOf(numberValue, start);
+        }
+
+        if (results.length === 0) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        const result = results.reduce((acc, cur) => acc + cur, 0) / results.length;
+
+        return NumberValueObject.create(result);
+    }
+
+    private _checkRefReferenceObject(ref: BaseReferenceObject): IRefType {
         let refHasError = false;
         let refErrorObject = ErrorValueObject.create(ErrorType.NA);
         const refNumbers: number[] = [];

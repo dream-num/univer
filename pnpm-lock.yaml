@@ -216,9 +216,6 @@ importers:
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
         version: link:../packages/docs-drawing-ui
-      '@univerjs/docs-hyper-link':
-        specifier: workspace:*
-        version: link:../packages/docs-hyper-link
       '@univerjs/docs-hyper-link-ui':
         specifier: workspace:*
         version: link:../packages/docs-hyper-link-ui
@@ -1071,33 +1068,6 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5(@types/node@22.3.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.5)
 
-  packages/docs-hyper-link:
-    devDependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
-      '@univerjs/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.5.4
-        version: 5.5.4
-      vite:
-        specifier: ^5.4.0
-        version: 5.4.0(@types/node@22.3.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.5)
-      vitest:
-        specifier: ^2.0.5
-        version: 2.0.5(@types/node@22.3.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.5)
-
   packages/docs-hyper-link-ui:
     dependencies:
       '@univerjs/docs-ui':
@@ -1144,36 +1114,6 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5(@types/node@22.3.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.5)
 
-  packages/docs-mention:
-    devDependencies:
-      '@types/react':
-        specifier: ^18.3.3
-        version: 18.3.3
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.5.4
-        version: 5.5.4
-      vite:
-        specifier: ^5.4.0
-        version: 5.4.0(@types/node@22.3.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.5)
-      vitest:
-        specifier: ^2.0.5
-        version: 2.0.5(@types/node@22.3.0)(happy-dom@14.12.3)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.5)
-
   packages/docs-mention-ui:
     devDependencies:
       '@types/react':
@@ -1188,9 +1128,6 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
-      '@univerjs/docs-mention':
-        specifier: workspace:*
-        version: link:../docs-mention
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
@@ -2210,9 +2147,6 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
-      '@univerjs/docs-hyper-link':
-        specifier: workspace:*
-        version: link:../docs-hyper-link
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -2851,12 +2785,6 @@ importers:
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
         version: link:../docs-drawing-ui
-      '@univerjs/docs-hyper-link':
-        specifier: workspace:*
-        version: link:../docs-hyper-link
-      '@univerjs/docs-hyper-link-ui':
-        specifier: workspace:*
-        version: link:../docs-hyper-link-ui
       '@univerjs/docs-thread-comment-ui':
         specifier: workspace:*
         version: link:../docs-thread-comment-ui

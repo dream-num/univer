@@ -18,7 +18,7 @@ import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagrap
 import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
-import { CutContentCommand, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
+import { copyCustomRange, CutContentCommand, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
 import type { RectRange, TextRange } from '@univerjs/engine-render';
 import { DOC_RANGE_TYPE } from '@univerjs/engine-render';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
@@ -209,10 +209,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
 
         // copy custom ranges
-        body.customRanges = body.customRanges?.map((range) => ({
-            ...Tools.deepClone(range),
-            rangeId: generateRandomId(),
-        }));
+        body.customRanges = body.customRanges?.map(copyCustomRange);
 
         const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};

@@ -15,10 +15,10 @@
  */
 
 import type { ICommand, IParagraph } from '@univerjs/core';
-import { BooleanNumber, CommandType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
-
+import { BooleanNumber, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { getInsertSelection } from '../../basics/selection';
+import { copyCustomRange } from '../../basics/custom-range';
 import { InsertCommand } from './core-editing.command';
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
@@ -64,7 +64,7 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -102,11 +102,7 @@ export const BreakLineCommand: ICommand = {
         // line breaks to 2
         if (prevParagraph && prevParagraph.startIndex > endOffset) {
             const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex + 1));
-
-            bodyAfter.customRanges = bodyAfter.customRanges?.map((range) => ({
-                ...Tools.deepClone(range),
-                rangeId: generateRandomId(),
-            }));
+            bodyAfter.customRanges = bodyAfter.customRanges?.map(copyCustomRange);
 
             const deleteRange = {
                 startOffset,

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export { getCustomRangesInterestsWithRange } from './basics/custom-range';
 export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';
 export { replaceSelectionFactory } from './basics/replace';
 export { makeSelection, getSelectionText, getDeleteSelection, getInsertSelection, isSegmentIntersects } from './basics/selection';
@@ -98,6 +97,7 @@ export { getRichTextEditPath } from './commands/util';
 export { getPlainTextFormDocument, getPlainTextFormBody } from './basics/plain-text';
 export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRangeFactory } from './basics/custom-range-factory';
 export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
+export { getCustomRangesInterestsWithRange, copyCustomRange } from './basics/custom-range';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocAutoFormatService } from './services/doc-auto-format.service';

@@ -66,7 +66,7 @@ export class CellEditorManagerService implements ICellEditorManagerService, IDis
         this._rect = null;
     }
 
-    setState(param: ICellEditorManagerParam) {
+    setState(param: ICellEditorManagerParam): void {
         this._state = param;
 
         this._refresh(param);

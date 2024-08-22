@@ -16,7 +16,7 @@
 
 import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 
 export class FPermission {
@@ -132,6 +132,14 @@ export class FPermission {
                 permissionId = await this.addWorksheetBasePermission(unitId, subUnitId);
             } else {
                 permissionId = hasBasePermission.permissionId;
+            }
+        } else {
+            const rule = this._worksheetProtectionPointRuleModel.getRule(unitId, subUnitId);
+            if (!rule) {
+                permissionId = await this._authzIoService.create({ objectType: 2 });
+                this._commandService.executeCommand(SetWorksheetPermissionPointsMutation.id, { unitId, subUnitId, permissionId });
+            } else {
+                permissionId = rule.permissionId;
             }
         }
 

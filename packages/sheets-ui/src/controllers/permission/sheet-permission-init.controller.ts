@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IAuthzIoService, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, IAuthzIoService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 
 import type { IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
 import { defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
@@ -38,7 +38,8 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(UserManagerService) private _userManagerService: UserManagerService,
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel
+        @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel,
+        @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService
     ) {
         super();
         this._initRangePermissionFromSnapshot();
@@ -379,7 +380,7 @@ export class SheetPermissionInitController extends Disposable {
             handler: (cell = {}, context, next) => {
                 const { unitId, subUnitId } = context;
                 const worksheetRule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-                if (worksheetRule?.permissionId && worksheetRule.name) {
+                if (worksheetRule?.permissionId) {
                     const selectionProtection = [{
                         [UnitAction.View]: this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? false,
                         [UnitAction.Edit]: this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false,
@@ -398,5 +399,93 @@ export class SheetPermissionInitController extends Disposable {
             },
         }
         ));
+    }
+
+    public refreshPermission(unitId: string, permissionId: string) {
+        const sheetRuleItem = this._worksheetProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
+        let needClearUndoRedo = false;
+        if (sheetRuleItem) {
+            const [_, subUnitId] = sheetRuleItem;
+            this._authzIoService.allowed({
+                objectID: permissionId,
+                unitID: unitId,
+                objectType: UnitObject.Worksheet,
+                actions: [UnitAction.Edit, UnitAction.View],
+            }).then((actionList) => {
+                let key = '';
+                getAllWorksheetPermissionPoint().forEach((F) => {
+                    const instance = new F(unitId, subUnitId);
+                    const unitActionName = instance.subType;
+                    const action = actionList.find((item) => item.action === unitActionName);
+                    if (action) {
+                        const originValue = this._permissionService.getPermissionPoint(instance.id)?.value;
+                        if (originValue !== action.allowed) {
+                            needClearUndoRedo = true;
+                        }
+                        this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+                        key += `${action.action}_${action.allowed}`;
+                    }
+                });
+                this._worksheetProtectionRuleModel.ruleRefresh(`${permissionId}_${key}`);
+                if (needClearUndoRedo) {
+                    this._undoRedoService.clearUndoRedo(unitId);
+                }
+            });
+        }
+        const sheetPointItem = this._worksheetProtectionPointRuleModel.getTargetByPermissionId(unitId, permissionId);
+        if (sheetPointItem) {
+            const [_, subUnitId] = sheetPointItem;
+            this._authzIoService.allowed({
+                objectID: permissionId,
+                unitID: unitId,
+                objectType: UnitObject.Worksheet,
+                actions: defaultWorksheetPermissionPoint,
+            }).then((actionList) => {
+                getAllWorksheetPermissionPointByPointPanel().forEach((F) => {
+                    const instance = new F(unitId, subUnitId);
+                    const unitActionName = instance.subType;
+                    const action = actionList.find((item) => item.action === unitActionName);
+                    if (action) {
+                        const originValue = this._permissionService.getPermissionPoint(instance.id)?.value;
+                        if (originValue !== action.allowed) {
+                            needClearUndoRedo = true;
+                        }
+                        this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+                    }
+                });
+                if (needClearUndoRedo) {
+                    this._undoRedoService.clearUndoRedo(unitId);
+                }
+            });
+        }
+        const rangeRuleItem = this._rangeProtectionRuleModel.getTargetByPermissionId(unitId, permissionId);
+        if (rangeRuleItem) {
+            const [_, subUnitId] = rangeRuleItem;
+            this._authzIoService.allowed({
+                objectID: permissionId,
+                unitID: unitId,
+                objectType: UnitObject.SelectRange,
+                actions: [UnitAction.Edit, UnitAction.View],
+            }).then((actionList) => {
+                let key = '';
+                getAllRangePermissionPoint().forEach((F) => {
+                    const instance = new F(unitId, subUnitId, permissionId);
+                    const unitActionName = instance.subType;
+                    const action = actionList.find((item) => item.action === unitActionName);
+                    if (action) {
+                        const originValue = this._permissionService.getPermissionPoint(instance.id)?.value;
+                        if (originValue !== action.allowed) {
+                            needClearUndoRedo = true;
+                        }
+                        this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+                        key += `${action.action}_${action.allowed}`;
+                    }
+                });
+                this._rangeProtectionRuleModel.ruleRefresh(`${permissionId}_${key}`);
+                if (needClearUndoRedo) {
+                    this._undoRedoService.clearUndoRedo(unitId);
+                }
+            });
+        }
     }
 }

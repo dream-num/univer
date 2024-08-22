@@ -33,12 +33,16 @@ const DEFAULT_RANGE_RULE: IRangeProtectionRule = {
 export enum viewState {
     othersCanView = 'othersCanView',
     noOneElseCanView = 'noOneElseCanView',
+}
 
+export enum editState {
+    designedUserCanEdit = 'designedUserCanEdit',
+    onlyMe = 'onlyMe',
 }
 
 type IPermissionPanelBaseRule = IRangeProtectionRule | IWorksheetProtectionRule;
 
-export type IPermissionPanelRule = IPermissionPanelBaseRule & { viewStatus?: viewState; ranges: IRange[] };
+export type IPermissionPanelRule = IPermissionPanelBaseRule & { viewStatus?: viewState; editStatus?: editState; ranges: IRange[] };
 
 @OnLifecycle(LifecycleStages.Starting, SheetPermissionPanelModel)
 export class SheetPermissionPanelModel {
@@ -46,6 +50,16 @@ export class SheetPermissionPanelModel {
     private _rule$ = new BehaviorSubject(this._rule);
     private _oldRule: Nullable<IPermissionPanelRule>;
     private _rangeErrorMsg$ = new BehaviorSubject('');
+
+    private _visible = false;
+
+    setVisible(v: boolean) {
+        this._visible = v;
+    }
+
+    getVisible() {
+        return this._visible;
+    }
 
     rangeErrorMsg$ = this._rangeErrorMsg$.asObservable();
 
@@ -67,6 +81,13 @@ export class SheetPermissionPanelModel {
     resetRule() {
         this._rule = DEFAULT_RANGE_RULE;
         this._rule$.next(this._rule);
+    }
+
+    reset() {
+        this.setVisible(false);
+        this.resetRule();
+        this.setRangeErrorMsg('');
+        this.setOldRule(null);
     }
 
     get oldRule() {

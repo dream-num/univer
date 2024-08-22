@@ -23,7 +23,7 @@ import type { Workbook } from '@univerjs/core';
 import { IDialogService } from '@univerjs/ui';
 import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
-import { CreateRequest_WorkSheetObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
+import { ObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
 import Spin from '../spin';
 import { defaultWorksheetUnitActionList, subUnitPermissionTypeMap, UNIVER_SHEET_PERMISSION_DIALOG_ID } from '../../../basics/const/permission';
 import styles from './index.module.less';
@@ -135,7 +135,10 @@ export const SheetPermissionDialog = () => {
                     collaborators,
                     name: '',
                     strategies: actions,
-                    scope: CreateRequest_WorkSheetObjectScope.AllCollaborator,
+                    scope: {
+                        read: ObjectScope.AllCollaborator,
+                        edit: ObjectScope.AllCollaborator,
+                    },
                 },
             });
 
@@ -154,6 +157,11 @@ export const SheetPermissionDialog = () => {
                 strategies: actions,
                 share: undefined,
                 name: '',
+                scope: {
+                    read: ObjectScope.AllCollaborator,
+                    edit: ObjectScope.AllCollaborator,
+                },
+                collaborators: undefined,
             }).then(() => {
                 getAllWorksheetPermissionPoint().forEach((F) => {
                     const instance = new F(unitId, subUnitId);
@@ -170,52 +178,50 @@ export const SheetPermissionDialog = () => {
     return (
         <Spin loading={loading}>
             <div className={styles.sheetPermissionDialogWrapper}>
-                <>
-                    <div className={styles.sheetPermissionDialogSplit} />
-                    {Object.keys(permissionMap).map((action) => {
-                        const actionItem = permissionMap[action];
-                        const { text, allowed } = actionItem;
-                        return (
-                            <div key={text} className={styles.sheetPermissionDialogItem}>
-                                <div>{text}</div>
-                                <Switch
-                                    defaultChecked={allowed}
-                                    onChange={() => {
-                                        setPermissionMap({
-                                            ...permissionMap,
-                                            [action]: {
-                                                ...actionItem,
-                                                allowed: !allowed,
-                                            },
-                                        });
-                                    }}
-                                />
-                            </div>
-                        );
-                    })}
-                    <div className={styles.sheetPermissionDialogSplit}></div>
-                    <div className={styles.sheetPermissionUserDialogFooter}>
+                <div className={styles.sheetPermissionDialogSplit} />
+                {Object.keys(permissionMap).map((action) => {
+                    const actionItem = permissionMap[action];
+                    const { text, allowed } = actionItem;
+                    return (
+                        <div key={text} className={styles.sheetPermissionDialogItem}>
+                            <div>{text}</div>
+                            <Switch
+                                defaultChecked={allowed}
+                                onChange={() => {
+                                    setPermissionMap({
+                                        ...permissionMap,
+                                        [action]: {
+                                            ...actionItem,
+                                            allowed: !allowed,
+                                        },
+                                    });
+                                }}
+                            />
+                        </div>
+                    );
+                })}
+                <div className={styles.sheetPermissionDialogSplit}></div>
+                <div className={styles.sheetPermissionUserDialogFooter}>
 
-                        <Button
-                            className={styles.sheetPermissionUserDialogButton}
-                            onClick={() => {
-                                dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
-                            }}
-                        >
-                            {localeService.t('permission.button.cancel')}
-                        </Button>
-                        <Button
-                            type="primary"
-                            onClick={() => {
-                                handleChangeActionPermission();
-                                dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
-                            }}
-                            className={clsx(styles.sheetPermissionUserDialogFooterConfirm, styles.sheetPermissionUserDialogButton)}
-                        >
-                            {localeService.t('permission.button.confirm')}
-                        </Button>
-                    </div>
-                </>
+                    <Button
+                        className={styles.sheetPermissionUserDialogButton}
+                        onClick={() => {
+                            dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
+                        }}
+                    >
+                        {localeService.t('permission.button.cancel')}
+                    </Button>
+                    <Button
+                        type="primary"
+                        onClick={() => {
+                            handleChangeActionPermission();
+                            dialogService.close(UNIVER_SHEET_PERMISSION_DIALOG_ID);
+                        }}
+                        className={clsx(styles.sheetPermissionUserDialogFooterConfirm, styles.sheetPermissionUserDialogButton)}
+                    >
+                        {localeService.t('permission.button.confirm')}
+                    </Button>
+                </div>
             </div>
         </Spin>
     );

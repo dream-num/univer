@@ -66,7 +66,7 @@
     },
     "dependencies": {
         "@types/lodash.mergewith": "^4.6.9",
-        "@univerjs/protocol": "0.1.39-alpha.3",
+        "@univerjs/protocol": "0.1.39-alpha.9",
         "@wendellhu/redi": "0.16.1",
         "lodash.mergewith": "^4.6.2",
         "nanoid": "5.0.7",

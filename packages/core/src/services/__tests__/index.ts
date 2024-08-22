@@ -42,7 +42,7 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     name: '',
     sheetOrder: [],
     styles: {},
-    resources: [],
+    resources: [{ name: 'SHEET_test_PLUGIN', data: '{"a":123}' }],
 });
 
 export const createTestBed = (dependencies?: Dependency[]) => {
@@ -59,9 +59,6 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             @Inject(Injector) override readonly _injector: Injector
         ) {
             super();
-        }
-
-        override onStarting(): void {
             dependencies?.forEach((d) => this._injector.add(d));
         }
     }

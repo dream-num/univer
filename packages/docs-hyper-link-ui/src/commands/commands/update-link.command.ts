@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, type ICommand, ICommandService, sequenceExecute } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, type ICommand, ICommandService } from '@univerjs/core';
 import { replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
 
 export interface IUpdateDocHyperLinkCommandParams {

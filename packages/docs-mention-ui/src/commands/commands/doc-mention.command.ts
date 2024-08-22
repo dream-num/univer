@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IDocumentBody } from '@univerjs/core';
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, ICommandService, sequenceExecute } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, ICommandService } from '@univerjs/core';
 import { deleteCustomRangeFactory, replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
 import type { IDocMention } from '../../types/interfaces/i-mention';
 

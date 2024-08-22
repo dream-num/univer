@@ -16,7 +16,6 @@
 
 import type { ICommand, IListData, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
 import {
-    BooleanNumber,
     CommandType,
     GridType,
     ICommandService,
@@ -38,6 +37,7 @@ import { serializeDocRange, TextSelectionManagerService } from '../../services/t
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getRichTextEditPath } from '../util';
+import { hasParagraphInTable } from '../../basics/paragraph';
 
 interface IListOperationCommandParams {
     listType: PresetListType;
@@ -130,13 +130,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
             const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
             const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
-            const bulletParagraphTextStyle = paragraphProperties.textStyle;
             const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
-            const bulletParagraphTextStyleEmpty = Object.keys(bulletParagraphTextStyle ?? {})
-                .reduce((acc: Record<string, any>, key) => {
-                    acc[key] = undefined;
-                    return acc;
-                }, {});
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             textX.push({
@@ -157,10 +151,6 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                     ...paragraphStyle,
                                     hanging: undefined,
                                     indentStart: indentStart ? { v: Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + getNumberUnitValue(listHanging, charSpaceApply) - getNumberUnitValue(listIndentStart, charSpaceApply)) } : undefined,
-                                    textStyle: {
-                                        ...paragraphStyle.textStyle,
-                                        ...bulletParagraphTextStyleEmpty,
-                                    },
                                 },
                                 startIndex: 0,
                             }
@@ -168,17 +158,6 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                 startIndex: 0,
                                 paragraphStyle: {
                                     ...paragraphStyle,
-                                    textStyle: {
-                                        ...paragraphStyle.textStyle,
-                                        ...bulletParagraphTextStyle,
-                                        ...bullet?.listType === PresetListType.CHECK_LIST_CHECKED
-                                            ? {
-                                                st: {
-                                                    s: BooleanNumber.FALSE,
-                                                },
-                                            }
-                                            : null,
-                                    },
                                     indentFirstLine: undefined,
                                     hanging: listHanging,
                                     indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
@@ -220,7 +199,7 @@ interface IChangeListTypeCommandParams {
 export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
     id: 'doc.command.change-list-type',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params: IChangeListTypeCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -276,7 +255,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
             const { startIndex, paragraphStyle = {}, bullet } = paragraph;
             const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
             const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
-            const bulletParagraphTextStyle = paragraphProperties.textStyle;
+            // const bulletParagraphTextStyle = paragraphProperties.textStyle;
             const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
             const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
 
@@ -298,17 +277,6 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
                             startIndex: 0,
                             paragraphStyle: {
                                 ...paragraphStyle,
-                                textStyle: {
-                                    ...paragraphStyle.textStyle,
-                                    ...bulletParagraphTextStyle,
-                                    ...bullet?.listType === PresetListType.CHECK_LIST_CHECKED
-                                        ? {
-                                            st: {
-                                                s: BooleanNumber.FALSE,
-                                            },
-                                        }
-                                        : null,
-                                },
                                 indentFirstLine: undefined,
                                 hanging: listHanging,
                                 indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
@@ -375,7 +343,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
         }
 
         const { segmentId } = activeRange;
-
+        const tables = docDataModel.getBody()?.tables ?? [];
         const selections = textSelectionManagerService.getDocRanges() ?? [];
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
         const serializedSelections = selections.map(serializeDocRange);
@@ -413,6 +381,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
 
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {}, bullet } = paragraph;
+            const isInTable = hasParagraphInTable(paragraph, tables);
 
             textX.push({
                 t: TextXActionType.RETAIN,
@@ -422,7 +391,10 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
 
             if (bullet) {
                 const listType = bullet.listType as keyof typeof lists;
-                const maxLevel = lists[listType].nestingLevel.length - 1;
+                let maxLevel = lists[listType].nestingLevel.length - 1;
+                if (isInTable) {
+                    maxLevel = Math.min(maxLevel, 2);
+                }
 
                 textX.push({
                     t: TextXActionType.RETAIN,
@@ -518,7 +490,7 @@ export interface IToggleCheckListCommandParams {
 export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
     id: 'doc.command.toggle-check-list',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: (accessor, params) => {
         if (!params) {
             return false;
@@ -558,19 +530,10 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        const customLists = docDataModel.getSnapshot().lists ?? {};
-
-        const lists: Record<string, IListData> = {
-            ...PRESET_LIST_TYPE,
-            ...customLists,
-        };
-
         const { startIndex, paragraphStyle = {} } = currentParagraph;
         const listType = currentParagraph.bullet.listType === PresetListType.CHECK_LIST ?
             PresetListType.CHECK_LIST_CHECKED
             : PresetListType.CHECK_LIST;
-        const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
-        const bulletParagraphTextStyle = paragraphProperties.textStyle;
 
         textX.push({
             t: TextXActionType.RETAIN,
@@ -586,13 +549,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
                 paragraphs: [
                     {
                         ...currentParagraph,
-                        paragraphStyle: {
-                            ...paragraphStyle,
-                            textStyle: {
-                                ...paragraphStyle.textStyle,
-                                ...bulletParagraphTextStyle,
-                            },
-                        },
+                        paragraphStyle,
                         startIndex: 0,
                         bullet: {
                             ...currentParagraph.bullet,

@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Imdiv } from '../index';
-import { BooleanValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -32,6 +32,13 @@ describe('Test imdiv function', () => {
             const inumber2 = StringValueObject.create('10+24i');
             const result = testFunction.calculate(inumber1, inumber2);
             expect(result.getValue()).toBe('5+12i');
+        });
+
+        it('Value is large numbers', () => {
+            const inumber1 = NumberValueObject.create(25698432);
+            const inumber2 = StringValueObject.create('10+24i');
+            const result = testFunction.calculate(inumber1, inumber2);
+            expect(result.getValue()).toBe('380154.319526627-912370.366863905i');
         });
 
         it('Value is number string', () => {
@@ -92,6 +99,13 @@ describe('Test imdiv function', () => {
             const inumber2 = StringValueObject.create('10+24i');
             const result = testFunction.calculate(inumber1, inumber2);
             expect(result.getValue()).toBe(ErrorType.NAME);
+        });
+
+        it('Different suffixes', () => {
+            const inumber1 = StringValueObject.create('10+24i');
+            const inumber2 = StringValueObject.create('10+24j');
+            const result = testFunction.calculate(inumber1, inumber2);
+            expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
         it('Value is array', () => {

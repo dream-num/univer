@@ -51,11 +51,15 @@ export class Impower extends BaseFunction {
 
         const numberValue = +numberObject.getValue();
 
-        if (complex.getRealNum() === 0 && complex.getINum() === 0 && numberValue <= 0) {
-            return ErrorValueObject.create(ErrorType.NUM);
+        if (Number.isNaN(numberValue)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const result = complex.Power(numberValue);
+
+        if (complex.isError()) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
 
         if (typeof result === 'number' || isRealNum(result)) {
             return NumberValueObject.create(+result);

@@ -51,6 +51,11 @@ export class Imsub extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        // Cannot perform operations on complex numbers with different suffixes.
+        if (complex1.isDifferentSuffixes(complex2)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
         const result = complex1.Sub(complex2);
 
         if (typeof result === 'number' || isRealNum(result)) {

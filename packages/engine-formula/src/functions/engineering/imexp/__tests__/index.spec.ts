@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Imexp } from '../index';
-import { BooleanValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -31,6 +31,12 @@ describe('Test imexp function', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
             expect(result.getValue()).toBe('125.239031836704-79.6344818493324i');
+        });
+
+        it('Value is large numbers', () => {
+            const inumber = NumberValueObject.create(25698432);
+            const result = testFunction.calculate(inumber);
+            expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
         it('Value is number string', () => {

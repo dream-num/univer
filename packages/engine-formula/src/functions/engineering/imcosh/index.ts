@@ -47,6 +47,10 @@ export class Imcosh extends BaseFunction {
 
         const result = complex.Cosh();
 
+        if (complex.isError()) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
         if (typeof result === 'number' || isRealNum(result)) {
             return NumberValueObject.create(+result);
         }

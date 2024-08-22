@@ -47,6 +47,10 @@ export class Imexp extends BaseFunction {
 
         const result = complex.Exp();
 
+        if (complex.isError()) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
         if (typeof result === 'number' || isRealNum(result)) {
             return NumberValueObject.create(+result);
         }

@@ -51,6 +51,11 @@ export class Imdiv extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        // Cannot perform operations on complex numbers with different suffixes.
+        if (complex1.isDifferentSuffixes(complex2)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
         if (complex2.getRealNum() === 0 && complex2.getINum() === 0) {
             return ErrorValueObject.create(ErrorType.NUM);
         }

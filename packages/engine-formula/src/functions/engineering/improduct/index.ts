@@ -30,9 +30,13 @@ export class Improduct extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...variants: BaseValueObject[]): BaseValueObject {
-        let result: number | string = '';
+        let result: number | string | ErrorValueObject = '';
 
         for (let i = 0; i < variants.length; i++) {
+            if (result instanceof ErrorValueObject) {
+                return result;
+            }
+
             const variant = variants[i];
 
             if (variant.isArray()) {
@@ -40,33 +44,12 @@ export class Improduct extends BaseFunction {
                 let errorObject: Nullable<ErrorValueObject>;
 
                 (variant as ArrayValueObject).iterator((valueObject) => {
-                    if (valueObject?.isError()) {
+                    result = this._handleSingleObject(valueObject as BaseValueObject, result as number | string);
+
+                    if (result instanceof ErrorValueObject) {
                         isError = true;
-                        errorObject = valueObject as ErrorValueObject;
+                        errorObject = result;
                         return false;
-                    }
-
-                    if (valueObject?.isBoolean()) {
-                        isError = true;
-                        errorObject = ErrorValueObject.create(ErrorType.VALUE);
-                        return false;
-                    }
-
-                    const value = `${valueObject?.getValue()}`;
-
-                    if (typeof result !== 'number' && !result) {
-                        result = value;
-                    } else {
-                        const complex1: Complex = new Complex(result);
-                        const complex2 = new Complex(value);
-
-                        if (complex1.isError() || complex2.isError()) {
-                            isError = true;
-                            errorObject = ErrorValueObject.create(ErrorType.NUM);
-                            return false;
-                        }
-
-                        result = complex1.Product(complex2);
                     }
                 });
 
@@ -74,29 +57,12 @@ export class Improduct extends BaseFunction {
                     return errorObject as ErrorValueObject;
                 }
             } else {
-                if (variant.isError()) {
-                    return variant;
-                }
-
-                if (variant.isBoolean()) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                const value = `${variant.getValue()}`;
-
-                if (typeof result !== 'number' && !result) {
-                    result = value;
-                } else {
-                    const complex1: Complex = new Complex(result);
-                    const complex2 = new Complex(value);
-
-                    if (complex1.isError() || complex2.isError()) {
-                        return ErrorValueObject.create(ErrorType.NUM);
-                    }
-
-                    result = complex1.Product(complex2);
-                }
+                result = this._handleSingleObject(variant, result);
             }
+        }
+
+        if (result instanceof ErrorValueObject) {
+            return result;
         }
 
         if (typeof result === 'number' || isRealNum(result)) {
@@ -104,5 +70,45 @@ export class Improduct extends BaseFunction {
         }
 
         return StringValueObject.create(result);
+    }
+
+    private _handleSingleObject(variant: BaseValueObject, result: number | string): number | string | ErrorValueObject {
+        let _result = result;
+
+        if (variant.isError()) {
+            return variant as ErrorValueObject;
+        }
+
+        if (variant.isBoolean()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        const value = `${variant.getValue()}`;
+
+        if (typeof result !== 'number' && !result) {
+            const complex = new Complex(value);
+
+            if (complex.isError()) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            _result = complex.toString();
+        } else {
+            const complex1: Complex = new Complex(result);
+            const complex2 = new Complex(value);
+
+            if (complex1.isError() || complex2.isError()) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            // Cannot perform operations on complex numbers with different suffixes.
+            if (complex1.isDifferentSuffixes(complex2)) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            _result = complex1.Product(complex2);
+        }
+
+        return _result;
     }
 }

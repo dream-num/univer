@@ -34,6 +34,13 @@ describe('Test impower function', () => {
             expect(result.getValue()).toBe('-2035-828i');
         });
 
+        it('Value is large numbers', () => {
+            const inumber = NumberValueObject.create(25698432);
+            const number = NumberValueObject.create(895);
+            const result = testFunction.calculate(inumber, number);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+        });
+
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const number = NumberValueObject.create(3);
@@ -46,6 +53,13 @@ describe('Test impower function', () => {
             const number = NumberValueObject.create(3);
             const result = testFunction.calculate(inumber, number);
             expect(result.getValue()).toBe(ErrorType.NUM);
+        });
+
+        it('Number value is normal string', () => {
+            const inumber = StringValueObject.create('5+12i');
+            const number = StringValueObject.create('test');
+            const result = testFunction.calculate(inumber, number);
+            expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {

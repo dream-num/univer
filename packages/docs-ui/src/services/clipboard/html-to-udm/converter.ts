@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from '@univerjs/core';
-import { CustomRangeType, DataStreamTreeTokenType, skipParseTagNames, Tools } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType, generateRandomId, skipParseTagNames, Tools } from '@univerjs/core';
 
 import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '@univerjs/docs';
 import { extractNodeStyle } from './parse-node-style';
@@ -106,31 +106,8 @@ export class HtmlToUDMService {
                 }
 
                 // TODO: @JOCS, More characters need to be replaced, like `\b`
-                let text = node.nodeValue?.replace(/[\r\n]/g, '');
+                const text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
-
-                if (parent && parent.nodeType === Node.ELEMENT_NODE) {
-                    if ((parent as Element).tagName.toUpperCase() === 'A') {
-                        const id = Tools.generateRandomId();
-                        text = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-                        body.customRanges = [
-                            ...(body.customRanges ?? []),
-                            {
-                                startIndex: body.dataStream.length,
-                                endIndex: body.dataStream.length + text.length - 1,
-                                rangeId: id,
-                                rangeType: CustomRangeType.HYPERLINK,
-                                properties: {
-                                    url: (parent as HTMLAnchorElement).href,
-                                },
-                            },
-                        ];
-                        // body.payloads = {
-                        //     ...body.payloads,
-                        //     [id]: (parent as HTMLAnchorElement).href,
-                        // };
-                    }
-                }
 
                 if (parent && this._styleCache.has(parent)) {
                     style = this._styleCache.get(parent);
@@ -148,6 +125,12 @@ export class HtmlToUDMService {
             } else if (skipParseTagNames.includes(node.nodeName.toLowerCase())) {
                 continue;
             } else if (node.nodeType === Node.ELEMENT_NODE) {
+                const element = node as HTMLElement;
+                const start = body.dataStream.length;
+                if (element.tagName.toUpperCase() === 'A') {
+                    body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_START;
+                }
+
                 const parentStyles = parent ? this._styleCache.get(parent) : {};
                 const styleRule = this._styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
                 const nodeStyles = styleRule
@@ -170,6 +153,18 @@ export class HtmlToUDMService {
 
                 if (afterProcessRule) {
                     afterProcessRule.handler(doc, node as HTMLElement);
+                }
+
+                if (element.tagName.toUpperCase() === 'A') {
+                    body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_END;
+                    body.customRanges = body.customRanges ?? [];
+                    body.customRanges.push({
+                        startIndex: start,
+                        endIndex: body.dataStream.length - 1,
+                        rangeId: element.dataset.rangeid ?? generateRandomId(),
+                        rangeType: CustomRangeType.HYPERLINK,
+                        properties: { url: (element as HTMLAnchorElement).href },
+                    });
                 }
             }
         }

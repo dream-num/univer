@@ -341,6 +341,9 @@ export interface ITextRun {
     // tab?: BooleanNumber; // if tab，default is false
 }
 
+/**
+ * Block element, link like, disabled to self nested
+ */
 export interface ICustomRange<T extends Record<string, any> = Record<string, any>> {
     startIndex: number;
     endIndex: number;

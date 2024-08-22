@@ -158,7 +158,7 @@ export class Offset extends BaseFunction {
     }
 
     private _handleSingleObject(reference: BaseReferenceObject, rowsValue: BaseValueObject, columnsValue: BaseValueObject, heightValue: BaseValueObject, widthValue: BaseValueObject, isReportError = false) {
-        const { startRow: referenceStartRow, startColumn: referenceStartColumn } = reference.getRangeData();
+        const { startRow: referenceStartRow, startColumn: referenceStartColumn } = reference.getRangePosition();
 
         const rowOffset = this.getIndexNumValue(rowsValue);
         const columnOffset = this.getIndexNumValue(columnsValue);

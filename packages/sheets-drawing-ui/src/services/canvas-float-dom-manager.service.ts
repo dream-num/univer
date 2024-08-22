@@ -134,14 +134,8 @@ const calcPosition = (
     skeleton: SpreadsheetSkeleton,
     worksheet: Worksheet
 ): IFloatDomLayout => {
-    const { scene, engine } = currentRender;
+    const { scene } = currentRender;
     const { left, top, width, height, angle } = targetObject;
-    const canvasElement = engine.getCanvasElement();
-    const canvasClientRect = canvasElement.getBoundingClientRect();
-    const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
-    const { top: topOffset, left: leftOffset, width: domWidth } = canvasClientRect; // real width affected by scale
-    const scaleAdjust = domWidth / widthOfCanvas;
-
     const bound: IBoundRectNoAngle = {
         left,
         right: left + width,
@@ -150,14 +144,15 @@ const calcPosition = (
     };
 
     const offsetBound = transformBound2DOMBound(bound, scene, skeleton, worksheet);
+
     return {
-        startX: offsetBound.left * scaleAdjust + leftOffset,
-        endX: offsetBound.right * scaleAdjust + leftOffset,
-        startY: offsetBound.top * scaleAdjust + topOffset,
-        endY: offsetBound.bottom * scaleAdjust + topOffset,
+        startX: offsetBound.left,
+        endX: offsetBound.right,
+        startY: offsetBound.top,
+        endY: offsetBound.bottom,
         rotate: angle,
-        width: width * scaleAdjust,
-        height: height * scaleAdjust,
+        width,
+        height,
         absolute: offsetBound.absolute,
     };
 };
@@ -322,6 +317,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         },
                         props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
                         data,
+                        unitId,
                     });
 
                     const listener = rect.onTransformChange$.subscribeEvent(() => {

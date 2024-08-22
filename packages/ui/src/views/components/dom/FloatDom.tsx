@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import React, { memo } from 'react';
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
@@ -27,7 +27,6 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const componentManager = useDependency(ComponentManager);
     const position = useObservable(layer.position$);
     const Component = typeof layer.componentKey === 'string' ? componentManager.get(layer.componentKey) : layer.componentKey;
-
     const layerProps: any = {
         data: layer.data,
         ...layer.props,
@@ -77,19 +76,17 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
         : null;
 });
 
-export const FloatDom = () => {
+export const FloatDom = ({ unitId }: { unitId?: string }) => {
+    const instanceService = useDependency(IUniverInstanceService);
     const domLayerService = useDependency(CanvasFloatDomService);
     const layers = useObservable(domLayerService.domLayers$);
+    const currentUnitId = unitId || instanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
 
-    return (
-        <>
-            {layers?.map((layer) => (
-                <FloatDomSingle
-                    id={layer[0]}
-                    layer={layer[1]}
-                    key={layer[0]}
-                />
-            ))}
-        </>
-    );
+    return layers?.filter((layer) => layer[1].unitId === currentUnitId)?.map((layer) => (
+        <FloatDomSingle
+            id={layer[0]}
+            layer={layer[1]}
+            key={layer[0]}
+        />
+    ));
 };

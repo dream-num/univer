@@ -15,18 +15,19 @@
  */
 
 import type { Documents, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, getParagraphByGlyph, GlyphType, PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, Vector2 } from '@univerjs/engine-render';
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, PresetListType } from '@univerjs/core';
-import { DocSkeletonManagerService, ToggleCheckListCommand, VIEWPORT_KEY } from '@univerjs/docs';
-import { DocHoverManagerService } from '../../services/doc-hover-manager.service';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { DocSkeletonManagerService, TextSelectionManagerService, ToggleCheckListCommand } from '@univerjs/docs';
+import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 export class DocChecklistRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocHoverManagerService) private readonly _docHoverManagerService: DocHoverManagerService
+        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -35,49 +36,17 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
     }
 
     private _initPointerDownObserver() {
-        this.disposeWithMe(
-            this._context.mainComponent!.onPointerDown$.subscribeEvent((evt) => {
-                const { offsetX, offsetY } = evt;
-
-                const documentComponent = this._context.mainComponent as Documents;
-                const coord = this._getTransformCoordForDocumentOffset(
-                    documentComponent,
-                    this._context.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!,
-                    offsetX,
-                    offsetY
-                );
-                if (!coord) {
-                    return;
-                }
-                const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop } = documentComponent.getOffsetConfig();
-                const skeleton = this._docSkeletonManagerService.getSkeleton();
-                const node = skeleton.findNodeByCoord(
-                    coord,
-                    pageLayoutType,
-                    pageMarginLeft,
-                    pageMarginTop
-                );
-                if (!node) {
-                    return;
-                }
-                const paragraph = getParagraphByGlyph(node.node, this._context.unit.getBody());
-                if (paragraph && paragraph.bullet && node.node.glyphType === GlyphType.LIST) {
-                    if (
-                        paragraph.bullet.listType === PresetListType.CHECK_LIST ||
-                        paragraph.bullet.listType === PresetListType.CHECK_LIST_CHECKED
-                    ) {
-                        this._commandService.executeCommand(ToggleCheckListCommand.id, {
-                            index: paragraph.startIndex,
-                        });
-                    }
-                }
-            })
-        );
+        this._docEventManagerService.clickBullets$.subscribe((paragraph) => {
+            this._commandService.executeCommand(ToggleCheckListCommand.id, {
+                index: paragraph.paragraph.startIndex,
+                segmentId: paragraph.segmentId,
+            });
+        });
     }
 
     private _initHoverCursor() {
         this.disposeWithMe(
-            this._docHoverManagerService.bullet$.subscribe((paragraph) => {
+            this._docEventManagerService.hoverBullet$.subscribe((paragraph) => {
                 if (paragraph) {
                     this._context.mainComponent!.setCursor(CURSOR_TYPE.POINTER);
                 } else {

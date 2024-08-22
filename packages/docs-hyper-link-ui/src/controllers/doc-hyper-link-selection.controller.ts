@@ -17,8 +17,8 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { SetTextSelectionsOperation } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
 @OnLifecycle(LifecycleStages.Ready, DocHyperLinkSelectionController)
@@ -39,30 +39,25 @@ export class DocHyperLinkSelectionController extends Disposable {
             this._commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id === SetTextSelectionsOperation.id) {
                     const params = commandInfo.params as ISetTextSelectionsOperationParams;
-                    const { unitId, ranges } = params;
-                    const render = this._renderMangerService.getRenderById(unitId);
-                    const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
-                    const editArea = skeleton?.getViewModel().getEditArea();
-                    if (editArea !== DocumentEditArea.BODY) {
-                        this._docHyperLinkService.hideInfoPopup();
-                        this._docHyperLinkService.hideEditPopup();
-                        return;
-                    }
+                    const { unitId, ranges, segmentId } = params;
 
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
                     const primary = ranges[0];
                     if (primary && doc) {
-                        const { startOffset, endOffset, collapsed } = primary;
-                        const customRanges = doc.getBody()?.customRanges;
-                        if (collapsed) { // cursor
+                        const { startOffset, endOffset, collapsed, segmentPage } = primary;
+                        const customRanges = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges;
+                        if (collapsed) {
+                            // cursor
                             const index = customRanges?.findIndex((value) => (value.startIndex) < startOffset && value.endIndex > endOffset - 1) ?? -1;
                             if (index > -1) {
                                 const customRange = customRanges![index];
-                                this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId, rangeIndex: index });
+                                this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId, segmentId, segmentPage });
                                 return;
                             }
-                        } else { // range
-                            if (customRanges?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1))) {
+                        } else {
+                            // range
+                            const range = customRanges?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
+                            if (range) {
                                 return;
                             }
                         }

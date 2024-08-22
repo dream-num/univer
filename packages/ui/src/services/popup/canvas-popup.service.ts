@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable, Tools } from '@univerjs/core';
 import type { IRectPopupProps } from '@univerjs/design';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
@@ -21,7 +22,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IPopup extends Pick<IRectPopupProps, 'closeOnSelfTarget' | 'direction' | 'excludeOutside' | 'onClickOutside' > {
-    anchorRect: IBoundRectNoAngle;
+    anchorRect: Nullable<IBoundRectNoAngle>;
     anchorRect$: Observable<IBoundRectNoAngle>;
     excludeRects?: IBoundRectNoAngle[];
     excludeRects$?: Observable<IBoundRectNoAngle[]>;

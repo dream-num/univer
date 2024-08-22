@@ -122,7 +122,7 @@ export class Averageif extends BaseFunction {
             return averageRange;
         }
 
-        const { startRow, startColumn } = averageRange.getRangeData();
+        const { startRow, startColumn } = averageRange.getRangePosition();
         const rangeData = {
             startRow,
             startColumn,

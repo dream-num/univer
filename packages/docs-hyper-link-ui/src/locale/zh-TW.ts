@@ -24,7 +24,7 @@ const locale: typeof zhCN = {
             title: '連結',
             address: '連結',
             label: '文本',
-            LabelError: '请输入链接文本',
+            labelError: '请输入链接文本',
             placeholder: '請輸入合法的連結',
             addressError: '請輸入合法的連結',
         },

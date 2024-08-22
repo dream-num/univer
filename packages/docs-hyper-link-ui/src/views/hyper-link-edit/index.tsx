@@ -127,7 +127,7 @@ export const DocHyperLinkEdit = () => {
                     ? (
                         <FormLayout
                             label={localeService.t('docLink.edit.label')}
-                            error={showError && !isLegal ? localeService.t('docLink.edit.labelError') : ''}
+                            error={showError && !label ? localeService.t('docLink.edit.labelError') : ''}
                         >
                             <Input
                                 value={label}

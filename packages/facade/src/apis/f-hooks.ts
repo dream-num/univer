@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { Inject, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import { Inject, Injector, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
 import { filter } from 'rxjs';
+import { FUnitHooks } from './hooks/f-unit-hooks';
 
 export class FHooks {
     constructor(
+        @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
     ) {
         // empty
@@ -60,4 +62,32 @@ export class FHooks {
     onSteady(callback: () => void): IDisposable {
         return toDisposable(this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Steady)).subscribe(callback));
     }
+
+   /**
+    * The beforeCreateUnit event is fired before a unit is created.
+    * @param callback Callback function that will be called when the event is fired, return false to cancel the creation of the unit
+    * @returns A disposable object that can be used to unsubscribe from the event
+    */
+    beforeCreateUnit = FUnitHooks.beforeCreateUnit.bind(this);
+
+    /**
+     * The afterCreateUnit event is fired after a unit is created.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    afterCreateUnit = FUnitHooks.afterCreateUnit.bind(this);
+
+   /**
+    * The beforeDisposeUnit event is fired before a unit is disposed.
+    * @param callback Callback function that will be called when the event is fired, return false to cancel the disposal of the unit
+    * @returns A disposable object that can be used to unsubscribe from the event
+    */
+    beforeDisposeUnit = FUnitHooks.beforeDisposeUnit.bind(this);
+
+    /**
+     * The afterDisposeUnit event is fired after a unit is disposed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    afterDisposeUnit = FUnitHooks.afterDisposeUnit.bind(this);
 }

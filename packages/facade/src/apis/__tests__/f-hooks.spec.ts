@@ -15,11 +15,11 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { LifecycleService, LifecycleStages } from '@univerjs/core';
-import type { Injector } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
+import type { Injector, Univer } from '@univerjs/core';
 
 import type { FUniver } from '../facade';
-import { createFacadeTestBed } from './create-test-bed';
+import { createFacadeTestBed, createUnitTestBed } from './create-test-bed';
 
 describe('Test FUniver', () => {
     let get: Injector['get'];
@@ -48,5 +48,88 @@ describe('Test FUniver', () => {
 
         onRenderedDisposable.dispose();
         onSteadyDisposable.dispose();
+    });
+});
+
+describe('Test Unit Hooks', () => {
+    let get: Injector['get'];
+    let univerAPI: FUniver;
+    let univer: Univer;
+
+    beforeEach(() => {
+        const testBed = createUnitTestBed();
+        get = testBed.get;
+        univerAPI = testBed.univerAPI;
+        univer = testBed.univer;
+    });
+
+    it('Hooks Create Unit', () => {
+        const randomUnitId = 'randomUnitId';
+        let unitId;
+        let unitType;
+        univerAPI.getHooks().afterCreateUnit((unit) => {
+            unitId = unit.getUnitId();
+            unitType = unit.getType();
+        });
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: randomUnitId,
+        });
+        expect(unitId).toBe(randomUnitId);
+        expect(unitType).toBe(UniverInstanceType.UNIVER_SHEET);
+    });
+
+    it('Hooks Deny Create Unit', () => {
+        const disposeObj = univerAPI.getHooks().beforeCreateUnit(() => false);
+        try {
+            univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+                id: 'randomUnitId',
+            });
+        } catch (e) {
+            expect(e).toBeInstanceOf(Error);
+            expect((e as Error).message).toBe('[UniverInstanceService]: cannot add unit with user callback.');
+        }
+
+        disposeObj.dispose();
+
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: 'randomUnitId',
+        });
+    });
+
+    it('Hooks dispose Unit', () => {
+        const randomUnitId = 'randomUnitId';
+        let unitId;
+        let unitType;
+        const disposeCallback = vi.fn();
+        const beforeCallbackDispose = univerAPI.getHooks().beforeDisposeUnit((unit) => {
+            unitId = unit.getUnitId();
+            unitType = unit.getType();
+
+            return false;
+        });
+        univerAPI.getHooks().afterCreateUnit(disposeCallback);
+
+        const unit = univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+            id: randomUnitId,
+        });
+
+        // TODO: not calling dispose() method
+        // unit.dispose();
+
+        const _univerInstanceService = get(IUniverInstanceService);
+        _univerInstanceService.disposeUnit(unit.getUnitId());
+
+        expect(unitId).toBe(randomUnitId);
+        expect(unitType).toBe(UniverInstanceType.UNIVER_SHEET);
+
+        // @ts-expect-error
+        expect(unit._disposed).toBe(false);
+
+        beforeCallbackDispose.dispose();
+        unit.dispose();
+        // @ts-expect-error
+        expect(unit._disposed).toBe(true);
+
+        expect(disposeCallback).toBeCalledTimes(1);
     });
 });

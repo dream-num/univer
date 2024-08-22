@@ -329,6 +329,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             for (const headerId in headers) {
                 const header = headers[headerId];
                 this.headerModelMap.set(headerId, new DocumentDataModel(header));
+                this.headerModelMap.get(headerId)!.updateDocumentId(this.getUnitId());
             }
         }
 
@@ -336,6 +337,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             for (const footerId in footers) {
                 const footer = footers[footerId];
                 this.footerModelMap.set(footerId, new DocumentDataModel(footer));
+                this.footerModelMap.get(footerId)!.updateDocumentId(this.getUnitId());
             }
         }
     }

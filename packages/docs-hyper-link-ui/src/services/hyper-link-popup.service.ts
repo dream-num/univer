@@ -25,7 +25,7 @@ import { DocLinkPopup } from '../views/hyper-link-popup';
 /**
  * A link will have a placeholder, and when it is a link at the beginning, the placeholder does not have a width or height, causing an evaluation error
  */
-const SKIT_PLACEHOLDER = 2;
+const SKIT_PLACEHOLDER = 0;
 
 export interface ILinkInfo {
     unitId: string;

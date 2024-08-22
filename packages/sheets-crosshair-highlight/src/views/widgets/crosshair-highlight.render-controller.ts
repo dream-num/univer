@@ -15,13 +15,13 @@
  */
 
 import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ColorKit, Disposable, Inject, RANGE_TYPE } from '@univerjs/core';
+import { ColorKit, Disposable, IContextService, Inject, RANGE_TYPE } from '@univerjs/core';
 
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { SheetsSelectionsService } from '@univerjs/sheets';
-import { combineLatest, merge, tap } from 'rxjs';
+import { DISABLE_NORMAL_SELECTIONS, IRefSelectionsService, SheetsSelectionsService } from '@univerjs/sheets';
+import { combineLatest, merge, startWith, tap } from 'rxjs';
 import { SHEETS_CROSSHAIR_HIGHLIGHT_Z_INDEX } from '../../const';
 import { CrossHairRangeCollection } from '../../util';
 import { SheetsCrosshairHighlightService } from '../../services/crosshair.service';
@@ -36,14 +36,16 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService,
-        @Inject(SheetsCrosshairHighlightService) private readonly _sheetsCrosshairHighlightService: SheetsCrosshairHighlightService
+        @Inject(SheetsCrosshairHighlightService) private readonly _sheetsCrosshairHighlightService: SheetsCrosshairHighlightService,
+        @Inject(IContextService) private readonly _contextService: IContextService,
+        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService
     ) {
         super();
 
         this._initRenderListener();
     }
 
-    private _transformSelection(selectionData: Nullable<ISelectionWithStyle[]>, sheet: Worksheet) {
+    private _transformSelection(selectionData: Nullable<ISelectionWithStyle[]>, sheet: Worksheet): void {
         if (!selectionData) {
             return;
         }
@@ -54,17 +56,20 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         }
     }
 
-    private _initRenderListener() {
+    private _initRenderListener(): void {
         const workbook = this._context.unit;
         this.disposeWithMe(combineLatest([
+            this._contextService.subscribeContextValue$(DISABLE_NORMAL_SELECTIONS).pipe(startWith(false)),
             this._sheetSkeletonManagerService.currentSkeleton$,
             this._sheetsCrosshairHighlightService.enabled$,
             this._sheetsCrosshairHighlightService.color$.pipe(tap((color) => (this._color = color))),
             merge(this._sheetsSelectionsService.selectionMoveStart$, this._sheetsSelectionsService.selectionMoving$, this._sheetsSelectionsService.selectionMoveEnd$),
-        ]).subscribe(([_, enabled, _color, selections]) => {
+            merge(this._refSelectionsService.selectionMoveStart$, this._refSelectionsService.selectionMoving$, this._refSelectionsService.selectionMoveEnd$),
+        ]).subscribe(([normalSelDisabled, _, enabled, _color, normalSelections, refSelection]) => {
             this._clear();
 
             if (!enabled) return;
+            const selections = normalSelDisabled ? refSelection : normalSelections;
 
             this._rangeCollection.reset();
             this._transformSelection(selections, workbook.getActiveSheet());
@@ -72,7 +77,7 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         }));
     }
 
-    addSelection(range: IRange, sheet: Worksheet) {
+    addSelection(range: IRange, sheet: Worksheet): void {
         if (range.rangeType === RANGE_TYPE.COLUMN || range.rangeType === RANGE_TYPE.ROW || range.rangeType === RANGE_TYPE.ALL) {
             return;
         }
@@ -112,14 +117,14 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         }
     }
 
-    private _clear() {
+    private _clear(): void {
         this._shapes.forEach((shape) => {
             shape.dispose();
         });
         this._shapes = [];
     }
 
-    private _addShapes(range: IRange, index: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
+    private _addShapes(range: IRange, index: number, scene: Scene, skeleton: SpreadsheetSkeleton): void {
         const { startRow, endRow, startColumn, endColumn } = range;
         const startPosition = getCoordByCell(startRow, startColumn, scene, skeleton);
         const endPosition = getCoordByCell(endRow, endColumn, scene, skeleton);

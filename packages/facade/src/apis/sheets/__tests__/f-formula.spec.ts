@@ -17,9 +17,9 @@
 import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
-import { beforeEach, describe, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 import type { FUniver } from '../../facade';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
@@ -55,6 +55,8 @@ describe('Test FFormula', () => {
         commandService.registerCommand(SetFormulaCalculationStartMutation);
         commandService.registerCommand(SetFormulaCalculationStopMutation);
         commandService.registerCommand(SetFormulaCalculationNotificationMutation);
+        commandService.registerCommand(SetFormulaCalculationResultMutation);
+        commandService.registerCommand(SetArrayFormulaDataMutation);
 
         getValueByPosition = (
             startRow: number,
@@ -85,14 +87,19 @@ describe('Test FFormula', () => {
     it('FFormula executeCalculation', () => {
         const formula = univerAPI.getFormula();
 
-        formula.calculationStart(() => {
-            // console.log('calculation start');
+        formula.calculationStart((forceCalculate) => {
+            expect(forceCalculate).toBe(true);
         });
 
-        formula.calculationEnd((allRuntimeData) => {
-            // console.log('calculation end', allRuntimeData);
+        formula.calculationProcessing((stageInfo) => {
+            expect(stageInfo).toBeDefined();
+        });
+
+        formula.calculationEnd((functionsExecutedState) => {
+            expect(functionsExecutedState).toBeDefined();
         });
 
         formula.executeCalculation();
+        formula.stopCalculation();
     });
 });

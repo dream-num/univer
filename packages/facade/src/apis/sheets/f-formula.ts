@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import { ICommandService, Inject, toDisposable } from '@univerjs/core';
-import type { IAllRuntimeData, IExecutionInProgressParams } from '@univerjs/engine-formula';
-import { CalculateFormulaService, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import type { ICommandInfo, IDisposable } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
+import type { FormulaExecutedStateType, IExecutionInProgressParams, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 
 /**
  * This interface class provides methods to modify the behavior of the operation formula.
  */
 export class FFormula {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(CalculateFormulaService) private readonly _calculateFormulaService: CalculateFormulaService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
-        // empty
     }
 
     /**
@@ -56,39 +54,46 @@ export class FFormula {
     /**
      * Listening calculation starts.
      */
-    calculationStart(callback: () => void): IDisposable {
-        const subscribe = this._calculateFormulaService.executionStartListener$.subscribe(() => {
-            callback();
-        });
-
-        return toDisposable(() => {
-            subscribe.unsubscribe();
+    calculationStart(callback: (forceCalculation: boolean) => void): IDisposable {
+        return this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id === SetFormulaCalculationStartMutation.id) {
+                const params = command.params as ISetFormulaCalculationStartMutation;
+                callback(params.forceCalculation);
+            }
         });
     }
 
     /**
      * Listening calculation ends.
      */
-    calculationEnd(callback: (allRuntimeData: IAllRuntimeData) => void): IDisposable {
-        const subscribe = this._calculateFormulaService.executionCompleteListener$.subscribe((allRuntimeData) => {
-            callback(allRuntimeData);
-        });
+    calculationEnd(callback: (functionsExecutedState: FormulaExecutedStateType) => void): IDisposable {
+        return this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id !== SetFormulaCalculationNotificationMutation.id) {
+                return;
+            }
 
-        return toDisposable(() => {
-            subscribe.unsubscribe();
+            const params = command.params as ISetFormulaCalculationNotificationMutation;
+
+            if (params.functionsExecutedState !== undefined) {
+                callback(params.functionsExecutedState);
+            }
         });
     }
 
     /**
      * Listening calculation processing.
      */
-    calculationProcessing(callback: (params: IExecutionInProgressParams) => void): IDisposable {
-        const subscribe = this._calculateFormulaService.executionInProgressListener$.subscribe((params) => {
-            callback(params);
-        });
+    calculationProcessing(callback: (stageInfo: IExecutionInProgressParams) => void): IDisposable {
+        return this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id !== SetFormulaCalculationNotificationMutation.id) {
+                return;
+            }
 
-        return toDisposable(() => {
-            subscribe.unsubscribe();
+            const params = command.params as ISetFormulaCalculationNotificationMutation;
+
+            if (params.stageInfo !== undefined) {
+                callback(params.stageInfo);
+            }
         });
     }
 }

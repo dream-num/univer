@@ -50,7 +50,8 @@ export class Len extends BaseFunction {
 
         if (text.isNumber()) {
             const numberValue = text.getValue() as number;
-            const numberValueString = stripErrorMargin(numberValue).toString();
+            // Specify Number.EPSILON to not discard necessary digits in the case of non-precision errors, for example, the length of 1/3 is 17
+            const numberValueString = stripErrorMargin(numberValue, 12, Number.EPSILON).toString();
             return NumberValueObject.create(numberValueString.length);
         }
 

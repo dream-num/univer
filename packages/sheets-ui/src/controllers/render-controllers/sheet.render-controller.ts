@@ -73,10 +73,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
         const sheetId = worksheet.getSheetId();
         this._sheetSkeletonManagerService.setCurrent({ sheetId });
-        const should = workbook.getShouldRenderLoopImmediately();
-        if (should) {
-            engine.runRenderLoop(() => scene.render());
-        }
+        engine.runRenderLoop(() => scene.render());
     }
 
     private _addComponent(workbook: Workbook) {

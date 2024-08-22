@@ -36,10 +36,11 @@ export class ThemeService extends Disposable {
         this.disposeWithMe(toDisposable(() => this._currentTheme$.complete()));
     }
 
-    getCurrentTheme(): Nullable<IStyleSheet> {
+    getCurrentTheme(): IStyleSheet {
         if (!this._currentTheme) {
             throw new Error('[ThemeService]: current theme is not set!');
         }
+
         return this._currentTheme;
     }
 

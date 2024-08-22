@@ -43,7 +43,9 @@ export const testSnapshot = (): ISnapshot => ({
                 name: 'Sheet 1',
                 rowCount: 1000,
                 columnCount: 20,
-                originalMeta: textEncoder.encode(b64DecodeUnicode('eyJmcmVlemUiOiB7InhTcGxpdCI6IDAsICJ5U3BsaXQiOiAwLCAic3RhcnRSb3ciOiAtMSwgInN0YXJ0Q29sdW1uIjogLTF9LCAiaGlkZGVuIjogMCwgInJvd0RhdGEiOiB7IjAiOiB7ImgiOiAyNywgImFoIjogMjcsICJoZCI6IDB9fSwgInRhYkNvbG9yIjogInJlZCIsICJtZXJnZURhdGEiOiBbXSwgInJvd0hlYWRlciI6IHsid2lkdGgiOiA0NiwgImhpZGRlbiI6IDB9LCAic2Nyb2xsVG9wIjogMjAwLCAiem9vbVJhdGlvIjogMSwgImNvbHVtbkRhdGEiOiB7fSwgInNjcm9sbExlZnQiOiAxMDAsICJzZWxlY3Rpb25zIjogWyJBMSJdLCAicmlnaHRUb0xlZnQiOiAwLCAiY29sdW1uSGVhZGVyIjogeyJoZWlnaHQiOiAyMCwgImhpZGRlbiI6IDB9LCAic2hvd0dyaWRsaW5lcyI6IDEsICJkZWZhdWx0Um93SGVpZ2h0IjogMjcsICJkZWZhdWx0Q29sdW1uV2lkdGgiOiA5M30=')),
+                originalMeta: textEncoder.encode(b64DecodeUnicode(
+                    'eyJmcmVlemUiOiB7InhTcGxpdCI6IDAsICJ5U3BsaXQiOiAwLCAic3RhcnRSb3ciOiAtMSwgInN0YXJ0Q29sdW1uIjogLTF9LCAiaGlkZGVuIjogMCwgInJvd0RhdGEiOiB7IjAiOiB7ImgiOiAyNywgImFoIjogMjcsICJoZCI6IDB9fSwgInRhYkNvbG9yIjogInJlZCIsICJtZXJnZURhdGEiOiBbXSwgInJvd0hlYWRlciI6IHsid2lkdGgiOiA0NiwgImhpZGRlbiI6IDB9LCAic2Nyb2xsVG9wIjogMjAwLCAiem9vbVJhdGlvIjogMSwgImNvbHVtbkRhdGEiOiB7fSwgInNjcm9sbExlZnQiOiAxMDAsICJyaWdodFRvTGVmdCI6IDAsICJjb2x1bW5IZWFkZXIiOiB7ImhlaWdodCI6IDIwLCAiaGlkZGVuIjogMH0sICJzaG93R3JpZGxpbmVzIjogMSwgImRlZmF1bHRSb3dIZWlnaHQiOiAyNywgImRlZmF1bHRDb2x1bW5XaWR0aCI6IDkzfQ=='
+                )),
             },
         },
         resources: [],

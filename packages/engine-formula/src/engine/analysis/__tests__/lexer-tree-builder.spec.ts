@@ -196,6 +196,16 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('=(TODAY())') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"TODAY","st":1,"ed":5,"children":[]}]}');
         });
+
+        it('array parameter number', () => {
+            const node = lexerTreeBuilder.treeBuilder('={-700000,120000,150000,180000,210000,260000}') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["{-700000,120000,150000,180000,210000,260000}"]}');
+        });
+
+        it('array parameter string', () => {
+            const node = lexerTreeBuilder.treeBuilder('={"2007/1/1", "2008/1/1"}') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["{\\"2007/1/1\\", \\"2008/1/1\\"}"]}');
+        });
     });
 
     describe('check error', () => {

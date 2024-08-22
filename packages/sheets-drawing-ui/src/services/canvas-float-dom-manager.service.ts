@@ -19,7 +19,7 @@ import { Disposable, DisposableCollection, DrawingTypeEnum, generateRandomId, IC
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, pxToNum, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';

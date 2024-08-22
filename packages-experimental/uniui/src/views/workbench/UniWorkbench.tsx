@@ -283,8 +283,8 @@ function UnitNode({ data }: IUnitNodeProps) {
     const { unitId } = data;
     const title = useUnitTitle(unitId);
     const focused = useUnitFocused(unitId);
+    const unitComponents = useComponentsOfPart(BuiltInUIPart.UNIT);
 
-    const instanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
     const commandService = useDependency(ICommandService);
 
@@ -316,6 +316,7 @@ function UnitNode({ data }: IUnitNodeProps) {
             <div className={styles.uniNodeTitle}>
                 {title}
             </div>
+            <ComponentContainer key="unit" components={unitComponents} sharedProps={{ unitId }} />
         </div>
 
     );

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../lib/types/shared';
 import { Range } from '../sheets/range';
 import type { IRange } from '../sheets/typedef';
 import type { ObjectMatrix } from './object-matrix';
+import type { Nullable } from './types';
 
 function maximalRectangle<T>(matrix: T[][], match: (val: T) => boolean) {
     if (matrix.length === 0 || matrix[0].length === 0) return null;

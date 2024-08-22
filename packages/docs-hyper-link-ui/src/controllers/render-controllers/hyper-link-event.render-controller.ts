@@ -55,7 +55,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
                 const activeRanges = this._textSelectionManagerService.getCurrentTextRanges();
                 const currentSegmentId = activeRanges?.[0].segmentId;
-                if (link?.segmentId !== currentSegmentId) {
+                if ((link?.segmentId ?? '') !== currentSegmentId) {
                     this._hideInfoPopup();
                     return;
                 }

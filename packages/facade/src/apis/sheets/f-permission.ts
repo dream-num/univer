@@ -16,7 +16,7 @@
 
 import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 
 export class FPermission {
@@ -74,13 +74,13 @@ export class FPermission {
         if (hasRangeProtection) {
             throw new Error('sheet protection cannot intersect with range protection');
         }
-        const permissionId = await this._authzIoService.create({ objectType: 2 });
+        const permissionId = await this._authzIoService.create({ objectType: UnitObject.Worksheet });
         const res = this._commandService.syncExecuteCommand(AddWorksheetProtectionMutation.id, {
             unitId,
             subUnitId,
             rule: {
                 permissionId,
-                unitType: 2,
+                unitType: UnitObject.Worksheet,
                 unitId,
                 subUnitId,
             },
@@ -133,6 +133,14 @@ export class FPermission {
             } else {
                 permissionId = hasBasePermission.permissionId;
             }
+        } else {
+            const rule = this._worksheetProtectionPointRuleModel.getRule(unitId, subUnitId);
+            if (!rule) {
+                permissionId = await this._authzIoService.create({ objectType: UnitObject.Worksheet });
+                this._commandService.executeCommand(SetWorksheetPermissionPointsMutation.id, { unitId, subUnitId, permissionId });
+            } else {
+                permissionId = rule.permissionId;
+            }
         }
 
         const instance = new FPointClass(unitId, subUnitId);
@@ -157,7 +165,7 @@ export class FPermission {
         ruleId: string;
     } | undefined> {
         // The permission ID generation here only provides the most basic permission type. If need collaborators later, need to expand this
-        const permissionId = await this._authzIoService.create({ objectType: 3 });
+        const permissionId = await this._authzIoService.create({ objectType: UnitObject.SelectRange });
         const ruleId = `ruleId_${generateRandomId(6)}`;
         const worksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
         if (worksheetProtection) {
@@ -179,7 +187,7 @@ export class FPermission {
             subUnitId,
             rules: [{
                 permissionId,
-                unitType: 3,
+                unitType: UnitObject.SelectRange,
                 unitId,
                 subUnitId,
                 ranges,

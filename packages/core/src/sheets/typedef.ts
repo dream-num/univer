@@ -128,10 +128,6 @@ export interface IWorksheetData {
     };
 
     showGridlines: BooleanNumber;
-
-    /** @deprecated */
-    selections: IRangeType[];
-
     rightToLeft: BooleanNumber;
 }
 

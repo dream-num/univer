@@ -76,7 +76,6 @@ export function mergeWorksheetSnapshotWithDefault(snapshot: Partial<IWorksheetDa
             height: DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT,
             hidden: BooleanNumber.FALSE,
         },
-        selections: ['A1'],
         rightToLeft: BooleanNumber.FALSE,
     };
 

@@ -108,9 +108,6 @@ export const testWorkbookData = (): IWorkbookData => ({
             zoomRatio: 1,
             columnData: {},
             scrollLeft: 100,
-            selections: [
-                'A1',
-            ],
             rightToLeft: 0,
             columnHeader: {
                 height: 20,

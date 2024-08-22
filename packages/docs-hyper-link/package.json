@@ -1,5 +1,5 @@
 {
-    "name": "@univerjs/docs-hyper-link-ui",
+    "name": "@univerjs/docs-hyper-link",
     "version": "0.2.8",
     "private": false,
     "description": "Univer thread comment plugin",
@@ -61,7 +61,6 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/doc-hyper-link": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
@@ -76,7 +75,6 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/doc-hyper-link": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",

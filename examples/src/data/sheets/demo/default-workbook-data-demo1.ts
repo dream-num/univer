@@ -1827,7 +1827,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
-            selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
         },
     },

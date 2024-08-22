@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { describe, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { IDocumentBody } from '../../../../types/interfaces';
 import { BooleanNumber } from '../../../../types/enum';
 import { TextX } from '../text-x';
@@ -23,7 +23,7 @@ import { TextXActionType } from '../action-types';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
 
 describe('test TextX static methods invert and makeInvertible', () => {
-    describe('test TextX static method invert', () => {
+    it('test TextX static method invert', () => {
         const actions: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 5,
@@ -147,7 +147,7 @@ describe('test TextX static methods invert and makeInvertible', () => {
         expect(invertedActions).toEqual(exceptActions);
     });
 
-    describe('test TextX static method makeInvertible when `retain` action occur', () => {
+    it('test TextX static method makeInvertible when `retain` action occur', () => {
         const docBody: IDocumentBody = {
             dataStream: 'hello\r\n',
             textRuns: [
@@ -208,7 +208,7 @@ describe('test TextX static methods invert and makeInvertible', () => {
         expect(textX.serialize()).toEqual(expectedActions);
     });
 
-    describe('test TextX static method makeInvertible when `delete` action occur', () => {
+    it('test TextX static method makeInvertible when `delete` action occur', () => {
         const docBody: IDocumentBody = {
             dataStream: 'hello\r\n',
             textRuns: [

@@ -17,13 +17,11 @@
 import type { ISheetBlock } from '@univerjs/protocol';
 
 import { b64DecodeUnicode } from '../../shared/coder';
-import type { IWorksheetData } from '../../types/interfaces/i-worksheet-data';
 import { Tools } from '../../shared/tools';
-import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import type { IDocumentData } from '../../types/interfaces/i-document-data';
-import type { ICellData } from '../../types/interfaces/i-cell-data';
 import type { IObjectMatrixPrimitiveType } from '../../shared/object-matrix';
 import { ObjectMatrix } from '../../shared/object-matrix';
+import type { ICellData, IWorkbookData, IWorksheetData } from '../../sheets/typedef';
 
 // Some properties are stored in the meta fields or are in sheet blocks.
 // They can be found in `packages/collaboration/src/services/snapshot/snapshot-utils.ts`.

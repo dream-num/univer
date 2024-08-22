@@ -21,15 +21,11 @@ import { ILogService } from '../services/log/log.service';
 import type { Nullable } from '../shared';
 import { Tools } from '../shared';
 import { BooleanNumber } from '../types/enum';
-import type {
-    IRangeType,
-    IWorkbookData,
-    IWorksheetData,
-} from '../types/interfaces';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
 import { getEmptySnapshot } from './empty-snapshot';
+import type { IRangeType, IWorkbookData, IWorksheetData } from './typedef';
 
 export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): string {
     return `${workbook.getUnitId()}|${worksheet.getSheetId()}`;
@@ -162,15 +158,6 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
     incrementRev(): void {
         this._snapshot.rev = this.getRev() + 1;
-    }
-
-    getShouldRenderLoopImmediately() {
-        const should = this._snapshot.shouldStartRenderingImmediately;
-        return should !== false;
-    }
-
-    getContainer() {
-        return this._snapshot.container;
     }
 
     /**

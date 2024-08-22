@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../common/type-util';
 import { THEME_COLORS } from '../../types/const/theme-color-map';
 import { ColorType, ThemeColors, ThemeColorType } from '../../types/enum';
+import type { Nullable } from '../types';
 
 export class ColorBuilder {
     private _themeValue: ThemeColorType = ThemeColorType.LIGHT1;

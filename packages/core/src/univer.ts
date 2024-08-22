@@ -26,6 +26,7 @@ import { IUniverInstanceService, UniverInstanceService } from './services/instan
 import { LifecycleStages } from './services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from './services/lifecycle/lifecycle.service';
 import { LocaleService } from './services/locale/locale.service';
+import type { LogLevel } from './services/log/log.service';
 import { DesktopLogService, ILogService } from './services/log/log.service';
 import { PermissionService } from './services/permission/permission.service';
 import { IPermissionService } from './services/permission/type';
@@ -34,12 +35,13 @@ import { ResourceManagerService } from './services/resource-manager/resource-man
 import { IResourceManagerService } from './services/resource-manager/type';
 import { ResourceLoaderService } from './services/resource-loader/resource-loader.service';
 import { IResourceLoaderService } from './services/resource-loader/type';
+import type { IStyleSheet } from './services/theme/theme.service';
 import { ThemeService } from './services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undoredo.service';
 import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
 import type { LocaleType } from './types/enum/locale-type';
-import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from './types/interfaces';
+import type { IDocumentData, ISlideData } from './types/interfaces';
 import type { UnitModel, UnitType } from './common/unit';
 import { UniverInstanceType } from './common/unit';
 import { PluginService } from './services/plugin/plugin.service';
@@ -49,6 +51,17 @@ import { mergeOverrideWithDependencies } from './services/plugin/plugin-override
 import { UserManagerService } from './services/user-manager/user-manager.service';
 import { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 import { IAuthzIoService } from './services/authz-io/type';
+import type { ILocales } from './shared';
+import type { IWorkbookData } from './sheets/typedef';
+
+export interface IUniverConfig {
+    theme: IStyleSheet;
+    locale: LocaleType;
+    locales: ILocales;
+    logLevel: LogLevel;
+
+    override?: DependencyOverride;
+}
 
 export class Univer {
     private _startedTypes = new Set<UnitType>();
@@ -67,15 +80,14 @@ export class Univer {
      * @param config Configuration data for Univer
      * @param parentInjector An optional parent injector of the Univer injector. For more information, see https://redi.wendell.fun/docs/hierarchy.
      */
-    constructor(config: Partial<IUniverData> = {}, parentInjector?: Injector) {
+    constructor(config: Partial<IUniverConfig> = {}, parentInjector?: Injector) {
         const injector = this._injector = createUniverInjector(parentInjector, config?.override);
 
         const { theme, locale, locales, logLevel } = config;
-
-        theme && this._injector.get(ThemeService).setTheme(theme);
-        locales && this._injector.get(LocaleService).load(locales);
-        locale && this._injector.get(LocaleService).setLocale(locale);
-        logLevel && this._injector.get(ILogService).setLogLevel(logLevel);
+        if (theme) this._injector.get(ThemeService).setTheme(theme);
+        if (locales) this._injector.get(LocaleService).load(locales);
+        if (locale) this._injector.get(LocaleService).setLocale(locale);
+        if (logLevel) this._injector.get(ILogService).setLogLevel(logLevel);
 
         this._init(injector);
     }
@@ -88,7 +100,7 @@ export class Univer {
         this._injector.dispose();
     }
 
-    setLocale(locale: LocaleType) {
+    setLocale(locale: LocaleType): void {
         this._injector.get(LocaleService).setLocale(locale);
     }
 
@@ -159,7 +171,7 @@ export class Univer {
     }
 }
 
-function createUniverInjector(parentInjector?: Injector, override?: DependencyOverride) {
+function createUniverInjector(parentInjector?: Injector, override?: DependencyOverride): Injector {
     const dependencies: Dependency[] = mergeOverrideWithDependencies([
         [ErrorService],
         [LocaleService],

@@ -18,11 +18,11 @@ import type { IFetchMissingChangesetsRequest, IFetchMissingChangesetsResponse, I
 import { ErrorCode } from '@univerjs/protocol';
 
 import { textEncoder } from '../snapshot-utils';
-import type { IWorkbookData } from '../../../types/interfaces/i-workbook-data';
 import { LocaleType } from '../../../types/enum/locale-type';
 import type { ILogContext } from '../../log/context';
 import type { ISnapshotServerService } from '../snapshot-server.service';
 import { b64DecodeUnicode } from '../../../shared/coder';
+import type { IWorkbookData } from '../../../sheets/typedef';
 
 export const testSnapshot = (): ISnapshot => ({
     unitID: '100',
@@ -43,7 +43,9 @@ export const testSnapshot = (): ISnapshot => ({
                 name: 'Sheet 1',
                 rowCount: 1000,
                 columnCount: 20,
-                originalMeta: textEncoder.encode(b64DecodeUnicode('eyJmcmVlemUiOiB7InhTcGxpdCI6IDAsICJ5U3BsaXQiOiAwLCAic3RhcnRSb3ciOiAtMSwgInN0YXJ0Q29sdW1uIjogLTF9LCAiaGlkZGVuIjogMCwgInJvd0RhdGEiOiB7IjAiOiB7ImgiOiAyNywgImFoIjogMjcsICJoZCI6IDB9fSwgInRhYkNvbG9yIjogInJlZCIsICJtZXJnZURhdGEiOiBbXSwgInJvd0hlYWRlciI6IHsid2lkdGgiOiA0NiwgImhpZGRlbiI6IDB9LCAic2Nyb2xsVG9wIjogMjAwLCAiem9vbVJhdGlvIjogMSwgImNvbHVtbkRhdGEiOiB7fSwgInNjcm9sbExlZnQiOiAxMDAsICJzZWxlY3Rpb25zIjogWyJBMSJdLCAicmlnaHRUb0xlZnQiOiAwLCAiY29sdW1uSGVhZGVyIjogeyJoZWlnaHQiOiAyMCwgImhpZGRlbiI6IDB9LCAic2hvd0dyaWRsaW5lcyI6IDEsICJkZWZhdWx0Um93SGVpZ2h0IjogMjcsICJkZWZhdWx0Q29sdW1uV2lkdGgiOiA5M30=')),
+                originalMeta: textEncoder.encode(b64DecodeUnicode(
+                    'eyJmcmVlemUiOiB7InhTcGxpdCI6IDAsICJ5U3BsaXQiOiAwLCAic3RhcnRSb3ciOiAtMSwgInN0YXJ0Q29sdW1uIjogLTF9LCAiaGlkZGVuIjogMCwgInJvd0RhdGEiOiB7IjAiOiB7ImgiOiAyNywgImFoIjogMjcsICJoZCI6IDB9fSwgInRhYkNvbG9yIjogInJlZCIsICJtZXJnZURhdGEiOiBbXSwgInJvd0hlYWRlciI6IHsid2lkdGgiOiA0NiwgImhpZGRlbiI6IDB9LCAic2Nyb2xsVG9wIjogMjAwLCAiem9vbVJhdGlvIjogMSwgImNvbHVtbkRhdGEiOiB7fSwgInNjcm9sbExlZnQiOiAxMDAsICJyaWdodFRvTGVmdCI6IDAsICJjb2x1bW5IZWFkZXIiOiB7ImhlaWdodCI6IDIwLCAiaGlkZGVuIjogMH0sICJzaG93R3JpZGxpbmVzIjogMSwgImRlZmF1bHRSb3dIZWlnaHQiOiAyNywgImRlZmF1bHRDb2x1bW5XaWR0aCI6IDkzfQ=='
+                )),
             },
         },
         resources: [],
@@ -108,9 +110,6 @@ export const testWorkbookData = (): IWorkbookData => ({
             zoomRatio: 1,
             columnData: {},
             scrollLeft: 100,
-            selections: [
-                'A1',
-            ],
             rightToLeft: 0,
             columnHeader: {
                 height: 20,

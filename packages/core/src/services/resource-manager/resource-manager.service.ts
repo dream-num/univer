@@ -16,8 +16,8 @@
 
 import { Subject } from 'rxjs';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import type { Resources } from '../../types/interfaces/i-workbook-data';
 import type { UniverInstanceType } from '../../common/unit';
+import type { Resources } from '../../types/interfaces/resource';
 import type { IResourceHook, IResourceManagerService, IResourceName } from './type';
 
 export class ResourceManagerService extends Disposable implements IResourceManagerService {

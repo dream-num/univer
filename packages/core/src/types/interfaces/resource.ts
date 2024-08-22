@@ -14,18 +14,4 @@
  * limitations under the License.
  */
 
-import type { LogLevel } from '../../services/log/log.service';
-import type { DependencyOverride } from '../../services/plugin/plugin-override';
-import type { IStyleSheet } from '../../services/theme/theme.service';
-import type { ILocales } from '../../shared/locale';
-import type { LocaleType } from '../enum';
-
-export interface IUniverData {
-    theme: IStyleSheet;
-    locale: LocaleType;
-    locales: ILocales;
-    logLevel: LogLevel;
-    id: string;
-
-    override?: DependencyOverride;
-}
+export type Resources = Array<{ id?: string; name: string; data: string }>;

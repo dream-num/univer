@@ -16,7 +16,6 @@
 
 import { Inject } from '../../common/di';
 import type { Workbook } from '../../sheets/workbook';
-import type { IWorkbookData } from '../../types/interfaces';
 import type { IResourceHook } from '../resource-manager/type';
 import { IResourceManagerService } from '../resource-manager/type';
 import { IUniverInstanceService } from '../instance/instance.service';
@@ -24,6 +23,7 @@ import { Disposable } from '../../shared/lifecycle';
 import { UniverInstanceType } from '../../common/unit';
 import type { DocumentDataModel } from '../../docs';
 import { isInternalEditorID } from '../../common/const';
+import type { IWorkbookData } from '../../sheets/typedef';
 import type { IResourceLoaderService } from './type';
 
 export class ResourceLoaderService extends Disposable implements IResourceLoaderService {

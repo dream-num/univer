@@ -552,7 +552,6 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
-            selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
         },
         'sheet-02': {
@@ -929,7 +928,6 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
-            selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
         },
         'sheet-0002': {

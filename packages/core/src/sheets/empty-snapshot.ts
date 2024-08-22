@@ -15,8 +15,8 @@
  */
 
 import { LocaleType } from '../types/enum/locale-type';
-import type { IWorkbookData } from '../types/interfaces';
 import { version } from '../../package.json';
+import type { IWorkbookData } from './typedef';
 
 export function getEmptySnapshot(
     unitID = '',

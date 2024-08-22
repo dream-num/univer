@@ -16,7 +16,8 @@
 
 import type { IKeyType, Nullable } from '../shared';
 import { LRUMap, Tools } from '../shared';
-import type { ICellDataForSheetInterceptor, IStyleData } from '../types/interfaces';
+import type { IStyleData } from '../types/interfaces';
+import type { ICellDataForSheetInterceptor } from './typedef';
 
 /**
  * Styles in a workbook, cells locate styles based on style IDs

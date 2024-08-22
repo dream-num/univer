@@ -19,7 +19,9 @@ import type { DataValidationType } from '../enum/data-validation-type';
 import type { DataValidationImeMode } from '../enum/data-validation-ime-mode';
 import type { DataValidationErrorStyle } from '../enum/data-validation-error-style';
 import type { DataValidationRenderMode } from '../enum/data-validation-render-mode';
-import type { IRange } from './i-range';
+import type { IRange } from '../../sheets/typedef';
+
+// TODO@weird94: should be moved outside of the or package
 
 export interface IDataValidationRuleBase {
     type: DataValidationType;

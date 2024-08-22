@@ -64,6 +64,7 @@ describe('Test snapshot transform', () => {
 
         expect(blocks).toStrictEqual(testSheetBlocks());
     });
+
     it('Function transformSnapshotToWorkbookData', () => {
         expect(transformSnapshotToWorkbookData(testSnapshot(), testSheetBlocks())).toStrictEqual(testWorkbookData());
     });

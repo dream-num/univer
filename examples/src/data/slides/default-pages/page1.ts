@@ -106,13 +106,13 @@ export const DEFAULT_FIRST_PAGE = {
             zIndex: 2,
             left: 430,
             top: 42,
-            width: 120,
-            height: 40,
+            width: 130,
+            height: 50,
             title: 'mask',
             description: '',
             type: PageElementType.TEXT,
             richText: {
-                text: '2022',
+                text: '2024',
                 fs: 48 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',

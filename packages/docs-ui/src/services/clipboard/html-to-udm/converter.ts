@@ -126,10 +126,7 @@ export class HtmlToUDMService {
                 continue;
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const element = node as HTMLElement;
-                const start = body.dataStream.length;
-                if (element.tagName.toUpperCase() === 'A') {
-                    body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_START;
-                }
+                const linkStart = this._processBeforeLink(element, doc);
 
                 const parentStyles = parent ? this._styleCache.get(parent) : {};
                 const styleRule = this._styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
@@ -154,18 +151,7 @@ export class HtmlToUDMService {
                 if (afterProcessRule) {
                     afterProcessRule.handler(doc, node as HTMLElement);
                 }
-
-                if (element.tagName.toUpperCase() === 'A') {
-                    body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_END;
-                    body.customRanges = body.customRanges ?? [];
-                    body.customRanges.push({
-                        startIndex: start,
-                        endIndex: body.dataStream.length - 1,
-                        rangeId: element.dataset.rangeid ?? generateRandomId(),
-                        rangeType: CustomRangeType.HYPERLINK,
-                        properties: { url: (element as HTMLAnchorElement).href },
-                    });
-                }
+                this._processAfterLink(element, doc, linkStart);
             }
         }
     }
@@ -277,6 +263,34 @@ export class HtmlToUDMService {
 
                 break;
             }
+        }
+    }
+
+    private _processBeforeLink(node: HTMLElement, doc: Partial<IDocumentData>) {
+        const body = doc.body!;
+        const element = node as HTMLElement;
+        const start = body.dataStream.length;
+        if (element.tagName.toUpperCase() === 'A') {
+            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_START;
+        }
+
+        return start;
+    }
+
+    private _processAfterLink(node: HTMLElement, doc: Partial<IDocumentData>, start: number) {
+        const body = doc.body!;
+        const element = node as HTMLElement;
+
+        if (element.tagName.toUpperCase() === 'A') {
+            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_END;
+            body.customRanges = body.customRanges ?? [];
+            body.customRanges.push({
+                startIndex: start,
+                endIndex: body.dataStream.length - 1,
+                rangeId: element.dataset.rangeid ?? generateRandomId(),
+                rangeType: CustomRangeType.HYPERLINK,
+                properties: { url: (element as HTMLAnchorElement).href },
+            });
         }
     }
 }

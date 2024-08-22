@@ -347,7 +347,6 @@ function testWorkbookDataFactory(): IWorkbookData {
                     },
                 },
                 showGridlines: 1,
-                selections: ['A1'],
                 rightToLeft: 0,
             },
             sheet1: {

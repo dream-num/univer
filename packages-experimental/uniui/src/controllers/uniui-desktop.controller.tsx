@@ -63,7 +63,7 @@ export class UniverUniUIController extends Disposable {
 
     private _initBuiltinComponents() {
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FLOATING, () => connectInjector(CanvasPopup, this._injector)));
-        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(FloatDom, this._injector)));
+        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.UNIT, () => connectInjector(FloatDom, this._injector)));
     }
 }
 

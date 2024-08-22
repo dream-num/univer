@@ -147,6 +147,7 @@ export {
     WorkbookViewHistoryPermission,
     WorkbookRecoverHistoryPermission,
 } from './services/permission/permission-point';
+export { UnitObject } from '@univerjs/protocol';
 export { checkRangesEditablePermission } from './services/permission/util';
 
 // range-protection

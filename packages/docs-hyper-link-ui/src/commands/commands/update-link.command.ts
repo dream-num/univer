@@ -32,7 +32,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         if (!params) {
             return false;
         }
-        const { payload, segmentId } = params;
+        const { unitId, payload, segmentId } = params;
         const commandService = accessor.get(ICommandService);
         const selectionService = accessor.get(TextSelectionManagerService);
         const currentSelection = selectionService.getActiveTextRange();
@@ -42,7 +42,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
 
         const newId = generateRandomId();
         const replaceSelection = replaceSelectionFactory(accessor, {
-            unitId: params.unitId,
+            unitId,
             body: {
                 dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${params.label}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
                 customRanges: [{

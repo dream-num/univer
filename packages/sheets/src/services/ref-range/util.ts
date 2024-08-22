@@ -1058,6 +1058,20 @@ export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRang
     return resultRange;
 };
 
+export const handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SheetsSelectionsService }) => {
+    const skipCommands = [DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id];
+    if (skipCommands.includes(commandInfo.id)) {
+        return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
+    }
+
+    const effectRanges = getEffectedRangesOnCommand(commandInfo as EffectRefRangeParams, deps);
+    if (effectRanges.some((effectRange) => Rectangle.intersects(effectRange, range))) {
+        return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
+    }
+
+    return range;
+};
+
 /**
  * This function should work as a pure function.
  *

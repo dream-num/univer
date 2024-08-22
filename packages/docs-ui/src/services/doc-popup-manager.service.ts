@@ -82,6 +82,7 @@ export function transformOffset2Bound(offsetX: number, offsetY: number, scene: S
 export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
+    multipleDirection?: IPopup['direction'];
 }
 
 export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
@@ -258,7 +259,7 @@ export class DocCanvasPopManagerService extends Disposable {
     attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup): IDisposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
         const unitId = workbook.getUnitId();
-        const { direction = 'top' } = popup;
+        const { direction = 'top', multipleDirection } = popup;
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             return {
@@ -278,7 +279,10 @@ export class DocCanvasPopManagerService extends Disposable {
             anchorRect$: position$,
             excludeRects: bounds,
             excludeRects$: bounds$,
-            direction: (direction.includes('top') || direction.includes('bottom')) ? direction : 'bottom',
+            direction:
+                (direction.includes('top') || direction.includes('bottom')) ?
+                    bounds.length > 1 ? multipleDirection : direction
+                    : 'bottom',
             canvasElement: currentRender.engine.getCanvasElement(),
         });
 

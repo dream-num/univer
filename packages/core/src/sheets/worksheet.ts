@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../shared';
+import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { type BooleanNumber, CellValueType } from '../types/enum';
-import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import type { Styles } from './styles';
+import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from './typedef';
 import { SheetViewModel } from './view-model';
 
 /**
@@ -48,7 +48,7 @@ export class Worksheet {
 
         const { columnData, rowData, cellData } = this._snapshot;
         this._sheetId = this._snapshot.id ?? Tools.generateRandomId(6);
-        this._cellData = new ObjectMatrix<ICellData>(cellData);
+        this._cellData = new ObjectMatrix<ICellData>(cellData as IObjectMatrixPrimitiveType<ICellData>);
 
         // This view model will immediately injected with hooks from SheetViewModel service as Worksheet is constructed.
         this._viewModel = new SheetViewModel((row, col) => this.getCellRaw(row, col));
@@ -60,7 +60,7 @@ export class Worksheet {
      * @internal
      * @param callback
      */
-    __interceptViewModel(callback: (viewModel: SheetViewModel) => void) {
+    __interceptViewModel(callback: (viewModel: SheetViewModel) => void): void {
         callback(this._viewModel);
     }
 

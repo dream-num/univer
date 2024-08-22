@@ -94,16 +94,6 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         return this.snapshot.body;
     }
 
-    getShouldRenderLoopImmediately() {
-        const should = this.snapshot.shouldStartRenderingImmediately;
-
-        return should !== false;
-    }
-
-    getContainer() {
-        return this.snapshot.container;
-    }
-
     getSnapshot() {
         return this.snapshot;
     }

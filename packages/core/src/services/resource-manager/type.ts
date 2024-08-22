@@ -18,7 +18,7 @@ import type { Observable } from 'rxjs';
 import type { UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '../../common/di';
 import { createIdentifier } from '../../common/di';
-import type { Resources } from '../../types/interfaces/i-workbook-data';
+import type { Resources } from '../../types/interfaces/resource';
 
 type IBusinessName = 'SHEET' | 'DOC';
 export type IResourceName = `${IBusinessName}_${string}_PLUGIN`;

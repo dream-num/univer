@@ -18,7 +18,7 @@ import { customAlphabet, nanoid } from 'nanoid';
 
 import mergeWith from 'lodash.mergewith';
 import { isLegalUrl, normalizeUrl } from '../common/url';
-import type { Class, IKeyValue } from './types';
+import type { IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;
@@ -359,10 +359,6 @@ export class Tools {
             return value.trim() === '';
         }
         return false;
-    }
-
-    static isAssignableFrom<T>(object: any, clazz: Class<T>): object is T {
-        return object instanceof clazz;
     }
 
     static isBoolean(value?: any): value is boolean {

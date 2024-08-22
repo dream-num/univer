@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ICellData, ICellDataForSheetInterceptor, IRange, IRangeWithCoord, ISelectionCell, ISelectionCellWithMergeInfo } from '../sheets/typedef';
+import { RANGE_TYPE } from '../sheets/typedef';
 import {
     BaselineOffset,
     BorderStyleTypes,
@@ -22,10 +24,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../types/enum';
-import { type IRange, RANGE_TYPE } from '../types/interfaces';
-import type { ICellData, ICellDataForSheetInterceptor } from '../types/interfaces/i-cell-data';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
-import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithMergeInfo } from '../types/interfaces/i-selection-data';
 import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
 import { ColorBuilder } from './color/color';
 import { Tools } from './tools';

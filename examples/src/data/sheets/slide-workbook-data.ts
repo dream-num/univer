@@ -611,7 +611,6 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
-            selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
         },
     },

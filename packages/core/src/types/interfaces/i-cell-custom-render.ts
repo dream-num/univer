@@ -19,9 +19,8 @@
 import type { Nullable } from '../../shared';
 import type { Worksheet } from '../../sheets/worksheet';
 import type { Workbook } from '../../sheets/workbook';
-import type { ISelectionCellWithMergeInfo } from './i-selection-data';
+import type { ICellDataForSheetInterceptor, ISelectionCellWithMergeInfo } from '../../sheets/typedef';
 import type { IStyleData } from './i-style-data';
-import type { ICellDataForSheetInterceptor } from './i-cell-data';
 
 export interface ICellRenderContext {
     data: ICellDataForSheetInterceptor;
@@ -37,6 +36,7 @@ export interface ICellRenderContext {
 
 /**
  * @debt This shouldn't exist in core package.
+ * @ignore
  *
  * @deprecated This interface is subject to change in the future.
  */

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import { Rectangle } from '../shared/rectangle';
-import type { IRange, IUnitRange } from '../types/interfaces';
-
 /**
  * Copyright 2023-present DreamNum Inc.
  *
@@ -32,17 +29,6 @@ import type { IRange, IUnitRange } from '../types/interfaces';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export const isRangesEqual = (oldRanges: IRange[], ranges: IRange[]) => {
-    return ranges.length === oldRanges.length && !oldRanges.some((oldRange) => ranges.some((range) => !Rectangle.equals(range, oldRange)));
-};
-
-export const isUnitRangesEqual = (oldRanges: IUnitRange[], ranges: IUnitRange[]) => {
-    return ranges.length === oldRanges.length && oldRanges.every((oldRange, i) => {
-        const current = ranges[i];
-        return current.unitId === oldRange.unitId && current.sheetId === oldRange.sheetId && Rectangle.equals(oldRange.range, current.range);
-    });
-};
 
 export function shallowEqual(objA: any, objB: any) {
     if (Object.is(objA, objB)) {

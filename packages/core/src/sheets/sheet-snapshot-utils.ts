@@ -15,7 +15,7 @@
  */
 
 import { BooleanNumber } from '../types/enum/text-style';
-import type { IWorksheetData } from '../types/interfaces/i-worksheet-data';
+import type { IWorksheetData } from './typedef';
 
 // TODO@wzhudev: default value should not be exposed, but the keys.
 
@@ -76,7 +76,6 @@ export function mergeWorksheetSnapshotWithDefault(snapshot: Partial<IWorksheetDa
             height: DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT,
             hidden: BooleanNumber.FALSE,
         },
-        selections: ['A1'],
         rightToLeft: BooleanNumber.FALSE,
     };
 

@@ -14287,9 +14287,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: [
-                'A1',
-            ],
             rightToLeft: 0,
         },
         'dv-test': {
@@ -15711,7 +15708,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: ['A1'],
             rightToLeft: 0,
         },
         'sheet-0009': {
@@ -16935,7 +16931,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: ['A1'],
             rightToLeft: 0,
         },
         'sheet-0008': {
@@ -18566,7 +18561,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: ['A1'],
             rightToLeft: 0,
         },
         'sheet-0007': {
@@ -19141,7 +19135,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: ['A1'],
             rightToLeft: 0,
         },
         'sheet-0006': {
@@ -19790,7 +19783,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: ['A1'],
             rightToLeft: 0,
         },
         'sheet-0005': {
@@ -21365,7 +21357,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: ['A1'],
             rightToLeft: 0,
         },
         'sheet-0004': {
@@ -21835,7 +21826,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
-            selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
         },
         'sheet-0003': {
@@ -22452,7 +22442,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
-            selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
         },
         'sheet-0002': {
@@ -23375,7 +23364,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
-            selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
         },
         'sheet-0001': {
@@ -23768,7 +23756,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
-            selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
         },
         // 'sheet-0011': {

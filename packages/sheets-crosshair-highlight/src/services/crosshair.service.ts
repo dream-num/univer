@@ -19,20 +19,20 @@ import { BehaviorSubject } from 'rxjs';
 
 // Currently these colors are hard-coded, but in the future they could be customizable.
 export const CROSSHAIR_HIGHLIGHT_COLORS = [
+    'rgba(158, 109, 227, 0.3)',
     'rgba(254, 75, 75, 0.3)',
     'rgba(255, 140, 81, 0.3)',
     'rgba(164, 220, 22, 0.3)',
     'rgba(45, 174, 255, 0.3)',
     'rgba(58, 96, 247, 0.3)',
-    'rgba(158, 109, 227, 0.3)',
     'rgba(242, 72, 166, 0.3)',
     'rgba(153, 153, 153, 0.3)',
+    'rgba(158, 109, 227, 0.15)',
     'rgba(254, 75, 75, 0.15)',
     'rgba(255, 140, 81, 0.15)',
     'rgba(164, 220, 22, 0.15)',
     'rgba(45, 174, 255, 0.15)',
     'rgba(58, 96, 247, 0.15)',
-    'rgba(158, 109, 227, 0.15)',
     'rgba(242, 72, 166, 0.15)',
     'rgba(153, 153, 153, 0.15)',
 ];

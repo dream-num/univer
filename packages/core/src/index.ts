@@ -150,7 +150,7 @@ export {
     mergeWorksheetSnapshotWithDefault,
 } from './sheets/sheet-snapshot-utils';
 export { SheetViewModel } from './sheets/view-model';
-export type { IWorkbookData, IWorksheetData } from './sheets/typedef';
+export * from './sheets/typedef';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
 export { Worksheet, extractPureTextFromCell } from './sheets/worksheet';
 export { SlideDataModel } from './slides/slide-model';

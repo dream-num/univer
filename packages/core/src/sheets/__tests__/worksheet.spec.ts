@@ -17,12 +17,12 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import type { Univer } from '../../univer';
-import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { LocaleType } from '../../types/enum/locale-type';
 import { extractPureTextFromCell, type Worksheet } from '../worksheet';
-import { type IRange, RANGE_TYPE } from '../../types/interfaces/i-range';
 import { DisposableCollection } from '../../shared/lifecycle';
 import { CellValueType } from '../../types/enum';
+import type { IRange, IWorkbookData } from '../typedef';
+import { RANGE_TYPE } from '../typedef';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('test worksheet', () => {

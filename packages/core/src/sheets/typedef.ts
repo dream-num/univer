@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRowData } from '@univerjs/protocol';
-import type { Nullable } from 'vitest';
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IStyleData } from '../types/interfaces/i-style-data';
 import type { Resources } from '../types/interfaces/resource';
-import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType } from '../shared';
-import type { BooleanNumber } from '../types/enum';
-import type { IColumnData, IFreeze, IRange, IRangeType } from '../types/interfaces';
+import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import { type BooleanNumber, CellValueType } from '../types/enum';
+import type { IDocumentData } from '../types/interfaces';
+import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
+import type { ICellValidationData } from '../types/interfaces/i-cell-validation-data';
 
 /**
  * Snapshot of a workbook.
@@ -100,8 +100,11 @@ export interface IWorksheetData {
 
     rowCount: number;
     columnCount: number;
+    /** @deprecated */
     zoomRatio: number;
+    /** @deprecated */
     scrollTop: number;
+    /** @deprecated */
     scrollLeft: number;
     defaultColumnWidth: number;
     defaultRowHeight: number;
@@ -130,4 +133,524 @@ export interface IWorksheetData {
     selections: IRangeType[];
 
     rightToLeft: BooleanNumber;
+}
+
+/**
+ * Properties of row data
+ */
+export interface IRowData {
+    /**
+     * height in pixel
+     */
+    h?: number;
+
+    /**
+     * is current row self-adaptive to its content, use `ah` to set row height when true, else use `h`.
+     */
+    ia?: BooleanNumber; // pre name `isAutoHeight`
+
+    /**
+     * auto height
+     */
+    ah?: number;
+
+    /**
+     * hidden
+     */
+    hd?: BooleanNumber;
+}
+
+export interface IRowAutoHeightInfo {
+    row: number;
+    autoHeight?: number;
+}
+
+/**
+ * Properties of column data
+ */
+export interface IColumnData {
+    /**
+     * width
+     */
+    w?: number;
+
+    /**
+     * hidden
+     */
+    hd?: BooleanNumber;
+}
+
+/**
+ * Cell value type
+ */
+export type CellValue = string | number | boolean;
+
+/**
+ * Cell data
+ */
+export interface ICellData {
+    /**
+     * The unique key, a random string, is used for the plug-in to associate the cell. When the cell information changes,
+     * the plug-in does not need to change the data, reducing the pressure on the back-end interface id?: string.
+     */
+    p?: Nullable<IDocumentData>; // univer docs, set null for cell clear all
+
+    /** style id */
+    s?: Nullable<IStyleData | string>;
+
+    /**
+     * Origin value
+     */
+    v?: Nullable<CellValue>;
+
+    // Usually the type is automatically determined based on the data, or the user directly specifies
+    t?: Nullable<CellValueType>; // 1 string, 2 number, 3 boolean, 4 force string, green icon, set null for cell clear all
+
+    /**
+     * Raw formula string. For example `=SUM(A1:B4)`.
+     */
+    f?: Nullable<string>;
+
+    /**
+     * Id of the formula.
+     */
+    si?: Nullable<string>;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: Nullable<Record<string, any>>;
+}
+
+export interface ICellMarksStyle {
+    color: string;
+    size: number;
+}
+
+export interface ICellMarks {
+    tl?: ICellMarksStyle;
+    tr?: ICellMarksStyle;
+    bl?: ICellMarksStyle;
+    br?: ICellMarksStyle;
+    isSkip?: boolean;
+}
+
+// TODO@weird94: should be moved outside of the core package
+export interface ICellDataForSheetInterceptor extends ICellData {
+    interceptorStyle?: Nullable<IStyleData>;
+    isInArrayFormulaRange?: Nullable<boolean>;
+    dataValidation?: Nullable<ICellValidationData>;
+    markers?: ICellMarks;
+    customRender?: Nullable<ICellCustomRender[]>;
+    interceptorAutoHeight?: number;
+    /**
+     * can cell be covered when sibling is overflow
+     */
+    coverable?: boolean;
+}
+
+export function isICellData(value: any): value is ICellData {
+    return (
+        value &&
+        ((value as ICellData).s !== undefined ||
+            (value as ICellData).p !== undefined ||
+            (value as ICellData).v !== undefined ||
+            (value as ICellData).t !== undefined ||
+            (value as ICellData).f !== undefined ||
+            (value as ICellData).si !== undefined)
+    );
+}
+
+export function getCellValueType(cell: ICellData) {
+    if (cell.t !== undefined) {
+        return cell.t;
+    }
+    if (typeof cell.v === 'string') {
+        return CellValueType.STRING;
+    }
+    if (typeof cell.v === 'number') {
+        return CellValueType.NUMBER;
+    }
+    if (typeof cell.v === 'boolean') {
+        return CellValueType.BOOLEAN;
+    }
+}
+
+export function isNullCell(cell: Nullable<ICellData>) {
+    if (cell == null) {
+        return true;
+    }
+
+    const { v, f, si, p, s, custom } = cell;
+
+    if (!(v == null || (typeof v === 'string' && v.length === 0))) {
+        return false;
+    }
+
+    if ((f != null && f.length > 0) || (si != null && si.length > 0)) {
+        return false;
+    }
+
+    if (p != null) {
+        return false;
+    }
+
+    if (custom != null) {
+        return false;
+    }
+
+    return true;
+}
+
+export function isCellV(cell: Nullable<ICellData | CellValue>) {
+    return cell != null && (typeof cell === 'string' || typeof cell === 'number' || typeof cell === 'boolean');
+}
+
+export interface IFreeze {
+    xSplit: number;
+    ySplit: number;
+    startRow: number;
+    startColumn: number;
+}
+
+export enum RANGE_TYPE {
+    NORMAL,
+    ROW,
+    COLUMN,
+    ALL,
+}
+
+/**
+ * none: A1
+ * row: A$1
+ * column: $A1
+ * all: $A$1
+ */
+export enum AbsoluteRefType {
+    NONE,
+    ROW,
+    COLUMN,
+    ALL,
+}
+
+interface IRangeLocation {
+    /**
+     * Id of the Workbook the range belongs to.
+     * When this field is not defined, it should be considered as the range in the currently activated worksheet.
+     */
+    unitId?: string;
+
+    /**
+     * Id of the Worksheet the range belongs to.
+     * When this field is not defined, it should be considered as the range in the currently activated worksheet.
+     */
+    sheetId?: string;
+}
+
+export interface IRowRange extends IRangeLocation {
+    /**
+     * The start row (inclusive) of the range
+     * startRow
+     */
+    startRow: number;
+
+    /**
+     * The end row (exclusive) of the range
+     * endRow
+     */
+    endRow: number;
+}
+
+export interface IColumnRange extends IRangeLocation {
+    /**
+     * The start column (inclusive) of the range
+     * startColumn
+     */
+    startColumn: number;
+
+    /**
+     * The end column (exclusive) of the range
+     * endColumn
+     */
+    endColumn: number;
+}
+
+/**
+ * Range data structure
+ *
+ * One of the range types,
+ *
+ * e.g.,
+ * {
+ *    startRow:0 ,
+ *    startColumn:0,
+ *    endRow:1,
+ *    endColumn:1,
+ * }
+ *
+ * means "A1:B2"
+ */
+export interface IRange extends IRowRange, IColumnRange {
+    rangeType?: RANGE_TYPE;
+
+    startAbsoluteRefType?: AbsoluteRefType;
+
+    endAbsoluteRefType?: AbsoluteRefType;
+}
+
+/**
+ * Transform an `IRange` object to an array.
+ * @param range
+ * @returns [rowStart, colStart, rowEnd, colEnd]
+ */
+export function selectionToArray(range: IRange): [number, number, number, number] {
+    return [range.startRow, range.startColumn, range.endRow, range.endColumn];
+}
+
+/**
+ * Range data of grid
+ */
+export interface IGridRange {
+    sheetId: string;
+    range: IRange;
+}
+
+export interface IUnitRangeName {
+    unitId: string;
+    sheetName: string;
+    range: IRange;
+}
+
+/**
+ * Range data of Unit
+ */
+export interface IUnitRange extends IGridRange {
+    unitId: string;
+}
+
+export interface IUnitRangeWithName extends IUnitRange {
+    sheetName: string;
+}
+
+/**
+ * One of the range types,
+ *
+ * e.g.,"A1:B2","sheet1!A1:B2","A1","1:1","A:A","AA1:BB2"
+ */
+export type IRangeStringData = string;
+
+/**
+ * Row data type
+ */
+export type IRowStartEndData = [startRow: number, endRow: number] | number[];
+
+/**
+ * Column data type
+ */
+export type IColumnStartEndData = [startColumn: number, endColumn: number] | number[];
+
+/**
+ * One of the range types,
+ *
+ * e.g.,
+ * {
+ *  row:[0,1],
+ *  column:[0,1]
+ * }
+ *todo
+
+ true false 枚举
+ * means "A1:B2"
+ */
+export interface IRangeArrayData {
+    /**
+     * row
+     */
+    row: IRowStartEndData;
+    /**
+     * column
+     */
+    column: IColumnStartEndData;
+}
+
+/**
+ * The row and column numbers represent a cell
+ */
+export interface IRangeCellData {
+    /**
+     * row
+     */
+    row: number;
+    /**
+     * column
+     */
+    column: number;
+}
+
+/**
+ * range types
+ *
+ * Allow users to provide one of three formats, we need to convert to IRange to store
+ */
+export type IRangeType = IRange | IRangeStringData | IRangeArrayData | IRangeCellData;
+
+/**
+ * Whether to clear only the contents.	Whether to clear only the format; note that clearing format also clears data validation rules.
+ */
+export interface IOptionData {
+    /**
+     * 1. designates that only the format should be copied
+     *
+     * 2. Whether to clear only the format; note that clearing format also clears data validation rules.
+     *
+     * 3. worksheet Whether to clear the format.
+     */
+    formatOnly?: boolean;
+    /**
+     * 1. designates that only the content should be copied
+     *
+     * 2. Whether to clear only the contents.
+     *
+     * 3. worksheet Whether to clear the content.
+     *
+     */
+    contentsOnly?: boolean;
+}
+
+/**
+ * Option of copyTo function
+ */
+export interface ICopyToOptionsData extends IOptionData {}
+
+export interface IRectLTRB {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width?: number;
+    height?: number;
+}
+
+/**
+ * Properties of selection data
+ */
+export interface IPosition {
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+}
+
+export interface ISingleCell {
+    actualRow: number;
+    actualColumn: number;
+    isMerged: boolean;
+    isMergedMainCell: boolean;
+}
+
+export interface IRangeWithCoord extends IPosition, IRange {}
+
+export interface ISelectionCell extends IRange, ISingleCell {}
+
+export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
+    mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
+}
+
+export interface ISelection {
+    /**
+     * Sheet selection range.
+     */
+    range: IRange;
+
+    /**
+     * The highlighted cell in the selection range. If there are several selections, only one selection would have a primary cell.
+     */
+    primary: Nullable<ISelectionCell>;
+}
+
+/**
+ * Selection range Info, contains selectionrange & primaryrange
+ * primaryrange is the range of the highlighted cell.
+ */
+export interface ISelectionWithCoord {
+    rangeWithCoord: IRangeWithCoord;
+    primaryWithCoord: Nullable<ISelectionCellWithMergeInfo>;
+}
+
+export interface ITextRangeStart {
+    startOffset: number;
+}
+
+export interface ITextRange extends ITextRangeStart {
+    endOffset: number;
+    collapsed: boolean;
+}
+
+export interface ITextRangeParam extends ITextRange {
+    segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
+    segmentPage?: number; //The page number of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
+    isActive?: boolean; // Whether the text range is active or current range.
+}
+
+/**
+ * Determines whether the cell(row, column) is within the range of the merged cells.
+ */
+export function getCellInfoInMergeData(row: number, column: number, mergeData?: IRange[]): ISelectionCell {
+    let isMerged = false; // The upper left cell only renders the content
+    let isMergedMainCell = false;
+    let newEndRow = row;
+    let newEndColumn = column;
+    let mergeRow = row;
+    let mergeColumn = column;
+
+    if (mergeData == null) {
+        return {
+            actualRow: row,
+            actualColumn: column,
+            isMergedMainCell,
+            isMerged,
+            endRow: newEndRow,
+            endColumn: newEndColumn,
+            startRow: mergeRow,
+            startColumn: mergeColumn,
+        };
+    }
+
+    for (let i = 0; i < mergeData.length; i++) {
+        const {
+            startRow: startRowMarge,
+            endRow: endRowMarge,
+            startColumn: startColumnMarge,
+            endColumn: endColumnMarge,
+        } = mergeData[i];
+        if (row === startRowMarge && column === startColumnMarge) {
+            newEndRow = endRowMarge;
+            newEndColumn = endColumnMarge;
+            mergeRow = startRowMarge;
+            mergeColumn = startColumnMarge;
+
+            isMergedMainCell = true;
+            break;
+        }
+        if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
+            newEndRow = endRowMarge;
+            newEndColumn = endColumnMarge;
+            mergeRow = startRowMarge;
+            mergeColumn = startColumnMarge;
+
+            isMerged = true;
+            break;
+        }
+    }
+
+    return {
+        actualRow: row,
+        actualColumn: column,
+        isMergedMainCell,
+        isMerged,
+        endRow: newEndRow,
+        endColumn: newEndColumn,
+        startRow: mergeRow,
+        startColumn: mergeColumn,
+    };
 }

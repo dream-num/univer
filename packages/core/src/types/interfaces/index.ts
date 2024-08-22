@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-export * from './i-cell-data';
-export * from './i-column-data';
 export * from './i-document-data';
 export * from './i-document-data-interceptor';
-export * from './i-freeze';
 export * from './i-image-properties';
 export * from './i-placeholder';
-export * from './i-range';
-export * from './i-row-data';
-export * from './i-selection-data';
 export * from './i-shape-properties';
 export * from './i-slide-data';
 export * from './i-style-data';
-export * from './i-univer-data';
-export * from './i-worksheet-order-data';

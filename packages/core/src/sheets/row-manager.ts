@@ -17,8 +17,7 @@
 import { getArrayLength, type IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import type { Nullable } from '../shared/types';
 import { BooleanNumber } from '../types/enum';
-import type { IRange, IRowData, IWorksheetData } from '../types/interfaces';
-import { RANGE_TYPE } from '../types/interfaces';
+import { type IRange, type IRowData, type IWorksheetData, RANGE_TYPE } from './typedef';
 import type { SheetViewModel } from './view-model';
 
 /**

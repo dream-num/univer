@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '../types/interfaces/i-range';
+import type { IRange } from '../sheets/typedef';
 import { Tools } from './tools';
 import type { Nullable } from './types';
 
@@ -473,19 +473,10 @@ export class ObjectMatrix<T> {
     getSizeOf(): number {
         const keys = Object.keys(this._matrix);
         return keys.length;
-        // return this._option.getSizeOf();
     }
 
     getLength(): number {
         return getArrayLength(this._matrix);
-        // let maxIndex = 0;
-        // const keys = Object.keys(this._matrix);
-        // for (const key of keys) {
-        //     const rowIndex = Number(key);
-        //     maxIndex = Math.max(maxIndex, rowIndex);
-        // }
-        // return maxIndex + 1;
-        // return this._option.getLength();
     }
 
     getRange(): IRange {

@@ -17,8 +17,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { Rectangle } from '../rectangle';
-import { AbsoluteRefType } from '../../types/interfaces/i-range';
-import type { IRange } from '../../types/interfaces/i-range';
+import type { IRange } from '../../sheets/typedef';
+import { AbsoluteRefType } from '../../sheets/typedef';
 
 const cellToRange = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col } as IRange);
 describe('test "Rectangle"', () => {

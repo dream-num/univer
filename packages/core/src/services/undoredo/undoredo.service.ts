@@ -26,7 +26,7 @@ import { CommandType, ICommandService, sequenceExecute } from '../command/comman
 import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
-import type { Nullable } from '../../common/type-util';
+import type { Nullable } from '../../shared/types';
 
 export interface IUndoRedoItem {
     /** unitID maps to unitId for UniverSheet / UniverDoc / UniverSlide */

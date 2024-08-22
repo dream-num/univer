@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AbsoluteRefType, type IRange } from '../types/interfaces/i-range';
+import type { IRange } from '../sheets/typedef';
+import { AbsoluteRefType } from '../sheets/typedef';
 import { Rectangle } from './rectangle';
 
 export function moveRangeByOffset(range: IRange, refOffsetX: number, refOffsetY: number, ignoreAbsolute = false): IRange {

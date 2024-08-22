@@ -18,11 +18,11 @@ import type { IFetchMissingChangesetsRequest, IFetchMissingChangesetsResponse, I
 import { ErrorCode } from '@univerjs/protocol';
 
 import { textEncoder } from '../snapshot-utils';
-import type { IWorkbookData } from '../../../types/interfaces/i-workbook-data';
 import { LocaleType } from '../../../types/enum/locale-type';
 import type { ILogContext } from '../../log/context';
 import type { ISnapshotServerService } from '../snapshot-server.service';
 import { b64DecodeUnicode } from '../../../shared/coder';
+import type { IWorkbookData } from '../../../sheets/typedef';
 
 export const testSnapshot = (): ISnapshot => ({
     unitID: '100',

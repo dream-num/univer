@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../common/type-util';
 import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import { getArrayLength } from '../shared/object-matrix';
+import type { Nullable } from '../shared/types';
 import { BooleanNumber } from '../types/enum';
-import type { IColumnData, IRange, IWorksheetData } from '../types/interfaces';
-import { RANGE_TYPE } from '../types/interfaces';
+import { type IColumnData, type IRange, type IWorksheetData, RANGE_TYPE } from './typedef';
 
 /**
  * Manage configuration information of all columns, get column width, column length, set column width, etc.

@@ -24,7 +24,7 @@ export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';
 export { CustomCommandExecutionError } from './common/error';
 export { Univer } from './univer';
-export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
+export { shallowEqual } from './common/equal';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { isBooleanString } from './common/boolean';
 export { dedupe, remove, rotate, groupBy, makeArray } from './common/array';
@@ -131,6 +131,7 @@ export { ConfigService } from './services/config/config.service';
 
 // #region sheet
 
+export { isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { Range } from './sheets/range';
 export { Styles } from './sheets/styles';
 export {

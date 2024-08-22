@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../common/type-util';
+import type { Nullable } from '../../lib/types/shared';
 import { Range } from '../sheets/range';
-import type { IRange } from '../types/interfaces';
+import type { IRange } from '../sheets/typedef';
 import type { ObjectMatrix } from './object-matrix';
 
 function maximalRectangle<T>(matrix: T[][], match: (val: T) => boolean) {

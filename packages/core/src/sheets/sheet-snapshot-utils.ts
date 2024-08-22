@@ -15,7 +15,7 @@
  */
 
 import { BooleanNumber } from '../types/enum/text-style';
-import type { IWorksheetData } from '../types/interfaces/i-worksheet-data';
+import type { IWorksheetData } from './typedef';
 
 // TODO@wzhudev: default value should not be exposed, but the keys.
 

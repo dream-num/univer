@@ -16,8 +16,8 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { AbsoluteRefType } from '../../types/interfaces/i-range';
 import { moveRangeByOffset } from '../range';
+import { AbsoluteRefType } from '../../sheets/typedef';
 
 describe('test moveRangeByOffset', () => {
     it('test normal', () => {

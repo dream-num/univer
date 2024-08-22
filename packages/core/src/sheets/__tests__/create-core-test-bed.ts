@@ -18,7 +18,7 @@ import { Univer } from '../../univer';
 import { IUniverInstanceService } from '../../services/instance/instance.service';
 import { ILogService, LogLevel } from '../../services/log/log.service';
 import { LocaleType } from '../../types/enum/locale-type';
-import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
+import type { IWorkbookData } from '../typedef';
 
 const testWorkbookDataFactory: () => IWorkbookData = () => ({
     id: 'test',

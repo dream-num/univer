@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../common/type-util';
+import type { Nullable } from '../../../lib/types/shared';
 import { THEME_COLORS } from '../../types/const/theme-color-map';
 import { ColorType, ThemeColors, ThemeColorType } from '../../types/enum';
 

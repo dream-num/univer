@@ -19,19 +19,18 @@ import { ObjectMatrix, Tools } from '../shared';
 import { DEFAULT_STYLES } from '../types/const';
 import type { HorizontalAlign, VerticalAlign } from '../types/enum';
 import { BooleanNumber, FontItalic, FontWeight, WrapStrategy } from '../types/enum';
-import {
-    type IBorderData,
-    type ICellData,
-    type IDocumentBody,
-    type IDocumentData,
-    type IRange,
-    type IStyleBase,
-    type IStyleData,
-    type ITextDecoration,
-    type ITextRotation,
-    RANGE_TYPE,
+import type {
+    IBorderData,
+    IDocumentBody,
+    IDocumentData,
+    IStyleBase,
+    IStyleData,
+    ITextDecoration,
+    ITextRotation,
 } from '../types/interfaces';
 import type { Styles } from './styles';
+import type { ICellData, IRange } from './typedef';
+import { RANGE_TYPE } from './typedef';
 import type { Worksheet } from './worksheet';
 
 /**
@@ -294,7 +293,7 @@ export class Range {
      * @returns  — A range containing a single cell at the specified coordinates.
      */
     getCell(row: number, column: number): Range {
-        const { startRow, endRow, startColumn, endColumn } = this._range;
+        const { startRow, startColumn } = this._range;
         const cell = {
             startRow: startRow + row,
             endRow: startRow + row,

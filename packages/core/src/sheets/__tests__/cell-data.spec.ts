@@ -15,8 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
-import { isCellV, isICellData, isNullCell } from '../i-cell-data';
+import { isCellV, isICellData, isNullCell } from '../typedef';
 
 const DOCUMENT_DATA = {
     id: 'd',

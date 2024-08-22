@@ -27,7 +27,7 @@ export class Imabs extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(inumber: BaseValueObject) {
+    override calculate(inumber: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(inumber);
 
         if (isError) {

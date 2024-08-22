@@ -26,7 +26,7 @@ export class Besselj extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(x: BaseValueObject, n: BaseValueObject) {
+    override calculate(x: BaseValueObject, n: BaseValueObject): BaseValueObject {
         if (x.isNull() || n.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }

@@ -26,7 +26,7 @@ export class Complex extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(realNum: BaseValueObject, iNum: BaseValueObject, suffix?: BaseValueObject) {
+    override calculate(realNum: BaseValueObject, iNum: BaseValueObject, suffix?: BaseValueObject): BaseValueObject {
         const _suffix = suffix ?? StringValueObject.create('i');
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(realNum, iNum, _suffix);

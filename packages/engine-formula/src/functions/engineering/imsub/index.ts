@@ -28,7 +28,7 @@ export class Imsub extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(inumber1: BaseValueObject, inumber2: BaseValueObject) {
+    override calculate(inumber1: BaseValueObject, inumber2: BaseValueObject): BaseValueObject {
         if (inumber1.isNull() || inumber2.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }

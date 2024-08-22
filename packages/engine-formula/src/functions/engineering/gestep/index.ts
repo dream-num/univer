@@ -25,7 +25,7 @@ export class Gestep extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(number: BaseValueObject, step?: BaseValueObject) {
+    override calculate(number: BaseValueObject, step?: BaseValueObject): BaseValueObject {
         if (number.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }

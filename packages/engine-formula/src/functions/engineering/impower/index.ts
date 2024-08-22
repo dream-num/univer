@@ -28,7 +28,7 @@ export class Impower extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(inumber: BaseValueObject, number: BaseValueObject) {
+    override calculate(inumber: BaseValueObject, number: BaseValueObject): BaseValueObject {
         if (inumber.isNull() || number.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }

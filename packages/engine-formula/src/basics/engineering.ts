@@ -58,7 +58,7 @@ export namespace BESSEL {
     }
 
     function _bessel_wrap(bessel0: IFunctionType, bessel1: IFunctionType, nonzero: number, sign: number) {
-        return function bessel(x: number, n: number) {
+        return function bessel(x: number, n: number): number {
             if (nonzero) {
                 if (x === 0) {
                     return nonzero === 1 ? -Infinity : Infinity;
@@ -404,11 +404,11 @@ export function erf(x: number): number {
         -2.8e-17];
 
     let _x = x;
-    let isneg = false;
+    let isNeg = false;
 
     if (_x < 0) {
         _x = -_x;
-        isneg = true;
+        isNeg = true;
     }
 
     const t = 2 / (2 + _x);
@@ -426,7 +426,7 @@ export function erf(x: number): number {
 
     const res = t * Math.exp(-_x * _x + 0.5 * (cof[0] + ty * d) - dd);
 
-    return isneg ? res - 1 : 1 - res;
+    return isNeg ? res - 1 : 1 - res;
 };
 
 export class Complex {
@@ -451,7 +451,7 @@ export class Complex {
         return result;
     }
 
-    static createByComplexStr(realNum: number, iNum: number, suffix: string) {
+    static createByComplexStr(realNum: number, iNum: number, suffix: string): Complex {
         const complexStr = Complex.getComplex(realNum, iNum, suffix);
 
         return new Complex(complexStr);
@@ -474,7 +474,7 @@ export class Complex {
         this.getImSuffix();
     }
 
-    getImReal() {
+    getImReal(): void {
         if (this._isError) {
             return;
         }
@@ -541,7 +541,7 @@ export class Complex {
         }
     }
 
-    getImAginary() {
+    getImAginary(): void {
         if (this._isError) {
             return;
         }
@@ -610,7 +610,7 @@ export class Complex {
         }
     }
 
-    getImSuffix() {
+    getImSuffix(): void {
         const inumberStr = `${this._inumber}`;
 
         const suffix = inumberStr.substring(inumberStr.length - 1);
@@ -618,27 +618,27 @@ export class Complex {
         this._suffix = suffix === 'i' || suffix === 'j' ? suffix : 'i';
     }
 
-    getRealNum() {
+    getRealNum(): number {
         return this._realNum;
     }
 
-    getINum() {
+    getINum(): number {
         return this._iNum;
     }
 
-    getSuffix() {
+    getSuffix(): string {
         return this._suffix;
     }
 
-    isError() {
+    isError(): boolean {
         return this._isError;
     }
 
-    Abs() {
+    Abs(): number {
         return Decimal.sqrt(Decimal.pow(this._realNum, 2).add(Decimal.pow(this._iNum, 2))).toSignificantDigits(16).toNumber();
     }
 
-    Argument() {
+    Argument(): number {
         let result = Decimal.acos(new Decimal(this._realNum).div(new Decimal(this.Abs()))).toSignificantDigits(16).toNumber();
 
         if (this._iNum < 0) {
@@ -648,25 +648,25 @@ export class Complex {
         return result;
     }
 
-    Conjugate() {
+    Conjugate(): number | string {
         return Complex.getComplex(this._realNum, -this._iNum, this._suffix);
     }
 
-    Cos() {
+    Cos(): number | string {
         const realNum = Decimal.cos(this._realNum).mul(Decimal.cosh(this._iNum)).toNumber();
         const iNum = Decimal.sin(this._realNum).mul(Decimal.sinh(this._iNum)).toNumber();
 
         return Complex.getComplex(realNum, -iNum, this._suffix);
     }
 
-    Cosh() {
+    Cosh(): number | string {
         const realNum = Decimal.cosh(this._realNum).mul(Decimal.cos(this._iNum)).toNumber();
         const iNum = Decimal.sinh(this._realNum).mul(Decimal.sin(this._iNum)).toNumber();
 
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Cot() {
+    Cot(): number | string {
         const den = Decimal.cosh(this._iNum * 2).sub(Decimal.cos(this._realNum * 2));
         const realNum = Decimal.sin(this._realNum * 2).div(den).toNumber();
         const iNum = Decimal.sinh(this._iNum * 2).div(den).toNumber();
@@ -674,7 +674,7 @@ export class Complex {
         return Complex.getComplex(realNum, -iNum, this._suffix);
     }
 
-    Csc() {
+    Csc(): number | string {
         const den = Decimal.cosh(this._iNum * 2).sub(Decimal.cos(this._realNum * 2));
         const realNum = Decimal.sin(this._realNum).mul(Decimal.cosh(this._iNum)).mul(2).div(den).toNumber();
         const iNum = Decimal.cos(this._realNum).mul(Decimal.sinh(this._iNum)).mul(-2).div(den).toNumber();
@@ -682,7 +682,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Csch() {
+    Csch(): number | string {
         const den = Decimal.cosh(this._realNum * 2).sub(Decimal.cos(this._iNum * 2));
         const realNum = Decimal.sinh(this._realNum).mul(Decimal.cos(this._iNum)).mul(2).div(den).toNumber();
         const iNum = Decimal.cosh(this._realNum).mul(Decimal.sin(this._iNum)).mul(-2).div(den).toNumber();
@@ -690,7 +690,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Div(complex2: Complex) {
+    Div(complex2: Complex): number | string {
         const Decimal_realNum1 = new Decimal(this._realNum);
         const Decimal_iNum1 = new Decimal(this._iNum);
         const Decimal_realNum2 = new Decimal(complex2.getRealNum());
@@ -703,21 +703,21 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Exp() {
+    Exp(): number | string {
         const realNum = Decimal.exp(this._realNum).mul(Decimal.cos(this._iNum)).toNumber();
         const iNum = Decimal.exp(this._realNum).mul(Decimal.sin(this._iNum)).toNumber();
 
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Ln() {
+    Ln(): number | string {
         const realNum = Decimal.ln(new Decimal(this.Abs())).toNumber();
         const iNum = this.Argument();
 
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Log10() {
+    Log10(): number | string {
         const Decimal_realNum = new Decimal(this._realNum);
         const Decimal_iNum = new Decimal(this._iNum);
 
@@ -727,7 +727,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Log2() {
+    Log2(): number | string {
         const Decimal_realNum = new Decimal(this._realNum);
         const Decimal_iNum = new Decimal(this._iNum);
 
@@ -737,7 +737,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Power(number: number) {
+    Power(number: number): number | string {
         if (this._realNum === 0 && this._iNum === 0 && number > 0) {
             return Complex.getComplex(this._realNum, this._iNum, this._suffix);
         }
@@ -758,7 +758,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Product(complex2: Complex) {
+    Product(complex2: Complex): number | string {
         const Decimal_realNum1 = new Decimal(this._realNum);
         const Decimal_iNum1 = new Decimal(this._iNum);
         const Decimal_realNum2 = new Decimal(complex2.getRealNum());
@@ -770,7 +770,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Sec() {
+    Sec(): number | string {
         const den = Decimal.cosh(this._iNum * 2).add(Decimal.cos(this._realNum * 2));
         const realNum = Decimal.cos(this._realNum).mul(Decimal.cosh(this._iNum)).mul(2).div(den).toNumber();
         const iNum = Decimal.sin(this._realNum).mul(Decimal.sinh(this._iNum)).mul(2).div(den).toNumber();
@@ -778,7 +778,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Sech() {
+    Sech(): number | string {
         const den = Decimal.cosh(this._realNum * 2).add(Decimal.cos(this._iNum * 2));
         const realNum = Decimal.cosh(this._realNum).mul(Decimal.cos(this._iNum)).mul(2).div(den).toNumber();
         const iNum = Decimal.sinh(this._realNum).mul(Decimal.sin(this._iNum)).mul(-2).div(den).toNumber();
@@ -786,21 +786,21 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Sin() {
+    Sin(): number | string {
         const realNum = Decimal.sin(this._realNum).mul(Decimal.cosh(this._iNum)).toNumber();
         const iNum = Decimal.cos(this._realNum).mul(Decimal.sinh(this._iNum)).toNumber();
 
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Sinh() {
+    Sinh(): number | string {
         const realNum = Decimal.sinh(this._realNum).mul(Decimal.cos(this._iNum)).toNumber();
         const iNum = Decimal.cosh(this._realNum).mul(Decimal.sin(this._iNum)).toNumber();
 
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Sqrt() {
+    Sqrt(): number | string {
         const abs_sqrt = Decimal.sqrt(this.Abs());
         const arg_2 = new Decimal(this.Argument()).div(2);
         const realNum = abs_sqrt.mul(Decimal.cos(arg_2)).toNumber();
@@ -809,7 +809,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Sub(complex2: Complex) {
+    Sub(complex2: Complex): number | string {
         const Decimal_realNum1 = new Decimal(this._realNum);
         const Decimal_iNum1 = new Decimal(this._iNum);
         const Decimal_realNum2 = new Decimal(complex2.getRealNum());
@@ -821,7 +821,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Sum(complex2: Complex) {
+    Sum(complex2: Complex): number | string {
         const Decimal_realNum1 = new Decimal(this._realNum);
         const Decimal_iNum1 = new Decimal(this._iNum);
         const Decimal_realNum2 = new Decimal(complex2.getRealNum());
@@ -833,7 +833,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Tan() {
+    Tan(): number | string {
         const den = Decimal.cos(this._realNum * 2).add(Decimal.cosh(this._iNum * 2));
         const realNum = Decimal.sin(this._realNum * 2).div(den).toNumber();
         const iNum = Decimal.sinh(this._iNum * 2).div(den).toNumber();

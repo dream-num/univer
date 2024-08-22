@@ -29,7 +29,7 @@ export class Improduct extends BaseFunction {
 
     override maxParams = 255;
 
-    override calculate(...variants: BaseValueObject[]) {
+    override calculate(...variants: BaseValueObject[]): BaseValueObject {
         let result: number | string = '';
 
         for (let i = 0; i < variants.length; i++) {

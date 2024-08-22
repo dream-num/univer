@@ -18,7 +18,6 @@ import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } fr
 import { DataValidationStatus, Inject, IUniverInstanceService, Range, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
-import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { IDataValidationResCache } from './dv-cache.service';
 import { DataValidationCacheService } from './dv-cache.service';
 
@@ -42,15 +41,15 @@ export class SheetsDataValidationValidatorService {
             throw new Error(`cannot find current worksheet, sheetId: ${subUnitId}`);
         }
 
-        const cellRaw = worksheet.getCellRaw(row, col);
         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+        const cell = worksheet.getCell(row, col);
         const rule = manager.getRuleByLocation(row, col);
         if (!rule) {
             return DataValidationStatus.VALID;
         }
 
         return new Promise<DataValidationStatus>((resolve) => {
-            manager.validator(getCellValueOrigin(cellRaw), rule, { unitId, subUnitId, row, col, worksheet, workbook }, resolve);
+            manager.validator(cell, rule, { unitId, subUnitId, row, col, worksheet, workbook }, resolve);
         });
     }
 

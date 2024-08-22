@@ -24,7 +24,7 @@ import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMo
 import { IDialogService } from '@univerjs/ui';
 import { IMEInputCommand, InsertCommand } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
-import { deserializeRangeWithSheet, IDefinedNamesService, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, LexerTreeBuilder, operatorToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../../views/permission/error-msg-dialog/interface';
 import type { ISheetPasteParams } from '../../commands/commands/clipboard.command';
 import { SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand } from '../../commands/commands/clipboard.command';
@@ -340,15 +340,18 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         if (!selectionRange) {
             return false;
         };
-        if (direction === 'top') {
-            selectionRange.startRow = 0;
-        } else if (direction === 'left') {
-            selectionRange.startColumn = 0;
-        } else if (direction === 'right') {
-            selectionRange.endColumn = worksheet.getColumnCount() - 1;
-        } else if (direction === 'bottom') {
+        if (direction === 'top' || direction === 'bottom') {
+            // selectionRange.startRow = 0;
             selectionRange.endRow = worksheet.getRowCount() - 1;
+        } else if (direction === 'left' || direction === 'right') {
+            // selectionRange.startColumn = 0;
+            selectionRange.endColumn = worksheet.getColumnCount() - 1;
         }
+        // } else if (direction === 'right') {
+        //     selectionRange.endColumn = worksheet.getColumnCount() - 1;
+        // } else if (direction === 'bottom') {
+        //     selectionRange.endRow = worksheet.getRowCount() - 1;
+        // }
 
         const selectionRuleRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).map((rule) => rule.ranges).flat();
         const hasLap = selectionRuleRanges.some((range) => {
@@ -657,7 +660,8 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                     if (sequenceGrid.sheetName) {
                         const targetSheet = workbook.getSheetBySheetName(sequenceGrid.sheetName);
                         if (!targetSheet) {
-                            return false;
+                            // Formula errors need to be handled by the formula system, and permissions will not be blocked
+                            return true;
                         }
                         const { startRow, endRow, startColumn, endColumn } = sequenceGrid.range;
                         for (let i = startRow; i <= endRow; i++) {
@@ -678,7 +682,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                 }
                 for (let i = 0; i < sequenceNodes.length; i++) {
                     const node = sequenceNodes[i];
-                    if (typeof node === 'string') {
+                    if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
                         continue;
                     }
                     const { token } = node;
@@ -709,6 +713,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                         }
                     }
                 }
+                return true;
             }
         }
         if (range) {

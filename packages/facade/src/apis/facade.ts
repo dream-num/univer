@@ -35,7 +35,8 @@ import {
     Quantity,
     toDisposable,
     UndoCommand,
-    Univer, UniverInstanceType, WrapStrategy } from '@univerjs/core';
+    Univer, UniverInstanceType, WrapStrategy,
+} from '@univerjs/core';
 import type { ISocket } from '@univerjs/network';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
@@ -57,6 +58,7 @@ import { FWorkbook } from './sheets/f-workbook';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
 import { FHooks } from './f-hooks';
 import { FDataValidationBuilder } from './sheets/f-data-validation-builder';
+import { FPermission } from './sheets/f-permission';
 
 export class FUniver {
     static BorderStyle = BorderStyleTypes;
@@ -205,7 +207,7 @@ export class FUniver {
      * @returns {FWorkbook | null} The currently focused Univer spreadsheet.
      */
     getActiveWorkbook(): FWorkbook | null {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return null;
         }
@@ -437,7 +439,7 @@ export class FUniver {
      * customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
      * ```
      */
-    customizeColumnHeader(cfg: IColumnsHeaderCfgParam) {
+    customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
         const wb = this.getActiveWorkbook();
         if (!wb) {
             console.error('WorkBook not exist');
@@ -458,7 +460,7 @@ export class FUniver {
      * customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
      * ```
      */
-    customizeRowHeader(cfg: IRowsHeaderCfgParam) {
+    customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
         const wb = this.getActiveWorkbook();
         if (!wb) {
             console.error('WorkBook not exist');
@@ -467,5 +469,14 @@ export class FUniver {
         const unitId = wb?.getId();
         const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
         sheetRow.setCustomHeader(cfg);
+    }
+
+    /**
+     * Get the PermissionInstance.
+     *
+     * @returns {FPermission} - The PermissionInstance.
+     */
+    getPermission(): FPermission {
+        return this._injector.createInstance(FPermission);
     }
 }

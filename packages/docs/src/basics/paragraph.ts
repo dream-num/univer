@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-export function excelSerialToUnixTimestamp(excelSerial: number) {
-    const date = new Date((excelSerial - 25569) * 86400);
-    return date.getTime();
-}
+import type { ICustomTable, IParagraph } from '@univerjs/core';
 
-export const timestamp2SerialTime = (timestamp: number) => {
-    return (timestamp / 86400) + 25569;
-};
+export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[]) {
+    return tables.some((table) => paragraph.startIndex > table.startIndex && paragraph.startIndex < table.endIndex);
+}

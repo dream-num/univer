@@ -18,8 +18,6 @@
 
 import type { Dependency, IWorkbookData, UnitModel, Workbook } from '@univerjs/core';
 import {
-    AuthzIoLocalService,
-    IAuthzIoService,
     ILogService,
     Inject,
     Injector,
@@ -34,7 +32,16 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import {
+    RangeProtectionRuleModel,
+    RefRangeService,
+    SheetInterceptorService,
+    SheetsSelectionsService,
+    WorkbookPermissionService,
+    WorksheetPermissionService,
+    WorksheetProtectionPointModel,
+    WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
 import {
     DescriptionService,
     IDescriptionService,
@@ -52,6 +59,7 @@ import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, Co
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationModel, SheetDataValidationManager, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from '@univerjs/engine-formula/services/active-dirty-manager.service.js';
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { FUniver } from '../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -149,29 +157,34 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([SheetSkeletonManagerService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
+            injector.add([RefRangeService]);
             injector.add([WorksheetPermissionService]);
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
-            injector.add([IAuthzIoService, { useClass: AuthzIoLocalService }]);
             injector.add([WorksheetProtectionRuleModel]);
 
             const renderManagerService = injector.get(IRenderManagerService);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetRenderController] as Dependency);
 
+            // register feature modules
             ([
+                // conditional formatting
                 [ConditionalFormattingService],
                 [ConditionalFormattingFormulaService],
                 [ConditionalFormattingRuleModel],
                 [ConditionalFormattingViewModel],
 
+                // data validation
                 [DataValidationCacheService],
                 [DataValidationFormulaService],
                 [DataValidationCustomFormulaService],
                 [RegisterOtherFormulaService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [SheetsDataValidationValidatorService],
+
+                // sheets filter
             ] as Dependency[]).forEach((d) => {
                 injector.add(d);
             });
@@ -180,25 +193,28 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         }
     }
 
+    // load i18n
     injector.get(LocaleService).load({ zhCN, enUS });
 
+    // load theme service
     const themeService = injector.get(ThemeService);
-    themeService.setTheme({
-        colorBlack: '#35322b',
-    });
+    themeService.setTheme({ colorBlack: '#35322b' });
 
+    // register builtin plugins
+    // note that UI plugins are not registered here, because the unit test environment does not have a UI
     univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(UniverSheetsFilterPlugin);
     univer.registerPlugin(UniverDataValidationPlugin);
 
     const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());
-
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');
+
+    // set log level
     const logService = injector.get(ILogService);
+    logService.setLogLevel(LogLevel.SILENT); // NOTE: change this to `LogLevel.VERBOSE` to debug tests via logs
 
-    logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
-
-    const univerAPI = FUniver.newAPI(injector);
+    // init data validation
     const createSheetDataValidationManager = (unitId: string, subUnitId: string) => {
         return new SheetDataValidationManager(
             unitId,
@@ -208,6 +224,8 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
     };
     const dataValidationModel = injector.get(DataValidationModel);
     dataValidationModel.setManagerCreator(createSheetDataValidationManager);
+
+    const univerAPI = FUniver.newAPI(injector);
 
     return {
         univer,

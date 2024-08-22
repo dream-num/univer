@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, Workbook } from '@univerjs/core';
+import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     Inject,
@@ -33,6 +33,7 @@ import type {
 } from '@univerjs/sheets';
 import { InsertSheetCommand, RemoveSheetCommand, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 
+import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FWorksheet } from './f-worksheet';
 
@@ -41,7 +42,7 @@ export class FWorkbook {
 
     constructor(
         private readonly _workbook: Workbook,
-        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(Injector) protected readonly _injector: Injector,
         @Inject(IResourceLoaderService) private readonly _resourceLoaderService: IResourceLoaderService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -72,12 +73,8 @@ export class FWorkbook {
      * Get the active sheet of the workbook.
      * @returns The active sheet of the workbook
      */
-    getActiveSheet(): FWorksheet | null {
+    getActiveSheet(): FWorksheet {
         const activeSheet = this._workbook.getActiveSheet();
-        if (!activeSheet) {
-            return null;
-        }
-
         return this._injector.createInstance(FWorksheet, this._workbook, activeSheet);
     }
 
@@ -85,7 +82,7 @@ export class FWorkbook {
      * Gets all the worksheets in this workbook
      * @returns An array of all the worksheets in the workbook
      */
-    getSheets() {
+    getSheets(): FWorksheet[] {
         return this._workbook.getSheets().map((sheet) => {
             return this._injector.createInstance(FWorksheet, this._workbook, sheet);
         });
@@ -155,7 +152,7 @@ export class FWorkbook {
      * @param sheet The worksheet to set as the active worksheet.
      * @returns The active worksheet
      */
-    setActiveSheet(sheet: FWorksheet) {
+    setActiveSheet(sheet: FWorksheet): FWorksheet {
         this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
             unitId: this.id,
             subUnitId: sheet.getSheetId(),
@@ -169,7 +166,7 @@ export class FWorkbook {
      * Using a default sheet name. The new sheet becomes the active sheet
      * @returns The new sheet
      */
-    insertSheet() {
+    insertSheet(): FWorksheet {
         this._commandService.syncExecuteCommand(InsertSheetCommand.id);
 
         const unitId = this.id;
@@ -191,7 +188,7 @@ export class FWorkbook {
      * Deletes the specified worksheet.
      * @param sheet The worksheet to delete.
      */
-    deleteSheet(sheet: FWorksheet) {
+    deleteSheet(sheet: FWorksheet): void {
         const unitId = this.id;
         const subUnitId = sheet.getSheetId();
         this._commandService.executeCommand(RemoveSheetCommand.id, {
@@ -282,7 +279,7 @@ export class FWorkbook {
      * get data validation validator status for current workbook
      * @returns matrix of validator status
      */
-    getValidatorStatus() {
+    getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<IDataValidationResCache>>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorkbook(
             this._workbook.getUnitId()

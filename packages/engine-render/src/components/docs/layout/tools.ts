@@ -16,9 +16,11 @@
 
 import type {
     DocumentDataModel,
+    IBullet,
     INumberUnit,
     IObjectPositionH,
     IObjectPositionV,
+    IParagraph,
     IParagraphStyle,
     ISectionBreak,
     ITextStyle,
@@ -793,12 +795,19 @@ export function getFontConfigFromLastGlyph(
     return result;
 }
 
+function getBulletParagraphTextStyle(bullet: IBullet, viewModel: DocumentViewModel) {
+    const { listType } = bullet;
+    const lists = viewModel.getDataModel().getBulletPresetList();
+
+    return lists[listType].nestingLevel[0].paragraphProperties?.textStyle;
+}
+
 export function getFontCreateConfig(
     index: number,
     viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
-    paragraphStyle: IParagraphStyle
+    paragraph: IParagraph
 ) {
     const {
         gridType = GridType.LINES,
@@ -808,12 +817,12 @@ export function getFontCreateConfig(
             width: Number.POSITIVE_INFINITY,
             height: Number.POSITIVE_INFINITY,
         },
-
         marginRight = 0,
         marginLeft = 0,
         localeService,
         renderConfig = {},
     } = sectionBreakConfig;
+    const { paragraphStyle = {}, bullet } = paragraph;
     const { isRenderStyle } = renderConfig;
     const { startIndex } = paragraphNode;
 
@@ -834,13 +843,15 @@ export function getFontCreateConfig(
         return cache;
     }
 
-    const { snapToGrid = BooleanNumber.TRUE, textStyle: paragraphStyleTextStyle } = paragraphStyle;
+    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const bulletTextStyle = bullet ? getBulletParagraphTextStyle(bullet, viewModel) : null;
+
     textStyle = {
         ...documentTextStyle,
         ...textStyle,
         ...customDecorationStyle,
         ...customRangeStyle,
-        ...paragraphStyleTextStyle,
+        ...bulletTextStyle,
     };
 
     const fontStyle = getFontStyleString(textStyle, localeService);

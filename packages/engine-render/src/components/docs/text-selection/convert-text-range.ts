@@ -290,7 +290,7 @@ export class NodePositionConvertToCursor {
         const { start, end } = compareNodePosition(startOrigin, endOrigin);
 
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight, marginTop, asc, paddingTop } = line;
+            const { lineHeight, asc, paddingTop, marginTop, marginBottom } = line;
             const { glyphGroup, st } = divide;
             if (glyphGroup.length === 0) {
                 // The divide is empty, and no need to set selection.
@@ -328,14 +328,14 @@ export class NodePositionConvertToCursor {
                     startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
                     startY,
                     endX: startX + lastGlyphLeft + lastGlyphWidth,
-                    endY: startY + lineHeight,
+                    endY: startY + lineHeight - marginTop - marginBottom,
                 };
 
                 contentBoxPosition = {
                     startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
-                    startY: startY + marginTop + paddingTop + asc - anchorGlyph.bBox.ba,
+                    startY: startY + paddingTop + asc - anchorGlyph.bBox.ba,
                     endX: startX + lastGlyphLeft + lastGlyphWidth,
-                    endY: startY + marginTop + paddingTop + asc + anchorGlyph.bBox.bd,
+                    endY: startY + paddingTop + asc + anchorGlyph.bBox.bd,
                 };
             } else {
                 const isStartBackFin = isStartBack && !isCurrentList;
@@ -344,14 +344,14 @@ export class NodePositionConvertToCursor {
                     startX: startX + firstGlyphLeft + (isStartBackFin ? 0 : firstGlyphWidth),
                     startY,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + lineHeight,
+                    endY: startY + lineHeight - marginTop - marginBottom,
                 };
 
                 contentBoxPosition = {
                     startX: startX + firstGlyphLeft + (isStartBackFin ? 0 : firstGlyphWidth),
-                    startY: startY + marginTop + paddingTop + asc - anchorGlyph.bBox.ba,
+                    startY: startY + paddingTop + asc - anchorGlyph.bBox.ba,
                     endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
-                    endY: startY + marginTop + paddingTop + asc + anchorGlyph.bBox.bd,
+                    endY: startY + paddingTop + asc + anchorGlyph.bBox.bd,
                 };
             }
 
@@ -640,7 +640,7 @@ export class NodePositionConvertToCursor {
                             l
                         );
                         this._liquid.translateSave();
-                        this._liquid.translateLine(line);
+                        this._liquid.translateLine(line, true, false);
 
                         for (let d = start_d; d <= end_d; d++) {
                             const divide = divides[d];

@@ -15,8 +15,8 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
-import { isFormulaTransformable, LexerTreeBuilder, transformFormula } from '@univerjs/engine-formula';
+import { DataValidationType, Disposable, ILogService, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { DataValidationCacheService } from './dv-cache.service';
@@ -46,7 +46,10 @@ type UnitId = string;
 type SubUnitId = string;
 type FormulaId = string;
 
-//
+function transformFormula(lexerTreeBuilder: LexerTreeBuilder, formula: string, originRow: number, originCol: number, targetRow: number, targetCol: number) {
+    return lexerTreeBuilder.moveFormulaRefOffset(formula, targetCol - originCol, targetRow - originRow);
+}
+
 export class DataValidationCustomFormulaService extends Disposable {
     private _formulaMap: Map<UnitId, Map<SubUnitId, ObjectMatrix<IDataValidationFormula>>> = new Map();
     /**
@@ -64,7 +67,8 @@ export class DataValidationCustomFormulaService extends Disposable {
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -175,54 +179,36 @@ export class DataValidationCustomFormulaService extends Disposable {
             return;
         }
 
-        const isTransformable = isFormulaTransformable(
-            this._lexerTreeBuilder,
-            formula
-        );
-
         const originRow = ranges[0].startRow;
         const originCol = ranges[0].startColumn;
 
         let originFormulaId: string | undefined;
-        if (isTransformable) {
-            ranges.forEach((range) => {
-                Range.foreach(range, (row, column) => {
-                    const relativeFormula = transformFormula(
-                        this._lexerTreeBuilder,
-                        formula,
-                        originRow,
-                        originCol,
-                        row,
-                        column
-                    );
-                    const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeFormula);
-                    formulaMap.setValue(row, column, {
-                        formulaId,
+        ranges.forEach((range) => {
+            Range.foreach(range, (row, column) => {
+                const relativeFormula = transformFormula(
+                    this._lexerTreeBuilder,
+                    formula,
+                    originRow,
+                    originCol,
+                    row,
+                    column
+                );
+                const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeFormula);
+                formulaMap.setValue(row, column, {
+                    formulaId,
                         // formulaText: relativeFormula,
-                        ruleId,
-                    });
-                    formulaCellMap.set(formulaId, { row, column });
+                    ruleId,
                 });
+                formulaCellMap.set(formulaId, { row, column });
             });
-        } else {
-            originFormulaId = this._registerFormula(unitId, subUnitId, ruleId, formula);
-            ranges.forEach((range) => {
-                Range.foreach(range, (row, col) => {
-                    formulaMap.setValue(row, col, {
-                        formulaId: originFormulaId!,
-                        // formulaText: formula,
-                        ruleId,
-                    });
-                });
-            });
-        }
+        });
 
         ruleFormulaMap.set(ruleId, {
             formula,
             originCol,
             originRow,
-            isTransformable,
             formulaId: originFormulaId,
+            isTransformable: true,
         });
     }
 
@@ -266,7 +252,6 @@ export class DataValidationCustomFormulaService extends Disposable {
                         const relativeText = transformFormula(this._lexerTreeBuilder, formula, originRow, originCol, row, col);
                         const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeText);
                         formulaMap.setValue(row, col, {
-                            // formulaText: relativeText,
                             ruleId,
                             formulaId,
                         });

@@ -79,8 +79,8 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.73",
-        "@univerjs/protocol": "0.1.39-alpha.3",
+        "@univerjs/icons": "^0.1.74",
+        "@univerjs/protocol": "0.1.39-alpha.9",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",
         "react-grid-layout": "^1.4.4",
@@ -94,7 +94,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons-svg": "^0.1.72",
+        "@univerjs/icons-svg": "^0.1.74",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",

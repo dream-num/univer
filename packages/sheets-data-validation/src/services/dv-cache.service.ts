@@ -19,6 +19,7 @@ import type { CellValue, DataValidationStatus, IRange, ISheetDataValidationRule,
 
 export interface IDataValidationResCache {
     value: Nullable<CellValue>;
+    interceptValue: Nullable<CellValue>;
     status: DataValidationStatus;
     ruleId: string;
     temp?: boolean;

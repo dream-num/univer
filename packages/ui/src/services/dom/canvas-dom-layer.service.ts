@@ -37,6 +37,7 @@ export interface IFloatDom {
     onWheel: (evt: WheelEvent) => void;
     props?: Record<string, any>;
     data?: Serializable;
+    unitId: string;
 }
 
 export class CanvasFloatDomService {

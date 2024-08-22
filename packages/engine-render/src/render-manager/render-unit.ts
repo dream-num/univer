@@ -20,6 +20,11 @@ import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
 
+/**
+ * Public interface of a {@link RenderUnit}.
+ *
+ * @property {string} unitId - The id of the RenderUnit.
+ */
 export interface IRender {
     unitId: string;
     type: UniverInstanceType;
@@ -33,10 +38,14 @@ export interface IRender {
     with<T>(dependency: DependencyIdentifier<T>): T;
 }
 
+/**
+ * Every render module should implement this interface.
+ */
 export interface IRenderModule extends IDisposable {}
 
 /**
- * This object encapsulates methods or properties to render each element.
+ * Necessary context for a render module.This interface would be the first argument of render modules' constructor
+ * functions.
  */
 export interface IRenderContext<T extends UnitModel = UnitModel> extends Omit<IRender, 'with'> {
     unit: T;
@@ -44,7 +53,8 @@ export interface IRenderContext<T extends UnitModel = UnitModel> extends Omit<IR
 }
 
 /**
- * RenderUnit impl IRender
+ * This class is necessary for Univer to render several units in the same webpage. It encapsulates the rendering
+ * context and rendering modules for a specific unit.
  */
 export class RenderUnit extends Disposable implements IRender {
     readonly isRenderUnit: boolean = true;
@@ -64,7 +74,7 @@ export class RenderUnit extends Disposable implements IRender {
     get mainComponent(): Nullable<RenderComponentType> { return this._renderContext.mainComponent; }
     set scene(scene: Scene) { this._renderContext.scene = scene; }
     get scene(): Scene { return this._renderContext.scene; }
-    get components() { return this._renderContext.components; }
+    get components(): Map<string, RenderComponentType> { return this._renderContext.components; }
 
     constructor(
         init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit' >,
@@ -85,19 +95,23 @@ export class RenderUnit extends Disposable implements IRender {
         };
     }
 
-    override dispose() {
+    override dispose(): void {
         this._injector.dispose();
         super.dispose();
     }
 
     /**
-     * Get render controller hold by this render unit.
+     * Get a dependency from the RenderUnit's injector.
      */
     with<T>(dependency: DependencyIdentifier<T>): T {
         return this._injector.get(dependency);
     }
 
-    addRenderDependencies(dependencies: Dependency[]) {
+    /**
+     * Add render dependencies to the RenderUnit's injector. Note that the dependencies would be initialized immediately
+     * after being added.
+     */
+    addRenderDependencies(dependencies: Dependency[]): void {
         this._initDependencies(dependencies);
     }
 
@@ -108,9 +122,13 @@ export class RenderUnit extends Disposable implements IRender {
             const [identifier, implOrNull] = Array.isArray(dep) ? dep : [dep, null];
 
             if (!implOrNull) {
-                j.add([identifier, { useFactory: () => j.createInstance(identifier, this._renderContext) }]);
+                j.add([identifier, {
+                    useFactory: (): IRenderModule => j.createInstance(identifier, this._renderContext),
+                }]);
             } else if (isClassDependencyItem(implOrNull)) {
-                j.add([identifier, { useFactory: () => j.createInstance(implOrNull.useClass, this._renderContext) }]);
+                j.add([identifier, {
+                    useFactory: (): IRenderModule => j.createInstance(implOrNull.useClass, this._renderContext),
+                }]);
             } else {
                 throw new Error('[RenderUnit]: render dependency could only be an class!');
             }

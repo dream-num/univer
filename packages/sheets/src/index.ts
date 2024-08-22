@@ -93,8 +93,9 @@ export {
     handleCommonDefaultRangeChangeWithEffectRefCommands,
     handleDefaultRangeChangeWithEffectRefCommands,
     handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests,
+    handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests,
 } from './services/ref-range/util';
-export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
+export { INTERCEPTOR_POINT, InterceptCellContentPriority } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { ISheetLocation, ISheetLocationBase, ISheetRowLocation } from './services/sheet-interceptor/utils/interceptor';
 export { MergeCellController, MERGE_CELL_INTERCEPTOR_CHECK } from './controllers/merge-cell.controller';
@@ -147,6 +148,7 @@ export {
     WorkbookViewHistoryPermission,
     WorkbookRecoverHistoryPermission,
 } from './services/permission/permission-point';
+export { UnitObject } from '@univerjs/protocol';
 export { checkRangesEditablePermission } from './services/permission/util';
 
 // range-protection
@@ -205,7 +207,7 @@ export {
     type IMoveColsCommandParams,
 } from './commands/commands/move-rows-cols.command';
 export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-name.command';
-export { RemoveRowCommand, RemoveColCommand, type IRemoveRowColCommandParams } from './commands/commands/remove-row-col.command';
+export { RemoveRowCommand, RemoveColCommand, type IRemoveRowColCommandParams, type IRemoveRowColCommandInterceptParams } from './commands/commands/remove-row-col.command';
 export { RemoveSheetCommand, type IRemoveSheetCommandParams } from './commands/commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
 export { ReorderRangeCommand, type IReorderRangeCommandParams } from './commands/commands/reorder-range.command';

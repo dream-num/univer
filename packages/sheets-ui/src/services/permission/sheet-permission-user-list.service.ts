@@ -43,6 +43,14 @@ export class SheetPermissionUserManagerService {
         this._userList = userList;
     }
 
+    reset() {
+        this._userList = [];
+        this._oldCollaboratorList = [];
+        this._selectUserList = [];
+        this._selectUserList$.next([]);
+        this._allUserList = [];
+    }
+
     get oldCollaboratorList() {
         return this._oldCollaboratorList;
     }

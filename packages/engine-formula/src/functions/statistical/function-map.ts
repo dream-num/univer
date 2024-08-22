@@ -31,6 +31,8 @@ import { Maxifs } from './maxifs';
 import { Min } from './min';
 import { Mina } from './mina';
 import { Minifs } from './minifs';
+import { RankAvg } from './rank-avg';
+import { RankEq } from './rank-eq';
 import { StdevP } from './stdev-p';
 import { StdevS } from './stdev-s';
 import { Stdeva } from './stdeva';
@@ -57,6 +59,8 @@ export const functionStatistical = [
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],
     [Mina, FUNCTION_NAMES_STATISTICAL.MINA],
     [Minifs, FUNCTION_NAMES_STATISTICAL.MINIFS],
+    [RankAvg, FUNCTION_NAMES_STATISTICAL.RANK_AVG],
+    [RankEq, FUNCTION_NAMES_STATISTICAL.RANK_EQ],
     [StdevP, FUNCTION_NAMES_STATISTICAL.STDEV_P],
     [StdevS, FUNCTION_NAMES_STATISTICAL.STDEV_S],
     [Stdeva, FUNCTION_NAMES_STATISTICAL.STDEVA],

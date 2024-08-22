@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
-import { UpdateDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, type ICommand, ICommandService, sequenceExecute } from '@univerjs/core';
+import { replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
+import type { IAddDocHyperLinkMutationParams } from '@univerjs/docs-hyper-link';
+import { AddDocHyperLinkMutation } from '@univerjs/docs-hyper-link';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;
     linkId: string;
     payload: string;
+    label: string;
+    segmentId: string;
 }
 
 export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParams> = {
@@ -30,8 +34,54 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         if (!params) {
             return false;
         }
-
+        const { unitId, payload, segmentId } = params;
         const commandService = accessor.get(ICommandService);
-        return commandService.syncExecuteCommand(UpdateDocHyperLinkMutation.id, params);
+        const selectionService = accessor.get(TextSelectionManagerService);
+        const currentSelection = selectionService.getActiveTextRange();
+        if (!currentSelection) {
+            return false;
+        }
+
+        const newId = generateRandomId();
+        const replaceSelection = replaceSelectionFactory(accessor, {
+            unitId: params.unitId,
+            body: {
+                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${params.label}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                customRanges: [{
+                    rangeId: newId,
+                    rangeType: CustomRangeType.HYPERLINK,
+                    startIndex: 0,
+                    endIndex: params.label.length + 1,
+                }],
+            },
+            selection: {
+                startOffset: currentSelection.startOffset!,
+                endOffset: currentSelection.endOffset!,
+                collapsed: false,
+                segmentId,
+            },
+        });
+
+        if (!replaceSelection) {
+            return false;
+        }
+
+        // doc don't support undo now
+        // so use an new id to replace the old link
+        // in case of undo or redo
+        const addLinkMutation = {
+            id: AddDocHyperLinkMutation.id,
+            params: {
+                unitId,
+                link: {
+                    id: newId,
+                    payload,
+                },
+            } as IAddDocHyperLinkMutationParams,
+        };
+
+        const result = sequenceExecute([addLinkMutation, replaceSelection], commandService);
+
+        return result.result;
     },
 };

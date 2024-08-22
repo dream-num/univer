@@ -25,10 +25,8 @@ import type {
     Nullable,
     ThemeService,
 } from '@univerjs/core';
-import {
-    createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE, UniverInstanceType,
-} from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderManagerService, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import { createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle, transformCellDataToSelectionData } from '@univerjs/sheets';
@@ -36,7 +34,7 @@ import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
@@ -171,7 +169,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         protected readonly _themeService: ThemeService,
         // WTF: why shortcutService is injected here?
         protected readonly _shortcutService: IShortcutService,
-        protected readonly _renderManagerService: IRenderManagerService
+        protected readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
         this._resetStyle();
@@ -335,8 +333,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     protected _getFreeze() {
-        const freeze = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)
-            ?.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+        const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
         return freeze;
     }
 
@@ -413,7 +410,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._downObserver = null;
     }
 
-    resetAndEndSelection() {
+    resetAndEndSelection(): void {
         this.endSelection();
         this._reset();
     }
@@ -434,7 +431,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
         viewport?: Viewport,
         scrollTimerType: ScrollTimerType = ScrollTimerType.ALL
-    ) {
+    ): void {
         this._shouldDetectMergedCells = rangeType === RANGE_TYPE.NORMAL;
 
         const skeleton = this._skeleton;
@@ -459,7 +456,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
         const { scaleX, scaleY } = scene.getAncestorScale();
         const cursorCellRangeInfo = this._getCellRangeByCursorPosition(viewportPosX, viewportPosY, scaleX, scaleY, scrollXY);
-        if (!cursorCellRangeInfo) return false;
+        if (!cursorCellRangeInfo) return;
 
         const { rangeWithCoord: cursorCellRange, primaryWithCoord: primaryCursorCellRange } = cursorCellRangeInfo;
         const cursorCellRangeWithRangeType: IRangeWithCoord = { ...cursorCellRange, rangeType };

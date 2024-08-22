@@ -17,7 +17,7 @@
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type ISelectionWithStyle, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
 import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
@@ -39,15 +39,14 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         @Inject(Injector) injector: Injector,
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
-        @IRenderManagerService renderManagerService: IRenderManagerService,
-        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService
     ) {
         super(
             injector,
             themeService,
             shortcutService,
-            renderManagerService
+            sheetSkeletonManagerService
         );
 
         this._workbookSelections = this._refSelectionsService.getWorkbookSelections(this._context.unitId);

@@ -45,7 +45,9 @@ import {
     DeleteColumn,
     DeleteRow,
     DirectExportSingle,
+    DollarSingle,
     DownBorder,
+    EuroSingle,
     ExportSingle,
     FolderSingle,
     FontColor,
@@ -100,6 +102,7 @@ import {
     RightRotationFortyFiveDegreesSingle,
     RightRotationNinetyDegreesSingle,
     RmbSingle,
+    RoubleSingle,
     SlashSingle,
     StrikethroughSingle,
     SubscriptSingle,
@@ -244,7 +247,9 @@ export class ComponentManager {
             AddDigitsSingle,
             ReduceDigitsSingle,
             PercentSingle,
-
+            EuroSingle,
+            RoubleSingle,
+            DollarSingle,
         };
 
         for (const k in iconList) {

@@ -34,7 +34,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 
 import { of, skip, switchMap } from 'rxjs';
 import { getPatternPreview } from '../utils/pattern';
@@ -113,7 +113,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
                 return next({ ...cell, ...res });
             },
-            priority: 10,
+            priority: InterceptCellContentPriority.NUMFMT,
         }));
 
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {

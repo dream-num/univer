@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-// This file provides a ton of mutations to manipulate `FilterModel`.
-// These models would be held on `SheetsFilterService`.
-
 import { CommandType } from '@univerjs/core';
 import type { IMutation, IRange, Nullable } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
@@ -24,12 +21,17 @@ import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import { SheetsFilterService } from '../../services/sheet-filter.service';
 import type { IFilterColumn } from '../../models/types';
 
+/**
+ * Parameters of mutation {@link SetSheetsFilterRangeMutation}.
+ * @property range - the range to be set as filter range.
+ */
 export interface ISetSheetsFilterRangeMutationParams extends ISheetCommandSharedParams {
     range: IRange;
 }
 
 /**
- * Set filter range in a Worksheet. If the `FilterModel` does not exist, it will be created.
+ * A {@link CommandType.MUTATION} to set filter range in a {@link Worksheet}. If no {@link FilterModel} exists,
+ * a new `FilterModel` will be created.
  *
  * Since there could only be a filter on a worksheet, when you want to update the range, you
  * don't necessarily need to remove the filter first, you can just execute this mutation.
@@ -49,23 +51,20 @@ export const SetSheetsFilterRangeMutation: IMutation<ISetSheetsFilterRangeMutati
     },
 };
 
+/**
+ * Parameters of mutation {@link SetSheetsFilterCriteriaMutation}.
+ * @property {number} col - the column index to set filter criteria.
+ * @property {IFilterColumn | null} criteria - the filter criteria to set. If it is `null`, the criteria will be removed.
+ * @property {boolean} [reCalc=true] - if it should trigger calculation on this `FilterColumn`.
+ */
 export interface ISetSheetsFilterCriteriaMutationParams extends ISheetCommandSharedParams {
     col: number;
-
-    /**
-     * Filter criteria to set. If it is `null`, the criteria will be removed.
-     */
     criteria: Nullable<IFilterColumn>;
-
-    /**
-     * If it should trigger calculation on this `FilterColumn`.
-     *
-     * @default true
-     */
     reCalc?: boolean;
 }
+
 /**
- * Set filter criteria of a Worksheet.
+ * A {@link CommandType.MUTATION} to set filter criteria of a given column of a {@link FilterModel}.
  */
 export const SetSheetsFilterCriteriaMutation: IMutation<ISetSheetsFilterCriteriaMutationParams> = {
     id: 'sheet.mutation.set-filter-criteria',
@@ -75,19 +74,17 @@ export const SetSheetsFilterCriteriaMutation: IMutation<ISetSheetsFilterCriteria
         const sheetsFilterService = accessor.get(SheetsFilterService);
 
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);
-        if (!filterModel) {
-            return false;
-        }
-
-        // TODO@wzhudev: check criteria out of bound.
+        if (!filterModel) return false;
 
         filterModel.setCriteria(col, criteria, reCalc);
         return true;
     },
 };
 
-export interface IRemoveSheetsFilterMutationParams extends ISheetCommandSharedParams { }
-export const RemoveSheetsFilterMutation: IMutation<IRemoveSheetsFilterMutationParams> = {
+/**
+ * A {@link CommandType.MUTATION} to remove a {@link FilterModel} in a {@link Worksheet}.
+ */
+export const RemoveSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = {
     id: 'sheet.mutation.remove-filter',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
@@ -97,8 +94,10 @@ export const RemoveSheetsFilterMutation: IMutation<IRemoveSheetsFilterMutationPa
     },
 };
 
-export interface IReCalcSheetsFilterMutationParams extends ISheetCommandSharedParams { }
-export const ReCalcSheetsFilterMutation: IMutation<IReCalcSheetsFilterMutationParams> = {
+/**
+ * A {@link CommandType.MUTATION} to re-calculate a {@link FilterModel}.
+ */
+export const ReCalcSheetsFilterMutation: IMutation<ISheetCommandSharedParams> = {
     id: 'sheet.mutation.re-calc-filter',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {

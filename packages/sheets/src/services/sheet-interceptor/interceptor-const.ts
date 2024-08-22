@@ -26,3 +26,8 @@ export const INTERCEPTOR_POINT = {
     CELL_CONTENT,
     ROW_FILTERED,
 };
+
+export enum InterceptCellContentPriority {
+    DATA_VALIDATION = 9,
+    NUMFMT = 10,
+}

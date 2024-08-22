@@ -81,6 +81,10 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         return this._name$.getValue();
     }
 
+    static isIRangeType(range: IRangeType | IRangeType[]): boolean {
+        return typeof range === 'string' || 'startRow' in range || 'row' in range;
+    }
+
     constructor(
         workbookData: Partial<IWorkbookData> = {},
         @ILogService private readonly _logService: ILogService
@@ -119,14 +123,21 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         this._name$.complete();
     }
 
+    /**
+     * Create a clone of the current snapshot.
+     * Call resourceLoaderService.saveWorkbook to save the data associated with the current plugin if needed.
+     * @memberof Workbook
+     */
     save(): IWorkbookData {
         return Tools.deepClone(this._snapshot);
     }
 
-    static isIRangeType(range: IRangeType | IRangeType[]): boolean {
-        return typeof range === 'string' || 'startRow' in range || 'row' in range;
-    }
-
+    /**
+     * Get current snapshot reference.
+     * Call resourceLoaderService.saveWorkbook to save the data associated with the current plugin if needed.
+     * @return {*}  {IWorkbookData}
+     * @memberof Workbook
+     */
     getSnapshot(): IWorkbookData {
         return this._snapshot;
     }

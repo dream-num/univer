@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import { ICommandService, type IRange, type Workbook, type Worksheet } from '@univerjs/core';
+import type { IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
 import { SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import { Inject, Injector } from '@univerjs/core';
+import { ICommandService, Inject, Injector } from '@univerjs/core';
 
+import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import type { FilterModel } from '@univerjs/sheets-filter';
+import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { FDataValidation } from './f-data-validation';
+import { FFilter } from './f-filter';
 
 export class FWorksheet {
     constructor(
@@ -60,7 +64,7 @@ export class FWorksheet {
         return this._injector.createInstance(FSelection, this._workbook, this._worksheet, selections);
     }
 
-    getRange(row: number, col: number, height?: number, width?: number): FRange | null {
+    getRange(row: number, col: number, height?: number, width?: number): FRange {
         const range: IRange = {
             startRow: row,
             endRow: row + (height ?? 1) - 1,
@@ -71,7 +75,7 @@ export class FWorksheet {
         return this._injector.createInstance(FRange, this._workbook, this._worksheet, range);
     }
 
-    setRowHeights(startRow: number, numRows: number, height: number) {
+    setRowHeights(startRow: number, numRows: number, height: number): void {
         this._commandService.syncExecuteCommand(SetWorksheetRowHeightMutation.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
@@ -87,7 +91,7 @@ export class FWorksheet {
         } as ISetWorksheetRowHeightMutationParams);
     }
 
-    setColumnWidths(startColumn: number, numColumns: number, width: number) {
+    setColumnWidths(startColumn: number, numColumns: number, width: number): void {
         this._commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
@@ -107,7 +111,7 @@ export class FWorksheet {
      * Returns the current number of columns in the sheet, regardless of content.
      * @return The maximum columns count of the sheet
      */
-    getMaxColumns() {
+    getMaxColumns(): number {
         return this._worksheet.getMaxColumns();
     }
 
@@ -115,15 +119,15 @@ export class FWorksheet {
      * Returns the current number of rows in the sheet, regardless of content.
      * @return The maximum rows count of the sheet
      */
-    getMaxRows() {
+    getMaxRows(): number {
         return this._worksheet.getMaxRows();
     }
 
      /**
       * get all data validation rules in current sheet
-      * @returns {FDataValidation[]} all data validation rules
+      * @returns all data validation rules
       */
-    getDataValidations() {
+    getDataValidations(): FDataValidation[] {
         const dataValidationModel = this._injector.get(DataValidationModel);
         return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule));
     }
@@ -132,11 +136,29 @@ export class FWorksheet {
      * get data validation validator status for current sheet
      * @returns matrix of validator status
      */
-    getValidatorStatus() {
+    getValidatorStatus(): Promise<ObjectMatrix<Nullable<IDataValidationResCache>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorksheet(
             this._workbook.getUnitId(),
             this._worksheet.getSheetId()
         );
     }
+
+    // #region Filter
+
+    getFilter(): FFilter | null {
+        const filterModel = this._getFilterModel();
+        if (!filterModel) return null;
+
+        return this._injector.createInstance(FFilter, this._workbook, this._worksheet, filterModel);
+    }
+
+    private _getFilterModel(): Nullable<FilterModel> {
+        return this._injector.get(SheetsFilterService).getFilterModel(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId()
+        );
+    }
+
+    // #endregion
 }

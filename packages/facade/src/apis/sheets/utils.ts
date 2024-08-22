@@ -137,14 +137,14 @@ export function covertCellValues(
     return cellValue.getMatrix();
 }
 
-export function isCellMerged(mergeInfo: IRangeWithCoord, range: IRange) {
+export function isCellMerged(mergeInfo: IRangeWithCoord, range: IRange): boolean {
     if (!isSingleCell(mergeInfo, range)) {
         return false;
     }
     return range.startColumn !== range.endColumn || range.startRow !== range.endRow;
 }
 
-export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange) {
+export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange): boolean {
     return mergeInfo.startColumn === range.startColumn
         && mergeInfo.endColumn === range.endColumn
         && mergeInfo.startRow === range.startRow

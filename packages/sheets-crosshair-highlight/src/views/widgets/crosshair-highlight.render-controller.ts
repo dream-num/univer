@@ -49,10 +49,21 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         if (!selectionData) {
             return;
         }
-        const ranges = selectionData.map((selection) => selection.range);
-        this._rangeCollection.setSelectedRanges(ranges);
+        const rowCount = sheet.getRowCount();
+        const columnCount = sheet.getColumnCount();
+        const ranges = [];
+        // remove the selection that covers the whole row or column
         for (const selection of selectionData) {
-            this.addSelection(selection.range, sheet);
+            const { startRow, endRow, startColumn, endColumn } = selection.range;
+            if (endRow - startRow + 1 === rowCount || endColumn - startColumn + 1 === columnCount) {
+                continue;
+            }
+            ranges.push(selection.range);
+        }
+
+        this._rangeCollection.setSelectedRanges(ranges);
+        for (const range of ranges) {
+            this.addSelection(range, sheet);
         }
     }
 

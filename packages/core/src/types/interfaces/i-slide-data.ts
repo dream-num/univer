@@ -19,14 +19,13 @@ import type { IKeyType, Nullable } from '../../shared/types';
 import type { LocaleType, ThemeColorType } from '../enum';
 import type { ShapeType } from '../enum/prst-geom-type';
 import type { ICustomBlock, IDocumentData, ILists, ITransformState } from './i-document-data';
-import type { IExtraModelData } from './i-extra-model-data';
 import type { IImageProperties } from './i-image-properties';
 import type { IPlaceholder } from './i-placeholder';
 import type { IShapeProperties } from './i-shape-properties';
 import type { IColorStyle, IStyleBase, IStyleData } from './i-style-data';
 import type { IWorksheetData } from './i-worksheet-data';
 
-export interface ISlideData extends IReferenceSource, IExtraModelData {
+export interface ISlideData extends IReferenceSource {
     id: string; // unit id
     locale?: LocaleType;
     title: string;

@@ -37,6 +37,7 @@ export interface ICellRenderContext {
 
 /**
  * @debt This shouldn't exist in core package.
+ * @ignore
  *
  * @deprecated This interface is subject to change in the future.
  */

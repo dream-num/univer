@@ -14,16 +14,63 @@
  * limitations under the License.
  */
 
-import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType } from '../../shared/object-matrix';
-import type { BooleanNumber } from '../enum';
-import type { ICellData } from './i-cell-data';
-import type { IColumnData } from './i-column-data';
-import type { IFreeze } from './i-freeze';
-import type { IRange, IRangeType } from './i-range';
-import type { IRowData } from './i-row-data';
+import type { ICellData, IRowData } from '@univerjs/protocol';
+import type { Nullable } from 'vitest';
+import type { LocaleType } from '../types/enum/locale-type';
+import type { IStyleData } from '../types/interfaces/i-style-data';
+import type { Resources } from '../types/interfaces/resource';
+import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType } from '../shared';
+import type { BooleanNumber } from '../types/enum';
+import type { IColumnData, IFreeze, IRange, IRangeType } from '../types/interfaces';
 
-// TODO: 考虑将非通用配置，抽离到插件
-// 比如 showGridlines 是 spreadsheet 特有的，而如果实现如普通表格，就不需要 showGridlines
+/**
+ * Snapshot of a workbook.
+ */
+export interface IWorkbookData {
+    /**
+     * Id of the Univer Sheet.
+     */
+    id: string;
+
+    /**
+     * Revision of this spreadsheet. Used in collaborated editing. Starts from one.
+     * @ignore
+     */
+    rev?: number;
+
+    /**
+     * Name of the Univer Sheet.
+     */
+    name: string;
+
+    /**
+     * Version of Univer model definition.
+     */
+    appVersion: string;
+
+    /**
+     * Locale of the document.
+     */
+    locale: LocaleType;
+
+    /**
+     * Style references.
+     */
+    styles: Record<string, Nullable<IStyleData>>;
+
+    /** Ids of {@link IWorksheetData}s of this Univer Sheet in sequence order. */
+    sheetOrder: string[];
+
+    /**
+     * Data of each {@link IWorksheetData} in this Univer Sheet.
+     */
+    sheets: { [sheetId: string]: Partial<IWorksheetData> };
+
+    /**
+     * Resources of the Univer Sheet. It is used to store the data of other plugins.
+     */
+    resources?: Resources;
+}
 
 /**
  * Snapshot of a worksheet.

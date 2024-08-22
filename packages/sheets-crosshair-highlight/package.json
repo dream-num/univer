@@ -23,7 +23,8 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -43,7 +44,8 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*"
+            "./lib/*": "./lib/*",
+            "./locale/*": "./lib/locale/*.json"
         }
     },
     "directories": {
@@ -61,24 +63,22 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.76",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": ">=2.0.0",
-        "react": ">=16.9.0",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.76"
+        "@univerjs/icons": "^0.1.77"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.76",
+        "@univerjs/icons": "^0.1.77",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -90,5 +90,19 @@
         "typescript": "^5.5.4",
         "vite": "^5.4.1",
         "vitest": "^2.0.5"
+    },
+    "univerSpace": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*",
+        "./locale/*": "./lib/locale/*.json"
     }
 }

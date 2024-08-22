@@ -18,7 +18,7 @@ import { useDependency, useObservable } from '@univerjs/core';
 import React, { useCallback } from 'react';
 import clsx from 'clsx';
 
-import { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from '../../services/cross-hair.service';
+import { CROSSHAIR_HIGHLIGHT_COLORS, SheetsCrosshairHighlightService } from '../../services/crosshair.service';
 
 import styles from './index.module.less';
 

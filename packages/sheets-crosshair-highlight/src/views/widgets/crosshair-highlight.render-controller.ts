@@ -24,7 +24,7 @@ import { SheetsSelectionsService } from '@univerjs/sheets';
 import { combineLatest, merge, tap } from 'rxjs';
 import { SHEETS_CROSSHAIR_HIGHLIGHT_Z_INDEX } from '../../const';
 import { CrossHairRangeCollection } from '../../util';
-import { SheetsCrosshairHighlightService } from '../../services/cross-hair.service';
+import { SheetsCrosshairHighlightService } from '../../services/crosshair.service';
 import { SheetCrossHairHighlightShape } from './crosshair-highlight-shape';
 
 export class SheetCrosshairHighlightRenderController extends Disposable implements IRenderModule {
@@ -137,7 +137,7 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
             zIndex: SHEETS_CROSSHAIR_HIGHLIGHT_Z_INDEX,
             evented: false,
         };
-        const currentShapes = new SheetCrossHairHighlightShape(`cross-hair-${index}`, shapeProps);
+        const currentShapes = new SheetCrossHairHighlightShape(`crosshair-${index}`, shapeProps);
         this._shapes.push(currentShapes);
         scene.addObject(currentShapes);
     }

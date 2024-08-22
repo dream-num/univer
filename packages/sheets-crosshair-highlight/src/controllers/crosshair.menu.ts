@@ -17,7 +17,7 @@
 import { type IAccessor, UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, type IMenuSelectorItem, MenuItemType } from '@univerjs/ui';
 import { SheetMenuPosition } from '@univerjs/sheets-ui';
-import { SheetsCrosshairHighlightService } from '../services/cross-hair.service';
+import { SheetsCrosshairHighlightService } from '../services/crosshair.service';
 import { SetCrosshairHighlightColorOperation, ToggleCrosshairHighlightOperation } from '../commands/operations/operation';
 
 export const CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT = 'CROSSHAIR_HIGHLIGHT_OVERLAY_COMPONENT';
@@ -29,7 +29,7 @@ export function CrosshairHighlightMenuItemFactory(accessor: IAccessor): IMenuSel
         id: ToggleCrosshairHighlightOperation.id,
         tooltip: 'crosshair.button.tooltip',
         type: MenuItemType.BUTTON_SELECTOR,
-        icon: 'CrossHighlighting',
+        icon: 'CrossHighlightingSingle',
         selections: [
             {
                 label: {
@@ -40,7 +40,6 @@ export function CrosshairHighlightMenuItemFactory(accessor: IAccessor): IMenuSel
         ],
         selectionsCommandId: SetCrosshairHighlightColorOperation.id,
         activated$: crosshairHighlightService.enabled$,
-        value$: crosshairHighlightService.color$,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         positions: [SheetMenuPosition.SHEET_FOOTER],
     };

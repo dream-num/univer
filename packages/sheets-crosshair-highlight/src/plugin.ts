@@ -17,8 +17,8 @@
 import type { Dependency } from '@univerjs/core';
 import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetsCrosshairHighlightController } from './controllers/cross-hair.controller';
-import { SheetsCrosshairHighlightService } from './services/cross-hair.service';
+import { SheetsCrosshairHighlightController } from './controllers/crosshair.controller';
+import { SheetsCrosshairHighlightService } from './services/crosshair.service';
 import { SheetCrosshairHighlightRenderController } from './views/widgets/crosshair-highlight.render-controller';
 
 export class UniverSheetsCrosshairHighlightPlugin extends Plugin {

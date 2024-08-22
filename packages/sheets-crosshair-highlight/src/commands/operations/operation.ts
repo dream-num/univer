@@ -15,7 +15,7 @@
  */
 
 import { CommandType, type IOperation } from '@univerjs/core';
-import { SheetsCrosshairHighlightService } from '../../services/cross-hair.service';
+import { SheetsCrosshairHighlightService } from '../../services/crosshair.service';
 
 /**
  * A {@link CommandType.OPERATION} to toggle the crosshair highlight.

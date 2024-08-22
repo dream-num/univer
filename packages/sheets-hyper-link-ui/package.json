@@ -80,7 +80,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.76",
+        "@univerjs/icons": "^0.1.77",
         "@univerjs/sheets-hyper-link": "workspace:*"
     },
     "devDependencies": {

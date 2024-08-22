@@ -78,7 +78,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.76",
+        "@univerjs/icons": "^0.1.77",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",

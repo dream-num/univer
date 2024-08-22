@@ -69,7 +69,7 @@
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.76"
+        "@univerjs/icons": "^0.1.77"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

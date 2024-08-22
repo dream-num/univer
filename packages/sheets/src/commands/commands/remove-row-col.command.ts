@@ -45,6 +45,11 @@ import { getSheetCommandTarget } from './utils/target-util';
 export interface IRemoveRowColCommandParams {
     range: IRange;
 }
+
+export interface IRemoveRowColCommandInterceptParams extends IRemoveRowColCommandParams {
+    ranges?: IRange[];
+}
+
 export const RemoveRowCommandId = 'sheet.command.remove-row';
 /**
  * This command would remove the selected rows. These selected rows can be non-continuous.
@@ -102,7 +107,7 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
 
         const canPerform = await sheetInterceptorService.beforeCommandExecute({
             id: RemoveRowCommand.id,
-            params: { range: totalRange } as IRemoveRowColCommandParams,
+            params: { range: totalRange, ranges } as IRemoveRowColCommandInterceptParams,
         });
 
         if (!canPerform) {
@@ -136,7 +141,7 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveRowCommand.id,
-            params: { range: totalRange } as IRemoveRowColCommandParams,
+            params: { range: totalRange, ranges } as IRemoveRowColCommandInterceptParams,
         });
 
         const commandService = accessor.get(ICommandService);

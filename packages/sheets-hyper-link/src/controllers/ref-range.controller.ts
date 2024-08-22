@@ -17,7 +17,7 @@
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, isValidRange, LifecycleStages, OnLifecycle, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
+import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
@@ -105,7 +105,8 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         };
 
         const handleRefRangeChange = (commandInfo: EffectRefRangeParams) => {
-            const resultRange = handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests(oldRange, commandInfo, { selectionManagerService: this._selectionManagerService });
+            const resultRanges = handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests(oldRange, commandInfo, { selectionManagerService: this._selectionManagerService });
+            const resultRange = Array.isArray(resultRanges) ? resultRanges[0] : resultRanges;
             if (resultRange && resultRange.startColumn === oldRange.startColumn && resultRange.startRow === oldRange.startRow) {
                 return {
                     undos: [],

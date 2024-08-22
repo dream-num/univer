@@ -65,7 +65,6 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "big.js": "^6.2.1",
         "decimal.js": "^10.4.3",
         "numfmt": "^2.5.2"
     },

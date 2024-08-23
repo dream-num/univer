@@ -33,6 +33,7 @@ import type { LexerNode } from '../lexer-node';
 import { AstTreeBuilder } from '../parser';
 import type { ArrayValueObject } from '../../value-object/array-value-object';
 import { Minus } from '../../../functions/meta/minus';
+import { Pi } from '../../../functions/math/pi';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test indirect', () => {
@@ -81,7 +82,12 @@ describe('Test indirect', () => {
             testBed.unitId
         );
 
-        functionService.registerExecutors(new Sum(FUNCTION_NAMES_MATH.SUM), new Plus(FUNCTION_NAMES_META.PLUS), new Minus(FUNCTION_NAMES_META.MINUS));
+        functionService.registerExecutors(
+            new Sum(FUNCTION_NAMES_MATH.SUM),
+            new Plus(FUNCTION_NAMES_META.PLUS),
+            new Minus(FUNCTION_NAMES_META.MINUS),
+            new Pi(FUNCTION_NAMES_MATH.PI)
+        );
     });
 
     describe('normal', () => {
@@ -207,6 +213,16 @@ describe('Test indirect', () => {
 
         it('Error #NAME?', async () => {
             const lexerNode = lexer.treeBuilder('=A1:A');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+        });
+
+        it('Root node has multiple parameter!', async () => {
+            const lexerNode = lexer.treeBuilder('=PI()/1.570796327,M54');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 

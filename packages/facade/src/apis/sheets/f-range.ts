@@ -29,7 +29,7 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import { BooleanNumber, DisposableCollection, generateRandomId, ICommandService, Inject, Injector, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, ICommandService, Inject, Injector, WrapStrategy } from '@univerjs/core';
 import type {
     ISetHorizontalTextAlignCommandParams,
     ISetStyleCommandParams,

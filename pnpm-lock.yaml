@@ -2957,6 +2957,9 @@ importers:
       '@univerjs/sheets-conditional-formatting-ui':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting-ui
+      '@univerjs/sheets-crosshair-highlight':
+        specifier: workspace:*
+        version: link:../sheets-crosshair-highlight
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation

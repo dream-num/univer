@@ -196,8 +196,8 @@ export function getRangeListFromSelection(
                     if (start <= tableStart - 1) {
                         const sp = skeleton.findNodePositionByCharIndex(start, true, segmentId, segmentPage);
                         const ep = skeleton.findNodePositionByCharIndex(tableStart - 1, false, segmentId, segmentPage);
-                        const ap = direction ? sp : ep;
-                        const fp = direction ? ep : sp;
+                        const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;
+                        const fp = direction === RANGE_DIRECTION.FORWARD ? ep : sp;
 
                         textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId));
                     }
@@ -205,8 +205,8 @@ export function getRangeListFromSelection(
                 }
 
                 if (tableStartPosition && tableEndPosition) {
-                    const ap = direction ? tableStartPosition : tableEndPosition;
-                    const fp = direction ? tableEndPosition : tableStartPosition;
+                    const ap = direction === RANGE_DIRECTION.FORWARD ? tableStartPosition : tableEndPosition;
+                    const fp = direction === RANGE_DIRECTION.FORWARD ? tableEndPosition : tableStartPosition;
 
                     rectRanges.push(...convertPositionsToRectRanges(
                         scene,
@@ -223,8 +223,8 @@ export function getRangeListFromSelection(
             if ((end >= startIndex && end <= endIndex) || endInTable) {
                 const sp = skeleton.findNodePositionByCharIndex(start, true, segmentId, segmentPage);
                 const ep = skeleton.findNodePositionByCharIndex(end, !endInTable, segmentId, segmentPage);
-                const ap = direction ? sp : ep;
-                const fp = direction ? ep : sp;
+                const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;
+                const fp = direction === RANGE_DIRECTION.FORWARD ? ep : sp;
 
                 // Can not create cursor(startOffset === endOffset) and rect range at the same time.
                 if (rectRanges.length && Tools.diffValue(ap, fp)) {

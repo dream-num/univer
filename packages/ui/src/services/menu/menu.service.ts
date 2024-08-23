@@ -25,23 +25,33 @@ import type { IDisplayMenuItem, IMenuItem, MenuConfig, MenuPosition } from './me
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 
+/**
+ * Breaking changes to IMenuService are expected in the next version. Use with caution. by @jikkai
+ */
 export interface IMenuService {
     menuChanged$: Observable<void>;
 
+    /** @deprecated */
     addMenuItem(item: IMenuItem, config: MenuConfig): IDisposable;
 
+    /** @deprecated */
     setMenuItem(item: IMenuItem): void;
 
     /** Get menu items for display at a given position or a submenu. */
+    /** @deprecated */
     getMenuItems(position: MenuPosition | string): Array<IDisplayMenuItem<IMenuItem>>;
+    /** @deprecated */
     getMenuItem(id: string): IMenuItem | null;
 }
 
 export class MenuService extends Disposable implements IMenuService {
+    /** @deprecated */
     private readonly _menuItemMap = new Map<string, IMenuItem>();
 
+    /** @deprecated */
     private readonly _menuByPositions = new Map<MenuPosition | string, Array<[string, IMenuItem]>>();
 
+    /** @deprecated */
     private readonly _menuConfigs = new Map<string, MenuConfig>();
 
     private _menuChanged$ = new BehaviorSubject<void>(undefined);
@@ -57,6 +67,7 @@ export class MenuService extends Disposable implements IMenuService {
         this._menuChanged$.complete();
     }
 
+    /** @deprecated */
     addMenuItem(item: IMenuItem, config: MenuConfig): IDisposable {
         if (this._menuItemMap.has(item.id)) {
             throw new Error(`Menu item with the same id ${item.id} has already been added!`);
@@ -105,6 +116,7 @@ export class MenuService extends Disposable implements IMenuService {
         });
     }
 
+    /** @deprecated */
     getMenuItems(positions: MenuPosition | string): Array<IDisplayMenuItem<IMenuItem>> {
         // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
@@ -118,6 +130,7 @@ export class MenuService extends Disposable implements IMenuService {
         return [] as Array<IDisplayMenuItem<IMenuItem>>;
     }
 
+    /** @deprecated */
     setMenuItem(item: IMenuItem): void {
         this._menuItemMap.set(item.id, item);
         if (Array.isArray(item.positions)) {
@@ -129,6 +142,7 @@ export class MenuService extends Disposable implements IMenuService {
         this._menuChanged$.next();
     }
 
+    /** @deprecated */
     getMenuItem(id: string): IMenuItem | null {
         if (this._menuItemMap.has(id)) {
             return this._menuItemMap.get(id)!;
@@ -137,10 +151,12 @@ export class MenuService extends Disposable implements IMenuService {
         return null;
     }
 
+    /** @deprecated */
     setMenuConfigs(id: string, config: MenuConfig): void {
         this._menuConfigs.set(id, config);
     }
 
+    /** @deprecated */
     getMenuConfig(id: string): MenuConfig | null {
         if (this._menuConfigs.has(id)) {
             return this._menuConfigs.get(id)!;
@@ -149,6 +165,7 @@ export class MenuService extends Disposable implements IMenuService {
         return null;
     }
 
+    /** @deprecated */
     private _getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem<IMenuItem> {
         const shortcut = this._shortcutService.getShortcutDisplayOfCommand(menuItem.id);
         if (!shortcut) {
@@ -161,6 +178,7 @@ export class MenuService extends Disposable implements IMenuService {
         };
     }
 
+    /** @deprecated */
     private _appendMenuToPosition(menu: IMenuItem, position: MenuPosition | string) {
         if (!this._menuByPositions.has(position)) {
             this._menuByPositions.set(position, []);
@@ -174,6 +192,7 @@ export class MenuService extends Disposable implements IMenuService {
         menuList.push([menu.id, menu]);
     }
 
+    /** @deprecated */
     private _updateMenuItems(menu: IMenuItem, position: MenuPosition | string) {
         if (!this._menuByPositions.has(position)) {
             this._menuByPositions.set(position, []);

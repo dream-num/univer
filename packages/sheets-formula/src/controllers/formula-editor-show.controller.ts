@@ -77,7 +77,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         this.disposeWithMe(
             this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
                 if (param == null) {
-                    this._logService.error('[FormulaEditorShowController]: should not receive currentSkeleton$ as null!');
+                    this._logService.debug('[FormulaEditorShowController]: should not receive currentSkeleton$ as null!');
                 } else {
                     const { skeleton } = param;
                     const prevSheetId = this._skeleton?.worksheet?.getSheetId();

@@ -122,6 +122,7 @@ export enum SheetMenuPosition {
     ROW_HEADER_CONTEXT_MENU = 'ROW_HEADER_CONTEXT_MENU',
     COL_HEADER_CONTEXT_MENU = 'COL_HEADER_CONTEXT_MENU',
     SHEET_BAR = 'SHEET_BAR',
+    SHEET_FOOTER = 'SHEET_FOOTER',
 }
 
 export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

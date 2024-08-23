@@ -1,0 +1,19 @@
+.crosshair-highlight-overlay {
+    display: grid;
+    row-gap: 12px;
+    column-gap: 8px;
+    grid-template-columns: repeat(8, 20px);
+}
+
+.crosshair-highlight-item {
+    width: 20px;
+    height: 20px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 0.5px solid rgb(var(--grey-400));
+
+    &-selected {
+        outline: 1.5px solid rgb(var(--primary-color));
+        outline-offset: 1.5px;
+    }
+}

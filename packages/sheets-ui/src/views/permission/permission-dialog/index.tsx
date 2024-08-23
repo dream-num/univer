@@ -25,7 +25,7 @@ import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, Wo
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
 import { ObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
 import Spin from '../spin';
-import { defaultWorksheetUnitActionList, subUnitPermissionTypeMap, UNIVER_SHEET_PERMISSION_DIALOG_ID } from '../../../basics/const/permission';
+import { defaultWorksheetUnitActionList, subUnitPermissionTypeMap, UNIVER_SHEET_PERMISSION_DIALOG_ID } from '../../../consts/permission';
 import styles from './index.module.less';
 
 interface IPermissionMap {

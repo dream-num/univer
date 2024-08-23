@@ -90,9 +90,7 @@ export class SelectionShapeExtension {
         private _selectionHooks: Record<string, () => void>
     ) {
         this._initialControl();
-
         this._initialWidget();
-
         this._initialFill();
 
         this._control.dispose$.subscribe(() => {
@@ -259,6 +257,10 @@ export class SelectionShapeExtension {
         this._control.selectionMoving$.next(this._targetSelection);
     }
 
+    /**
+     * Drag move whole selectionControl when cusor turns to crosshair. Not for dragging 8 control points.
+     * @param evt
+     */
     private _controlEvent(evt: IMouseEvent | IPointerEvent) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
@@ -281,7 +283,6 @@ export class SelectionShapeExtension {
         );
 
         this._startOffsetX = newEvtOffsetX;
-
         this._startOffsetY = newEvtOffsetY;
 
         const { row, column } = actualSelection;
@@ -294,7 +295,6 @@ export class SelectionShapeExtension {
         } = this._control.model;
 
         let fixRow = 0;
-
         let fixColumn = 0;
 
         if (row < originStartRow) {
@@ -310,14 +310,11 @@ export class SelectionShapeExtension {
         }
 
         this._relativeSelectionPositionRow = originStartRow - row + fixRow;
-
         this._relativeSelectionPositionColumn = originStartColumn - column + fixColumn;
-
         this._relativeSelectionRowLength = originEndRow - originStartRow;
-
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
 
-        const style = this._control.selectionStyle!;
+        const style = this._control.currentStyle!;
         const scale = this._getScale();
 
         if (this.isHelperSelection) {
@@ -329,15 +326,11 @@ export class SelectionShapeExtension {
         }
 
         // const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
-
         // const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
         const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
-
         const scrollTimer = ScrollTimer.create(scene);
-
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
-
         this._scrollTimer = scrollTimer;
+        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
 
         scene.disableEvent();
 
@@ -370,10 +363,9 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
-            // selectionScaled$  -->  disableLockedSelectionChange
             this._control.selectionMoved$.next(this._targetSelection);
-            // this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-            // this function should placed after this._control.selectionMoved$,
+
+            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoved$,
             // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
             this._selectionHooks.selectionMoveEnd?.();
         });
@@ -421,18 +413,107 @@ export class SelectionShapeExtension {
             });
 
             control.onPointerDown$.subscribeEvent((evt: IMouseEvent | IPointerEvent) => {
-                this._widgetEvent(evt, cursors[index]);
+                this._widgetPointerDownEvent(evt, cursors[index]);
             });
         });
     }
 
+    /**
+     * Pointer down Events for 8 control point.
+     * @param evt
+     * @param cursor
+     */
+    private _widgetPointerDownEvent(evt: IMouseEvent | IPointerEvent, cursor: CURSOR_TYPE) {
+        const scene = this._scene;
+
+        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
+        this._startOffsetX = evtOffsetX;
+        this._startOffsetY = evtOffsetY;
+
+        const {
+            startRow: originStartRow,
+            startColumn: originStartColumn,
+            endRow: originEndRow,
+            endColumn: originEndColumn,
+        } = this._control.model;
+
+        // When dragging the bottom line of the selection area over the previous top line, at this time, endRow < startRow
+        // when dragging top line lower than the previous bottom line, at this time, startRow > endRow
+        // see https://github.com/dream-num/univer-pro/issues/1451
+        const startRow = Math.min(originStartRow, originEndRow);
+        const startColumn = Math.min(originStartColumn, originEndColumn);
+        const endRow = Math.max(originStartRow, originEndRow);
+        const endColumn = Math.max(originStartColumn, originEndColumn);
+
+        this._relativeSelectionPositionRow = startRow;
+        this._relativeSelectionPositionColumn = startColumn;
+        this._relativeSelectionRowLength = endRow - startRow;
+        this._relativeSelectionColumnLength = endColumn - startColumn;
+
+        if (cursor === CURSOR_TYPE.NORTH_WEST_RESIZE) {
+            this._relativeSelectionPositionRow = endRow;
+            this._relativeSelectionPositionColumn = endColumn;
+        } else if (cursor === CURSOR_TYPE.NORTH_RESIZE) {
+            this._relativeSelectionPositionRow = endRow;
+        } else if (cursor === CURSOR_TYPE.NORTH_EAST_RESIZE) {
+            this._relativeSelectionPositionRow = endRow;
+        } else if (cursor === CURSOR_TYPE.WEST_RESIZE) {
+            this._relativeSelectionPositionColumn = endColumn;
+        } else if (cursor === CURSOR_TYPE.SOUTH_WEST_RESIZE) {
+            this._relativeSelectionPositionColumn = endColumn;
+        } else if (cursor === CURSOR_TYPE.SOUTH_RESIZE) {
+            this._relativeSelectionPositionRow = startRow;
+        }
+
+        const scrollTimer = ScrollTimer.create(scene);
+        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
+        this._scrollTimer = scrollTimer;
+
+        scene.disableEvent();
+
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
+                Vector2.FromArray([moveOffsetX, moveOffsetY])
+            );
+
+            this._widgetMoving(newMoveOffsetX, newMoveOffsetY, cursor);
+
+            scene.setCursor(cursor);
+
+            scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
+                this._widgetMoving(newMoveOffsetX, newMoveOffsetY, cursor);
+            });
+        });
+
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
+            const scene = this._scene;
+            scene.resetCursor();
+            this._clearObserverEvent();
+            scene.enableEvent();
+            this._scrollTimer?.dispose();
+            this._control.selectionScaled$.next(this._targetSelection);
+
+            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoved$,
+            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
+            this._selectionHooks.selectionMoveEnd?.();
+        });
+    }
+
+    /**
+     * Pointer move Events for 8 control point.
+     * @param moveOffsetX
+     * @param moveOffsetY
+     * @param cursor
+     */
     private _widgetMoving(moveOffsetX: number, moveOffsetY: number, cursor: CURSOR_TYPE) {
         const scene = this._scene;
 
         const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
-
         const { scaleX, scaleY } = scene.getAncestorScale();
-
         const moveActualSelection = this._skeleton.getCellPositionByOffset(
             moveOffsetX,
             moveOffsetY,
@@ -442,19 +523,12 @@ export class SelectionShapeExtension {
         );
 
         const { row, column } = moveActualSelection;
-
         const { rowHeaderWidth, columnHeaderHeight } = this._skeleton;
-
         // const maxRow = this._skeleton.getRowCount() - 1;
-
         // const maxColumn = this._skeleton.getColumnCount() - 1;
-
         let startRow = this._relativeSelectionPositionRow;
-
         let startColumn = this._relativeSelectionPositionColumn;
-
         let endRow = row;
-
         let endColumn = column;
 
         if (cursor === CURSOR_TYPE.NORTH_WEST_RESIZE) {
@@ -517,95 +591,9 @@ export class SelectionShapeExtension {
             endColumn,
         };
 
-        this._control.update(this._targetSelection, rowHeaderWidth, columnHeaderHeight, this._control.selectionStyle);
+        this._control.update(this._targetSelection, rowHeaderWidth, columnHeaderHeight, this._control.currentStyle);
         this._control.clearHighlight();
         this._control.selectionScaling$.next(this._targetSelection);
-    }
-
-    /**
-     * Events for 8 control point
-     * @param evt
-     * @param cursor
-     */
-    private _widgetEvent(evt: IMouseEvent | IPointerEvent, cursor: CURSOR_TYPE) {
-        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-
-        const scene = this._scene;
-
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
-
-        const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
-
-        this._startOffsetX = evtOffsetX;
-
-        this._startOffsetY = evtOffsetY;
-
-        const {
-            startRow: originStartRow,
-            startColumn: originStartColumn,
-            endRow: originEndRow,
-            endColumn: originEndColumn,
-        } = this._control.model;
-
-        this._relativeSelectionPositionRow = originStartRow;
-
-        this._relativeSelectionPositionColumn = originStartColumn;
-
-        this._relativeSelectionRowLength = originEndRow - originStartRow;
-
-        this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
-
-        if (cursor === CURSOR_TYPE.NORTH_WEST_RESIZE) {
-            this._relativeSelectionPositionRow = originEndRow;
-            this._relativeSelectionPositionColumn = originEndColumn;
-        } else if (cursor === CURSOR_TYPE.NORTH_RESIZE) {
-            this._relativeSelectionPositionRow = originEndRow;
-        } else if (cursor === CURSOR_TYPE.NORTH_EAST_RESIZE) {
-            this._relativeSelectionPositionRow = originEndRow;
-        } else if (cursor === CURSOR_TYPE.WEST_RESIZE) {
-            this._relativeSelectionPositionColumn = originEndColumn;
-        } else if (cursor === CURSOR_TYPE.SOUTH_WEST_RESIZE) {
-            this._relativeSelectionPositionColumn = originEndColumn;
-        }
-
-        const scrollTimer = ScrollTimer.create(scene);
-
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
-
-        this._scrollTimer = scrollTimer;
-
-        scene.disableEvent();
-
-        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
-            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
-                Vector2.FromArray([moveOffsetX, moveOffsetY])
-            );
-
-            this._widgetMoving(newMoveOffsetX, newMoveOffsetY, cursor);
-
-            scene.setCursor(cursor);
-
-            scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
-                this._widgetMoving(newMoveOffsetX, newMoveOffsetY, cursor);
-            });
-        });
-
-        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
-            const scene = this._scene;
-            scene.resetCursor();
-            this._clearObserverEvent();
-            scene.enableEvent();
-            this._scrollTimer?.dispose();
-            this._control.selectionScaled$.next(this._targetSelection);
-            // selectionMoveEnd$ update selection model
-            // _selectionHooks.selectionMoveEnd --> SelectionRenderService._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-
-            // this function should placed after this._control.selectionMoved$,
-            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
-            this._selectionHooks.selectionMoveEnd?.();
-        });
     }
 
     private _initialFill() {
@@ -627,6 +615,7 @@ export class SelectionShapeExtension {
         fillControl.onPointerDown$.subscribeEvent(this._fillEvent.bind(this));
     }
 
+    // eslint-disable-next-line complexity
     private _fillMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
         // const activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
@@ -800,7 +789,7 @@ export class SelectionShapeExtension {
 
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
 
-        const style = this._control.selectionStyle;
+        const style = this._control.currentStyle;
         let stroke = style?.stroke;
         let strokeWidth = style?.strokeWidth;
         const defaultStyle = getNormalSelectionStyle(this._themeService);

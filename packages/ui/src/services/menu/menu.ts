@@ -28,6 +28,7 @@ export enum MenuPosition {
     TOOLBAR_VIEW = 'uiToolbar.view',
     TOOLBAR_OTHERS = 'uiToolbar.others',
     CONTEXT_MENU = 'contextMenu',
+    FOOTER = 'footer',
 }
 
 export enum MenuGroup {
@@ -73,9 +74,11 @@ interface IMenuItemBase<V> {
     tooltip?: string;
 
     /** The group that the item belongs to. */
+    /** @deprecated group will be removed in the future. */
     group?: MenuGroup;
 
     /** In what menu should the item display. */
+    /** @deprecated positions will be removed in the future. */
     positions: OneOrMany<MenuPosition | string>;
 
     type: MenuItemType;
@@ -128,6 +131,13 @@ export interface ICustomComponentProps<T> {
 
 export interface IMenuSelectorItem<V = MenuItemDefaultValueType, T = undefined> extends IMenuItemBase<V> {
     type: MenuItemType.SELECTOR | MenuItemType.BUTTON_SELECTOR | MenuItemType.SUBITEMS;
+
+    /**
+     * If this property is set, changing the value of the selection will trigger the command with this id,
+     * instead of {@link IMenuItemBase.id} or {@link IMenuItemBase.commandId}. At the same title,
+     * clicking the button will trigger IMenuItemBase.id or IMenuItemBase.commandId.
+     */
+    selectionsCommandId?: string;
 
     // selections 子菜单可以为三种类型
     // 一个是当前 menu 的 options，选中后直接使用其 value 触发 command

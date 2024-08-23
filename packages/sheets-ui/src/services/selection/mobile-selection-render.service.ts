@@ -355,7 +355,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             activeSelectionControl = this.newSelectionControl(scene, rangeType);
         }
 
-        this._updateSelectionControlRange(
+        this._updateSelectionControlByRange(
             activeSelectionControl,
             cursorCellRangeWithRangeType,
             primaryCursorCellRange
@@ -376,7 +376,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
             // _moving would update activeSelectionControl range when row & col
             // this update logic should split from _moving!!!
-            this._moving(viewportPosX, viewportPosY, activeSelectionControl, rangeType);
+            this._movingHandler(viewportPosX, viewportPosY, activeSelectionControl, rangeType);
         }
     }
 
@@ -580,7 +580,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
      *
      * In Mobile version, new selection is determined by cursor cell and current of activeSelectionControl.model
      */
-    protected override _moving(
+    protected override _movingHandler(
         offsetX: number,
         offsetY: number,
         activeSelectionControl: MobileSelectionControl,
@@ -681,7 +681,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             currSelectionRange.endColumn !== newSelectionRange.endColumn;
         if (rangeChanged) {
             if (activeSelectionControl) {
-                this._updateSelectionControlRange(activeSelectionControl, newSelectionRangeWithCoord);
+                this._updateSelectionControlByRange(activeSelectionControl, newSelectionRangeWithCoord);
                 this._selectionMoving$.next(this.getSelectionDataWithStyle());
             }
         }

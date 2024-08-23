@@ -17,6 +17,7 @@
 import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
+import { UniverSheetsCrosshairHighlightPlugin } from '@univerjs/sheets-crosshair-highlight';
 // import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
@@ -32,7 +33,9 @@ export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCt
         //             return './vs/editor/editor.worker.js';
         //         },
         //     },
+
         // ],
+        [UniverSheetsCrosshairHighlightPlugin],
         [UniverSheetsFilterUIPlugin, { useRemoteFilterValuesGenerator: true }],
         [UniverSheetsFindReplacePlugin],
     ];

@@ -17,6 +17,7 @@
 import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import {
     ICommandService,
+    ILogService,
     Inject,
     Injector,
     IPermissionService,
@@ -47,7 +48,8 @@ export class FWorkbook {
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IPermissionService private readonly _permissionService: IPermissionService
+        @IPermissionService private readonly _permissionService: IPermissionService,
+        @ILogService private readonly _logService: ILogService
 
     ) {
         this.id = this._workbook.getUnitId();
@@ -62,11 +64,21 @@ export class FWorkbook {
     }
 
     /**
-     * Returns workbook snapshot data, including conditional formatting, data validation, and other plugin data.
+     * save workbook snapshot data, including conditional formatting, data validation, and other plugin data.
+     */
+    save(): IWorkbookData {
+        const snapshot = this._resourceLoaderService.saveUnit<IWorkbookData>(this._workbook.getUnitId())!;
+        return snapshot;
+    }
+
+    /**
+     * @deprecated use 'save' instead.
+     * @return {*}  {IWorkbookData}
+     * @memberof FWorkbook
      */
     getSnapshot(): IWorkbookData {
-        const snapshot = this._resourceLoaderService.saveWorkbook(this._workbook);
-        return snapshot;
+        this._logService.warn(`use 'save' instead of 'getSnapshot'`);
+        return this.save();
     }
 
     /**

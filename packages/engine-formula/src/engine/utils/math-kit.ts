@@ -180,21 +180,27 @@ export function strip(num: number, precision = 15) {
  * @param right
  * @returns
  */
-export function withinErrorMargin(left: number, right: number) {
-    return Math.abs(left - right) < Number.EPSILON;
+export function withinErrorMargin(left: number, right: number, tolerance = Number.EPSILON) {
+    return Math.abs(left - right) < tolerance;
 }
 
 /**
  * Tolerance for the results of accuracy issues to tolerate certain errors
  *
- * Why 12?
+ * Why is precision 12?
    This is an empirical choice. Generally, choosing 12 can solve most of the 0001 and 0009 problems. e.g. floor(5,1.23) = 0.0800000000000001
+
+   why is tolerance 1e-10?
+   Since the value of Number.EPSILON is too small to be applicable to all floating-point precision processing, for most application scenarios, the error range of 1e-10 can tolerate common floating-point errors.
+   For example, =30.2 - 30 displayed as 0.2 in Excel
  * @param num
+ * @param precision
+ * @param tolerance
  * @returns
  */
-export function stripErrorMargin(num: number, precision = 12) {
+export function stripErrorMargin(num: number, precision = 12, tolerance = 1e-10) {
     const stripResult = strip(num, precision);
-    return withinErrorMargin(num, stripResult) ? stripResult : strip(num);
+    return withinErrorMargin(num, stripResult, tolerance) ? stripResult : strip(num);
 }
 
 /**

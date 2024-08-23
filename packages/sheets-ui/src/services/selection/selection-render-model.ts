@@ -28,9 +28,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
     private _endY: number = 0;
 
     /**
-     * highlight cell of selection
-     * when there is no merge info
-     * top left cell of current selection (or bottomLeft of current selection)
+     * The highlight cell of a selection. aka: current cell
      */
     private _primary: Nullable<ISelectionCellWithMergeInfo>;
     private _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
@@ -153,10 +151,15 @@ export class SelectionRenderModel implements IRangeWithCoord {
         if (rangeType) {
             this._rangeType = rangeType;
         }
-
         this.setCurrentCell(currentCell);
     }
 
+    /**
+     * Set primary cell.
+     *
+     * TODO @lumixraku there are 3 concepts for same thing, primary and current and highlight, primary is better cuz selectionModel is using primary.
+     * @param currentCell
+     */
     setCurrentCell(currentCell: Nullable<ISelectionCellWithMergeInfo>) {
         if (currentCell) {
             this._primary = currentCell;

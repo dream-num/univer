@@ -17,7 +17,7 @@
 import { useDependency } from '@univerjs/core';
 import type { ComponentType } from 'react';
 import React, { useMemo, useRef } from 'react';
-import { filter, map, startWith } from 'rxjs';
+import { debounceTime, filter, map, startWith } from 'rxjs';
 import type { Injector } from '@univerjs/core';
 import { useObservable } from '../../components/hooks/observable';
 import { IUIPartsService } from '../../services/parts/parts.service';
@@ -46,10 +46,12 @@ export function ComponentContainer(props: IComponentContainerProps) {
  */
 export function useComponentsOfPart(part: string, injector?: Injector) {
     const uiPartsService = injector?.get(IUIPartsService) ?? useDependency(IUIPartsService);
+
     const updateCounterRef = useRef<number>(0);
     const componentPartUpdateCount = useObservable(
         () => uiPartsService.componentRegistered$.pipe(
             filter((key) => key === part),
+            debounceTime(200),
             map(() => updateCounterRef.current += 1),
             startWith(updateCounterRef.current += 1) // trigger update when subscribe
         ),

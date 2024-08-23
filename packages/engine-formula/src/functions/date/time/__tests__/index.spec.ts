@@ -48,7 +48,7 @@ describe('Test time function', () => {
             const minute = NumberValueObject.create(750); // 750 minutes = 12 hours, 30 minutes
             const second = NumberValueObject.create(3661); // 3661 seconds = 1 hour, 1 minute, 1 second
             const result = testFunction.calculate(hour, minute, second);
-            expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([[0.688206018518518]]); // 16:31:01
+            expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([[0.688206018519]]); // 16:31:01
         });
 
         it('Negative values', () => {
@@ -72,7 +72,7 @@ describe('Test time function', () => {
             const minute = NumberValueObject.create(45);
             const second = NumberValueObject.create(30);
             const result = testFunction.calculate(hour, minute, second);
-            expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([[0.531597222222222, 0.0315972222222222, ErrorType.NUM, ErrorType.VALUE]]);
+            expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([[0.531597222222, 0.0315972222222, ErrorType.NUM, ErrorType.VALUE]]);
         });
 
         it('Handling leap values in hours, minutes, and seconds', () => {

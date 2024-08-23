@@ -17,7 +17,7 @@
 import { Subject } from 'rxjs';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import type { UniverInstanceType } from '../../common/unit';
-import type { Resources } from '../../types/interfaces/resource';
+import type { IResources } from '../resource-manager/type';
 import type { IResourceHook, IResourceManagerService, IResourceName } from './type';
 
 export class ResourceManagerService extends Disposable implements IResourceManagerService {
@@ -31,9 +31,9 @@ export class ResourceManagerService extends Disposable implements IResourceManag
         return list;
     }
 
-    public getResources(unitId: string): Resources;
-    public getResources(unitId: string, type: UniverInstanceType): Resources;
-    public getResources(unitId: string, type?: UniverInstanceType): Resources {
+    public getResources(unitId: string): IResources;
+    public getResources(unitId: string, type: UniverInstanceType): IResources;
+    public getResources(unitId: string, type?: UniverInstanceType): IResources {
         if (type) {
             return this.getResourcesByType(unitId, type);
         }
@@ -75,7 +75,7 @@ export class ResourceManagerService extends Disposable implements IResourceManag
         this._resourceMap.delete(pluginName);
     }
 
-    public loadResources(unitId: string, resources?: Resources) {
+    public loadResources(unitId: string, resources?: IResources) {
         this.getAllResourceHooks().forEach((hook) => {
             const data = resources?.find((resource) => resource.name === hook.pluginName)?.data;
             if (data) {

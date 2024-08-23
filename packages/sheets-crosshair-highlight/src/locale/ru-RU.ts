@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-export * from './const';
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    crosshair: {
+        button: {
+            tooltip: 'Перекрестный выделение',
+        },
+    },
+};
+
+export default locale;

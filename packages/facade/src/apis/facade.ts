@@ -53,12 +53,15 @@ import type {
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
+import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '@univerjs/sheets-crosshair-highlight';
 import { FDocument } from './docs/f-document';
 import { FWorkbook } from './sheets/f-workbook';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
 import { FHooks } from './f-hooks';
 import { FDataValidationBuilder } from './sheets/f-data-validation-builder';
 import { FPermission } from './sheets/f-permission';
+import { FFormula } from './sheets/f-formula';
 
 export class FUniver {
     static BorderStyle = BorderStyleTypes;
@@ -304,6 +307,10 @@ export class FUniver {
         });
     }
 
+    getFormula(): FFormula {
+        return this._injector.createInstance(FFormula);
+    }
+
     // #region
 
     /**
@@ -470,6 +477,32 @@ export class FUniver {
         const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
         sheetRow.setCustomHeader(cfg);
     }
+
+    // #region API applies to all workbooks
+
+    /**
+     * Enable or disable crosshair highlight.
+     * @param {boolean} enabled if crosshair highlight should be enabled
+     */
+    setCrosshairHighlightEnabled(enabled: boolean): void {
+        if (enabled) {
+            this._commandService.executeCommand(EnableCrosshairHighlightOperation.id);
+        } else {
+            this._commandService.executeCommand(DisableCrosshairHighlightOperation.id);
+        }
+    }
+
+    /**
+     * Set the color of the crosshair highlight.
+     * @param {string} color the color of the crosshair highlight
+     */
+    setCrosshairHighlightColor(color: string): void {
+        this._commandService.executeCommand(SetCrosshairHighlightColorOperation.id, {
+            value: color,
+        } as ISetCrosshairHighlightColorOperationParams);
+    }
+
+    // #endregion
 
     /**
      * Get the PermissionInstance.

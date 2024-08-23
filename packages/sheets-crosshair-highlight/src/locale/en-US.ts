@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-export type Resources = Array<{ id?: string; name: string; data: string }>;
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    crosshair: {
+        button: {
+            tooltip: 'Crosshair Highlight',
+        },
+    },
+};
+
+export default locale;

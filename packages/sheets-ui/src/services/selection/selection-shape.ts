@@ -72,7 +72,7 @@ export enum SELECTION_MANAGER_KEY {
 const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
 
 /**
- * The main selection canvas component
+ * The main selection canvas component, includes leftControl,rightControl,topControl,bottomControl,backgroundControlTop,backgroundControlMiddleLeft,backgroundControlMiddleRight,backgroundControlBottom,fillControl
  */
 export class SelectionControl extends Disposable {
     private _leftControl!: Rect;
@@ -111,7 +111,10 @@ export class SelectionControl extends Disposable {
 
     protected _selectionModel!: SelectionRenderModel;
 
-    protected _selectionStyle: Nullable<ISelectionStyle>;
+    // why three style prop? what's diff between _selectionStyle & _currentStyle?
+    // protected _selectionStyle: Nullable<ISelectionStyle>;
+    private _defaultStyle!: ISelectionStyle;
+    private _currentStyle: ISelectionStyle;
 
     protected _rowHeaderWidth: number = 0;
     protected _columnHeaderHeight: number = 0;
@@ -121,6 +124,10 @@ export class SelectionControl extends Disposable {
     private _dispose$ = new BehaviorSubject<SelectionControl>(this);
     readonly dispose$ = this._dispose$.asObservable();
 
+    /**
+     * eventSource: selectionShapeExtension selectionMoving$.next,
+     * Observer: prompt.controller
+     */
     readonly selectionMoving$ = new Subject<IRangeWithCoord>();
     readonly selectionMoved$ = new Subject<IRangeWithCoord>();
     readonly selectionScaling$ = new Subject<IRangeWithCoord>();
@@ -130,10 +137,6 @@ export class SelectionControl extends Disposable {
     private readonly _selectionFilled$ = new Subject<Nullable<IRangeWithCoord>>();
 
     readonly selectionFilled$ = this._selectionFilled$.asObservable();
-
-    private _defaultStyle!: ISelectionStyle;
-
-    private _currentStyle: Nullable<ISelectionStyle>;
 
     private _isHelperSelection: boolean = true;
 
@@ -243,13 +246,13 @@ export class SelectionControl extends Disposable {
         return this._themeService;
     }
 
-    get selectionStyle() {
-        return this._selectionStyle;
-    }
+    // get selectionStyle() {
+    //     return this._selectionStyle;
+    // }
 
-    set selectionStyle(style: Nullable<ISelectionStyle>) {
-        this._selectionStyle = style;
-    }
+    // set selectionStyle(style: Nullable<ISelectionStyle>) {
+    //     this._selectionStyle = style;
+    // }
 
     get selectionModel() {
         return this._selectionModel;
@@ -276,7 +279,9 @@ export class SelectionControl extends Disposable {
     }
 
     set currentStyle(style: Nullable<ISelectionStyle>) {
-        this._currentStyle = style;
+        if (style) {
+            this._currentStyle = style;
+        }
     }
 
     get isHelperSelection() {
@@ -310,52 +315,214 @@ export class SelectionControl extends Disposable {
         this._selectionFilled$.next(val);
     }
 
-    updateStyle(style: ISelectionStyle) {
-        this._updateControl(style, this._rowHeaderWidth, this._columnHeaderHeight);
+    /**
+     * invoked when update selection style & range change, invoked by updateStyle, updateRange, update
+     */
+    // eslint-disable-next-line max-lines-per-function
+    protected _updateControlStyleAndLayout(selectionStyle: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+        // this._selectionStyle = selectionStyle;
+        this._rowHeaderWidth = rowHeaderWidth || 0;
+        this._columnHeaderHeight = columnHeaderHeight || 0;
+
+        // startX startY shares same coordinate with viewport.(include row & colheader)
+        const { startX, startY, endX, endY } = this._selectionModel;
+        const defaultStyle = this._defaultStyle;
+        const currentStyle = this.currentStyle = selectionStyle || this._currentStyle;// rediculous! style param value is this._currentStyle, but this._currentStyle may be null.
+
+        const {
+            stroke = defaultStyle.stroke!,
+            widgets = defaultStyle.widgets!,
+            hasAutoFill = defaultStyle.hasAutoFill!,
+            AutofillStroke = defaultStyle.AutofillStroke!,
+            strokeDash,
+            isAnimationDash,
+        } = currentStyle;
+
+        let {
+            strokeWidth = defaultStyle.strokeWidth!,
+            AutofillSize = defaultStyle.AutofillSize!,
+            AutofillStrokeWidth = defaultStyle.AutofillStrokeWidth!,
+        } = currentStyle;
+
+        const scale = this._getScale();
+
+        const leftAdjustWidth = (strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH) / 2 / scale;
+
+        strokeWidth /= scale;
+        AutofillSize /= scale;
+        AutofillStrokeWidth /= scale < 1 ? 1 : scale;
+
+        // const selectBorderOffsetFix = SELECTION_BORDER_OFFSET_FIX / scale;
+
+        const borderBuffer = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
+
+        const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
+
+        this.leftControl.transformByState({
+            height: endY - startY,
+            left: -leftAdjustWidth + fixOnePixelBlurOffset,
+            width: strokeWidth,
+            strokeWidth: borderBuffer,
+            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
+        });
+
+        this.leftControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
+        this.rightControl.transformByState({
+            height: endY - startY,
+            left: endX - startX - leftAdjustWidth + fixOnePixelBlurOffset,
+            width: strokeWidth,
+            strokeWidth: borderBuffer,
+            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
+        });
+
+        this.rightControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
+        this.topControl.transformByState({
+            width: endX - startX + strokeWidth,
+            top: -leftAdjustWidth + fixOnePixelBlurOffset,
+            left: -leftAdjustWidth + fixOnePixelBlurOffset,
+            height: strokeWidth,
+            strokeWidth: borderBuffer,
+        });
+
+        this.topControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
+        this.bottomControl.transformByState({
+            width: endX - startX + strokeWidth,
+            top: endY - startY - leftAdjustWidth + fixOnePixelBlurOffset,
+            height: strokeWidth,
+            left: -leftAdjustWidth + fixOnePixelBlurOffset,
+            strokeWidth: borderBuffer,
+        });
+
+        this.bottomControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
+        if (strokeDash === null || strokeDash === undefined) {
+            this.dashRect.hide();
+            this._stopAntLineAnimation();
+        } else {
+            const dashRectBorderWidth = currentStyle.strokeWidth * 2 / scale;
+            this.dashRect.transformByState({
+                height: endY - startY,
+                width: endX - startX,
+                strokeWidth: dashRectBorderWidth,
+                left: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
+                top: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
+            });
+
+            this.dashRect.setProps({
+                strokeDashArray: [0, strokeDash / scale],
+            });
+
+            this._stopAntLineAnimation();
+
+            if (isAnimationDash !== false) {
+                this._startAntLineAnimation();
+            }
+
+            this.dashRect.show();
+        }
+
+        if (hasAutoFill === true && !this._hasWidgets(widgets)) {
+            const fillProps: IRectProps = {
+                fill: stroke,
+                stroke: AutofillStroke,
+                strokeScaleEnabled: false,
+            };
+            const sizeState: IObjectFullState = {
+                width: AutofillSize - AutofillStrokeWidth,
+                height: AutofillSize - AutofillStrokeWidth,
+                left: endX - startX - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
+                top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
+                strokeWidth: AutofillStrokeWidth,
+            };
+            this.fillControl.setProps(fillProps);
+            this.fillControl.transformByState(sizeState);
+            this.fillControl.show();
+        } else {
+            this.fillControl.hide();
+        }
+
+        this._updateBackgroundControl(selectionStyle);
+
+        this._updateBackgroundTitle(selectionStyle, rowHeaderWidth, columnHeaderHeight);
+
+        this._updateWidgets(selectionStyle);
+
+        this.selectionShape.show();
+        this.selectionShape.translate(startX, startY);
+
+        // this._selectionStyle = selectionStyle;
+
+        // this._rowHeaderWidth = rowHeaderWidth || 0;
+
+        // this._columnHeaderHeight = columnHeaderHeight || 0;
+
+        this.selectionShape.makeDirtyNoDebounce(true);
     }
 
-    updateRange(range: IRangeWithCoord) {
-        this._selectionModel.setValue(range);
+    updateStyle(style: ISelectionStyle) {
+        this._updateControlStyleAndLayout(style, this._rowHeaderWidth, this._columnHeaderHeight);
+    }
+
+    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithMergeInfo>) {
+        this._selectionModel.setValue(range, primaryCell);
         // TODO @lumixraku
         // why update rowHeaderWidth and columnHeaderHeight at the same time? Did they change when update range?
-        this._updateControl(null, this._rowHeaderWidth, this._columnHeaderHeight);
+        this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
     /**
-     * update seleciton model(new range)
-     * @param newSelectionRange update new selection range!!
+     * update selection model with new range & primary cell(aka: highlight/current), also update row/col selection size & style.
+     *
+     * @param newSelectionRange
      * @param rowHeaderWidth
      * @param columnHeaderHeight
      * @param style
-     * @param highlight
+     * @param primaryCell primary cell
      */
     update(
         newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number = 0,
         columnHeaderHeight: number = 0,
         style?: Nullable<ISelectionStyle>,
-        highlight?: Nullable<ISelectionCellWithMergeInfo>
+        primaryCell?: Nullable<ISelectionCellWithMergeInfo>
     ) {
-        this._selectionModel.setValue(newSelectionRange, highlight);
-        if (style == null) {
-            style = this._selectionStyle;
-        }
-        this._updateControl(style, rowHeaderWidth, columnHeaderHeight);
+        this._selectionModel.setValue(newSelectionRange, primaryCell);
+        this._updateControlStyleAndLayout(style || this._currentStyle, rowHeaderWidth, columnHeaderHeight);
     }
 
-    updateCurrCell(highlight?: Nullable<ISelectionCellWithMergeInfo>) {
-        this._selectionModel.setCurrentCell(highlight);
+    /**
+     * update primary range
+     * @param primaryCell model.current (aka: highlight)
+     */
+    updateCurrCell(primaryCell?: Nullable<ISelectionCellWithMergeInfo>) {
+        this._selectionModel.setCurrentCell(primaryCell);
     }
 
     clearHighlight() {
         this._selectionModel.clearCurrentCell();
-        this._updateControl(this._selectionStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+        this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
     getScene() {
         return this._scene;
     }
 
+    // eslint-disable-next-line complexity
     override dispose() {
         this._leftControl?.dispose();
         this._rightControl?.dispose();
@@ -434,7 +601,7 @@ export class SelectionControl extends Disposable {
     getValue(): ISelectionWithCoordAndStyle {
         return {
             ...this._selectionModel.getValue(),
-            style: this._selectionStyle,
+            style: this._currentStyle,
         };
     }
 
@@ -450,178 +617,17 @@ export class SelectionControl extends Disposable {
         this._isHelperSelection = false;
     }
 
-    updateStyleId(id: string) {
-        if (this._selectionStyle == null) {
-            return;
-        }
-        this._selectionStyle.id = id;
-    }
-
-    /**
-     * invoked when update selection style & range change
-     */
-    // eslint-disable-next-line max-lines-per-function
-    protected _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
-        // startX startY shares same coordinate with viewport.(include row & colheader)
-        const { startX, startY, endX, endY } = this._selectionModel;
-        const defaultStyle = this._defaultStyle;
-        if (style == null) {
-            style = defaultStyle;
-        }
-
-        this._currentStyle = style;
-
-        const {
-            stroke = defaultStyle.stroke!,
-            widgets = defaultStyle.widgets!,
-            hasAutoFill = defaultStyle.hasAutoFill!,
-
-            AutofillStroke = defaultStyle.AutofillStroke!,
-
-            strokeDash,
-
-            isAnimationDash,
-        } = style;
-
-        let {
-            strokeWidth = defaultStyle.strokeWidth!,
-            AutofillSize = defaultStyle.AutofillSize!,
-            AutofillStrokeWidth = defaultStyle.AutofillStrokeWidth!,
-        } = style;
-
-        const scale = this._getScale();
-
-        const leftAdjustWidth = (strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH) / 2 / scale;
-
-        strokeWidth /= scale;
-        AutofillSize /= scale;
-        AutofillStrokeWidth /= scale < 1 ? 1 : scale;
-
-        // const selectBorderOffsetFix = SELECTION_BORDER_OFFSET_FIX / scale;
-
-        const borderBuffer = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
-
-        const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
-
-        this.leftControl.transformByState({
-            height: endY - startY,
-            left: -leftAdjustWidth + fixOnePixelBlurOffset,
-            width: strokeWidth,
-            strokeWidth: borderBuffer,
-            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
-        });
-
-        this.leftControl.setProps({
-            fill: stroke,
-            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
-        });
-
-        this.rightControl.transformByState({
-            height: endY - startY,
-            left: endX - startX - leftAdjustWidth + fixOnePixelBlurOffset,
-            width: strokeWidth,
-            strokeWidth: borderBuffer,
-            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
-        });
-
-        this.rightControl.setProps({
-            fill: stroke,
-            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
-        });
-
-        this.topControl.transformByState({
-            width: endX - startX + strokeWidth,
-            top: -leftAdjustWidth + fixOnePixelBlurOffset,
-            left: -leftAdjustWidth + fixOnePixelBlurOffset,
-            height: strokeWidth,
-            strokeWidth: borderBuffer,
-        });
-
-        this.topControl.setProps({
-            fill: stroke,
-            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
-        });
-
-        this.bottomControl.transformByState({
-            width: endX - startX + strokeWidth,
-            top: endY - startY - leftAdjustWidth + fixOnePixelBlurOffset,
-            height: strokeWidth,
-            left: -leftAdjustWidth + fixOnePixelBlurOffset,
-            strokeWidth: borderBuffer,
-        });
-
-        this.bottomControl.setProps({
-            fill: stroke,
-            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
-        });
-
-        if (strokeDash === null || strokeDash === undefined) {
-            this.dashRect.hide();
-            this._stopAntLineAnimation();
-        } else {
-            const dashRectBorderWidth = style.strokeWidth * 2 / scale;
-            this.dashRect.transformByState({
-                height: endY - startY,
-                width: endX - startX,
-                strokeWidth: dashRectBorderWidth,
-                left: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
-                top: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
-            });
-
-            this.dashRect.setProps({
-                strokeDashArray: [0, strokeDash / scale],
-            });
-
-            this._stopAntLineAnimation();
-
-            if (isAnimationDash !== false) {
-                this._startAntLineAnimation();
-            }
-
-            this.dashRect.show();
-        }
-
-        if (hasAutoFill === true && !this._hasWidgets(widgets)) {
-            const fillProps: IRectProps = {
-                fill: stroke,
-                stroke: AutofillStroke,
-                strokeScaleEnabled: false,
-            };
-            const sizeState: IObjectFullState = {
-                width: AutofillSize - AutofillStrokeWidth,
-                height: AutofillSize - AutofillStrokeWidth,
-                left: endX - startX - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
-                top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
-                strokeWidth: AutofillStrokeWidth,
-            };
-            this.fillControl.setProps(fillProps);
-            this.fillControl.transformByState(sizeState);
-            this.fillControl.show();
-        } else {
-            this.fillControl.hide();
-        }
-
-        this._updateBackgroundControl(style);
-
-        this._updateBackgroundTitle(style, rowHeaderWidth, columnHeaderHeight);
-
-        this._updateWidgets(style);
-
-        this.selectionShape.show();
-        this.selectionShape.translate(startX, startY);
-
-        this._selectionStyle = style;
-
-        this._rowHeaderWidth = rowHeaderWidth || 0;
-
-        this._columnHeaderHeight = columnHeaderHeight || 0;
-
-        this.selectionShape.makeDirtyNoDebounce(true);
-    }
+    // updateStyleId(id: string) {
+    //     if (this._selectionStyle == null) {
+    //         return;
+    //     }
+    //     this._selectionStyle.id = id;
+    // }
 
     // eslint-disable-next-line max-lines-per-function
     private _initialize() {
         this._defaultStyle = getNormalSelectionStyle(this._themeService);
+        this._currentStyle = getNormalSelectionStyle(this._themeService);
 
         this._selectionModel = new SelectionRenderModel();
         const zIndex = this._zIndex;
@@ -660,10 +666,14 @@ export class SelectionControl extends Disposable {
             evented: false,
         });
 
+        // size of fillControl is set in _updateControlStyleAndLayout(), because control size(visual size) stays same when zoom change.
+        // The size of control is not a const value, so it was handled by _updateWidgets() & _updateControlStyleAndLayout()
         this._fillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
             zIndex: zIndex + 1,
         });
 
+        // That weird, new Dashedrect should called when strokeDash. not every selectionControl need dashedRect.
+        // strokeDash === null || strokeDash === undefined ---> _dashRect.hide()
         this._dashRect = new DashedRect(SELECTION_MANAGER_KEY.dash + zIndex, {
             zIndex: zIndex + 2,
             evented: false,
@@ -695,7 +705,7 @@ export class SelectionControl extends Disposable {
                         return;
                     }
 
-                    this._updateControl(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+                    this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
                 })
             )
         );

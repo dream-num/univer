@@ -89,7 +89,7 @@ export async function generateTemporarySnap(
 
             // Trigger RPC and store the result in sheetBlocks.
             if (worksheet.cellData) {
-                const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.rowCount!);
+                const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.columnCount!);
                 const responses = await Promise.all(
                     sheetBlocks.map((block) =>
                         snapshotService.saveSheetBlock(context, {
@@ -174,7 +174,7 @@ export async function transformWorkbookDataToSnapshot(
 
             // Trigger RPC and store the result in sheetBlocks.
             if (worksheet.cellData) {
-                const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.rowCount!);
+                const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.columnCount!);
                 const responses = await Promise.all(
                     sheetBlocks.map((block) =>
                         snapshotService.saveSheetBlock(context, {

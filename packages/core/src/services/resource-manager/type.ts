@@ -18,7 +18,8 @@ import type { Observable } from 'rxjs';
 import type { UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '../../common/di';
 import { createIdentifier } from '../../common/di';
-import type { Resources } from '../../types/interfaces/resource';
+
+export type IResources = Array<{ id?: string; name: string; data: string }>;
 
 type IBusinessName = 'SHEET' | 'DOC';
 export type IResourceName = `${IBusinessName}_${string}_PLUGIN`;
@@ -40,10 +41,10 @@ export interface IResourceManagerService {
     /**
      * @deprecated You should get resource with type specified.
      */
-    getResources(unitId: string): Resources;
-    getResources(unitId: string, type: UniverInstanceType): Resources;
-    getResourcesByType: (unitId: string, type: UniverInstanceType) => Resources;
-    loadResources: (unitId: string, resources?: Resources) => void;
+    getResources(unitId: string): IResources;
+    getResources(unitId: string, type: UniverInstanceType): IResources;
+    getResourcesByType: (unitId: string, type: UniverInstanceType) => IResources;
+    loadResources: (unitId: string, resources?: IResources) => void;
     unloadResources(unitId: string): void;
 }
 

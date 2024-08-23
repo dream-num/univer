@@ -22,7 +22,7 @@ import { IDialogService } from '@univerjs/ui';
 import { type ICollaborator, UnitRole } from '@univerjs/protocol';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
-import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../basics/const/permission';
+import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import styles from './index.module.less';
 import { UserEmptyBase64 } from './constant';
 

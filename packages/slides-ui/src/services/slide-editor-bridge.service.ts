@@ -152,16 +152,12 @@ export class SlideEditorBridgeService extends Disposable implements ISlideEditor
 
     /**
      * 1st part of startEditing.
-     * editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
      * @editorInfo editorInfo
      */
     setEditorRect(editorInfo: ISetEditorInfo) {
         this._currentEditRectInfo = editorInfo;
-
-        /**
-         * If there is no editor currently focused, then default to selecting the sheet editor to prevent the editorService from using the previously selected editor object.
-         * todo: wzhudev: In univer mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
-         */
+        // If there is no editor currently focused, then default to selecting the sheet editor to prevent the editorService from using the previously selected editor object.
+        // todo: wzhudev: In univer mode, it is necessary to switch to the corresponding editorId based on the host's unitId.
         if (!this._editorService.getFocusEditor()) {
             this._editorService.focus(SLIDE_EDITOR_ID);
             this._contextService.setContextValue(EDITOR_ACTIVATED, false);

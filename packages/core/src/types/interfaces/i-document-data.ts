@@ -350,6 +350,10 @@ export interface ICustomRange<T extends Record<string, any> = Record<string, any
      * display as a whole-entity
      */
     wholeEntity?: boolean;
+    /**
+     * properties of custom range,
+     * for example, hyperlink: `{ url: string }`
+     */
     properties?: T;
 }
 

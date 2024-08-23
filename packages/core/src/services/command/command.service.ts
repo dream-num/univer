@@ -411,8 +411,7 @@ export class CommandService extends Disposable implements ICommandService {
     private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): Promise<R> {
         this._logService.debug(
             '[CommandService]',
-            `${'|-'.repeat(Math.max(this._commandExecutingLevel, 0))}executing command "${command.id}"`,
-            { params }
+            `${'|-'.repeat(Math.max(this._commandExecutingLevel, 0))}executing command "${command.id}"`
         );
 
         this._commandExecutingLevel++;
@@ -432,8 +431,7 @@ export class CommandService extends Disposable implements ICommandService {
     private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): R {
         this._logService.debug(
             '[CommandService]',
-            `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}".`,
-            { params }
+            `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}".`
         );
 
         this._commandExecutingLevel++;

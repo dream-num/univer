@@ -231,7 +231,7 @@ export class WorkbookSelections extends Disposable {
         this._emitOnEnd([]);
     }
 
-    addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]) {
+    addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]): void {
         const selections = this._ensureSheetSelection(sheetId);
         selections.push(...selectionDatas);
         this._emitOnEnd(selections);
@@ -244,7 +244,7 @@ export class WorkbookSelections extends Disposable {
      * @param selectionDatas
      * @param type
      */
-    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
+    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType): void {
         // selectionDatas should not be same variable as this._worksheetSelections !!!
         // but there are some place get selection from this._worksheetSelections and set selectionDatas(2nd parameter of this function ) cause selectionDatas is always []
         // see univer/pull/2909

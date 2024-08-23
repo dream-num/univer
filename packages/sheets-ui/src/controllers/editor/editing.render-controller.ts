@@ -847,12 +847,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                     unitId: this._context.unit.getUnitId(),
                     subUnitId: worksheetId,
-
-                    // must be a new selectionData
-                    // in selection-manager.service.ts@setSelections
-                    // this._ensureWorkbookSelection(unitIdOrSelections).setSelections
-                    // would clear selection Data on selecitonManagerInstance.
-                    selections: [...selections],
+                    selections,
                 });
             }
 

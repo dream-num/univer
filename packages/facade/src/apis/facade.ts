@@ -61,6 +61,7 @@ import { FSheetHooks } from './sheets/f-sheet-hooks';
 import { FHooks } from './f-hooks';
 import { FDataValidationBuilder } from './sheets/f-data-validation-builder';
 import { FPermission } from './sheets/f-permission';
+import { FFormula } from './sheets/f-formula';
 
 export class FUniver {
     static BorderStyle = BorderStyleTypes;
@@ -304,6 +305,10 @@ export class FUniver {
             registerDisposable.dispose();
             sheetComponent.makeDirty(true);
         });
+    }
+
+    getFormula(): FFormula {
+        return this._injector.createInstance(FFormula);
     }
 
     // #region

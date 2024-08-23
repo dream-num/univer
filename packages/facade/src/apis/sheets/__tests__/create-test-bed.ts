@@ -27,7 +27,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
+import { FunctionService, IFunctionService, UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
@@ -102,6 +102,7 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
     injector.get(LocaleService).load({ zhCN, enUS });
 
     univer.registerPlugin(TestPlugin);
+    univer.registerPlugin(UniverFormulaEnginePlugin);
     const sheet = univer.createUniverSheet(workbookData || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);

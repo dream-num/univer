@@ -227,8 +227,13 @@ describe('Test math kit', () => {
     });
 
     it('Function getFractionalPart', () => {
-        expect(stripErrorMargin(getFractionalPart(123.456))).toBe(0.456000000000003);
-        expect(stripErrorMargin(getFractionalPart(-123.456))).toBe(-0.456000000000003);
+        expect(stripErrorMargin(getFractionalPart(123.456))).toBe(0.456);
+        expect(stripErrorMargin(getFractionalPart(-123.456))).toBe(-0.456);
         expect(getFractionalPart(123)).toBe(0);
+    });
+
+    it('Function stripErrorMargin', () => {
+        expect(stripErrorMargin(0.1 + 0.2)).toBe(0.3);
+        expect(stripErrorMargin(30.2 - 30)).toBe(0.2);
     });
 });

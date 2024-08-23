@@ -220,17 +220,15 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
             if (prevSheetId !== skeleton.worksheet.getSheetId()) {
                 // If there is no initial selection, add one by default in the top left corner.
-                const firstSelection = this._workbookSelections.getCurrentLastSelection();
-                if (!firstSelection) {
-                    // WARNING: SetSelectionsOperation with type=null would clear all exists selections
-                    // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
-                    // TODO @lumixraku why use such weird a way to clear existing selection? subscribe to currentSkeleton$ is much better?
-                    this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                        unitId,
-                        subUnitId: sheetId,
-                        selections: [getTopLeftSelection(skeleton)],
-                    } as ISetSelectionsOperationParams);
-                }
+                const selections = this._workbookSelections.getCurrentSelections();
+                // WARNING: SetSelectionsOperation with type=null would clear all exists selections
+                // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
+                // TODO @lumixraku why use such weird a way to clear existing selection? subscribe to currentSkeleton$ is much better?
+                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                    unitId,
+                    subUnitId: sheetId,
+                    selections: selections.length !== 0 ? selections : [getTopLeftSelection(skeleton)],
+                } as ISetSelectionsOperationParams);
             }
 
             const currentSelections = this._workbookSelections.getCurrentSelections();

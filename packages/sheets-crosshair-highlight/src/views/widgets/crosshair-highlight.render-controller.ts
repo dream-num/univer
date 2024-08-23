@@ -21,7 +21,7 @@ import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '
 import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { DISABLE_NORMAL_SELECTIONS, IRefSelectionsService, SheetsSelectionsService } from '@univerjs/sheets';
-import { combineLatest, merge, startWith, tap } from 'rxjs';
+import { combineLatest, map, merge, startWith, tap } from 'rxjs';
 import { SHEETS_CROSSHAIR_HIGHLIGHT_Z_INDEX } from '../../const';
 import { CrossHairRangeCollection } from '../../util';
 import { SheetsCrosshairHighlightService } from '../../services/crosshair.service';
@@ -69,13 +69,25 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
 
     private _initRenderListener(): void {
         const workbook = this._context.unit;
+
         this.disposeWithMe(combineLatest([
             this._contextService.subscribeContextValue$(DISABLE_NORMAL_SELECTIONS).pipe(startWith(false)),
             this._sheetSkeletonManagerService.currentSkeleton$,
             this._sheetsCrosshairHighlightService.enabled$,
             this._sheetsCrosshairHighlightService.color$.pipe(tap((color) => (this._color = color))),
-            merge(this._sheetsSelectionsService.selectionMoveStart$, this._sheetsSelectionsService.selectionMoving$, this._sheetsSelectionsService.selectionMoveEnd$),
-            merge(this._refSelectionsService.selectionMoveStart$, this._refSelectionsService.selectionMoving$, this._refSelectionsService.selectionMoveEnd$),
+
+            merge(
+                this._sheetsSelectionsService.selectionMoveStart$,
+                this._sheetsSelectionsService.selectionMoving$,
+                this._sheetsSelectionsService.selectionMoveEnd$,
+                workbook.activeSheet$.pipe(map(() => this._sheetsSelectionsService.getCurrentSelections()))
+            ),
+            merge(
+                this._refSelectionsService.selectionMoveStart$,
+                this._refSelectionsService.selectionMoving$,
+                this._refSelectionsService.selectionMoveEnd$,
+                workbook.activeSheet$.pipe(map(() => this._refSelectionsService.getCurrentSelections()))
+            ),
         ]).subscribe(([normalSelDisabled, _, enabled, _color, normalSelections, refSelection]) => {
             this._clear();
 

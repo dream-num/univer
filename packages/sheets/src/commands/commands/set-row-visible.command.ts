@@ -141,6 +141,13 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
     },
 };
 
+// TODO@Dushusir: add this
+export interface ISetRowHiddenCommandParams {
+    unitId: string;
+    subUnitId: string;
+    ranges: IRange[];
+}
+
 export const SetRowHiddenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-rows-hidden',

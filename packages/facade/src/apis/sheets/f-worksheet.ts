@@ -16,8 +16,8 @@
 
 import type { IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
-import { SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import { ICommandService, Inject, Injector } from '@univerjs/core';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, RemoveColCommand, RemoveRowCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { Direction, ICommandService, Inject, Injector } from '@univerjs/core';
 
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
@@ -75,38 +75,6 @@ export class FWorksheet {
         return this._injector.createInstance(FRange, this._workbook, this._worksheet, range);
     }
 
-    setRowHeights(startRow: number, numRows: number, height: number): void {
-        this._commandService.syncExecuteCommand(SetWorksheetRowHeightMutation.id, {
-            unitId: this._workbook.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            ranges: [
-                {
-                    startRow,
-                    endRow: startRow + numRows - 1,
-                    startColumn: 0,
-                    endColumn: this._worksheet.getColumnCount() - 1,
-                },
-            ],
-            rowHeight: height,
-        } as ISetWorksheetRowHeightMutationParams);
-    }
-
-    setColumnWidths(startColumn: number, numColumns: number, width: number): void {
-        this._commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, {
-            unitId: this._workbook.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            ranges: [
-                {
-                    startColumn,
-                    endColumn: startColumn + numColumns - 1,
-                    startRow: 0,
-                    endRow: this._worksheet.getRowCount() - 1,
-                },
-            ],
-            colWidth: width,
-        } as ISetWorksheetColWidthMutationParams);
-    }
-
     /**
      * Returns the current number of columns in the sheet, regardless of content.
      * @return The maximum columns count of the sheet
@@ -158,6 +126,437 @@ export class FWorksheet {
             this._workbook.getUnitId(),
             this._worksheet.getSheetId()
         );
+    }
+
+    // #endregion
+
+    // #region Row
+
+    /**
+     * Inserts a row after the given row position.
+     * @param afterPosition The row after which the new row should be added.
+     * @returns This sheet, for chaining.
+     */
+    async insertRowAfter(afterPosition: number): Promise<FWorksheet> {
+        return this.insertRowsAfter(afterPosition, 1);
+    }
+
+    /**
+     * Inserts a row before the given row position.
+     * @param beforePosition The row before which the new row should be added.
+     * @returns This sheet, for chaining.
+     */
+    async insertRowBefore(beforePosition: number): Promise<FWorksheet> {
+        return this.insertRowsBefore(beforePosition, 1);
+    }
+
+    /**
+     * Inserts one or more consecutive blank rows in a sheet starting at the specified location.
+     * @param rowIndex The index indicating where to insert a row.
+     * @param numRows The number of rows to insert.
+     * @returns This sheet, for chaining.
+     */
+    async insertRows(rowIndex: number, numRows: number = 1): Promise<FWorksheet> {
+        return this.insertRowsBefore(rowIndex, numRows);
+    }
+
+    /**
+     * Inserts a number of rows after the given row position.
+     * @param afterPosition The row after which the new rows should be added.
+     * @param howMany The number of rows to insert.
+     * @returns This sheet, for chaining.
+     */
+    async insertRowsAfter(afterPosition: number, howMany: number): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const direction = Direction.DOWN;
+
+        const startRow = afterPosition + 1;
+        const endRow = afterPosition + howMany;
+        const startColumn = 0;
+        const endColumn = this._worksheet.getColumnCount() - 1;
+
+        // copy styles of the row below
+        const cellValue = copyRangeStyles(this._worksheet, startRow, endRow, startColumn, endColumn, true, afterPosition);
+
+        await this._commandService.executeCommand(InsertRowCommand.id, {
+            unitId,
+            subUnitId,
+            direction,
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            },
+            cellValue,
+        });
+
+        return this;
+    }
+
+    /**
+     * Inserts a number of rows before the given row position.
+     * @param beforePosition The row before which the new rows should be added.
+     * @param howMany The number of rows to insert.
+     * @returns This sheet, for chaining.
+     */
+    async insertRowsBefore(beforePosition: number, howMany: number): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const direction = Direction.UP;
+
+        const startRow = beforePosition;
+        const endRow = beforePosition + howMany - 1;
+        const startColumn = 0;
+        const endColumn = this._worksheet.getColumnCount() - 1;
+
+        // copy styles of the row above
+        const cellValue = copyRangeStyles(this._worksheet, startRow, endRow, startColumn, endColumn, true, beforePosition - 1);
+
+        await this._commandService.executeCommand(InsertRowCommand.id, {
+            unitId,
+            subUnitId,
+            direction,
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            },
+            cellValue,
+        });
+
+        return this;
+    }
+
+    /**
+     * Deletes the row at the given row position.
+     * @param rowPosition The position of the row, starting at 1 for the first row.
+     * @returns This sheet, for chaining.
+     */
+    async deleteRow(rowPosition: number): Promise<FWorksheet> {
+        return this.deleteRows(rowPosition, 1);
+    }
+
+    /**
+     * Deletes a number of rows starting at the given row position.
+     * @param rowPosition The position of the first row to delete.
+     * @param howMany The number of rows to delete.
+     * @returns This sheet, for chaining.
+     */
+    async deleteRows(rowPosition: number, howMany: number): Promise<FWorksheet> {
+        const range = {
+            startRow: rowPosition,
+            endRow: rowPosition + howMany - 1,
+            startColumn: 0,
+            endColumn: this._worksheet.getColumnCount() - 1,
+        };
+
+        await this._commandService.executeCommand(RemoveRowCommand.id, {
+            range,
+        });
+
+        return this;
+    }
+
+    /**
+     * Moves the rows selected by the given range to the position indicated by the destinationIndex. The rowSpec itself does not have to exactly represent an entire row or group of rows to move—it selects all rows that the range spans.
+     * @param rowSpec A range spanning the rows that should be moved.
+     * @param destinationIndex The index that the rows should be moved to. Note that this index is based on the coordinates before the rows are moved. Existing data is shifted down to make room for the moved rows while the source rows are removed from the grid. Therefore, the data may end up at a different index than originally specified.
+     */
+    moveRows(rowSpec: FRange, destinationIndex: number): void {
+
+    }
+
+    /**
+     * Hides the rows in the given range.
+     * @param row The row range to hide.
+     */
+    hideRow(row: FRange): void {
+
+    }
+
+    /**
+     * Hides one or more consecutive rows starting at the given index.
+     * @param rowIndex The starting index of the rows to hide.
+     * @param numRows The number of rows to hide.
+     */
+    hideRows(rowIndex: number, numRows: number = 1): void {
+
+    }
+
+    /**
+     * Unhides the row in the given range.
+     * @param row The range to unhide, if hidden.
+     */
+    unhideRow(row: FRange): void {
+
+    }
+
+    /**
+     * Unhides one or more consecutive rows starting at the given index.
+     * @param rowIndex The starting index of the rows to unhide.
+     * @param numRows The number of rows to unhide.
+     */
+    showRows(rowIndex: number, numRows: number = 1): void {
+
+    }
+
+    /**
+     * Sets the row height of the given row in pixels. By default, rows grow to fit cell contents. If you want to force rows to a specified height, use setRowHeightsForced(startRow, numRows, height).
+     * @param rowPosition The row position to change.
+     * @param height The height in pixels to set it to.
+     * @returns This sheet, for chaining.
+     */
+    setRowHeight(rowPosition: number, height: number): FWorksheet {
+        return this;
+    }
+
+    /**
+     * Sets the height of the given rows in pixels. By default, rows grow to fit cell contents. If you want to force rows to a specified height, use setRowHeightsForced(startRow, numRows, height).
+     * @param startRow The starting row position to change.
+     * @param numRows The number of rows to change.
+     * @param height The height in pixels to set it to.
+     * @returns This sheet, for chaining.
+     */
+    setRowHeights(startRow: number, numRows: number, height: number): FWorksheet {
+        this._commandService.syncExecuteCommand(SetWorksheetRowHeightMutation.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [
+                {
+                    startRow,
+                    endRow: startRow + numRows - 1,
+                    startColumn: 0,
+                    endColumn: this._worksheet.getColumnCount() - 1,
+                },
+            ],
+            rowHeight: height,
+        } as ISetWorksheetRowHeightMutationParams);
+
+        return this;
+    }
+
+    /**
+     * Sets the height of the given rows in pixels. By default, rows grow to fit cell contents. When you use setRowHeightsForced, rows are forced to the specified height even if the cell contents are taller than the row height.
+     * @param startRow The starting row position to change.
+     * @param numRows The number of rows to change.
+     * @param height The height in pixels to set it to.
+     * @returns This sheet, for chaining.
+     */
+    setRowHeightsForced(startRow: number, numRows: number, height: number): FWorksheet {
+        return this;
+    }
+
+    // #endregion
+
+    // #region Column
+
+    /**
+     * Inserts a column after the given column position.
+     * @param afterPosition The column after which the new column should be added.
+     * @returns This sheet, for chaining.
+     */
+    async insertColumnAfter(afterPosition: number): Promise<FWorksheet> {
+        return this.insertColumnsAfter(afterPosition, 1);
+    }
+
+    /**
+     * Inserts a column before the given column position.
+     * @param beforePosition The column before which the new column should be added.
+     * @returns This sheet, for chaining.
+     */
+    async insertColumnBefore(beforePosition: number): Promise<FWorksheet> {
+        return this.insertColumnsBefore(beforePosition, 1);
+    }
+
+    /**
+     * Inserts one or more consecutive blank columns in a sheet starting at the specified location.
+     * @param columnIndex The index indicating where to insert a column.
+     * @param numColumns The number of columns to insert.
+     * @returns This sheet, for chaining.
+     */
+    async insertColumns(columnIndex: number, numColumns: number = 1): Promise<FWorksheet> {
+        return this.insertColumnsBefore(columnIndex, numColumns);
+    }
+
+    /**
+     * Inserts a given number of columns after the given column position.
+     * @param afterPosition The column after which the new column should be added.
+     * @param howMany The number of columns to insert.
+     * @returns This sheet, for chaining.
+     */
+    async insertColumnsAfter(afterPosition: number, howMany: number): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const direction = Direction.RIGHT;
+
+        const startRow = 0;
+        const endRow = this._worksheet.getRowCount() - 1;
+        const startColumn = afterPosition + 1;
+        const endColumn = afterPosition + howMany;
+
+        // copy styles of the column to the right
+        const cellValue = copyRangeStyles(this._worksheet, startRow, endRow, startColumn, endColumn, false, afterPosition);
+
+        await this._commandService.executeCommand(InsertColCommand.id, {
+            unitId,
+            subUnitId,
+            direction,
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            },
+            cellValue,
+        });
+
+        return this;
+    }
+
+    /**
+     * Inserts a number of columns before the given column position.
+     * @param beforePosition The column before which the new column should be added.
+     * @param howMany The number of columns to insert.
+     * @returns This sheet, for chaining.
+     */
+    async insertColumnsBefore(beforePosition: number, howMany: number): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const direction = Direction.LEFT;
+
+        const startRow = 0;
+        const endRow = this._worksheet.getRowCount() - 1;
+        const startColumn = beforePosition;
+        const endColumn = beforePosition + howMany - 1;
+
+        // copy styles of the column to the left
+        const cellValue = copyRangeStyles(this._worksheet, startRow, endRow, startColumn, endColumn, false, beforePosition - 1);
+
+        await this._commandService.executeCommand(InsertColCommand.id, {
+            unitId,
+            subUnitId,
+            direction,
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            },
+            cellValue,
+        });
+
+        return this;
+    }
+
+    /**
+     * Deletes the column at the given column position.
+     * @param columnPosition The position of the column, starting at 1 for the first column.
+     * @returns This sheet, for chaining.
+     */
+    async deleteColumn(columnPosition: number): Promise<FWorksheet> {
+        return this.deleteColumns(columnPosition, 1);
+    }
+
+    /**
+     * Deletes a number of columns starting at the given column position.
+     * @param columnPosition The position of the first column to delete.
+     * @param howMany The number of columns to delete.
+     * @returns This sheet, for chaining.
+     */
+    async deleteColumns(columnPosition: number, howMany: number): Promise<FWorksheet> {
+        const range = {
+            startRow: 0,
+            endRow: this._worksheet.getRowCount() - 1,
+            startColumn: columnPosition,
+            endColumn: columnPosition + howMany - 1,
+        };
+
+        await this._commandService.executeCommand(RemoveColCommand.id, {
+            range,
+        });
+
+        return this;
+    }
+
+    /**
+     * Moves the columns selected by the given range to the position indicated by the destinationIndex. The columnSpec itself does not have to exactly represent an entire column or group of columns to move—it selects all columns that the range spans.
+     * @param columnSpec A range spanning the columns that should be moved.
+     * @param destinationIndex The index that the columns should be moved to. Note that this index is based on the coordinates before the columns are moved. Existing data is shifted right to make room for the moved columns while the source columns are removed from the grid. Therefore, the data may end up at a different index than originally specified.
+     */
+    moveColumns(columnSpec: FRange, destinationIndex: number): void {
+
+    }
+
+    /**
+     * Hides the column or columns in the given range.
+     * @param column The column range to hide.
+     */
+    hideColumn(column: FRange): void {
+
+    }
+
+    /**
+     * Hides one or more consecutive columns starting at the given index. Use 1-index for this method.
+     * @param columnIndex The starting index of the columns to hide.
+     * @param numColumns The number of columns to hide.
+     */
+    hideColumns(columnIndex: number, numColumns: number = 1): void {
+
+    }
+
+    /**
+     * Unhides the column in the given range.
+     * @param column The range to unhide, if hidden.
+     */
+    unhideColumn(column: FRange): void {
+
+    }
+
+    /**
+     * Unhides one or more consecutive columns starting at the given index.
+     * @param columnIndex The starting index of the columns to unhide.
+     * @param numColumns The number of columns to unhide.
+     */
+    showColumns(columnIndex: number, numColumns: number = 1): void {
+
+    }
+
+    /**
+     * Sets the width of the given column in pixels.
+     * @param columnPosition The position of the given column to set.
+     * @param width The width in pixels to set it to.
+     * @returns This sheet, for chaining.
+     */
+    setColumnWidth(columnPosition: number, width: number): FWorksheet {
+        return this;
+    }
+
+    /**
+     * Sets the width of the given columns in pixels.
+     * @param startColumn The starting column position to change.
+     * @param numColumns The number of columns to change.
+     * @param width The width in pixels to set it to.
+     * @returns This sheet, for chaining.
+     */
+    setColumnWidths(startColumn: number, numColumns: number, width: number): FWorksheet {
+        this._commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            ranges: [
+                {
+                    startColumn,
+                    endColumn: startColumn + numColumns - 1,
+                    startRow: 0,
+                    endRow: this._worksheet.getRowCount() - 1,
+                },
+            ],
+            colWidth: width,
+        } as ISetWorksheetColWidthMutationParams);
+
+        return this;
     }
 
     // #endregion

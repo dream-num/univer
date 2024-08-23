@@ -44,7 +44,6 @@ import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 
 import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -139,7 +138,90 @@ userManagerService.setCurrentUser(mockUser);
 
 // create univer sheet instance
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            // 1
+            //  2-3-
+            // 	4
+            //  |
+            sheet1: {
+                id: 'sheet1',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 'A1',
+                            s: 's1',
+                        },
+                    },
+                    1: {
+                        1: {
+                            v: 'B2',
+                            s: 's2',
+                        },
+                        4: {
+                            v: 'E2',
+                            s: 's3',
+                        },
+                    },
+                    2: {
+                        1: {
+                            v: 'B3',
+                            s: 's4',
+                        },
+                    },
+                    3: {
+                        1: {
+                            v: 1,
+                        },
+                    },
+                    4: {
+                        1: {
+                            v: 2,
+                        },
+                    },
+                    5: {
+                        1: {
+                            v: 3,
+                        },
+                    },
+                },
+                mergeData: [
+                    { startRow: 1, endRow: 1, startColumn: 2, endColumn: 3 },
+                    {
+                        startRow: 2,
+                        endRow: 3,
+                        startColumn: 2,
+                        endColumn: 2,
+                    },
+                    {
+                        startRow: 10,
+                        endRow: 15,
+                        startColumn: 2,
+                        endColumn: 2,
+                    },
+                    {
+                        startRow: 10,
+                        endRow: 10,
+                        startColumn: 10,
+                        endColumn: 15,
+                    },
+                ],
+                rowCount: 20,
+                columnCount: 20,
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {
+            s1: { bg: { rgb: '#00ff00' } },
+            s2: { bl: 0 },
+            s3: { bl: 1 },
+            s4: { fs: 12, bg: { rgb: '#ff0000' } },
+        },
+    });
 }
 
 setTimeout(() => {

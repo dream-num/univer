@@ -246,33 +246,33 @@ export class SheetsThreadCommentController extends Disposable {
 
             const { row, column } = location;
             if (Number.isNaN(row) || Number.isNaN(column)) {
-                return;
+                return null;
             }
 
-            const shapeId = this._markSelectionService.addShape({
-                range: {
-                    startColumn: column,
-                    endColumn: column,
-                    startRow: row,
-                    endRow: row,
-                },
-                style: {
-                    hasAutoFill: false,
-                    fill: 'rgb(255, 189, 55, 0.35)',
-                    strokeWidth: 1,
-                    stroke: '#FFBD37',
-                    widgets: {},
-                },
-                primary: null,
-            });
-            if (!shapeId) {
-                return;
-            }
+            // const shapeId = this._markSelectionService.addShape({
+            //     range: {
+            //         startColumn: column,
+            //         endColumn: column,
+            //         startRow: row,
+            //         endRow: row,
+            //     },
+            //     style: {
+            //         hasAutoFill: false,
+            //         fill: 'rgb(255, 189, 55, 0.35)',
+            //         strokeWidth: 1,
+            //         stroke: '#FFBD37',
+            //         widgets: {},
+            //     },
+            //     primary: null,
+            // });
+            // if (!shapeId) {
+            //     return;
+            // }
 
-            this._selectionShapeInfo = {
-                ...activeComment,
-                shapeId,
-            };
+            // this._selectionShapeInfo = {
+            //     ...activeComment,
+            //     shapeId,
+            // };
         }));
     }
 }

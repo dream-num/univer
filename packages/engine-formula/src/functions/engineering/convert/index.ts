@@ -105,6 +105,7 @@ export class Convert extends BaseFunction {
 
         if (from[3] === 'temperature') {
             result = this._getTemperatureConversion(numberValue, from[1] as string, to[1] as string);
+            result = +result.toFixed(2);
         } else {
             result = (numberValue * (from[6] as number) * fromMultiplier) / ((to[6] as number) * toMultiplier);
         }

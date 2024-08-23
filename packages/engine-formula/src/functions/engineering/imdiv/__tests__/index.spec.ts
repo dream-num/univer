@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Imdiv } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -60,6 +60,13 @@ describe('Test imdiv function', () => {
             const inumber2 = StringValueObject.create('10+24i');
             const result = testFunction.calculate(inumber1, inumber2);
             expect(result.getValue()).toBe(ErrorType.VALUE);
+        });
+
+        it('Value is null', () => {
+            const inumber1 = NullValueObject.create();
+            const inumber2 = StringValueObject.create('10+24i');
+            const result = testFunction.calculate(inumber1, inumber2);
+            expect(result.getValue()).toBe(ErrorType.NA);
         });
 
         it('Value is blank cell', () => {

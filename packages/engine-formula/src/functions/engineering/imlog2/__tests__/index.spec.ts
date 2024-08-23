@@ -31,6 +31,10 @@ describe('Test imlog2 function', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
             expect(result.getValue()).toBe('3.70043971814109+1.69661688033575i');
+
+            const inumber2 = StringValueObject.create('5-12i');
+            const result2 = testFunction.calculate(inumber2);
+            expect(result2.getValue()).toBe('3.70043971814109-1.69661688033575i');
         });
 
         it('Value is large numbers', () => {

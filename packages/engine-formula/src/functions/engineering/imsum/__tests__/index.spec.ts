@@ -32,6 +32,11 @@ describe('Test imsum function', () => {
             const inumber2 = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber1, inumber2);
             expect(result.getValue()).toBe('10+24i');
+
+            const inumber3 = NumberValueObject.create(5);
+            const inumber4 = NumberValueObject.create(12);
+            const result2 = testFunction.calculate(inumber3, inumber4);
+            expect(result2.getValue()).toBe(17);
         });
 
         it('Value is large numbers', () => {
@@ -87,10 +92,10 @@ describe('Test imsum function', () => {
         });
 
         it('Different suffixes', () => {
-            const inumber1 = ErrorValueObject.create(ErrorType.NAME);
-            const inumber2 = StringValueObject.create('5+12i');
+            const inumber1 = StringValueObject.create('5+12i');
+            const inumber2 = StringValueObject.create('5+12j');
             const result = testFunction.calculate(inumber1, inumber2);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
         it('Value is array', () => {

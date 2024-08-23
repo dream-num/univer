@@ -33,6 +33,12 @@ describe('Test oct2dec function', () => {
             expect(result.getValue()).toBe(44);
         });
 
+        it('Number >= 536870912', () => {
+            const number = NumberValueObject.create(7777777777);
+            const result = testFunction.calculate(number);
+            expect(result.getValue()).toBe(-1);
+        });
+
         it('Value is number string', () => {
             const number = StringValueObject.create('-0.5');
             const result = testFunction.calculate(number);

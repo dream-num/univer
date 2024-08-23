@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Imsub } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -32,6 +32,11 @@ describe('Test imsub function', () => {
             const inumber2 = StringValueObject.create('10+24i');
             const result = testFunction.calculate(inumber1, inumber2);
             expect(result.getValue()).toBe('-248+216i');
+
+            const inumber3 = NumberValueObject.create(-238);
+            const inumber4 = NumberValueObject.create(10);
+            const result2 = testFunction.calculate(inumber3, inumber4);
+            expect(result2.getValue()).toBe(-248);
         });
 
         it('Value is large numbers', () => {
@@ -60,6 +65,13 @@ describe('Test imsub function', () => {
             const inumber2 = StringValueObject.create('10+24i');
             const result = testFunction.calculate(inumber1, inumber2);
             expect(result.getValue()).toBe(ErrorType.VALUE);
+        });
+
+        it('Value is null', () => {
+            const inumber1 = NullValueObject.create();
+            const inumber2 = StringValueObject.create('10+24i');
+            const result = testFunction.calculate(inumber1, inumber2);
+            expect(result.getValue()).toBe(ErrorType.NA);
         });
 
         it('Value is blank cell', () => {

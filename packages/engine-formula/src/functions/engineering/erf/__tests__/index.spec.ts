@@ -43,10 +43,21 @@ describe('Test erf function', () => {
             expect(result.getValue()).toBe(0.9661051464753108);
         });
 
+        it('Value is negative number', () => {
+            const lowerLimit = NumberValueObject.create(-2);
+            const result = testFunction.calculate(lowerLimit);
+            expect(result.getValue()).toBe(-0.9953222650189527);
+        });
+
         it('Value is normal string', () => {
             const lowerLimit = StringValueObject.create('test');
             const result = testFunction.calculate(lowerLimit);
             expect(result.getValue()).toBe(ErrorType.VALUE);
+
+            const lowerLimit2 = NumberValueObject.create(1);
+            const upperLimit2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(lowerLimit2, upperLimit2);
+            expect(result2.getValue()).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
@@ -65,6 +76,11 @@ describe('Test erf function', () => {
             const lowerLimit = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(lowerLimit);
             expect(result.getValue()).toBe(ErrorType.NAME);
+
+            const lowerLimit2 = NumberValueObject.create(1);
+            const upperLimit2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(lowerLimit2, upperLimit2);
+            expect(result2.getValue()).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

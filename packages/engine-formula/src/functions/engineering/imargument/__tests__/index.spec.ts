@@ -31,6 +31,10 @@ describe('Test imargument function', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
             expect(result.getValue()).toBe(1.176005207095135);
+
+            const inumber2 = StringValueObject.create('5-12i');
+            const result2 = testFunction.calculate(inumber2);
+            expect(result2.getValue()).toBe(-1.176005207095135);
         });
 
         it('Value is large numbers', () => {

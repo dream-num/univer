@@ -34,6 +34,18 @@ describe('Test besseli function', () => {
             expect(result.getValue()).toBe(0.981666428475166);
         });
 
+        it('n < 0 || x === Infinity', () => {
+            const x = NumberValueObject.create(1.5);
+            const n = NumberValueObject.create(-1);
+            const result = testFunction.calculate(x, n);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+
+            const x2 = NumberValueObject.create(Infinity);
+            const n2 = NumberValueObject.create(1);
+            const result2 = testFunction.calculate(x2, n2);
+            expect(result2.getValue()).toBe(ErrorType.NUM);
+        });
+
         it('Value is number string', () => {
             const x = StringValueObject.create('-0.5');
             const n = NumberValueObject.create(1);

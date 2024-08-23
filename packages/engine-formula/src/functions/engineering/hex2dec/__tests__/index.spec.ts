@@ -33,6 +33,12 @@ describe('Test hex2dec function', () => {
             expect(result.getValue()).toBe(165);
         });
 
+        it('Number >= 549755813888', () => {
+            const number = StringValueObject.create('FFFFFFFFFF');
+            const result = testFunction.calculate(number);
+            expect(result.getValue()).toBe(-1);
+        });
+
         it('Value is number string', () => {
             const number = StringValueObject.create('-0.5');
             const result = testFunction.calculate(number);

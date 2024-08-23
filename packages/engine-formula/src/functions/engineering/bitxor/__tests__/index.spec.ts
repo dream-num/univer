@@ -46,6 +46,11 @@ describe('Test bitxor function', () => {
             const number2 = NumberValueObject.create(3);
             const result = testFunction.calculate(number1, number2);
             expect(result.getValue()).toBe(ErrorType.VALUE);
+
+            const number3 = NumberValueObject.create(5);
+            const number4 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(number3, number4);
+            expect(result2.getValue()).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
@@ -67,6 +72,11 @@ describe('Test bitxor function', () => {
             const number2 = NumberValueObject.create(3);
             const result = testFunction.calculate(number1, number2);
             expect(result.getValue()).toBe(ErrorType.NAME);
+
+            const number3 = NumberValueObject.create(5);
+            const number4 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(number3, number4);
+            expect(result2.getValue()).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

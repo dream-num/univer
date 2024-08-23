@@ -206,6 +206,11 @@ export namespace BESSEL {
                     if (j === _n) {
                         ret = bjp;
                     }
+
+                    // After more than 100 iterations, the result is 0
+                    if ((m - j) > 100 && ret === 0) {
+                        return Number.NaN;
+                    }
                 }
 
                 sum = 2.0 * sum - bj;
@@ -339,6 +344,11 @@ export namespace BESSEL {
                 }
 
                 if (j === _n) ret = bip;
+
+                // After more than 100 iterations, the result is 0
+                if ((m - j) > 100 && ret === 0) {
+                    return Number.NaN;
+                }
             }
 
             ret *= besseli(x, 0) / bi;
@@ -475,16 +485,12 @@ export class Complex {
         }
 
         this._inumber = inumber;
-        this.getImReal();
-        this.getImAginary();
-        this.getImSuffix();
+        this._getImReal();
+        this._getImAginary();
+        this._getImSuffix();
     }
 
-    getImReal(): void {
-        if (this._isError) {
-            return;
-        }
-
+    private _getImReal(): void {
         if (this._inumber === 0 || this._inumber === '0') {
             this._realNum = 0;
             return;
@@ -547,7 +553,7 @@ export class Complex {
         }
     }
 
-    getImAginary(): void {
+    private _getImAginary(): void {
         if (this._isError) {
             return;
         }
@@ -616,7 +622,7 @@ export class Complex {
         }
     }
 
-    getImSuffix(): void {
+    private _getImSuffix(): void {
         const inumberStr = `${this._inumber}`;
 
         const suffix = inumberStr.substring(inumberStr.length - 1);

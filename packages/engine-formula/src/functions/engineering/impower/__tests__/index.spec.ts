@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
 import { Impower } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -32,6 +32,14 @@ describe('Test impower function', () => {
             const number = NumberValueObject.create(3);
             const result = testFunction.calculate(inumber, number);
             expect(result.getValue()).toBe('-2035-828i');
+
+            const number2 = NumberValueObject.create(-3);
+            const result2 = testFunction.calculate(inumber, number2);
+            expect(result2.getValue()).toBe('-0.000421603589452162+0.000171541902735327i');
+
+            const inumber3 = StringValueObject.create('5-12i');
+            const result3 = testFunction.calculate(inumber3, number);
+            expect(result3.getValue()).toBe('-2035+828i');
         });
 
         it('Value is large numbers', () => {
@@ -67,6 +75,13 @@ describe('Test impower function', () => {
             const number = NumberValueObject.create(3);
             const result = testFunction.calculate(inumber, number);
             expect(result.getValue()).toBe(ErrorType.VALUE);
+        });
+
+        it('Value is null', () => {
+            const inumber = NullValueObject.create();
+            const number = NumberValueObject.create(3);
+            const result = testFunction.calculate(inumber, number);
+            expect(result.getValue()).toBe(ErrorType.NA);
         });
 
         it('Value is blank cell', () => {

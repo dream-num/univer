@@ -54,11 +54,10 @@ export const SaveSnapshotOptions: ICommand = {
         const gitBranch = process.env.GIT_REF_NAME;
         const buildTime = process.env.BUILD_TIME;
         const preName = new Date().toLocaleString();
-
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (!workbook) {
             const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)!;
-            const snapshot = resourceLoaderService.saveDoc(doc);
+            const snapshot = resourceLoaderService.saveUnit(doc.getUnitId());
             (snapshot as any).__env__ = { gitHash, gitBranch, buildTime };
             const text = JSON.stringify(snapshot, null, 2);
             exportController.exportJson(text, `${preName} snapshot`);
@@ -69,7 +68,7 @@ export const SaveSnapshotOptions: ICommand = {
         if (!worksheet) {
             return false;
         }
-        const snapshot = resourceLoaderService.saveWorkbook(workbook);
+        const snapshot = resourceLoaderService.saveUnit<ReturnType<typeof workbook.getSnapshot>>(workbook.getUnitId())!;
 
         (snapshot as any).__env__ = { gitHash, gitBranch, buildTime };
 

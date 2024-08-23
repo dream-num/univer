@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Dependency, IWorkbookData, UnitModel, Workbook } from '@univerjs/core';
+import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import {
     ILogService,
     Inject,
@@ -114,7 +114,7 @@ function getTestWorkbookDataDemo(): IWorkbookData {
 export interface ITestBed {
     univer: Univer;
     get: Injector['get'];
-    sheet: UnitModel<Workbook>;
+    sheet: UnitModel<IWorkbookData>;
     univerAPI: FUniver;
     injector: Injector;
 }
@@ -206,7 +206,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
     univer.registerPlugin(UniverSheetsFilterPlugin);
     univer.registerPlugin(UniverDataValidationPlugin);
 
-    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());
+    const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');
 

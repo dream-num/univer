@@ -877,7 +877,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             worksheet.getCellRaw(row, column) || {},
             documentLayoutObject,
             this._lexerTreeBuilder,
-            (model) => this._resourceLoaderService.saveDoc(model),
+            (model) => this._resourceLoaderService.saveUnit(model.getUnitId())!,
             this._localService,
             this._functionService
         );

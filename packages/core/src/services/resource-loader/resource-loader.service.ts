@@ -23,7 +23,7 @@ import { Disposable } from '../../shared/lifecycle';
 import { UniverInstanceType } from '../../common/unit';
 import type { DocumentDataModel } from '../../docs';
 import { isInternalEditorID } from '../../common/const';
-import type { IWorkbookData } from '../../sheets/typedef';
+import { Tools } from '../../shared';
 import type { IResourceLoaderService } from './type';
 
 export class ResourceLoaderService extends Disposable implements IResourceLoaderService {
@@ -109,19 +109,14 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         );
     }
 
-    saveWorkbook: (workbook: Workbook) => IWorkbookData = (workbook) => {
-        const unitId = workbook.getUnitId();
-        const resources = this._resourceManagerService.getResources(unitId, UniverInstanceType.UNIVER_SHEET);
-        const snapshot = workbook.getSnapshot();
+    saveUnit<T = object>(unitId: string) {
+        const unit = this._univerInstanceService.getUnit(unitId);
+        if (!unit) {
+            return null;
+        }
+        const resources = this._resourceManagerService.getResources(unitId, unit.type);
+        const snapshot = Tools.deepClone(unit.getSnapshot()) as { resources: typeof resources } & T;
         snapshot.resources = resources;
         return snapshot;
-    };
-
-    saveDoc(doc: DocumentDataModel) {
-        const unitId = doc.getUnitId();
-        const resources = this._resourceManagerService.getResources(unitId, UniverInstanceType.UNIVER_DOC);
-        const snapshot = doc.getSnapshot();
-        snapshot.resources = resources;
-        return snapshot;
-    };
+    }
 }

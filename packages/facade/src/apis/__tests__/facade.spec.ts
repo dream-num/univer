@@ -274,7 +274,7 @@ describe('Test FUniver', () => {
     });
 
     it('Function getSnapshot', () => {
-        const snapshot = univerAPI.getActiveWorkbook()?.getSnapshot();
+        const snapshot = univerAPI.getActiveWorkbook()?.save();
         expect(snapshot?.resources).toEqual([
             {
                 data: '{}',

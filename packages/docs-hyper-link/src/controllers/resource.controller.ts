@@ -73,7 +73,29 @@ export class DocHyperLinkResourceController extends Disposable {
             },
             onUnLoad: (unitID: string) => {},
             toJson: (unitID: string) => {
-                return JSON.stringify({ links: [] });
+                const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitID, UniverInstanceType.UNIVER_DOC);
+                const links: { id: string; payload: string }[] = [];
+                if (doc) {
+                    const handleDoc = (model: DocumentDataModel) => {
+                        model.getBody()?.customRanges?.forEach((customRange) => {
+                            if (customRange.rangeType === CustomRangeType.HYPERLINK) {
+                                links.push({
+                                    id: customRange.rangeId,
+                                    payload: customRange.properties?.url || '',
+                                });
+                            }
+                        });
+                    };
+                    doc.headerModelMap.forEach((headerModel) => {
+                        handleDoc(headerModel);
+                    });
+                    doc.footerModelMap.forEach((footerModel) => {
+                        handleDoc(footerModel);
+                    });
+                    handleDoc(doc);
+                }
+
+                return JSON.stringify({ links });
             },
             parseJson(bytes: string): IDocHyperLinkJSON {
                 return JSON.parse(bytes);

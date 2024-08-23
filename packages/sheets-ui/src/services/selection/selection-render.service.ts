@@ -61,7 +61,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         this._init();
     }
 
-    private _init() {
+    private _init(): void {
         const sheetObject = this._getSheetObject();
 
         this._initEventListeners(sheetObject);
@@ -131,7 +131,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }));
     }
 
-    private _initThemeChangeListener() {
+    private _initThemeChangeListener(): void {
         this.disposeWithMe(this._themeService.currentTheme$.subscribe(() => {
             this._resetSelectionStyle();
             const selections = this._workbookSelections.getCurrentSelections();
@@ -145,7 +145,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         return this._contextService.getContextValue(DISABLE_NORMAL_SELECTIONS);
     }
 
-    private _initSelectionChangeListener() {
+    private _initSelectionChangeListener(): void {
         // When selection completes, we need to update the selections' rendering and clear event handlers.
         this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((params) => {
             this._reset();
@@ -156,7 +156,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }));
     }
 
-    private _initUserActionSyncListener() {
+    private _initUserActionSyncListener(): void {
         this.disposeWithMe(this.selectionMoveStart$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_START)));
         this.disposeWithMe(this.selectionMoving$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVING)));
 
@@ -199,7 +199,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         });
     }
 
-    private _initSkeletonChangeListener() {
+    private _initSkeletonChangeListener(): void {
         // changing sheet is not the only way cause currentSkeleton$ emit, a lot of cmds will emit currentSkeleton$
         // COMMAND_LISTENER_SKELETON_CHANGE ---> currentSkeleton$.next
         // 'sheet.mutation.set-worksheet-row-auto-height' is one of COMMAND_LISTENER_SKELETON_CHANGE

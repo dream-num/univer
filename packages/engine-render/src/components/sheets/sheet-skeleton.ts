@@ -43,14 +43,17 @@ import type {
     IBorderStyleData,
     ICellData,
     IColumnData,
+    IColumnRange,
     IDocumentData,
     IDocumentRenderConfig,
     IObjectArrayPrimitiveType,
     IPaddingData,
+    IPosition,
     IRange,
     IRowAutoHeightInfo,
     IRowData,
     ISelectionCellWithMergeInfo,
+    ISize,
     IStyleBase,
     IStyleData,
     ITextRotation,
@@ -88,12 +91,12 @@ import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
  * @param documentSkeleton Data of the document's ViewModel
  * @param angleInDegree The rotation angle of an Excel cell, it's **degree**
  */
-export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angleInDegree: number = 0) {
+export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angleInDegree: number = 0): Nullable<Required<ISize>> {
     const skeletonData = documentSkeleton?.getSkeletonData();
     const angle = degToRad(angleInDegree);
 
     if (!skeletonData) {
-        return;
+        return null;
     }
     const { pages } = skeletonData;
     const lastPage = pages[pages.length - 1];
@@ -269,62 +272,62 @@ export class SpreadsheetSkeleton extends Skeleton {
         // this.updateDataMerge();
     }
 
-    get rowHeightAccumulation() {
+    get rowHeightAccumulation(): number[] {
         return this._rowHeightAccumulation;
     }
 
-    get rowTotalHeight() {
+    get rowTotalHeight(): number {
         return this._rowTotalHeight;
     }
 
-    get columnWidthAccumulation() {
+    get columnWidthAccumulation(): number[] {
         return this._columnWidthAccumulation;
     }
 
-    get columnTotalWidth() {
+    get columnTotalWidth(): number {
         return this._columnTotalWidth;
     }
 
-    get rowHeaderWidth() {
+    get rowHeaderWidth(): number {
         return this._rowHeaderWidth;
     }
 
-    get columnHeaderHeight() {
+    get columnHeaderHeight(): number {
         return this._columnHeaderHeight;
     }
 
     /**
      * row col start & end range
      */
-    get rowColumnSegment() {
+    get rowColumnSegment(): IRowColumnSegment {
         return this._rowColumnSegment;
     }
 
-    get dataMergeCache() {
+    get dataMergeCache(): IRange[] {
         return this._dataMergeCache;
     }
 
-    get stylesCache() {
+    get stylesCache(): IStylesCache {
         return this._stylesCache;
     }
 
-    get overflowCache() {
+    get overflowCache(): ObjectMatrix<IRange> {
         return this._overflowCache;
     }
 
-    get showGridlines() {
+    get showGridlines(): BooleanNumber {
         return this._showGridlines;
     }
 
-    get mergeData() {
+    get mergeData(): IRange[] {
         return this._worksheetData.mergeData;
     }
 
-    get rowHeaderWidthAndMarginLeft() {
+    get rowHeaderWidthAndMarginLeft(): number {
         return this.rowHeaderWidth + this._marginLeft;
     }
 
-    get columnHeaderHeightAndMarginTop() {
+    get columnHeaderHeightAndMarginTop(): number {
         return this.columnHeaderHeight + this._marginTop;
     }
 
@@ -351,7 +354,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     /**
      * @deprecated should never expose a property that is provided by another module!
      */
-    getsStyles() {
+    getsStyles(): Styles {
         return this._styles;
     }
 
@@ -363,7 +366,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return [this.worksheet.getUnitId(), this.worksheet.getSheetId()];
     }
 
-    private _initContextListener() {
+    private _initContextListener(): void {
         this.disposeWithMe(
             this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(
                 startWith(false),
@@ -376,27 +379,27 @@ export class SpreadsheetSkeleton extends Skeleton {
         );
     }
 
-    setOverflowCache(value: ObjectMatrix<IRange>) {
+    setOverflowCache(value: ObjectMatrix<IRange>): void {
         this._overflowCache = value;
     }
 
-    setMarginLeft(left: number) {
+    setMarginLeft(left: number): void {
         this._marginLeft = left;
     }
 
-    setMarginTop(top: number) {
+    setMarginTop(top: number): void {
         this._marginTop = top;
     }
 
-    calculateSegment(bounds?: IViewportInfo) {
+    calculateSegment(bounds?: IViewportInfo): boolean {
         if (!this._worksheetData) {
-            return;
+            return false;
         }
 
         this._updateLayout();
 
         if (!this._rowHeightAccumulation || !this._columnWidthAccumulation) {
-            return;
+            return false;
         }
 
         if (bounds != null) {
@@ -406,7 +409,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return true;
     }
 
-    calculateWithoutClearingCache(bounds?: IViewportInfo) {
+    calculateWithoutClearingCache(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
         if (!this.calculateSegment(bounds)) {
             return;
         }
@@ -420,7 +423,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    calculate(bounds?: IViewportInfo) {
+    calculate(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
         this._resetCache();
 
         this.calculateWithoutClearingCache(bounds);
@@ -428,7 +431,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    calculateAutoHeightInRange(ranges: Nullable<IRange[]>) {
+    calculateAutoHeightInRange(ranges: Nullable<IRange[]>): IRowAutoHeightInfo[] {
         if (!Tools.isArray(ranges)) {
             return [];
         }
@@ -544,9 +547,8 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     /**
      * Calculate data for row col & cell position, then update position value to this._rowHeaderWidth & this._rowHeightAccumulation & this._columnHeaderHeight & this._columnWidthAccumulation.
-     * @returns this
      */
-    private _updateLayout() {
+    private _updateLayout(): void {
         if (!this.dirty) {
             return;
         }
@@ -583,8 +585,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._showGridlines = showGridlines;
 
         this.makeDirty(false);
-
-        return this;
     }
 
     private _dynamicallyUpdateRowHeaderWidth(rowHeader: { width: number }): number {
@@ -593,7 +593,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return Math.max(rowHeader.width, widthByComputation);
     }
 
-    getRowColumnSegment(bounds?: IViewportInfo) {
+    getRowColumnSegment(bounds?: IViewportInfo): IRange {
         return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.cacheBound);
         // return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);
     }
@@ -602,11 +602,11 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @deprecated should never expose a property that is provided by another module!
      * @returns
      */
-    getWorksheetConfig() {
+    getWorksheetConfig(): IWorksheetData {
         return this._worksheetData;
     }
 
-    getRowColumnSegmentByViewBound(bound?: IBoundRectNoAngle) {
+    getRowColumnSegmentByViewBound(bound?: IBoundRectNoAngle): IRange {
         return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
     }
 
@@ -674,7 +674,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    appendToOverflowCache(row: number, column: number, startColumn: number, endColumn: number) {
+    appendToOverflowCache(row: number, column: number, startColumn: number, endColumn: number): void {
         this._overflowCache.setValue(row, column, {
             startRow: row,
             endRow: row,
@@ -683,22 +683,22 @@ export class SpreadsheetSkeleton extends Skeleton {
         });
     }
 
-    getColumnCount() {
+    getColumnCount(): number {
         return this._columnWidthAccumulation.length;
     }
 
-    getRowCount() {
+    getRowCount(): number {
         return this._rowHeightAccumulation.length;
     }
 
     getOverflowPosition(
-        contentSize: { width: number; height: number },
+        contentSize: Required<ISize>,
         horizontalAlign: HorizontalAlign,
         row: number,
         column: number,
         columnCount: number
-    ) {
-        const { width: contentWidth } = contentSize;
+    ): IColumnRange {
+        const contentWidth = contentSize?.width ?? 0;
 
         let startColumn = column;
         let endColumn = column;
@@ -720,7 +720,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number) {
+    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number): IPosition {
         const {
             rowHeightAccumulation,
             columnWidthAccumulation,
@@ -761,7 +761,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getNoMergeCellPositionByIndexWithNoHeader(rowIndex: number, columnIndex: number) {
+    getNoMergeCellPositionByIndexWithNoHeader(rowIndex: number, columnIndex: number): IPosition {
         const { rowHeightAccumulation, columnWidthAccumulation } = this;
 
         const { startY, endY, startX, endX } = getCellPositionByIndex(
@@ -780,7 +780,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     *
+     * Get cell by pos(offsetX, offsetY).
      * @param offsetX HTML coordinate system, mouse position x.
      * @param offsetY HTML coordinate system, mouse position y.
      * @param scaleX render scene scale x-axis, scene.getAncestorScale
@@ -820,9 +820,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         scaleY: number,
         scrollXY: { x: number; y: number },
         closeFirst?: boolean
-    ) {
+    ): { row: number; column: number } {
         const row = this.getRowPositionByOffsetY(offsetY, scaleY, scrollXY, closeFirst);
-
         const column = this.getColumnPositionByOffsetX(offsetX, scaleX, scrollXY, closeFirst);
 
         return {
@@ -839,7 +838,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns
      */
 
-    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }, closeFirst?: boolean) {
+    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }, closeFirst?: boolean): number {
         offsetX = this.getTransformOffsetX(offsetX, scaleX, scrollXY);
 
         const { columnWidthAccumulation } = this;
@@ -870,7 +869,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param scrollXY.x
      * @param scrollXY.y
      */
-    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, closeFirst?: boolean) {
+    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, closeFirst?: boolean): number {
         const { rowHeightAccumulation } = this;
 
         offsetY = this.getTransformOffsetY(offsetY, scaleY, scrollXY);
@@ -893,7 +892,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return row;
     }
 
-    getTransformOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+    getTransformOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }): number {
         const { x: scrollX } = scrollXY;
 
         // so we should map physical positions to ideal positions
@@ -902,7 +901,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return offsetX;
     }
 
-    getTransformOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+    getTransformOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }): number {
         const { y: scrollY } = scrollXY;
 
         // these values are not affected by zooming (ideal positions)
@@ -927,7 +926,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return columnWidthAccumulation[lastColumnIndex] + rowHeaderWidthAndMarginLeft;
     }
 
-    getOffsetByPositionY(row: number) {
+    getOffsetByPositionY(row: number): number {
         const { rowHeightAccumulation, columnHeaderHeightAndMarginTop } = this;
         const lastRowIndex = rowHeightAccumulation.length - 1;
         const rowValue = rowHeightAccumulation[row];
@@ -985,7 +984,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getCellByIndexWithNoHeader(row: number, column: number) {
+    getCellByIndexWithNoHeader(row: number, column: number): ISelectionCellWithMergeInfo {
         const { rowHeightAccumulation, columnWidthAccumulation } = this;
 
         const primary = getCellByIndex(
@@ -1014,7 +1013,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     // convert canvas content position to physical position in screen
-    convertTransformToOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+    convertTransformToOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }): number {
         const { x: scrollX } = scrollXY;
 
         offsetX = (offsetX - scrollX) * scaleX;
@@ -1023,7 +1022,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     // convert canvas content position to physical position in screen
-    convertTransformToOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+    convertTransformToOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }): number {
         const { y: scrollY } = scrollXY;
 
         offsetY = (offsetY - scrollY) * scaleY;
@@ -1074,7 +1073,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     // Only used for cell edit, and no need to rotate text when edit cell content!
-    getCellDocumentModelWithFormula(cell: ICellData) {
+    getCellDocumentModelWithFormula(cell: ICellData): Nullable<IDocumentLayoutObject> {
         return this._getCellDocumentModel(cell, {
             isDeepClone: true,
             displayRawFormula: true,
@@ -1171,7 +1170,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getDecomposedOffset(offsetX: number, offsetY: number) {
+    getDecomposedOffset(offsetX: number, offsetY: number): { row: number; column: number; columnOffset: number; rowOffset: number } {
         let column = searchArray(this._columnWidthAccumulation, offsetX);
         let columnOffset = 0;
         if (column === -1 || column === 0) {
@@ -1203,7 +1202,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Overflow on the left or right is aligned according to the text's horizontal alignment.
      */
     // eslint-disable-next-line complexity
-    private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem) {
+    private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem): boolean {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
 
@@ -1314,6 +1313,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             this.appendToOverflowCache(row, column, startColumn, endColumn);
         }
+        return false;
     }
 
     /**
@@ -1327,7 +1327,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
         viewBound?: IBoundRectNoAngle
-    ) {
+    ): IRange {
         const rhaLength = rowHeightAccumulation.length;
         const cwaLength = columnWidthAccumulation.length;
 
@@ -1401,7 +1401,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         rowCount: number,
         rowData: IObjectArrayPrimitiveType<Partial<IRowData>>,
         defaultRowHeight: number
-    ) {
+    ): { rowTotalHeight: number; rowHeightAccumulation: number[] } {
         let rowTotalHeight = 0;
         const rowHeightAccumulation: number[] = [];
         const data = rowData;
@@ -1443,7 +1443,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         colCount: number,
         columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>,
         defaultColumnWidth: number
-    ) {
+    ): { columnTotalWidth: number; columnWidthAccumulation: number[] } {
         let columnTotalWidth = 0;
         const columnWidthAccumulation: number[] = [];
 
@@ -1479,13 +1479,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    //eslint-disable-next-line complexity
     private _getOverflowBound(
         row: number,
         startColumn: number,
         endColumn: number,
         contentWidth: number,
         horizontalAlign = HorizontalAlign.LEFT
-    ) {
+    ): number {
         let cumWidth = 0;
         if (startColumn > endColumn) {
             const columnCount = this._columnWidthAccumulation.length - 1;
@@ -1548,7 +1549,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return endColumn;
     }
 
-    intersectMergeRange(row: number, column: number) {
+    intersectMergeRange(row: number, column: number): boolean {
         const dataMergeCache = this.dataMergeCache;
         for (const dataCache of dataMergeCache) {
             const {
@@ -1588,7 +1589,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     return mergeRangeCache;
     // }
 
-    private _calculateStylesCache() {
+    private _calculateStylesCache(): void {
         const dataMergeCaches = this._dataMergeCache;
         const rowColumnSegment = this._rowColumnSegment;
         const columnWidthAccumulation = this.columnWidthAccumulation;
@@ -1806,7 +1807,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         documentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
         renderConfig?: IDocumentRenderConfig
-    ) {
+    ): Nullable<DocumentDataModel> {
         if (!renderConfig) {
             return;
         }
@@ -1840,7 +1841,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return new DocumentDataModel(documentData);
     }
 
-    private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: ICellOtherConfig) {
+    private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: ICellOtherConfig): DocumentDataModel {
         const contentLength = content.length;
         const {
             textRotation,
@@ -1909,7 +1910,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * pro/issues/344
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
-    private _setMergeBorderProps(type: BORDER_TYPE, cache: IStylesCache, mergeRange: IRange) {
+    private _setMergeBorderProps(type: BORDER_TYPE, cache: IStylesCache, mergeRange: IRange): void {
         if (!this.worksheet || !cache.border) {
             return;
         }
@@ -1995,10 +1996,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
-    private _setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache) {
+    private _setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache): void {
         const props: Nullable<IBorderStyleData> = style.bd?.[type];
         if (!props || !cache.border) {
-            return true;
+            return;
         }
         const rgb = getColorStyle(props.cl) || COLOR_BLACK_RGB;
 
@@ -2017,12 +2018,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (type === BORDER_TYPE.TOP) {
             const borderBottom = borderCache.getValue(r - 1, c)?.[BORDER_TYPE.BOTTOM];
             if (borderBottom && isWhiteColor(rgb)) {
-                return true;
+                return;
             }
         } else if (type === BORDER_TYPE.LEFT) {
             const borderRight = borderCache.getValue(r, c - 1)?.[BORDER_TYPE.RIGHT];
             if (borderRight && isWhiteColor(rgb)) {
-                return true;
+                return;
             }
         }
 
@@ -2050,7 +2051,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return style;
     }
 
-    private _getOtherStyle(format?: Nullable<IStyleData>) {
+    private _getOtherStyle(format?: Nullable<IStyleData>): ICellOtherConfig {
         if (!format) {
             return {};
         }
@@ -2076,7 +2077,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             verticalAlign,
             wrapStrategy,
             paddingData,
-        };
+        } as ICellOtherConfig;
     }
 
     /**
@@ -2084,7 +2085,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param mergeData all marge data
      * @param rowColumnSegment current screen range, include row and column
      */
-    private _getMergeCells(mergeData: IRange[], rowColumnSegment?: IRowColumnSegment) {
+    private _getMergeCells(mergeData: IRange[], rowColumnSegment?: IRowColumnSegment): IRange[] {
         // const rowColumnSegment = this._rowColumnSegment;
         const endColumnLast = this.columnWidthAccumulation.length - 1;
         if (!rowColumnSegment) {

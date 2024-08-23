@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
-import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject, IUniverInstanceService } from '@univerjs/core';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { type ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
@@ -57,11 +57,13 @@ export class DataValidationDropdownManagerService extends Disposable {
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService
     ) {
         super();
         this._init();
 
+        this._initSelectionChange();
         this.disposeWithMe(() => {
             this._activeDropdown$.complete();
         });
@@ -71,6 +73,38 @@ export class DataValidationDropdownManagerService extends Disposable {
         this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
             this._zenVisible = visible;
             if (visible) {
+                this.hideDropdown();
+            }
+        }));
+    }
+
+    private _getDropdownByCell(unitId: string | undefined, subUnitId: string | undefined, row: number, col: number) {
+        const workbook = unitId ?
+            this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+            : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return;
+        }
+
+        const worksheet = subUnitId ? workbook.getSheetBySheetId(subUnitId) : workbook.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
+
+        const manager = this._dataValidationModel.ensureManager(workbook.getUnitId(), worksheet.getSheetId()) as SheetDataValidationManager;
+        const rule = manager.getRuleByLocation(row, col);
+        if (!rule) {
+            return;
+        }
+
+        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+
+        return validator?.dropdown;
+    }
+
+    private _initSelectionChange() {
+        this.disposeWithMe(this._sheetsSelectionsService.selectionMoveEnd$.subscribe((selections) => {
+            if (selections && selections.every((selection) => !(selection.primary && this._getDropdownByCell(selection.primary.unitId, selection.primary.sheetId, selection.primary.actualRow, selection.primary.actualColumn)))) {
                 this.hideDropdown();
             }
         }));
@@ -133,7 +167,7 @@ export class DataValidationDropdownManagerService extends Disposable {
     }
 
     showDataValidationDropdown(unitId: string, subUnitId: string, row: number, col: number, onHide?: () => void) {
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return;
         }

@@ -15,7 +15,7 @@
  */
 
 import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
-import { DataValidationStatus, Inject, IUniverInstanceService, Range, UniverInstanceType } from '@univerjs/core';
+import { DataValidationStatus, Inject, IUniverInstanceService, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import type { IDataValidationResCache } from './dv-cache.service';
@@ -39,6 +39,10 @@ export class SheetsDataValidationValidatorService {
         const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             throw new Error(`cannot find current worksheet, sheetId: ${subUnitId}`);
+        }
+
+        if (!Tools.isDefine(row) || !Tools.isDefine(col)) {
+            throw new Error(`row or col is not defined, row: ${row}, col: ${col}`);
         }
 
         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;

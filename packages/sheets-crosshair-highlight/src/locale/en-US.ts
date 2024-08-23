@@ -14,5 +14,14 @@
  * limitations under the License.
  */
 
-export * from './plugin-name';
-export * from './ui-name.ts';
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    crosshair: {
+        button: {
+            tooltip: 'Crosshair Highlight',
+        },
+    },
+};
+
+export default locale;

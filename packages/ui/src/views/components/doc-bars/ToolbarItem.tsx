@@ -44,7 +44,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
 
     const { value, hidden, disabled, activated } = useToolbarItemStatus(props);
 
-    const handleCommandExecuted = (commandId: string, params?: Record<string, any>) => {
+    const executeCommand = (commandId: string, params?: Record<string, any>) => {
         layoutService.focus();
         commandService.executeCommand(commandId, params);
     };
@@ -61,7 +61,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
         }
     }
 
-    const { tooltip, shortcut, icon, title, label, id } = props;
+    const { tooltip, shortcut, icon, title, label, id, commandId } = props;
 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
@@ -91,37 +91,31 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
     const iconToDisplay = useObservable(icon$, undefined, true);
 
     function renderSelectorType(menuType: MenuItemType) {
+        const selectionsCommandId = (props as IDisplayMenuItem<IMenuSelectorItem>).selectionsCommandId;
+        const bId = commandId ?? id;
+        const sId = selectionsCommandId ?? commandId ?? id;
+
         function handleSelect(option: IValueOption) {
-            if (disabled) {
-                return;
-            }
+            if (disabled) return;
 
-            let commandId = id;
-            const value = option;
-
+            let commandId = sId;
             if (option.id) {
                 commandId = option.id;
             }
 
-            handleCommandExecuted(commandId, value);
+            executeCommand(commandId, { value: option.value });
         }
 
-        function handleChange(value: string | number) {
-            if (disabled) {
-                return;
-            }
-
-            const commandId = id;
-            handleCommandExecuted(commandId, { value });
+        function handleSelectionsValueChange(value: string | number) {
+            if (disabled) return;
+            executeCommand(sId, { value });
         }
 
         function handleClick() {
-            if (disabled) {
-                return;
-            }
+            if (disabled) return;
+
             if (menuType === MenuItemType.BUTTON_SELECTOR) {
-                const commandId = id;
-                handleCommandExecuted(commandId, { value });
+                executeCommand(bId, { value });
             }
         }
 
@@ -141,7 +135,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                             title={title!}
                             value={value}
                             label={label}
-                            onChange={handleChange}
+                            onChange={handleSelectionsValueChange}
                         />
                     </div>
                     <Dropdown
@@ -186,7 +180,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                             title={title!}
                             value={value}
                             label={label}
-                            onChange={handleChange}
+                            onChange={handleSelectionsValueChange}
                         />
                         <div
                             className={clsx(styles.toolbarItemSelectArrow, {
@@ -208,8 +202,8 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                 className={styles.toolbarItemTextButton}
                 active={activated}
                 disabled={disabled}
-                onClick={() => handleCommandExecuted(props.commandId ?? props.id)}
-                onDoubleClick={() => props.subId && handleCommandExecuted(props.subId)}
+                onClick={() => executeCommand(props.commandId ?? props.id)}
+                onDoubleClick={() => props.subId && executeCommand(props.subId)}
             >
                 {isCustomComponent
                     ? (

@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-export enum SheetsUIPart {
-    FILTER_PANEL_EMBED_POINT = 'filter-panel-embed-point',
-}
+export { UniverSheetsCrosshairHighlightPlugin } from './plugin';
+export { CROSSHAIR_HIGHLIGHT_COLORS } from './services/crosshair.service';
+
+// #region commands
+
+export {
+    ToggleCrosshairHighlightOperation,
+    DisableCrosshairHighlightOperation,
+    EnableCrosshairHighlightOperation,
+    SetCrosshairHighlightColorOperation,
+    type ISetCrosshairHighlightColorOperationParams,
+} from './commands/operations/operation';
+
+// #endregion

@@ -21,7 +21,7 @@ import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle }
 import { RangeProtectionRuleModel } from '@univerjs/sheets';
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import { merge, throttleTime } from 'rxjs';
-import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER, UNIVER_SHEET_PERMISSION_USER_DIALOG } from '../../basics/const/permission';
+import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER, UNIVER_SHEET_PERMISSION_USER_DIALOG } from '../../consts/permission';
 import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionPanelFooter, SheetPermissionUserDialog } from '../../views/permission';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
 import { AlertDialog } from '../../views/permission/error-msg-dialog';

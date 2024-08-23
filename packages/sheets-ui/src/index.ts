@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-export * from './basics';
+export { SheetsUIPart } from './consts/ui-name';
+export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { getEditorObject } from './basics/editor/get-editor-object';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from './controllers/menu/menu-util';

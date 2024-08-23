@@ -88,7 +88,7 @@ export { IEditorService, EditorService, Editor } from './services/editor/editor.
 export { TextEditor } from './components/editor/TextEditor';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
-export { type IMenuGroup, useToolbarGroups, useToolbarItemStatus, useToolbarCollapseObserver } from './views/components/doc-bars/hook';
+export { type IMenuGroup, useSimpleToolbarGroups, useToolbarGroups, useToolbarItemStatus, useToolbarCollapseObserver } from './views/components/doc-bars/hook';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';

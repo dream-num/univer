@@ -17,7 +17,7 @@
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
@@ -44,21 +44,20 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         @Inject(Injector) injector: Injector,
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
-        @IRenderManagerService renderManagerService: IRenderManagerService,
-        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
+        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
+        @Inject(SheetSkeletonManagerService) sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IContextService private readonly _contextService: IContextService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @IContextService private readonly _contextService: IContextService
     ) {
         super(
             injector,
             themeService,
             shortcutService,
-            renderManagerService
+            sheetSkeletonManagerService
         );
 
-        this._workbookSelections = _selectionManagerService.getWorkbookSelections(this._context.unitId);
+        this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
     }
 
@@ -134,11 +133,11 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _initThemeChangeListener() {
         this.disposeWithMe(this._themeService.currentTheme$.subscribe(() => {
-            this._resetStyle();
-            const param = this._workbookSelections.getCurrentSelections();
-            if (!param) return;
+            this._resetSelectionStyle();
+            const selections = this._workbookSelections.getCurrentSelections();
+            if (!selections) return;
 
-            this._refreshSelectionControl(param);
+            this._refreshSelectionControl(selections);
         }));
     }
 
@@ -177,8 +176,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     }
 
     /**
-     * set new selection range in seletion model
-     * selectionMoveEnd$ ---> _updateSelections --> selectionOperation@selectionManagerService.setSelections
+     * Update selectionData to current sheet.
      * @param selectionDataWithStyleList
      * @param type
      */
@@ -218,18 +216,15 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const prevSheetId = this._skeleton?.worksheet?.getSheetId();
             this._changeRuntime(skeleton, scene, viewportMain);
 
-            // If there is no initial selection, add one by default in the top left corner.
-            // const firstSelection = this._workbookSelections.getCurrentLastSelection();
-            // Dont do that above! Ref selection also need syncExecCmd to reset selection.
-            // TODO @lumixraku why use such weird a way to clear existing selection? subscribe to currentSkeleton$ is much better?
-
             if (this._normalSelectionDisabled()) return;
 
-            // SetSelectionsOperation would clear all exists selections
-            // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
             if (prevSheetId !== skeleton.worksheet.getSheetId()) {
+                // If there is no initial selection, add one by default in the top left corner.
                 const firstSelection = this._workbookSelections.getCurrentLastSelection();
                 if (!firstSelection) {
+                    // WARNING: SetSelectionsOperation with type=null would clear all exists selections
+                    // SetSelectionsOperation ---> selectionManager@setSelections ---> moveEnd$ ---> selectionRenderService@_reset
+                    // TODO @lumixraku why use such weird a way to clear existing selection? subscribe to currentSkeleton$ is much better?
                     this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                         unitId,
                         subUnitId: sheetId,

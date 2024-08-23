@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDocumentMeta, IGetSheetBlockRequest, ISheetBlock, ISheetBlockMeta, ISnapshot, IWorkbookMeta, IWorksheetMeta } from '@univerjs/protocol';
+import type { ICellData, IDocumentMeta, IGetSheetBlockRequest, ISheetBlock, ISheetBlockMeta, ISnapshot, IWorkbookMeta, IWorksheetMeta } from '@univerjs/protocol';
 import { ErrorCode, isError, UniverType } from '@univerjs/protocol';
 
 import type { ILogContext } from '../log/context';
-import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { SheetTypes } from '../../types/enum/sheet-types';
-import type { IWorksheetData } from '../../types/interfaces/i-worksheet-data';
-import type { ICellData } from '../../types/interfaces/i-cell-data';
 import { LocaleType } from '../../types/enum/locale-type';
 import type { IDocumentData } from '../../types/interfaces/i-document-data';
+import type { IWorkbookData, IWorksheetData } from '../../sheets/typedef';
 import {
     decodeDocOriginalMeta,
     decodePartOfCellData,
@@ -91,7 +89,7 @@ export async function generateTemporarySnap(
 
             // Trigger RPC and store the result in sheetBlocks.
             if (worksheet.cellData) {
-                const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.rowCount!);
+                const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.columnCount!);
                 const responses = await Promise.all(
                     sheetBlocks.map((block) =>
                         snapshotService.saveSheetBlock(context, {
@@ -176,7 +174,7 @@ export async function transformWorkbookDataToSnapshot(
 
             // Trigger RPC and store the result in sheetBlocks.
             if (worksheet.cellData) {
-                const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.rowCount!);
+                const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.columnCount!);
                 const responses = await Promise.all(
                     sheetBlocks.map((block) =>
                         snapshotService.saveSheetBlock(context, {

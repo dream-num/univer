@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * Built-in locales.
+ */
 export enum LocaleType {
     EN_US = 'enUS',
     ZH_CN = 'zhCN',
@@ -21,5 +24,3 @@ export enum LocaleType {
     ZH_TW = 'zhTW',
     VI_VN = 'viVN',
 }
-
-export type LocaleTypes = `${LocaleType}`;

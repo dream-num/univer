@@ -36,7 +36,7 @@ export const ShowCommentPanelOperation: ICommand<IShowCommentPanelOperationParam
         const panelService = accessor.get(ThreadCommentPanelService);
         const sidebarService = accessor.get(ISidebarService);
 
-        if (!panelService.panelVisible) {
+        if (!panelService.panelVisible || sidebarService.options.children?.label !== DocThreadCommentPanel.componentKey) {
             sidebarService.open({
                 header: { title: 'threadCommentUI.panel.title' },
                 children: { label: DocThreadCommentPanel.componentKey },
@@ -45,6 +45,7 @@ export const ShowCommentPanelOperation: ICommand<IShowCommentPanelOperationParam
             });
             panelService.setPanelVisible(true);
         }
+
         if (params) {
             panelService.setActiveComment(params?.activeComment);
         }
@@ -90,7 +91,6 @@ export const StartAddCommentOperation: ICommand = {
         const docCommentService = accessor.get(DocThreadCommentService);
         const commandService = accessor.get(ICommandService);
         const sidebarService = accessor.get(ISidebarService);
-
         const textRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (!doc || !textRange) {
             return false;
@@ -106,10 +106,7 @@ export const StartAddCommentOperation: ICommand = {
             return true;
         }
 
-        if (!panelService.panelVisible) {
-            commandService.executeCommand(ShowCommentPanelOperation.id);
-        }
-
+        commandService.executeCommand(ShowCommentPanelOperation.id);
         const unitId = doc.getUnitId();
         const text = getSelectionText(doc.getBody()?.dataStream ?? '', textRange.startOffset, textRange.endOffset);
         const subUnitId = DEFAULT_DOC_SUBUNIT_ID;

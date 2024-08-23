@@ -16,9 +16,9 @@
 
 import type { IDisposable } from '../common/di';
 
-import type { Nullable } from '../common/type-util';
 import { Disposable, toDisposable } from '../shared/lifecycle';
-import type { ICellData, ICellDataForSheetInterceptor } from '../types/interfaces/i-cell-data';
+import type { Nullable } from '../shared/types';
+import type { ICellData, ICellDataForSheetInterceptor } from './typedef';
 
 /**
  * @internal

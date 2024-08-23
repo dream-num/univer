@@ -36,7 +36,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, Viewport } from '@univerjs/engine-render';
-import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
@@ -73,19 +73,18 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         @Inject(Injector) injector: Injector,
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
-        @IRenderManagerService renderManagerService: IRenderManagerService,
         @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
+        @Inject(SheetSkeletonManagerService) sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService
     ) {
         super(
             injector,
             themeService,
             shortcutService,
-            renderManagerService
+            sheetSkeletonManagerService
         );
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
@@ -356,7 +355,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             activeSelectionControl = this.newSelectionControl(scene, rangeType);
         }
 
-        this._updateSelectionControlRange(
+        this._updateSelectionControlByRange(
             activeSelectionControl,
             cursorCellRangeWithRangeType,
             primaryCursorCellRange
@@ -377,7 +376,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
             // _moving would update activeSelectionControl range when row & col
             // this update logic should split from _moving!!!
-            this._moving(viewportPosX, viewportPosY, activeSelectionControl, rangeType);
+            this._movingHandler(viewportPosX, viewportPosY, activeSelectionControl, rangeType);
         }
     }
 
@@ -581,7 +580,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
      *
      * In Mobile version, new selection is determined by cursor cell and current of activeSelectionControl.model
      */
-    protected override _moving(
+    protected override _movingHandler(
         offsetX: number,
         offsetY: number,
         activeSelectionControl: MobileSelectionControl,
@@ -682,7 +681,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             currSelectionRange.endColumn !== newSelectionRange.endColumn;
         if (rangeChanged) {
             if (activeSelectionControl) {
-                this._updateSelectionControlRange(activeSelectionControl, newSelectionRangeWithCoord);
+                this._updateSelectionControlByRange(activeSelectionControl, newSelectionRangeWithCoord);
                 this._selectionMoving$.next(this.getSelectionDataWithStyle());
             }
         }

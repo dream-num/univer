@@ -121,12 +121,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         this._addComponent();
 
-        const should = unit.getShouldRenderLoopImmediately();
-        if (should) {
-            engine.runRenderLoop(() => {
-                scene.render();
-            });
-        }
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
     }
 
     private _addComponent() {

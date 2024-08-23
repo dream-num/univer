@@ -27,6 +27,8 @@ import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Layer } from './layer';
 import type { ITransformerConfig } from './basics/transformer-config';
+import type { Scene } from './scene';
+import type { Engine } from './engine';
 
 export const BASE_OBJECT_ARRAY = [
     'top',
@@ -790,11 +792,11 @@ export abstract class BaseObject extends Disposable {
         return props;
     }
 
-    getScene(): any {
+    getScene(): Nullable<Scene> {
         let parent: any = this.parent;
 
         if (parent == null) {
-            return;
+            return null;
         }
 
         if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
@@ -818,7 +820,7 @@ export abstract class BaseObject extends Disposable {
         this.getScene()?.setCursor(val);
     }
 
-    getEngine(): any {
+    getEngine(): Nullable<Engine> {
         let parent: any = this.getParent();
         while (parent != null) {
             if (parent.classType === RENDER_CLASS_TYPE.ENGINE) {

@@ -16,10 +16,10 @@
 
 import { createIdentifier } from '../../common/di';
 import type { Workbook } from '../../sheets/workbook';
-import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { LifecycleStages, runOnLifecycle } from '../lifecycle/lifecycle';
 import type { IDocumentData } from '../../types/interfaces';
 import type { DocumentDataModel } from '../../docs';
+import type { IWorkbookData } from '../../sheets/typedef';
 
 export interface IResourceLoaderService {
     saveWorkbook: (workbook: Workbook) => IWorkbookData;

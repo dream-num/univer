@@ -125,6 +125,7 @@ function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, f
             paddingTop = realMargin;
             break;
     }
+    paddingTop = Math.max(MARGIN_V, paddingTop);
 
     let paddingLeft = 0;
     switch (ht) {
@@ -138,6 +139,7 @@ function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, f
         default:
             break;
     }
+    paddingLeft = Math.max(MARGIN_H, paddingLeft);
 
     return {
         paddingLeft,

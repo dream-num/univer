@@ -65,10 +65,6 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         this._unitId = this._snapshot.id ?? generateRandomId(6);
     }
 
-    getContainer() {
-        return this._snapshot.container;
-    }
-
     getSnapshot() {
         return this._snapshot;
     }

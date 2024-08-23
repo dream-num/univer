@@ -17,7 +17,7 @@
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
+import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAddCommentMutationParams, IUpdateCommentRefMutationParams } from '@univerjs/thread-comment';
 import { AddCommentMutation, DeleteCommentMutation, ThreadCommentModel, UpdateCommentRefMutation } from '@univerjs/thread-comment';
 import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
@@ -115,7 +115,8 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
         this._disposableMap.set(
             this._getIdWithUnitId(unitId, subUnitId, commentId),
             this._refRangeService.registerRefRange(oldRange, (commandInfo: EffectRefRangeParams) => {
-                const resultRange = handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests(oldRange, commandInfo, { selectionManagerService: this._selectionManagerService });
+                const resultRanges = handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests(oldRange, commandInfo, { selectionManagerService: this._selectionManagerService });
+                const resultRange = Array.isArray(resultRanges) ? resultRanges[0] : resultRanges;
                 if (resultRange && resultRange.startColumn === oldRange.startColumn && resultRange.startRow === oldRange.startRow) {
                     return {
                         undos: [],

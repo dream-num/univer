@@ -420,8 +420,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            number: { name: 'số', detail: 'Số mà bạn muốn tìm thứ hạng của nó.' },
+            ref: { name: 'danh sách các số', detail: 'Tham chiếu tới danh sách các số. Các giá trị không phải là số trong tham chiếu sẽ được bỏ qua.' },
+            order: { name: 'xếp hạng số', detail: 'Một con số chỉ rõ cách xếp hạng số. 0 hoặc bị bỏ qua đối với thứ tự giảm dần, khác 0 đối với thứ tự tăng dần.' },
         },
     },
     STDEV: {

@@ -3289,7 +3289,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO6: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: ['A1'],
             rightToLeft: 0,
         },
     },

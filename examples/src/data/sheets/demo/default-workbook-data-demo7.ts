@@ -16778,7 +16778,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: ['A1'],
             rightToLeft: 0,
         },
         // 'sheet-0011':{
@@ -26638,9 +26637,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
         //         "height": 20,
         //         "hidden": 0
         //     },
-        //     "selections": [
-        //         "A1"
-        //     ],
         //     "rightToLeft": 0,
         // }
     },

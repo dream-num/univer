@@ -1644,23 +1644,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
-            selections: ['A2'],
             rightToLeft: BooleanNumber.FALSE,
         },
     },
-    // namedRanges: [
-    //     {
-    //         namedRangeId: 'named-rang',
-    //         name: 'namedRange',
-    //         range: {
-    //             sheetId: 'sheet-0001',
-    //             range: {
-    //                 startRow: 0,
-    //                 startColumn: 0,
-    //                 endRow: 1,
-    //                 endColumn: 1,
-    //             },
-    //         },
-    //     },
-    // ],
 };

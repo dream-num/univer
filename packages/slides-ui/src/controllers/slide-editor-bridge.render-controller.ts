@@ -92,7 +92,6 @@ export class SlideEditorBridgeRenderController extends RxDisposable implements I
             richTextObj: targetObject,
         };
 
-        // invoked by editorBridgeRenderController@startEditing ---> editorBridgeRenderController@_updateEditor
         this._editorBridgeService.setEditorRect(setEditorRect);
     }
 

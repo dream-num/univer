@@ -123,7 +123,7 @@ export function getDeleteSelection<T extends ITextRange>(selection: T, body: IDo
     };
 }
 
-export function getInsertSelection(selection: ITextRange, body: IDocumentBody): ITextRange {
+export function getInsertSelection<T extends ITextRange>(selection: T, body: IDocumentBody): T {
     let { startOffset, endOffset, collapsed } = normalizeSelection(selection);
 
     if (collapsed) {
@@ -138,12 +138,14 @@ export function getInsertSelection(selection: ITextRange, body: IDocumentBody): 
         }
 
         return {
+            ...selection,
             startOffset,
             endOffset,
             collapsed,
         };
     } else {
         return {
+            ...selection,
             ...getSelectionWithSymbolMax(selection, body),
             collapsed: false,
         };

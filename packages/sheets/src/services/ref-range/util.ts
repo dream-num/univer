@@ -27,6 +27,7 @@ import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
 import type { SheetsSelectionsService } from '../selections/selection-manager.service';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
+import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
 import type {
     EffectRefRangeParams,
     IDeleteRangeMoveLeftCommand,
@@ -872,6 +873,24 @@ export const handleDeleteRangeMoveUpCommon = (param: IDeleteRangeMoveUpCommand, 
     return queryObjectMatrix(matrix, (v) => v === 1);
 };
 
+export const handleRemoveRowCommon = (param: IRemoveRowColCommandInterceptParams, targetRange: IRange) => {
+    const ranges = param.ranges ?? [param.range];
+    const matrix = new ObjectMatrix();
+
+    Range.foreach(targetRange, (row, col) => {
+        matrix.setValue(row, col, 1);
+    });
+
+    ranges.forEach((range) => {
+        const startRow = range.startRow;
+        const endRow = range.endRow;
+        const count = endRow - startRow + 1;
+        matrix.removeRows(startRow, count);
+    });
+
+    return queryObjectMatrix(matrix, (value) => value === 1);
+};
+
 export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {
     let result: Nullable<IRange> = { ...range };
     operators.forEach((operator) => {
@@ -1032,12 +1051,25 @@ export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRang
             break;
         }
         case EffectRefRangId.RemoveRowCommandId: {
-            operator = handleIRemoveRow(commandInfo as IRemoveRowColCommand, range);
-            break;
+            return handleRemoveRowCommon(commandInfo.params as IRemoveRowColCommandInterceptParams, range);
         }
     }
     const resultRange = runRefRangeMutations(operator, range);
     return resultRange;
+};
+
+export const handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SheetsSelectionsService }) => {
+    const skipCommands = [DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id];
+    if (skipCommands.includes(commandInfo.id)) {
+        return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
+    }
+
+    const effectRanges = getEffectedRangesOnCommand(commandInfo as EffectRefRangeParams, deps);
+    if (effectRanges.some((effectRange) => Rectangle.intersects(effectRange, range))) {
+        return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
+    }
+
+    return range;
 };
 
 /**

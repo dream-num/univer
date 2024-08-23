@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IRectLTRB } from '../types/interfaces/i-range';
-import { AbsoluteRefType, RANGE_TYPE } from '../types/interfaces/i-range';
+import { AbsoluteRefType, type IRange, type IRectLTRB, RANGE_TYPE } from '../sheets/typedef';
 import type { Nullable } from './types';
 
 /**

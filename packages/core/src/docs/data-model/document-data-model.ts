@@ -23,6 +23,7 @@ import type {
     IDocumentRenderConfig,
     IDocumentStyle,
     IDrawings,
+    IListData,
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
@@ -30,6 +31,7 @@ import { getBodySlice, SliceBodyType } from './text-x/utils';
 import { getEmptySnapshot } from './empty-snapshot';
 import type { JSONXActions } from './json-x/json-x';
 import { JSONX } from './json-x/json-x';
+import { PRESET_LIST_TYPE } from './preset-list-type';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -92,18 +94,18 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         return this.snapshot.body;
     }
 
-    getShouldRenderLoopImmediately() {
-        const should = this.snapshot.shouldStartRenderingImmediately;
-
-        return should !== false;
-    }
-
-    getContainer() {
-        return this.snapshot.container;
-    }
-
     getSnapshot() {
         return this.snapshot;
+    }
+
+    getBulletPresetList() {
+        const customLists = this.snapshot.lists ?? {};
+        const lists: Record<string, IListData> = {
+            ...PRESET_LIST_TYPE,
+            ...customLists,
+        };
+
+        return lists;
     }
 
     updateDocumentId(unitId: string) {
@@ -329,6 +331,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             for (const headerId in headers) {
                 const header = headers[headerId];
                 this.headerModelMap.set(headerId, new DocumentDataModel(header));
+                this.headerModelMap.get(headerId)!.updateDocumentId(this.getUnitId());
             }
         }
 
@@ -336,6 +339,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             for (const footerId in footers) {
                 const footer = footers[footerId];
                 this.footerModelMap.set(footerId, new DocumentDataModel(footer));
+                this.footerModelMap.get(footerId)!.updateDocumentId(this.getUnitId());
             }
         }
     }

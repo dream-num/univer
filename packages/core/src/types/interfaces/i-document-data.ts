@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../common/type-util';
 import type { IAbsoluteTransform, ISize } from '../../shared/shape';
+import type { Nullable } from '../../shared/types';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
-import type { IExtraModelData } from './i-extra-model-data';
 import type { IColorStyle, IStyleBase } from './i-style-data';
 
 // Attention: all dimensional units, unless otherwise stated, refer to pt，1 pt = 1 / 72 in
 /**
  * Properties of document
  */
-export interface IDocumentData extends IReferenceSource, IExtraModelData {
+export interface IDocumentData extends IReferenceSource {
     /** unit ID */
     id: string;
     /** Revision of this document. Would be used in collaborated editing. Starts with zero. */
@@ -188,8 +187,6 @@ export interface IListData {
  */
 export interface INestingLevel {
     paragraphProperties?: IParagraphStyle;
-    paragraphTextStyle?: ITextStyle;
-
     bulletAlignment: BulletAlignment; // ordered list support lvlJc
     // The glyph format contains one or more placeholders, and these placeholder are replaced with the appropriate values depending on the glyphType or glyphSymbol. The placeholders follow the pattern %[nestingLevel]. Furthermore, placeholders can have prefixes and suffixes. Thus, the glyph format follows the pattern <prefix>%[nestingLevel]<suffix>. Note that the prefix and suffix are optional and can be arbitrary strings.
     //  <prefix>%[nestingLevel]<suffix>

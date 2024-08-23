@@ -16,12 +16,12 @@
 
 import { Button, FormLayout, Input } from '@univerjs/design';
 import React, { useEffect, useState } from 'react';
-import { CloseSingle } from '@univerjs/icons';
-import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { DocumentDataModel } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { getPlainTextFormBody, TextSelectionManagerService } from '@univerjs/docs';
+import { KeyCode } from '@univerjs/ui';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
@@ -45,35 +45,42 @@ export const DocHyperLinkEdit = () => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const localeService = useDependency(LocaleService);
     const hyperLinkModel = useDependency(DocHyperLinkModel);
-    const editingId = useObservable(hyperLinkService.editingLink$);
+    const editing = useObservable(hyperLinkService.editingLink$);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const textSelectionRenderManager = useDependency(ITextSelectionRenderManager);
     const textSelectionManagerService = useDependency(TextSelectionManagerService);
     const [link, setLink] = useState('');
+    const [label, setLabel] = useState('');
     const [showError, setShowError] = useState(false);
     const isLegal = Tools.isLegalUrl(link);
-    const doc = editingId
-        ? univerInstanceService.getUnit<DocumentDataModel>(editingId.unitId, UniverInstanceType.UNIVER_DOC) :
+    const doc = editing
+        ? univerInstanceService.getUnit<DocumentDataModel>(editing.unitId, UniverInstanceType.UNIVER_DOC) :
         univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
     useEffect(() => {
-        if (editingId) {
-            const linkDetail = editingId ? hyperLinkModel.getLink(editingId.unitId, editingId.linkId) : null;
-            setLink(linkDetail?.payload ?? '');
-            return;
-        }
         const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
         if (!activeRange) {
             return;
         }
-        const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const matchedRange = doc?.getBody()?.customRanges?.find((i) => Math.max(activeRange.startOffset, i.startIndex) <= Math.min(activeRange.endOffset - 1, i.endIndex));
+
+        if (editing) {
+            const linkDetail = editing ? hyperLinkModel.getLink(editing.unitId, editing.linkId) : null;
+            setLink(linkDetail?.payload ?? '');
+            const body = doc?.getSelfOrHeaderFooterModel(editing.segmentId)?.getBody();
+            const matchedRange = body?.customRanges?.find((i) => linkDetail?.id === i.rangeId);
+            if (doc && matchedRange) {
+                setLabel(getPlainTextFormBody(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex)));
+            }
+            return;
+        }
+
+        const matchedRange = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody()?.customRanges?.find((i) => Math.max(activeRange.startOffset, i.startIndex) <= Math.min(activeRange.endOffset - 1, i.endIndex));
         if (doc && matchedRange) {
             const linkDetail = hyperLinkModel.getLink(doc.getUnitId(), matchedRange.rangeId);
             setLink(linkDetail?.payload ?? '');
         }
-    }, [editingId, hyperLinkModel, textSelectionManagerService, univerInstanceService]);
+    }, [doc, editing, hyperLinkModel, textSelectionManagerService, univerInstanceService]);
 
     useEffect(() => {
         textSelectionRenderManager.blurEditor();
@@ -92,16 +99,22 @@ export const DocHyperLinkEdit = () => {
         }
         const linkFinal = transformUrl(link);
 
-        if (!editingId) {
+        if (!editing) {
             commandService.executeCommand(AddDocHyperLinkCommand.id, {
                 unitId: doc.getUnitId(),
                 payload: linkFinal,
             });
         } else {
+            if (!label) {
+                return;
+            }
+
             commandService.executeCommand(UpdateDocHyperLinkCommand.id, {
                 unitId: doc.getUnitId(),
                 payload: linkFinal,
-                linkId: editingId.linkId,
+                linkId: editing.linkId,
+                label,
+                segmentId: editing.segmentId,
             });
         }
         hyperLinkService.hideEditPopup();
@@ -113,16 +126,40 @@ export const DocHyperLinkEdit = () => {
 
     return (
         <div className={styles.docsLinkEdit}>
-            <div className={styles.docsLinkEditTitle}>
-                <span>{localeService.t('docLink.edit.title')}</span>
-                <CloseSingle className={styles.docsLinkEditClose} onClick={handleCancel} />
-            </div>
             <div>
+                {editing
+                    ? (
+                        <FormLayout
+                            label={localeService.t('docLink.edit.label')}
+                            error={showError && !isLegal ? localeService.t('docLink.edit.labelError') : ''}
+                        >
+                            <Input
+                                value={label}
+                                onChange={setLabel}
+                                autoFocus
+                                onKeyDown={(evt) => {
+                                    if (evt.keyCode === KeyCode.ENTER) {
+                                        handleConfirm();
+                                    }
+                                }}
+                            />
+                        </FormLayout>
+                    )
+                    : null}
                 <FormLayout
                     label={localeService.t('docLink.edit.address')}
                     error={showError && !isLegal ? localeService.t('docLink.edit.addressError') : ''}
                 >
-                    <Input value={link} onChange={setLink} autoFocus />
+                    <Input
+                        value={link}
+                        onChange={setLink}
+                        autoFocus
+                        onKeyDown={(evt) => {
+                            if (evt.keyCode === KeyCode.ENTER) {
+                                handleConfirm();
+                            }
+                        }}
+                    />
                 </FormLayout>
             </div>
             <div className={styles.docsLinkEditButtons}>

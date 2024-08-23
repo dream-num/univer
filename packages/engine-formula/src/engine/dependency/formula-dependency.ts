@@ -858,6 +858,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
             if (tree.isAdded()) {
                 formulaRunList.push(tree);
+                // If cacheStack is empty, that is, all parent nodes of the node have been processed, call setSkip() to mark the node as skipped. The premise of this is that the node should have been added to the formulaRunList, that is, the calculation is completed.
+                // Make sure setSkip is called after the node is added to formulaRunList to avoid skipping processing early.
+                tree.setSkip();
                 continue;
             }
 

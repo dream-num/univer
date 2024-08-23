@@ -26348,9 +26348,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A1"
-            ],
             "rightToLeft": 0
         },
         "dv-test": {
@@ -26413,9 +26410,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A1"
-            ],
             "rightToLeft": 0
         },
         "sheet-0010": {
@@ -27798,9 +27792,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A1"
-            ],
             "rightToLeft": 0
         },
         "sheet-0009": {
@@ -29024,9 +29015,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A1"
-            ],
             "rightToLeft": 0,
             "freeze": {
                 "xSplit": 0,
@@ -30663,9 +30651,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A1"
-            ],
             "rightToLeft": 0,
             "freeze": {
                 "xSplit": 0,
@@ -31246,9 +31231,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A1"
-            ],
             "rightToLeft": 0,
             "freeze": {
                 "xSplit": 0,
@@ -31903,9 +31885,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A1"
-            ],
             "rightToLeft": 0,
             "freeze": {
                 "xSplit": 0,
@@ -33486,9 +33465,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A1"
-            ],
             "rightToLeft": 0,
             "freeze": {
                 "xSplit": 0,
@@ -34006,9 +33982,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A2"
-            ],
             "rightToLeft": 0,
             "freeze": {
                 "xSplit": 0,
@@ -34788,9 +34761,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A2"
-            ],
             "rightToLeft": 0,
             "freeze": {
                 "xSplit": 0,
@@ -35719,9 +35689,7 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A2"
-            ],
+
             "rightToLeft": 0,
             "freeze": {
                 "xSplit": 0,
@@ -36157,9 +36125,6 @@
                 "height": 20,
                 "hidden": 0
             },
-            "selections": [
-                "A2"
-            ],
             "rightToLeft": 0,
             "freeze": {
                 "xSplit": 0,

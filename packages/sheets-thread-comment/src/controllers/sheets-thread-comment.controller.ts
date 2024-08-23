@@ -249,6 +249,7 @@ export class SheetsThreadCommentController extends Disposable {
                 return null;
             }
 
+            // TODO: use evented: false to solve this problem later
             const shapeId = this._markSelectionService.addShape(
                 {
                     range: {

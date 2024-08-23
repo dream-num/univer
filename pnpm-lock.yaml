@@ -1536,6 +1536,9 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../sheets-drawing-ui
       '@univerjs/sheets-filter':
         specifier: workspace:*
         version: link:../sheets-filter

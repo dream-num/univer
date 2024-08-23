@@ -16,6 +16,8 @@
 
 import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable } from '@univerjs/core';
 import {
+    DisposableCollection,
+    generateRandomId,
     HorizontalAlign,
     isCellV,
     isFormulaString,
@@ -24,6 +26,7 @@ import {
     Tools,
     VerticalAlign,
 } from '@univerjs/core';
+import type { ComponentManager } from '@univerjs/ui';
 
 export type FHorizontalAlignment = 'left' | 'center' | 'normal';
 export type FVerticalAlignment = 'top' | 'middle' | 'bottom';
@@ -149,4 +152,29 @@ export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange): boolean
         && mergeInfo.endColumn === range.endColumn
         && mergeInfo.startRow === range.startRow
         && mergeInfo.endRow === range.endRow;
+}
+
+export interface IFComponentKey {
+    /**
+     * The key of the component to be rendered in the popup.
+     * if key is a string, it will be query from the component registry.
+     * if key is a React component, it will be rendered directly.
+     */
+    componentKey: string | React.ComponentType;
+}
+
+export function transformComponentKey(componentKey: IFComponentKey['componentKey'], componentManager: ComponentManager): { key: string; disposableCollection: DisposableCollection } {
+    let key: string;
+    const disposableCollection = new DisposableCollection();
+    if (typeof componentKey === 'string') {
+        key = componentKey;
+    } else {
+        key = `External_${generateRandomId(6)}`;
+        disposableCollection.add(componentManager.register(key, componentKey));
+    }
+
+    return {
+        key,
+        disposableCollection,
+    };
 }

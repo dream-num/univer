@@ -19,6 +19,7 @@ import type {
     DataValidationStatus,
     ICellData,
     IColorStyle,
+    IDisposable,
     IObjectMatrixPrimitiveType,
     IRange,
     ISelectionCellWithMergeInfo,
@@ -28,7 +29,7 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import { BooleanNumber, ICommandService, Inject, Injector, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, DisposableCollection, generateRandomId, ICommandService, Inject, Injector, WrapStrategy } from '@univerjs/core';
 import type {
     ISetHorizontalTextAlignCommandParams,
     ISetStyleCommandParams,
@@ -47,7 +48,8 @@ import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { ICanvasPopup } from '@univerjs/sheets-ui';
+import { ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
 import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
@@ -55,11 +57,13 @@ import type { FilterModel } from '@univerjs/sheets-filter';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { ISetSheetFilterRangeCommandParams } from '@univerjs/sheets-filter-ui';
 import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
-import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
+import { ComponentManager } from '@univerjs/ui';
+import type { FHorizontalAlignment, FVerticalAlignment, IFComponentKey } from './utils';
 import {
     covertCellValue,
     covertCellValues,
     isCellMerged,
+    transformComponentKey,
     transformCoreHorizontalAlignment,
     transformCoreVerticalAlignment,
     transformFacadeHorizontalAlignment,
@@ -71,6 +75,10 @@ import { FFilter } from './f-filter';
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
 export type FontWeight = 'normal' | 'bold';
+
+export interface IFCanvasPopup extends Omit<ICanvasPopup, 'componentKey'>, IFComponentKey {
+
+}
 
 export class FRange {
     constructor(
@@ -714,4 +722,30 @@ export class FRange {
     }
 
     // #endregion
+
+    /**
+     * Attach a popup to the start cell of current range.
+     * If current worksheet is not active, the popup will not be shown.
+     * Be careful to manager the detach disposable object, if not dispose correctly, it might memory leaks.
+     * @param popup The popup to attach
+     * @returns The disposable object to detach the popup, if the popup is not attached, return `null`.
+     */
+    attachPopupToCell(popup: IFCanvasPopup): Nullable<IDisposable> {
+        const { key, disposableCollection } = transformComponentKey(popup.componentKey, this._injector.get(ComponentManager));
+        const sheetsPopupService = this._injector.get(SheetCanvasPopManagerService);
+        const disposePopup = sheetsPopupService.attachPopupToCell(
+            this._range.startRow,
+            this._range.startColumn,
+            { ...popup, componentKey: key },
+            this.getUnitId(),
+            this._worksheet.getSheetId()
+        );
+        if (disposePopup) {
+            disposableCollection.add(disposePopup);
+            return disposableCollection;
+        }
+
+        disposableCollection.dispose();
+        return null;
+    }
 }

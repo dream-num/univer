@@ -33,10 +33,18 @@ import type {
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
 import { InsertSheetCommand, RemoveSheetCommand, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
-
+import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
+import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { ComponentManager } from '@univerjs/ui';
 import { FWorksheet } from './f-worksheet';
+import type { IFComponentKey } from './utils';
+import { transformComponentKey } from './utils';
+
+export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey'>, IFComponentKey {
+
+}
 
 export class FWorkbook {
     readonly id: string;
@@ -296,5 +304,34 @@ export class FWorkbook {
         return validatorService.validatorWorkbook(
             this._workbook.getUnitId()
         );
+    }
+
+    /**
+     * add a float dom to position
+     * @param layer float dom config
+     * @param id float dom id, if not given will be auto generated
+     * @returns float dom id and dispose function
+     */
+    addFloatDomToPosition(layer: IFICanvasFloatDom, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }> {
+        const { key, disposableCollection } = transformComponentKey(layer.componentKey, this._injector.get(ComponentManager));
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const res = floatDomService.addFloatDomToPosition({ ...layer, componentKey: key }, id);
+
+        if (res) {
+            disposableCollection.add(res.dispose);
+            return {
+                id: res.id,
+                dispose: (): void => {
+                    disposableCollection.dispose();
+                    res.dispose();
+                },
+            };
+        }
+
+        disposableCollection.dispose();
+        return null;
     }
 }

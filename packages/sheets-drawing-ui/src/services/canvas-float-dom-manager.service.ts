@@ -32,10 +32,22 @@ import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-dra
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 
 export interface ICanvasFloatDom {
+    /**
+     * whether allow transform float-dom
+     */
     allowTransform: boolean;
+    /**
+     * initial position of float-dom
+     */
     initPosition: IPosition;
     componentKey: string;
+    /**
+     * unitId of workbook, if not set, will use current workbook
+     */
     unitId?: string;
+    /**
+     * subUnitId of worksheet, if not set, will use current worksheet
+     */
     subUnitId?: string;
     /**
      * @deprecated Please use `data`. for saving to disk, everything add to float-dom must be serializable.

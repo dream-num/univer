@@ -72,6 +72,7 @@ async function generateLocale() {
         '@univerjs/thread-comment-ui',
         '@univerjs/ui',
         '@univerjs/uniscript',
+        '@univerjs/sheets-crosshair-highlight',
     ];
 
     const languages = [{
@@ -144,6 +145,7 @@ function buildCSS() {
         '@univerjs/slides-ui',
         '@univerjs/find-replace',
         '@univerjs/uniscript',
+        '@univerjs/sheets-crosshair-highlight',
     ];
 
     const output = libs.map((lib) => {
@@ -234,6 +236,7 @@ function buildJS() {
         '@univerjs/network',
         '@univerjs/facade',
         '@univerjs/uniscript',
+        '@univerjs/sheets-crosshair-highlight',
     ];
 
     const output = libs.map((lib) => {

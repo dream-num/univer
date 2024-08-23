@@ -145,6 +145,7 @@ export type ComponentList = Map<string, IVue3Component | IReactComponent>;
 
 export class ComponentManager {
     private _components: ComponentList = new Map();
+    private _componentsReverse = new Map<ComponentType, string>();
 
     // eslint-disable-next-line max-lines-per-function
     constructor() {
@@ -268,8 +269,16 @@ export class ComponentManager {
             framework,
             component,
         });
+        this._componentsReverse.set(component, name);
 
-        return toDisposable(() => this._components.delete(name));
+        return toDisposable(() => {
+            this._components.delete(name);
+            this._componentsReverse.delete(component);
+        });
+    }
+
+    getKey(component: ComponentType) {
+        return this._componentsReverse.get(component);
     }
 
     get(name: string) {

@@ -731,7 +731,7 @@ export class FRange {
      * @returns The disposable object to detach the popup, if the popup is not attached, return `null`.
      */
     attachPopupToCell(popup: IFCanvasPopup): Nullable<IDisposable> {
-        const { key, disposableCollection } = transformComponentKey(popup.componentKey, this._injector.get(ComponentManager));
+        const { key, disposableCollection } = transformComponentKey(popup, this._injector.get(ComponentManager));
         const sheetsPopupService = this._injector.get(SheetCanvasPopManagerService);
         const disposePopup = sheetsPopupService.attachPopupToCell(
             this._range.startRow,

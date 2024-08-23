@@ -26,7 +26,7 @@ import {
     Tools,
     VerticalAlign,
 } from '@univerjs/core';
-import type { ComponentManager } from '@univerjs/ui';
+import type { ComponentManager, ComponentType } from '@univerjs/ui';
 
 export type FHorizontalAlignment = 'left' | 'center' | 'normal';
 export type FVerticalAlignment = 'top' | 'middle' | 'bottom';
@@ -158,19 +158,24 @@ export interface IFComponentKey {
     /**
      * The key of the component to be rendered in the popup.
      * if key is a string, it will be query from the component registry.
-     * if key is a React component, it will be rendered directly.
+     * if key is a React or Vue3 component, it will be rendered directly.
      */
-    componentKey: string | React.ComponentType;
+    componentKey: string | ComponentType;
+    /**
+     * If componentKey is a Vue3 component, this must be set to true
+     */
+    isVue3?: boolean;
 }
 
-export function transformComponentKey(componentKey: IFComponentKey['componentKey'], componentManager: ComponentManager): { key: string; disposableCollection: DisposableCollection } {
+export function transformComponentKey(component: IFComponentKey, componentManager: ComponentManager): { key: string; disposableCollection: DisposableCollection } {
+    const { componentKey, isVue3 } = component;
     let key: string;
     const disposableCollection = new DisposableCollection();
     if (typeof componentKey === 'string') {
         key = componentKey;
     } else {
-        key = `External_${generateRandomId(6)}`;
-        disposableCollection.add(componentManager.register(key, componentKey));
+        key = componentManager.getKey(componentKey) ?? `External_${generateRandomId(6)}`;
+        disposableCollection.add(componentManager.register(key, componentKey, { framework: isVue3 ? 'vue3' : 'react' }));
     }
 
     return {

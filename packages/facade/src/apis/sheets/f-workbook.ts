@@ -316,7 +316,7 @@ export class FWorkbook {
         id: string;
         dispose: () => void;
     }> {
-        const { key, disposableCollection } = transformComponentKey(layer.componentKey, this._injector.get(ComponentManager));
+        const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const res = floatDomService.addFloatDomToPosition({ ...layer, componentKey: key }, id);
 

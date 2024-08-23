@@ -374,7 +374,36 @@ export class LexerTreeBuilder extends Disposable {
         return `=${generateStringWithSequence(newSequenceNodes)}`;
     }
 
-    getSequenceNode(sequenceArray: ISequenceArray[]) {
+    /**
+     * univer-pro/issues/1684
+     * =sum({}{})
+     */
+    private _formulaSpellCheck(): boolean {
+        if (this._currentLexerNode.getChildren().length === 0) {
+            return true;
+        }
+        const node = this._currentLexerNode.getChildren()[0];
+
+        if (node instanceof LexerNode) {
+            return true;
+        }
+
+        if (
+            OPERATOR_TOKEN_SET.has(node)
+            || SUFFIX_TOKEN_SET.has(node)
+            || node === prefixToken.AT
+            || node === matchToken.COMMA
+            || node === matchToken.COLON
+            || node === matchToken.OPEN_BRACKET
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // eslint-disable-next-line complexity
+    getSequenceNode(sequenceArray: ISequenceArray[]): (string | ISequenceNode)[] {
         const sequenceNodes: Array<ISequenceNode | string> = [];
 
         let maybeString = false;
@@ -418,7 +447,7 @@ export class LexerTreeBuilder extends Disposable {
 
             const preSegmentNotPrefixToken = this._replacePrefixString(preSegmentTrim);
 
-            if (maybeString === true && preSegmentTrim[preSegmentTrim.length - 1] === matchToken.DOUBLE_QUOTATION) {
+            if (maybeString === true && preSegmentTrim[preSegmentTrim.length - 1] === matchToken.DOUBLE_QUOTATION && preSegmentTrim[0] !== matchToken.OPEN_BRACES) {
                 maybeString = false;
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.STRING, preSegment, startIndex, endIndex, deleteEndIndex);
             } else if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(preSegmentNotPrefixToken) && isReferenceStringWithEffectiveColumn(preSegmentNotPrefixToken)) {
@@ -472,7 +501,7 @@ export class LexerTreeBuilder extends Disposable {
      * Merge array and handle ref operations
      *
      */
-    private _mergeSequenceNodeReference(sequenceNodes: Array<string | ISequenceNode>) {
+    private _mergeSequenceNodeReference(sequenceNodes: Array<string | ISequenceNode>): (string | ISequenceNode)[] {
         const newSequenceNodes: Array<string | ISequenceNode> = [];
 
         const sequenceNodesCount = sequenceNodes.length;
@@ -634,7 +663,8 @@ export class LexerTreeBuilder extends Disposable {
         return this._currentLexerNode;
     }
 
-    private _suffixExpressionHandler(lexerNode: LexerNode) {
+    // eslint-disable-next-line complexity
+    private _suffixExpressionHandler(lexerNode: LexerNode): boolean {
         const children = lexerNode.getChildren();
         if (!children) {
             return false;
@@ -643,6 +673,9 @@ export class LexerTreeBuilder extends Disposable {
 
         const baseStack: Array<string | LexerNode> = []; // S2
         const symbolStack: string[] = []; // S1
+
+        let isChildValid = true;
+
         for (let i = 0; i < childrenCount; i++) {
             const node = children[i];
             if (!(node instanceof LexerNode)) {
@@ -693,15 +726,19 @@ export class LexerTreeBuilder extends Disposable {
                     baseStack.push(node as string);
                 }
             } else {
-                this._suffixExpressionHandler(node as LexerNode);
+                isChildValid = this._suffixExpressionHandler(node as LexerNode);
                 baseStack.push(node);
             }
+        }
+
+        if (!isChildValid) {
+            return false;
         }
 
         return this._processSuffixExpressionRemain(baseStack, symbolStack, lexerNode);
     }
 
-    private _processSuffixExpressionRemain(baseStack: (string | LexerNode)[], symbolStack: string[], lexerNode: LexerNode) {
+    private _processSuffixExpressionRemain(baseStack: (string | LexerNode)[], symbolStack: string[], lexerNode: LexerNode): boolean {
         const baseStackLength = baseStack.length;
         const lastBaseStack = baseStack[baseStackLength - 1];
         while (symbolStack.length > 0) {
@@ -741,7 +778,7 @@ export class LexerTreeBuilder extends Disposable {
     }
 
     private _checkCloseBracket(node: Nullable<string | LexerNode>) {
-        return node === matchToken.CLOSE_BRACKET;
+        return node === matchToken.CLOSE_BRACKET || node instanceof LexerNode;
     }
 
     private _checkOpenBracket(node: Nullable<string | LexerNode>) {
@@ -1011,7 +1048,7 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
-    private _getSequenceArray(formulaString: string) {
+    private _getSequenceArray(formulaString: string): ISequenceArray[] {
         const sequenceArray: ISequenceArray[] = [];
 
         this._nodeMaker(formulaString, sequenceArray);
@@ -1019,7 +1056,7 @@ export class LexerTreeBuilder extends Disposable {
         return sequenceArray;
     }
 
-    private _resetTemp() {
+    private _resetTemp(): void {
         this._currentLexerNode = new LexerNode();
 
         this._upLevel = 0;
@@ -1037,6 +1074,26 @@ export class LexerTreeBuilder extends Disposable {
         this._lambdaState = false; // Lambda
 
         this._colonState = false; // :
+    }
+
+    private _checkErrorState(): boolean {
+        if (this._bracketState.length > 0) {
+            return true;
+        }
+
+        if (this._bracesState > 0) {
+            return true;
+        }
+
+        if (this._singleQuotationState > 0) {
+            return true;
+        }
+
+        if (this._doubleQuotationState > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     private _checkSimilarErrorToken(currentString: string, curRow: number, formulaStringArray: string[]) {
@@ -1159,6 +1216,10 @@ export class LexerTreeBuilder extends Disposable {
             ) {
                 this._pushSegment(currentString);
                 this._openBraces();
+
+                if (!this._formulaSpellCheck()) {
+                    return ErrorType.VALUE;
+                }
             } else if (
                 currentString === matchToken.CLOSE_BRACES &&
                 this.isSingleQuotationClose() &&
@@ -1459,6 +1520,10 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         this._pushNodeToChildren(this._segment);
+
+        if (this._checkErrorState()) {
+            return ErrorType.VALUE;
+        }
     }
 
     private _isScientificNotation(formulaStringArray: string[], cur: number, currentString: string) {

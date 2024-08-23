@@ -228,6 +228,31 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('=(1+3)9') as LexerNode;
             expect(node).toStrictEqual(ErrorType.VALUE);
         });
+
+        it('Error for spell check!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=PI()0.1') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Sum error for spell check!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum(PI()0.1)') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Braces together error!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum({}{})') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Zero braces together error!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum({0}{0})') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Lack braces error!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum((1)') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
     });
 
     describe('checkIfAddBracket', () => {
@@ -250,6 +275,10 @@ describe('lexer nodeMaker test', () => {
         it('nest blank function bracket', () => {
             expect(lexerTreeBuilder.checkIfAddBracket('=sum(sum(sum(sum(')).toStrictEqual(4);
         });
+
+        // it('nest one function bracket', () => {
+        //     expect(lexerTreeBuilder.checkIfAddBracket('=sum((1)')).toStrictEqual(1);
+        // });
     });
 
     describe('sequenceNodesBuilder', () => {
@@ -421,6 +450,15 @@ describe('lexer nodeMaker test', () => {
                     token: '100',
                 },
             ]);
+        });
+
+        it('Array format for sequence', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('={"2007/1/1", "2008/1/1"}')).toStrictEqual([{
+                endIndex: 23,
+                nodeType: 5,
+                startIndex: 0,
+                token: '{"2007/1/1", "2008/1/1"}',
+            }]);
         });
     });
 

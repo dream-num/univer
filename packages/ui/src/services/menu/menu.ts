@@ -73,9 +73,11 @@ interface IMenuItemBase<V> {
     tooltip?: string;
 
     /** The group that the item belongs to. */
+    /** @deprecated group will be removed in the future. */
     group?: MenuGroup;
 
     /** In what menu should the item display. */
+    /** @deprecated positions will be removed in the future. */
     positions: OneOrMany<MenuPosition | string>;
 
     type: MenuItemType;

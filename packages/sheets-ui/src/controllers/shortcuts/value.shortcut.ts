@@ -27,10 +27,3 @@ export const ClearSelectionValueShortcutItem: IShortcutItem = {
     binding: KeyCode.DELETE,
     mac: KeyCode.BACKSPACE,
 };
-
-export const ClearSelectionValueBackspaceShortcutItem: IShortcutItem = {
-    id: ClearSelectionContentCommand.id,
-    // when focusing on any other input tag do not trigger this shortcut
-    preconditions: (contextService) => whenSheetEditorFocused(contextService),
-    binding: KeyCode.BACKSPACE,
-};

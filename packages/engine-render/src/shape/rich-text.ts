@@ -351,12 +351,11 @@ export class RichText extends BaseObject {
     }
 
     /**
-     *
-     * it should be invoked when _documentData changed.
-     * _documentData changed ---> update _documentSkeleton & _documentSkeleton
-     *
-     * now it is invoked when transformByState(change editor size) & end of editing
+     * After changing editor size & end of editing, update skeleton of doc.
      */
+    // TODO: This method should be invoked when _documentData changed.
+    // _documentData changed ---> update _documentSkeleton & _documentSkeleton
+    // now it is invoked when transformByState(change editor size) & end of editing
     refreshDocumentByDocData() {
         const docModel = this.documentModel = new DocumentDataModel(this._documentData);
         const docViewModel = new DocumentViewModel(docModel);

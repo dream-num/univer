@@ -238,6 +238,16 @@ export class Worksheet {
         return null;
     }
 
+    /**
+     * Get cellData, includes cellData, customRender, markers, dataValidate, etc.
+     *
+     * WARNING: All sheet CELL_CONTENT interceptors will be called in this method, cause performance issue.
+     * example: this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT);
+     *
+     * @param row
+     * @param col
+     * @returns ICellDataForSheetInterceptor
+     */
     getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
         if (row < 0 || col < 0) {
             return null;

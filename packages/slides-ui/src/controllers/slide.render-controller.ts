@@ -33,13 +33,6 @@ import type { PageID } from '../type';
 export class SlideRenderController extends RxDisposable implements IRenderModule {
     private _objectProvider: ObjectProvider | null = null;
 
-    /**
-     * As a dep of UNIVER_SLIDE, init by RenderManagerService@createRender --> injector.get(dep)
-     * @param _renderContext
-     * @param _injector
-     * @param _univerInstanceService
-     * @param _renderManagerService
-     */
     constructor(
         private readonly _renderContext: IRenderContext<UnitModel>,
         @Inject(Injector) private readonly _injector: Injector,
@@ -52,9 +45,6 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
         this._addNewRender();
     }
 
-    /**
-     * _initialize --> _create --> _addNewRender
-     */
     private _addNewRender() {
         const { unitId, engine, scene } = this._renderContext;
         const slideDataModel = this._getCurrUnitModel();
@@ -157,7 +147,6 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
     }, 300);
 
     /**
-     * init --> _addNewRender
      * @param mainScene
      */
     private _createSlide(mainScene: Scene) {
@@ -245,8 +234,7 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
     }
 
     /**
-     * _createScene by pages, createScene --> set sceneMap
-     * invoked stack: initialize --> _create --> _addNewRender --> _createSlidePages
+     * CreateScene by pages, and activate first one.
      * @param slideDataModel
      * @param slide
      */
@@ -354,14 +342,11 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
     }
 
     /**
-     * _initialize --> _create --> _addNewRender --> _createSlidePages --> page forEach --> createPageScene
-     * _sceneMap.set(pageId, pageScene);
-     *
+     * Create scene by page and set to _sceneMap.
      * @param pageId
      * @param page
-     * @returns pageScene: Scene
      */
-    createPageScene(pageId: string, page: ISlidePage) {
+    createPageScene(pageId: string, page: ISlidePage): Nullable<Scene> {
         // const render = this._currentRender();
         const render = this._renderContext;
         if (!render || !this._objectProvider) {
@@ -373,7 +358,6 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
         const slide = mainComponent as Slide;
         const { width, height } = slide;
 
-        // new Scene  ----> add SubScene.
         const pageScene = new Scene(pageId, slide, {
             width,
             height,
@@ -420,12 +404,12 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
     }
 
     /**
-     * get pageScene from Slide
-     * pageScene was added to the mainComponent(Slide) in createPageScene --> slide.addPageScene
+     * Get pageScene from Slide.
      * @param pageId
-     * @returns {Scene, Engine, UnitModel}
+     * @returns {Scene, Engine, UnitModel} scene & engine & unit from renderContext
      */
     getPageRenderUnit(pageId: PageID) {
+        //pageScene was added to the mainComponent(Slide) in createPageScene --> slide.addPageScene
         const subsceneMap = (this._renderContext.mainComponent as Slide).getSubScenes();
         const pageScene = subsceneMap.get(pageId) as unknown as Scene;
         const { engine, unit } = this._renderContext;

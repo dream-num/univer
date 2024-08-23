@@ -281,8 +281,6 @@ export class Engine extends ThinEngine<Scene> {
 
         this._activeRenderLoops = [];
         this.getCanvas().dispose();
-        // this._canvas = null; // 不应该这么做, 上面已经调用了 _canvas 的 dispose 方法
-        // 并且 idleCallback --> resize 时需要 _canvas 对象
         this.onTransformChange$.complete();
 
         this._beginFrame$.complete();

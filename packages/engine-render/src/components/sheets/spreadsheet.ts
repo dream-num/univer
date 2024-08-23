@@ -108,8 +108,6 @@ export class Spreadsheet extends SheetComponent {
 
     /**
      * draw by viewport
-     * cacheBound ---> viewBound
-     * diffCacheBounds ---> diffRange
      * @param ctx
      * @param viewportInfo
      */

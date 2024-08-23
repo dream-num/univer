@@ -1609,10 +1609,5 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         this._updateViewport(startRow, startColumn, ySplit, xSplit, resetScroll);
         this._getSheetObject()?.spreadsheet.makeForceDirty();
-
-        // no need to set viewport markForceDirty again
-        // when change freeze area ---> viewport.resize ---> viewport.markForceDity()
-        // this._getSheetObject()?.spreadsheet.makeForceDirty();
-        // this._getSheetObject()?.scene.getViewports().forEach(vp => vp.makeForceDirty());
     }
 }

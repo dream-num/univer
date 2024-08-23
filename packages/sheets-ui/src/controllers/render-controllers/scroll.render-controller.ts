@@ -162,9 +162,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         //#region scrollInfo$ subscriber ---> viewport.scrollTo
         this.disposeWithMe(
             toDisposable(
-                // wheel event --> set-scroll.command('sheet.operation.set-scroll') --> scroll.operation.ts -->
-                // scrollManagerService.setScrollInfoAndEmitEvent --->  scrollManagerService.setScrollInfo(raw value, may be negative) &&
-                // _notifyCurrentScrollInfo
                 this._scrollManagerService.rawScrollInfo$.subscribe((rawScrollInfo: Nullable<IScrollState>) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                     if (!skeleton) return;

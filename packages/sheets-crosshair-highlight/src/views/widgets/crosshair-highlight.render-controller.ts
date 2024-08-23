@@ -45,7 +45,7 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         this._initRenderListener();
     }
 
-    private _transformSelection(selectionData: Nullable<ISelectionWithStyle[]>, sheet: Worksheet): void {
+    private _transformSelection(selectionData: Readonly<Nullable<ISelectionWithStyle[]>>, sheet: Worksheet): void {
         if (!selectionData) {
             return;
         }

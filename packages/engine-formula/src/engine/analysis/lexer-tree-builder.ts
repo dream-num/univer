@@ -18,7 +18,7 @@ import type { IRange, Nullable } from '@univerjs/core';
 import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
-import { ErrorType } from '../../basics/error-type';
+import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken } from '../../basics/match-token';
 import { REFERENCE_SINGLE_RANGE_REGEX } from '../../basics/regex';
 import {
@@ -1096,7 +1096,7 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
-    private _checkSimilarErrorToken(currentString: string, curRow: number, formulaStringArray: string[]) {
+    private _checkSimilarErrorToken(currentString: string, curRow: number, formulaStringArray: string[]): boolean {
         let cur = curRow;
         if (currentString !== suffixToken.POUND) {
             return true;
@@ -1113,6 +1113,27 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         return false;
+    }
+
+    private _checkIfErrorObject(cur: number, formulaStringArray: string[]): boolean {
+        const errorType = this._findErrorObject(cur, formulaStringArray);
+        if (!errorType) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private _findErrorObject(curRaw: number, formulaStringArray: string[]): Nullable<string> {
+        for (let i = 0; i < ERROR_TYPE_COUNT_ARRAY.length; i++) {
+            const errorTypeCount = ERROR_TYPE_COUNT_ARRAY[i];
+
+            const errorType = formulaStringArray.slice(curRaw, curRaw + errorTypeCount).join('').toUpperCase();
+
+            if (ERROR_TYPE_SET.has(errorType as ErrorType)) {
+                return errorType;
+            }
+        }
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -1140,7 +1161,27 @@ export class LexerTreeBuilder extends Disposable {
                 return [this._currentLexerNode, currentString];
             }
 
-            if (
+            if (currentString === suffixToken.POUND &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose() &&
+                this._checkIfErrorObject(cur, formulaStringArray)
+            ) {
+                const errorType = this._findErrorObject(cur, formulaStringArray);
+                if (errorType == null) {
+                    return ErrorType.VALUE;
+                }
+                this._pushNodeToChildren(errorType);
+                for (let i = 0; i < errorType.length; i++) {
+                    const curStr = formulaStringArray[cur];
+                    this._pushSegment(curStr);
+                    this._addSequenceArray(sequenceArray, curStr, cur, isZeroAdded);
+                    cur++;
+                }
+                this._resetSegment();
+                // this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
+                // cur += errorType.length;
+                continue;
+            } else if (
                 currentString === matchToken.OPEN_BRACKET &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose()

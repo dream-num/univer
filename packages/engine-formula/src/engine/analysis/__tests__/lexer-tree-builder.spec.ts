@@ -135,10 +135,10 @@ describe('lexer nodeMaker test', () => {
             expect(elapsed).toBeGreaterThan(0);
         });
 
-        it('error', () => {
+        it('error include function test', () => {
             const node = lexerTreeBuilder.treeBuilder('=sum(#REF! + 5 , #REF!)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#REF! "," 5 ","+"]},{"token":"P_1","st":11,"ed":13,"children":[" #REF!"]}]}]}'
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#REF!"," 5 "," +"]},{"token":"P_1","st":11,"ed":13,"children":["#REF!"]}]}]}'
             );
         });
 
@@ -205,6 +205,16 @@ describe('lexer nodeMaker test', () => {
         it('array parameter string', () => {
             const node = lexerTreeBuilder.treeBuilder('={"2007/1/1", "2008/1/1"}') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["{\\"2007/1/1\\", \\"2008/1/1\\"}"]}');
+        });
+
+        it('error as parameter', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum(#NUM! + #VALUE!) + #SPILL! - (#CALC!)') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#NUM!","#VALUE!"," +"]}]},"#SPILL!"," +","#CALC!","-"]}');
+        });
+
+        it('error type lexer function', () => {
+            const node = lexerTreeBuilder.treeBuilder('=ERROR.TYPE(#DIV/0!)/ERROR.TYPE(#N/A)') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"ERROR.TYPE","st":0,"ed":9,"children":[{"token":"P_1","st":7,"ed":9,"children":["#DIV/0!"]}]},{"token":"ERROR.TYPE","st":20,"ed":29,"children":[{"token":"P_1","st":27,"ed":29,"children":["#N/A"]}]},"/"]}');
         });
     });
 

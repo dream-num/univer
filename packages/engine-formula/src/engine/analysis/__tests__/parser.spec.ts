@@ -17,7 +17,6 @@
 import type { Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { ErrorType } from '../../../basics/error-type';
 import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
 import { Sum } from '../../../functions/math/sum';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
@@ -34,6 +33,7 @@ import { AstTreeBuilder } from '../parser';
 import type { ArrayValueObject } from '../../value-object/array-value-object';
 import { Minus } from '../../../functions/meta/minus';
 import { Pi } from '../../../functions/math/pi';
+import { ErrorType } from '../../../basics/error-type';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test indirect', () => {
@@ -229,6 +229,16 @@ describe('Test indirect', () => {
             const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+        });
+
+        it('error as return #NUM!', async () => {
+            const lexerNode = lexer.treeBuilder('=SUM(#NUM! + #VALUE!) + #SPILL! - (#CALC!)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NUM);
         });
     });
 });

@@ -243,7 +243,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     };
 
     /** A matrix to store if a (row, column) position has render cache. */
-    private _renderedCellCache = new ObjectMatrix<boolean>();
+    private _cellHasBgOrBorder = new ObjectMatrix<boolean>();
 
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
 
@@ -343,7 +343,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._rowColumnSegment = null as any;
         this._dataMergeCache = [];
         this._stylesCache = null as any;
-        this._renderedCellCache = null as unknown as ObjectMatrix<boolean>;
+        this._cellHasBgOrBorder = null as unknown as ObjectMatrix<boolean>;
         this._overflowCache = null as unknown as ObjectMatrix<IRange>;
 
         this._worksheetData = null as unknown as IWorksheetData;
@@ -1639,7 +1639,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             border: new ObjectMatrix<BorderCache>(),
         };
 
-        this._renderedCellCache = new ObjectMatrix<boolean>();
+        this._cellHasBgOrBorder = new ObjectMatrix<boolean>();
 
         this._overflowCache.reset();
     }
@@ -1671,8 +1671,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             return true;
         }
 
-        const needsRendering = this._renderedCellCache.getValue(r, c);
-        if (needsRendering === false) {
+        const hasCache = this._cellHasBgOrBorder.getValue(r, c);
+        if (hasCache === false) {
             this._makeDocumentSkeletonDirty(r, c);
             return true;
         }
@@ -1706,7 +1706,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        const cache = this._stylesCache;
+        // const stylesCache = this._stylesCache;
 
         // style supports inline styles
         // const style = styles && styles.get(cell.s);
@@ -1715,43 +1715,46 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };
+
+        //#region cache for background
         if (cacheItem.bg && style && style.bg && style.bg.rgb) {
             const rgb = style.bg.rgb;
-            if (!cache.background![rgb]) {
-                cache.background![rgb] = new ObjectMatrix();
+            if (!this._stylesCache.background![rgb]) {
+                this._stylesCache.background![rgb] = new ObjectMatrix();
             }
-            const bgCache = cache.background![rgb];
 
+            const bgCache = this._stylesCache.background![rgb];
             bgCache.setValue(r, c, rgb);
-
             const cellInfo = this.getCellByIndexWithNoHeader(r, c);
-
-            cache.backgroundPositions?.setValue(r, c, cellInfo);
+            this._stylesCache.backgroundPositions?.setValue(r, c, cellInfo);
         }
+        //#endregion
 
+        //#region cache for border
         if (cacheItem.border && style && style.bd) {
             const mergeRange = options?.mergeRange;
             if (mergeRange) {
-                this._setMergeBorderProps(BORDER_TYPE.TOP, cache, mergeRange);
-                this._setMergeBorderProps(BORDER_TYPE.BOTTOM, cache, mergeRange);
-                this._setMergeBorderProps(BORDER_TYPE.LEFT, cache, mergeRange);
-                this._setMergeBorderProps(BORDER_TYPE.RIGHT, cache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.TOP, this._stylesCache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.BOTTOM, this._stylesCache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.LEFT, this._stylesCache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.RIGHT, this._stylesCache, mergeRange);
             } else if (!this.intersectMergeRange(r, c)) {
-                this._setBorderProps(r, c, BORDER_TYPE.TOP, style, cache);
-                this._setBorderProps(r, c, BORDER_TYPE.BOTTOM, style, cache);
-                this._setBorderProps(r, c, BORDER_TYPE.LEFT, style, cache);
-                this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
+                this._setBorderProps(r, c, BORDER_TYPE.TOP, style, this._stylesCache);
+                this._setBorderProps(r, c, BORDER_TYPE.BOTTOM, style, this._stylesCache);
+                this._setBorderProps(r, c, BORDER_TYPE.LEFT, style, this._stylesCache);
+                this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, this._stylesCache);
             }
 
-            this._setBorderProps(r, c, BORDER_TYPE.TL_BR, style, cache);
-            this._setBorderProps(r, c, BORDER_TYPE.TL_BC, style, cache);
-            this._setBorderProps(r, c, BORDER_TYPE.TL_MR, style, cache);
-            this._setBorderProps(r, c, BORDER_TYPE.BL_TR, style, cache);
-            this._setBorderProps(r, c, BORDER_TYPE.ML_TR, style, cache);
-            this._setBorderProps(r, c, BORDER_TYPE.BC_TR, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.TL_BR, style, this._stylesCache);
+            this._setBorderProps(r, c, BORDER_TYPE.TL_BC, style, this._stylesCache);
+            this._setBorderProps(r, c, BORDER_TYPE.TL_MR, style, this._stylesCache);
+            this._setBorderProps(r, c, BORDER_TYPE.BL_TR, style, this._stylesCache);
+            this._setBorderProps(r, c, BORDER_TYPE.ML_TR, style, this._stylesCache);
+            this._setBorderProps(r, c, BORDER_TYPE.BC_TR, style, this._stylesCache);
         }
+        //#endregion
 
-        if (needsRendering === true) {
+        if (hasCache === true) {
             this._makeDocumentSkeletonDirty(r, c);
             return true;
         }
@@ -1775,11 +1778,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
         const documentViewModel = new DocumentViewModel(documentModel);
 
-        if (!cache.font![fontString]) {
-            cache.font![fontString] = new ObjectMatrix();
+        if (!this._stylesCache.font![fontString]) {
+            this._stylesCache.font![fontString] = new ObjectMatrix();
         }
 
-        const fontCache = cache.font![fontString];
+        const fontCache = this._stylesCache.font![fontString];
 
         const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
 
@@ -1798,15 +1801,14 @@ export class SpreadsheetSkeleton extends Skeleton {
             };
 
             fontCache.setValue(r, c, config);
-
             this._calculateOverflowCell(r, c, config);
         }
 
         // same as: if (!skipBackgroundAndBorder) {...}
         if (cacheItem.bg || cacheItem.border) {
-            this._renderedCellCache.setValue(r, c, false);
+            this._cellHasBgOrBorder.setValue(r, c, true);
         } else {
-            this._renderedCellCache.setValue(r, c, true);
+            this._cellHasBgOrBorder.setValue(r, c, false);
         }
     }
 

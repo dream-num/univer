@@ -342,6 +342,12 @@ export class ObjectMatrix<T> {
         return false;
     }
 
+    /**
+     * Get from this._matrix, if not exist, return undefined.
+     * @param row
+     * @param column
+     * @returns {T|undefined} if not exist, return undefined.
+     */
     getValue(row: number, column: number): T {
         return this._matrix?.[row]?.[column];
     }

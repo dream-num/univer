@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/facade",
-    "version": "0.2.8",
+    "version": "0.2.9",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -66,6 +66,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-crosshair-highlight": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-filter-ui": "workspace:*",

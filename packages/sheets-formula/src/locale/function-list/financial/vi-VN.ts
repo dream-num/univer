@@ -842,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'trị giá', detail: 'Chi phí của tài sản.' },
+            salvage: { name: 'giá trị còn lại', detail: 'Giá trị khi kết thúc khấu hao (đôi khi được gọi là giá trị thu hồi của tài sản).' },
+            life: { name: 'tuổi thọ sử dụng', detail: 'Số thời gian khấu hao của một tài sản (đôi khi còn được gọi là thời gian sử dụng hữu ích của tài sản).' },
+            startPeriod: { name: 'kỳ đầu tiên', detail: 'Kỳ đầu tiên mà bạn muốn tính khấu hao.' },
+            endPeriod: { name: 'kỳ kết thúc', detail: 'Kỳ kết thúc mà bạn muốn tính khấu hao.' },
+            factor: { name: 'nhân tố', detail: 'Tỷ lệ suy giảm số dư. Nếu bỏ qua yếu tố ảnh hưởng thì giả định là 2 (phương pháp số dư giảm dần kép).' },
+            noSwitch: { name: 'không chuyển đổi', detail: 'Giá trị logic chỉ định liệu có nên chuyển sang khấu hao theo đường thẳng hay không khi mức khấu hao lớn hơn phép tính số dư giảm dần.' },
         },
     },
     XIRR: {
@@ -871,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'tỷ lệ chiết khấu', detail: 'Tỷ lệ chiết khấu áp dụng cho dòng tiền.' },
+            values: { name: 'dòng tiền', detail: 'Một chuỗi các dòng tiền tương ứng với thời điểm thanh toán theo ngày. Khoản trả trước là tùy chọn và liên quan đến chi phí hoặc khoản thanh toán khi bắt đầu đầu tư. Nếu giá trị đầu tiên là chi phí hoặc khoản thanh toán thì giá trị đó phải âm. Tất cả các khoản thanh toán tiếp theo được chiết khấu trên cơ sở 365 ngày/năm. Chuỗi giá trị phải chứa ít nhất một giá trị dương và một giá trị âm.' },
+            dates: { name: 'bảng ngày tháng', detail: 'Lịch trình ngày thanh toán tương ứng với các khoản thanh toán dòng tiền. Ngày tháng có thể xuất hiện theo bất kỳ thứ tự nào.' },
         },
     },
     YIELD: {

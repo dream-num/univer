@@ -211,7 +211,7 @@ export function calculateOddFPrice(
     redemption: number,
     frequency: number,
     basis: number
-) {
+): number {
     // DFC = number of days from the beginning of the odd first coupon to the first coupon date.
     const DFC = getPositiveDaysBetween(issueSerialNumber, firstCouponSerialNumber, basis);
 
@@ -517,7 +517,15 @@ function guessIsNaNorInfinity(guess: number, iterF: IIterFFunctionType): number 
     return xI;
 }
 
-export function calculatePrice(settlementSerialNumber: number, maturitySerialNumber: number, rate: number, yld: number, redemption: number, frequency: number, basis: number) {
+export function calculatePrice(
+    settlementSerialNumber: number,
+    maturitySerialNumber: number,
+    rate: number,
+    yld: number,
+    redemption: number,
+    frequency: number,
+    basis: number
+): number {
     // N is the number of coupons payable between the settlement date and redemption date
     const N = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency);
 
@@ -545,6 +553,34 @@ export function calculatePrice(settlementSerialNumber: number, maturitySerialNum
     }
 
     result -= 100 * rate / frequency * A / E;
+
+    return result;
+}
+
+export function calculateDDB(cost: number, salvage: number, life: number, period: number, factor: number): number {
+    let oldCost = 0;
+    let fdl = factor / life;
+
+    if (fdl >= 1) {
+        fdl = 1;
+        oldCost = period === 1 ? cost : 0;
+    } else {
+        oldCost = cost * ((1 - fdl) ** (period - 1));
+    }
+
+    const newCost = cost * ((1 - fdl) ** period);
+
+    let result = 0;
+
+    if (newCost < salvage) {
+        result = oldCost - salvage;
+    } else {
+        result = oldCost - newCost;
+    }
+
+    if (result < 0) {
+        result = 0;
+    }
 
     return result;
 }

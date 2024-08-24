@@ -842,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '资产原值。' },
+            salvage: { name: '残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
+            startPeriod: { name: '起始时期', detail: '您要计算折旧的起始时期。' },
+            endPeriod: { name: '终止时期', detail: '您要计算折旧的终止时期。' },
+            factor: { name: '速率', detail: '余额递减速率。如果省略影响因素，则假定为2（双倍余额递减法）。' },
+            noSwitch: { name: '不切换', detail: '逻辑值，指定当折旧值大于余额递减计算值时，是否转用直线折旧法。' },
         },
     },
     XIRR: {
@@ -871,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '贴现率', detail: '应用于现金流的贴现率。' },
+            values: { name: '现金流', detail: '与 dates 中的支付时间相对应的一系列现金流。 首期支付是可选的，并与投资开始时的成本或支付有关。 如果第一个值是成本或支付，则它必须是负值。 所有后续支付都基于 365 天/年贴现。 值系列中必须至少包含一个正值和一个负值。' },
+            dates: { name: '日期表', detail: '与现金流支付相对应的支付日期表。 日期可以按任意顺序出现。' },
         },
     },
     YIELD: {

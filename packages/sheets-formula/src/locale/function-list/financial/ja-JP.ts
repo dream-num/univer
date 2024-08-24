@@ -842,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格 (資産の救済価額) を指定します。' },
+            life: { name: '耐用年数', detail: '資産を使用できる年数 (資産の寿命年数) を指定します。' },
+            startPeriod: { name: '開始期', detail: '減価償却費の計算の対象となる最初の期を指定します。' },
+            endPeriod: { name: '終了期', detail: '減価償却費の計算の対象となる最後の期を指定します。' },
+            factor: { name: '率', detail: '減価償却率を指定します。率を省略すると、2 を指定したと見なされ、倍額定率法で計算が行われます。' },
+            noSwitch: { name: '切り替えなし', detail: '減価償却費が定率法による計算の結果より大きくなったときに、自動的に定額法に切り替えるかどうかを、論理値で指定します。' },
         },
     },
     XIRR: {
@@ -871,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '割引率', detail: '対象となるキャッシュ フローに適用する割引率を指定します。' },
+            values: { name: 'キャッシュフロー', detail: '収支明細表の日付に対応する一覧のキャッシュ フローを指定します。 最初の支払いは投資の最初に発生する原価や支払いに対応し、省略できます。 最初のキャッシュ フローが原価や支払いの場合、負の値を指定する必要があります。 それ以降の支払いは、1 年の日数を 365 日として割り引かれます。 値には、正の値と負の値が少なくとも 1 つずつ含まれている必要があります。' },
+            dates: { name: '日付テーブル', detail: 'キャッシュ フローに対応する一連の支払日を指定します。 指定順序は自由です。' },
         },
     },
     YIELD: {

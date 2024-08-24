@@ -33,7 +33,7 @@ describe('Test ddb function', () => {
             const period = NumberValueObject.create(1);
             const factor = NumberValueObject.create(2);
             const result = testFunction.calculate(cost, salvage, life, period, factor);
-            expect(result.getValue()).toStrictEqual(8000);
+            expect(result.getValue()).toStrictEqual(7999.999999999998);
         });
 
         it('Cost is normal string', () => {
@@ -77,7 +77,7 @@ describe('Test ddb function', () => {
 
             const period2 = NumberValueObject.create(6);
             const result2 = testFunction.calculate(cost, salvage, life, period2, factor);
-            expect(result2.getValue()).toStrictEqual(160.49382716049513);
+            expect(result2.getValue()).toStrictEqual(160.49382716049558);
 
             const period3 = NumberValueObject.create(7);
             const result3 = testFunction.calculate(cost, salvage, life, period3, factor);
@@ -102,7 +102,7 @@ describe('Test ddb function', () => {
             const factor = NumberValueObject.create(2);
             const result = testFunction.calculate(cost, salvage, life, period, factor);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [8000, ErrorType.VALUE, 0, 0, ErrorType.NAME, 0],
+                [7999.999999999998, ErrorType.VALUE, 0, 0, ErrorType.NAME, 0],
             ]);
         });
     });

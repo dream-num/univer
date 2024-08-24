@@ -20,7 +20,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { getResultByGuessIterF } from '../../../basics/financial';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 
 interface ICheckErrorType {
     isError: boolean;
@@ -40,44 +40,53 @@ interface ICheckNumber {
     negative: boolean;
 }
 
-export class Xirr extends BaseFunction {
-    override minParams = 2;
+export class Xnpv extends BaseFunction {
+    override minParams = 3;
 
     override maxParams = 3;
 
-    override calculate(values: BaseValueObject, dates: BaseValueObject, guess?: BaseValueObject): BaseValueObject {
-        if (values.isNull() || dates.isNull()) {
+    override calculate(rate: BaseValueObject, values: BaseValueObject, dates: BaseValueObject): BaseValueObject {
+        if (rate.isNull() || values.isNull() || dates.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        const { isError, errorObejct, _values, _dates } = this._checkErrors(values, dates);
+        const { isError: _isError_rate, errorObject: _errorObject_rate, variants } = checkVariantsErrorIsArrayOrBoolean(rate);
+
+        if (_isError_rate) {
+            return _errorObject_rate as ErrorValueObject;
+        }
+
+        const [rateObject] = variants as BaseValueObject[];
+
+        const rateValue = +rateObject.getValue();
+
+        if (Number.isNaN(rateValue)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        let { isError, errorObejct, _values, _dates } = this._checkErrors(values, dates);
 
         if (isError) {
             return errorObejct as ErrorValueObject;
         }
 
-        let _guess = guess ?? NumberValueObject.create(0.1);
+        _values = _values as number[];
+        _dates = _dates as number[];
 
-        if (_guess.isNull()) {
-            _guess = NumberValueObject.create(0.1);
-        }
+        const { positive, negative } = this._checkValues(_values);
 
-        const guessValue = +_guess.getValue();
-
-        if (_guess.isArray() || _guess.isBoolean() || Number.isNaN(guessValue)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        const { positive, negative } = this._checkValues(_values as number[]);
-
-        if (!positive || !negative || _values?.length !== _dates?.length || guessValue < 0) {
+        if (rateValue < 0 || !positive || !negative || _values.length !== _dates.length) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = getResultByGuessIterF(guessValue, (rate: number) => this._iterF(_values as number[], _dates as number[], rate));
+        let result = 0;
+        const d1 = _dates[0];
 
-        if (typeof result !== 'number') {
-            return result as ErrorValueObject;
+        for (let i = 0; i < _dates.length; i++) {
+            const di = _dates[i];
+            const Pi = _values[i];
+
+            result += Pi / ((1 + rateValue) ** ((di - d1) / 365));
         }
 
         return NumberValueObject.create(result);
@@ -272,18 +281,5 @@ export class Xirr extends BaseFunction {
             positive,
             negative,
         };
-    }
-
-    private _iterF(values: number[], dates: number[], rate: number): number {
-        const D_0 = dates[0];
-        const r = rate + 1;
-
-        let res = values[0];
-
-        for (let i = 1; i < values.length; i++) {
-            res += values[i] / (r ** ((dates[i] - D_0) / 365));
-        }
-
-        return res;
     }
 }

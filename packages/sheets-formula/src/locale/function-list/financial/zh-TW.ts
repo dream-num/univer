@@ -842,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '這是資產的原始成本。' },
+            salvage: { name: '殘值', detail: '這是折舊最後的值 (有時稱為資產的殘餘價值)。' },
+            life: { name: '使用年限', detail: '這是資產折舊的期數 (有時稱為資產的使用年限)。' },
+            startPeriod: { name: '開始期間', detail: '這是要計算折舊的開始期間。' },
+            endPeriod: { name: '結束期間', detail: '這是要計算折舊的結束期間。' },
+            factor: { name: '速率', detail: '這是餘額遞減的速率。如果省略factor，將假設其值為2(倍率遞減法)。' },
+            noSwitch: { name: '不切換', detail: '這是用於指定當折舊大於遞減餘額計算時，是否切換到直線折舊法的邏輯值。' },
         },
     },
     XIRR: {
@@ -871,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '貼現率', detail: '這是要套用到現金流的貼現率。' },
+            values: { name: '現金流', detail: '這是一系列與 dates 的付款日期對應的現金流。第一次付款是選擇性的，而且與投資開始時的成本和付款對應。如果第一個值是成本或付款，則它必須是負值。而之後的付款都會以一年 365 天為基礎來折算。序列值必須至少包括一個正值和一個負值。' },
+            dates: { name: '日期表', detail: '這是一系列與現金流對應的付款日期。日期可能會以任何順序發生。' },
         },
     },
     YIELD: {

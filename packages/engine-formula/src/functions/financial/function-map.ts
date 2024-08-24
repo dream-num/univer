@@ -63,7 +63,9 @@ import { Syd } from './syd';
 import { Tbilleq } from './tbilleq';
 import { Tbillprice } from './tbillprice';
 import { Tbillyield } from './tbillyield';
+import { Vdb } from './vdb';
 import { Xirr } from './xirr';
+import { Xnpv } from './xnpv';
 
 export const functionFinancial = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
@@ -114,5 +116,7 @@ export const functionFinancial = [
     [Tbilleq, FUNCTION_NAMES_FINANCIAL.TBILLEQ],
     [Tbillprice, FUNCTION_NAMES_FINANCIAL.TBILLPRICE],
     [Tbillyield, FUNCTION_NAMES_FINANCIAL.TBILLYIELD],
+    [Vdb, FUNCTION_NAMES_FINANCIAL.VDB],
     [Xirr, FUNCTION_NAMES_FINANCIAL.XIRR],
+    [Xnpv, FUNCTION_NAMES_FINANCIAL.XNPV],
 ];

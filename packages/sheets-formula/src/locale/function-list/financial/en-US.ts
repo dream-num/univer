@@ -842,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The initial cost of the asset.' },
+            salvage: { name: 'salvage', detail: 'The value at the end of the depreciation (sometimes called the salvage value of the asset).' },
+            life: { name: 'life', detail: 'The number of periods over which the asset is being depreciated (sometimes called the useful life of the asset).' },
+            startPeriod: { name: 'start_period', detail: 'The starting period for which you want to calculate the depreciation.' },
+            endPeriod: { name: 'end_period', detail: 'The ending period for which you want to calculate the depreciation.' },
+            factor: { name: 'factor', detail: 'The rate at which the balance declines. If factor is omitted, it is assumed to be 2 (the double-declining balance method).' },
+            noSwitch: { name: 'no_switch', detail: 'A logical value specifying whether to switch to straight-line depreciation when depreciation is greater than the declining balance calculation.' },
         },
     },
     XIRR: {
@@ -871,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The discount rate to apply to the cash flows.' },
+            values: { name: 'values', detail: 'A series of cash flows that corresponds to a schedule of payments in dates. The first payment is optional and corresponds to a cost or payment that occurs at the beginning of the investment. If the first value is a cost or payment, it must be a negative value. All succeeding payments are discounted based on a 365-day year. The series of values must contain at least one positive and one negative value.' },
+            dates: { name: 'dates', detail: 'A schedule of payment dates that corresponds to the cash flow payments. Dates may occur in any order.' },
         },
     },
     YIELD: {

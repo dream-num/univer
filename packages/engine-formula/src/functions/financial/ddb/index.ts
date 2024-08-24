@@ -21,6 +21,7 @@ import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { calculateDDB } from '../../../basics/financial';
 
 export class Ddb extends BaseFunction {
     override minParams = 4;
@@ -73,7 +74,7 @@ export class Ddb extends BaseFunction {
             const costValue = +_costObject.getValue();
             const salvageValue = +_salvageObject.getValue();
             const lifeValue = +_lifeObject.getValue();
-            const periodValue = Math.ceil(+_periodObject.getValue());
+            const periodValue = +_periodObject.getValue();
             const factorValue = +_factorObject.getValue();
 
             if (
@@ -81,13 +82,23 @@ export class Ddb extends BaseFunction {
                 salvageValue < 0 ||
                 lifeValue <= 0 ||
                 periodValue <= 0 ||
-                Math.floor(periodValue) > Math.floor(lifeValue) ||
+                periodValue > lifeValue ||
                 factorValue <= 0
             ) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return this._getResult(costValue, salvageValue, lifeValue, periodValue, factorValue, rowIndex, columnIndex);
+            const result = calculateDDB(costValue, salvageValue, lifeValue, periodValue, factorValue);
+
+            if (Number.isNaN(result) || !Number.isFinite(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            if (rowIndex === 0 && columnIndex === 0) {
+                return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
+            }
+
+            return NumberValueObject.create(result);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -95,35 +106,5 @@ export class Ddb extends BaseFunction {
         }
 
         return resultArray;
-    }
-
-    private _getResult(
-        costValue: number,
-        salvageValue: number,
-        lifeValue: number,
-        periodValue: number,
-        factorValue: number,
-        rowIndex: number,
-        columnIndex: number
-    ): BaseValueObject {
-        let total = 0;
-        let result = 0;
-
-        if (salvageValue < costValue) {
-            for (let i = 1; i <= periodValue; i++) {
-                result = Math.min((costValue - total) * (factorValue / lifeValue), costValue - salvageValue - total);
-                total += result;
-            }
-        }
-
-        if (Number.isNaN(result) || !Number.isFinite(result)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        if (rowIndex === 0 && columnIndex === 0) {
-            return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
-        } else {
-            return NumberValueObject.create(result);
-        }
     }
 }

@@ -19,13 +19,14 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { BaseFunction } from '../../base-function';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { Complex as COMPLEX } from '../../../basics/complex';
 
 export class Complex extends BaseFunction {
     override minParams = 2;
 
     override maxParams = 3;
 
-    override calculate(realNum: BaseValueObject, iNum: BaseValueObject, suffix?: BaseValueObject) {
+    override calculate(realNum: BaseValueObject, iNum: BaseValueObject, suffix?: BaseValueObject): BaseValueObject {
         const _suffix = suffix ?? StringValueObject.create('i');
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(realNum, iNum, _suffix);
@@ -48,25 +49,12 @@ export class Complex extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (realNumValue === 0 && iNumValue === 0) {
-            return NumberValueObject.create(0);
+        const result = COMPLEX.getComplex(realNumValue, iNumValue, suffixValue);
+
+        if (typeof result === 'number') {
+            return NumberValueObject.create(result);
         }
 
-        if (realNumValue === 0) {
-            if (iNumValue === 1) {
-                return StringValueObject.create(suffixValue);
-            }
-
-            return StringValueObject.create(`${iNumValue}${suffixValue}`);
-        }
-
-        if (iNumValue === 0) {
-            return NumberValueObject.create(realNumValue);
-        }
-
-        const sign = iNumValue > 0 ? '+' : '';
-        const suffixStr = iNumValue === 1 ? suffixValue : `${iNumValue}${suffixValue}`;
-
-        return StringValueObject.create(`${realNumValue}${sign}${suffixStr}`);
+        return StringValueObject.create(result);
     }
 }

@@ -26,7 +26,7 @@ export class Erfc extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(x: BaseValueObject) {
+    override calculate(x: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(x);
 
         if (isError) {

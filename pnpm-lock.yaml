@@ -1414,6 +1414,9 @@ importers:
 
   packages/engine-formula:
     dependencies:
+      decimal.js:
+        specifier: ^10.4.3
+        version: 10.4.3
       numfmt:
         specifier: ^2.5.2
         version: 2.5.2

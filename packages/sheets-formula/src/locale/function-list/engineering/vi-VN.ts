@@ -332,14 +332,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            number: { name: 'số', detail: 'Giá trị để kiểm tra bước.' },
+            step: { name: 'ngưỡng', detail: 'Giá trị ngưỡng. Nếu bạn bỏ qua giá trị của bước, hàm GESTEP sẽ dùng số 0.' },
         },
     },
     HEX2BIN: {
@@ -393,14 +387,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm giá trị tuyệt đối của nó.' },
         },
     },
     IMAGINARY: {
@@ -413,14 +400,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm hệ số ảo của nó.' },
         },
     },
     IMARGUMENT: {
@@ -433,14 +413,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm đối số theta.' },
         },
     },
     IMCONJUGATE: {
@@ -453,14 +426,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm số liên hợp của nó.' },
         },
     },
     IMCOS: {
@@ -473,14 +439,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm cosin của nó.' },
         },
     },
     IMCOSH: {
@@ -493,14 +452,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy cosin hyperbolic.' },
         },
     },
     IMCOT: {
@@ -513,14 +465,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy cotangent.' },
         },
     },
     IMCSC: {
@@ -533,14 +478,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy cosecant.' },
         },
     },
     IMCSCH: {
@@ -553,14 +491,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy hyperbolic cosecant.' },
         },
     },
     IMDIV: {
@@ -573,14 +504,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber1: { name: 'tử số phức', detail: 'Số bị chia hoặc tử số phức.' },
+            inumber2: { name: 'mẫu số phức', detail: 'Ước số hoặc mẫu số phức.' },
         },
     },
     IMEXP: {
@@ -593,14 +518,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm hàm mũ của nó.' },
         },
     },
     IMLN: {
@@ -613,14 +531,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm lô-ga-rit tự nhiên của nó.' },
         },
     },
     IMLOG10: {
@@ -633,14 +544,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm lô-ga-rit thập phân của nó.' },
         },
     },
     IMLOG2: {
@@ -653,14 +557,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: {
-                name: 'number1',
-                detail: 'đầu tiên',
-            },
-            number2: {
-                name: 'number2',
-                detail: 'thứ hai',
-            },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm lô-ga-rit cơ số 2 của nó.' },
         },
     },
 
@@ -674,13 +571,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber: { name: 'số phức', detail: 'Một số phức mà bạn muốn nâng lên theo một lũy thừa.' },
+            number: { name: 'số', detail: 'Lũy thừa mà bạn muốn nâng số phức lên theo đó.' },
         },
     },
     IMPRODUCT: {
-        description: 'Trả về tích của từ 2 đến 255 số phức',
-        abstract: 'Trả về tích của từ 2 đến 255 số phức',
+        description: 'Trả về tích của nhiều số phức',
+        abstract: 'Trả về tích của nhiều số phức',
         links: [
             {
                 title: 'Giảng dạy',
@@ -688,8 +585,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber1: { name: 'số phức 1', detail: '1 tới 255 số phức cần nhân với nhau.' },
+            inumber2: { name: 'số phức 2', detail: '1 tới 255 số phức cần nhân với nhau.' },
         },
     },
     IMREAL: {
@@ -702,8 +599,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm hệ số thực của nó.' },
         },
     },
     IMSEC: {
@@ -716,8 +612,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy sec.' },
         },
     },
     IMSECH: {
@@ -730,8 +625,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy sech.' },
         },
     },
     IMSIN: {
@@ -744,8 +638,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy sin.' },
         },
     },
     IMSINH: {
@@ -758,8 +651,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy sinh.' },
         },
     },
     IMSQRT: {
@@ -772,8 +664,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm căn bậc hai của nó.' },
         },
     },
     IMSUB: {
@@ -786,8 +677,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber1: { name: 'số phức 1', detail: 'số phức 1.' },
+            inumber2: { name: 'số phức 2', detail: 'số phức 2.' },
         },
     },
     IMSUM: {
@@ -800,8 +691,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber1: { name: 'số phức 1', detail: '1 tới 255 số phức cần cộng với nhau.' },
+            inumber2: { name: 'số phức 2', detail: '1 tới 255 số phức cần cộng với nhau.' },
         },
     },
     IMTAN: {
@@ -814,8 +705,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy tang.' },
         },
     },
     OCT2BIN: {

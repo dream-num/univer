@@ -33,6 +33,10 @@ describe('Test complex function', () => {
             const suffix = StringValueObject.create('i');
             const result = testFunction.calculate(realNum, iNum, suffix);
             expect(result.getValue()).toBe('3+4i');
+
+            const iNum2 = NumberValueObject.create(0);
+            const result2 = testFunction.calculate(realNum, iNum2, suffix);
+            expect(result2.getValue()).toBe(3);
         });
 
         it('Value is number string', () => {

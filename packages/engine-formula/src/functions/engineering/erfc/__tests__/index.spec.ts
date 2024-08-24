@@ -39,6 +39,12 @@ describe('Test erfc function', () => {
             expect(result.getValue()).toBe(0.03389485352468924);
         });
 
+        it('Value is negative number', () => {
+            const x = NumberValueObject.create(-2);
+            const result = testFunction.calculate(x);
+            expect(result.getValue()).toBe(1.9953222650189528);
+        });
+
         it('Value is normal string', () => {
             const x = StringValueObject.create('test');
             const result = testFunction.calculate(x);

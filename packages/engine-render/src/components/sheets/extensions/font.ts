@@ -278,6 +278,9 @@ export class Font extends SheetExtension {
                     // );
                 }
                 ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
+                if (rowIndex === 26 && columnIndex === 0) {
+                    console.log('render long text');
+                }
                 this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
                 ctx.closePath();
                 ctx.restore();
@@ -312,7 +315,7 @@ export class Font extends SheetExtension {
 
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
-            documentSkeleton.calculate();
+            // documentSkeleton.calculate();
         } else {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(Number.POSITIVE_INFINITY);
         }
@@ -320,7 +323,10 @@ export class Font extends SheetExtension {
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
         // so that the divide will be aligned when the skeleton is calculated.
         const overflowRectangle = overflowCache.getValue(row, column);
-        if (!(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && vertexAngle === 0)) {
+
+        const isOverflow = !(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && vertexAngle === 0);
+        if (isOverflow) {
+            console.time('overflowstart');
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);
 
             const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;
@@ -332,10 +338,15 @@ export class Font extends SheetExtension {
                     .getViewModel()
                     .getDataModel()
                     .updateDocumentDataPageSize(width + marginLeft + marginRight);
-                documentSkeleton.calculate();
+                console.time('calcstart');
+                if (!documentSkeleton.getSkeletonData()) {
+                    // documentSkeleton.calculate();
+                }
+                console.timeEnd('calcstart');
             }
-        }
 
+            console.timeEnd('overflowstart');
+        }
         documentSkeleton.makeDirty(false);
         documents.resize(cellWidth, cellHeight);
         documents.changeSkeleton(documentSkeleton).render(ctx);

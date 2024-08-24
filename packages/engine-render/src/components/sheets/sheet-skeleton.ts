@@ -1685,6 +1685,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!cell) {
             return true;
         }
+        if (isNullCell(cell)) {
+            return;
+        }
 
         const hidden = this.worksheet.getColVisible(c) === false || this.worksheet.getRowVisible(r) === false;
         if (hidden) {
@@ -1752,10 +1755,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._makeDocumentSkeletonDirty(r, c);
             return true;
         }
-
-        if (isNullCell(cell)) {
-            return;
-        }
+        // put above?
+        // if (isNullCell(cell)) {
+        //     return;
+        // }
 
         const modelObject = cell && this._getCellDocumentModel(cell, {
             displayRawFormula: this._renderRawFormula,
@@ -1781,6 +1784,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
 
         if (documentViewModel) {
+            console.log('create documentSkeleton', r, c);
             const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
             documentSkeleton.calculate();
 

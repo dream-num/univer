@@ -132,6 +132,7 @@ export class DocumentSkeleton extends Skeleton {
         localeService: LocaleService
     ) {
         super(localeService);
+        console.log('new DocumentSkeleton');
     }
 
     static create(docViewModel: DocumentViewModel, localeService: LocaleService) {
@@ -149,6 +150,10 @@ export class DocumentSkeleton extends Skeleton {
         return this._docViewModel;
     }
 
+    override makeDirty(state: boolean) {
+        this._dirty = state;
+    }
+
     // Layout the document.
     calculate(bounds?: IViewportInfo) {
         if (!this.dirty) {
@@ -157,9 +162,9 @@ export class DocumentSkeleton extends Skeleton {
 
         const ctx = this._prepareLayoutContext();
 
-        // const start = +new Date();
+        const start = +new Date();
         this._skeletonData = this._createSkeleton(ctx, bounds);
-        // console.log('skeleton calculate cost', +new Date() - start);
+        console.log('skeleton calculate cost', +new Date() - start);
         this._dirty$.next(true);
     }
 

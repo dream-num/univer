@@ -216,6 +216,11 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('=ERROR.TYPE(#DIV/0!)/ERROR.TYPE(#N/A)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"ERROR.TYPE","st":0,"ed":9,"children":[{"token":"P_1","st":7,"ed":9,"children":["#DIV/0!"]}]},{"token":"ERROR.TYPE","st":20,"ed":29,"children":[{"token":"P_1","st":27,"ed":29,"children":["#N/A"]}]},"/"]}');
         });
+
+        it('array error lexer text', () => {
+            const node = lexerTreeBuilder.treeBuilder('=RANK({1,2,121,#NAME?},A1:F1,0)') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"RANK","st":0,"ed":3,"children":[{"token":"P_1","st":1,"ed":3,"children":["{1,2,121,#NAME?}"]},{"token":"P_1","st":18,"ed":20,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"F1","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":24,"ed":26,"children":["0"]}]}]}');
+        });
     });
 
     describe('check error', () => {

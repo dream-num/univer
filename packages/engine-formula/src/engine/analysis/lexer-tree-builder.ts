@@ -1164,6 +1164,8 @@ export class LexerTreeBuilder extends Disposable {
             if (currentString === suffixToken.POUND &&
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose() &&
+                this.isBracesClose() &&
+                this.isSquareBracketClose() &&
                 this._checkIfErrorObject(cur, formulaStringArray)
             ) {
                 const errorType = this._findErrorObject(cur, formulaStringArray);

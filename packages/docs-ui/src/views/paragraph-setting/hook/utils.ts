@@ -14,24 +14,31 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IParagraph } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { getParagraphsInRanges, TextSelectionManagerService } from '@univerjs/docs';
-import { useMemo, useState } from 'react';
-import { getNumberUnitValue } from '@univerjs/engine-render';
+import type { DocumentDataModel, IParagraph, ISectionBreak } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, SpacingRule, UniverInstanceType, useDependency } from '@univerjs/core';
+import { DocSkeletonManagerService, findNearestSectionBreak, getParagraphsInRanges, TextSelectionManagerService } from '@univerjs/docs';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { getNumberUnitValue, IRenderManagerService } from '@univerjs/engine-render';
+import { BehaviorSubject } from 'rxjs';
+import { bufferTime, filter, map } from 'rxjs/operators';
 import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
 import { DocParagraphSettingCommand } from '../../../commands/commands/doc-paragraph-setting.command';
 
-export const useCurrentParagraph = () => {
+const useDocRanges = () => {
     const textSelectionManagerService = useDependency(TextSelectionManagerService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     // The `getDocRanges` function internally needs to use `range.position` to obtain the offset.
     // However, when the form control changes and triggers the `getDocRanges` function, the `Skeleton` has already been updated.
     // The information of `range.position` in the textSelectionManagerService does not match the `Skeleton`, causing errors in value retrieval.
     // To address this issue, adding useMemo here to only retrieve the range information for the first time to avoid mismatches between the `Skeleton` and `position`.
     // TODO@GGGPOUND, the business side should not be aware of the timing issue with getDocRanges.
     const docRanges = useMemo(() => textSelectionManagerService.getDocRanges(), []);
+    return docRanges;
+};
+
+export const useCurrentParagraph = () => {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const docRanges = useDocRanges();
 
     if (!docDataModel || docRanges.length === 0) {
         return [];
@@ -43,6 +50,36 @@ export const useCurrentParagraph = () => {
     const currentParagraphs = getParagraphsInRanges(docRanges, paragraphs) ?? [];
 
     return currentParagraphs;
+};
+
+export const useCurrentSections = (currentParagraphs: IParagraph[]) => {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const docRanges = useDocRanges();
+
+    if (!docDataModel || docRanges.length === 0) {
+        return [];
+    }
+
+    const segmentId = docRanges[0].segmentId;
+
+    const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
+    const currentSectionBreaks = currentParagraphs
+        .map((item) => findNearestSectionBreak(item.startIndex, sectionBreaks))
+        .reduce((a, b, index, list) => {
+            const isEnd = list.length - 1 === index;
+            if (b) {
+                a.map[b.startIndex] = b;
+            }
+            if (isEnd) {
+                for (const key in a.map) {
+                    const v = a.map[key];
+                    a.result.push(v);
+                }
+            }
+            return a;
+        }, { map: {}, result: [] } as { map: Record<string, ISectionBreak>; result: ISectionBreak[] }).result;
+    return currentSectionBreaks;
 };
 
 export const useFirstParagraphHorizontalAlign = (paragraph: IParagraph[], defaultValue: string) => {
@@ -58,7 +95,7 @@ export const useFirstParagraphHorizontalAlign = (paragraph: IParagraph[], defaul
     const horizontalAlignSet = (v: string) => {
         _horizontalAlignSet(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
-            horizontalAlign: Number(v),
+            paragraph: { horizontalAlign: Number(v) },
         } as IDocParagraphSettingCommandParams);
     };
     return [horizontalAlign, horizontalAlignSet] as const;
@@ -77,7 +114,7 @@ export const useFirstParagraphIndentStart = (paragraph: IParagraph[]) => {
     const indentStartSet = (v: number) => {
         _indentStartSet(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
-            indentStart: { v },
+            paragraph: { indentStart: { v } },
         } as IDocParagraphSettingCommandParams);
     };
     return [indentStart, indentStartSet] as const;
@@ -96,7 +133,7 @@ export const useFirstParagraphIndentEnd = (paragraph: IParagraph[]) => {
     const indentEndSet = (v: number) => {
         _indentEndSet(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
-            indentEnd: { v },
+            paragraph: { indentEnd: { v } },
         } as IDocParagraphSettingCommandParams);
     };
     return [indentEnd, indentEndSet] as const;
@@ -115,7 +152,7 @@ export const useFirstParagraphIndentFirstLine = (paragraph: IParagraph[]) => {
     const indentFirstLineSet = (v: number) => {
         _indentFirstLineSet(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
-            indentFirstLine: { v },
+            paragraph: { indentFirstLine: { v } },
         } as IDocParagraphSettingCommandParams);
     };
     return [indentFirstLine, indentFirstLineSet] as const;
@@ -134,7 +171,7 @@ export const useFirstParagraphIndentHanging = (paragraph: IParagraph[]) => {
     const hangingSet = (v: number) => {
         _hangingSet(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
-            hanging: { v },
+            paragraph: { hanging: { v } },
         } as IDocParagraphSettingCommandParams);
     };
     return [hanging, hangingSet] as const;
@@ -153,7 +190,7 @@ export const useFirstParagraphIndentSpaceAbove = (paragraph: IParagraph[]) => {
     const spaceAboveSet = (v: number) => {
         _spaceAboveSet(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
-            spaceAbove: { v },
+            paragraph: { spaceAbove: { v } },
         } as IDocParagraphSettingCommandParams);
     };
     return [spaceAbove, spaceAboveSet] as const;
@@ -172,7 +209,7 @@ export const useFirstParagraphSpaceBelow = (paragraph: IParagraph[]) => {
     const spaceBelowSet = (v: number) => {
         _spaceBelowSet(v);
         return commandService.executeCommand(DocParagraphSettingCommand.id, {
-            spaceBelow: { v },
+            paragraph: { spaceBelow: { v } },
         } as IDocParagraphSettingCommandParams);
     };
     return [spaceBelow, spaceBelowSet] as const;
@@ -180,6 +217,18 @@ export const useFirstParagraphSpaceBelow = (paragraph: IParagraph[]) => {
 
 export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
     const commandService = useDependency(ICommandService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+
+    const skeleton = useMemo(() => {
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!docDataModel) {
+            return undefined;
+        }
+        return renderManagerService.getRenderById(docDataModel?.getUnitId())?.with(DocSkeletonManagerService).getSkeleton();
+    }, []);
+
+    const stateChange$ = useMemo(() => new BehaviorSubject<{ spacingRule?: SpacingRule; lineSpacing?: number }>({}), []);
 
     const [lineSpacing, _lineSpacingSet] = useState(() => {
         const firstParagraph = paragraph[0];
@@ -188,11 +237,59 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
         }
         return firstParagraph.paragraphStyle?.lineSpacing ?? 1;
     });
-    const lineSpacingSet = (v: number) => {
+
+    const lineSpacingCache = useRef<number>(lineSpacing);
+
+    const [spacingRule, _spacingRuleSet] = useState<SpacingRule>(() => {
+        const firstParagraph = paragraph[0];
+        if (!firstParagraph) {
+            return SpacingRule.AUTO;
+        }
+        return firstParagraph.paragraphStyle?.spacingRule ?? SpacingRule.AUTO;
+    });
+
+    const lineSpacingSet = async (v: number) => {
         _lineSpacingSet(v);
-        return commandService.executeCommand(DocParagraphSettingCommand.id, {
-            lineSpacing: v,
-        } as IDocParagraphSettingCommandParams);
+        stateChange$.next({ lineSpacing: v });
     };
-    return [lineSpacing, lineSpacingSet] as const;
+
+    const spacingRuleSet = async (v: SpacingRule) => {
+        if (v !== spacingRule) {
+            let cache = lineSpacingCache.current;
+            if (v === SpacingRule.AT_LEAST) {
+                const glyphNode = skeleton?.findNodeByCharIndex(paragraph[0].startIndex);
+                const divideNode = glyphNode?.parent;
+                const lineNode = divideNode?.parent;
+                if (lineNode?.contentHeight !== undefined) {
+                    cache = Math.max(lineNode.contentHeight, cache);
+                }
+            }
+            lineSpacingCache.current = lineSpacing;
+            lineSpacingSet(cache);
+            _spacingRuleSet(v);
+            stateChange$.next({ spacingRule: v });
+        }
+    };
+
+    useEffect(() => {
+        const dispose = stateChange$.pipe(filter((obj) => !!Object.keys(obj).length), bufferTime(16), filter((list) => !!list.length), map((list) => {
+            return list.reduce((a, b) => {
+                Object.keys(b).forEach((key) => {
+                    a[key as 'spacingRule'] = b[key as 'spacingRule'];
+                });
+                return a;
+            }, {} as { spacingRule?: SpacingRule; lineSpacing?: number });
+        })).subscribe((v) => {
+            return commandService.executeCommand(DocParagraphSettingCommand.id, {
+                paragraph: { ...v },
+            } as IDocParagraphSettingCommandParams);
+        });
+        return () => dispose.unsubscribe();
+    }, []);
+
+    return {
+        lineSpacing: [lineSpacing, lineSpacingSet] as const,
+        spacingRule: [spacingRule, spacingRuleSet] as const,
+
+    };
 };

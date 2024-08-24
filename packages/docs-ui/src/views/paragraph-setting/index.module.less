@@ -8,6 +8,7 @@
         justify-content: space-between;
         border: 1px solid var(---Grey-200, #e5e5e5);
         border-radius: var(--radius-m, 6px);
+
         &-item {
             padding: 4px 14px;
             border-radius: 4px;
@@ -16,32 +17,44 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
+
             &:hover {
                 background: var(--black-6, rgba(30, 34, 43, 0.06));
             }
         }
+
         &-item&-active {
             background: var(--black-9, rgba(30, 34, 43, 0.09));
         }
     }
+
     &-title {
         margin-top: var(--margin-base);
         font-size: 13px;
         color: #1e222b;
         font-weight: 500;
     }
+
     &-label {
         font-size: 12px;
         margin-top: var(--margin-sm);
         color: #1e222b;
         font-weight: 400;
     }
+
     &-mt-base {
         margin-top: var(--margin-base);
     }
+
     &-flex-col {
         display: flex;
         justify-content: space-between;
         align-items: center;
+    }
+
+    &-space-line {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
     }
 }

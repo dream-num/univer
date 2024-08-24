@@ -15,7 +15,7 @@
  */
 
 export { getCustomRangesInterestsWithRange } from './basics/custom-range';
-export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';
+export { getParagraphsInRange, getParagraphsInRanges, findNearestSectionBreak } from './commands/commands/list.command';
 export { replaceSelectionFactory } from './basics/replace';
 export { makeSelection, getSelectionText, getDeleteSelection, getInsertSelection, isSegmentIntersects } from './basics/selection';
 export { hasParagraphInTable } from './basics/paragraph';

@@ -1329,6 +1329,22 @@ export class StringValueObject extends BaseValueObject {
         return StringValueObject.create(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
+    override plus(valueObject: BaseValueObject): BaseValueObject {
+        return this.convertToNumberObjectValue().plus(valueObject);
+    }
+
+    override minus(valueObject: BaseValueObject): BaseValueObject {
+        return this.convertToNumberObjectValue().minus(valueObject);
+    }
+
+    override multiply(valueObject: BaseValueObject): BaseValueObject {
+        return this.convertToNumberObjectValue().multiply(valueObject);
+    }
+
+    override divided(valueObject: BaseValueObject): BaseValueObject {
+        return this.convertToNumberObjectValue().divided(valueObject);
+    }
+
     override compare(valueObject: BaseValueObject, operator: compareToken, isCaseSensitive?: boolean): BaseValueObject {
         if (valueObject.isArray()) {
             // const o = valueObject.getReciprocal();

@@ -781,8 +781,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'giá trị ban đầu của tài sản', detail: 'Giá trị ban đầu của tài sản.' },
+            salvage: { name: 'giá trị còn lại của tài sản', detail: 'Giá trị khi kết thúc khấu hao (đôi khi được gọi là giá trị thu hồi của tài sản).' },
+            life: { name: 'thời gian sử dụng tài sản', detail: 'Số thời gian khấu hao của một tài sản (đôi khi còn được gọi là thời gian sử dụng hữu ích của tài sản).' },
+            per: { name: 'thời kỳ', detail: 'Chu kỳ và phải sử dụng cùng đơn vị với cuộc sống.' },
         },
     },
     TBILLEQ: {
@@ -795,8 +797,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán trái phiếu kho bạc.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của trái phiếu kho bạc.' },
+            discount: { name: 'lãi suất chiết', detail: 'Lãi suất chiết khấu của trái phiếu kho bạc.' },
         },
     },
     TBILLPRICE: {
@@ -809,8 +812,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán trái phiếu kho bạc.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của trái phiếu kho bạc.' },
+            discount: { name: 'lãi suất chiết', detail: 'Lãi suất chiết khấu của trái phiếu kho bạc.' },
         },
     },
     TBILLYIELD: {
@@ -823,8 +827,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán trái phiếu kho bạc.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của trái phiếu kho bạc.' },
+            pr: { name: 'giá', detail: 'Giá trái phiếu kho bạc tính theo mệnh giá 100 đô la.' },
         },
     },
     VDB: {

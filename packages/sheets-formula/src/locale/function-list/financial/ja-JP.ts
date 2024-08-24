@@ -781,8 +781,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格 (資産の救済価額) を指定します。' },
+            life: { name: '耐用年数', detail: '資産を使用できる年数、つまり償却の対象となる資産の寿命年数を指定します。' },
+            per: { name: '期間', detail: '期間 と は、有効期間と同じ単位を使用する必要があります。' },
         },
     },
     TBILLEQ: {
@@ -795,8 +797,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '財務省証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '財務省証券の満期日を指定します。' },
+            discount: { name: '割引率', detail: '財務省証券の割引率を指定します。' },
         },
     },
     TBILLPRICE: {
@@ -809,8 +812,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '財務省証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '財務省証券の満期日を指定します。' },
+            discount: { name: '割引率', detail: '財務省証券の割引率を指定します。' },
         },
     },
     TBILLYIELD: {
@@ -823,8 +827,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '財務省証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '財務省証券の満期日を指定します。' },
+            pr: { name: '価値', detail: '額面 $100 に対する財務省証券の価値を指定します。' },
         },
     },
     VDB: {

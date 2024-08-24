@@ -781,8 +781,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '资产原值', detail: '资产原值。' },
+            salvage: { name: '资产残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '资产使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
+            per: { name: '期间', detail: '期间。' },
         },
     },
     TBILLEQ: {
@@ -795,8 +797,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '国库券的结算日。' },
+            maturity: { name: '到期日', detail: '国库券的到期日。' },
+            discount: { name: '贴现率', detail: '国库券的贴现率。' },
         },
     },
     TBILLPRICE: {
@@ -809,8 +812,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '国库券的结算日。' },
+            maturity: { name: '到期日', detail: '国库券的到期日。' },
+            discount: { name: '贴现率', detail: '国库券的贴现率。' },
         },
     },
     TBILLYIELD: {
@@ -823,8 +827,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '国库券的结算日。' },
+            maturity: { name: '到期日', detail: '国库券的到期日。' },
+            pr: { name: '价格', detail: '面值 ￥100 的国库券的价格。' },
         },
     },
     VDB: {

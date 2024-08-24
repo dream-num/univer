@@ -59,6 +59,10 @@ import { Rate } from './rate';
 import { Received } from './received';
 import { Rri } from './rri';
 import { Sln } from './sln';
+import { Syd } from './syd';
+import { Tbilleq } from './tbilleq';
+import { Tbillprice } from './tbillprice';
+import { Tbillyield } from './tbillyield';
 import { Xirr } from './xirr';
 
 export const functionFinancial = [
@@ -106,5 +110,9 @@ export const functionFinancial = [
     [Received, FUNCTION_NAMES_FINANCIAL.RECEIVED],
     [Rri, FUNCTION_NAMES_FINANCIAL.RRI],
     [Sln, FUNCTION_NAMES_FINANCIAL.SLN],
+    [Syd, FUNCTION_NAMES_FINANCIAL.SYD],
+    [Tbilleq, FUNCTION_NAMES_FINANCIAL.TBILLEQ],
+    [Tbillprice, FUNCTION_NAMES_FINANCIAL.TBILLPRICE],
+    [Tbillyield, FUNCTION_NAMES_FINANCIAL.TBILLYIELD],
     [Xirr, FUNCTION_NAMES_FINANCIAL.XIRR],
 ];

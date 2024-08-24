@@ -20,3 +20,4 @@ export { FRange } from './apis/sheets/f-range';
 export { FSelection } from './apis/sheets/f-selection';
 export { FWorkbook } from './apis/sheets/f-workbook';
 export { FWorksheet } from './apis/sheets/f-worksheet';
+export { FFilter } from './apis/sheets/f-filter';

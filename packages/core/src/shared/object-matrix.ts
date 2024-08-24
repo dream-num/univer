@@ -348,7 +348,7 @@ export class ObjectMatrix<T> {
      * @param column
      * @returns {T|undefined} if not exist, return undefined.
      */
-    getValue(row: number, column: number): T {
+    getValue(row: number, column: number): T | undefined {
         return this._matrix?.[row]?.[column];
     }
 

@@ -989,7 +989,7 @@ export class Documents extends DocComponent {
         } else if (verticalAlign === VerticalAlign.TOP) {
             offsetTop = pagePaddingTop;
         } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
-            offsetTop = this.height - pageHeight - pagePaddingBottom;
+            offsetTop = this.height - pageHeight - pagePaddingBottom - 1;
         }
 
         return offsetTop;

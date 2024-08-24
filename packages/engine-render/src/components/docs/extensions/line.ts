@@ -52,7 +52,7 @@ export class Line extends docExtension {
         const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset, bbl: bottomBorderLine } = textStyle;
 
         if (underline) {
-            const startY = asc + dsc;
+            const startY = asc + dsc - 1;
             this._drawLine(ctx, glyph, underline, startY, scale);
         }
 

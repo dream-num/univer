@@ -180,7 +180,7 @@ export class DocumentViewModel implements IDisposable {
 
     constructor(private _documentDataModel: DocumentDataModel) {
         if (_documentDataModel.getBody() == null) {
-            return;
+            return; // What!! That's too tricky!
         }
 
         this.children = parseDataStreamToTree(_documentDataModel.getBody()!.dataStream);

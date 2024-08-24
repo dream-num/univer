@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable } from '@univerjs/core';
+import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable, Worksheet } from '@univerjs/core';
 import {
     HorizontalAlign,
     isCellV,
     isFormulaString,
     isICellData,
     ObjectMatrix,
+    RANGE_TYPE,
     Tools,
     VerticalAlign,
 } from '@univerjs/core';
@@ -149,4 +150,24 @@ export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange): boolean
         && mergeInfo.endColumn === range.endColumn
         && mergeInfo.startRow === range.startRow
         && mergeInfo.endRow === range.endRow;
+}
+
+export function covertToRowRange(range: IRange, worksheet: Worksheet): IRange {
+    return {
+        startRow: range.startRow,
+        endRow: range.endRow,
+        startColumn: 0,
+        endColumn: worksheet.getColumnCount() - 1,
+        rangeType: RANGE_TYPE.ROW,
+    };
+}
+
+export function covertToColRange(range: IRange, worksheet: Worksheet): IRange {
+    return {
+        startRow: 0,
+        endRow: worksheet.getRowCount() - 1,
+        startColumn: range.startColumn,
+        endColumn: range.endColumn,
+        rangeType: RANGE_TYPE.COLUMN,
+    };
 }

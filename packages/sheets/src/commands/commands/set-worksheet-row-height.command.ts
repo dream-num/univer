@@ -189,6 +189,7 @@ export const DeltaRowHeightCommand: ICommand = {
 };
 
 export interface ISetRowHeightCommandParams {
+    ranges?: IRange[];
     value: number;
 }
 export const SetRowHeightCommand: ICommand = {
@@ -202,7 +203,8 @@ export const SetRowHeightCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        // user can specify the ranges to set row height, if not, use the current selection
+        const selections = params?.ranges ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
         }

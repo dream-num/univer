@@ -278,7 +278,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                 ...cell?.interceptorStyle,
                                 ...extra.interceptorStyle,
                             },
-                            get interceptorAutoHeight() {
+                            interceptorAutoHeight: () => {
                                 const mergeCell = skeleton.mergeData.find((range) => {
                                     const { startColumn, startRow, endColumn, endRow } = range;
                                     return row >= startRow && col >= startColumn && row <= endRow && col <= endColumn;
@@ -484,7 +484,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                                 ...cell?.interceptorStyle,
                                 ...extra.interceptorStyle,
                             },
-                            get interceptorAutoHeight() {
+                            interceptorAutoHeight: () => {
                                 const mergeCell = skeleton.mergeData.find((range) => {
                                     const { startColumn, startRow, endColumn, endRow } = range;
                                     return row >= startRow && col >= startColumn && row <= endRow && col <= endColumn;

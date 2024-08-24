@@ -488,8 +488,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
             const cell = worksheet.getCell(rowNum, i);
             if (cell?.interceptorAutoHeight) {
-                height = Math.max(height, cell.interceptorAutoHeight);
-                continue;
+                const cellHeight = cell.interceptorAutoHeight();
+                if (cellHeight) {
+                    height = Math.max(height, cellHeight);
+                    continue;
+                }
             }
 
             const modelObject = cell && this._getCellDocumentModel(cell);

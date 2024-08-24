@@ -238,7 +238,7 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     dataValidation?: Nullable<ICellValidationData>;
     markers?: ICellMarks;
     customRender?: Nullable<ICellCustomRender[]>;
-    interceptorAutoHeight?: number;
+    interceptorAutoHeight?: () => number | undefined;
     /**
      * can cell be covered when sibling is overflow
      */

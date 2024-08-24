@@ -19,7 +19,7 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { BaseFunction } from '../../base-function';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
-import { Complex as COMPLEX } from '../../../basics/engineering';
+import { Complex as COMPLEX } from '../../../basics/complex';
 
 export class Complex extends BaseFunction {
     override minParams = 2;

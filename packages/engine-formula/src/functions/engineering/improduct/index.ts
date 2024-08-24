@@ -20,7 +20,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
-import { Complex } from '../../../basics/engineering';
+import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 

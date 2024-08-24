@@ -20,7 +20,7 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { BaseFunction } from '../../base-function';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
-import { Complex } from '../../../basics/engineering';
+import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
 
 export class Imlog2 extends BaseFunction {

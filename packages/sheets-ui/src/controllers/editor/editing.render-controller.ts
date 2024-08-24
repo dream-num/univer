@@ -31,6 +31,7 @@ import {
     Inject,
     IResourceLoaderService,
     isFormulaString,
+    isRealNum,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
@@ -1068,6 +1069,14 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.FORCE_STRING;
+    } else if (isRealNum(newDataStream)) {
+        // If it can be converted to a number and is not forced to be a string, then the style cannot be set.
+        cellData.v = newDataStream;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+        cellData.s = null;
+        cellData.t = CellValueType.NUMBER;
     } else if (isRichText(body)) {
         if (body.dataStream === '\r\n') {
             cellData.v = '';
@@ -1089,6 +1098,7 @@ export function getCellDataByInput(
         cellData.f = null;
         cellData.si = null;
         cellData.p = null;
+        // If the style length in textRun.ts is equal to the content length, it should be set as the cell style
         const style = getCellStyleBySnapshot(snapshot);
         if (style) {
             cellData.s = style;

@@ -103,7 +103,7 @@ export function Sidebar() {
                     </a>
                 </header>
 
-                <section className={styles.sidebarBody}>{options?.children}</section>
+                <section className={styles.sidebarBody} style={options?.bodyStyle}>{options?.children}</section>
 
                 {options?.footer && <footer className={styles.sidebarFooter}>{options.footer}</footer>}
             </section>

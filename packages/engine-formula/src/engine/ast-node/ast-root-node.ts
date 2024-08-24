@@ -29,6 +29,12 @@ export class AstRootNode extends BaseAstNode {
 
     override execute() {
         const children = this.getChildren();
+
+        if (children.length > 1) {
+            this.setValue(ErrorValueObject.create(ErrorType.VALUE));
+            return;
+        }
+
         const node = children[0];
         // if (node.nodeType === NodeType.FUNCTION) {
         //     await node.executeAsync(interpreterCalculateProps);

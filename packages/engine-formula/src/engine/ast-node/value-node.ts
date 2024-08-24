@@ -28,21 +28,21 @@ export class ValueNode extends BaseAstNode {
         super(_operatorString);
     }
 
-    override get nodeType() {
+    override get nodeType(): NodeType {
         return NodeType.VALUE;
     }
 
-    override execute() {
+    override execute(): void {
         this.setValue(ValueObjectFactory.create(this._operatorString));
     }
 }
 
 export class ValueNodeFactory extends BaseAstNodeFactory {
-    override get zIndex() {
+    override get zIndex(): number {
         return NODE_ORDER_MAP.get(NodeType.VALUE) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
     }
 
-    _checkValueNode(token: string) {
+    _checkValueNode(token: string): BaseAstNode | undefined {
         if (Number.isNaN(Number(token))) {
             const tokenTrim = token.trim();
             const startToken = tokenTrim.charAt(0);
@@ -72,7 +72,7 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
         return new ValueNode(param);
     }
 
-    override checkAndCreateNodeType(param: LexerNode | string) {
+    override checkAndCreateNodeType(param: LexerNode | string): BaseAstNode | undefined {
         if (param instanceof LexerNode) {
             return;
         }

@@ -23,6 +23,7 @@ import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { RangeProtectionPermissionViewPoint, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { type IOpenFilterPanelOperationParams, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
+import { SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
 
 export interface IUniverSheetsFilterUIConfig {
     menu: MenuConfig;
@@ -51,6 +52,15 @@ export class SheetsFilterPermissionController extends Disposable {
     private _commandExecutedListener() {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SmartToggleSheetsFilterCommand.id) {
+                    const permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithoutRange({
+                        rangeTypes: [RangeProtectionPermissionViewPoint],
+                        worksheetTypes: [WorksheetViewPermission, WorksheetFilterPermission],
+                    });
+                    if (!permission) {
+                        this._sheetPermissionInterceptorBaseController.haveNotPermissionHandle(this._localeService.t('permission.dialog.filterErr'));
+                    }
+                }
                 if (command.id === OpenFilterPanelOperation.id) {
                     const params = command.params as IOpenFilterPanelOperationParams;
                     const { unitId, subUnitId } = params;

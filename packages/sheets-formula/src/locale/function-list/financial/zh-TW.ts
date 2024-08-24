@@ -766,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '資產原始成本', detail: '這是資產的原始成本。' },
+            salvage: { name: '資產殘餘價值', detail: '這是折舊最後的值 (有時稱為資產的殘餘價值)。' },
+            life: { name: '資產使用年限', detail: '這是固定資產折舊的期數 (有時稱為固定資產的使用年限)。' },
         },
     },
     SYD: {

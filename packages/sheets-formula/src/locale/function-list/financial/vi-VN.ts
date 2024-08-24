@@ -766,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'giá trị ban đầu của tài sản', detail: 'Giá trị ban đầu của tài sản.' },
+            salvage: { name: 'giá trị còn lại của tài sản', detail: 'Giá trị khi kết thúc khấu hao (đôi khi được gọi là giá trị thu hồi của tài sản).' },
+            life: { name: 'thời gian sử dụng tài sản', detail: 'Số thời gian khấu hao của một tài sản (đôi khi còn được gọi là thời gian sử dụng hữu ích của tài sản).' },
         },
     },
     SYD: {

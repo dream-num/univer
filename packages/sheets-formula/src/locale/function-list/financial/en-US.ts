@@ -766,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The initial cost of the asset.' },
+            salvage: { name: 'salvage', detail: 'The value at the end of the depreciation (sometimes called the salvage value of the asset).' },
+            life: { name: 'life', detail: 'The number of periods over which the asset is depreciated (sometimes called the useful life of the asset).' },
         },
     },
     SYD: {

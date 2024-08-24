@@ -766,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '资产原值', detail: '资产原值。' },
+            salvage: { name: '资产残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '资产使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
         },
     },
     SYD: {

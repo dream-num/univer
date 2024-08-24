@@ -58,6 +58,7 @@ import { Pv } from './pv';
 import { Rate } from './rate';
 import { Received } from './received';
 import { Rri } from './rri';
+import { Sln } from './sln';
 import { Xirr } from './xirr';
 
 export const functionFinancial = [
@@ -104,5 +105,6 @@ export const functionFinancial = [
     [Rate, FUNCTION_NAMES_FINANCIAL.RATE],
     [Received, FUNCTION_NAMES_FINANCIAL.RECEIVED],
     [Rri, FUNCTION_NAMES_FINANCIAL.RRI],
+    [Sln, FUNCTION_NAMES_FINANCIAL.SLN],
     [Xirr, FUNCTION_NAMES_FINANCIAL.XIRR],
 ];

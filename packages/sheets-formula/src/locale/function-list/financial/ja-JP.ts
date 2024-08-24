@@ -766,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格 (資産の救済価額) を指定します。' },
+            life: { name: '耐用年数', detail: '資産を使用できる年数、つまり償却の対象となる資産の寿命年数を指定します。' },
         },
     },
     SYD: {

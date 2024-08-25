@@ -20,3 +20,5 @@ export { FRange } from './apis/sheets/f-range';
 export { FSelection } from './apis/sheets/f-selection';
 export { FWorkbook } from './apis/sheets/f-workbook';
 export { FWorksheet } from './apis/sheets/f-worksheet';
+export { FDataValidation } from './apis/sheets/f-data-validation';
+export { FDataValidationBuilder } from './apis/sheets/f-data-validation-builder';

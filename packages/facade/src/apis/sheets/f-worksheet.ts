@@ -40,6 +40,22 @@ export class FWorksheet {
     }
 
     /**
+     * Returns the injector
+     * @returns The injector
+     */
+    getInject(): Injector {
+        return this._injector;
+    }
+
+    /**
+     * Returns the workbook
+     * @returns The workbook
+     */
+    getWorkbook(): Workbook {
+        return this._workbook;
+    }
+
+    /**
      * Returns the worksheet id
      * @returns The id of the worksheet
      */

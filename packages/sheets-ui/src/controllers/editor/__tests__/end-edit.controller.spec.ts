@@ -149,7 +149,7 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: '2', t: CellValueType.NUMBER, s: null, f: null, si: null, p: null });
+            expect(cellData).toEqual({ v: '2', t: CellValueType.NUMBER, f: null, si: null, p: null });
         });
         it('Rich text cell', () => {
             const cell = {
@@ -366,7 +366,8 @@ describe('Test EndEditController', () => {
                 ],
             };
             const res = getCellDataByInputCell({}, { p: dataStreamOnlyHaveNumber });
-            expect(res?.s).toBe(null);
+            // Because the previous cell had no style, and the value set now can be converted to a number, the style set this time is not retained.
+            expect(res?.s).toBeUndefined();
 
             const dataStreamHaveString = {
                 id: '__INTERNAL_EDITOR__DOCS_NORMAL',

@@ -31,10 +31,10 @@ import {
     Inject,
     IResourceLoaderService,
     isFormulaString,
-    isRealNum,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    numfmt,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -1069,13 +1069,12 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.FORCE_STRING;
-    } else if (isRealNum(newDataStream)) {
-        // If it can be converted to a number and is not forced to be a string, then the style cannot be set.
+    } else if (numfmt.parseValue(newDataStream)) {
+        // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
         cellData.v = newDataStream;
         cellData.f = null;
         cellData.si = null;
         cellData.p = null;
-        cellData.s = null;
         cellData.t = CellValueType.NUMBER;
     } else if (isRichText(body)) {
         if (body.dataStream === '\r\n') {

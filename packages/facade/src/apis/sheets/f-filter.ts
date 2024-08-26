@@ -37,6 +37,14 @@ export class FFilter {
     }
 
     /**
+     * Get the filtered out rows by this filter.
+     * @returns {number[]} Filtered out rows by this filter.
+     */
+    getFilteredOutRows(): number[] {
+        return Array.from(this._filterModel.filteredOutRows).sort();
+    }
+
+    /**
      * Get the filter criteria of a column.
      * @param {number} col The column number.
      * @returns {Nullable<IFilterColumn>} The filter criteria of the column.

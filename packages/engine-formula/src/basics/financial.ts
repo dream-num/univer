@@ -15,7 +15,7 @@
  */
 
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
-import { excelDateSerial, excelSerialToDate, getDaysInMonth, getTwoDateDaysByBasis } from './date';
+import { dateAddMonths, excelDateSerial, excelSerialToDate, getDaysInMonth, getTwoDateDaysByBasis, lastDayOfMonth } from './date';
 import { ErrorType } from './error-type';
 
 export function calculateCoupdaybs(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number, basis: number): number {
@@ -32,8 +32,8 @@ export function calculateCoupdays(settlementSerialNumber: number, maturitySerial
     if (basis === 1) {
         const beforeSettlementDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequency);
 
-        const coupDate = excelSerialToDate(beforeSettlementDateSerialNumber);
-        coupDate.setUTCMonth(coupDate.getUTCMonth() + 12 / frequency);
+        let coupDate = excelSerialToDate(beforeSettlementDateSerialNumber);
+        coupDate = dateAddMonths(coupDate, 12 / frequency);
 
         const afterSettlementDateSerialNumber = excelDateSerial(coupDate);
 
@@ -54,7 +54,7 @@ export function calculateCoupdays(settlementSerialNumber: number, maturitySerial
 
 export function calculateCoupncd(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number): number {
     const settlementDate = excelSerialToDate(settlementSerialNumber);
-    const coupDate = excelSerialToDate(maturitySerialNumber);
+    let coupDate = excelSerialToDate(maturitySerialNumber);
 
     coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
 
@@ -62,12 +62,11 @@ export function calculateCoupncd(settlementSerialNumber: number, maturitySerialN
         coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
     }
 
-    // eslint-disable-next-line
     while (coupDate > settlementDate) {
-        coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequency);
+        coupDate = dateAddMonths(coupDate, -12 / frequency);
     }
 
-    coupDate.setUTCMonth(coupDate.getUTCMonth() + 12 / frequency);
+    coupDate = dateAddMonths(coupDate, 12 / frequency);
 
     const coupDateSerialNumber = excelDateSerial(coupDate);
 
@@ -78,11 +77,10 @@ export function calculateCoupnum(settlementSerialNumber: number, maturitySerialN
     let result = 0;
 
     const settlementDate = excelSerialToDate(settlementSerialNumber);
-    const coupDate = excelSerialToDate(maturitySerialNumber);
+    let coupDate = excelSerialToDate(maturitySerialNumber);
 
-    // eslint-disable-next-line
     while (coupDate > settlementDate) {
-        coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequency);
+        coupDate = dateAddMonths(coupDate, -12 / frequency);
         result++;
     }
 
@@ -91,7 +89,7 @@ export function calculateCoupnum(settlementSerialNumber: number, maturitySerialN
 
 export function calculateCouppcd(settlementSerialNumber: number, maturitySerialNumber: number, frequency: number): number {
     const settlementDate = excelSerialToDate(settlementSerialNumber);
-    const coupDate = excelSerialToDate(maturitySerialNumber);
+    let coupDate = excelSerialToDate(maturitySerialNumber);
 
     coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
 
@@ -99,17 +97,11 @@ export function calculateCouppcd(settlementSerialNumber: number, maturitySerialN
         coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
     }
 
-    // eslint-disable-next-line
     while (coupDate > settlementDate) {
-        coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequency);
+        coupDate = dateAddMonths(coupDate, -12 / frequency);
     }
 
-    let coupDateSerialNumber = excelDateSerial(coupDate);
-
-    // special handle for excel
-    if (coupDateSerialNumber < 0) {
-        coupDateSerialNumber = 0;
-    }
+    const coupDateSerialNumber = excelDateSerial(coupDate);
 
     return coupDateSerialNumber;
 }
@@ -365,14 +357,9 @@ function getPositiveDaysBetween(startDateSerialNumber: number, endDateSerialNumb
     return startDateSerialNumber < endDateSerialNumber ? days : 0;
 }
 
-function lastDayOfMonth(year: number, month: number, day: number): boolean {
-    return getDaysInMonth(year, month) === day;
-}
-
-function getDateSerialNumberByMonths(serialNumber: number, months: number, returnLastDay: boolean): number {
-    const date = excelSerialToDate(serialNumber);
-
-    date.setUTCMonth(date.getUTCMonth() + months);
+export function getDateSerialNumberByMonths(serialNumber: number, months: number, returnLastDay: boolean): number {
+    let date = excelSerialToDate(serialNumber);
+    date = dateAddMonths(date, months);
 
     if (returnLastDay) {
         const year = date.getUTCFullYear();

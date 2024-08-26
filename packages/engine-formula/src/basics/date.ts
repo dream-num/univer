@@ -537,3 +537,26 @@ export function getNormalYearDaysByBasis(dateSerialNumber: number, basis: number
             return -1;
     }
 }
+
+export function lastDayOfMonth(year: number, month: number, day: number): boolean {
+    return getDaysInMonth(year, month) === day;
+}
+
+export function dateAddMonths(date: Date, months: number): Date {
+    let year = date.getUTCFullYear();
+    let month = date.getUTCMonth();
+    const day = date.getUTCDate();
+
+    if (lastDayOfMonth(year, month, day)) {
+        date.setUTCDate(1);
+        date.setUTCMonth(date.getUTCMonth() + months);
+
+        year = date.getUTCFullYear();
+        month = date.getUTCMonth();
+        date.setUTCDate(getDaysInMonth(year, month));
+    } else {
+        date.setUTCMonth(date.getUTCMonth() + months);
+    }
+
+    return date;
+}

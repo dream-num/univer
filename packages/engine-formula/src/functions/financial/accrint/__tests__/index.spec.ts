@@ -40,7 +40,7 @@ describe('Test accrint function', () => {
 
             const basis = NumberValueObject.create(1);
             result = testFunction.calculate(issue, firstInterest, settlement, rate, par, frequency, basis);
-            expect(result.getValue()).toStrictEqual(16.939890710382514);
+            expect(result.getValue()).toStrictEqual(16.847826086956523);
         });
 
         it('value is normal, endDate < startDate', () => {

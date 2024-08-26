@@ -66,7 +66,12 @@ export class Couppcd extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue);
+        let result = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue);
+
+        // special handle for excel
+        if (result < 0) {
+            result = 0;
+        }
 
         return NumberValueObject.create(result);
     }

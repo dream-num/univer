@@ -392,7 +392,7 @@ export class SheetClipboardController extends RxDisposable {
                         id: SetWorksheetRowHeightMutation.id,
                         params: {
                             ...setRowPropertyMutation,
-                            rowHeight: 20,
+                            rowHeight: originRowHeight,
                         },
                     });
                 }

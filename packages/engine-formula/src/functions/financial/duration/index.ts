@@ -81,6 +81,11 @@ export class Duration extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
+        // Special handle for excel (1900)
+        if (settlementSerialNumber <= 0 || maturitySerialNumber <= 366) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
         const result = calculateDuration(settlementSerialNumber, maturitySerialNumber, couponValue, yldValue, frequencyValue, basisValue);
 
         return NumberValueObject.create(result);

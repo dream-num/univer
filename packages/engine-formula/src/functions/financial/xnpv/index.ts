@@ -140,19 +140,21 @@ export class Xnpv extends BaseFunction {
             let errorObejct = ErrorValueObject.create(ErrorType.VALUE);
 
             (values as ArrayValueObject).iterator((valuesObject) => {
-                if (valuesObject?.isError()) {
+                const _valuesObject = valuesObject as BaseValueObject;
+
+                if (_valuesObject.isError()) {
                     isError = true;
-                    errorObejct = valuesObject as ErrorValueObject;
+                    errorObejct = _valuesObject as ErrorValueObject;
                     return false;
                 }
 
-                if (valuesObject?.isBoolean()) {
+                if (_valuesObject.isBoolean()) {
                     isError = true;
                     errorObejct = ErrorValueObject.create(ErrorType.VALUE);
                     return false;
                 }
 
-                const value = +(valuesObject as BaseValueObject).getValue();
+                const value = +_valuesObject.getValue();
 
                 if (Number.isNaN(value)) {
                     isError = true;

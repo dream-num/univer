@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { calculateNpv } from '../../../basics/financial';
 
 interface INumberValues {
     numberValues: number[];
@@ -89,6 +87,10 @@ export class Mirr extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
+            if (reinvestRateValue === -1) {
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            }
+
             const result = this._getResult(numberValues, financeRateValue, reinvestRateValue);
 
             if (rowIndex === 0 && columnIndex === 0) {
@@ -146,31 +148,33 @@ export class Mirr extends BaseFunction {
         let negative = false;
 
         (values as ArrayValueObject).iterator((valueOject) => {
-            if (valueOject?.isError()) {
+            const _valueOject = valueOject as BaseValueObject;
+
+            if (_valueOject.isError()) {
                 valuesHasError = true;
-                errorObject = valueOject as ErrorValueObject;
+                errorObject = _valueOject as ErrorValueObject;
                 return false;
             }
 
-            if (valueOject?.isNull() || valueOject?.isBoolean()) {
+            if (_valueOject.isNull() || _valueOject.isBoolean()) {
                 return true;
             }
 
-            const value = valueOject?.getValue();
+            const value = +_valueOject.getValue();
 
-            if (!value || !isRealNum(value)) {
+            if (Number.isNaN(value)) {
                 return true;
             }
 
-            if (+value > 0) {
+            if (value > 0) {
                 positive = true;
             }
 
-            if (+value < 0) {
+            if (value < 0) {
                 negative = true;
             }
 
-            numberValues.push(+value);
+            numberValues.push(value);
         });
 
         return {
@@ -184,21 +188,37 @@ export class Mirr extends BaseFunction {
 
     private _getResult(values: number[], financeRate: number, reinvestRate: number): number {
         const n = values.length;
-
         const negatives = [];
         const positives = [];
 
         for (let i = 0; i < n; i++) {
-            if (values[i] < 0) {
-                negatives.push(values[i]);
-            } else {
+            if (values[i] > 0) {
                 positives.push(values[i]);
+            } else if (values[i] < 0) {
+                negatives.push(values[i]);
             }
         }
 
-        const num = -calculateNpv(reinvestRate, positives) * ((1 + reinvestRate) ** (n - 1));
-        const den = calculateNpv(financeRate, negatives) * (1 + financeRate);
+        const npvR = this._npv(reinvestRate, values, 'positive');
+        const npvF = this._npv(financeRate, values, 'negative');
+        const num = -npvR * ((1 + reinvestRate) ** n);
+        const den = npvF * (1 + financeRate);
+        const result = (num / den) ** (1 / (n - 1)) - 1;
 
-        return (num / den) ** (1 / (n - 1)) - 1;
+        return result;
+    }
+
+    private _npv(rate: number, values: number[], type: 'positive' | 'negative'): number {
+        let res = 0;
+
+        for (let i = 1; i <= values.length; i++) {
+            const value = values[i - 1];
+
+            if ((type === 'positive' && value > 0) || (type === 'negative' && value < 0)) {
+                res += value / ((1 + rate) ** i);
+            }
+        }
+
+        return res;
     }
 }

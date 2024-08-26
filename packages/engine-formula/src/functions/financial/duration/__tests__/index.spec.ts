@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Duration } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
@@ -41,6 +41,17 @@ describe('Test duration function', () => {
         it('Value is normal, settlement >= maturity', () => {
             const settlement = StringValueObject.create('2048-1-1');
             const maturity = StringValueObject.create('2018-7-1');
+            const coupon = NumberValueObject.create(0.08);
+            const yld = NumberValueObject.create(0.09);
+            const frequency = NumberValueObject.create(2);
+            const basis = NumberValueObject.create(1);
+            const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
+            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+        });
+
+        it('Value is normal, settlement <= 0 || maturity <= 366', () => {
+            const settlement = NumberValueObject.create(0);
+            const maturity = StringValueObject.create('2048-1-1');
             const coupon = NumberValueObject.create(0.08);
             const yld = NumberValueObject.create(0.09);
             const frequency = NumberValueObject.create(2);
@@ -115,6 +126,10 @@ describe('Test duration function', () => {
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis5);
             expect(result5.getValue()).toStrictEqual(10.919145281591927);
+
+            const basis6 = NullValueObject.create();
+            const result6 = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis6);
+            expect(result6.getValue()).toStrictEqual(10.919145281591927);
         });
 
         it('Value is error', () => {
@@ -148,6 +163,15 @@ describe('Test duration function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const settlement2 = StringValueObject.create('2018-7-1');
+            const maturity2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(settlement2, maturity2, coupon, yld, frequency, basis);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const coupon2 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(settlement2, maturity, coupon2, yld, frequency, basis);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is array', () => {

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -111,22 +110,24 @@ export class Irr extends BaseFunction {
         let valuesHasError = false;
 
         (values as ArrayValueObject).iterator((valueOject) => {
-            if (valueOject?.isError()) {
+            const _valueOject = valueOject as BaseValueObject;
+
+            if (_valueOject.isError()) {
                 valuesHasError = true;
                 return false;
             }
 
-            if (valueOject?.isNull() || valueOject?.isBoolean()) {
+            if (_valueOject.isNull() || _valueOject.isBoolean()) {
                 return true;
             }
 
-            const value = valueOject?.getValue();
+            const value = +_valueOject.getValue();
 
-            if (!value || !isRealNum(value)) {
+            if (Number.isNaN(value)) {
                 return true;
             }
 
-            _values.push(+value);
+            _values.push(value);
         });
 
         return {

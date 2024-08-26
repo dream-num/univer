@@ -1112,8 +1112,16 @@ export function isRichText(body: IDocumentBody): boolean {
 
     const bodyNoLineBreak = body.dataStream.replace('\r\n', '');
 
+    // Some styles are unique to rich text. When this style appears, we consider the value to be rich text.
+    const richTextStyle = ['va'];
+
     return (
-        textRuns.some((textRun) => textRun.ts && (textRun.ed - textRun.st < bodyNoLineBreak.length)) ||
+        textRuns.some((textRun) => {
+            const hasRichTextStyle = Boolean(textRun.ts && Object.keys(textRun.ts).some((property) => {
+                return richTextStyle.includes(property);
+            }));
+            return hasRichTextStyle || (textRun.ts && (textRun.ed - textRun.st < bodyNoLineBreak.length));
+        }) ||
         paragraphs.some((paragraph) => paragraph.bullet) ||
         paragraphs.length >= 2 ||
         Boolean(customRanges?.length) ||

@@ -193,7 +193,7 @@ export const SetWorksheetRowIsAutoHeightMutation: IMutation<ISetWorksheetRowIsAu
                 if (typeof autoHeightInfo === 'number') {
                     row.ia = autoHeightInfo;
                 } else {
-                    row.ia = autoHeightInfo[rowIndex - startRow] ?? defaultRowIsAutoHeight;
+                    row.ia = autoHeightInfo[rowIndex] ?? defaultRowIsAutoHeight; // Start from startRow, same as SetWorksheetRowHeightMutation
                 }
             }
         }

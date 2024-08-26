@@ -15,8 +15,7 @@
  */
 
 import type { IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { Direction, ICommandService, Inject, Injector, RANGE_TYPE } from '@univerjs/core';
 
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
@@ -385,8 +384,8 @@ export class FWorksheet {
      * @param height The height in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    setRowHeight(rowPosition: number, height: number): FWorksheet {
-        return this;
+    async setRowHeight(rowPosition: number, height: number): Promise<FWorksheet> {
+        return this.setRowHeights(rowPosition, 1, height);
     }
 
     /**
@@ -397,29 +396,24 @@ export class FWorksheet {
      * @returns This sheet, for chaining.
      */
     async setRowHeights(startRow: number, numRows: number, height: number): Promise<FWorksheet> {
-        // const unitId = this._workbook.getUnitId();
-        // const subUnitId = this._worksheet.getSheetId();
-        // const ranges = [
-        //     {
-        //         startRow,
-        //         endRow: startRow + numRows - 1,
-        //         startColumn: 0,
-        //         endColumn: this._worksheet.getColumnCount() - 1,
-        //     },
-        // ];
-        this._commandService.syncExecuteCommand(SetWorksheetRowHeightMutation.id, {
-            unitId: this._workbook.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            ranges: [
-                {
-                    startRow,
-                    endRow: startRow + numRows - 1,
-                    startColumn: 0,
-                    endColumn: this._worksheet.getColumnCount() - 1,
-                },
-            ],
-            rowHeight: height,
-        } as ISetWorksheetRowHeightMutationParams);
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const ranges = [
+            {
+                startRow,
+                endRow: startRow + numRows - 1,
+                startColumn: 0,
+                endColumn: this._worksheet.getColumnCount() - 1,
+            },
+        ];
+
+        await this._commandService.executeCommand(SetRowHeightCommand.id, {
+            unitId,
+            subUnitId,
+            ranges,
+            isFitContent: true,
+            value: height,
+        });
 
         return this;
     }
@@ -431,7 +425,25 @@ export class FWorksheet {
      * @param height The height in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    setRowHeightsForced(startRow: number, numRows: number, height: number): FWorksheet {
+    async setRowHeightsForced(startRow: number, numRows: number, height: number): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const ranges = [
+            {
+                startRow,
+                endRow: startRow + numRows - 1,
+                startColumn: 0,
+                endColumn: this._worksheet.getColumnCount() - 1,
+            },
+        ];
+
+        await this._commandService.executeCommand(SetRowHeightCommand.id, {
+            unitId,
+            subUnitId,
+            ranges,
+            value: height,
+        });
+
         return this;
     }
 
@@ -692,8 +704,8 @@ export class FWorksheet {
      * @param width The width in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    setColumnWidth(columnPosition: number, width: number): FWorksheet {
-        return this;
+    async setColumnWidth(columnPosition: number, width: number): Promise<FWorksheet> {
+        return this.setColumnWidths(columnPosition, 1, width);
     }
 
     /**
@@ -703,20 +715,24 @@ export class FWorksheet {
      * @param width The width in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    setColumnWidths(startColumn: number, numColumns: number, width: number): FWorksheet {
-        this._commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, {
-            unitId: this._workbook.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            ranges: [
-                {
-                    startColumn,
-                    endColumn: startColumn + numColumns - 1,
-                    startRow: 0,
-                    endRow: this._worksheet.getRowCount() - 1,
-                },
-            ],
-            colWidth: width,
-        } as ISetWorksheetColWidthMutationParams);
+    async setColumnWidths(startColumn: number, numColumns: number, width: number): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const ranges = [
+            {
+                startColumn,
+                endColumn: startColumn + numColumns - 1,
+                startRow: 0,
+                endRow: this._worksheet.getRowCount() - 1,
+            },
+        ];
+
+        await this._commandService.executeCommand(SetColWidthCommand.id, {
+            unitId,
+            subUnitId,
+            ranges,
+            value: width,
+        });
 
         return this;
     }

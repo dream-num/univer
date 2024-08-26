@@ -189,7 +189,7 @@ export const DeltaRowHeightCommand: ICommand = {
 };
 
 export interface ISetRowHeightCommandParams {
-    ranges?: IRange[];
+    ranges?: IRange[]; // For Facade API
     value: number;
 }
 export const SetRowHeightCommand: ICommand = {
@@ -290,13 +290,13 @@ export const SetRowHeightCommand: ICommand = {
 };
 
 export interface ISetWorksheetRowIsAutoHeightCommandParams {
-    anchorRow?: number;
+    ranges?: IRange[]; // For Facade API
 }
 
 export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-is-auto-height',
-    handler: async (accessor: IAccessor, params: ISetWorksheetRowIsAutoHeightCommandParams) => {
+    handler: async (accessor: IAccessor, params?: ISetWorksheetRowIsAutoHeightCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -306,19 +306,19 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;
-        const { anchorRow } = params ?? {};
+        const ranges = params?.ranges ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
-        const ranges =
-            anchorRow != null
-                ? [
-                    {
-                        startRow: anchorRow,
-                        endRow: anchorRow,
-                        startColumn: 0,
-                        endColumn: worksheet.getMaxColumns() - 1,
-                    },
-                ]
-                : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        // const ranges =
+        //     anchorRow != null
+        //         ? [
+        //             {
+        //                 startRow: anchorRow,
+        //                 endRow: anchorRow,
+        //                 startColumn: 0,
+        //                 endColumn: worksheet.getMaxColumns() - 1,
+        //             },
+        //         ]
+        //         :;
 
         if (!ranges?.length) {
             return false;

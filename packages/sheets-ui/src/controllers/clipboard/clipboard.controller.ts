@@ -63,9 +63,9 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-import { IMessageService, textTrim } from '@univerjs/ui';
+import { IMessageService } from '@univerjs/ui';
 
-import { IRenderManagerService, ITextSelectionRenderManager, ptToPx } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import {
     SheetCopyCommand,
@@ -155,7 +155,6 @@ export class SheetClipboardController extends RxDisposable {
         this.disposeWithMe({ dispose: () => disposables.forEach((d) => d.dispose()) });
     }
 
-    //eslint-disable-next-line max-lines-per-function
     private _initCopyingHooks(): ISheetClipboardHook {
         const self = this;
         let currentSheet: Worksheet | null = null;
@@ -279,7 +278,6 @@ export class SheetClipboardController extends RxDisposable {
         };
     }
 
-    //eslint-disable-next-line max-lines-per-function
     private _initPastingHook(): ISheetClipboardHook {
         const self = this;
 
@@ -325,31 +323,8 @@ export class SheetClipboardController extends RxDisposable {
                 if (addingRowsCount > 0) {
                     const rowInfo: IObjectArrayPrimitiveType<IRowData> = {};
                     rowProperties.slice(existingRowsCount).forEach((property, index) => {
-                        const { style, height: PropertyHeight } = property || {};
-                        if (style) {
-                            const cssTextArray = style.split(';');
-                            let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
-
-                            cssTextArray.find((css) => {
-                                css = css.toLowerCase();
-                                const key = textTrim(css.substr(0, css.indexOf(':')));
-                                const value = textTrim(css.substr(css.indexOf(':') + 1));
-                                if (key === 'height') {
-                                    if (value.endsWith('pt')) {
-                                        height = ptToPx(Number.parseFloat(value));
-                                    } else {
-                                        height = Number.parseFloat(value);
-                                    }
-                                    return true;
-                                }
-                                return false;
-                            });
-
-                            rowInfo[index] = {
-                                h: height,
-                                hd: BooleanNumber.FALSE,
-                            };
-                        } else if (PropertyHeight) {
+                        const { height: PropertyHeight } = property || {};
+                        if (PropertyHeight) {
                             rowInfo[index] = {
                                 h: Number.parseFloat(PropertyHeight),
                                 hd: BooleanNumber.FALSE,
@@ -379,28 +354,8 @@ export class SheetClipboardController extends RxDisposable {
                 const rowHeight: IObjectArrayPrimitiveType<number> = {};
                 const originRowHeight: IObjectArrayPrimitiveType<number> = {};
                 rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
-                    const { style, height: propertyHeight } = property;
-                    if (style) {
-                        const cssTextArray = style.split(';');
-                        let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
-
-                        cssTextArray.find((css) => {
-                            css = css.toLowerCase();
-                            const key = textTrim(css.substr(0, css.indexOf(':')));
-                            const value = textTrim(css.substr(css.indexOf(':') + 1));
-                            if (key === 'height') {
-                                if (value.endsWith('pt')) {
-                                    height = ptToPx(Number.parseFloat(value));
-                                } else {
-                                    height = Number.parseFloat(value);
-                                }
-                                return true;
-                            }
-                            return false;
-                        });
-
-                        rowHeight[index + range.rows[0]] = height;
-                    } else if (propertyHeight) {
+                    const { height: propertyHeight } = property;
+                    if (propertyHeight) {
                         const rowConfigBeforePaste = rowManager.getRow(range.rows[0] + index);
                         const willSetHeight = Number.parseFloat(propertyHeight);
                         if (rowConfigBeforePaste) {
@@ -418,27 +373,29 @@ export class SheetClipboardController extends RxDisposable {
                 });
 
                 // apply row properties to the existing rows
-                const setRowPropertyMutation: ISetWorksheetRowHeightMutationParams = {
-                    unitId: unitId!,
-                    subUnitId: subUnitId!,
-                    ranges: [{
-                        startRow: range.rows[0], endRow: Math.min(range.rows[range.rows.length - 1], maxRow),
-                        startColumn: range.cols[0], endColumn: range.cols[range.cols.length - 1],
-                    }],
-                    rowHeight,
-                };
-                redoMutations.push({
-                    id: SetWorksheetRowHeightMutation.id,
-                    params: setRowPropertyMutation,
-                });
+                if (Object.keys(rowHeight).length) {
+                    const setRowPropertyMutation: ISetWorksheetRowHeightMutationParams = {
+                        unitId: unitId!,
+                        subUnitId: subUnitId!,
+                        ranges: [{
+                            startRow: range.rows[0], endRow: Math.min(range.rows[range.rows.length - 1], maxRow),
+                            startColumn: range.cols[0], endColumn: range.cols[range.cols.length - 1],
+                        }],
+                        rowHeight,
+                    };
+                    redoMutations.push({
+                        id: SetWorksheetRowHeightMutation.id,
+                        params: setRowPropertyMutation,
+                    });
 
-                undoMutations.push({
-                    id: SetWorksheetRowHeightMutation.id,
-                    params: {
-                        ...setRowPropertyMutation,
-                        rowHeight: 20,
-                    },
-                });
+                    undoMutations.push({
+                        id: SetWorksheetRowHeightMutation.id,
+                        params: {
+                            ...setRowPropertyMutation,
+                            rowHeight: 20,
+                        },
+                    });
+                }
 
                 return {
                     redos: redoMutations,
@@ -625,7 +582,6 @@ export class SheetClipboardController extends RxDisposable {
         });
     }
 
-    //eslint-disable-next-line max-lines-per-function
     private _initSpecialPasteHooks() {
         const self = this;
 

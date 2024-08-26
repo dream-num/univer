@@ -77,6 +77,16 @@ export function compareNodePositionInTable(a: INodePosition, b: INodePosition): 
     const { path: aPath } = a;
     const { path: bPath } = b;
 
+    const aTableId = aPath[aPath.length - 5];
+    const bTableId = bPath[bPath.length - 5];
+
+    if (aTableId !== bTableId && typeof aTableId === 'string' && typeof bTableId === 'string') {
+        const aSlideId = aTableId.split('#-#')[1];
+        const bSlideId = bTableId.split('#-#')[1];
+
+        return +aSlideId < +bSlideId;
+    }
+
     const aRowCount = aPath[aPath.length - 3];
     const bRowCount = bPath[bPath.length - 3];
     const aCellCount = aPath[aPath.length - 1];
@@ -219,7 +229,10 @@ export class NodePositionConvertToRectRange {
         };
     }
 
-    getNodePositionGroup(anchorNodePosition: INodePosition, focusNodePosition: INodePosition): Nullable<IRectRangeNodePositions[]> {
+    getNodePositionGroup(
+        anchorNodePosition: INodePosition,
+        focusNodePosition: INodePosition
+    ): Nullable<IRectRangeNodePositions[]> {
         const nodePositionGroup: IRectRangeNodePositions[] = [];
         const compare = compareNodePositionInTable(anchorNodePosition, focusNodePosition);
         const startNodePosition = compare ? anchorNodePosition : focusNodePosition;

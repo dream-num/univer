@@ -291,7 +291,7 @@ export class DocumentSkeleton extends Skeleton {
             index += g.count;
         }
 
-        return index;
+        return position.isBack ? index : (index + glyph!.count);
     }
 
     findNodePositionByCharIndex(charIndex: number, isBack: boolean = true, segmentId = '', segmentPIndex = -1): Nullable<INodePosition> {
@@ -370,13 +370,9 @@ export class DocumentSkeleton extends Skeleton {
 
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
-        const { divide, line, column, section, isBack, segmentPage, pageType, path } = position;
+        const { divide, line, column, section, segmentPage, pageType, path } = position;
 
         let { glyph } = position;
-
-        if (isBack === false) {
-            glyph += 1;
-        }
 
         let skePage: Nullable<IDocumentSkeletonPage> = null;
 

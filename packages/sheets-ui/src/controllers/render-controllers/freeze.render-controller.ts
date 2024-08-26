@@ -307,7 +307,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         if (freezeObjectMainRect) {
             const _freezeObjectMainRectEnterSub = freezeObjectMainRect.onPointerEnter$.subscribeEvent(() => {
-                const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(true, null);
                 if (!permissionCheck) {
                     return false;
                 }
@@ -332,7 +332,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         if (freezeObjectHeaderRect) {
             const _freezeObjHeaderPointerEnterSub = freezeObjectHeaderRect.onPointerEnter$.subscribeEvent(() => {
-                const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(true, null);
                 if (!permissionCheck) {
                     return false;
                 }
@@ -479,7 +479,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+        const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(true, null);
         if (!permissionCheck) {
             return false;
         }
@@ -512,7 +512,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 true
             );
 
-            const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+            const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(true, null);
             if (!permissionCheck) {
                 return false;
             }

@@ -306,7 +306,7 @@ export function getSetCellValueMutations(
         if (value.p?.body) {
             valueMatrix.setValue(realRow, realCol, Tools.deepClone({ p: value.p, v: originNumberValue ?? value.v }));
         } else {
-            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: originNumberValue ?? value.v }));
+            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: originNumberValue ?? value.v, t: value.t }));
         }
     });
     // set cell value and style

@@ -316,7 +316,8 @@ export class SheetClipboardController extends RxDisposable {
 
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxRow = currentSheet!.getMaxRows();
-                const addingRowsCount = range.rows[range.rows.length - 1] - maxRow;
+                const rowCount = maxRow - 1;
+                const addingRowsCount = range.rows[range.rows.length - 1] - rowCount;
                 const existingRowsCount = rowProperties.length - addingRowsCount;
 
                 const rowManager = currentSheet!.getRowManager();
@@ -410,7 +411,8 @@ export class SheetClipboardController extends RxDisposable {
 
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxColumn = currentSheet!.getMaxColumns();
-                const addingColsCount = range.cols[range.cols.length - 1] - maxColumn;
+                const colCount = maxColumn - 1;
+                const addingColsCount = range.cols[range.cols.length - 1] - colCount;
                 const existingColsCount = colProperties.length - addingColsCount;
 
                 const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;

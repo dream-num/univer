@@ -72,7 +72,10 @@
         "@univerjs/sheets-filter-ui": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/thread-comment": "workspace:*",
+        "@univerjs/thread-comment-ui": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
@@ -93,7 +96,10 @@
         "@univerjs/sheets-filter-ui": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/thread-comment": "workspace:*",
+        "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "jest-canvas-mock": "^2.5.2",
         "jsdom": "^24.1.1",

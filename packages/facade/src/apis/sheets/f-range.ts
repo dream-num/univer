@@ -20,6 +20,7 @@ import type {
     ICellData,
     IColorStyle,
     IDisposable,
+    IDocumentBody,
     IObjectMatrixPrimitiveType,
     IRange,
     ISelectionCellWithMergeInfo,
@@ -29,7 +30,7 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import { BooleanNumber, ICommandService, Inject, Injector, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, ICommandService, Inject, Injector, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
 import type {
     ISetHorizontalTextAlignCommandParams,
     ISetStyleCommandParams,
@@ -46,7 +47,6 @@ import {
 } from '@univerjs/sheets';
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
-
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
 import { ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -58,6 +58,8 @@ import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { ISetSheetFilterRangeCommandParams } from '@univerjs/sheets-filter-ui';
 import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
 import { ComponentManager } from '@univerjs/ui';
+import { AddCommentCommand, DeleteCommentTreeCommand, SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { getDT } from '@univerjs/thread-comment-ui';
 import type { FHorizontalAlignment, FVerticalAlignment, IFComponentKey } from './utils';
 import {
     covertCellValue,
@@ -71,6 +73,7 @@ import {
 } from './utils';
 import { FDataValidation } from './f-data-validation';
 import { FFilter } from './f-filter';
+import { FThreadComment } from './f-thread-comment';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
@@ -747,5 +750,75 @@ export class FRange {
 
         disposableCollection.dispose();
         return null;
+    }
+
+    /**
+     * Get the comment of the start cell in the current range.
+     * @returns The comment of the start cell in the current range. If the cell does not have a comment, return `null`.
+     */
+    getComment(): Nullable<FThreadComment> {
+        const injector = this._injector;
+        const sheetsTheadCommentModel = injector.get(SheetsThreadCommentModel);
+        const unitId = this._workbook.getUnitId();
+        const sheetId = this._worksheet.getSheetId();
+        const commentWithChildren = sheetsTheadCommentModel.getCommentWithChildren(unitId, sheetId, this._range.startRow, this._range.startColumn);
+
+        if (commentWithChildren) {
+            const comment = {
+                ...commentWithChildren.root,
+                children: commentWithChildren.children,
+            };
+
+            return this._injector.createInstance(FThreadComment, comment);
+        }
+
+        return null;
+    }
+
+    addComment(content: IDocumentBody): boolean {
+        const injector = this._injector;
+        const currentComment = this.getComment()?.getCommentData();
+        const commentService = injector.get(ICommandService);
+        const userService = injector.get(UserManagerService);
+        const unitId = this._workbook.getUnitId();
+        const sheetId = this._worksheet.getSheetId();
+        const refStr = `${Tools.chatAtABC(this._range.startColumn)}${this._range.startRow + 1}`;
+        const currentUser = userService.getCurrentUser();
+
+        return commentService.syncExecuteCommand(AddCommentCommand.id, {
+            unitId,
+            subUnitId: sheetId,
+            comment: {
+                text: content,
+                attachments: [],
+                dT: getDT(),
+                id: Tools.generateRandomId(),
+                ref: refStr!,
+                personId: currentUser.userID,
+                parentId: currentComment?.id,
+                unitId,
+                subUnitId: sheetId,
+                threadId: currentComment?.threadId,
+            },
+        });
+    }
+
+    clearComment(): boolean {
+        const injector = this._injector;
+        const currentComment = this.getComment()?.getCommentData();
+        const commentService = injector.get(ICommandService);
+        const unitId = this._workbook.getUnitId();
+        const sheetId = this._worksheet.getSheetId();
+
+        if (currentComment) {
+            return commentService.syncExecuteCommand(DeleteCommentTreeCommand.id, {
+                unitId,
+                subUnitId: sheetId,
+                threadId: currentComment.threadId,
+                commentId: currentComment.id,
+            });
+        }
+
+        return true;
     }
 }

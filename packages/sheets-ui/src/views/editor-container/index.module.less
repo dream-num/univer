@@ -21,7 +21,9 @@
         width: 100%;
         height: 100%;
 
-        background: white;
+        // Do not set a color, it should be transparent.
+        // create a rendering editor canvas may took 200ms, there would be a white flash if rendering have not finished.
+        // background: white;
 
         canvas {
             position: absolute;

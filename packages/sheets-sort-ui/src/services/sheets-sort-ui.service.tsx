@@ -258,16 +258,12 @@ export class SheetsSortUIService extends Disposable {
                 this.setSelection(unitId, subUnitId, range);
             }
         }
-        const primary = this._selectionManagerService.getCurrentLastSelection()?.primary;
-        if (!primary) {
-            return null;
-        }
 
         return {
             range,
             unitId,
             subUnitId,
-            colIndex: primary.actualColumn,
+            colIndex: selection.primary.actualColumn,
         };
     }
 }

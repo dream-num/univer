@@ -44,7 +44,8 @@ import {
     LocaleService,
     ObjectMatrix,
     OnLifecycle,
-    Optional, RxDisposable, UniverInstanceType } from '@univerjs/core';
+    Optional, RxDisposable, UniverInstanceType,
+} from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import type {
     IInsertColMutationParams,
@@ -363,7 +364,8 @@ export class SheetClipboardController extends RxDisposable {
                             startColumn: range.cols[0],
                             endColumn: range.cols[range.cols.length - 1],
                             endRow: range.rows[range.rows.length - 1],
-                            startRow: maxRow },
+                            startRow: maxRow,
+                        },
                         rowInfo,
                     };
                     redoMutations.push({
@@ -419,8 +421,9 @@ export class SheetClipboardController extends RxDisposable {
                 const setRowPropertyMutation: ISetWorksheetRowHeightMutationParams = {
                     unitId: unitId!,
                     subUnitId: subUnitId!,
-                    ranges: [{ startRow: range.rows[0], endRow: Math.min(range.rows[range.rows.length - 1], maxRow),
-                               startColumn: range.cols[0], endColumn: range.cols[range.cols.length - 1],
+                    ranges: [{
+                        startRow: range.rows[0], endRow: Math.min(range.rows[range.rows.length - 1], maxRow),
+                        startColumn: range.cols[0], endColumn: range.cols[range.cols.length - 1],
                     }],
                     rowHeight,
                 };
@@ -454,6 +457,7 @@ export class SheetClipboardController extends RxDisposable {
                 const existingColsCount = colProperties.length - addingColsCount;
 
                 const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;
+                const pasteToCols = range.cols;
 
                 if (addingColsCount > 0) {
                     const addColMutation: IInsertColMutationParams = {
@@ -465,8 +469,8 @@ export class SheetClipboardController extends RxDisposable {
                             endColumn: range.cols[range.cols.length - 1],
                             startColumn: maxColumn,
                         },
-                        colInfo: colProperties.slice(existingColsCount).map((property) => ({
-                            w: property.width ? +property.width : defaultColumnWidth,
+                        colInfo: colProperties.slice(existingColsCount).map((property, index) => ({
+                            w: property.width ? Math.max(+property.width, currentSheet!.getColumnWidth(pasteToCols[index])) : defaultColumnWidth,
                             hd: BooleanNumber.FALSE,
                         })),
                     };
@@ -475,8 +479,8 @@ export class SheetClipboardController extends RxDisposable {
                         params: addColMutation,
                     });
                 }
-                // apply col properties to the existing rows
-                const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
+
+                const targetSetColPropertyParams = {
                     unitId: unitId!,
                     subUnitId: subUnitId!,
                     ranges: [{
@@ -484,21 +488,38 @@ export class SheetClipboardController extends RxDisposable {
                         endRow: range.rows[range.rows.length - 1],
 
                         startColumn: range.cols[0],
-                        endColumn: Math.min(range.cols[range.cols.length - 1], maxColumn) }],
+                        endColumn: Math.min(range.cols[range.cols.length - 1], maxColumn),
+                    }],
+                };
+
+                // apply col properties to the existing rows
+                const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
+                    ...targetSetColPropertyParams,
                     colWidth: colProperties
                         .slice(0, existingColsCount)
-                        .map((property) => (property.width ? +property.width : defaultColumnWidth)),
+                        .map((property, index) => (property.width ? Math.max(+property.width, currentSheet!.getColumnWidth(pasteToCols[index])) : defaultColumnWidth)),
                 };
+
+                const undoSetColPropertyParams: ISetWorksheetColWidthMutationParams = {
+                    ...targetSetColPropertyParams,
+                    colWidth: colProperties
+                        .slice(0, existingColsCount)
+                        .map((_property, index) => currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth),
+                };
+
                 redoMutations.push({
                     id: SetWorksheetColWidthMutation.id,
                     params: setColPropertyMutation,
                 });
 
-                // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
+                undoMutations.push({
+                    id: SetWorksheetColWidthMutation.id,
+                    params: undoSetColPropertyParams,
+                });
 
                 return {
                     redos: redoMutations,
-                    undos: [] || undoMutations,
+                    undos: undoMutations,
                 };
             },
 

@@ -891,8 +891,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            pr: { name: 'pr', detail: "The security's price per $100 face value." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year. For annual payments, frequency = 1; for semiannual, frequency = 2; for quarterly, frequency = 4.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     YIELDDISC: {
@@ -905,8 +910,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            pr: { name: 'pr', detail: "The security's price per $100 face value." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     YIELDMAT: {
@@ -919,8 +927,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            issue: { name: 'issue', detail: "The security's issue date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            pr: { name: 'pr', detail: "The security's price per $100 face value." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
 };

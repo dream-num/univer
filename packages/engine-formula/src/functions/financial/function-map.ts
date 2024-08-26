@@ -66,6 +66,9 @@ import { Tbillyield } from './tbillyield';
 import { Vdb } from './vdb';
 import { Xirr } from './xirr';
 import { Xnpv } from './xnpv';
+import { Yield } from './yield';
+import { Yielddisc } from './yielddisc';
+import { Yieldmat } from './yieldmat';
 
 export const functionFinancial = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
@@ -119,4 +122,7 @@ export const functionFinancial = [
     [Vdb, FUNCTION_NAMES_FINANCIAL.VDB],
     [Xirr, FUNCTION_NAMES_FINANCIAL.XIRR],
     [Xnpv, FUNCTION_NAMES_FINANCIAL.XNPV],
+    [Yield, FUNCTION_NAMES_FINANCIAL.YIELD],
+    [Yielddisc, FUNCTION_NAMES_FINANCIAL.YIELDDISC],
+    [Yieldmat, FUNCTION_NAMES_FINANCIAL.YIELDMAT],
 ];

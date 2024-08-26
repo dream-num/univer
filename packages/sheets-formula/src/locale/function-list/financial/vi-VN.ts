@@ -891,8 +891,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            pr: { name: 'giá', detail: 'Giá chứng khoán tính theo mệnh giá 100 đô la.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu giảm giá mỗi năm. Đối với các khoản thanh toán hàng năm, tần suất = 1; đối với các khoản thanh toán nửa năm, tần suất = 2; đối với các khoản thanh toán hàng quý, tần suất = 4.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     YIELDDISC: {
@@ -905,8 +910,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            pr: { name: 'giá', detail: 'Giá chứng khoán tính theo mệnh giá 100 đô la.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     YIELDMAT: {
@@ -919,8 +927,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            issue: { name: 'ngày phát hành', detail: 'Ngày phát hành chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            pr: { name: 'giá', detail: 'Giá chứng khoán tính theo mệnh giá 100 đô la.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
 };

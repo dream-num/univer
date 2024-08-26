@@ -891,8 +891,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            pr: { name: '价格', detail: '有价证券的价格（按面值为 ￥100 计算）。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            frequency: { name: '频次', detail: '年付息次数。 如果按年支付，frequency = 1；按半年期支付，frequency = 2；按季支付，frequency = 4。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     YIELDDISC: {
@@ -905,8 +910,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            pr: { name: '价格', detail: '有价证券的价格（按面值为 ￥100 计算）。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     YIELDMAT: {
@@ -919,8 +927,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            issue: { name: '发行日', detail: '有价证券的发行日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            pr: { name: '价格', detail: '有价证券的价格（按面值为 ￥100 计算）。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
 };

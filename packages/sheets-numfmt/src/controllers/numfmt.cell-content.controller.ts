@@ -81,7 +81,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 }
 
                 // just handle number
-                if (originCellValue.t !== CellValueType.NUMBER) {
+                if (originCellValue.t !== CellValueType.NUMBER || originCellValue.v == null || Number.isNaN(originCellValue.v)) {
                     return next(cell);
                 }
 

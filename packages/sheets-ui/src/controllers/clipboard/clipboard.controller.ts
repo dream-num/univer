@@ -450,29 +450,31 @@ export class SheetClipboardController extends RxDisposable {
                 };
 
                 // apply col properties to the existing rows
-                const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
-                    ...targetSetColPropertyParams,
-                    colWidth: colProperties
-                        .slice(0, existingColsCount)
-                        .map((property, index) => (property.width ? Math.max(+property.width, currentSheet!.getColumnWidth(pasteToCols[index])) : defaultColumnWidth)),
-                };
+                if (colProperties.length > 0) {
+                    const setColPropertyMutation: ISetWorksheetColWidthMutationParams = {
+                        ...targetSetColPropertyParams,
+                        colWidth: colProperties
+                            .slice(0, existingColsCount)
+                            .map((property, index) => (property.width ? Math.max(+property.width, currentSheet!.getColumnWidth(pasteToCols[index])) : defaultColumnWidth)),
+                    };
 
-                const undoSetColPropertyParams: ISetWorksheetColWidthMutationParams = {
-                    ...targetSetColPropertyParams,
-                    colWidth: colProperties
-                        .slice(0, existingColsCount)
-                        .map((_property, index) => currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth),
-                };
+                    const undoSetColPropertyParams: ISetWorksheetColWidthMutationParams = {
+                        ...targetSetColPropertyParams,
+                        colWidth: colProperties
+                            .slice(0, existingColsCount)
+                            .map((_property, index) => currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth),
+                    };
 
-                redoMutations.push({
-                    id: SetWorksheetColWidthMutation.id,
-                    params: setColPropertyMutation,
-                });
+                    redoMutations.push({
+                        id: SetWorksheetColWidthMutation.id,
+                        params: setColPropertyMutation,
+                    });
 
-                undoMutations.push({
-                    id: SetWorksheetColWidthMutation.id,
-                    params: undoSetColPropertyParams,
-                });
+                    undoMutations.push({
+                        id: SetWorksheetColWidthMutation.id,
+                        params: undoSetColPropertyParams,
+                    });
+                }
 
                 return {
                     redos: redoMutations,

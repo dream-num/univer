@@ -188,7 +188,7 @@ export class SheetInterceptorService extends Disposable {
         };
     }
 
-    intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T) {
+    intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T): IDisposable {
         const key = name as unknown as string;
         if (!this._interceptorsByName.has(key)) {
             this._interceptorsByName.set(key, []);

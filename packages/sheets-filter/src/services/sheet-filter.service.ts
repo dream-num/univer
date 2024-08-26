@@ -118,11 +118,11 @@ export class SheetsFilterService extends Disposable {
         return false;
     }
 
-    setFilterErrorMsg(content: string) {
+    setFilterErrorMsg(content: string): void {
         this._errorMsg$.next(content);
     }
 
-    private _updateActiveFilterModel() {
+    private _updateActiveFilterModel(): void {
         let workbook: Nullable<Workbook>;
         try {
             workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
@@ -147,7 +147,7 @@ export class SheetsFilterService extends Disposable {
         this._activeFilterModel$.next(filterModel);
     }
 
-    private _initActiveFilterModel() {
+    private _initActiveFilterModel(): void {
         this.disposeWithMe(
             merge(
                 // source1: executing filter related mutations
@@ -174,7 +174,7 @@ export class SheetsFilterService extends Disposable {
         return JSON.stringify(json);
     }
 
-    private _deserializeAutoFiltersForUnit(unitId: string, json: ISheetsFilterResource) {
+    private _deserializeAutoFiltersForUnit(unitId: string, json: ISheetsFilterResource): void {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId)!;
         Object.keys(json).forEach((worksheetId: WorksheetID) => {
             const autoFilter = json[worksheetId]!;
@@ -183,10 +183,10 @@ export class SheetsFilterService extends Disposable {
         });
     }
 
-    private _initModel() {
+    private _initModel(): void {
         this._resourcesManagerService.registerPluginResource<ISheetsFilterResource>({
             pluginName: SHEET_FILTER_SNAPSHOT_ID,
-            businesses: [2],
+            businesses: [UniverInstanceType.UNIVER_SHEET],
             toJson: (id) => this._serializeAutoFiltersForUnit(id),
             parseJson: (json) => JSON.parse(json),
             onLoad: (unitId, value) => {
@@ -204,7 +204,7 @@ export class SheetsFilterService extends Disposable {
         });
     }
 
-    private _cacheFilterModel(unitId: string, subUnitId: string, filterModel: FilterModel) {
+    private _cacheFilterModel(unitId: string, subUnitId: string, filterModel: FilterModel): void {
         if (!this._filterModels.has(unitId)) {
             this._filterModels.set(unitId, new Map());
         }

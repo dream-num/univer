@@ -102,7 +102,7 @@ export { MergeCellController, MERGE_CELL_INTERCEPTOR_CHECK } from './controllers
 export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from './commands/utils/handle-merge-operation';
 
 export type { FormatType } from './services/numfmt/type';
-export { expandToContinuousRange } from './basics/utils';
+export { expandToContinuousRange } from './basics/expand-range';
 
 // permission
 export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './services/permission';

@@ -146,6 +146,8 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
 };
 
 export interface ISetColWidthCommandParams {
+    unitId?: string;
+    subUnitId?: string;
     ranges?: IRange[];
     value: number;
 }
@@ -160,10 +162,10 @@ export const SetColWidthCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         // user can specify the ranges to set col width, if not, use current selections
-        const selections = params?.ranges ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        const selections = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) return false;
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
         const { subUnitId, unitId } = target;

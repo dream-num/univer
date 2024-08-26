@@ -396,7 +396,17 @@ export class FWorksheet {
      * @param height The height in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    setRowHeights(startRow: number, numRows: number, height: number): FWorksheet {
+    async setRowHeights(startRow: number, numRows: number, height: number): Promise<FWorksheet> {
+        // const unitId = this._workbook.getUnitId();
+        // const subUnitId = this._worksheet.getSheetId();
+        // const ranges = [
+        //     {
+        //         startRow,
+        //         endRow: startRow + numRows - 1,
+        //         startColumn: 0,
+        //         endColumn: this._worksheet.getColumnCount() - 1,
+        //     },
+        // ];
         this._commandService.syncExecuteCommand(SetWorksheetRowHeightMutation.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),

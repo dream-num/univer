@@ -143,9 +143,9 @@ export const SetSelectedColsVisibleCommand: ICommand = {
 };
 
 export interface ISetColHiddenCommandParams {
-    unitId: string;
-    subUnitId: string;
-    ranges: IRange[];
+    unitId?: string;
+    subUnitId?: string;
+    ranges?: IRange[];
 }
 
 export const SetColHiddenCommand: ICommand = {
@@ -157,7 +157,7 @@ export const SetColHiddenCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        let ranges = params?.ranges.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+        let ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
         if (!ranges?.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService, params);

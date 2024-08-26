@@ -189,9 +189,12 @@ export const DeltaRowHeightCommand: ICommand = {
 };
 
 export interface ISetRowHeightCommandParams {
+    unitId?: string;
+    subUnitId?: string;
     ranges?: IRange[]; // For Facade API
     value: number;
 }
+
 export const SetRowHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-height',
@@ -204,12 +207,12 @@ export const SetRowHeightCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         // user can specify the ranges to set row height, if not, use the current selection
-        const selections = params?.ranges ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        const selections = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
         }
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
@@ -290,6 +293,8 @@ export const SetRowHeightCommand: ICommand = {
 };
 
 export interface ISetWorksheetRowIsAutoHeightCommandParams {
+    unitId?: string;
+    subUnitId?: string;
     ranges?: IRange[]; // For Facade API
 }
 
@@ -302,23 +307,11 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
-        const { unitId, subUnitId, worksheet } = target;
-        const ranges = params?.ranges ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-
-        // const ranges =
-        //     anchorRow != null
-        //         ? [
-        //             {
-        //                 startRow: anchorRow,
-        //                 endRow: anchorRow,
-        //                 startColumn: 0,
-        //                 endColumn: worksheet.getMaxColumns() - 1,
-        //             },
-        //         ]
-        //         :;
+        const { unitId, subUnitId } = target;
+        const ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
         if (!ranges?.length) {
             return false;

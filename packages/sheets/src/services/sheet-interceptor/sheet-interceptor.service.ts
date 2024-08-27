@@ -30,8 +30,6 @@ import {
     Disposable,
     DisposableCollection,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     remove,
     toDisposable,
     UniverInstanceType,
@@ -62,10 +60,7 @@ export interface IRangeInterceptors {
 
 /**
  * This class expose methods for sheet features to inject code to sheet underlying logic.
- *
- * It would inject Workbook & Worksheet.
  */
-@OnLifecycle(LifecycleStages.Starting, SheetInterceptorService)
 export class SheetInterceptorService extends Disposable {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
     private _commandInterceptors: ICommandInterceptor[] = [];
@@ -76,6 +71,7 @@ export class SheetInterceptorService extends Disposable {
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
+    /** @ignore */
     constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
         super();
 
@@ -258,12 +254,12 @@ export class SheetInterceptorService extends Disposable {
         // We should intercept all instantiated worksheet and should subscribe to
         // worksheet creation event to intercept newly created worksheet.
         workbook.getSheets().forEach((worksheet) => interceptViewModel(worksheet));
-        disposables.add(toDisposable(workbook.sheetCreated$.subscribe((worksheet) => interceptViewModel(worksheet))));
+        disposables.add(workbook.sheetCreated$.subscribe((worksheet) => interceptViewModel(worksheet)));
 
         // Dispose all underlying interceptors when workbook is disposed.
         disposables.add(toDisposable(() => workbook.getSheets().forEach((worksheet) => this._disposeSheetInterceptor(unitId, worksheet))));
         // Dispose interceptor when a worksheet is destroyed.
-        disposables.add(toDisposable(workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(unitId, worksheet))));
+        disposables.add(workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(unitId, worksheet)));
 
         this._workbookDisposables.set(unitId, disposables);
     }

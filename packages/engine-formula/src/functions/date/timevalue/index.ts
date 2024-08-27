@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { isDate, parseFormattedValue } from '../../../basics/date';
+import { excelDateTimeSerial, isDate, parseFormattedValue } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { getFractionalPart } from '../../../engine/utils/math-kit';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
@@ -44,10 +44,14 @@ export class Timevalue extends BaseFunction {
             const value = `${timeTextObject.getValue()}`;
             const parsedTime = parseFormattedValue(value);
             if (parsedTime) {
-                const { v, z } = parsedTime;
+                let { v, z } = parsedTime;
 
-                if (isDate(z)) {
-                    return NumberValueObject.create(getFractionalPart(v));
+                if (z && isDate(z)) {
+                    if (v instanceof Date) {
+                        v = excelDateTimeSerial(v);
+                    }
+
+                    return NumberValueObject.create(getFractionalPart(+v));
                 }
             }
         }

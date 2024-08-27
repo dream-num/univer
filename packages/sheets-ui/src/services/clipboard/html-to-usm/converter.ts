@@ -678,7 +678,23 @@ function parseColGroup(raw: string): IClipboardPropertyItem[] | null {
         return null;
     }
 
-    return Array.from(colMatches).map((colMatch) => parseProperties(colMatch[1]));
+    const colPropertiesWithSpan = Array.from(colMatches).map((colMatch) => parseProperties(colMatch[1]));
+
+    const colProperties: IClipboardPropertyItem[] = [];
+    colPropertiesWithSpan.forEach((propertiesWithSpan) => {
+        const span = Number(propertiesWithSpan.span);
+        if (span) {
+            for (let i = 0; i < span; i++) {
+                const propertiesWithoutSpan = { ...propertiesWithSpan };
+                delete propertiesWithoutSpan.span;
+                colProperties.push(propertiesWithoutSpan);
+            }
+        } else {
+            colProperties.push(propertiesWithSpan);
+        }
+    });
+
+    return colProperties;
 }
 
 function childNodeToHTML(node: ChildNode) {

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IMutationInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    ICellData, IDisposable,
+    IMutationInfo,
+    IRange,
+    Nullable, Workbook, Worksheet,
+} from '@univerjs/core';
 import {
-    createIdentifier,
-    Disposable,
-    ErrorService,
-    extractPureTextFromCell,
-    ICommandService,
+    createIdentifier, Disposable, ErrorService, extractPureTextFromCell, ICommandService,
     ILogService,
     Inject,
     Injector,
@@ -29,7 +30,10 @@ import {
     LocaleService,
     ObjectMatrix,
     ThemeService,
-    toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+    toDisposable,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     getPrimaryForRange,
@@ -507,14 +511,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const pasteTarget = this._getPastedRange(cellMatrix);
         if (!pasteTarget) return false;
 
-        const worksheet = this._univerInstanceService
+        const pasteToWorksheet = this._univerInstanceService
             .getUniverSheetInstance(pasteTarget.unitId)
             ?.getSheetBySheetId(pasteTarget.subUnitId);
-        if (!worksheet) {
+        if (!pasteToWorksheet) {
             return false;
         }
 
-        const mergeData = worksheet?.getMergeData();
+        const mergeData = pasteToWorksheet?.getMergeData();
 
         if (mergeData) {
             const pastedRangeLapWithMergedCell = mergeData.some((m) => {
@@ -526,10 +530,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
         }
 
-        const colManager = worksheet.getColumnManager();
-        const rowManager = worksheet.getRowManager();
-        const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
-        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
+        const pasteFromWorkbook = this._univerInstanceService.getUnit<Workbook>(copyUnitId);
+        if (!pasteFromWorkbook) return false;
+        const pasteFromWorksheet = pasteFromWorkbook.getSheetBySheetId(copySubUnitId);
+        if (!pasteFromWorksheet) return false;
+
+        const colManager = pasteFromWorksheet.getColumnManager();
+        const rowManager = pasteFromWorksheet.getRowManager();
+        const defaultColumnWidth = pasteFromWorksheet.getConfig().defaultColumnWidth;
+        const defaultRowHeight = pasteFromWorksheet.getConfig().defaultRowHeight;
 
         const colProperties: IClipboardPropertyItem[] = [];
         const rowProperties: IClipboardPropertyItem[] = [];

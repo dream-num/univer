@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IObjectArrayPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -192,7 +192,6 @@ export interface ISetRowHeightCommandParams {
     unitId?: string;
     subUnitId?: string;
     ranges?: IRange[]; // For Facade API
-    isFitContent?: boolean; // For Facade API. If the set height is less than the row height, the automatic row height is triggered. If it is greater than the row height, the value is applied.
     value: number;
 }
 
@@ -216,37 +215,13 @@ export const SetRowHeightCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
-        const { unitId, subUnitId, worksheet } = target;
-        const { isFitContent, value } = params;
-
-        let rowHeight: number | IObjectArrayPrimitiveType<Nullable<number>> = value;
-        let autoHeightInfo: BooleanNumber | IObjectArrayPrimitiveType<Nullable<BooleanNumber>> = BooleanNumber.FALSE;
-
-        // get rowHeight and autoHeightInfo base on every row
-        if (isFitContent) {
-            const rowManager = worksheet.getRowManager();
-            rowHeight = {};
-            autoHeightInfo = {};
-            selections.forEach((range) => {
-                const { startRow, endRow } = range;
-                for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
-                    const currentRowHeight = rowManager.getRowHeight(rowIndex);
-                    if (value <= currentRowHeight) {
-                        // autoHeightInfo[rowIndex] = BooleanNumber.TRUE;
-                        // TODO auto height
-                    } else {
-                        // autoHeightInfo[rowIndex] = BooleanNumber.FALSE;
-                        // rowHeight[rowIndex] = value;
-                    }
-                }
-            });
-        }
+        const { unitId, subUnitId } = target;
 
         const redoMutationParams: ISetWorksheetRowHeightMutationParams = {
             subUnitId,
             unitId,
             ranges: selections,
-            rowHeight,
+            rowHeight: params.value,
         };
 
         const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(
@@ -258,7 +233,7 @@ export const SetRowHeightCommand: ICommand = {
             unitId,
             subUnitId,
             ranges: redoMutationParams.ranges,
-            autoHeightInfo,
+            autoHeightInfo: BooleanNumber.FALSE,
         };
 
         const undoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams =

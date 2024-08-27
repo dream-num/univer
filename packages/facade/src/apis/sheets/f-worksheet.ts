@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { Direction, ICommandService, Inject, Injector, RANGE_TYPE } from '@univerjs/core';
 
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
@@ -398,21 +398,39 @@ export class FWorksheet {
     async setRowHeights(startRow: number, numRows: number, height: number): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        const ranges = [
-            {
-                startRow,
-                endRow: startRow + numRows - 1,
+        const rowManager = this._worksheet.getRowManager();
+
+        const autoHeightRanges: IRange[] = [];
+        const rowHeightRanges: IRange[] = [];
+
+        for (let i = startRow; i < startRow + numRows; i++) {
+            const rowHeight = rowManager.getRowHeight(i);
+            const range = {
+                startRow: i,
+                endRow: i,
                 startColumn: 0,
                 endColumn: this._worksheet.getColumnCount() - 1,
-            },
-        ];
+            };
+
+            // if the new height is less than the current height, set auto height
+            if (height <= rowHeight) {
+                autoHeightRanges.push(range);
+            } else { // if the new height is greater than the current height, set the new height
+                rowHeightRanges.push(range);
+            }
+        }
 
         await this._commandService.executeCommand(SetRowHeightCommand.id, {
             unitId,
             subUnitId,
-            ranges,
-            isFitContent: true,
+            ranges: rowHeightRanges,
             value: height,
+        });
+
+        await this._commandService.executeCommand(SetWorksheetRowIsAutoHeightCommand.id, {
+            unitId,
+            subUnitId,
+            ranges: autoHeightRanges,
         });
 
         return this;

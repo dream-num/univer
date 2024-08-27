@@ -159,7 +159,7 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
                 if (typeof rowHeight === 'number') {
                     row.h = rowHeight;
                 } else {
-                    row.h = rowHeight[rowIndex] ?? defaultRowHeight;
+                    row.h = rowHeight[rowIndex] ?? defaultRowHeight; // Start from startRow
                 }
 
                 row.h = Math.min(MAXIMUM_ROW_HEIGHT, row.h);

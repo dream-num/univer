@@ -134,8 +134,6 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         const unitId = this._context.unitId;
         const sheetId = this._currentSkeletonSearchParam.sheetId;
         const sheetSkeletonManagerParam = this.getUnitSkeleton(unitId, sheetId);
-        console.log('setCurrent');
-
         this._currentSkeletonBefore$.next(sheetSkeletonManagerParam);
         this._currentSkeleton$.next(sheetSkeletonManagerParam);
     }

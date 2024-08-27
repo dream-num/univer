@@ -32,7 +32,7 @@ const STEADY_TIMEOUT = 3000;
 
 @OnLifecycle(LifecycleStages.Ready, DesktopUIController)
 export class DesktopUIController extends Disposable {
-    private _steadyTimeout: number;
+    private _steadyTimeout: NodeJS.Timeout;
     constructor(
         private readonly _config: IUniverUIConfig,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -52,6 +52,10 @@ export class DesktopUIController extends Disposable {
     }
 
     private _bootstrapWorkbench(): void {
+        this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe(() => {
+            clearTimeout(this._steadyTimeout);
+        }));
+
         this.disposeWithMe(
             bootstrap(this._injector, this._config, (contentElement, containerElement) => {
                 if (this._layoutService) {
@@ -70,12 +74,6 @@ export class DesktopUIController extends Disposable {
                     }
                 });
 
-                this._instanceSrv.unitDisposed$
-                    // .pipe(takeUntil(this.dispose$))
-                    .subscribe(() => {
-                        clearTimeout(this._steadyTimeout);
-                    });
-
                 setTimeout(() => {
                     const allRenders = this._renderManagerService.getRenderAll();
 
@@ -92,7 +90,7 @@ export class DesktopUIController extends Disposable {
         );
     }
 
-    private _initBuiltinComponents() {
+    private _initBuiltinComponents(): void {
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FLOATING, () => connectInjector(CanvasPopup, this._injector)));
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(FloatDom, this._injector)));
     }

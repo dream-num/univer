@@ -800,7 +800,7 @@ export class SheetsFilterController extends Disposable {
             const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
             if (!filterModel) return;
             const filterRange = filterModel.getRange();
-            if (command.id === MoveRowsCommand.id && params.fromRange.startRow <= filterRange.startRow && params.fromRange.endRow < filterRange.endRow) {
+            if (command.id === MoveRowsCommand.id && params.fromRange.startRow <= filterRange.startRow && params.fromRange.endRow < filterRange.endRow && params.fromRange.endRow >= filterRange.startRow) {
                 this._sheetsFilterService.setFilterErrorMsg('sheets-filter.msg.filter-header-forbidden');
                 throw new Error('[SheetsFilterController]: Cannot move header row of filter');
             }

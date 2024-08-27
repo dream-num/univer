@@ -377,7 +377,7 @@ describe('Test FUniver', () => {
             dataStream: 'test updated\r\n',
         });
         // expect(worksheet.getComments()).toBe([]);
-        // expect(newComment.getContent().dataStream).toBe('test updated\r\n');
+        expect(newComment.getContent().dataStream).toBe('test updated\r\n');
         expect(range.getComment()?.getContent().dataStream).toBe('test updated\r\n');
 
         await newComment.delete();

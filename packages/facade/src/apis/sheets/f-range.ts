@@ -761,14 +761,13 @@ export class FRange {
         const sheetsTheadCommentModel = injector.get(SheetsThreadCommentModel);
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
-        const commentWithChildren = sheetsTheadCommentModel.getCommentWithChildren(unitId, sheetId, this._range.startRow, this._range.startColumn);
+        const commentId = sheetsTheadCommentModel.getByLocation(unitId, sheetId, this._range.startRow, this._range.startColumn);
+        if (!commentId) {
+            return null;
+        }
 
-        if (commentWithChildren) {
-            const comment = {
-                ...commentWithChildren.root,
-                children: commentWithChildren.children,
-            };
-
+        const comment = sheetsTheadCommentModel.getComment(unitId, sheetId, commentId);
+        if (comment) {
             return this._injector.createInstance(FThreadComment, comment);
         }
 

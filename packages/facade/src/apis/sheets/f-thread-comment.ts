@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, Workbook } from '@univerjs/core';
+import type { IDocumentBody, IRange, Workbook } from '@univerjs/core';
 import { ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IBaseComment, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { getDT } from '@univerjs/thread-comment-ui';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from './f-range';
 
 export class FThreadComment {
@@ -28,8 +29,16 @@ export class FThreadComment {
         private readonly _parent: IThreadComment | undefined,
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetsThreadCommentModel) private readonly _threadCommentModel: SheetsThreadCommentModel
     ) {
+    }
+
+    private _getRef(): IRange {
+        const ref = this._parent?.ref || (this._thread as IThreadComment).ref;
+        const range = deserializeRangeWithSheet(ref);
+
+        return range.range;
     }
 
     /**
@@ -54,7 +63,10 @@ export class FThreadComment {
      * @returns the replies of the comment
      */
     getReplies(): FThreadComment[] | undefined {
-        return this._thread.children?.map((child) => this._injector.createInstance(FThreadComment, child));
+        const range = this._getRef();
+        const comments = this._threadCommentModel.getCommentWithChildren(this._thread.unitId, this._thread.subUnitId, range.startRow, range.startColumn);
+
+        return comments?.children?.map((child) => this._injector.createInstance(FThreadComment, child));
     }
 
     /**
@@ -70,9 +82,8 @@ export class FThreadComment {
         if (!worksheet) {
             return null;
         }
-        const ref = this._parent?.ref || (this._thread as IThreadComment).ref;
-        const range = deserializeRangeWithSheet(ref);
-        return this._injector.createInstance(FRange, workbook, worksheet, range.range);
+        const range = this._getRef();
+        return this._injector.createInstance(FRange, workbook, worksheet, range);
     }
 
     /**
@@ -103,8 +114,9 @@ export class FThreadComment {
      * @param content The new content of the comment
      * @returns success or not
      */
-    update(content: IDocumentBody): Promise<boolean> {
-        return this._commandService.executeCommand(
+    async update(content: IDocumentBody): Promise<boolean> {
+        const dt = getDT();
+        const res = await this._commandService.executeCommand(
             UpdateCommentCommand.id,
             {
                 unitId: this._thread.unitId,
@@ -113,10 +125,12 @@ export class FThreadComment {
                     commentId: this._thread.id,
                     text: content,
                     updated: true,
-                    updateT: getDT(),
+                    updateT: dt,
                 },
             } as IUpdateCommentCommandParams
         );
+
+        return res;
     }
 
     /**

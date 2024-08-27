@@ -66,7 +66,6 @@ interface IDistance {
 interface INearestCache {
     nearestNodeList: INodeInfo[];
     nearestNodeDistanceList: IDistance[];
-    nearestNodeDistanceY: number;
 }
 
 export interface IFindNodeRestrictions {
@@ -292,7 +291,7 @@ export class DocumentSkeleton extends Skeleton {
             index += g.count;
         }
 
-        return index;
+        return position.isBack ? index : (index + glyph!.count);
     }
 
     findNodePositionByCharIndex(charIndex: number, isBack: boolean = true, segmentId = '', segmentPIndex = -1): Nullable<INodePosition> {
@@ -371,13 +370,9 @@ export class DocumentSkeleton extends Skeleton {
 
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
-        const { divide, line, column, section, isBack, segmentPage, pageType, path } = position;
+        const { divide, line, column, section, segmentPage, pageType, path } = position;
 
         let { glyph } = position;
-
-        if (isBack === false) {
-            glyph += 1;
-        }
 
         let skePage: Nullable<IDocumentSkeletonPage> = null;
 
@@ -510,7 +505,6 @@ export class DocumentSkeleton extends Skeleton {
         const cache: INearestCache = {
             nearestNodeList: [],
             nearestNodeDistanceList: [],
-            nearestNodeDistanceY: Number.POSITIVE_INFINITY,
         };
 
         const { pages, skeHeaders, skeFooters } = skeletonData;
@@ -731,6 +725,8 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         if (pointInPage) {
+            let nearestNodeDistanceY = Number.POSITIVE_INFINITY;
+
             for (const section of sections) {
                 const { columns } = section;
 
@@ -794,7 +790,7 @@ export class DocumentSkeleton extends Skeleton {
                                             };
                                         }
 
-                                        if (cache.nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
+                                        if (nearestNodeDistanceY !== Number.NEGATIVE_INFINITY) {
                                             cache.nearestNodeList = [];
                                             cache.nearestNodeDistanceList = [];
                                         }
@@ -812,17 +808,17 @@ export class DocumentSkeleton extends Skeleton {
                                             nestLevel,
                                         });
 
-                                        cache.nearestNodeDistanceY = Number.NEGATIVE_INFINITY;
+                                        nearestNodeDistanceY = Number.NEGATIVE_INFINITY;
                                         continue;
                                     }
 
-                                    if (distanceY < cache.nearestNodeDistanceY) {
-                                        cache.nearestNodeDistanceY = distanceY;
+                                    if (distanceY < nearestNodeDistanceY) {
+                                        nearestNodeDistanceY = distanceY;
                                         cache.nearestNodeList = [];
                                         cache.nearestNodeDistanceList = [];
                                     }
 
-                                    if (distanceY === cache.nearestNodeDistanceY) {
+                                    if (distanceY === nearestNodeDistanceY) {
                                         cache.nearestNodeList.push({
                                             node: glyph,
                                             segmentPage: pageType === DocumentSkeletonPageType.BODY ? -1 : pi,

@@ -149,7 +149,7 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: '2', f: null, si: null, p: null });
+            expect(cellData).toEqual({ v: '2', t: CellValueType.NUMBER, f: null, si: null, p: null });
         });
         it('Rich text cell', () => {
             const cell = {
@@ -272,7 +272,7 @@ describe('Test EndEditController', () => {
 
         it('test isRichText util', () => {
             const cellBody = {
-                dataStream: '11111111\r\n',
+                dataStream: 'qqqqqq\r\n',
                 textRuns: [
                     {
                         ts: {
@@ -297,10 +297,143 @@ describe('Test EndEditController', () => {
             // textRuns acts on the entire string
             expect(isRichTextRes).toBe(false);
             const anotherCellBody = Tools.deepClone(cellBody);
-            anotherCellBody.dataStream = `111${anotherCellBody.dataStream}`;
+            anotherCellBody.dataStream = `${anotherCellBody.dataStream}qqq`;
             // textRuns works on parts of strings
             const isRichTextRes2 = isRichText(anotherCellBody);
             expect(isRichTextRes2).toBe(true);
+        });
+
+        it('test number can not set style', () => {
+            const dataStreamOnlyHaveNumber = {
+                id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                documentStyle: {
+                    pageSize: {
+                        width: 320.4903259277344,
+                    },
+                    marginTop: 0,
+                    marginBottom: 1,
+                    marginRight: 2,
+                    marginLeft: 2,
+                    renderConfig: {
+                        verticalAlign: 0,
+                        horizontalAlign: 0,
+                        wrapStrategy: 0,
+                        background: {},
+                        centerAngle: 0,
+                        vertexAngle: 0,
+                    },
+                },
+                body: {
+                    dataStream: '111111111111111\r\n',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 15,
+                            ts: {
+                                fs: 28,
+                            },
+                        },
+                    ],
+                    paragraphs: [
+                        {
+                            startIndex: 15,
+                            paragraphStyle: {
+                                horizontalAlign: 0,
+                            },
+                        },
+                    ],
+                    customRanges: [],
+                    customDecorations: [],
+                },
+                drawings: {},
+                drawingsOrder: [],
+                settings: {
+                    zoomRatio: 1,
+                },
+                resources: [
+                    {
+                        name: 'SHEET_THREAD_COMMENT_PLUGIN',
+                        data: '{}',
+                    },
+                    {
+                        name: 'DOC_HYPER_LINK_PLUGIN',
+                        data: '{"links":[]}',
+                    },
+                    {
+                        name: 'SHEET_AuthzIoMockService_PLUGIN',
+                        data: '{}',
+                    },
+                ],
+            };
+            const res = getCellDataByInputCell({}, { p: dataStreamOnlyHaveNumber });
+            // Because the previous cell had no style, and the value set now can be converted to a number, the style set this time is not retained.
+            expect(res?.s).toBeUndefined();
+
+            const dataStreamHaveString = {
+                id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                documentStyle: {
+                    pageSize: {
+                        width: 220.712890625,
+                    },
+                    marginTop: 0,
+                    marginBottom: 1,
+                    marginRight: 2,
+                    marginLeft: 2,
+                    renderConfig: {
+                        verticalAlign: 0,
+                        horizontalAlign: 0,
+                        wrapStrategy: 0,
+                        background: {},
+                        centerAngle: 0,
+                        vertexAngle: 0,
+                    },
+                },
+                body: {
+                    dataStream: 'qqqqqwwww\r\n',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 9,
+                            ts: {
+                                fs: 28,
+                            },
+                        },
+                    ],
+                    paragraphs: [
+                        {
+                            startIndex: 9,
+                            paragraphStyle: {
+                                horizontalAlign: 0,
+                            },
+                        },
+                    ],
+                    customRanges: [],
+                    customDecorations: [],
+                },
+                drawings: {},
+                drawingsOrder: [],
+                settings: {
+                    zoomRatio: 1,
+                },
+                resources: [
+                    {
+                        name: 'SHEET_THREAD_COMMENT_PLUGIN',
+                        data: '{}',
+                    },
+                    {
+                        name: 'DOC_HYPER_LINK_PLUGIN',
+                        data: '{"links":[]}',
+                    },
+                    {
+                        name: 'SHEET_AuthzIoMockService_PLUGIN',
+                        data: '{}',
+                    },
+                ],
+            };
+            const res2 = getCellDataByInputCell({}, { p: dataStreamHaveString });
+            expect(res2?.s).toStrictEqual({
+                fs: 28,
+            });
         });
     });
 });

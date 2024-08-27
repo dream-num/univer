@@ -46,6 +46,11 @@ describe('Test bitlshift function', () => {
             const shiftAmount = NumberValueObject.create(2);
             const result = testFunction.calculate(number, shiftAmount);
             expect(result.getValue()).toBe(ErrorType.VALUE);
+
+            const number2 = NumberValueObject.create(4);
+            const shiftAmount2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(number2, shiftAmount2);
+            expect(result2.getValue()).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
@@ -67,6 +72,18 @@ describe('Test bitlshift function', () => {
             const shiftAmount = NumberValueObject.create(2);
             const result = testFunction.calculate(number, shiftAmount);
             expect(result.getValue()).toBe(ErrorType.NAME);
+
+            const number2 = NumberValueObject.create(4);
+            const shiftAmount2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(number2, shiftAmount2);
+            expect(result2.getValue()).toBe(ErrorType.NAME);
+        });
+
+        it('Result > 281474976710655', () => {
+            const number = NumberValueObject.create(2);
+            const shiftAmount = NumberValueObject.create(52);
+            const result = testFunction.calculate(number, shiftAmount);
+            expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
         it('Value is array', () => {

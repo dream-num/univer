@@ -34,6 +34,35 @@ describe('Test hex2bin function', () => {
             expect(result.getValue()).toBe('00001111');
         });
 
+        it('Number < -512 || > 511 || < 0', () => {
+            const number = StringValueObject.create('FFFFF00000');
+            const result = testFunction.calculate(number);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+
+            const number2 = StringValueObject.create('FFFFFFFFF0');
+            const result2 = testFunction.calculate(number2);
+            expect(result2.getValue()).toBe('1111110000');
+        });
+
+        it('Places test', () => {
+            const number = NumberValueObject.create(22);
+            const places = NumberValueObject.create(1);
+            const result = testFunction.calculate(number, places);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+
+            const places2 = NumberValueObject.create(-1);
+            const result2 = testFunction.calculate(number, places2);
+            expect(result2.getValue()).toBe(ErrorType.NUM);
+
+            const places3 = BooleanValueObject.create(true);
+            const result3 = testFunction.calculate(number, places3);
+            expect(result3.getValue()).toBe(ErrorType.VALUE);
+
+            const places4 = StringValueObject.create('test');
+            const result4 = testFunction.calculate(number, places4);
+            expect(result4.getValue()).toBe(ErrorType.VALUE);
+        });
+
         it('Value is number string', () => {
             const number = StringValueObject.create('-0.5');
             const places = NumberValueObject.create(8);

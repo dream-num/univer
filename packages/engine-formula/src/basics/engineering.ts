@@ -16,6 +16,10 @@
 
 // eslint-disable-next-line ts/no-namespace
 export namespace BESSEL {
+    interface IFunctionType {
+        (x: number): number;
+    }
+
     const W = 0.636619772;
 
     function _horner(arr: number[], v: number): number {
@@ -51,8 +55,8 @@ export namespace BESSEL {
         return f2;
     }
 
-    function _bessel_wrap(bessel0: Function, bessel1: Function, nonzero: number, sign: number) {
-        return function bessel(x: number, n: number) {
+    function _bessel_wrap(bessel0: IFunctionType, bessel1: IFunctionType, nonzero: number, sign: number) {
+        return function bessel(x: number, n: number): number {
             if (nonzero) {
                 if (x === 0) {
                     return nonzero === 1 ? -Infinity : Infinity;
@@ -200,6 +204,11 @@ export namespace BESSEL {
                     if (j === _n) {
                         ret = bjp;
                     }
+
+                    // After more than 100 iterations, the result is 0
+                    if ((m - j) > 100 && ret === 0) {
+                        return Number.NaN;
+                    }
                 }
 
                 sum = 2.0 * sum - bj;
@@ -333,6 +342,11 @@ export namespace BESSEL {
                 }
 
                 if (j === _n) ret = bip;
+
+                // After more than 100 iterations, the result is 0
+                if ((m - j) > 100 && ret === 0) {
+                    return Number.NaN;
+                }
             }
 
             ret *= besseli(x, 0) / bi;
@@ -398,11 +412,11 @@ export function erf(x: number): number {
         -2.8e-17];
 
     let _x = x;
-    let isneg = false;
+    let isNeg = false;
 
     if (_x < 0) {
         _x = -_x;
-        isneg = true;
+        isNeg = true;
     }
 
     const t = 2 / (2 + _x);
@@ -420,5 +434,5 @@ export function erf(x: number): number {
 
     const res = t * Math.exp(-_x * _x + 0.5 * (cof[0] + ty * d) - dd);
 
-    return isneg ? res - 1 : 1 - res;
+    return isNeg ? res - 1 : 1 - res;
 };

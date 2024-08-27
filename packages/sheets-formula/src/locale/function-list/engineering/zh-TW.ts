@@ -331,8 +331,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要檢定閾值的值。' },
+            step: { name: '閾值', detail: '這是閾值。如果您省略閾值的值，GESTEP 會使用零。' },
         },
     },
     HEX2BIN: {
@@ -386,8 +386,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得絕對值的複數。' },
         },
     },
     IMAGINARY: {
@@ -400,8 +399,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得虛係數的複數。' },
         },
     },
     IMARGUMENT: {
@@ -414,8 +412,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求自變數 theta 的複數。' },
         },
     },
     IMCONJUGATE: {
@@ -428,8 +425,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得共軛的複數。' },
         },
     },
     IMCOS: {
@@ -442,8 +438,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得餘弦值的複數。' },
         },
     },
     IMCOSH: {
@@ -456,13 +451,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得雙曲餘弦值的複數。' },
         },
     },
     IMCOT: {
-        description: '傳回複數的餘弦值',
-        abstract: '傳回複數的餘弦值',
+        description: '傳回複數的餘切值',
+        abstract: '傳回複數的餘切值',
         links: [
             {
                 title: '教導',
@@ -470,8 +464,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得餘切值的複數。' },
         },
     },
     IMCSC: {
@@ -484,8 +477,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得餘割值的複數。' },
         },
     },
     IMCSCH: {
@@ -498,8 +490,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得雙曲餘割值的複數。' },
         },
     },
     IMDIV: {
@@ -512,8 +503,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '複數分子', detail: '這是複數分子或被除數。' },
+            inumber2: { name: '複數分母', detail: '這是複數分母或除數。' },
         },
     },
     IMEXP: {
@@ -526,8 +517,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得指數的複數。' },
         },
     },
     IMLN: {
@@ -540,8 +530,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得自然對數的複數。' },
         },
     },
     IMLOG10: {
@@ -554,8 +543,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得常用對數的複數。' },
         },
     },
     IMLOG2: {
@@ -568,8 +556,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得底數為 2 之對數的複數。' },
         },
     },
     IMPOWER: {
@@ -582,13 +569,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要遞增至乘冪的複數。' },
+            number: { name: '數值', detail: '這是要遞增至複數的乘冪。' },
         },
     },
     IMPRODUCT: {
-        description: '傳回 2 到 255 的複數的乘積',
-        abstract: '傳回 2 到 255 的複數的乘積',
+        description: '傳回多個複數的乘積',
+        abstract: '傳回多個複數的乘積',
         links: [
             {
                 title: '教導',
@@ -596,8 +583,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '複數1', detail: '這是 1 到 255 個要乘以的複數。' },
+            inumber2: { name: '複數2', detail: '這是 1 到 255 個要乘以的複數。' },
         },
     },
     IMREAL: {
@@ -610,13 +597,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得實係數的複數。' },
         },
     },
     IMSEC: {
-        description: '傳回複數的正切值',
-        abstract: '傳回複數的正切值',
+        description: '傳回複數的正割值',
+        abstract: '傳回複數的正割值',
         links: [
             {
                 title: '教導',
@@ -624,13 +610,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得正割值的複數。' },
         },
     },
     IMSECH: {
-        description: '傳回複數的雙曲正切值',
-        abstract: '傳回複數的雙曲正切值',
+        description: '傳回複數的雙曲正割值',
+        abstract: '傳回複數的雙曲正割值',
         links: [
             {
                 title: '教導',
@@ -638,8 +623,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得雙曲正割值的複數。' },
         },
     },
     IMSIN: {
@@ -652,8 +636,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得正弦值的複數。' },
         },
     },
     IMSINH: {
@@ -666,8 +649,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得雙曲正弦值的複數。' },
         },
     },
     IMSQRT: {
@@ -680,8 +662,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得平方根的複數。' },
         },
     },
     IMSUB: {
@@ -694,8 +675,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '複數1', detail: '複數1。' },
+            inumber2: { name: '複數2', detail: '複數2。' },
         },
     },
     IMSUM: {
@@ -708,8 +689,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '複數1', detail: '這是 1 到 255 個要相加的複數。' },
+            inumber2: { name: '複數2', detail: '這是 1 到 255 個要相加的複數。' },
         },
     },
     IMTAN: {
@@ -722,8 +703,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '複數', detail: '這是要求得正切值的複數。' },
         },
     },
     OCT2BIN: {

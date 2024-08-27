@@ -33,6 +33,12 @@ describe('Test bin2dec function', () => {
             expect(result.getValue()).toBe(100);
         });
 
+        it('Number length is 10', () => {
+            const number = NumberValueObject.create(1100100000);
+            const result = testFunction.calculate(number);
+            expect(result.getValue()).toBe(-224);
+        });
+
         it('Value is number string', () => {
             const number = StringValueObject.create('-0.5');
             const result = testFunction.calculate(number);

@@ -15,8 +15,7 @@
  */
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ColorKit,
-    Disposable,
+import { ColorKit, Disposable,
     ICommandService,
     ILogService,
     Inject,
@@ -73,7 +72,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         // Do not intercept v:null and add t: CellValueType.NUMBER. When the cell =TODAY() is automatically filled, the number format will recognize the Number type and parse it as 1900-01-00 date format.
     }
 
-    private _initSkeletonChangeListener() {
+    private _initSkeletonChangeListener(): void {
         this.disposeWithMe(
             this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
                 if (param == null) {
@@ -92,11 +91,11 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         );
     }
 
-    protected _changeRuntime(skeleton: SpreadsheetSkeleton) {
+    protected _changeRuntime(skeleton: SpreadsheetSkeleton): void {
         this._skeleton = skeleton;
     }
 
-    private _initInterceptorEditorStart() {
+    private _initInterceptorEditorStart(): void {
         this.disposeWithMe(
             toDisposable(
                 this._editorBridgeService.interceptor.intercept(
@@ -158,7 +157,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         );
     }
 
-    private _commandExecutedListener() {
+    private _commandExecutedListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
             if (command.id === SetFormulaCalculationResultMutation.id || (command.id === SetArrayFormulaDataMutation.id && options && options.remove)
             ) {
@@ -187,7 +186,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         );
     }
 
-    private _displayArrayFormulaRangeShape(matrixRange: IObjectMatrixPrimitiveType<IRange>, row: number, col: number, unitId: string, subUnitId: string, worksheet: Worksheet, cellInfo: Nullable<ICellDataForSheetInterceptor>) {
+    private _displayArrayFormulaRangeShape(matrixRange: IObjectMatrixPrimitiveType<IRange>, row: number, col: number, unitId: string, subUnitId: string, worksheet: Worksheet, cellInfo: Nullable<ICellDataForSheetInterceptor>): Nullable<ICellDataForSheetInterceptor> {
         new ObjectMatrix(matrixRange).forValue((rowIndex, columnIndex, range) => {
             if (range == null) {
                 return true;
@@ -230,7 +229,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         return cellInfo;
     }
 
-    private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string) {
+    private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string): void {
         const styleSheet = this._themeService.getCurrentTheme();
         const fill = new ColorKit(styleSheet.colorWhite).setAlpha(0).toString();
         const style = {
@@ -264,7 +263,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         this._previousShape = control;
     }
 
-    private _removeArrayFormulaRangeShape() {
+    private _removeArrayFormulaRangeShape(): void {
         if (this._previousShape == null) {
             return;
         }
@@ -272,7 +271,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         this._previousShape = null;
     }
 
-    private _refreshArrayFormulaRangeShape(unitId: string, range: IRange) {
+    private _refreshArrayFormulaRangeShape(unitId: string, range: IRange): void {
         if (this._previousShape) {
             const { startRow, endRow, startColumn, endColumn } = this._previousShape.getRange();
             const range = { startRow, endRow, startColumn, endColumn };
@@ -281,7 +280,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         }
     }
 
-    private _checkCurrentSheet(unitId: string, subUnitId: string) {
+    private _checkCurrentSheet(unitId: string, subUnitId: string): boolean {
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
         if (!skeleton) return false;
 
@@ -295,7 +294,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         return false;
     }
 
-    private _refreshArrayFormulaRangeShapeByRanges(unitId: string, subUnitId: string, ranges: IRange[]) {
+    private _refreshArrayFormulaRangeShapeByRanges(unitId: string, subUnitId: string, ranges: IRange[]): void {
         if (!this._checkCurrentSheet(unitId, subUnitId)) return;
 
         if (!this._previousShape) return;
@@ -325,7 +324,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         }
     }
 
-    private _refreshArrayFormulaRangeShapeByRow(unitId: string, subUnitId: string, rowAutoHeightInfo: IRowAutoHeightInfo[]) {
+    private _refreshArrayFormulaRangeShapeByRow(unitId: string, subUnitId: string, rowAutoHeightInfo: IRowAutoHeightInfo[]): void {
         if (!this._checkCurrentSheet(unitId, subUnitId)) return;
 
         if (!this._previousShape) return;

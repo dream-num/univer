@@ -47,3 +47,5 @@ export enum ErrorType {
 }
 
 export const ERROR_TYPE_SET = new Set(Object.values(ErrorType));
+
+export const ERROR_TYPE_COUNT_ARRAY = [...new Set(Object.values(ErrorType).map((error) => error.length))];

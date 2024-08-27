@@ -34,6 +34,31 @@ describe('Test bin2hex function', () => {
             expect(result.getValue()).toBe('00FB');
         });
 
+        it('Number length is 10', () => {
+            const number = NumberValueObject.create(1100100000);
+            const result = testFunction.calculate(number);
+            expect(result.getValue()).toBe('FFFFFFFF20');
+        });
+
+        it('Places test', () => {
+            const number = NumberValueObject.create(11111011);
+            const places = NumberValueObject.create(1);
+            const result = testFunction.calculate(number, places);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+
+            const places2 = NumberValueObject.create(-1);
+            const result2 = testFunction.calculate(number, places2);
+            expect(result2.getValue()).toBe(ErrorType.NUM);
+
+            const places3 = BooleanValueObject.create(true);
+            const result3 = testFunction.calculate(number, places3);
+            expect(result3.getValue()).toBe(ErrorType.VALUE);
+
+            const places4 = StringValueObject.create('test');
+            const result4 = testFunction.calculate(number, places4);
+            expect(result4.getValue()).toBe(ErrorType.VALUE);
+        });
+
         it('Value is number string', () => {
             const number = StringValueObject.create('-0.5');
             const places = NumberValueObject.create(4);

@@ -25,7 +25,7 @@ export class Dec2hex extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(number: BaseValueObject, places?: BaseValueObject) {
+    override calculate(number: BaseValueObject, places?: BaseValueObject): BaseValueObject {
         if (number.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);
         }

@@ -26,7 +26,7 @@ export class Erf extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(lowerLimit: BaseValueObject, upperLimit?: BaseValueObject) {
+    override calculate(lowerLimit: BaseValueObject, upperLimit?: BaseValueObject): BaseValueObject {
         let result;
 
         if (upperLimit) {

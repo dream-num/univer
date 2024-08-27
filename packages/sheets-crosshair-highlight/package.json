@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/sheets-crosshair-highlight",
-    "version": "0.0.1",
-    "private": true,
+    "version": "0.2.9",
+    "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -76,9 +76,7 @@
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.77",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

@@ -50,7 +50,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
         this._initHeaderResizePermissionInterceptor();
         this._initRangeFillPermissionInterceptor();
         this._initRangeMovePermissionInterceptor();
-        this._initFreezePermissionInterceptor();
+        // this._initFreezePermissionInterceptor();
     }
 
     private _initHeaderMovePermissionInterceptor() {

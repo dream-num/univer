@@ -36,7 +36,10 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
 
         const { selections, type, unitId, subUnitId } = params;
         const selectionManagerService = getSelectionsService(accessor);
-        selectionManagerService.setSelections(unitId, subUnitId, selections, type);
+        // must be a new selectionData
+        // this._ensureWorkbookSelection(unitIdOrSelections).setSelections would clear selection Data on selecitonManagerInstance.
+        // see issues#2199
+        selectionManagerService.setSelections(unitId, subUnitId, [...selections], type);
 
         return true;
     },

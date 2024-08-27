@@ -15,6 +15,7 @@
  */
 
 import type {
+    IFreeze,
     IInterceptor,
     Injector,
     IRange,
@@ -150,7 +151,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     private _selectionMoving = false;
 
-    get selectionMoving() {
+    get selectionMoving(): boolean {
         return this._selectionMoving;
     }
 
@@ -170,7 +171,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._initMoving();
     }
 
-    private _initMoving() {
+    private _initMoving(): void {
         this.disposeWithMe(this._selectionMoving$.subscribe(() => {
             this._selectionMoving = true;
         }));
@@ -180,19 +181,19 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }));
     }
 
-    protected _setSelectionStyle(style: ISelectionStyle) {
+    protected _setSelectionStyle(style: ISelectionStyle): void {
         this._selectionStyle = style;
     }
 
     /**
      * Reset this._selectionStyle to default normal selection style
      */
-    protected _resetSelectionStyle() {
+    protected _resetSelectionStyle(): void {
         this._setSelectionStyle(getDefaultNormalSelectionStyle(this._themeService));
     }
 
     /** @deprecated This should not be provided by the selection render service. */
-    getViewPort() {
+    getViewPort(): Viewport {
         return this._activeViewport!;
     }
 
@@ -204,7 +205,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * Add a selection in spreadsheet, create a new SelectionControl and then update this control by range derives from selection.
      * @param {ISelectionWithCoordAndStyle} selection
      */
-    protected _addSelectionControlBySelectionData(selection: ISelectionWithCoordAndStyle) {
+    protected _addSelectionControlBySelectionData(selection: ISelectionWithCoordAndStyle): void {
         const skeleton = this._skeleton;
         const style = selection.style ?? getDefaultNormalSelectionStyle(this._themeService);
         const scene = this._scene;
@@ -219,7 +220,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         // TODO: memory leak? This extension seems never released.
         // eslint-disable-next-line no-new
         new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector, {
-            selectionMoveEnd: () => {
+            selectionMoveEnd: (): void => {
                 this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
             },
         });
@@ -243,7 +244,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * selectionData[i] syncs selectionControls[i]
      * @param selections
      */
-    updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
+    updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void {
         const selectionControls = this.getSelectionControls();
         if (!selectionControls) {
             return;
@@ -271,17 +272,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
     }
 
-    refreshSelectionMoveStart() {
+    refreshSelectionMoveStart(): void {
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
     }
 
-    protected _changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport) {
+    protected _changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void {
         this._skeleton = skeleton;
         this._scene = scene;
         this._activeViewport = viewport || scene?.getViewports()[0];
     }
 
-    getSkeleton() {
+    getSkeleton(): SpreadsheetSkeleton {
         return this._skeleton;
     }
 
@@ -300,11 +301,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         });
     }
 
-    getSelectionControls() {
+    getSelectionControls(): SelectionControl[] {
         return this._selectionControls;
     }
 
-    protected _clearSelectionControls() {
+    protected _clearSelectionControls(): void {
         const allSelectionControls = this._selectionControls;
         for (const control of allSelectionControls) {
             control.dispose();
@@ -313,12 +314,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._selectionControls.length = 0; // clear currentSelectionControls
     }
 
-    protected _getFreeze() {
+    protected _getFreeze(): Nullable<IFreeze> {
         const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
         return freeze;
     }
 
-    protected _getViewportByCell(row?: number, column?: number) {
+    protected _getViewportByCell(row?: number, column?: number): Nullable<Viewport> {
         if (row === undefined || column === undefined) {
             return null;
         }
@@ -371,7 +372,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
     }
 
-    endSelection() {
+    endSelection(): void {
         this._clearUpdatingListeners();
         this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
         // when selection mouse up, enable the short cut service
@@ -381,7 +382,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     /**
      * Clear existed selections.
      */
-    protected _reset() {
+    protected _reset(): void {
         this._clearSelectionControls();
         this._downObserver?.unsubscribe();
         this._downObserver = null;
@@ -723,7 +724,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         offsetY: number,
         activeSelectionControl: Nullable<SelectionControl>,
         rangeType: RANGE_TYPE
-    ) {
+    ): void {
         const skeleton = this._skeleton;
         const scene = this._scene;
         const [unitId, sheetId] = skeleton.getLocation();
@@ -756,7 +757,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const cursorCellRangeInfo = this._getCellRangeByCursorPosition(offsetX, offsetY, scaleX, scaleY, scrollXY);
         if (!cursorCellRangeInfo) {
-            return false;
+            return;
         }
 
         const { rangeWithCoord: cursorCellRange } = cursorCellRangeInfo;
@@ -774,7 +775,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
 
         if (!newSelectionRange) {
-            return false;
+            return;
         }
 
         const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
@@ -811,7 +812,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * @param newSelectionRange
      * @param highlight
      */
-    protected _updateSelectionControlByRange(control: SelectionControl, newSelectionRange: IRangeWithCoord, highlight: Nullable<ISelectionCellWithMergeInfo>) {
+    protected _updateSelectionControlByRange(control: SelectionControl, newSelectionRange: IRangeWithCoord, highlight: Nullable<ISelectionCellWithMergeInfo>): void {
         // const skeleton = this._skeleton;
         // const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
@@ -821,7 +822,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         control.updateRange(newSelectionRange, highlight);
     }
 
-    protected _clearUpdatingListeners() {
+    protected _clearUpdatingListeners(): void {
         const scene = this._scene;
         scene.enableEvent();
 
@@ -836,7 +837,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._scrollTimer?.dispose();
     }
 
-    protected _addEndingListeners() {
+    protected _addEndingListeners(): void {
         const scene = this._scene!;
         const mainScene = scene.getEngine()?.activeScene;
         if (!mainScene || mainScene === scene) {
@@ -924,7 +925,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         };
     }
 
-    protected _checkClearPreviousControls(evt: IPointerEvent | IMouseEvent) {
+    protected _checkClearPreviousControls(evt: IPointerEvent | IMouseEvent): void {
         const curControls = this.getSelectionControls();
         if (curControls.length === 0) return;
 
@@ -1000,7 +1001,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * Reset all this.selectionControls by selectionsData.
      * @param selectionsData
      */
-    protected _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]) {
+    protected _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]): void {
         const selections = selectionsData.map((selectionWithStyle) => {
             const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
             selectionData.style = getDefaultNormalSelectionStyle(this._themeService);
@@ -1019,12 +1020,12 @@ export function getAllSelection(skeleton: SpreadsheetSkeleton): ISelectionWithSt
             endColumn: skeleton.getColumnCount() - 1,
             rangeType: RANGE_TYPE.ALL,
         },
-        primary: getTopLeftSelection(skeleton).primary,
+        primary: getTopLeftSelection(skeleton)!.primary,
         style: null,
     };
 }
 
-export function getTopLeftSelection(skeleton: SpreadsheetSkeleton) {
+export function getTopLeftSelection(skeleton: SpreadsheetSkeleton): Nullable<ISelectionWithStyle> {
     const mergeData = skeleton.mergeData;
     return (
         transformCellDataToSelectionData(0, 0, mergeData) || {

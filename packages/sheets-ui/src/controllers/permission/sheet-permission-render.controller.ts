@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, IPermissionService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { ComponentManager } from '@univerjs/ui';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
 import { RangeProtectionRuleModel } from '@univerjs/sheets';
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
@@ -32,25 +32,17 @@ export interface IUniverSheetsPermissionMenuConfig {
     menu: MenuConfig;
 }
 
-export const DefaultSheetPermissionMenuConfig = {};
-
-@OnLifecycle(LifecycleStages.Rendered, SheetPermissionRenderManagerController)
 export class SheetPermissionRenderManagerController extends Disposable {
-    constructor(
-        private readonly _config: Partial<IUniverSheetsPermissionMenuConfig>,
-        @IMenuService private _menuService: IMenuService,
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(Injector) private readonly _injector: Injector
-    ) {
+    constructor(@Inject(ComponentManager) private _componentManager: ComponentManager) {
         super();
         this._init();
     }
 
-    private _init() {
+    private _init(): void {
         this._initComponents();
     }
 
-    private _initComponents() {
+    private _initComponents(): void {
         ([
             [permissionMenuIconKey, ProtectSingle],
             [permissionDeleteIconKey, DeleteSingle],
@@ -96,7 +88,7 @@ export class SheetPermissionRenderController extends Disposable implements IRend
         });
     }
 
-    private _initRender() {
+    private _initRender(): void {
         const spreadsheetRender = this._context.mainComponent as Spreadsheet;
         if (spreadsheetRender) {
             if (!spreadsheetRender.getExtensionByKey(RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY)) {
@@ -108,7 +100,7 @@ export class SheetPermissionRenderController extends Disposable implements IRend
         }
     }
 
-    private _initSkeleton() {
+    private _initSkeleton(): void {
         const markDirtySkeleton = () => {
             this._sheetSkeletonManagerService.reCalculate();
             this._context.mainComponent?.makeDirty();

@@ -82,12 +82,14 @@ import { SheetsDefinedNameController } from './controllers/defined-name/defined-
 import { MoveRangeRenderController } from './controllers/move-range.controller';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 import { SheetScrollManagerService } from './services/scroll-manager.service';
+import { SelectAllService } from './services/select-all/select-all.service';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
     static override type = UniverInstanceType.UNIVER_SHEET;
 
+    /** @ignore */
     constructor(
         private readonly _config: Partial<IUniverSheetsUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
@@ -101,7 +103,6 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     override onStarting(): void {
         mergeOverrideWithDependencies([
-            // services
             [ShortcutExperienceService],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
             [ISheetClipboardService, { useClass: SheetClipboardService }],
@@ -111,15 +112,13 @@ export class UniverSheetsUIPlugin extends Plugin {
             [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
             [IAutoFillService, { useClass: AutoFillService }],
             [SheetPrintInterceptorService],
-
-            // This would be removed from global injector and moved into RenderUnit provider.
-            // [SheetSkeletonManagerService],
             [IStatusBarService, { useClass: StatusBarService }],
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [HoverManagerService],
             [DragManagerService],
             [SheetCanvasPopManagerService],
             [CellAlertManagerService],
+            [SelectAllService],
 
             // controllers
             [ActiveWorksheetController],
@@ -127,12 +126,9 @@ export class UniverSheetsUIPlugin extends Plugin {
             [FormulaEditorController],
             [SheetClipboardController],
             [SheetsRenderService],
-            [
-                SheetUIController,
-                {
-                    useFactory: () => this._injector.createInstance(SheetUIController, this._config),
-                },
-            ],
+            [SheetUIController, {
+                useFactory: (): SheetUIController => this._injector.createInstance(SheetUIController, this._config),
+            }],
             [StatusBarController],
             [AutoFillController],
             [FormatPainterController],
@@ -145,27 +141,22 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionInterceptorBaseController],
             [SheetPermissionInitController],
-            // [MoveRangeController],
+            [SheetPermissionRenderManagerController],
         ] as Dependency[], this._config.override).forEach((d) => this._injector.add(d));
-
-        this._injector.add(
-            [
-                SheetPermissionRenderManagerController,
-                {
-                    useFactory: () => this._injector.createInstance(SheetPermissionRenderManagerController, this._config),
-                },
-            ]
-
-        );
     }
 
     override onReady(): void {
-        this._markSheetAsFocused();
+        if (!this._config.disableAutoFocus) {
+            this._markSheetAsFocused();
+        }
+
         this._registerRenderBasics();
     }
 
     override onRendered(): void {
         this._registerRenderModules();
+
+        this._injector.get(SheetPermissionRenderManagerController);
     }
 
     private _registerRenderBasics(): void {
@@ -185,8 +176,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [HeaderMoveRenderController],
             [HeaderUnhideRenderController],
             [HeaderResizeRenderController],
-            // Caution: ScrollRenderController should placed before ZoomRenderController
-            // because ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
+            // Caution: ScrollRenderController should placed before ZoomRenderController.
             [SheetScrollManagerService],
             [SheetsScrollRenderController],
             [HeaderFreezeRenderController],
@@ -217,10 +207,10 @@ export class UniverSheetsUIPlugin extends Plugin {
         });
     }
 
-    private _markSheetAsFocused() {
+    private _markSheetAsFocused(): void {
         const univerInstanceService = this._univerInstanceService;
-        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+        this.disposeWithMe(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(filter((v) => !!v))
-            .subscribe((workbook) => univerInstanceService.focusUnit(workbook!.getUnitId()));
+            .subscribe((workbook) => univerInstanceService.focusUnit(workbook!.getUnitId())));
     }
 }

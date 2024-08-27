@@ -69,6 +69,7 @@ import { SheetContextMenuMobileRenderController } from './controllers/render-con
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 import { MobileSheetsSelectionRenderService } from './services/selection/mobile-selection-render.service';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
+import { SelectAllService } from './services/select-all/select-all.service';
 
 /**
  * @ignore
@@ -92,16 +93,12 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
     override onStarting(): void {
         (
             [
-                // services
                 [ShortcutExperienceService],
                 [ISheetClipboardService, { useClass: SheetClipboardService }],
                 [ISheetBarService, { useClass: SheetBarService }],
                 [IFormatPainterService, { useClass: FormatPainterService }],
                 [IAutoFillService, { useClass: AutoFillService }],
                 [SheetPrintInterceptorService],
-
-                // This would be removed from global injector and moved into RenderUnit provider.
-                // [SheetSkeletonManagerService],
                 [ISheetSelectionRenderService, { useClass: MobileSheetsSelectionRenderService }],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
@@ -109,21 +106,16 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [DragManagerService],
                 [SheetCanvasPopManagerService],
                 [CellAlertManagerService],
+                [SelectAllService],
 
-                // controllers
                 [ActiveWorksheetController],
                 [AutoHeightController],
                 [SheetClipboardController],
                 [SheetsRenderService],
-                [
-                    SheetUIMobileController,
-                    {
-                        useFactory: () => this._injector.createInstance(SheetUIMobileController, this._config),
-                    },
-                ],
+                [SheetUIMobileController, {
+                    useFactory: (): SheetUIMobileController => this._injector.createInstance(SheetUIMobileController, this._config),
+                }],
                 [StatusBarController],
-                // [AutoFillController],
-                // [FormatPainterController],
 
                 // permission
                 [SheetPermissionPanelModel],
@@ -132,18 +124,11 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [SheetPermissionInterceptorClipboardController],
                 [SheetPermissionInterceptorBaseController],
                 [SheetPermissionInitController],
+                [SheetPermissionRenderManagerController, {
+                    useFactory: (): SheetPermissionRenderManagerController => this._injector.createInstance(SheetPermissionRenderManagerController, this._config),
+                }],
             ] as Dependency[]
         ).forEach((d) => this._injector.add(d));
-
-        this._injector.add(
-            [
-                SheetPermissionRenderManagerController,
-                {
-                    useFactory: () => this._injector.createInstance(SheetPermissionRenderManagerController, this._config),
-                },
-            ]
-
-        );
     }
 
     override onReady(): void {
@@ -177,8 +162,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             [HeaderMoveRenderController],
             [HeaderFreezeRenderController],
             // Caution: ScrollRenderController should placed before ZoomRenderController
-            // because ZoomRenderController would change scrollInfo in currentSkeletonBefore$
-            // currentSkeletonBefore$ --> ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
+            // because ZoomRenderController would change scrollInfo in currentSkeletonBefore$.
             [MobileSheetsScrollRenderController],
             [SheetsZoomRenderController],
             [FormatPainterRenderController],
@@ -199,12 +183,12 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
         });
     }
 
-    private _markSheetAsFocused() {
+    private _markSheetAsFocused(): void {
         const univerInstanceService = this._univerInstanceService;
-        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+        this.disposeWithMe(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(filter((v) => !!v))
             .subscribe((workbook) => {
                 univerInstanceService.focusUnit(workbook!.getUnitId());
-            });
+            }));
     }
 }

@@ -30,9 +30,10 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import type {
+    ISetSelectionsOperationParams,
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
-import { InsertSheetCommand, RemoveSheetCommand, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import { getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
 import type { IAddSheetDataValidationCommandParams, IDataValidationResCache, IRemoveSheetAllDataValidationCommandParams, IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
 import { AddSheetDataValidationCommand, DataValidationModel, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
@@ -43,6 +44,7 @@ import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, Thre
 import { filter } from 'rxjs';
 import type { IFComponentKey } from './utils';
 import { FWorksheet } from './f-worksheet';
+import type { FRange } from './f-range';
 
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {
 
@@ -315,6 +317,27 @@ export class FWorkbook {
             this._workbook.getUnitId()
         );
     }
+
+    setActiveRange(range: FRange): void {
+        const sheet = this.getActiveSheet();
+        const sheetId = sheet.getSheetId();
+
+        const worksheet = sheetId ? this._workbook.getSheetBySheetId(sheetId) : this._workbook.getActiveSheet(true);
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
+
+        const setSelectionOperationParams: ISetSelectionsOperationParams = {
+            unitId: this.getId(),
+            subUnitId: sheet.getSheetId(),
+
+            selections: [range].map((r) => ({ range: r.getRange(), primary: getPrimaryForRange(r.getRange(), worksheet), style: null })),
+        };
+
+        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, setSelectionOperationParams);
+    }
+
+    setActiveSelection = this.setActiveRange;
 
     // region DataValidationHooks
     /**

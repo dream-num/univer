@@ -17,6 +17,7 @@
 import { Inject, Injector, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
 import { filter } from 'rxjs';
+import { FClipboardHooks } from './hooks/f-clipboard-hooks';
 import { FUndoRedoHooks } from './hooks/f-undoredo-hooks';
 
 export class FHooks {
@@ -90,4 +91,9 @@ export class FHooks {
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onRedo = FUndoRedoHooks.afterRedo.bind(this);
+
+    beforeCopy = FClipboardHooks.beforeCopy.bind(this);
+    afterCopy = FClipboardHooks.afterCopy.bind(this);
+    beforePaste = FClipboardHooks.beforePaste.bind(this);
+    afterPaste = FClipboardHooks.afterPaste.bind(this);
 }

@@ -84,6 +84,9 @@ export abstract class ThinScene extends Disposable {
     constructor(sceneKey: string) {
         super();
         this._sceneKey = sceneKey;
+        if (sceneKey.indexOf('workbook') > -1) {
+            console.log('new scene', sceneKey);
+        }
     }
 
     get classType() {
@@ -123,6 +126,7 @@ export abstract class ThinScene extends Disposable {
     }
 
     set width(num: number) {
+        this.sceneKey.indexOf('workbook') > -1 && console.log('setW', this._width, num);
         this._width = num;
     }
 

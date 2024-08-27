@@ -66,6 +66,7 @@ export class LifecycleService extends Disposable {
     }
 
     override dispose(): void {
+        console.log('life cycle dispose');
         this._lifecycle$.complete();
 
         super.dispose();

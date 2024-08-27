@@ -78,7 +78,10 @@ export class SheetsRenderService extends RxDisposable {
             });
 
         this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
-            .forEach((workbook) => this._createRenderer(workbook));
+            .forEach((workbook) => {
+                console.log('sheets render service _createRenderer');
+                this._createRenderer(workbook);
+            });
 
         this._instanceSrv.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))

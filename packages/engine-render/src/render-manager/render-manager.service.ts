@@ -123,6 +123,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     }
 
     override dispose() {
+        console.error('rms _renderMap.clear');
         super.dispose();
 
         this._renderMap.forEach((item) => this._disposeItem(item));
@@ -196,8 +197,10 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @returns renderUnit:IRender
      */
     createRender(unitId: string): IRender {
+        console.group(`createRender ${unitId}`);
         const renderer = this._createRender(unitId, new Engine());
         this._renderCreated$.next(renderer);
+        console.groupEnd();
         return renderer;
     }
 
@@ -278,9 +281,12 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 scene,
                 isMainScene,
             });
+            this._addRenderUnit(unitId, renderUnit);
 
             // init deps
+            console.group('_tryAddRenderDependencies');
             this._tryAddRenderDependencies(renderUnit, ctorOfDeps);
+            console.groupEnd();
         } else {
             // For slide pages
             renderUnit = {
@@ -297,18 +303,19 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                     return null;
                 },
             } as IRender;
+            this._addRenderUnit(unitId, renderUnit);
         }
 
-        this._addRenderUnit(unitId, renderUnit);
         return renderUnit;
     }
 
-    addRender(unitId: string, item: IRender) {
-        this._addRenderUnit(unitId, item);
+    addRender(unitId: string, renderUnit: IRender) {
+        this._addRenderUnit(unitId, renderUnit);
     }
 
-    private _addRenderUnit(unitId: string, item: IRender) {
-        this._renderMap.set(unitId, item);
+    private _addRenderUnit(unitId: string, renderUnit: IRender) {
+        console.info('rms set _renderMap', unitId);
+        this._renderMap.set(unitId, renderUnit);
     }
 
     removeRender(unitId: string) {

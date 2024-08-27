@@ -145,12 +145,31 @@ if (!IS_E2E) {
 setTimeout(() => {
     import('./lazy').then((lazy) => {
         const plugins = lazy.default();
-        plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
+        plugins.forEach((p) => {
+            univer.registerPlugin(p[0], p[1]);
+        });
     });
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;
 window.univerAPI = FUniver.newAPI(univer);
+
+setTimeout(async () => {
+    window.univerAPI.disposeUnit('workbook-01');
+
+    await setTimeout(() => { }, 1000);
+    console.error('createUnit again!!!');
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    // setTimeout(() => {
+    //     import('./lazy').then((lazy) => {
+    //         const plugins = lazy.default();
+    //         plugins.forEach((p) => {
+    //             console.log('plugins  again', p);
+    //             univer.registerPlugin(p[0], p[1]);
+    //         });
+    //     });
+    // }, LOAD_LAZY_PLUGINS_TIMEOUT);
+}, 2000);
 
 declare global {
     // eslint-disable-next-line ts/naming-convention

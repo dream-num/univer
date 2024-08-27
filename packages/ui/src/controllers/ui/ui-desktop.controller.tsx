@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, IConfigService, Inject, Injector, isInternalEditorID, LifecycleService, LifecycleStages, OnLifecycle, Optional, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
+import { connectInjector, Disposable, IConfigService, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, Optional, toDisposable } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IDisposable } from '@univerjs/core';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
 
@@ -32,9 +32,11 @@ const STEADY_TIMEOUT = 3000;
 
 @OnLifecycle(LifecycleStages.Ready, DesktopUIController)
 export class DesktopUIController extends Disposable {
+    private _steadyTimeout: number;
     constructor(
         private readonly _config: IUniverUIConfig,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
@@ -68,6 +70,12 @@ export class DesktopUIController extends Disposable {
                     }
                 });
 
+                this._instanceSrv.unitDisposed$
+                    // .pipe(takeUntil(this.dispose$))
+                    .subscribe(() => {
+                        clearTimeout(this._steadyTimeout);
+                    });
+
                 setTimeout(() => {
                     const allRenders = this._renderManagerService.getRenderAll();
 
@@ -78,7 +86,7 @@ export class DesktopUIController extends Disposable {
                     }
 
                     this._lifecycleService.stage = LifecycleStages.Rendered;
-                    setTimeout(() => this._lifecycleService.stage = LifecycleStages.Steady, STEADY_TIMEOUT);
+                    this._steadyTimeout = setTimeout(() => this._lifecycleService.stage = LifecycleStages.Steady, STEADY_TIMEOUT);
                 }, 300);
             })
         );

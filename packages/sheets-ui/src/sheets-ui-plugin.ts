@@ -181,6 +181,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     // We have to let render basics get bootstrapped before. Because some render controllers relies on
     // a correct skeleton when they get loaded.
     private _registerRenderModules(): void {
+        console.log('register SheetsScrollRenderController in onrendered');
         ([
             [HeaderMoveRenderController],
             [HeaderUnhideRenderController],

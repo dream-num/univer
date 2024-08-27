@@ -75,6 +75,10 @@ export class Univer {
         return this._injector.get(PluginService);
     }
 
+    getLifecycle(): LifecycleService {
+        return this._injector.get(LifecycleService);
+    }
+
     /**
      * Create a Univer instance.
      * @param config Configuration data for Univer

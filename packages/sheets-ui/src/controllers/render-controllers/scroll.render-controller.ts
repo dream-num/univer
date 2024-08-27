@@ -268,7 +268,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         //#endregion
     }
 
-    private _initSkeletonListener() {
+    private _initSkeletonListener(): void {
+        console.log('scroll initSkeletonListener');
         this.disposeWithMe(toDisposable(
             this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
                 if (param == null) {
@@ -290,6 +291,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                         viewportMain.viewportScrollX = 0;
                         viewportMain.viewportScrollY = 0;
                     }
+                    console.log('scroll update scene size in currentSkeletonBefore$', param);
                     this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
                 }
             })));
@@ -303,6 +305,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const { unitId } = this._context;
         const { skeleton } = param;
         const scene = this._renderManagerService.getRenderById(unitId)?.scene;
+        !scene && console.error('scene is null', unitId);
 
         if (skeleton == null || scene == null) {
             return;
@@ -310,6 +313,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } =
             skeleton;
+        console.log('_updateSceneSize', columnTotalWidth);
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return;

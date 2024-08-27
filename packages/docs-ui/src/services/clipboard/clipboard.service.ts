@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
-import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
 import { CutContentCommand, DocCustomRangeService, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
@@ -132,6 +132,11 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     async legacyPaste(html?: string, text?: string): Promise<boolean> {
         const partDocData = this._genDocDataFromHtmlAndText(html, text);
 
+        // Paste in sheet editing mode without paste style
+        if (this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+            delete partDocData.body?.textRuns;
+        }
+
         return this._paste(partDocData);
     }
 
@@ -184,7 +189,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             ];
 
             return this._commandService.executeCommand(CutContentCommand.id, { segmentId, textRanges: newTextRanges });
-        // eslint-disable-next-line unused-imports/no-unused-vars
+            // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (_e) {
             this._logService.error('[DocClipboardController] cut content failed');
             return false;

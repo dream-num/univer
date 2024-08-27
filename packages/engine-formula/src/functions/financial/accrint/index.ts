@@ -101,11 +101,9 @@ export class Accrint extends BaseFunction {
         calcMethodValue: number
     ): NumberValueObject {
         let couppcd = calculateCouppcd(issueSerialNumber, firstInterestSerialNumber, frequencyValue);
-
         if (couppcd <= 0) {
-            NumberValueObject.create(0);
+            return NumberValueObject.create(0);
         }
-
         couppcd = calculateCouppcd(settlementSerialNumber, firstInterestSerialNumber, frequencyValue);
 
         const numMonths = 12 / frequencyValue;
@@ -116,10 +114,8 @@ export class Accrint extends BaseFunction {
         const lastDayOfMonthF = lastDayOfMonth(firstInterestDateYear, firstInterestDateMonth, firstInterestDateDay);
 
         let coupDateSerialNumber = getDateSerialNumberByMonths(firstInterestSerialNumber, -numMonths, lastDayOfMonthF);
-
         if (settlementSerialNumber > firstInterestSerialNumber && calcMethodValue) {
             coupDateSerialNumber = firstInterestSerialNumber;
-
             while (coupDateSerialNumber < settlementSerialNumber) {
                 coupDateSerialNumber = getDateSerialNumberByMonths(coupDateSerialNumber, numMonths, lastDayOfMonthF);
             }
@@ -128,8 +124,11 @@ export class Accrint extends BaseFunction {
         let firstDateSerialNumber = issueSerialNumber > coupDateSerialNumber ? issueSerialNumber : coupDateSerialNumber;
 
         let { days } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, basisValue);
-
-        if (couppcd < issueSerialNumber && settlementSerialNumber < firstDateSerialNumber) {
+        if (couppcd >= issueSerialNumber) {
+            const { days: DFS } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, !basisValue ? 0 : 4);
+            days = DFS;
+        }
+        if (settlementSerialNumber < firstDateSerialNumber) {
             days = -days;
         }
 

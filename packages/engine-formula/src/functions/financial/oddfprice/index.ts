@@ -91,6 +91,7 @@ export class Oddfprice extends BaseFunction {
         if (
             rateValue < 0 ||
             yldValue < 0 ||
+            redemptionValue < 0 ||
             ![1, 2, 4].includes(frequencyValue) ||
             basisValue < 0 ||
             basisValue > 4 ||

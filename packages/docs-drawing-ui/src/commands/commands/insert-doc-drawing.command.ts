@@ -24,7 +24,7 @@ import {
     TextXActionType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { getRetainAndDeleteFromReplace, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import { getCustomBlockIdsInSelections, getRetainAndDeleteFromReplace, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { IInsertDrawingCommandParams } from './interfaces';
 
 /**
@@ -64,6 +64,7 @@ export const InsertDocDrawingCommand: ICommand = {
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
         const drawingOrderLength = documentDataModel.getSnapshot().drawingsOrder?.length ?? 0;
+        let removeDrawingLen = 0;
 
         // Step 1: Insert placeholder `\b` in dataStream and add drawing to customBlocks.
         if (collapsed) {
@@ -77,6 +78,37 @@ export const InsertDocDrawingCommand: ICommand = {
         } else {
             const { dos } = getRetainAndDeleteFromReplace(activeTextRange, segmentId, 0, body);
             textX.push(...dos);
+
+            const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [activeTextRange]);
+            const drawings = documentDataModel.getDrawings() ?? {};
+            const drawingOrder = documentDataModel.getDrawingsOrder() ?? [];
+            const sortedRemovedCustomBlockIds = removedCustomBlockIds.sort((a, b) => {
+                if (drawingOrder.indexOf(a) > drawingOrder.indexOf(b)) {
+                    return -1;
+                } else if (drawingOrder.indexOf(a) < drawingOrder.indexOf(b)) {
+                    return 1;
+                }
+
+                return 0;
+            });
+
+            if (sortedRemovedCustomBlockIds.length > 0) {
+                for (const blockId of sortedRemovedCustomBlockIds) {
+                    const drawing = drawings[blockId];
+                    const drawingIndex = drawingOrder.indexOf(blockId);
+                    if (drawing == null || drawingIndex < 0) {
+                        continue;
+                    }
+
+                    const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
+                    const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
+
+                    rawActions.push(removeDrawingAction!);
+                    rawActions.push(removeDrawingOrderAction!);
+
+                    removeDrawingLen++;
+                }
+            }
         }
 
         textX.push({
@@ -102,7 +134,7 @@ export const InsertDocDrawingCommand: ICommand = {
         for (const drawing of drawings) {
             const { drawingId } = drawing;
             const addDrawingAction = jsonX.insertOp(['drawings', drawingId], drawing);
-            const addDrawingOrderAction = jsonX.insertOp(['drawingsOrder', drawingOrderLength], drawingId);
+            const addDrawingOrderAction = jsonX.insertOp(['drawingsOrder', drawingOrderLength - removeDrawingLen], drawingId);
 
             rawActions.push(addDrawingAction!);
             rawActions.push(addDrawingOrderAction!);

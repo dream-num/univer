@@ -325,10 +325,10 @@ export class SelectionControl extends Disposable {
      * invoked when update selection style & range change, invoked by updateStyle, updateRange, update
      */
     // eslint-disable-next-line max-lines-per-function
-    protected _updateControlStyleAndLayout(selectionStyle: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number): void {
+    protected _updateControlStyleAndLayout(selectionStyle: Nullable<ISelectionStyle>): void {
         // this._selectionStyle = selectionStyle;
-        this._rowHeaderWidth = (rowHeaderWidth ?? this._rowHeaderWidth) || 0;
-        this._columnHeaderHeight = (columnHeaderHeight ?? this._columnHeaderHeight) || 0;
+        // this._rowHeaderWidth = (rowHeaderWidth ?? this._rowHeaderWidth) || 0;
+        // this._columnHeaderHeight = (columnHeaderHeight ?? this._columnHeaderHeight) || 0;
 
         // startX startY shares same coordinate with viewport.(include row & colheader)
         const { startX, startY, endX, endY } = this._selectionModel;
@@ -464,7 +464,7 @@ export class SelectionControl extends Disposable {
 
         this._updateBackgroundControl(selectionStyle);
 
-        this._updateHeaderBackground(selectionStyle, rowHeaderWidth, columnHeaderHeight);
+        this._updateHeaderBackground(selectionStyle);
 
         this._updateWidgets(selectionStyle);
 
@@ -481,14 +481,14 @@ export class SelectionControl extends Disposable {
     }
 
     updateStyle(style: ISelectionStyle): void {
-        this._updateControlStyleAndLayout(style, this._rowHeaderWidth, this._columnHeaderHeight);
+        this._updateControlStyleAndLayout(style);
     }
 
     updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithMergeInfo>): void {
         this._selectionModel.setValue(range, primaryCell);
         // TODO @lumixraku
         // why update rowHeaderWidth and columnHeaderHeight at the same time? Did they change when update range?
-        this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+        this._updateControlStyleAndLayout(this._currentStyle);
     }
 
     /**
@@ -508,7 +508,11 @@ export class SelectionControl extends Disposable {
         primaryCell?: Nullable<ISelectionCellWithMergeInfo>
     ): void {
         this._selectionModel.setValue(newSelectionRange, primaryCell);
-        this._updateControlStyleAndLayout(style || this._currentStyle, rowHeaderWidth, columnHeaderHeight);
+        // this._selectionStyle = selectionStyle;
+        this._rowHeaderWidth = rowHeaderWidth;
+        this._columnHeaderHeight = columnHeaderHeight;
+
+        this._updateControlStyleAndLayout(style || this._currentStyle);
     }
 
     /**
@@ -521,7 +525,7 @@ export class SelectionControl extends Disposable {
 
     clearHighlight(): void {
         this._selectionModel.clearCurrentCell();
-        this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+        this._updateControlStyleAndLayout(this._currentStyle);
     }
 
     getScene(): Scene {
@@ -711,7 +715,7 @@ export class SelectionControl extends Disposable {
                         return;
                     }
 
-                    this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+                    this._updateControlStyleAndLayout(this._currentStyle);
                 })
             )
         );
@@ -811,7 +815,7 @@ export class SelectionControl extends Disposable {
         ];
     }
 
-    private _updateHeaderBackground(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number): void {
+    private _updateHeaderBackground(style: Nullable<ISelectionStyle>): void {
         const { startX, startY, endX, endY, rangeType } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
 
@@ -833,8 +837,9 @@ export class SelectionControl extends Disposable {
         } = style;
 
         rowHeaderStrokeWidth /= scale;
-
         columnHeaderStrokeWidth /= scale;
+        const rowHeaderWidth = this._rowHeaderWidth;
+        const columnHeaderHeight = this._columnHeaderHeight;
 
         if (hasColumnHeader === true) {
             let highlightTitleColor = columnHeaderFill;

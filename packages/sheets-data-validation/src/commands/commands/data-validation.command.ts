@@ -514,7 +514,28 @@ export const ClearRangeDataValidationCommand: ICommand<IClearRangeDataValidation
         if (!params) {
             return false;
         }
+        const { unitId, subUnitId, ranges } = params;
         const commandService = accessor.get(ICommandService);
-        return true;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
+        const dataValidationModel = accessor.get(DataValidationModel);
+
+        if (!target) return false;
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const manager = dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+
+        const matrix = manager.getRuleObjectMatrix().clone();
+        matrix.removeRange(ranges);
+
+        const diffs = matrix.diff(manager.getDataValidations());
+        const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, accessor);
+
+        undoRedoService.pushUndoRedo({
+            unitID: unitId,
+            redoMutations,
+            undoMutations,
+        });
+
+        return sequenceExecute(redoMutations, commandService).result;
     },
 };

@@ -450,7 +450,7 @@ export class SheetsFilterController extends Disposable {
                         criteria: { ...filter.serialize(), colId: newColIndex },
                     };
                     redos.push({ id: SetSheetsFilterCriteriaMutation.id, params: setCriteriaMutationParams });
-                    undos.push({ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId, col: newColIndex, criteria: { ...filterModel.getFilterColumn(newColIndex)?.serialize(), colId: newColIndex } } });
+                    undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: { unitId, subUnitId, col: newColIndex, criteria: { ...filterModel.getFilterColumn(newColIndex)?.serialize(), colId: newColIndex } } });
                 }
                 if (!filterCol[oldColIndex]?.filter) {
                     const setCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
@@ -476,7 +476,7 @@ export class SheetsFilterController extends Disposable {
                 },
             };
             redos.unshift({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
-            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+            undos.unshift({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
         }
 
         return {

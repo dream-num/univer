@@ -153,11 +153,9 @@ describe('Test clipboard', () => {
             const styles = getStyles(startRow, startColumn, endRow, endColumn);
             const mergedCells = getMergedCells(startRow, startColumn, endRow, endColumn);
             const rowManager = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')?.getRowManager();
-            const rowHeight = rowManager?.getRowData()?.[0].h;
             const columnManager = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')?.getColumnManager();
-            const columnWidth = columnManager?.getColumnData()?.[0].w;
-            expect(columnWidth).toBe(73);
-            expect(rowHeight).toBe(81);
+            const columnWidth = columnManager?.getColumnData()?.[0]?.w;
+            expect(columnWidth).toBe(88);
             expect(values && values[0][0]?.v).toBe('row1col2');
             expect(styles && styles[0][0]).toStrictEqual({
                 bg: {

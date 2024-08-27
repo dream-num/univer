@@ -296,8 +296,8 @@ export function getSetCellValueMutations(
         let originNumberValue;
         if (!value.p && value.v && !pasteFrom) {
             const content = String(value.v);
-            const numfmtValue = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
-            if (numfmtValue?.v && typeof numfmtValue.v === 'number') {
+            const numfmtValue = numfmt.parseValue(content);
+            if (numfmtValue?.v !== undefined && typeof numfmtValue.v === 'number') {
                 originNumberValue = numfmtValue.v;
             }
         }
@@ -306,7 +306,7 @@ export function getSetCellValueMutations(
         if (value.p?.body) {
             valueMatrix.setValue(realRow, realCol, Tools.deepClone({ p: value.p, v: originNumberValue ?? value.v }));
         } else {
-            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: originNumberValue ?? value.v }));
+            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: originNumberValue ?? value.v, t: value.t }));
         }
     });
     // set cell value and style
@@ -363,7 +363,7 @@ export function getSetCellStyleMutations(
             newValue.p = value.p;
         }
         const content = String(value.v);
-        const numfmtValue = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
+        const numfmtValue = numfmt.parseValue(content);
         if (numfmtValue?.z) {
             if (!newValue.s) {
                 newValue.s = {};

@@ -59,6 +59,8 @@ import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, Co
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationModel, SheetDataValidationManager, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { FUniver } from '../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -186,6 +188,10 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 [SheetsDataValidationValidatorService],
 
                 // sheets filter
+                // comment
+                [SheetsThreadCommentModel],
+                [ThreadCommentModel],
+                [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
             ] as Dependency[]).forEach((d) => {
                 injector.add(d);
             });

@@ -775,7 +775,7 @@ export class FRange {
         return null;
     }
 
-    addComment(content: IDocumentBody): boolean {
+    addComment(content: IDocumentBody): Promise<boolean> {
         const injector = this._injector;
         const currentComment = this.getComment()?.getCommentData();
         const commentService = injector.get(ICommandService);
@@ -785,7 +785,7 @@ export class FRange {
         const refStr = `${Tools.chatAtABC(this._range.startColumn)}${this._range.startRow + 1}`;
         const currentUser = userService.getCurrentUser();
 
-        return commentService.syncExecuteCommand(AddCommentCommand.id, {
+        return commentService.executeCommand(AddCommentCommand.id, {
             unitId,
             subUnitId: sheetId,
             comment: {
@@ -803,7 +803,7 @@ export class FRange {
         });
     }
 
-    clearComment(): boolean {
+    clearComment(): Promise<boolean> {
         const injector = this._injector;
         const currentComment = this.getComment()?.getCommentData();
         const commentService = injector.get(ICommandService);
@@ -811,7 +811,7 @@ export class FRange {
         const sheetId = this._worksheet.getSheetId();
 
         if (currentComment) {
-            return commentService.syncExecuteCommand(DeleteCommentTreeCommand.id, {
+            return commentService.executeCommand(DeleteCommentTreeCommand.id, {
                 unitId,
                 subUnitId: sheetId,
                 threadId: currentComment.threadId,
@@ -819,6 +819,6 @@ export class FRange {
             });
         }
 
-        return true;
+        return Promise.resolve(true);
     }
 }

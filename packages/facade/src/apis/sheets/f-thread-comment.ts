@@ -16,8 +16,8 @@
 
 import type { IDocumentBody, Workbook } from '@univerjs/core';
 import { ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { IBaseComment, IDeleteCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
-import { DeleteCommentCommand, DeleteCommentTreeCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
+import type { IBaseComment, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import { DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { getDT } from '@univerjs/thread-comment-ui';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { FRange } from './f-range';
@@ -76,11 +76,19 @@ export class FThreadComment {
     }
 
     /**
+     * Get the content of the comment
+     * @returns The content of the comment
+     */
+    getContent(): IDocumentBody {
+        return this._thread.text;
+    }
+
+    /**
      * Delete the comment and it's replies
      * @returns success or not
      */
-    delete(): boolean {
-        return this._commandService.syncExecuteCommand(
+    delete(): Promise<boolean> {
+        return this._commandService.executeCommand(
             this.getIsRoot() ? DeleteCommentTreeCommand.id : DeleteCommentCommand.id,
             {
                 commentId: this._thread.id,
@@ -95,8 +103,8 @@ export class FThreadComment {
      * @param content The new content of the comment
      * @returns success or not
      */
-    update(content: IDocumentBody): boolean {
-        return this._commandService.syncExecuteCommand(
+    update(content: IDocumentBody): Promise<boolean> {
+        return this._commandService.executeCommand(
             UpdateCommentCommand.id,
             {
                 unitId: this._thread.unitId,
@@ -108,6 +116,23 @@ export class FThreadComment {
                     updateT: getDT(),
                 },
             } as IUpdateCommentCommandParams
+        );
+    }
+
+    /**
+     * Resolve the comment
+     * @param resolved Whether the comment is resolved
+     * @returns success or not
+     */
+    resolve(resolved?: boolean): Promise<boolean> {
+        return this._commandService.executeCommand(
+            ResolveCommentCommand.id,
+            {
+                unitId: this._thread.unitId,
+                subUnitId: this._thread.subUnitId,
+                commentId: this._thread.id,
+                resolved: resolved ?? !this._thread.resolved,
+            } as IResolveCommentCommandParams
         );
     }
 }

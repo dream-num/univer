@@ -110,13 +110,13 @@ export class NumfmtEditorController extends Disposable {
                                 const type = getPatternType(numfmtCell.pattern);
                                 switch (type) {
                                     case 'scientific':
-                                    case 'percent':
                                     case 'currency':
                                     case 'grouped':
                                     case 'number': {
                                         const cell = context.worksheet.getCellRaw(row, col);
                                         return cell;
                                     }
+                                    case 'percent':
                                     case 'date':
                                     case 'time':
                                     case 'datetime':
@@ -138,6 +138,7 @@ export class NumfmtEditorController extends Disposable {
      * @private
      * @memberof NumfmtService
      */
+
     private _initInterceptorEditorEnd() {
         if (!this._editorBridgeService) {
             return;
@@ -159,6 +160,7 @@ export class NumfmtEditorController extends Disposable {
                             );
                             const currentNumfmtType = (currentNumfmtValue && getPatternType(currentNumfmtValue.pattern)) ?? '';
                             const clean = () => {
+                                // eslint-disable-next-line ts/no-unused-expressions
                                 currentNumfmtValue &&
                                     this._collectEffectMutation.add(
                                         context.unitId,
@@ -174,24 +176,24 @@ export class NumfmtEditorController extends Disposable {
 
                             const content = String(value.v);
 
-                            const dateInfo = numfmt.parseDate(content) || numfmt.parseTime(content);
-                            const isTranslateDate = !!dateInfo;
-                            if (isTranslateDate) {
-                                if (dateInfo && dateInfo.z) {
-                                    const v = Number(dateInfo.v);
+                            const numfmtInfo = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
+
+                            if (numfmtInfo) {
+                                if (numfmtInfo.z) {
+                                    const v = Number(numfmtInfo.v);
                                     this._collectEffectMutation.add(
                                         context.unitId,
                                         context.subUnitId,
                                         context.row,
                                         context.col,
                                         {
-                                            pattern: dateInfo.z,
+                                            pattern: numfmtInfo.z,
                                         }
                                     );
                                     return { ...value, v, t: CellValueType.NUMBER };
                                 }
                             } else if (
-                                ['date', 'time', 'datetime'].includes(currentNumfmtType) ||
+                                ['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) ||
                                 !isNumeric(content)
                             ) {
                                 clean();

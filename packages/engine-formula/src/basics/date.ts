@@ -313,11 +313,15 @@ export function getDateSerialNumberByObject(serialNumberObject: BaseValueObject)
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
+        if (dateSerial instanceof Date) {
+            dateSerial = excelDateTimeSerial(dateSerial);
+        }
+
         if (+dateSerial < 0 || +dateSerial > 2958465) { // 2958465 = 9999/12/31
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return dateSerial;
+        return +dateSerial;
     } else {
         const dateSerial = +serialNumberObject.getValue();
 

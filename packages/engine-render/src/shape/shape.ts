@@ -341,7 +341,11 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         return this;
     }
 
-    setProps(props?: T) {
+    /**
+     * this[_key] = props[key]
+     * @param props
+     */
+    setProps(props?: T): void {
         if (!props) {
             return;
         }

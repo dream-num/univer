@@ -92,11 +92,11 @@ export class SelectionControl extends Disposable {
     private _rowHeaderBackground!: Rect;
     private _rowHeaderBorder!: Rect;
     private _rowHeaderGroup!: Group;
-    private _rowHeaderHighlight!: Rect;
+    // private _rowHeaderHighlight!: Rect;
     private _columnHeaderBackground!: Rect;
     private _columnHeaderBorder!: Rect;
     private _columnHeaderGroup!: Group;
-    private _columnHeaderHighlight!: Rect;
+    // private _columnHeaderHighlight!: Rect;
 
     private _topLeftWidget!: Rect;
     private _topCenterWidget!: Rect;
@@ -143,106 +143,112 @@ export class SelectionControl extends Disposable {
     constructor(
         protected _scene: Scene,
         protected _zIndex: number,
-        protected _isHeaderHighlight: boolean = true,
-        protected readonly _themeService: ThemeService
+        protected readonly _themeService: ThemeService,
+        protected _highlightHeader: boolean = true,
+        options?: {
+            rowHeaderWidth: number;
+            columnHeaderHeight: number;
+        }
     ) {
         super();
+        this._rowHeaderWidth = (options?.rowHeaderWidth) || 0;
+        this._columnHeaderHeight = (options?.columnHeaderHeight) || 0;
         this._initialize();
     }
 
-    get zIndex() {
+    get zIndex(): number {
         return this._zIndex;
     }
 
-    get leftControl() {
+    get leftControl(): Rect {
         return this._leftControl;
     }
 
-    get rightControl() {
+    get rightControl(): Rect {
         return this._rightControl;
     }
 
-    get topControl() {
+    get topControl(): Rect {
         return this._topControl;
     }
 
-    get bottomControl() {
+    get bottomControl(): Rect {
         return this._bottomControl;
     }
 
-    get fillControl() {
+    get fillControl(): Rect {
         return this._fillControl;
     }
 
-    get backgroundControlTop() {
+    get backgroundControlTop(): Rect {
         return this._backgroundControlTop;
     }
 
-    get backgroundControlBottom() {
+    get backgroundControlBottom(): Rect {
         return this._backgroundControlBottom;
     }
 
-    get backgroundControlMiddleLeft() {
+    get backgroundControlMiddleLeft(): Rect {
         return this._backgroundControlMiddleLeft;
     }
 
-    get backgroundControlMiddleRight() {
+    get backgroundControlMiddleRight(): Rect {
         return this._backgroundControlMiddleRight;
     }
 
-    get selectionShape() {
+    get selectionShape(): Rect {
         return this._selectionShapeGroup;
     }
 
-    get columnHeaderGroup() {
+    get columnHeaderGroup(): Group {
         return this._columnHeaderGroup;
     }
 
-    get rowHeaderGroup() {
+    get rowHeaderGroup(): Group {
         return this._rowHeaderGroup;
     }
 
-    get selectionShapeGroup() {
+    get selectionShapeGroup(): Group {
         return this._selectionShapeGroup;
     }
 
-    get model() {
+    get model(): SelectionRenderModel {
         return this._selectionModel;
     }
 
-    get topLeftWidget() {
+    get topLeftWidget(): Rect {
         return this._topLeftWidget;
     }
 
-    get topCenterWidget() {
+    get topCenterWidget(): Rect {
         return this._topCenterWidget;
     }
 
-    get topRightWidget() {
+    get topRightWidget(): Rect {
         return this._topRightWidget;
     }
 
-    get middleLeftWidget() {
+    get middleLeftWidget(): Rect {
         return this._middleLeftWidget;
     }
 
-    get middleRightWidget() {
+    get middleRightWidget(): Rect {
         return this._middleRightWidget;
     }
 
-    get bottomLeftWidget() {
+    get bottomLeftWidget(): Rect {
         return this._bottomLeftWidget;
     }
 
-    get bottomCenterWidget() {
+    get bottomCenterWidget(): Rect {
         return this._bottomCenterWidget;
     }
 
-    get bottomRightWidget() {
+    get bottomRightWidget(): Rect {
         return this._bottomRightWidget;
     }
 
-    get themeService() {
+    get themeService(): ThemeService {
         return this._themeService;
     }
 
@@ -254,7 +260,7 @@ export class SelectionControl extends Disposable {
     //     this._selectionStyle = style;
     // }
 
-    get selectionModel() {
+    get selectionModel(): SelectionRenderModel {
         return this._selectionModel;
     }
 
@@ -262,7 +268,7 @@ export class SelectionControl extends Disposable {
         this._selectionModel = model;
     }
 
-    get defaultStyle() {
+    get defaultStyle(): ISelectionStyle {
         return this._defaultStyle;
     }
 
@@ -270,11 +276,11 @@ export class SelectionControl extends Disposable {
         this._defaultStyle = style;
     }
 
-    get dashRect() {
+    get dashRect(): Rect {
         return this._dashRect;
     }
 
-    get currentStyle() {
+    get currentStyle(): Nullable<ISelectionStyle> {
         return this._currentStyle;
     }
 
@@ -284,11 +290,11 @@ export class SelectionControl extends Disposable {
         }
     }
 
-    get isHelperSelection() {
+    get isHelperSelection(): boolean {
         return this._isHelperSelection;
     }
 
-    get rowHeaderWidth() {
+    get rowHeaderWidth(): number {
         return this._rowHeaderWidth;
     }
 
@@ -296,7 +302,7 @@ export class SelectionControl extends Disposable {
         this._rowHeaderWidth = width;
     }
 
-    get columnHeaderHeight() {
+    get columnHeaderHeight(): number {
         return this._columnHeaderHeight;
     }
 
@@ -304,14 +310,14 @@ export class SelectionControl extends Disposable {
         this._columnHeaderHeight = height;
     }
 
-    setEvent(state: boolean) {
+    setEvent(state: boolean): void {
         this.leftControl.evented = state;
         this.rightControl.evented = state;
         this.topControl.evented = state;
         this.bottomControl.evented = state;
     }
 
-    refreshSelectionFilled(val: IRangeWithCoord) {
+    refreshSelectionFilled(val: IRangeWithCoord): void {
         this._selectionFilled$.next(val);
     }
 
@@ -319,10 +325,10 @@ export class SelectionControl extends Disposable {
      * invoked when update selection style & range change, invoked by updateStyle, updateRange, update
      */
     // eslint-disable-next-line max-lines-per-function
-    protected _updateControlStyleAndLayout(selectionStyle: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    protected _updateControlStyleAndLayout(selectionStyle: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number): void {
         // this._selectionStyle = selectionStyle;
-        this._rowHeaderWidth = rowHeaderWidth || 0;
-        this._columnHeaderHeight = columnHeaderHeight || 0;
+        this._rowHeaderWidth = (rowHeaderWidth ?? this._rowHeaderWidth) || 0;
+        this._columnHeaderHeight = (columnHeaderHeight ?? this._columnHeaderHeight) || 0;
 
         // startX startY shares same coordinate with viewport.(include row & colheader)
         const { startX, startY, endX, endY } = this._selectionModel;
@@ -458,7 +464,7 @@ export class SelectionControl extends Disposable {
 
         this._updateBackgroundControl(selectionStyle);
 
-        this._updateBackgroundTitle(selectionStyle, rowHeaderWidth, columnHeaderHeight);
+        this._updateHeaderBackground(selectionStyle, rowHeaderWidth, columnHeaderHeight);
 
         this._updateWidgets(selectionStyle);
 
@@ -474,11 +480,11 @@ export class SelectionControl extends Disposable {
         this.selectionShape.makeDirtyNoDebounce(true);
     }
 
-    updateStyle(style: ISelectionStyle) {
+    updateStyle(style: ISelectionStyle): void {
         this._updateControlStyleAndLayout(style, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
-    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithMergeInfo>) {
+    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithMergeInfo>): void {
         this._selectionModel.setValue(range, primaryCell);
         // TODO @lumixraku
         // why update rowHeaderWidth and columnHeaderHeight at the same time? Did they change when update range?
@@ -500,7 +506,7 @@ export class SelectionControl extends Disposable {
         columnHeaderHeight: number = 0,
         style?: Nullable<ISelectionStyle>,
         primaryCell?: Nullable<ISelectionCellWithMergeInfo>
-    ) {
+    ): void {
         this._selectionModel.setValue(newSelectionRange, primaryCell);
         this._updateControlStyleAndLayout(style || this._currentStyle, rowHeaderWidth, columnHeaderHeight);
     }
@@ -509,21 +515,21 @@ export class SelectionControl extends Disposable {
      * update primary range
      * @param primaryCell model.current (aka: highlight)
      */
-    updateCurrCell(primaryCell?: Nullable<ISelectionCellWithMergeInfo>) {
+    updateCurrCell(primaryCell?: Nullable<ISelectionCellWithMergeInfo>): void {
         this._selectionModel.setCurrentCell(primaryCell);
     }
 
-    clearHighlight() {
+    clearHighlight(): void {
         this._selectionModel.clearCurrentCell();
         this._updateControlStyleAndLayout(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
-    getScene() {
+    getScene(): Scene {
         return this._scene;
     }
 
     // eslint-disable-next-line complexity
-    override dispose() {
+    override dispose(): void {
         this._leftControl?.dispose();
         this._rightControl?.dispose();
         this._topControl?.dispose();
@@ -605,15 +611,15 @@ export class SelectionControl extends Disposable {
         };
     }
 
-    getRange() {
+    getRange(): IRangeWithCoord {
         return this._selectionModel.getValue().rangeWithCoord;
     }
 
-    enableHelperSelection() {
+    enableHelperSelection(): void {
         this._isHelperSelection = true;
     }
 
-    disableHelperSelection() {
+    disableHelperSelection(): void {
         this._isHelperSelection = false;
     }
 
@@ -625,7 +631,7 @@ export class SelectionControl extends Disposable {
     // }
 
     // eslint-disable-next-line max-lines-per-function
-    private _initialize() {
+    private _initialize(): void {
         this._defaultStyle = getNormalSelectionStyle(this._themeService);
         this._currentStyle = getNormalSelectionStyle(this._themeService);
 
@@ -710,10 +716,10 @@ export class SelectionControl extends Disposable {
             )
         );
 
-        this._initialTitle();
+        this._initialHeader();
     }
 
-    private _initialTitle() {
+    private _initialHeader(): void {
         const zIndex = this._zIndex;
         this._rowHeaderBackground = new Rect(SELECTION_MANAGER_KEY.rowHeaderBackground + zIndex, {
             zIndex: zIndex - 1,
@@ -732,9 +738,7 @@ export class SelectionControl extends Disposable {
         );
 
         this._rowHeaderGroup.hide();
-
         this._rowHeaderGroup.evented = false;
-
         this._rowHeaderGroup.zIndex = zIndex;
 
         this._columnHeaderBackground = new Rect(SELECTION_MANAGER_KEY.columnHeaderBackground + zIndex, {
@@ -754,16 +758,14 @@ export class SelectionControl extends Disposable {
         );
 
         this._columnHeaderGroup.hide();
-
         this._columnHeaderGroup.evented = false;
-
         this._columnHeaderGroup.zIndex = zIndex;
 
         const scene = this.getScene();
         scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX);
     }
 
-    private _initialWidget() {
+    private _initialWidget(): Rect[] {
         const zIndex = this._zIndex;
         this._topLeftWidget = new Rect(SELECTION_MANAGER_KEY.topLeftWidget + zIndex, {
             zIndex: zIndex + 1,
@@ -809,7 +811,7 @@ export class SelectionControl extends Disposable {
         ];
     }
 
-    private _updateBackgroundTitle(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    private _updateHeaderBackground(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number): void {
         const { startX, startY, endX, endY, rangeType } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
 
@@ -836,7 +838,7 @@ export class SelectionControl extends Disposable {
 
         if (hasColumnHeader === true) {
             let highlightTitleColor = columnHeaderFill;
-            if (this._isHeaderHighlight && rangeType === RANGE_TYPE.COLUMN) {
+            if (this._highlightHeader && rangeType === RANGE_TYPE.COLUMN) {
                 highlightTitleColor = new ColorKit(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._columnHeaderBackground.setProps({
@@ -863,7 +865,7 @@ export class SelectionControl extends Disposable {
 
         if (hasRowHeader === true) {
             let highlightTitleColor = rowHeaderFill;
-            if (this._isHeaderHighlight && rangeType === RANGE_TYPE.ROW) {
+            if (this._highlightHeader && rangeType === RANGE_TYPE.ROW) {
                 highlightTitleColor = new ColorKit(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._rowHeaderBackground.setProps({
@@ -889,7 +891,7 @@ export class SelectionControl extends Disposable {
         this._rowHeaderGroup.makeDirty(true);
     }
 
-    private _updateBackgroundControl(style: Nullable<ISelectionStyle>) {
+    private _updateBackgroundControl(style: Nullable<ISelectionStyle>): void {
         const { startX, startY, endX, endY } = this._selectionModel;
 
         const defaultStyle = this._defaultStyle;
@@ -970,7 +972,7 @@ export class SelectionControl extends Disposable {
         this._backgroundControlBottom.setProps({ fill });
     }
 
-    private _updateWidgets(style: Nullable<ISelectionStyle>) {
+    private _updateWidgets(style: Nullable<ISelectionStyle>): void {
         const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
 
@@ -1049,7 +1051,7 @@ export class SelectionControl extends Disposable {
         }
     }
 
-    protected _hasWidgets(widgets: ISelectionWidgetConfig) {
+    protected _hasWidgets(widgets: ISelectionWidgetConfig): boolean {
         if (widgets == null) {
             return false;
         }
@@ -1069,7 +1071,7 @@ export class SelectionControl extends Disposable {
         return true;
     }
 
-    private _getScale() {
+    private _getScale(): number {
         const { scaleX, scaleY } = this._scene.getAncestorScale();
         return Math.max(scaleX, scaleY);
     }
@@ -1078,12 +1080,12 @@ export class SelectionControl extends Disposable {
 
     private _antRequestNewFrame: number = -1;
 
-    private _stopAntLineAnimation() {
+    private _stopAntLineAnimation(): void {
         this._antLineOffset = 0;
         cancelRequestFrame(this._antRequestNewFrame);
     }
 
-    private _startAntLineAnimation() {
+    private _startAntLineAnimation(): void {
         const scale = this._getScale();
         this._antLineOffset += 0.6 / scale;
         if (this._antLineOffset > 160 / scale) {

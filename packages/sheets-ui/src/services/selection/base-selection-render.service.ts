@@ -217,7 +217,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const { rangeWithCoord, primaryWithCoord } = selection;
         const { rangeType } = rangeWithCoord;
-        const control = this.newSelectionControl(scene, rangeType || RANGE_TYPE.NORMAL);
+        const control = this.newSelectionControl(scene, rangeType || RANGE_TYPE.NORMAL, skeleton);
 
         // TODO: memory leak? This extension seems never released.
         // eslint-disable-next-line no-new
@@ -228,14 +228,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         });
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
     }
 
-    newSelectionControl(scene: Scene, _rangeType: RANGE_TYPE): SelectionControl {
+    newSelectionControl(scene: Scene, _rangeType: RANGE_TYPE, skeleton: SpreadsheetSkeleton): SelectionControl {
         const selectionControls = this.getSelectionControls();
-
-        const control = new SelectionControl(scene, selectionControls.length, this._isHeaderHighlight, this._themeService);
+        const zIndex = selectionControls.length;
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        const control = new SelectionControl(scene, zIndex, this._themeService, this._isHeaderHighlight, {
+            rowHeaderWidth,
+            columnHeaderHeight,
+        });
         this._selectionControls.push(control);
 
         return control;
@@ -494,7 +497,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             );
         } else {
             // Create new control as default
-            activeSelectionControl = this.newSelectionControl(scene, rangeType);
+            activeSelectionControl = this.newSelectionControl(scene, rangeType, skeleton);
             this._updateSelectionControlByRange(
                 activeSelectionControl,
                 cursorCellRangeWithRangeType,

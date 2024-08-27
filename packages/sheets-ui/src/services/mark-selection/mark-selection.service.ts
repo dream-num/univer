@@ -97,7 +97,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
             const { scene } = renderUnit;
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-            const control = new SelectionControl(scene, zIndex, false, this._themeService);
+            const control = new SelectionControl(scene, zIndex, this._themeService, false, { rowHeaderWidth: 46, columnHeaderHeight: 20 });
             const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISheetSelectionRenderService).attachSelectionWithCoord(selection);
             control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
             shape.control = control;

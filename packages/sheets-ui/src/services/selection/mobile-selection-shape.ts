@@ -44,16 +44,16 @@ export class MobileSelectionControl extends SelectionControl {
     constructor(
         protected override _scene: Scene,
         protected override _zIndex: number,
-        protected override _isHeaderHighlight: boolean = true,
+        protected override _highlightHeader: boolean = true,
         protected override readonly _themeService: ThemeService,
         protected _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL
     ) {
-        super(_scene, _zIndex, _isHeaderHighlight, _themeService);
+        super(_scene, _zIndex, _themeService, _highlightHeader);
         // window.sp = this;
         this.initControlPoints();
     }
 
-    initControlPoints() {
+    initControlPoints(): void {
         const defaultStyle = this.defaultStyle!;
         const expandCornerSize = defaultStyle.expandCornerSize || 0;
         const expandCornerInnerSize = (defaultStyle.expandCornerSize || 0) / 4;
@@ -149,18 +149,18 @@ export class MobileSelectionControl extends SelectionControl {
         this._rangeType = value;
     }
 
-    override dispose() {
+    override dispose(): void {
         this._fillControlBottomRight?.dispose();
         this._fillControlTopLeft?.dispose();
         super.dispose();
     }
 
-    override updateRange(range: IRangeWithCoord) {
+    override updateRange(range: IRangeWithCoord): void {
         this._selectionModel.setValue(range);
         this._updateControlStyleAndLayout(null, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
-    protected override _updateControlStyleAndLayout(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    protected override _updateControlStyleAndLayout(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number): void {
         super._updateControlStyleAndLayout(style, rowHeaderWidth, columnHeaderHeight);
 
         // const rangeType = this.rangeType;
@@ -213,7 +213,7 @@ export class MobileSelectionControl extends SelectionControl {
      * @param sheetContentHeight max sheet content height, for very short sheet, control pointer shoud not out of sheet
      */
     // eslint-disable-next-line max-lines-per-function
-    transformControlPoint(viewportScrollX: number = 0, viewportScrollY: number = 0, sheetContentWidth: number = 0, sheetContentHeight: number = 0) {
+    transformControlPoint(viewportScrollX: number = 0, viewportScrollY: number = 0, sheetContentWidth: number = 0, sheetContentHeight: number = 0): void {
         const style = this.currentStyle!;
         const rangeType = this.selectionModel.rangeType;
         const expandCornerSizeInner = style.expandCornerSize! / 4;

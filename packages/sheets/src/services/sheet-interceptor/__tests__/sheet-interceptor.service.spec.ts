@@ -21,7 +21,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { INTERCEPTOR_POINT } from '../interceptor-const';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
 import type { ISheetLocation } from '../utils/interceptor';
-import { createCoreTestBed } from './create-core-test-bed';
+import { createSheetTestBed } from './create-core-test-bed';
 
 describe('Test SheetInterceptorService', () => {
     let univer: Univer;
@@ -30,7 +30,7 @@ describe('Test SheetInterceptorService', () => {
     const numberIntercept = createInterceptorKey<number, { step: number }>('numberIntercept');
 
     beforeEach(() => {
-        const testBed = createCoreTestBed(undefined, [[SheetInterceptorService]]);
+        const testBed = createSheetTestBed(undefined, [[SheetInterceptorService]]);
         univer = testBed.univer;
         get = testBed.get;
     });

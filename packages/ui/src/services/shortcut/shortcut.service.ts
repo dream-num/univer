@@ -25,49 +25,110 @@ import { IPlatformService } from '../platform/platform.service';
 import type { KeyCode } from './keycode';
 import { KeyCodeToChar, MetaKeys } from './keycode';
 
+/**
+ * A shortcut item that could be registered to the {@link IShortcutService}.
+ */
 export interface IShortcutItem<P extends object = object> {
-    /** This should reuse the corresponding command's id. */
+    /** Id of the shortcut item. It should reuse the corresponding {@link ICommand}'s id. */
     id: string;
+
     /** Description of the shortcut. */
     description?: string;
 
     /** If two shortcuts have the same binding, the one with higher priority would be check first. */
     priority?: number;
-    /** A callback that will be triggered to examine if the shortcut should be invoked. */
+
+    /**
+     * A callback that will be triggered to examine if the shortcut should be invoked. The `{@link IContextService}`
+     * would be passed to the callback.
+     */
     preconditions?: (contextService: IContextService) => boolean;
 
-    /** A command can be bound to several bindings, with different static parameters perhaps. */
+    /**
+     * The binding of the shortcut. It should be a combination of {@link KeyCode} and {@link MetaKeys}.
+     *
+     * A command can be bound to several bindings, with different static parameters perhaps.
+     *
+     * @example { binding: KeyCode.ENTER | MetaKeys.ALT }
+     */
     binding: KeyCode | number;
+    /**
+     * The binding of the shortcut for macOS. If the property is not specified, the default binding would be used.
+     */
     mac?: number;
+    /**
+     * The binding of the shortcut for Windows. If the property is not specified, the default binding would be used.
+     */
     win?: number;
+    /**
+     * The binding of the shortcut for Linux. If the property is not specified, the default binding would be used.
+     */
     linux?: number;
 
     /**
      * The group of the menu item should belong to. The shortcut item would be rendered in the
      * panel if this is set.
+     *
+     * @example { group: '10_global-shortcut' }
      */
     group?: string;
 
-    /** Static parameters of this shortcut. Would be send to `CommandService.executeCommand`. */
+    /**
+     * Static parameters of this shortcut. Would be send to {@link ICommandService.executeCommand} as the second
+     * parameter when the corresponding command is executed.
+     *
+     * You can define multi shortcuts with the same command id but different static parameters.
+     */
     staticParameters?: P;
 }
 
+/**
+ * The dependency injection identifier of the {@link IShortcutService}.
+ */
+export const IShortcutService = createIdentifier<IShortcutService>('ui.shortcut.service');
+/**
+ * The interface of the shortcut service.
+ */
 export interface IShortcutService {
+    /**
+     * An observable that emits when the shortcuts are changed.
+     */
     shortcutChanged$: Observable<void>;
 
+    /**
+     * Make the shortcut service ignore all keyboard events.
+     * @returns {IDisposable} a disposable that could be used to cancel the force escaping.
+     */
     forceEscape(): IDisposable;
-    // registerCaptureSelector(selector: string): IDisposable;
-    // registerEscapeSelector(selector: string): IDisposable;
 
+    /**
+     * Register a shortcut item to the shortcut service.
+     * @param {IShortcutItem} shortcut - the shortcut item to be registered.
+     * @returns {IDisposable} a disposable that could be used to unregister the shortcut.
+     */
     registerShortcut(shortcut: IShortcutItem): IDisposable;
+    /**
+     * Get the display string of the shortcut item.
+     * @param shortcut - the shortcut item to get the display string.
+     * @returns {string} the display string of the shortcut. For example `Ctrl+Enter`.
+     */
     getShortcutDisplay(shortcut: IShortcutItem): string;
+    /**
+     * Get the display string of the shortcut of the command.
+     * @param id the id of the command to get the shortcut display.
+     * @returns {string | null} the display string of the shortcut. For example `Ctrl+Enter`.
+     */
     getShortcutDisplayOfCommand(id: string): string | null;
+    /**
+     * Get all the shortcuts registered in the shortcut service.
+     * @returns {IShortcutItem[]} all the shortcuts registered in the shortcut service.
+     */
     getAllShortcuts(): IShortcutItem[];
-    setDisable(disable: boolean): void;
 }
 
-export const IShortcutService = createIdentifier<IShortcutService>('univer.shortcut');
-
+/**
+ * @ignore
+ */
 export class ShortcutService extends Disposable implements IShortcutService {
     private readonly _shortCutMapping = new Map<number, Set<IShortcutItem>>();
     private readonly _commandIDMapping = new Map<string, Set<IShortcutItem>>();
@@ -76,8 +137,6 @@ export class ShortcutService extends Disposable implements IShortcutService {
     readonly shortcutChanged$ = this._shortcutChanged$.asObservable();
 
     private _forceEscaped = false;
-
-    private _disable = false;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -95,10 +154,6 @@ export class ShortcutService extends Disposable implements IShortcutService {
                 capture: true,
             })
         );
-    }
-
-    setDisable(disable: boolean): void {
-        this._disable = disable;
     }
 
     getAllShortcuts(): IShortcutItem[] {
@@ -179,14 +234,8 @@ export class ShortcutService extends Disposable implements IShortcutService {
         // Should get the container element of the Univer instance and see if
         // the event target is a descendant of the container element.
         // Also we should check through escape list and force catching list.
-        // if the target is not focused on the univer instance we should ingore the keyboard event
-        if (this._forceEscaped) {
-            return;
-        }
-
-        if (this._disable) {
-            return;
-        }
+        // if the target is not focused on the univer instance we should ignore the keyboard event
+        if (this._forceEscaped) return;
 
         if (
             this._layoutService &&
@@ -201,7 +250,7 @@ export class ShortcutService extends Disposable implements IShortcutService {
         }
     }
 
-    private _dispatch(e: KeyboardEvent) {
+    private _dispatch(e: KeyboardEvent): boolean {
         const binding = this._deriveBindingFromEvent(e);
         if (binding === null) {
             return false;

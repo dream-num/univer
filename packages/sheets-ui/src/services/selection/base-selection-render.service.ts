@@ -15,6 +15,7 @@
  */
 
 import type {
+    IDisposable,
     IFreeze,
     IInterceptor,
     Injector,
@@ -150,7 +151,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
     private _selectionMoving = false;
-
     get selectionMoving(): boolean {
         return this._selectionMoving;
     }
@@ -158,6 +158,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected _activeViewport: Nullable<Viewport>;
 
     readonly interceptor = new InterceptorManager({ RANGE_MOVE_PERMISSION_CHECK, RANGE_FILL_PERMISSION_CHECK });
+
+    private _escapeShortcutDisposable: Nullable<IDisposable> = null;
 
     constructor(
         protected readonly _injector: Injector,
@@ -375,8 +377,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     endSelection(): void {
         this._clearUpdatingListeners();
         this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+
         // when selection mouse up, enable the short cut service
-        this._shortcutService.setDisable(false);
+        this._escapeShortcutDisposable?.dispose();
+        this._escapeShortcutDisposable = null;
     }
 
     /**
@@ -520,11 +524,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, viewportPosX, viewportPosY);
 
-        this._shortcutService.setDisable(true);
+        this._escapeShortcutDisposable = this._shortcutService.forceEscape();
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             this._clearUpdatingListeners();
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-            this._shortcutService.setDisable(false);
+            this._escapeShortcutDisposable?.dispose();
+            this._escapeShortcutDisposable = null;
         });
     }
 

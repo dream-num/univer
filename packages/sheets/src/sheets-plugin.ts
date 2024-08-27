@@ -15,7 +15,7 @@
  */
 
 import type { Dependency, DependencyOverride } from '@univerjs/core';
-import { DependentOn, ICommandService, IConfigService, Inject, Injector, LocaleService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
@@ -52,9 +52,6 @@ export interface IUniverSheetsConfig {
     onlyRegisterFormulaRelatedMutations?: true;
 }
 
-/**
- * The main sheet base, construct the sheet container and layout, mount the rendering engine
- */
 @DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
@@ -62,9 +59,7 @@ export class UniverSheetsPlugin extends Plugin {
 
     constructor(
         private _config: IUniverSheetsConfig | undefined,
-        @ICommandService private readonly _commandService: ICommandService,
         @IConfigService private readonly _configService: IConfigService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
     ) {
         super();
@@ -82,7 +77,7 @@ export class UniverSheetsPlugin extends Plugin {
         }
     }
 
-    private _initDependencies(sheetInjector: Injector) {
+    private _initDependencies(sheetInjector: Injector): void {
         const dependencies: Dependency[] = [
             // services
             [BorderStyleManagerService],
@@ -111,14 +106,14 @@ export class UniverSheetsPlugin extends Plugin {
         ];
 
         if (!this._config?.notExecuteFormula) {
-            // Should execute formula.
-            dependencies.push(
-                [CalculateResultApplyController]
-            );
+            dependencies.push([CalculateResultApplyController]);
         }
 
         mergeOverrideWithDependencies(dependencies, this._config?.override).forEach((d) => {
             sheetInjector.add(d);
         });
+
+        this._injector.get(SheetInterceptorService);
+        this._injector.get(RangeProtectionService);
     }
 }

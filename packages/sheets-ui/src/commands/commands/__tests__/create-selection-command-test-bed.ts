@@ -29,11 +29,13 @@ import {
 } from '../set-frozen.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
+import { SelectAllService } from '../../../services/select-all/select-all.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 export function createSelectionCommandTestBed(workbookData?: IWorkbookData) {
     const { univer, get, sheet } = createCommandTestBed(workbookData || SIMPLE_SELECTION_WORKBOOK_DATA, [
         [ShortcutExperienceService],
+        [SelectAllService],
     ]);
 
     const commandService = get(ICommandService);

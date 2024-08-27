@@ -77,7 +77,7 @@ export interface IRenderManagerService extends IDisposable {
     /**
      * add dep to _renderDependencies(type, dep)
      * @param type
-     * @param depCtor
+     * @param dep
      */
     registerRenderModule<T extends UnitModel>(type: UnitType, dep: Dependency<T>): IDisposable;
 }
@@ -106,7 +106,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     private readonly _renderDisposed$ = new Subject<string>();
     readonly disposed$ = this._renderDisposed$.asObservable();
 
-    get defaultEngine() {
+    get defaultEngine(): Engine {
         if (!this._defaultEngine) {
             this._defaultEngine = new Engine();
         }
@@ -122,7 +122,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         super();
     }
 
-    override dispose() {
+    override dispose(): void {
         super.dispose();
 
         this._renderMap.forEach((item) => this._disposeItem(item));
@@ -278,6 +278,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 scene,
                 isMainScene,
             });
+            this._addRenderUnit(unitId, renderUnit);
 
             // init deps
             this._tryAddRenderDependencies(renderUnit, ctorOfDeps);
@@ -297,21 +298,21 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                     return null;
                 },
             } as IRender;
+            this._addRenderUnit(unitId, renderUnit);
         }
 
-        this._addRenderUnit(unitId, renderUnit);
         return renderUnit;
     }
 
-    addRender(unitId: string, item: IRender) {
-        this._addRenderUnit(unitId, item);
+    addRender(unitId: string, renderUnit: IRender): void {
+        this._addRenderUnit(unitId, renderUnit);
     }
 
-    private _addRenderUnit(unitId: string, item: IRender) {
-        this._renderMap.set(unitId, item);
+    private _addRenderUnit(unitId: string, renderUnit: IRender): void {
+        this._renderMap.set(unitId, renderUnit);
     }
 
-    removeRender(unitId: string) {
+    removeRender(unitId: string): void {
         const item = this._renderMap.get(unitId);
         if (item != null) {
             this._disposeItem(item);
@@ -320,21 +321,21 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         this._renderMap.delete(unitId);
     }
 
-    has(unitId: string) {
+    has(unitId: string): boolean {
         return this._renderMap.has(unitId);
     }
 
-    setCurrent(unitId: string) {
+    setCurrent(unitId: string): void {
         this._currentUnitId = unitId;
 
         this._currentRender$.next(unitId);
     }
 
-    getCurrent() {
+    getCurrent(): Nullable<IRender> {
         return this._renderMap.get(this._currentUnitId);
     }
 
-    getFirst() {
+    getFirst(): Nullable<IRender> {
         return [...this.getRenderAll().values()][0];
     }
 
@@ -347,11 +348,11 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this._renderMap.get(unitId);
     }
 
-    getRenderAll() {
+    getRenderAll(): Map<string, IRender> {
         return this._renderMap;
     }
 
-    private _disposeItem(item: Nullable<IRender>, shouldDestroyEngine: boolean = true) {
+    private _disposeItem(item: Nullable<IRender>, shouldDestroyEngine: boolean = true): void {
         if (item == null) {
             return;
         }

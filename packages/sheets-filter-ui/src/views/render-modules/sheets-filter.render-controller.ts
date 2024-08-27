@@ -17,16 +17,15 @@
 import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import { CommandType, fromCallback, ICommandService, Inject, Injector, RxDisposable, ThemeService } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
-import { FILTER_MUTATIONS, ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
+import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
+import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
-import type { ISheetsFilterButtonShapeProps } from '../filter-button.shape';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../filter-button.shape';
+import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
+import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 
 const DEFAULT_Z_INDEX = 1000;
 
@@ -52,19 +51,10 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
         super();
-
-        [
-            SetSheetsFilterRangeMutation,
-            SetSheetsFilterCriteriaMutation,
-            RemoveSheetsFilterMutation,
-            ReCalcSheetsFilterMutation,
-        ].forEach((m) => this.disposeWithMe(this._sheetsRenderService.registerSkeletonChangingMutations(m.id)));
 
         this._initRenderer();
     }
@@ -100,24 +90,17 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
             takeUntil(this.dispose$)
         ).subscribe((renderParams) => {
             this._disposeRendering();
-
-            // If there's no filter range, we don't need to render anything.
             if (!renderParams || !renderParams.range) {
                 return;
             }
 
-            this._renderRange(renderParams.unitId, renderParams.range, renderParams.skeleton);
+            this._renderRange(renderParams.range, renderParams.skeleton);
             this._renderButtons(renderParams as Required<ISheetsFilterRenderParams>);
         });
     }
 
-    private _renderRange(unitId: string, range: IRange, skeleton: SpreadsheetSkeleton): void {
-        const renderer = this._renderManagerService.getRenderById(unitId);
-        if (!renderer) {
-            return;
-        }
-
-        const { scene } = renderer;
+    private _renderRange(range: IRange, skeleton: SpreadsheetSkeleton): void {
+        const { scene } = this._context;
         const { rangeWithCoord, style } = this._selectionRenderService.attachSelectionWithCoord({
             range,
             primary: null,
@@ -138,15 +121,10 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
 
     private _renderButtons(params: Required<ISheetsFilterRenderParams>): void {
         const { range, filterModel, unitId, skeleton, worksheetId } = params;
-        const currentRenderer = this._renderManagerService.getRenderById(unitId);
-        if (!currentRenderer) {
-            return;
-        }
-
-        const { scene } = currentRenderer;
+        const { scene } = this._context;
 
         // Push cell contents to leave space for the filter buttons.
-        this._interceptCellContent(params.range);
+        this._interceptCellContent(unitId, worksheetId, params.range);
 
         // Create filter button shapes.
         const { startColumn, endColumn, startRow } = range;
@@ -185,12 +163,18 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         scene.makeDirty();
     }
 
-    private _interceptCellContent(range: IRange): void {
+    private _interceptCellContent(workbookId: string, worksheetId: string, range: IRange): void {
         const { startRow, startColumn, endColumn } = range;
         this._buttonRenderDisposable = this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             handler: (cell, pos, next) => {
-                const { row, col } = pos;
-                if (row !== startRow || col < startColumn || col > endColumn) {
+                const { row, col, unitId, subUnitId } = pos;
+                if (
+                    unitId !== workbookId ||
+                    subUnitId !== worksheetId ||
+                    row !== startRow ||
+                    col < startColumn ||
+                    col > endColumn
+                ) {
                     return next(cell);
                 }
 

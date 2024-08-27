@@ -45,6 +45,7 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     sheetOrder: [],
     styles: {},
 });
+
 export const createTestBed = (dependencies?: Dependency[]) => {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -67,7 +68,10 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             injector.add([SheetInterceptorService]);
             injector.add([SheetSkeletonManagerService]);
             injector.add([LexerTreeBuilder]);
+
             dependencies?.forEach((d) => injector.add(d));
+
+            injector.get(SheetInterceptorService);
         }
     }
 

@@ -20,7 +20,7 @@ import { ComponentManager, IMenuService, IMessageService, IShortcutService } fro
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 
 import { distinctUntilChanged } from 'rxjs';
-import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { FilterSingle } from '@univerjs/icons';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -61,9 +61,10 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
         @IMenuService private readonly _menuService: IMenuService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
-        @IRenderManagerService _renderManagerService: IRenderManagerService
+        @Inject(SheetsRenderService) sheetsRenderService: SheetsRenderService,
+        @IRenderManagerService renderManagerService: IRenderManagerService
     ) {
-        super(_renderManagerService);
+        super(renderManagerService, sheetsRenderService);
 
         this._initCommands();
         this._initShortcuts();

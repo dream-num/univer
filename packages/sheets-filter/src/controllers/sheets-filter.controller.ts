@@ -691,7 +691,7 @@ export class SheetsFilterController extends Disposable {
         };
     }
 
-    private _commandExecutedListener() {
+    private _commandExecutedListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
             const { unitId, subUnitId } = command.params as unknown as ISheetCommandSharedParams || {};
 

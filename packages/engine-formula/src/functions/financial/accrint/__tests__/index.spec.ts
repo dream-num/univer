@@ -72,6 +72,10 @@ describe('Test accrint function', () => {
             const basis = NumberValueObject.create(3);
             const result3 = testFunction.calculate(issue2, firstInterest, settlement2, rate, par, frequency, basis);
             expect(result3.getValue()).toStrictEqual(67.94520547945206);
+
+            const basis2 = NumberValueObject.create(1);
+            const result4 = testFunction.calculate(issue2, firstInterest, settlement2, rate, par, frequency, basis2);
+            expect(result4.getValue()).toStrictEqual(68.20652173913044);
         });
 
         it('value is error', () => {

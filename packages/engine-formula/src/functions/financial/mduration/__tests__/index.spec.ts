@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Mduration } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
@@ -115,6 +115,10 @@ describe('Test mduration function', () => {
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis5);
             expect(result5.getValue()).toStrictEqual(10.448942853198018);
+
+            const basis6 = NullValueObject.create();
+            const result6 = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis6);
+            expect(result6.getValue()).toStrictEqual(10.448942853198018);
         });
 
         it('Value is error', () => {
@@ -148,6 +152,15 @@ describe('Test mduration function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, coupon, yld, frequency, basis);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const settlement2 = StringValueObject.create('2018-7-1');
+            const maturity2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(settlement2, maturity2, coupon, yld, frequency, basis);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const coupon2 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(settlement2, maturity, coupon2, yld, frequency, basis);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is array', () => {

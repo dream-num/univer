@@ -161,6 +161,10 @@ export function calculateFV(rate: number, nper: number, pmt: number, pv: number,
     if (rate === 0) {
         result = pv + pmt * nper;
     } else {
+        if (rate === -1 && nper === 0) {
+            return Number.NaN;
+        }
+
         const term = (1 + rate) ** nper;
 
         result = type === 1

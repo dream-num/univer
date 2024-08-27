@@ -18,8 +18,8 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Irr } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 
@@ -46,6 +46,11 @@ describe('Test irr function', () => {
             const guess = NumberValueObject.create(0.1);
             const result = testFunction.calculate(values, guess);
             expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+
+            const values2 = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
+            const guess2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(values2, guess2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -78,6 +83,28 @@ describe('Test irr function', () => {
             const guess = NumberValueObject.create(16);
             const result = testFunction.calculate(values, guess);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const values2 = NumberValueObject.create(16);
+            const guess2 = NullValueObject.create();
+            const result2 = testFunction.calculate(values2, guess2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const values3 = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
+            const guess3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['1.02', 'test', true, false, ErrorType.NAME, null],
+                ]),
+                rowCount: 1,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(values3, guess3);
+            expect(transformToValue(result3.getArrayValue())).toStrictEqual([
+                [0.08663094803651532, ErrorType.VALUE, 0.08663094803656471, 0.08663094803653167, ErrorType.NAME, 0.08663094803653167],
+            ]);
         });
     });
 });

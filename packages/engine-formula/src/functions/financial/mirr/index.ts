@@ -64,10 +64,6 @@ export class Mirr extends BaseFunction {
                 return values;
             }
 
-            if (financeRateObject.isError()) {
-                return financeRateObject;
-            }
-
             if (reinvestRateObject.isError()) {
                 return reinvestRateObject;
             }

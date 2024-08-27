@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -102,23 +101,25 @@ export class Npv extends BaseFunction {
                 let errorObject = ErrorValueObject.create(ErrorType.VALUE);
 
                 (variant as ArrayValueObject).iterator((variantOject) => {
-                    if (variantOject?.isError()) {
+                    const _variantOject = variantOject as BaseValueObject;
+
+                    if (_variantOject.isError()) {
                         isError = true;
-                        errorObject = variantOject as ErrorValueObject;
+                        errorObject = _variantOject as ErrorValueObject;
                         return false;
                     }
 
-                    if (variantOject?.isNull() || variantOject?.isBoolean()) {
+                    if (_variantOject.isNull() || _variantOject.isBoolean()) {
                         return true;
                     }
 
-                    const value = variantOject?.getValue();
+                    const value = +_variantOject.getValue();
 
-                    if (!value || !isRealNum(value)) {
+                    if (Number.isNaN(value)) {
                         return true;
                     }
 
-                    values.push(+value);
+                    values.push(value);
                 });
 
                 if (isError) {

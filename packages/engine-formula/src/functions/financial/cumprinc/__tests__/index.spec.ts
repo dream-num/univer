@@ -84,6 +84,11 @@ describe('Test cumprinc function', () => {
             const endPeriod3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(rate, nper, pv, startPeriod3, endPeriod3, type);
             expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const startPeriod4 = NumberValueObject.create(1.1);
+            const endPeriod4 = NumberValueObject.create(1.1);
+            const result4 = testFunction.calculate(rate, nper, pv, startPeriod4, endPeriod4, type);
+            expect(result4.getValue()).toStrictEqual(0);
         });
 
         it('Type value is not 0 or 1', () => {

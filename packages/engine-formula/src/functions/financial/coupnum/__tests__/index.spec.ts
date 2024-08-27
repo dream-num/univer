@@ -36,13 +36,20 @@ describe('Test coupnum function', () => {
             expect(result.getValue()).toStrictEqual(2);
         });
 
-        it('Value is normal, settlement >= maturity', () => {
+        it('Value is normal, settlement and maturity test', () => {
             const settlement = StringValueObject.create('2012-1-25');
             const maturity = StringValueObject.create('2011-11-15');
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, frequency, basis);
             expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const settlement2 = NumberValueObject.create(1);
+            const maturity2 = StringValueObject.create('2011-11-15');
+            const frequency2 = NumberValueObject.create(2);
+            const basis2 = NumberValueObject.create(1);
+            const result2 = testFunction.calculate(settlement2, maturity2, frequency2, basis2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
         });
 
         it('Frequency value test', () => {
@@ -112,6 +119,15 @@ describe('Test coupnum function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, frequency, basis);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const settlement2 = StringValueObject.create('2011-1-25');
+            const maturity2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(settlement2, maturity2, frequency, basis);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const frequency2 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(settlement2, maturity, frequency2, basis);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is array', () => {

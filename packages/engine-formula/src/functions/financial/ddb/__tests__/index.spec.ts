@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Ddb } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 
@@ -41,7 +41,7 @@ describe('Test ddb function', () => {
             const salvage = NumberValueObject.create(3000);
             const life = NumberValueObject.create(6);
             const period = NumberValueObject.create(1);
-            const factor = NumberValueObject.create(2);
+            const factor = NullValueObject.create();
             const result = testFunction.calculate(cost, salvage, life, period, factor);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });

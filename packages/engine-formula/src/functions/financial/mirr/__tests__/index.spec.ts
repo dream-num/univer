@@ -18,8 +18,8 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Mirr } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 
@@ -41,6 +41,22 @@ describe('Test mirr function', () => {
             const reinvestRate = NumberValueObject.create(0.12);
             const result = testFunction.calculate(values, financeRate, reinvestRate);
             expect(result.getValue()).toStrictEqual(ErrorType.DIV_BY_ZERO);
+
+            const values2 = NullValueObject.create();
+            const result2 = testFunction.calculate(values2, financeRate, reinvestRate);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const values3 = NumberValueObject.create(1);
+            const result3 = testFunction.calculate(values3, financeRate, reinvestRate);
+            expect(result3.getValue()).toStrictEqual(ErrorType.DIV_BY_ZERO);
+        });
+
+        it('ReinvestRate === -1', () => {
+            const values = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
+            const financeRate = NumberValueObject.create(0.1);
+            const reinvestRate = NumberValueObject.create(-1);
+            const result = testFunction.calculate(values, financeRate, reinvestRate);
+            expect(result.getValue()).toStrictEqual(ErrorType.DIV_BY_ZERO);
         });
 
         it('Value is error', () => {
@@ -49,6 +65,15 @@ describe('Test mirr function', () => {
             const reinvestRate = NumberValueObject.create(0.12);
             const result = testFunction.calculate(values, financeRate, reinvestRate);
             expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+
+            const values2 = ArrayValueObject.create('{700000,120000,150000,180000,210000,260000}');
+            const financeRate2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(values2, financeRate2, reinvestRate);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
+
+            const reinvestRate2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(values2, financeRate, reinvestRate2);
+            expect(result3.getValue()).toStrictEqual(ErrorType.NAME);
         });
 
         it('Value is boolean', () => {
@@ -84,6 +109,23 @@ describe('Test mirr function', () => {
             const reinvestRate = NumberValueObject.create(0.12);
             const result = testFunction.calculate(values, financeRate, reinvestRate);
             expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+
+            const values2 = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
+            const financeRate2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [0.1, 0.12],
+                ]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(values2, financeRate2, reinvestRate);
+            expect(transformToValue(result2.getArrayValue())).toStrictEqual([
+                [0.09866910733715017, 0.09866910733715017],
+            ]);
         });
     });
 });

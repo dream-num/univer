@@ -32,6 +32,10 @@ describe('Test fvschedule function', () => {
             const schedule = ArrayValueObject.create('{0.09,0.11,0.1}');
             const result = testFunction.calculate(principal, schedule);
             expect(result.getValue()).toStrictEqual(1.3308900000000004);
+
+            const schedule2 = NumberValueObject.create(1);
+            const result2 = testFunction.calculate(principal, schedule2);
+            expect(result2.getValue()).toStrictEqual(2);
         });
 
         it('Value is error', () => {
@@ -46,6 +50,11 @@ describe('Test fvschedule function', () => {
             const schedule = ArrayValueObject.create('{0.09,0.11,0.1}');
             const result = testFunction.calculate(principal, schedule);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const principal2 = NumberValueObject.create(1);
+            const schedule2 = BooleanValueObject.create(true);
+            const result2 = testFunction.calculate(principal2, schedule2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is blank cell', () => {
@@ -60,6 +69,11 @@ describe('Test fvschedule function', () => {
             const schedule = ArrayValueObject.create('{0.09,0.11,0.1}');
             const result = testFunction.calculate(principal, schedule);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const principal2 = NumberValueObject.create(1);
+            const schedule2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(principal2, schedule2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is array', () => {
@@ -77,6 +91,35 @@ describe('Test fvschedule function', () => {
             const schedule = ArrayValueObject.create('{0.09,0.11,0.1}');
             const result = testFunction.calculate(principal, schedule);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const principal2 = NumberValueObject.create(1);
+            const schedule2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['1.02', 'test', true, false, ErrorType.NAME],
+                ]),
+                rowCount: 1,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(principal2, schedule2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const schedule3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['1.02', true, 'test', false, ErrorType.NAME],
+                ]),
+                rowCount: 1,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(principal2, schedule3);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
         });
     });
 });

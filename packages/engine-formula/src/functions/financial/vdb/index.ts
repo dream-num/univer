@@ -188,19 +188,8 @@ export class Vdb extends BaseFunction {
                 result += ddb;
             }
         } else {
-            let _life = life;
-            let _startPeriod = startPeriod;
-            let _endPeriod = endPeriod;
-
-            if (startPeriod !== Math.floor(startPeriod) && factor > 1 && startPeriod >= life / 2) {
-                const fPart = startPeriod - life / 2;
-                _startPeriod = life / 2;
-                _endPeriod -= fPart;
-                _life += 1;
-            }
-
-            const _cost = cost - this._getVdb(cost, salvage, life, _life, _startPeriod, factor);
-            result = this._getVdb(_cost, salvage, life, life - _startPeriod, _endPeriod - _startPeriod, factor);
+            const _cost = cost - this._getVdb(cost, salvage, life, life, startPeriod, factor);
+            result = this._getVdb(_cost, salvage, life, life - startPeriod, endPeriod - startPeriod, factor);
         }
 
         return result;

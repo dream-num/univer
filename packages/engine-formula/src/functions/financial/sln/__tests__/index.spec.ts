@@ -21,6 +21,7 @@ import { Sln } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test sln function', () => {
     const testFunction = new Sln(FUNCTION_NAMES_FINANCIAL.SLN);
@@ -56,6 +57,19 @@ describe('Test sln function', () => {
             const life = NullValueObject.create();
             const result = testFunction.calculate(cost, salvage, life);
             expect(result.getValue()).toStrictEqual(ErrorType.DIV_BY_ZERO);
+        });
+
+        it('Value is error', () => {
+            const cost = NumberValueObject.create(300000);
+            const salvage = ErrorValueObject.create(ErrorType.NAME);
+            const life = NumberValueObject.create(10);
+            const result = testFunction.calculate(cost, salvage, life);
+            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+
+            const salvage2 = NumberValueObject.create(75000);
+            const life2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(cost, salvage2, life2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
         });
 
         it('value is array', () => {

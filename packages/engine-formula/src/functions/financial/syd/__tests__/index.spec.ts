@@ -21,6 +21,7 @@ import { Syd } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test syd function', () => {
     const testFunction = new Syd(FUNCTION_NAMES_FINANCIAL.SYD);
@@ -60,6 +61,24 @@ describe('Test syd function', () => {
             const per = NumberValueObject.create(10);
             const result = testFunction.calculate(cost, salvage, life, per);
             expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+        });
+
+        it('Value is error', () => {
+            const cost = NumberValueObject.create(300000);
+            const salvage = ErrorValueObject.create(ErrorType.NAME);
+            const life = NumberValueObject.create(10);
+            const per = NumberValueObject.create(10);
+            const result = testFunction.calculate(cost, salvage, life, per);
+            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+
+            const salvage2 = NumberValueObject.create(75000);
+            const life2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(cost, salvage2, life2, per);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
+
+            const per2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(cost, salvage2, life, per2);
+            expect(result3.getValue()).toStrictEqual(ErrorType.NAME);
         });
 
         it('Salvage < 0', () => {

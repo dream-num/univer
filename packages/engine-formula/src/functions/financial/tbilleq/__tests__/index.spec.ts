@@ -81,6 +81,15 @@ describe('Test tbilleq function', () => {
             const discount = NumberValueObject.create(0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const settlement2 = StringValueObject.create('2008-3-31');
+            const maturity2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(settlement2, maturity2, discount);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const discount2 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(settlement2, maturity, discount2);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is array', () => {

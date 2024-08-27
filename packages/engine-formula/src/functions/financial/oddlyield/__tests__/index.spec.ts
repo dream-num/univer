@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Oddlyield } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
@@ -127,6 +127,10 @@ describe('Test oddlyield function', () => {
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis5);
             expect(result5.getValue()).toStrictEqual(0.10708735030923248);
+
+            const basis6 = NullValueObject.create();
+            const result6 = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis6);
+            expect(result6.getValue()).toStrictEqual(0.10708735030923248);
         });
 
         it('Value is error', () => {
@@ -166,6 +170,19 @@ describe('Test oddlyield function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, lastInterest, rate, pr, redemption, frequency, basis);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const settlement2 = StringValueObject.create('2008-11-11');
+            const maturity2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(settlement2, maturity2, lastInterest, rate, pr, redemption, frequency, basis);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const lastInterest2 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(settlement2, maturity, lastInterest2, rate, pr, redemption, frequency, basis);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const rate2 = StringValueObject.create('test');
+            const result4 = testFunction.calculate(settlement2, maturity, lastInterest, rate2, pr, redemption, frequency, basis);
+            expect(result4.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is array', () => {

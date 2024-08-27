@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Yielddisc } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
@@ -91,6 +91,10 @@ describe('Test yielddisc function', () => {
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, pr, redemption, basis5);
             expect(result5.getValue()).toStrictEqual(0.0012794247632892156);
+
+            const basis6 = NullValueObject.create();
+            const result6 = testFunction.calculate(settlement, maturity, pr, redemption, basis6);
+            expect(result6.getValue()).toStrictEqual(0.0012794247632892156);
         });
 
         it('Value is error', () => {
@@ -121,6 +125,15 @@ describe('Test yielddisc function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, pr, redemption, basis);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const settlement2 = StringValueObject.create('2008-11-11');
+            const maturity2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(settlement2, maturity2, pr, redemption, basis);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const pr2 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(settlement2, maturity, pr2, redemption, basis);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is array', () => {

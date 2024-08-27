@@ -1120,7 +1120,7 @@ export function isRichText(body: IDocumentBody): boolean {
             const hasRichTextStyle = Boolean(textRun.ts && Object.keys(textRun.ts).some((property) => {
                 return richTextStyle.includes(property);
             }));
-            return hasRichTextStyle || (textRun.ts && (textRun.ed - textRun.st < bodyNoLineBreak.length));
+            return hasRichTextStyle || (Object.keys(textRun.ts ?? {}).length && (textRun.ed - textRun.st < bodyNoLineBreak.length));
         }) ||
         paragraphs.some((paragraph) => paragraph.bullet) ||
         paragraphs.length >= 2 ||

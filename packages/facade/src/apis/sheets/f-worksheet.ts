@@ -23,10 +23,12 @@ import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { FDataValidation } from './f-data-validation';
 import { FFilter } from './f-filter';
+import { FThreadComment } from './f-thread-comment';
 
 export class FWorksheet {
     constructor(
@@ -176,5 +178,17 @@ export class FWorksheet {
         );
     }
 
+    // #endregion
+
+    // #region Comment
+    /**
+     * Get all comments in the current sheet
+     * @returns all comments in the current sheet
+     */
+    getComments(): FThreadComment[] {
+        const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
+        const comments = sheetsTheadCommentModel.getSubUnitAll(this._workbook.getUnitId(), this._worksheet.getSheetId());
+        return comments.map((comment) => this._injector.createInstance(FThreadComment, comment));
+    }
     // #endregion
 }

@@ -268,4 +268,8 @@ export class SheetsThreadCommentModel extends Disposable {
 
         return false;
     }
+
+    getSubUnitAll(unitId: string, subUnitId: string) {
+        return Object.values(this._threadCommentModel.getAll()[unitId]?.[subUnitId] ?? {});
+    }
 }

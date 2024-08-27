@@ -22,3 +22,4 @@ export { FWorkbook } from './apis/sheets/f-workbook';
 export { FWorksheet } from './apis/sheets/f-worksheet';
 export { FDataValidation } from './apis/sheets/f-data-validation';
 export { FDataValidationBuilder } from './apis/sheets/f-data-validation-builder';
+export { FThreadComment } from './apis/sheets/f-thread-comment';

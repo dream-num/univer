@@ -14,33 +14,71 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '@univerjs/core';
-import { ICommandService, Inject, Injector } from '@univerjs/core';
+import type { IDocumentBody, Workbook } from '@univerjs/core';
+import { ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IBaseComment, IDeleteCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { DeleteCommentCommand, DeleteCommentTreeCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { getDT } from '@univerjs/thread-comment-ui';
+import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
+import { FRange } from './f-range';
 
 export class FThreadComment {
     constructor(
         private readonly _thread: IThreadComment | IBaseComment,
+        private readonly _parent: IThreadComment | undefined,
         @Inject(Injector) private readonly _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
     }
 
+    /**
+     * Whether the comment is a root comment
+     * @returns Whether the comment is a root comment
+     */
     getIsRoot(): boolean {
-        return !this._thread.parentId;
+        return !this._parent;
     }
 
+    /**
+     * Get the comment data
+     * @returns The comment data
+     */
     getCommentData(): IBaseComment {
         const { children, ...comment } = this._thread;
         return comment;
     }
 
-    getChildren(): FThreadComment[] | undefined {
+    /**
+     * Get the replies of the comment
+     * @returns the replies of the comment
+     */
+    getReplies(): FThreadComment[] | undefined {
         return this._thread.children?.map((child) => this._injector.createInstance(FThreadComment, child));
     }
 
+    /**
+     * Get the range of the comment
+     * @returns The range of the comment
+     */
+    getRange(): FRange | null {
+        const workbook = this._univerInstanceService.getUnit<Workbook>(this._thread.unitId, UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return null;
+        }
+        const worksheet = workbook.getSheetBySheetId(this._thread.subUnitId);
+        if (!worksheet) {
+            return null;
+        }
+        const ref = this._parent?.ref || (this._thread as IThreadComment).ref;
+        const range = deserializeRangeWithSheet(ref);
+        return this._injector.createInstance(FRange, workbook, worksheet, range.range);
+    }
+
+    /**
+     * Delete the comment and it's replies
+     * @returns success or not
+     */
     delete(): boolean {
         return this._commandService.syncExecuteCommand(
             this.getIsRoot() ? DeleteCommentTreeCommand.id : DeleteCommentCommand.id,
@@ -52,6 +90,11 @@ export class FThreadComment {
         );
     }
 
+    /**
+     * Update the comment content
+     * @param content The new content of the comment
+     * @returns success or not
+     */
     update(content: IDocumentBody): boolean {
         return this._commandService.syncExecuteCommand(
             UpdateCommentCommand.id,

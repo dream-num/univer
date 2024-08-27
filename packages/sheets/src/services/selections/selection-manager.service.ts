@@ -41,6 +41,10 @@ export class SheetsSelectionsService extends RxDisposable {
         return { unitId: workbook.getUnitId(), sheetId: worksheet.getSheetId() };
     }
 
+    get currentSelectionParam() {
+        return this._currentSelectionPos;
+    }
+
     selectionMoveStart$: Observable<Nullable<ISelectionWithStyle[]>>;
     selectionMoving$: Observable<Nullable<ISelectionWithStyle[]>>;
     selectionMoveEnd$: Observable<ISelectionWithStyle[]>;

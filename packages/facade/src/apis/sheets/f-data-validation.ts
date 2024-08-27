@@ -18,8 +18,8 @@ import type { DataValidationOperator, DataValidationType, IDataValidationRule, I
 import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
 
 import { DataValidationModel, getRuleOptions } from '@univerjs/data-validation';
-import type { IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
-import { UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import type { IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
+import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 import type { FWorksheet } from './f-worksheet';
 
@@ -207,5 +207,22 @@ export class FDataValidation {
 
         this.rule.ranges = ranges;
         return true;
+    }
+
+    /**
+     * Delete the data validation rule from the worksheet.
+     * @returns true if the rule is deleted successfully, false otherwise.
+     */
+    delete(): boolean {
+        if (!this.getApplied()) {
+            return false;
+        }
+
+        const commandService = this._worksheet!.getInject().get(ICommandService);
+        return commandService.syncExecuteCommand(RemoveSheetDataValidationCommand.id, {
+            unitId: this.getUnitId(),
+            subUnitId: this.getSheetId(),
+            ruleId: this.rule.uid,
+        } as IRemoveSheetDataValidationCommandParams);
     }
 }

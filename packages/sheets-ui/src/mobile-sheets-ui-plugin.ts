@@ -124,9 +124,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [SheetPermissionInterceptorClipboardController],
                 [SheetPermissionInterceptorBaseController],
                 [SheetPermissionInitController],
-                [SheetPermissionRenderManagerController, {
-                    useFactory: (): SheetPermissionRenderManagerController => this._injector.createInstance(SheetPermissionRenderManagerController, this._config),
-                }],
+                [SheetPermissionRenderManagerController],
             ] as Dependency[]
         ).forEach((d) => this._injector.add(d));
     }

@@ -301,6 +301,30 @@ describe('Test EndEditController', () => {
             // textRuns works on parts of strings
             const isRichTextRes2 = isRichText(anotherCellBody);
             expect(isRichTextRes2).toBe(true);
+
+            const cellBody2 = {
+                dataStream: 'true\r\n',
+                textRuns: [
+                    {
+                        ts: {},
+                        st: 0,
+                        ed: 0,
+                    },
+                ],
+                paragraphs: [
+                    {
+                        startIndex: 4,
+                        paragraphStyle: {
+                            horizontalAlign: 0,
+                        },
+                    },
+                ],
+                customBlocks: [],
+                customRanges: [],
+            };
+
+            const isRichTextWithCellBody2 = isRichText(cellBody2);
+            expect(isRichTextWithCellBody2).toBe(false);
         });
 
         it('test number can not set style', () => {

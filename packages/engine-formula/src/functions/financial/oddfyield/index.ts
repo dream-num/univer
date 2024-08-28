@@ -16,7 +16,7 @@
 
 import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateOddFPrice, getResultByGuessIterF } from '../../../basics/financial';
+import { calculateOddFPrice, getResultByGuessIterF, validCouppcdIsGte0ByTwoDate, validDaysBetweenIsWholeFrequencyByTwoDate } from '../../../basics/financial';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -86,26 +86,25 @@ export class Oddfyield extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const isCorrectOrder = this._getDateCorrectOrder(maturitySerialNumber, firstCouponSerialNumber, settlementSerialNumber, issueSerialNumber);
-
         if (
             rateValue < 0 ||
             prValue <= 0 ||
+            redemptionValue <= 0 ||
             ![1, 2, 4].includes(frequencyValue) ||
             basisValue < 0 ||
             basisValue > 4 ||
-            !isCorrectOrder
+            !this._validDate(maturitySerialNumber, firstCouponSerialNumber, settlementSerialNumber, issueSerialNumber, frequencyValue)
         ) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = this._getResult(settlementSerialNumber, maturitySerialNumber, issueSerialNumber, firstCouponSerialNumber, rateValue, prValue, redemptionValue, frequencyValue, basisValue);
+        return this._getResult(settlementSerialNumber, maturitySerialNumber, issueSerialNumber, firstCouponSerialNumber, rateValue, prValue, redemptionValue, frequencyValue, basisValue);
+    }
 
-        if (typeof result !== 'number') {
-            return result as ErrorValueObject;
-        }
-
-        return NumberValueObject.create(result);
+    private _validDate(maturitySerialNumber: number, firstCouponSerialNumber: number, settlementSerialNumber: number, issueSerialNumber: number, frequencyValue: number): boolean {
+        return this._getDateCorrectOrder(maturitySerialNumber, firstCouponSerialNumber, settlementSerialNumber, issueSerialNumber)
+            && validDaysBetweenIsWholeFrequencyByTwoDate(maturitySerialNumber, firstCouponSerialNumber, frequencyValue)
+            && validCouppcdIsGte0ByTwoDate(issueSerialNumber, maturitySerialNumber, frequencyValue);
     }
 
     private _getDateCorrectOrder(maturitySerialNumber: number, firstCouponSerialNumber: number, settlementSerialNumber: number, issueSerialNumber: number): boolean {
@@ -124,7 +123,7 @@ export class Oddfyield extends BaseFunction {
         redemption: number,
         frequency: number,
         basis: number
-    ): number | ErrorValueObject {
+    ): BaseValueObject {
         const { days } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basis);
         const guess = (rate * days * 100 - (pr - 100)) / ((pr - 100) * 0.25 * (1 + 2 * days) + days * 100);
 
@@ -132,6 +131,12 @@ export class Oddfyield extends BaseFunction {
             return pr - calculateOddFPrice(settlementSerialNumber, maturitySerialNumber, issueSerialNumber, firstCouponSerialNumber, rate, yld, redemption, frequency, basis);
         }
 
-        return getResultByGuessIterF(guess, (yld: number) => _iterF(yld));
+        const result = getResultByGuessIterF(guess, (yld: number) => _iterF(yld));
+
+        if (typeof result !== 'number') {
+            return result as ErrorValueObject;
+        }
+
+        return NumberValueObject.create(result);
     }
 }

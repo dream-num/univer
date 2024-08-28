@@ -16,7 +16,7 @@
 
 import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateOddFPrice } from '../../../basics/financial';
+import { calculateOddFPrice, validCouppcdIsGte0ByTwoDate, validDaysBetweenIsWholeFrequencyByTwoDate } from '../../../basics/financial';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -86,16 +86,14 @@ export class Oddfprice extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const isCorrectOrder = this._getDateCorrectOrder(maturitySerialNumber, firstCouponSerialNumber, settlementSerialNumber, issueSerialNumber);
-
         if (
             rateValue < 0 ||
             yldValue < 0 ||
-            redemptionValue < 0 ||
+            redemptionValue <= 0 ||
             ![1, 2, 4].includes(frequencyValue) ||
             basisValue < 0 ||
             basisValue > 4 ||
-            !isCorrectOrder
+            !this._validDate(maturitySerialNumber, firstCouponSerialNumber, settlementSerialNumber, issueSerialNumber, frequencyValue)
         ) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
@@ -103,6 +101,12 @@ export class Oddfprice extends BaseFunction {
         const result = calculateOddFPrice(settlementSerialNumber, maturitySerialNumber, issueSerialNumber, firstCouponSerialNumber, rateValue, yldValue, redemptionValue, frequencyValue, basisValue);
 
         return NumberValueObject.create(result);
+    }
+
+    private _validDate(maturitySerialNumber: number, firstCouponSerialNumber: number, settlementSerialNumber: number, issueSerialNumber: number, frequencyValue: number): boolean {
+        return this._getDateCorrectOrder(maturitySerialNumber, firstCouponSerialNumber, settlementSerialNumber, issueSerialNumber)
+            && validDaysBetweenIsWholeFrequencyByTwoDate(maturitySerialNumber, firstCouponSerialNumber, frequencyValue)
+            && validCouppcdIsGte0ByTwoDate(issueSerialNumber, maturitySerialNumber, frequencyValue);
     }
 
     private _getDateCorrectOrder(maturitySerialNumber: number, firstCouponSerialNumber: number, settlementSerialNumber: number, issueSerialNumber: number): boolean {

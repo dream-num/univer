@@ -51,12 +51,16 @@ describe('Test tbillprice function', () => {
             expect(result.getValue()).toStrictEqual(ErrorType.NUM);
         });
 
-        it('Discount <= 0', () => {
+        it('Discount <= 0 || discount to result < 0 or NaN', () => {
             const settlement = StringValueObject.create('2008-3-31');
             const maturity = StringValueObject.create('2008-6-1');
             const discount = NumberValueObject.create(-0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
             expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const discount2 = NumberValueObject.create(11);
+            const result2 = testFunction.calculate(settlement, maturity, discount2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
         });
 
         it('Value is error', () => {

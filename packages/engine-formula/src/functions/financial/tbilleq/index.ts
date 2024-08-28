@@ -61,7 +61,7 @@ export class Tbilleq extends BaseFunction {
         }
 
         // where DSM is the number of days between settlement and maturity computed according to the 360 days per year basis.
-        const DSM = maturitySerialNumber - settlementSerialNumber;
+        const DSM = Math.floor(maturitySerialNumber) - Math.floor(settlementSerialNumber);
 
         const date = excelSerialToDate(settlementSerialNumber);
         const year = date.getUTCFullYear();
@@ -73,7 +73,22 @@ export class Tbilleq extends BaseFunction {
         }
 
         // TBILLEQ is calculated as TBILLEQ = (365 x rate)/(360-(rate x DSM))
-        const result = (365 * discountValue) / (360 - (discountValue * DSM));
+        let result = (365 * discountValue) / (360 - (discountValue * DSM));
+
+        if (DSM > 182) {
+            const tbillPrice = 100 * (1 - discountValue * DSM / 360);
+            const fraction = DSM / 365;
+
+            result = (-fraction + Math.sqrt(fraction * fraction - (fraction * 2 - 1) * (1 - 100 / tbillPrice))) / (fraction - 0.5);
+
+            if (Number.isNaN(result)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+        }
+
+        if (result < 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
 
         return NumberValueObject.create(result);
     }

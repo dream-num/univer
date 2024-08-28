@@ -16,7 +16,7 @@
 
 import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { calculateCoupdays } from '../../../basics/financial';
+import { calculateCoupdays, validCouppcdIsGte0ByTwoDate } from '../../../basics/financial';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -79,15 +79,14 @@ export class Oddlyield extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const isCorrectOrder = this._getDateCorrectOrder(maturitySerialNumber, settlementSerialNumber, lastInterestSerialNumber);
-
         if (
             rateValue < 0 ||
             prValue <= 0 ||
+            redemptionValue <= 0 ||
             ![1, 2, 4].includes(frequencyValue) ||
             basisValue < 0 ||
             basisValue > 4 ||
-            !isCorrectOrder
+            !this._validDate(maturitySerialNumber, settlementSerialNumber, lastInterestSerialNumber, frequencyValue)
         ) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
@@ -97,9 +96,10 @@ export class Oddlyield extends BaseFunction {
         return NumberValueObject.create(result);
     }
 
-    private _getDateCorrectOrder(maturitySerialNumber: number, settlementSerialNumber: number, lastInterestSerialNumber: number): boolean {
+    private _validDate(maturitySerialNumber: number, settlementSerialNumber: number, lastInterestSerialNumber: number, frequencyValue: number): boolean {
         return Math.floor(maturitySerialNumber) > Math.floor(settlementSerialNumber)
-            && Math.floor(settlementSerialNumber) > Math.floor(lastInterestSerialNumber);
+            && Math.floor(settlementSerialNumber) > Math.floor(lastInterestSerialNumber)
+            && validCouppcdIsGte0ByTwoDate(lastInterestSerialNumber, maturitySerialNumber, frequencyValue);
     }
 
     private _getResult(

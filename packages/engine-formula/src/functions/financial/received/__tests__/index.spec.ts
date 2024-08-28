@@ -35,6 +35,10 @@ describe('Test received function', () => {
             const basis = NumberValueObject.create(2);
             const result = testFunction.calculate(settlement, maturity, investment, discount, basis);
             expect(result.getValue()).toStrictEqual(10046534.991941841);
+
+            const settlement2 = StringValueObject.create('1990-2-15');
+            const result2 = testFunction.calculate(settlement2, maturity, investment, discount, basis);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
         });
 
         it('Settlement >= maturity', () => {

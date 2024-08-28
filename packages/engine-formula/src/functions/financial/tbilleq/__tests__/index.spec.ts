@@ -33,6 +33,10 @@ describe('Test tbilleq function', () => {
             const discount = NumberValueObject.create(0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
             expect(result.getValue()).toStrictEqual(0.09415149356594302);
+
+            const maturity2 = StringValueObject.create('2008-11-1');
+            const result2 = testFunction.calculate(settlement, maturity2, discount);
+            expect(result2.getValue()).toStrictEqual(0.09730435851979326);
         });
 
         it('Settlement >= maturity', () => {
@@ -51,12 +55,20 @@ describe('Test tbilleq function', () => {
             expect(result.getValue()).toStrictEqual(ErrorType.NUM);
         });
 
-        it('Discount <= 0', () => {
+        it('Discount <= 0 || discount to result < 0 or NaN', () => {
             const settlement = StringValueObject.create('2008-3-31');
             const maturity = StringValueObject.create('2008-6-1');
             const discount = NumberValueObject.create(-0.0914);
             const result = testFunction.calculate(settlement, maturity, discount);
             expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const discount2 = NumberValueObject.create(11);
+            const result2 = testFunction.calculate(settlement, maturity, discount2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const maturity2 = StringValueObject.create('2008-12-1');
+            const result3 = testFunction.calculate(settlement, maturity2, discount2);
+            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
         });
 
         it('Value is error', () => {

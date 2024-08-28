@@ -83,6 +83,10 @@ export class Received extends BaseFunction {
 
         const result = investmentValue / (1 - (discountValue * DSM / B));
 
+        if (result < 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
         return NumberValueObject.create(result);
     }
 }

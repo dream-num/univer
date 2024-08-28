@@ -61,7 +61,7 @@ export class Tbillyield extends BaseFunction {
         }
 
         // where DSM is the number of days between settlement and maturity computed according to the 360 days per year basis.
-        const DSM = maturitySerialNumber - settlementSerialNumber;
+        const DSM = Math.floor(maturitySerialNumber) - Math.floor(settlementSerialNumber);
 
         const date = excelSerialToDate(settlementSerialNumber);
         const year = date.getUTCFullYear();

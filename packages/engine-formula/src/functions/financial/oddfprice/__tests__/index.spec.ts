@@ -41,7 +41,7 @@ describe('Test oddfprice function', () => {
             expect(result.getValue()).toStrictEqual(113.59771747407883);
         });
 
-        it('Value is normal, but correct order is maturity > first_coupon > settlement > issue, otherwise return #NUM!', () => {
+        it('Value is normal, but date valid error, return #NUM!', () => {
             const settlement = StringValueObject.create('2018-11-11');
             const maturity = StringValueObject.create('2021-3-1');
             const issue = StringValueObject.create('2008-10-15');
@@ -53,6 +53,11 @@ describe('Test oddfprice function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, issue, firstCoupon, rate, yld, redemption, frequency, basis);
             expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const maturity2 = StringValueObject.create('2021-3-1');
+            const firstCoupon2 = StringValueObject.create('2009-3-2');
+            const result2 = testFunction.calculate(settlement, maturity2, issue, firstCoupon2, rate, yld, redemption, frequency, basis);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NUM);
         });
 
         it('Rate < 0', () => {

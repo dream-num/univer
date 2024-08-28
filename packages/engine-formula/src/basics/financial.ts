@@ -361,6 +361,37 @@ function getPositiveDaysBetween(startDateSerialNumber: number, endDateSerialNumb
     return startDateSerialNumber < endDateSerialNumber ? days : 0;
 }
 
+export function validDaysBetweenIsWholeFrequencyByTwoDate(date1SerialNumber: number, date2SerialNumber: number, frequency: number): boolean {
+    const date1 = excelSerialToDate(date1SerialNumber);
+    const date1Year = date1.getUTCFullYear();
+    const date1Month = date1.getUTCMonth();
+    const date1Day = date1.getUTCDate();
+    const date1LastDayOfMonth = lastDayOfMonth(date1Year, date1Month, date1Day);
+
+    const date2 = excelSerialToDate(date2SerialNumber);
+    const date2Year = date2.getUTCFullYear();
+    const date2Month = date2.getUTCMonth();
+    const date2Day = date2.getUTCDate();
+    const date2LastDayOfMonth = lastDayOfMonth(date2Year, date2Month, date2Day);
+
+    if (date1Day !== date2Day && !(date1LastDayOfMonth && date2LastDayOfMonth)) {
+        return false;
+    }
+
+    const months = Math.abs((date2Year - date1Year) * 12 + (date2Month - date1Month));
+
+    if (months % (12 / frequency) !== 0) {
+        return false;
+    }
+
+    return true;
+}
+
+export function validCouppcdIsGte0ByTwoDate(date1SerialNumber: number, date2SerialNumber: number, frequency: number): boolean {
+    const couppcd = calculateCouppcd(date1SerialNumber, date2SerialNumber, frequency);
+    return couppcd >= 0;
+}
+
 export function getDateSerialNumberByMonths(serialNumber: number, months: number, returnLastDay: boolean): number {
     let date = excelSerialToDate(serialNumber);
     date = dateAddMonths(date, months);

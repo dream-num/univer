@@ -16,7 +16,7 @@
 
 import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { calculatePrice } from '../../../basics/financial';
+import { calculatePrice, validCouppcdIsGte0ByTwoDate } from '../../../basics/financial';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -79,7 +79,8 @@ export class Yield extends BaseFunction {
             ![1, 2, 4].includes(frequencyValue) ||
             basisValue < 0 ||
             basisValue > 4 ||
-            settlementSerialNumber >= maturitySerialNumber
+            settlementSerialNumber >= maturitySerialNumber ||
+            !validCouppcdIsGte0ByTwoDate(settlementSerialNumber, maturitySerialNumber, frequencyValue)
         ) {
             return ErrorValueObject.create(ErrorType.NUM);
         }

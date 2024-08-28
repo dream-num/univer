@@ -404,7 +404,7 @@ export class FWorksheet {
         const rowHeightRanges: IRange[] = [];
 
         for (let i = startRow; i < startRow + numRows; i++) {
-            const rowHeight = rowManager.getRowHeight(i);
+            const autoRowHeight = rowManager.getRow(i)?.ah || this._worksheet.getConfig().defaultRowHeight;
             const range = {
                 startRow: i,
                 endRow: i,
@@ -413,25 +413,29 @@ export class FWorksheet {
             };
 
             // if the new height is less than the current height, set auto height
-            if (height <= rowHeight) {
+            if (height <= autoRowHeight) {
                 autoHeightRanges.push(range);
             } else { // if the new height is greater than the current height, set the new height
                 rowHeightRanges.push(range);
             }
         }
 
-        await this._commandService.executeCommand(SetRowHeightCommand.id, {
-            unitId,
-            subUnitId,
-            ranges: rowHeightRanges,
-            value: height,
-        });
+        if (rowHeightRanges.length > 0) {
+            await this._commandService.executeCommand(SetRowHeightCommand.id, {
+                unitId,
+                subUnitId,
+                ranges: rowHeightRanges,
+                value: height,
+            });
+        }
 
-        await this._commandService.executeCommand(SetWorksheetRowIsAutoHeightCommand.id, {
-            unitId,
-            subUnitId,
-            ranges: autoHeightRanges,
-        });
+        if (autoHeightRanges.length > 0) {
+            await this._commandService.executeCommand(SetWorksheetRowIsAutoHeightCommand.id, {
+                unitId,
+                subUnitId,
+                ranges: autoHeightRanges,
+            });
+        }
 
         return this;
     }

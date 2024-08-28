@@ -910,14 +910,8 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 
     let textRun;
 
-    for (let i = 0; i < textRuns.length; i++) {
+    for (let i = textRuns.length - 1; i >= 0; i--) {
         const curTextRun = textRuns[i];
-        const nextTextRun = textRuns[i + 1];
-
-        if (nextTextRun && nextTextRun.st === nextTextRun.ed && startOffset === nextTextRun.st) {
-            textRun = nextTextRun;
-            break;
-        }
 
         if (curTextRun.st <= startOffset && startOffset <= curTextRun.ed) {
             textRun = curTextRun;

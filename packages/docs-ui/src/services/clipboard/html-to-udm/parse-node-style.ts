@@ -64,7 +64,7 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
 
         switch (cssRule) {
             case 'font-family': {
-                docStyles.ff = cssValue;
+                docStyles.ff = cssValue.replace(/^"/g, '').replace(/"$/g, '');
 
                 break;
             }

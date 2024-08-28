@@ -26,7 +26,7 @@ export interface IRetryInterceptorFactoryParams {
     delayInterval?: number;
 }
 
-export const RetryInterceptorFactory: HTTPInterceptorFnFactory<[Nullable<undefined>, Nullable<IRetryInterceptorFactoryParams>]> = (_accessor, params) => {
+export const RetryInterceptorFactory: HTTPInterceptorFnFactory<[Nullable<IRetryInterceptorFactoryParams>]> = (params) => {
     const maxRetryAttempts = params?.maxRetryAttempts ?? DEFAULT_MAX_RETRY_ATTEMPTS;
     const delayInterval = params?.delayInterval ?? DELAY_INTERVAL;
     return (request, next) => next(request).pipe(retry({ delay: delayInterval, count: maxRetryAttempts }));

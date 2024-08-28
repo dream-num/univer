@@ -89,12 +89,18 @@ const HighlightCellInput = (props: {
             }
         }
     }, [type]);
+
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
             handler: (v, _c, next) => {
                 switch (type) {
                     case CFSubRuleType.text: {
-                        if ([CFTextOperator.beginsWith, CFTextOperator.containsText, CFTextOperator.endsWith, CFTextOperator.notEqual, CFTextOperator.notContainsText, CFTextOperator.equal]) {
+                        if ([CFTextOperator.beginsWith,
+                            CFTextOperator.containsText,
+                            CFTextOperator.endsWith,
+                            CFTextOperator.notEqual,
+                            CFTextOperator.notContainsText,
+                            CFTextOperator.equal].includes(operator as any)) {
                             if (!inputTextValue) {
                                 textErrorSet(localeService.t('sheet.cf.errorMessage.notBlank'));
                                 return false;
@@ -109,7 +115,7 @@ const HighlightCellInput = (props: {
         return () => {
             dispose();
         };
-    }, [type, inputNumberValue, inputTextValue, inputNumberMin, inputNumberMax]);
+    }, [type, inputNumberValue, inputTextValue, operator]);
 
     switch (type) {
         case CFSubRuleType.text: {
@@ -258,6 +264,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         label: localeService.t('sheet.cf.subRuleType.uniqueValues'),
     },
     ];
+
     const operatorOptions = useMemo(() => getOperatorOptions(subType, localeService), [subType]);
 
     const [operator, operatorSet] = useState<IResult['operator'] | undefined>(() => {
@@ -278,6 +285,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     });
 
     const [style, styleSet] = useState<IHighlightCell['style']>({});
+
     const getResult = useMemo(() => (option: { subType?: string; operator?: string; value?: IValue; style?: IHighlightCell['style'] }) => {
         switch (option.subType || subType) {
             case CFSubRuleType.text: {
@@ -351,6 +359,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         _operator && valueSet(createDefaultValue(_subType, _operator));
         onChange(getResult({ subType: _subType, operator: _operator }));
     };
+
     const onOperatorChange = (v: string) => {
         const _operator = v as typeof operator;
         operatorSet(_operator);
@@ -361,6 +370,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         valueSet(value);
         onChange(getResult({ value }));
     };
+
     const inputRenderKey = useMemo(() => {
         return `${subType}_${operator}_${Math.random()}`;
     }, [subType, operator]);

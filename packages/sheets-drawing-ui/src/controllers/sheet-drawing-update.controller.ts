@@ -61,7 +61,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
-        this._drawingAddListener();
     }
 
     /**

@@ -449,8 +449,17 @@ export class SheetsFilterController extends Disposable {
                         col: newColIndex,
                         criteria: { ...filter.serialize(), colId: newColIndex },
                     };
+
+                    const undoSetCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
+                        unitId,
+                        subUnitId,
+                        col: newColIndex,
+                        criteria: filterModel.getFilterColumn(newColIndex) ?
+                            { ...filterModel.getFilterColumn(newColIndex)?.serialize(), colId: newColIndex }
+                            : null,
+                    };
                     redos.push({ id: SetSheetsFilterCriteriaMutation.id, params: setCriteriaMutationParams });
-                    undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: { unitId, subUnitId, col: newColIndex, criteria: { ...filterModel.getFilterColumn(newColIndex)?.serialize(), colId: newColIndex } } });
+                    undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: undoSetCriteriaMutationParams });
                 }
                 if (!filterCol[oldColIndex]?.filter) {
                     const setCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {

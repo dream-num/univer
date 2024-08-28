@@ -64,6 +64,7 @@ export interface IFormatPainterBeforeApplyHookParams {
     subUnitId: string;
     range: IRange;
     redoMutationsInfo: IMutationInfo[];
+    undoMutationsInfo: IMutationInfo[];
     format: ISelectionFormatInfo;
 }
 
@@ -154,6 +155,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
                     range,
                     redoMutationsInfo,
                     format: this._selectionFormat,
+                    undoMutationsInfo,
                 });
 
                 if (!result) {

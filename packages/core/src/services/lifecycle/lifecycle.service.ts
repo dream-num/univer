@@ -46,28 +46,18 @@ export class LifecycleService extends Disposable {
     }
 
     set stage(stage: LifecycleStages) {
-        if (stage < this.stage) {
-            throw new Error('[LifecycleService]: lifecycle stage cannot go backward!');
-        }
+        if (this._lock) throw new Error('[LifecycleService]: cannot set new stage when related logic is all handled!');
+        if (stage < this.stage) throw new Error('[LifecycleService]: lifecycle stage cannot go backward!');
+        if (stage === this.stage) return;
 
-        if (stage === this.stage) {
-            return;
-        }
-
-        if (this._lock) {
-            throw new Error('[LifecycleService]: cannot set new stage when related logic is all handled!');
-        }
         this._lock = true;
-
         this._reportProgress(stage);
         this._lifecycle$.next(stage);
-
         this._lock = false;
     }
 
     override dispose(): void {
         this._lifecycle$.complete();
-
         super.dispose();
     }
 

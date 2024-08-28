@@ -276,7 +276,7 @@ export function getDeleteMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
-            const rowColRangeExpand = Tools.deepClone(range);
+            const rowColRangeExpand = Tools.deepClone(range) as IRange;
 
             if (type === 'row') {
                 rowColRangeExpand.startColumn = 0;
@@ -325,7 +325,7 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
-            const rowColRangeExpand = Tools.deepClone(range);
+            const rowColRangeExpand = Tools.deepClone(range) as IRange;
             if (type === 'row') {
                 rowColRangeExpand.endRow = worksheet.getRowCount() - 1;
             } else {

@@ -50,9 +50,9 @@ export interface IFormatPainterHook {
         subUnitId: string,
         range: IRange,
         format: ISelectionFormatInfo): {
-            undos: IMutationInfo[];
-            redos: IMutationInfo[];
-        };
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    };
 }
 export enum FormatPainterStatus {
     OFF,

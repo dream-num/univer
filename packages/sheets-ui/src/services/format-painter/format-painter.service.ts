@@ -43,7 +43,7 @@ export interface IFormatPainterHook {
     id: string;
     isDefaultHook?: boolean;
     priority?: number;
-    onStatusChange(status: FormatPainterStatus): void;
+    onStatusChange?(status: FormatPainterStatus): void;
     onApply?(
         unitId: string,
         subUnitId: string,
@@ -111,7 +111,9 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         this._status$.next(status);
         const hooks = this.getHooks();
         hooks.forEach((hook) => {
-            hook.onStatusChange(status);
+            if (hook.onStatusChange !== undefined) {
+                hook.onStatusChange(status);
+            }
         });
     }
 

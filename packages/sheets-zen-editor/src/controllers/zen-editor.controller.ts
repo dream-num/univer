@@ -184,7 +184,7 @@ export class ZenEditorController extends RxDisposable {
             },
         ];
 
-        this._textSelectionManagerService.replaceTextRanges(textRanges);
+        this._textSelectionManagerService.replaceTextRanges(textRanges, false);
     }
 
     private _editorSyncHandler(param: IEditorBridgeServiceParam) {

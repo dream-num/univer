@@ -1043,9 +1043,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             ignoreTextRotation: true,
         });
 
+        const style = this._styles.getStyleByCell(cell);
+        const textStyle = this._getFontFormat(style);
+
         if (documentModelObject != null) {
             if (documentModelObject.documentModel == null) {
-                documentModelObject.documentModel = this._getDocumentDataByStyle('', {}, {});
+                documentModelObject.documentModel = this._getDocumentDataByStyle('', textStyle, {});
             }
             return documentModelObject;
         }
@@ -1062,7 +1065,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         fontString = getFontStyleString({}, this._localService).fontCache;
 
-        const documentModel = this._getDocumentDataByStyle(content, {}, {});
+        const documentModel = this._getDocumentDataByStyle(content, textStyle, {});
 
         return {
             documentModel,

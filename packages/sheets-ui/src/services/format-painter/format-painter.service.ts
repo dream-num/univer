@@ -32,7 +32,6 @@ export interface IFormatPainterService {
     setSelectionFormat(format: ISelectionFormatInfo): void;
     getSelectionFormat(): ISelectionFormatInfo;
     applyFormatPainter(unitId: string, subUnitId: string, range: IRange): boolean;
-    addBeforeApplyHook(hook: IFormatPainterBeforeApplyHook): void;
 }
 
 export interface ISelectionFormatInfo {
@@ -45,7 +44,7 @@ export interface IFormatPainterHook {
     isDefaultHook?: boolean;
     priority?: number;
     onStatusChange(status: FormatPainterStatus): void;
-    onApply(
+    onApply?(
         unitId: string,
         subUnitId: string,
         range: IRange,
@@ -53,6 +52,7 @@ export interface IFormatPainterHook {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
+    onBeforeApply?(ctx: IFormatPainterBeforeApplyHookParams): boolean;
 }
 export enum FormatPainterStatus {
     OFF,
@@ -66,9 +66,6 @@ export interface IFormatPainterBeforeApplyHookParams {
     redoMutationsInfo: IMutationInfo[];
     format: ISelectionFormatInfo;
 }
-export interface IFormatPainterBeforeApplyHook {
-    onBeforeApply(ctx: IFormatPainterBeforeApplyHookParams): boolean;
-}
 
 export const IFormatPainterService = createIdentifier<IFormatPainterService>('univer.format-painter-service');
 
@@ -79,7 +76,6 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
     private readonly _status$: BehaviorSubject<FormatPainterStatus>;
     private _defaultHook: IFormatPainterHook | null = null;
     private _extendHooks: IFormatPainterHook[] = [];
-    private _beforeApplyHooks: IFormatPainterBeforeApplyHook[] = [];
 
     constructor(
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
@@ -96,11 +92,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         this._selectionFormat = { styles: new ObjectMatrix<IStyleData>(), merges: [] };
     }
 
-    addBeforeApplyHook(hook: IFormatPainterBeforeApplyHook) {
-        this._beforeApplyHooks.push(hook);
-    }
-
-    addHook(hook: IFormatPainterHook) {
+    addHook(hook: IFormatPainterHook): void {
         if (hook.isDefaultHook && (hook.priority ?? 0) > (this._defaultHook?.priority ?? -1)) {
             this._defaultHook = hook;
         } else {
@@ -109,11 +101,11 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         }
     }
 
-    getHooks() {
+    getHooks(): IFormatPainterHook[] {
         return this._defaultHook ? [this._defaultHook, ...this._extendHooks] : this._extendHooks;
     }
 
-    setStatus(status: FormatPainterStatus) {
+    setStatus(status: FormatPainterStatus): void {
         this._updateRangeMark(status);
         this._status$.next(status);
         const hooks = this.getHooks();
@@ -126,43 +118,47 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         return this._status$.getValue();
     }
 
-    setSelectionFormat(format: ISelectionFormatInfo) {
+    setSelectionFormat(format: ISelectionFormatInfo): void {
         this._selectionFormat = format;
     }
 
-    getSelectionFormat() {
+    getSelectionFormat(): ISelectionFormatInfo {
         return this._selectionFormat;
     }
 
-    applyFormatPainter(unitId: string, subUnitId: string, range: IRange) {
+    applyFormatPainter(unitId: string, subUnitId: string, range: IRange): boolean {
         const hooks = this.getHooks();
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
         hooks.forEach((h) => {
-            const applyReturn = h.onApply(
-                unitId,
-                subUnitId,
-                range,
-                this._selectionFormat
-            );
-            if (applyReturn) {
-                redoMutationsInfo.push(...applyReturn.redos);
-                undoMutationsInfo.push(...applyReturn.undos);
+            if (h.onApply !== undefined) {
+                const applyReturn = h.onApply(
+                    unitId,
+                    subUnitId,
+                    range,
+                    this._selectionFormat
+                );
+                if (applyReturn) {
+                    redoMutationsInfo.push(...applyReturn.redos);
+                    undoMutationsInfo.push(...applyReturn.undos);
+                }
             }
         });
 
-        for (const beforeHook of this._beforeApplyHooks) {
-            // check before apply hook， it can cancel the apply action
-            const result = beforeHook.onBeforeApply({
-                unitId,
-                subUnitId,
-                range,
-                redoMutationsInfo,
-                format: this._selectionFormat,
-            });
+        for (const beforeHook of hooks) {
+            if (beforeHook.onBeforeApply !== undefined) {
+                // check before apply hook， it can cancel the apply action
+                const result = beforeHook.onBeforeApply({
+                    unitId,
+                    subUnitId,
+                    range,
+                    redoMutationsInfo,
+                    format: this._selectionFormat,
+                });
 
-            if (!result) {
-                return false;
+                if (!result) {
+                    return false;
+                }
             }
         }
 
@@ -184,7 +180,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         return result;
     }
 
-    private _updateRangeMark(status: FormatPainterStatus) {
+    private _updateRangeMark(status: FormatPainterStatus): void {
         this._markSelectionService.removeAllShapes();
 
         if (status !== FormatPainterStatus.OFF) {

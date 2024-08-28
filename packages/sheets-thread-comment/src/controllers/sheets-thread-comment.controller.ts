@@ -21,12 +21,13 @@ import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { CommentSingle } from '@univerjs/icons';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { RangeProtectionPermissionViewPoint, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionViewPoint, SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
 import { IMarkSelectionService, ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import { debounceTime } from 'rxjs';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
@@ -88,7 +89,6 @@ export class SheetsThreadCommentController extends Disposable {
         if (!range) {
             return;
         }
-
         const rangeType = range.rangeType ?? RANGE_TYPE.NORMAL;
         if (rangeType !== RANGE_TYPE.NORMAL || range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) {
             if (this._threadCommentPanelService.activeCommentId) {
@@ -119,6 +119,9 @@ export class SheetsThreadCommentController extends Disposable {
     private _initSelectionUpdateListener() {
         this.disposeWithMe(
             this._sheetSelectionService.selectionMoveEnd$.subscribe((selections) => {
+                if (this._isSwitchToCommenting) {
+                    return;
+                }
                 const current = this._sheetSelectionService.currentSelectionParam;
                 if (!current) {
                     return;
@@ -130,17 +133,6 @@ export class SheetsThreadCommentController extends Disposable {
 
     private _initCommandListener() {
         this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetSelectionsOperation.id) {
-                if (this._isSwitchToCommenting) {
-                    return;
-                }
-                const params = commandInfo.params as ISetSelectionsOperationParams;
-                const { unitId, subUnitId, selections, type } = params;
-                if ((type === undefined)) {
-                    this._handleSelectionChange(selections, unitId, subUnitId);
-                }
-            }
-
             if (commandInfo.id === DeleteCommentMutation.id) {
                 const params = commandInfo.params as IDeleteCommentMutationParams;
                 const active = this._sheetsThreadCommentPopupService.activePopup;
@@ -241,7 +233,7 @@ export class SheetsThreadCommentController extends Disposable {
     }
 
     private _initMarkSelection() {
-        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.subscribe((activeComment) => {
+        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.pipe(debounceTime(100)).subscribe((activeComment) => {
             if (!activeComment) {
                 if (this._selectionShapeInfo) {
                     this._markSelectionService.removeShape(this._selectionShapeInfo.shapeId);

@@ -272,7 +272,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             fontRenderExtension: {
                                 // @ts-ignore
                                 ...cell?.fontRenderExtension,
-                                isSkip: validator?.skipDefaultFontRender(rule, cellValue, pos),
+                                // @ts-ignore
+                                isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender(rule, cellValue, pos),
                             },
                             interceptorStyle: {
                                 ...cell?.interceptorStyle,

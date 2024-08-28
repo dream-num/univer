@@ -23,6 +23,7 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { SelectionControl } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
+import { SELECTION_SHAPE_DEPTH } from '../selection/const';
 
 export interface IMarkSelectionService {
     addShape(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;
@@ -41,9 +42,12 @@ interface IMarkSelectionInfo {
     exits: string[];
 }
 
-const DEFAULT_Z_INDEX = 10000;
+const DEFAULT_Z_INDEX = SELECTION_SHAPE_DEPTH.MARK_SELECTION; ;
 export const IMarkSelectionService = createIdentifier<IMarkSelectionService>('univer.mark-selection-service');
 
+/**
+ * For condition format selection.
+ */
 export class MarkSelectionService extends Disposable implements IMarkSelectionService {
     private _shapeMap: Map<string, IMarkSelectionInfo> = new Map();
 
@@ -73,7 +77,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         return id;
     }
 
-    refreshShapes() {
+    refreshShapes(): void {
         const currentSheet = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!currentSheet) return;
 
@@ -81,14 +85,12 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         const currentSubUnitId = currentSheet.getActiveSheet()?.getSheetId();
         this._shapeMap.forEach((shape) => {
             const { unitId, subUnitId, selection, control: oldControl, zIndex } = shape;
-
-            oldControl && oldControl.dispose();
+            oldControl?.dispose();
 
             if (unitId !== currentUnitId || subUnitId !== currentSubUnitId) {
                 return;
             }
 
-            const { style } = selection;
             const renderUnit = this._renderManagerService.getRenderById(unitId);
             if (!renderUnit) return;
 
@@ -97,9 +99,13 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
             const { scene } = renderUnit;
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-            const control = new SelectionControl(scene, zIndex, this._themeService, false, { rowHeaderWidth: 46, columnHeaderHeight: 20 });
+            const control = new SelectionControl(scene, zIndex, this._themeService, false, { rowHeaderWidth, columnHeaderHeight });
             const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISheetSelectionRenderService).attachSelectionWithCoord(selection);
-            control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+            control.updateRange(rangeWithCoord, primaryWithCoord);
+            const { style } = selection;
+            if (style) {
+                control.updateStyle(style);
+            }
             shape.control = control;
         });
     }
@@ -112,14 +118,14 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         const shapeInfo = this._shapeMap.get(id);
         if (!shapeInfo) return;
         const { control } = shapeInfo;
-        control && control.dispose();
+        control?.dispose();
         this._shapeMap.delete(id);
     }
 
     removeAllShapes(): void {
         for (const shape of this._shapeMap.values()) {
             const { control } = shape;
-            control && control.dispose();
+            control?.dispose();
         }
         this._shapeMap.clear();
     }

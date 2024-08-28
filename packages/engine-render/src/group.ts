@@ -156,19 +156,13 @@ export class Group extends BaseObject {
             }
 
             object.parent = this;
-
             object.isInGroup = true;
-
             object.groupKey = this.oKey;
-
             this._objects.push(object);
         } else {
             o.parent = this;
-
             o.isInGroup = true;
-
             o.groupKey = this.oKey;
-
             this._objects.push(o);
         }
     }

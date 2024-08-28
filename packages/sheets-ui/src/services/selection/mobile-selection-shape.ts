@@ -157,11 +157,10 @@ export class MobileSelectionControl extends SelectionControl {
 
     override updateRange(range: IRangeWithCoord): void {
         this._selectionModel.setValue(range);
-        this._updateControlStyleAndLayout(null, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
-    protected override _updateControlStyleAndLayout(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number): void {
-        super._updateControlStyleAndLayout(style, rowHeaderWidth, columnHeaderHeight);
+    protected override _updateControlStyleAndLayout(style: Nullable<ISelectionStyle>): void {
+        super._updateControlStyleAndLayout(style);
 
         // const rangeType = this.rangeType;
         // startX startY shares same coordinate with viewport.(include row & colheader)

@@ -414,7 +414,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,
         rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
-        viewport?: Viewport,
+        viewport: Nullable<Viewport>,
         scrollTimerType: ScrollTimerType = ScrollTimerType.ALL
     ): void {
         this._shouldDetectMergedCells = rangeType === RANGE_TYPE.NORMAL;

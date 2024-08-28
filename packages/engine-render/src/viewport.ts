@@ -757,7 +757,7 @@ export class Viewport {
      * @param objects
      * @param isMaxLayer
      */
-    render(parentCtx?: UniverRenderingContext, objects: BaseObject[] = [], isMaxLayer = false) {
+    render(parentCtx?: UniverRenderingContext, objects: BaseObject[] = [], isMaxLayer = false): void {
         if (!this.shouldIntoRender()) {
             return;
         }

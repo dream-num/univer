@@ -345,14 +345,14 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
      * this[_key] = props[key]
      * @param props
      */
-    setProps(props?: T): void {
+    setProps(props?: T): Shape<T> {
         if (!props) {
-            return;
+            return this;
         }
 
         const themeKeys = Object.keys(props);
         if (themeKeys.length === 0) {
-            return;
+            return this;
         }
         themeKeys.forEach((key) => {
             if ((props as IKeyValue)[key] === undefined) {

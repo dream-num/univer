@@ -16,9 +16,10 @@
 
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type ISelectionWithStyle, SelectionMoveType, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
+import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelections } from '@univerjs/sheets';
+import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
 import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 
@@ -157,7 +158,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     /**
      * Update selectionModel in this._workbookSelections by user action in spreadsheet area.
      */
-    private _initUserActionSyncListener() {
+    private _initUserActionSyncListener(): void {
         this.disposeWithMe(this.selectionMoveStart$.subscribe((selectionDataWithStyle) => {
             this._updateSelections(selectionDataWithStyle, SelectionMoveType.MOVE_START);
         }));
@@ -169,7 +170,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         }));
     }
 
-    private _updateSelections(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
+    private _updateSelections(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType): void {
         const workbook = this._context.unit;
         const sheetId = workbook.getActiveSheet()!.getSheetId();
 
@@ -223,7 +224,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         }));
     }
 
-    protected override _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]) {
+    protected override _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]): void {
         const selections = selectionsData.map((selectionWithStyle) => {
             const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
             return selectionData;
@@ -231,7 +232,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this.updateControlForCurrentByRangeData(selections);
     }
 
-    private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
+    private _getActiveViewport(evt: IPointerEvent | IMouseEvent): Nullable<Viewport> {
         const sheetObject = this._getSheetObject();
         return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
     }
@@ -246,7 +247,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
  * @param themeService
  * @returns The selection's style.
  */
-function getDefaultRefSelectionStyle(themeService: ThemeService) {
+function getDefaultRefSelectionStyle(themeService: ThemeService): ISelectionStyle {
     const style = getNormalSelectionStyle(themeService);
     style.hasAutoFill = false;
     style.hasRowHeader = false;

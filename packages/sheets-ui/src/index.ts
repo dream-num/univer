@@ -97,6 +97,9 @@ export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';
 export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
 export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 
+export { IFormatPainterService } from './services/format-painter/format-painter.service';
+export type {IFormatPainterBeforeApplyHook, IFormatPainterBeforeApplyHookParams} from './services/format-painter/format-painter.service';
+
 // #region - all commands
 
 export { AddWorksheetMergeCommand, AddWorksheetMergeAllCommand, AddWorksheetMergeVerticalCommand, AddWorksheetMergeHorizontalCommand } from './commands/commands/add-worksheet-merge.command';

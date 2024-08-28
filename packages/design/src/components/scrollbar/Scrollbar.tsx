@@ -96,7 +96,7 @@ export function Scrollbar(props: IScrollbarProps) {
 
             const { scrollHeight } = contentRef.current!;
             setThumbHeight((containerHeight / scrollHeight) * 100);
-            containerRef.current!.style.height = `${containerHeight}px`;
+            containerRef.current!.style.height = `${Math.floor(containerHeight)}px`;
         }
 
         function handleScroll(e: Event) {

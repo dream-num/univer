@@ -32,6 +32,7 @@ export interface IFormatPainterService {
     setSelectionFormat(format: ISelectionFormatInfo): void;
     getSelectionFormat(): ISelectionFormatInfo;
     applyFormatPainter(unitId: string, subUnitId: string, range: IRange): boolean;
+    addBeforeApplyHook(hook: IFormatPainterBeforeApplyHook): void;
 }
 
 export interface ISelectionFormatInfo {
@@ -49,14 +50,24 @@ export interface IFormatPainterHook {
         subUnitId: string,
         range: IRange,
         format: ISelectionFormatInfo): {
-        undos: IMutationInfo[];
-        redos: IMutationInfo[];
-    };
+            undos: IMutationInfo[];
+            redos: IMutationInfo[];
+        };
 }
 export enum FormatPainterStatus {
     OFF,
     ONCE,
     INFINITE,
+}
+export interface IFormatPainterBeforeApplyHookParams {
+    unitId: string;
+    subUnitId: string;
+    range: IRange;
+    redoMutationsInfo: IMutationInfo[];
+    format: ISelectionFormatInfo;
+}
+export interface IFormatPainterBeforeApplyHook {
+    onBeforeApply(ctx: IFormatPainterBeforeApplyHookParams): boolean;
 }
 
 export const IFormatPainterService = createIdentifier<IFormatPainterService>('univer.format-painter-service');
@@ -68,6 +79,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
     private readonly _status$: BehaviorSubject<FormatPainterStatus>;
     private _defaultHook: IFormatPainterHook | null = null;
     private _extendHooks: IFormatPainterHook[] = [];
+    private _beforeApplyHooks: IFormatPainterBeforeApplyHook[] = [];
 
     constructor(
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
@@ -82,6 +94,10 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         this._status$ = new BehaviorSubject<FormatPainterStatus>(FormatPainterStatus.OFF);
         this.status$ = this._status$.asObservable();
         this._selectionFormat = { styles: new ObjectMatrix<IStyleData>(), merges: [] };
+    }
+
+    addBeforeApplyHook(hook: IFormatPainterBeforeApplyHook) {
+        this._beforeApplyHooks.push(hook);
     }
 
     addHook(hook: IFormatPainterHook) {
@@ -134,6 +150,21 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
                 undoMutationsInfo.push(...applyReturn.undos);
             }
         });
+
+        for (const beforeHook of this._beforeApplyHooks) {
+            // check before apply hook， it can cancel the apply action
+            const result = beforeHook.onBeforeApply({
+                unitId,
+                subUnitId,
+                range,
+                redoMutationsInfo,
+                format: this._selectionFormat,
+            });
+
+            if (!result) {
+                return false;
+            }
+        }
 
         this._logService.log('[FormatPainterService]', 'apply mutations', {
             undoMutationsInfo,

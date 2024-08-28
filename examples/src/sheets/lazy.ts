@@ -36,7 +36,7 @@ export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCt
 
         // ],
         [UniverSheetsCrosshairHighlightPlugin],
-        [UniverSheetsFilterUIPlugin],
+        [UniverSheetsFilterUIPlugin, { useRemoteFilterValuesGenerator: false }],
         [UniverSheetsFindReplacePlugin],
     ];
 }

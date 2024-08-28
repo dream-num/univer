@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-// @ts-ignore
-import _numfmt from 'numfmt';
-import type { INumfmt } from './types/numfmt.type';
+import type { IRange } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 
-const numfmt = _numfmt as INumfmt;
-export { numfmt };
+export class SelectAllService extends Disposable {
+    rangesStack: IRange[] = [];
+    selectedRangeWorksheet: string = '';
+}

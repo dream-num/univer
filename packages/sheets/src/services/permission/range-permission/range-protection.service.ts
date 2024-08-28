@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IPermissionService, IResourceManagerService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, IResourceManagerService } from '@univerjs/core';
 
 import { UnitAction, UnitObject, UniverType } from '@univerjs/protocol';
 import type { IObjectModel } from '../../../model/range-protection-rule.model';
@@ -24,7 +24,6 @@ import { getAllRangePermissionPoint } from './util';
 
 const PLUGIN_NAME = 'SHEET_RANGE_PROTECTION_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Starting, RangeProtectionService)
 export class RangeProtectionService extends Disposable {
     constructor(
         @Inject(RangeProtectionRuleModel) private _selectionProtectionRuleModel: RangeProtectionRuleModel,
@@ -37,7 +36,7 @@ export class RangeProtectionService extends Disposable {
         this._initRuleChange();
     }
 
-    private _initRuleChange() {
+    private _initRuleChange(): void {
         this.disposeWithMe(
             this._selectionProtectionRuleModel.ruleChange$.subscribe((info) => {
                 switch (info.type) {

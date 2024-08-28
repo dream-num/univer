@@ -1069,7 +1069,7 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.FORCE_STRING;
-    } else if (numfmt.parseValue(newDataStream)) {
+    } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
         // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
         cellData.v = newDataStream;
         cellData.f = null;
@@ -1120,7 +1120,7 @@ export function isRichText(body: IDocumentBody): boolean {
             const hasRichTextStyle = Boolean(textRun.ts && Object.keys(textRun.ts).some((property) => {
                 return richTextStyle.includes(property);
             }));
-            return hasRichTextStyle || (textRun.ts && (textRun.ed - textRun.st < bodyNoLineBreak.length));
+            return hasRichTextStyle || (Object.keys(textRun.ts ?? {}).length && (textRun.ed - textRun.st < bodyNoLineBreak.length));
         }) ||
         paragraphs.some((paragraph) => paragraph.bullet) ||
         paragraphs.length >= 2 ||

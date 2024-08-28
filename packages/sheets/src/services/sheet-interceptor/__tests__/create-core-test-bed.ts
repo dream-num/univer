@@ -16,6 +16,7 @@
 
 import type { Dependency, IWorkbookData } from '@univerjs/core';
 import { ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { SheetInterceptorService } from '../sheet-interceptor.service';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
@@ -41,7 +42,7 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     styles: {},
 };
 
-export function createCoreTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
+export function createSheetTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -59,6 +60,8 @@ export function createCoreTestBed(workbookData?: IWorkbookData, dependencies?: D
 
         override onStarting(): void {
             dependencies?.forEach((d) => this._injector.add(d));
+
+            this._injector.get(SheetInterceptorService);
         }
     }
 

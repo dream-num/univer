@@ -22,6 +22,7 @@ import type {
     IMutationInfo,
     ITextRange,
     JSONXActions,
+    Nullable,
 } from '@univerjs/core';
 import {
     CommandType,
@@ -43,7 +44,30 @@ import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
-function hasRangeInTable(ranges: TextRange[]) {
+export function getCustomBlockIdsInSelections(body: IDocumentBody, selections: ITextRange[]): string[] {
+    const customBlockIds: string[] = [];
+    const { customBlocks = [] } = body;
+
+    for (const selection of selections) {
+        const { startOffset, endOffset } = selection;
+
+        if (startOffset == null || endOffset == null) {
+            continue;
+        }
+
+        for (const customBlock of customBlocks) {
+            const { startIndex } = customBlock;
+
+            if (startIndex >= startOffset && startIndex < endOffset) {
+                customBlockIds.push(customBlock.blockId);
+            }
+        }
+    }
+
+    return customBlockIds;
+}
+
+function hasRangeInTable(ranges: TextRange[]): boolean {
     return ranges.some((range) => {
         const { anchorNodePosition } = range;
 
@@ -377,6 +401,33 @@ function getCutActionsFromRectRanges(
     }, null as JSONXActions);
 }
 
+export function getCutActionsFromDocRanges(
+    textRanges: Readonly<Nullable<(ITextRange | TextRange)[]>>,
+    rectRanges: Readonly<Nullable<RectRange[]>>,
+    docDataModel: DocumentDataModel,
+    viewModel: DocumentViewModel,
+    segmentId: string
+): JSONXActions {
+    let rawActions: JSONXActions = [];
+
+    if (Array.isArray(textRanges) && textRanges?.length !== 0) {
+        rawActions = getCutActionsFromTextRanges(textRanges, docDataModel, segmentId);
+    }
+    if (Array.isArray(rectRanges) && rectRanges?.length !== 0) {
+        const actions = getCutActionsFromRectRanges(rectRanges, docDataModel, viewModel, segmentId);
+        if (rawActions == null || rawActions.length === 0) {
+            rawActions = actions;
+        } else {
+            rawActions = JSONX.compose(
+                rawActions,
+                JSONX.transform(actions, rawActions, 'right')!
+            ) as JSONXActions;
+        }
+    }
+
+    return rawActions;
+}
+
 export interface IInnerCutCommandParams {
     segmentId: string;
     textRanges: ITextRangeWithStyle[];
@@ -431,20 +482,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             },
         };
 
-        if (Array.isArray(selections) && selections?.length !== 0) {
-            doMutation.params.actions = getCutActionsFromTextRanges(selections, docDataModel, segmentId);
-        }
-        if (Array.isArray(rectRanges) && rectRanges?.length !== 0) {
-            const actions = getCutActionsFromRectRanges(rectRanges, docDataModel, viewModel, segmentId);
-            if (doMutation.params.actions?.length === 0 || doMutation.params.actions == null) {
-                doMutation.params.actions = actions;
-            } else {
-                doMutation.params.actions = JSONX.compose(
-                    doMutation.params.actions,
-                    JSONX.transform(actions, doMutation.params.actions, 'right')!
-                ) as JSONXActions;
-            }
-        }
+        doMutation.params.actions = getCutActionsFromDocRanges(selections, rectRanges, docDataModel, viewModel, segmentId);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -454,27 +492,4 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         return Boolean(result);
     },
 };
-
-function getCustomBlockIdsInSelections(body: IDocumentBody, selections: ITextRange[]): string[] {
-    const customBlockIds: string[] = [];
-    const { customBlocks = [] } = body;
-
-    for (const selection of selections) {
-        const { startOffset, endOffset } = selection;
-
-        if (startOffset == null || endOffset == null) {
-            continue;
-        }
-
-        for (const customBlock of customBlocks) {
-            const { startIndex } = customBlock;
-
-            if (startIndex >= startOffset && startIndex < endOffset) {
-                customBlockIds.push(customBlock.blockId);
-            }
-        }
-    }
-
-    return customBlockIds;
-}
 

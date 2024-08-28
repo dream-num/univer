@@ -18,11 +18,13 @@
     "Redi Injection Identifier": {
         "prefix": ["@I"],
         "body": ["@I${1:identifier} private readonly _${2:name}: I${1:identifier},"],
-        "description": "Inject an identifier with Redi."
+        "description": "Inject an identifier with Redi.",
+        "scope": "typescript,typescriptreact"
     },
     "Redi Injection": {
         "prefix": ["@In"],
         "body": ["@Inject(${1:identifier}) private readonly _${2:name}: ${1:identifier},"],
-        "description": "Inject a class item with Redi."
+        "description": "Inject a class item with Redi.",
+        "scope": "typescript,typescriptreact"
     }
 }

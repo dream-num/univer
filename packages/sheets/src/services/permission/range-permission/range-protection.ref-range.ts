@@ -21,7 +21,6 @@ import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.m
 import { RangeProtectionRenderModel } from '../../../model/range-protection-render.model';
 import type { ISetRangeProtectionMutationParams } from '../../../commands/mutations/set-range-protection.mutation';
 import { SetRangeProtectionMutation } from '../../../commands/mutations/set-range-protection.mutation';
-
 import { InsertColMutation, InsertRowMutation } from '../../../commands/mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../../commands/mutations/remove-row-col.mutation';
 import { type IMoveRowsMutationParams, MoveColsMutation, MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
@@ -32,7 +31,6 @@ import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../../
 import { InsertColCommand, InsertRowCommand } from '../../../commands/commands/insert-row-col.command';
 import type { IRemoveRowColCommandParams } from '../../../commands/commands/remove-row-col.command';
 import type { EffectRefRangeParams } from '../../../services/ref-range/type';
-
 import type {
     IMoveColsCommandParams,
     IMoveRowsCommandParams,

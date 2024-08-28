@@ -233,6 +233,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
     }
 
+    /**
+     * Create a new selection control and record in this._selectionControls
+     * @param scene
+     * @param _rangeType
+     * @param skeleton
+     * @returns {SelectionControl} control
+     */
     newSelectionControl(scene: Scene, _rangeType: RANGE_TYPE, skeleton: SpreadsheetSkeleton): SelectionControl {
         const selectionControls = this.getSelectionControls();
         const zIndex = selectionControls.length;
@@ -453,6 +460,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const cursorCellRangeWithRangeType: IRangeWithCoord = { ...cursorCellRange, rangeType };
         this._startRangeWhenPointerDown = { ...cursorCellRange, rangeType };
 
+        // for multi selection, active selection control is the last selection.
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
         const curControls = this.getSelectionControls();
         for (const control of curControls) {

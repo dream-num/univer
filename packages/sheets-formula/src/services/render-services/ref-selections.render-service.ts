@@ -61,6 +61,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         this._setSelectionStyle(getDefaultRefSelectionStyle(this._themeService));
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
+
+        window.fsrs = this;
     }
 
     getLocation(): [string, string] {
@@ -71,6 +73,11 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._remainLastEnabled = enabled;
     }
 
+    /**
+     * Decide to start a new ref selection, or just update current selection(last selection control)
+     * _skipLastEnabled = true means start a new ref selection
+     * @param enabled
+     */
     setSkipLastEnabled(enabled: boolean): void {
         this._skipLastEnabled = enabled;
     }
@@ -156,7 +163,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     /**
-     * Update selectionModel in this._workbookSelections by user action in spreadsheet area.
+     * Update selectionData in this._workbookSelections by user action in spreadsheet area.
      */
     private _initUserActionSyncListener(): void {
         this.disposeWithMe(this.selectionMoveStart$.subscribe((selectionDataWithStyle) => {
@@ -182,6 +189,9 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         );
     }
 
+    /**
+     * Create SelectionControl by selectionData in workbookSelections.
+     */
     private _initSelectionChangeListener(): void {
         // selectionMoveEnd$ beforeSelectionMoveEnd$ was triggered when pointerup after dragging to change selection area.
         // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
@@ -237,7 +247,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
     }
 
-    private _getSheetObject() {
+    private _getSheetObject(): ReturnType<typeof getSheetObject> {
         return getSheetObject(this._context.unit, this._context)!;
     }
 }

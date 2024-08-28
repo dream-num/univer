@@ -198,6 +198,8 @@ export class PromptController extends Disposable {
         super();
 
         this._initialize();
+
+        window.pc = this;
     }
 
     override dispose(): void {
@@ -325,6 +327,15 @@ export class PromptController extends Disposable {
                 }
             })
         );
+
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onKeydown$.subscribe((param) => {
+                if (!param) return;
+                if ((param.event as KeyboardEvent).key === 'Backspace') {
+                    this._previousInsertRefStringIndex = null;
+                }
+            })
+        );
     }
 
     private _closeRangePromptWhenEditorInvisible() {
@@ -393,7 +404,7 @@ export class PromptController extends Disposable {
         this._hideFunctionPanel();
     }
 
-    private _initSelectionsEndListener() {
+    private _initSelectionsEndListener(): void {
         const d = new DisposableCollection();
 
         this.disposeWithMe(this._refSelectionsService.selectionMoveEnd$.subscribe((selections) => {
@@ -466,7 +477,7 @@ export class PromptController extends Disposable {
         this._selectionsChangeDisposables = null;
     }
 
-    private _insertControlSelections(selections: ISelectionWithStyle[]) {
+    private _insertControlSelections(selections: ISelectionWithStyle[]): void {
         const currentSelection = selections[selections.length - 1];
 
         this._resetSequenceNodes(selections.length);
@@ -477,8 +488,10 @@ export class PromptController extends Disposable {
         ) {
             this._insertControlSelectionReplace(currentSelection);
         } else {
-            // Holding down ctrl causes an addition, requiring the ref string to be increased.
+            // add selection
+
             let insertNodes = this._formulaPromptService.getSequenceNodes()!;
+
             const char = this._getCurrentChar()!;
 
             // To reset the cursor position when resetting the editor's content.
@@ -495,6 +508,7 @@ export class PromptController extends Disposable {
             }
 
             this._previousSequenceNodes = Tools.deepClone(insertNodes);
+            console.log('insertControlSelections this._previousSequenceNodes', this._previousSequenceNodes);
             this._formulaPromptService.setSequenceNodes(insertNodes);
 
             const refString = this._generateRefString(currentSelection);
@@ -802,7 +816,19 @@ export class PromptController extends Disposable {
                 this._lexerTreeBuilder.sequenceNodesBuilder(config.dataStream) ||
                 [];
 
+            this._previousSequenceNodes = lastSequenceNodes;//this._formulaPromptService.getSequenceNodes();
+            let selectionLen = 0;
+            lastSequenceNodes.forEach((node) => {
+                if (!(typeof node === 'string')) {
+                    selectionLen++;
+                }
+            });
+            this._previousRangesCount = selectionLen;
+            console.log('_contextSwitch', this._previousSequenceNodes);
             this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
+            // if (this._formulaPromptService.getSequenceNodes().length !== this._previousSequenceNodes.length) {
+            //     this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
+            // }
 
             const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
@@ -826,7 +852,8 @@ export class PromptController extends Disposable {
         this._formulaPromptService.disableLockedSelectionInsert();
 
         // this._lastSequenceNodes = [];
-
+        this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
+        console.log('_contextSwitch clear', this._previousSequenceNodes);
         this._formulaPromptService.clearSequenceNodes();
 
         this._hideFunctionPanel();
@@ -1329,9 +1356,10 @@ export class PromptController extends Disposable {
         docViewModel.reset(documentDataModel);
     }
 
-    private _insertControlSelectionReplace(currentSelection: ISelectionWithStyle) {
+    private _insertControlSelectionReplace(currentSelection: ISelectionWithStyle): void {
         if (this._previousSequenceNodes == null) {
             this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
+            console.log('_insertControlSelectionReplace _previousSequenceNodes', this._previousSequenceNodes);
         }
 
         if (this._previousInsertRefStringIndex == null) {
@@ -1410,6 +1438,7 @@ export class PromptController extends Disposable {
         }
 
         if (this._existsSequenceNode) {
+            this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
             this._formulaPromptService.clearSequenceNodes();
             this._previousRangesCount = 0;
             this._existsSequenceNode = false;
@@ -1800,7 +1829,10 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _inputFormulaListener() {
+    /**
+     * Formula input editor listener
+     */
+    private _inputFormulaListener(): void {
         this.disposeWithMe(
             this._editorService.inputFormula$.subscribe((param) => {
                 const { formulaString, editorUnitId } = param;
@@ -1819,7 +1851,9 @@ export class PromptController extends Disposable {
                 }
 
                 const lastSequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
-
+                // Must！
+                this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
+                console.log('_inputFormulaListener this._previousSequenceNodes', this._previousSequenceNodes);
                 this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 
                 this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId, true, false);
@@ -1887,6 +1921,8 @@ export class PromptController extends Disposable {
 
         const difference = finalToken.length - node.token.length;
 
+        this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
+        console.log('change ref string this._previousSequenceNodes', this._previousSequenceNodes);
         this._formulaPromptService.updateSequenceRef(nodeIndex, finalToken);
 
         this._syncToEditor(this._formulaPromptService.getSequenceNodes(), strIndex + difference + 1);

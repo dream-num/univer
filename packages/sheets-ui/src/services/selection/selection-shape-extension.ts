@@ -175,7 +175,13 @@ export class SelectionShapeExtension {
         });
     }
 
-    private _controlMoving(moveOffsetX: number, moveOffsetY: number) {
+    /**
+     * Dragging the whole selection and moving (when cursor is crosshair), not for 8 control points.
+     * Now only ref selection can do this.
+     * @param moveOffsetX
+     * @param moveOffsetY
+     */
+    private _controlMoving(moveOffsetX: number, moveOffsetY: number): void {
         const scene = this._scene;
 
         const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([moveOffsetX, moveOffsetY]));
@@ -258,10 +264,11 @@ export class SelectionShapeExtension {
     }
 
     /**
-     * Drag move whole selectionControl when cusor turns to crosshair. Not for dragging 8 control points.
+     * Pointer down event for whole selectionControl (when cursor turns to crosshair). Not for dragging 8 control points.
+     * Also handle pointermove and pointerup for whole selectionControl.
      * @param evt
      */
-    private _controlEvent(evt: IMouseEvent | IPointerEvent) {
+    private _controlEvent(evt: IMouseEvent | IPointerEvent): void {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const scene = this._scene;

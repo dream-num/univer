@@ -125,10 +125,14 @@ export class SelectionControl extends Disposable {
     readonly dispose$ = this._dispose$.asObservable();
 
     /**
+     * Dragging the whole selection and moving
      * eventSource: selectionShapeExtension selectionMoving$.next,
      * Observer: prompt.controller
      */
     readonly selectionMoving$ = new Subject<IRangeWithCoord>();
+    /**
+     * pointerup after dragging the whole selection.
+     */
     readonly selectionMoved$ = new Subject<IRangeWithCoord>();
     readonly selectionScaling$ = new Subject<IRangeWithCoord>();
     readonly selectionScaled$ = new Subject<Nullable<IRangeWithCoord>>();

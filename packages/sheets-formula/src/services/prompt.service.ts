@@ -235,6 +235,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
     }
 
     setSequenceNodes(nodes: Array<string | ISequenceNode>) {
+        console.log('setSequenceNodes', nodes);
         this._sequenceNodes = nodes;
     }
 
@@ -316,7 +317,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
             newNode.startIndex += difference;
             newNode.endIndex += difference;
-
+            console.log('this._sequenceNodes[i] ', this._sequenceNodes);
             this._sequenceNodes[i] = newNode;
         }
     }
@@ -349,7 +350,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
             newNode.startIndex += refStringCount;
             newNode.endIndex += refStringCount;
-
+            console.log('this._sequenceNodes[i] ', this._sequenceNodes);
             this._sequenceNodes[i] = newNode;
         }
     }
@@ -376,7 +377,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
             newNode.startIndex += contentCount;
             newNode.endIndex += contentCount;
-
+            console.log('this._sequenceNodes[i] ', this._sequenceNodes);
             this._sequenceNodes[i] = newNode;
         }
     }

@@ -147,6 +147,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _initSelectionChangeListener(): void {
         // When selection completes, we need to update the selections' rendering and clear event handlers.
+
         this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((params) => {
             this._reset();
             for (const selectionWithStyle of params) {

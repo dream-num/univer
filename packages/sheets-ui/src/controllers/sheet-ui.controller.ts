@@ -231,7 +231,7 @@ import { sheetPermissionAddProtectContextMenuFactory, sheetPermissionChangeSheet
 
 export interface IUniverSheetsUIConfig {
     menu: MenuConfig;
-
+    disableAutoFocus?: true;
     override?: DependencyOverride;
 }
 

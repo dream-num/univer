@@ -25,7 +25,7 @@ export class Delta extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(number1: BaseValueObject, number2?: BaseValueObject) {
+    override calculate(number1: BaseValueObject, number2?: BaseValueObject): BaseValueObject {
         const _number2 = number2 ?? NumberValueObject.create(0);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(number1, _number2);

@@ -34,6 +34,13 @@ describe('Test besselk function', () => {
             expect(result.getValue()).toBe(0.2773878036322587);
         });
 
+        it('n < 0', () => {
+            const x = NumberValueObject.create(1.5);
+            const n = NumberValueObject.create(-1);
+            const result = testFunction.calculate(x, n);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+        });
+
         it('Value is number string', () => {
             const x = StringValueObject.create('-0.5');
             const n = NumberValueObject.create(1);

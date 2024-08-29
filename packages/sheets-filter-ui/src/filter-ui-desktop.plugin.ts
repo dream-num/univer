@@ -49,15 +49,17 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
             [SheetsFilterPanelService],
             [SheetsFilterPermissionController],
             [SheetsFilterUIDesktopController, {
-                useFactory: () => this._injector.createInstance(SheetsFilterUIDesktopController, this._config),
+                useFactory: (): SheetsFilterUIDesktopController =>
+                    this._injector.createInstance(SheetsFilterUIDesktopController, this._config),
             }],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
 
         if (this._config.useRemoteFilterValuesGenerator && this._rpcChannelService) {
             this._injector.add([ISheetsGenerateFilterValuesService, {
-                useFactory: () => toModule<ISheetsGenerateFilterValuesService>(
-                    this._rpcChannelService!.requestChannel(SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME)
-                ),
+                useFactory: (): ISheetsGenerateFilterValuesService =>
+                    toModule<ISheetsGenerateFilterValuesService>(
+                        this._rpcChannelService!.requestChannel(SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME)
+                    ),
             }]);
         }
     }

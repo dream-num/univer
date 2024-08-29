@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
+import { CellValueType, CommandType, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
 import { getSheetCommandTarget, INumfmtService, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
@@ -30,7 +30,6 @@ export const AddDecimalCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const numfmtService = accessor.get(INumfmtService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-
         const selections = selectionManagerService.getCurrentSelections();
         if (!selections || !selections.length) {
             return false;
@@ -46,6 +45,17 @@ export const AddDecimalCommand: ICommand = {
             Range.foreach(selection.range, (row, col) => {
                 const numfmtValue = numfmtService.getValue(unitId, subUnitId, row, col);
                 if (!numfmtValue) {
+                    const cell = target.worksheet.getCellRaw(row, col);
+                    if (!maxDecimals && cell && cell.t === CellValueType.NUMBER && cell.v) {
+                        const regResult = /\.(\d*)$/.exec(String(cell.v));
+                        if (regResult) {
+                            const length = regResult[1].length;
+                            if (!length) {
+                                return;
+                            }
+                            maxDecimals = Math.max(maxDecimals, length);
+                        }
+                    }
                     return;
                 }
                 const decimals = getDecimalFromPattern(numfmtValue.pattern);

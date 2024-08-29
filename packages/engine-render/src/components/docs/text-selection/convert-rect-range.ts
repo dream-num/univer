@@ -21,7 +21,7 @@ import type { IDocumentOffsetConfig } from '../document';
 import type { DocumentSkeleton } from '../layout/doc-skeleton';
 import { Liquid } from '../liquid';
 import { getTableIdAndSliceIndex } from '../layout/block/table';
-import { getPageFromPath, pushToPoints } from './convert-text-range';
+import { compareNodePositionLogic, getPageFromPath, pushToPoints } from './convert-text-range';
 
 // The anchor and focus need to be in the same table,
 // and cannot be in the same cell, start node must be the first glyph in the cell,
@@ -74,8 +74,22 @@ export function isInSameTableCell(anchorNodePosition: INodePosition, focusNodePo
 
 // Return true if a is before b.
 export function compareNodePositionInTable(a: INodePosition, b: INodePosition): boolean {
+    if (isInSameTableCell(a, b)) {
+        return compareNodePositionLogic(a, b);
+    }
+
     const { path: aPath } = a;
     const { path: bPath } = b;
+
+    const aTableId = aPath[aPath.length - 5];
+    const bTableId = bPath[bPath.length - 5];
+
+    if (aTableId !== bTableId && typeof aTableId === 'string' && typeof bTableId === 'string') {
+        const aSlideId = aTableId.split('#-#')[1];
+        const bSlideId = bTableId.split('#-#')[1];
+
+        return +aSlideId < +bSlideId;
+    }
 
     const aRowCount = aPath[aPath.length - 3];
     const bRowCount = bPath[bPath.length - 3];
@@ -219,7 +233,10 @@ export class NodePositionConvertToRectRange {
         };
     }
 
-    getNodePositionGroup(anchorNodePosition: INodePosition, focusNodePosition: INodePosition): Nullable<IRectRangeNodePositions[]> {
+    getNodePositionGroup(
+        anchorNodePosition: INodePosition,
+        focusNodePosition: INodePosition
+    ): Nullable<IRectRangeNodePositions[]> {
         const nodePositionGroup: IRectRangeNodePositions[] = [];
         const compare = compareNodePositionInTable(anchorNodePosition, focusNodePosition);
         const startNodePosition = compare ? anchorNodePosition : focusNodePosition;

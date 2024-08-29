@@ -306,8 +306,8 @@ export class Font extends SheetExtension {
         }
 
         const { documentSkeleton, vertexAngle = 0, wrapStrategy } = docsConfig;
-        const cellWidth = endX - startX;
         const cellHeight = endY - startY;
+        const cellWidth = endX - startX;
 
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
@@ -336,9 +336,7 @@ export class Font extends SheetExtension {
         }
 
         documentSkeleton.makeDirty(false);
-
         documents.resize(cellWidth, cellHeight);
-
         documents.changeSkeleton(documentSkeleton).render(ctx);
     }
 

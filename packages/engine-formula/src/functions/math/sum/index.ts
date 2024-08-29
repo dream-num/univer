@@ -40,6 +40,10 @@ export class Sum extends BaseFunction {
                 variant = variant.sum();
             }
 
+            if (variant.isError()) {
+                return variant;
+            }
+
             accumulatorAll = accumulatorAll.plus(variant);
 
             if (accumulatorAll.isError()) {

@@ -43,7 +43,7 @@ exports.baseRules = {
     'command/command': 'off',
 
     // TODO: debatable rules
-    'ts/explicit-function-return-type': 'warn',
+    'react/no-duplicate-key': 'warn',
     'test/prefer-lowercase-title': 'off',
     'antfu/top-level-function': 'off',
     'style/operator-linebreak': 'off',

@@ -22,6 +22,22 @@ import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-
 
 type IUnitItem = Array<string | Array<string> | number | boolean | null>;
 
+interface IFrom {
+    _from: IUnitItem | null;
+}
+
+interface ITo {
+    _to: IUnitItem | null;
+}
+
+interface IFromMultiplier extends IFrom {
+    _fromMultiplier: number;
+}
+
+interface IToMultiplier extends ITo {
+    _toMultiplier: number;
+}
+
 interface IPrefixesKey {
     [index: string]: Array<string | number>;
 }
@@ -31,7 +47,7 @@ export class Convert extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(number: BaseValueObject, fromUnit: BaseValueObject, toUnit: BaseValueObject) {
+    override calculate(number: BaseValueObject, fromUnit: BaseValueObject, toUnit: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(number, fromUnit, toUnit);
 
         if (isError) {
@@ -89,6 +105,7 @@ export class Convert extends BaseFunction {
 
         if (from[3] === 'temperature') {
             result = this._getTemperatureConversion(numberValue, from[1] as string, to[1] as string);
+            result = +result.toFixed(2);
         } else {
             result = (numberValue * (from[6] as number) * fromMultiplier) / ((to[6] as number) * toMultiplier);
         }
@@ -96,7 +113,7 @@ export class Convert extends BaseFunction {
         return NumberValueObject.create(result);
     }
 
-    private _lookupFromAndToUnits(fromUnitValue: string, toUnitValue: string) {
+    private _lookupFromAndToUnits(fromUnitValue: string, toUnitValue: string): IFrom & ITo {
         let _from = null;
         let _to = null;
         let alt;
@@ -119,7 +136,7 @@ export class Convert extends BaseFunction {
         };
     }
 
-    private _lookupFromPrefix(fromUnitValue: string) {
+    private _lookupFromPrefix(fromUnitValue: string): IFromMultiplier {
         let _from = null;
         let _fromMultiplier = 1;
         let baseFromUnit = fromUnitValue;
@@ -157,7 +174,7 @@ export class Convert extends BaseFunction {
         };
     }
 
-    private _lookupToPrefix(toUnitValue: string) {
+    private _lookupToPrefix(toUnitValue: string): IToMultiplier {
         let _to = null;
         let _toMultiplier = 1;
         let baseToUnit = toUnitValue;
@@ -195,7 +212,7 @@ export class Convert extends BaseFunction {
         };
     }
 
-    private _getTemperatureConversion(number: number, from: string, to: string) {
+    private _getTemperatureConversion(number: number, from: string, to: string): number {
         switch (from) {
             case 'C':
                 return this._centigradeConversion(number, to);
@@ -212,7 +229,7 @@ export class Convert extends BaseFunction {
         }
     }
 
-    private _centigradeConversion(number: number, to: string) {
+    private _centigradeConversion(number: number, to: string): number {
         switch (to) {
             case 'F':
                 return (number * 9 / 5) + 32;
@@ -227,7 +244,7 @@ export class Convert extends BaseFunction {
         }
     }
 
-    private _fahrenheitConversion(number: number, to: string) {
+    private _fahrenheitConversion(number: number, to: string): number {
         switch (to) {
             case 'C':
                 return (number - 32) * 5 / 9;
@@ -242,7 +259,7 @@ export class Convert extends BaseFunction {
         }
     }
 
-    private _kelvinConversion(number: number, to: string) {
+    private _kelvinConversion(number: number, to: string): number {
         switch (to) {
             case 'C':
                 return number - 273.15;
@@ -257,7 +274,7 @@ export class Convert extends BaseFunction {
         }
     }
 
-    private _rankineConversion(number: number, to: string) {
+    private _rankineConversion(number: number, to: string): number {
         switch (to) {
             case 'C':
                 return (number - 491.67) * 5 / 9;
@@ -272,7 +289,7 @@ export class Convert extends BaseFunction {
         }
     }
 
-    private _reaumurConversion(number: number, to: string) {
+    private _reaumurConversion(number: number, to: string): number {
         switch (to) {
             case 'C':
                 return number * 5 / 4;

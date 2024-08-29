@@ -105,6 +105,7 @@ export { ChangeListNestingLevelType } from './commands/commands/list.command';
 export { getCommandSkeleton } from './commands/util';
 export { generateParagraphs } from './commands/commands/break-line.command';
 export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';
+export { getCutActionsFromDocRanges, getCustomBlockIdsInSelections } from './commands/commands/clipboard.inner.command';
 export { CreateDocTableCommand, type ICreateDocTableCommandParams } from './commands/commands/table/doc-table-create.command';
 export { DocTableDeleteRowsCommand, DocTableDeleteColumnsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
 export type { IDocTableDeleteRowsCommandParams, IDocTableDeleteColumnsCommandParams, IDocTableDeleteTableCommandParams } from './commands/commands/table/doc-table-delete.command';

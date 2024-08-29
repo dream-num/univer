@@ -295,7 +295,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     setCursorManually(evtOffsetX: number, evtOffsetY: number) {
-        const startNode = this.findNodeByCoord(evtOffsetX, evtOffsetY, {
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
             strict: true,
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
@@ -394,7 +394,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const startNode = this.findNodeByCoord(evtOffsetX, evtOffsetY, {
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
             strict: false,
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
@@ -456,7 +456,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const startNode = this.findNodeByCoord(evtOffsetX, evtOffsetY, {
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
             strict: false,
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
@@ -495,7 +495,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const startNode = this.findNodeByCoord(evtOffsetX, evtOffsetY, {
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
             strict: false,
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
@@ -955,7 +955,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const focusNode = this.findNodeByCoord(moveOffsetX, moveOffsetY, {
+        const focusNode = this._findNodeByCoord(moveOffsetX, moveOffsetY, {
             strict: true,
             segmentId: this._currentSegmentId,
             segmentPage: this._currentSegmentPage,
@@ -1209,7 +1209,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         return documentTransform.clone().invert().applyPoint(originCoord);
     }
 
-    findNodeByCoord(evtOffsetX: number, evtOffsetY: number, restrictions: IFindNodeRestrictions) {
+    private _findNodeByCoord(evtOffsetX: number, evtOffsetY: number, restrictions: IFindNodeRestrictions) {
         const coord = this._getTransformCoordForDocumentOffset(evtOffsetX, evtOffsetY);
 
         if (coord == null) {
@@ -1229,11 +1229,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         return nodeInfo;
     }
 
-    private _getNodeIndex(node: INodeInfo) {
-        const index = node.node.parent!.st + node.node.parent!.glyphGroup.indexOf(node.node);
-        return index;
-    }
-
     private _detachEvent() {
         this._onInputBefore$.complete();
         this._onKeydown$.complete();
@@ -1242,15 +1237,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._onCompositionupdate$.complete();
         this._onCompositionend$.complete();
         this._onSelectionStart$.complete();
-    }
-
-    private _activeSelectionRefresh() {
-        if (this._docSkeleton == null) {
-            return;
-        }
-        const activeRangeInstance = this._getActiveRangeInstance();
-
-        activeRangeInstance?.refresh();
     }
 }
 

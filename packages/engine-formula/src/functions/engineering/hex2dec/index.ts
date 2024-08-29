@@ -26,7 +26,7 @@ export class Hex2dec extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(number: BaseValueObject) {
+    override calculate(number: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(number);
 
         if (isError) {

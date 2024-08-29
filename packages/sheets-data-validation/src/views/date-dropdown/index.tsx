@@ -35,7 +35,7 @@ const transformDate = (value: Nullable<CellValue>) => {
     }
 
     if (typeof value === 'number' || !Number.isNaN(+value)) {
-        return dayjs(numfmt.format('yyyy-MM-dd HH:mm:ss', value));
+        return dayjs(numfmt.format('yyyy-MM-dd HH:mm:ss', Number(value)));
     }
 
     const date = dayjs(value);
@@ -70,7 +70,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
         const newValue = date;
         // convert current date to utc date
         const dateStr = newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00');
-        const serialTime = numfmt.parseDate(dateStr)?.v;
+        const serialTime = numfmt.parseDate(dateStr)?.v as number;
 
         if (
             rule.errorStyle !== DataValidationErrorStyle.STOP ||

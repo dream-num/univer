@@ -15,6 +15,8 @@
  */
 
 // @ts-ignore
-import numfmt from 'numfmt';
+import _numfmt from 'numfmt';
+import type { INumfmt } from './types/numfmt.type';
 
+const numfmt = _numfmt as INumfmt;
 export { numfmt };

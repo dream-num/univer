@@ -127,7 +127,8 @@ function mergeStyle(
     const backupStyle: Record<string, any> = Tools.deepClone(oldStyle) || {};
     if (!backupStyle) return;
     for (const k in newStyle) {
-        if (isRichText && ['bd', 'tr', 'td', 'ht', 'vt', 'tb', 'pd'].includes(k)) {
+        // Do not copy cell background color to rich text background color.
+        if (isRichText && ['bd', 'tr', 'td', 'ht', 'vt', 'tb', 'pd', 'bg'].includes(k)) {
             continue;
         }
         // you can only choose one of the themeColor and rgbColor of the border setting

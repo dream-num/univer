@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -34,6 +34,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    numfmt,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -847,12 +848,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                     unitId: this._context.unit.getUnitId(),
                     subUnitId: worksheetId,
-
-                    // must be a new selectionData
-                    // in selection-manager.service.ts@setSelections
-                    // this._ensureWorkbookSelection(unitIdOrSelections).setSelections
-                    // would clear selection Data on selecitonManagerInstance.
-                    selections: [...selections],
+                    selections,
                 });
             }
 
@@ -1073,6 +1069,13 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.FORCE_STRING;
+    } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
+        // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
+        cellData.v = newDataStream;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+        cellData.t = CellValueType.NUMBER;
     } else if (isRichText(body)) {
         if (body.dataStream === '\r\n') {
             cellData.v = '';
@@ -1094,21 +1097,54 @@ export function getCellDataByInput(
         cellData.f = null;
         cellData.si = null;
         cellData.p = null;
+        // If the style length in textRun.ts is equal to the content length, it should be set as the cell style
+        const style = getCellStyleBySnapshot(snapshot);
+        if (style) {
+            cellData.s = style;
+        }
     }
 
     return cellData;
 }
 
-export function isRichText(body: IDocumentBody) {
+export function isRichText(body: IDocumentBody): boolean {
     const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
 
     const bodyNoLineBreak = body.dataStream.replace('\r\n', '');
 
+    // Some styles are unique to rich text. When this style appears, we consider the value to be rich text.
+    const richTextStyle = ['va'];
+
     return (
-        textRuns.some((textRun) => textRun.ts && (textRun.st !== 0 || textRun.ed !== bodyNoLineBreak.length)) ||
+        textRuns.some((textRun) => {
+            const hasRichTextStyle = Boolean(textRun.ts && Object.keys(textRun.ts).some((property) => {
+                return richTextStyle.includes(property);
+            }));
+            return hasRichTextStyle || (Object.keys(textRun.ts ?? {}).length && (textRun.ed - textRun.st < bodyNoLineBreak.length));
+        }) ||
         paragraphs.some((paragraph) => paragraph.bullet) ||
         paragraphs.length >= 2 ||
         Boolean(customRanges?.length) ||
         customBlocks.length > 0
     );
 }
+
+export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyleData> {
+    const { body } = snapshot;
+    if (!body) return null;
+    const { textRuns = [] } = body;
+
+    let style = {};
+    const bodyNoLineBreak = body.dataStream.replace('\r\n', '');
+    textRuns.forEach((textRun) => {
+        const { st, ed, ts } = textRun;
+        if (ed - st >= bodyNoLineBreak.length) {
+            style = { ...style, ...ts };
+        }
+    });
+    if (Object.keys(style).length) {
+        return style;
+    }
+    return null;
+}
+

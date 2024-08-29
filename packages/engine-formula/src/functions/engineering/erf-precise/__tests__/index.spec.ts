@@ -39,6 +39,12 @@ describe('Test erf.precise function', () => {
             expect(result.getValue()).toBe(0.9661051464753108);
         });
 
+        it('Value is negative number', () => {
+            const x = NumberValueObject.create(-2);
+            const result = testFunction.calculate(x);
+            expect(result.getValue()).toBe(-0.9953222650189527);
+        });
+
         it('Value is normal string', () => {
             const x = StringValueObject.create('test');
             const result = testFunction.calculate(x);

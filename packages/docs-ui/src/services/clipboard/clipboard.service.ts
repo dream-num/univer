@@ -160,6 +160,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             if (rectRanges.length > 0) {
                 cursor = getCursorWhenDelete(textRanges as Readonly<TextRange[]>, rectRanges);
             } else if (activeEndOffset != null) {
+                cursor = activeEndOffset;
                 for (const range of textRanges) {
                     const { startOffset, endOffset } = range;
 
@@ -182,7 +183,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             ];
 
             return this._commandService.executeCommand(CutContentCommand.id, { segmentId, textRanges: newTextRanges });
-        } catch (e) {
+        // eslint-disable-next-line unused-imports/no-unused-vars
+        } catch (_e) {
             this._logService.error('[DocClipboardController] cut content failed');
             return false;
         }
@@ -250,7 +252,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 doc: {
                     ...docData,
                     body,
-                }, segmentId, textRanges,
+                },
+                segmentId,
+                textRanges,
             });
         } catch (_e) {
             this._logService.error('[DocClipboardController]', 'clipboard is empty.');

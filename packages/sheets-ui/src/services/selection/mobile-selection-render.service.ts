@@ -505,12 +505,14 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         scene.getTransformer()?.clearSelectedObjects();
 
-        //#region pointermove
+        // #region pointermove
         const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
         this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, relativeCoords.x, relativeCoords.y);
-        //#endregion
+        // #endregion
 
-        //#region pointerup
+        // #region pointerup
+        // when selection mouse down, disable the short cut service
+        const disposableShortcut = this._shortcutService.forceEscape();
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent) => {
             this.endSelection();
             this._expandingSelection = false;
@@ -518,12 +520,9 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
             // when selection mouse up, enable the short cut service
-            this._shortcutService.setDisable(false);
+            disposableShortcut.dispose();
         });
-        //#endregion
-
-        // when selection mouse down, disable the short cut service
-        this._shortcutService.setDisable(true);
+        // #endregion
     }
 
     private _changeCurrCellWhenControlPointerDown(): ISelectionCellWithMergeInfo {

@@ -14,21 +14,29 @@
  * limitations under the License.
  */
 
-import { RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { Inject, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { Dependency } from '@univerjs/core';
-import { SheetsFilterRenderController } from '../views/widgets/render-modules/sheets-filter.render-controller';
+import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '@univerjs/sheets-filter';
+import { SheetsRenderService } from '@univerjs/sheets-ui';
+import { SheetsFilterRenderController } from '../views/render-modules/sheets-filter.render-controller';
 
 export class SheetsFilterUIMobileController extends RxDisposable {
     constructor(
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService
     ) {
         super();
 
-        this._initRenderControllers();
-    }
+        [
+            SetSheetsFilterRangeMutation,
+            SetSheetsFilterCriteriaMutation,
+            RemoveSheetsFilterMutation,
+            ReCalcSheetsFilterMutation,
+        ].forEach((m) => this.disposeWithMe(this._sheetsRenderService.registerSkeletonChangingMutations(m.id)));
 
-    private _initRenderControllers(): void {
-        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetsFilterRenderController] as Dependency));
+        this.disposeWithMe(this._renderManagerService.registerRenderModule(
+            UniverInstanceType.UNIVER_SHEET, [SheetsFilterRenderController] as Dependency
+        ));
     }
 }

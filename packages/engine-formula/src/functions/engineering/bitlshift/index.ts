@@ -26,7 +26,7 @@ export class Bitlshift extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(number: BaseValueObject, shiftAmount: BaseValueObject) {
+    override calculate(number: BaseValueObject, shiftAmount: BaseValueObject): BaseValueObject {
         if (number.isError()) {
             return number;
         }

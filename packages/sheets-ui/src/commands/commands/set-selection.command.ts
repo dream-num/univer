@@ -26,6 +26,7 @@ import {
 import { KeyCode } from '@univerjs/ui';
 
 import { ShortcutExperienceService } from '../../services/shortcut-experience.service';
+import { SelectAllService } from '../../services/select-all/select-all.service';
 import {
     checkIfShrink,
     expandToNextCell,
@@ -330,35 +331,25 @@ export interface ISelectAllCommandParams {
     loop?: boolean;
 }
 
-let RANGES_STACK: IRange[] = [];
-
-let SELECTED_RANGE_WORKSHEET = '';
-
 /**
  * This command expand selection to all neighbor ranges. If there are no neighbor ranges. Select the whole sheet.
  */
 export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
     id: 'sheet.command.select-all',
     type: CommandType.COMMAND,
-    onDispose() {
-        RANGES_STACK = [];
-        SELECTED_RANGE_WORKSHEET = '';
-    },
     handler: async (accessor, params = { expandToGapFirst: true, loop: false }) => {
-        const selection = getSelectionsService(accessor).getCurrentLastSelection();
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
         if (!target) return false;
+        const selection = getSelectionsService(accessor).getCurrentLastSelection();
+        if (!selection) return false;
+
+        const selectAllService = accessor.get(SelectAllService);
 
         const { worksheet, unitId, subUnitId } = target;
-
-        if (!selection || !worksheet) {
-            return false;
-        }
-
         const id = `${unitId}|${subUnitId}`;
-        if (id !== SELECTED_RANGE_WORKSHEET) {
-            RANGES_STACK = [];
-            SELECTED_RANGE_WORKSHEET = id;
+        if (id !== selectAllService.selectedRangeWorksheet) {
+            selectAllService.rangesStack = [];
+            selectAllService.selectedRangeWorksheet = id;
         }
 
         const maxRow = worksheet.getMaxRows();
@@ -371,9 +362,9 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
             range.startRow === 0 &&
             range.startColumn === 0;
 
-        if (!RANGES_STACK.some((s) => Rectangle.equals(s, range))) {
-            RANGES_STACK = [];
-            RANGES_STACK.push(range);
+        if (!selectAllService.rangesStack.some((s) => Rectangle.equals(s, range))) {
+            selectAllService.rangesStack = [];
+            selectAllService.rangesStack.push(range);
         }
 
         let destRange: IRange;
@@ -381,12 +372,12 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         // determined what kind of adjustment it should get
         if (isWholeSheetSelected) {
             if (loop) {
-                const currentSelectionIndex = RANGES_STACK.findIndex((s) => Rectangle.equals(s, range));
-                if (currentSelectionIndex !== RANGES_STACK.length - 1) {
+                const currentSelectionIndex = selectAllService.rangesStack.findIndex((s) => Rectangle.equals(s, range));
+                if (currentSelectionIndex !== selectAllService.rangesStack.length - 1) {
                     return false;
                 }
 
-                destRange = RANGES_STACK[0];
+                destRange = selectAllService.rangesStack[0];
             } else {
                 return false;
             }
@@ -400,8 +391,8 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
             destRange = expandToWholeSheet(worksheet);
         }
 
-        if (!RANGES_STACK.some((s) => Rectangle.equals(s, destRange))) {
-            RANGES_STACK.push(destRange);
+        if (!selectAllService.rangesStack.some((s) => Rectangle.equals(s, destRange))) {
+            selectAllService.rangesStack.push(destRange);
         }
 
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {

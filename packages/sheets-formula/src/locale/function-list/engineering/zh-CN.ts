@@ -331,8 +331,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要针对阈值进行测试的值。' },
+            step: { name: '阈值', detail: '阈值。如果省略阈值，则 GESTEP 使用零。' },
         },
     },
     HEX2BIN: {
@@ -386,8 +386,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其绝对值的复数。' },
         },
     },
     IMAGINARY: {
@@ -400,8 +399,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其虚系数的复数。' },
         },
     },
     IMARGUMENT: {
@@ -414,8 +412,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '要为其参数 theta 的复数。' },
         },
     },
     IMCONJUGATE: {
@@ -428,8 +425,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其共轭数的复数。' },
         },
     },
     IMCOS: {
@@ -442,8 +438,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其余弦的复数。' },
         },
     },
     IMCOSH: {
@@ -456,13 +451,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其双曲余弦值的复数。' },
         },
     },
     IMCOT: {
-        description: '返回复数的余弦值',
-        abstract: '返回复数的余弦值',
+        description: '返回复数的余切值',
+        abstract: '返回复数的余切值',
         links: [
             {
                 title: '教学',
@@ -470,8 +464,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其余切的复数。' },
         },
     },
     IMCSC: {
@@ -484,8 +477,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其余割值的复数。' },
         },
     },
     IMCSCH: {
@@ -498,8 +490,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其双曲余割值的复数。' },
         },
     },
     IMDIV: {
@@ -512,8 +503,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '复数分子', detail: '复数分子或被除数。' },
+            inumber2: { name: '复数分母', detail: '复数分母或除数。' },
         },
     },
     IMEXP: {
@@ -526,8 +517,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其指数的复数。' },
         },
     },
     IMLN: {
@@ -540,8 +530,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其自然对数的复数。' },
         },
     },
     IMLOG10: {
@@ -554,8 +543,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其常用对数的复数。' },
         },
     },
     IMLOG2: {
@@ -568,8 +556,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算以 2 为底数的对数的复数。' },
         },
     },
     IMPOWER: {
@@ -582,13 +569,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其幂值的复数。' },
+            number: { name: '数值', detail: '需要对复数应用的幂次。' },
         },
     },
     IMPRODUCT: {
-        description: '返回从 2 到 255 的复数的乘积',
-        abstract: '返回从 2 到 255 的复数的乘积',
+        description: '返回多个复数的乘积',
+        abstract: '返回多个复数的乘积',
         links: [
             {
                 title: '教学',
@@ -596,8 +583,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '复数1', detail: '1 到 255 个要相乘的复数。' },
+            inumber2: { name: '复数2', detail: '1 到 255 个要相乘的复数。' },
         },
     },
     IMREAL: {
@@ -610,13 +597,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其实系数的复数。' },
         },
     },
     IMSEC: {
-        description: '返回复数的正切值',
-        abstract: '返回复数的正切值',
+        description: '返回复数的正割值',
+        abstract: '返回复数的正割值',
         links: [
             {
                 title: '教学',
@@ -624,13 +610,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其正割值的复数。' },
         },
     },
     IMSECH: {
-        description: '返回复数的双曲正切值',
-        abstract: '返回复数的双曲正切值',
+        description: '返回复数的双曲正割值',
+        abstract: '返回复数的双曲正割值',
         links: [
             {
                 title: '教学',
@@ -638,8 +623,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其双曲正割值的复数。' },
         },
     },
     IMSIN: {
@@ -652,8 +636,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其正弦值的复数。' },
         },
     },
     IMSINH: {
@@ -666,8 +649,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其双曲正弦值的复数。' },
         },
     },
     IMSQRT: {
@@ -680,8 +662,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其平方根的复数。' },
         },
     },
     IMSUB: {
@@ -694,8 +675,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '复数1', detail: '复数1。' },
+            inumber2: { name: '复数2', detail: '复数2。' },
         },
     },
     IMSUM: {
@@ -708,8 +689,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber1: { name: '复数1', detail: '1 到 255 个要相加的复数。' },
+            inumber2: { name: '复数2', detail: '1 到 255 个要相加的复数。' },
         },
     },
     IMTAN: {
@@ -722,8 +703,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            inumber: { name: '复数', detail: '需要计算其正切值的复数。' },
         },
     },
     OCT2BIN: {

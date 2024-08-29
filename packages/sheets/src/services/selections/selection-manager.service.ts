@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
@@ -76,7 +76,7 @@ export class SheetsSelectionsService extends RxDisposable {
         return this._getCurrentSelections();
     }
 
-    getCurrentLastSelection(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
+    getCurrentLastSelection(): DeepReadonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
         const selectionData = this._getCurrentSelections();
         return selectionData?.[selectionData.length - 1] as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
     }
@@ -231,7 +231,7 @@ export class WorkbookSelections extends Disposable {
         this._emitOnEnd([]);
     }
 
-    addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]) {
+    addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]): void {
         const selections = this._ensureSheetSelection(sheetId);
         selections.push(...selectionDatas);
         this._emitOnEnd(selections);
@@ -244,7 +244,7 @@ export class WorkbookSelections extends Disposable {
      * @param selectionDatas
      * @param type
      */
-    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
+    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType): void {
         // selectionDatas should not be same variable as this._worksheetSelections !!!
         // but there are some place get selection from this._worksheetSelections and set selectionDatas(2nd parameter of this function ) cause selectionDatas is always []
         // see univer/pull/2909

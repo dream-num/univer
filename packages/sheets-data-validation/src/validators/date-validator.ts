@@ -41,7 +41,7 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
 
     // transform date string to serial number
     const dateStr = `${dayjs(value).format('YYYY-MM-DD HH:mm:ss')}`;
-    return numfmt.parseDate(dateStr)?.v;
+    return numfmt.parseDate(dateStr)?.v as number | undefined;
 };
 
 export class DateValidator extends BaseDataValidator<number> {

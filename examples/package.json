@@ -64,14 +64,14 @@
         "@univerjs/uniscript": "workspace:*",
         "@univerjs/uniui": "workspace:*",
         "clsx": "^2.1.1",
-        "monaco-editor": "0.50.0",
+        "monaco-editor": "0.51.0",
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "react-mosaic-component": "^6.1.0",
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "@types/react": "^18.3.3",
+        "@types/react": "^18.3.4",
         "@types/react-dom": "^18.3.0",
         "@univerjs/shared": "workspace:*",
         "esbuild": "^0.23.0",

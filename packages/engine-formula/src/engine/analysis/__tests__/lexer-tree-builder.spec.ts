@@ -135,10 +135,10 @@ describe('lexer nodeMaker test', () => {
             expect(elapsed).toBeGreaterThan(0);
         });
 
-        it('error', () => {
+        it('error include function test', () => {
             const node = lexerTreeBuilder.treeBuilder('=sum(#REF! + 5 , #REF!)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual(
-                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#REF! "," 5 ","+"]},{"token":"P_1","st":11,"ed":13,"children":[" #REF!"]}]}]}'
+                '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#REF!"," 5 "," +"]},{"token":"P_1","st":11,"ed":13,"children":["#REF!"]}]}]}'
             );
         });
 
@@ -206,6 +206,21 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('={"2007/1/1", "2008/1/1"}') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["{\\"2007/1/1\\", \\"2008/1/1\\"}"]}');
         });
+
+        it('error as parameter', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum(#NUM! + #VALUE!) + #SPILL! - (#CALC!)') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#NUM!","#VALUE!"," +"]}]},"#SPILL!"," +","#CALC!","-"]}');
+        });
+
+        it('error type lexer function', () => {
+            const node = lexerTreeBuilder.treeBuilder('=ERROR.TYPE(#DIV/0!)/ERROR.TYPE(#N/A)') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"ERROR.TYPE","st":0,"ed":9,"children":[{"token":"P_1","st":7,"ed":9,"children":["#DIV/0!"]}]},{"token":"ERROR.TYPE","st":20,"ed":29,"children":[{"token":"P_1","st":27,"ed":29,"children":["#N/A"]}]},"/"]}');
+        });
+
+        it('array error lexer text', () => {
+            const node = lexerTreeBuilder.treeBuilder('=RANK({1,2,121,#NAME?},A1:F1,0)') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"RANK","st":0,"ed":3,"children":[{"token":"P_1","st":1,"ed":3,"children":["{1,2,121,#NAME?}"]},{"token":"P_1","st":18,"ed":20,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"F1","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":24,"ed":26,"children":["0"]}]}]}');
+        });
     });
 
     describe('check error', () => {
@@ -226,6 +241,31 @@ describe('lexer nodeMaker test', () => {
 
         it('open bracket number', () => {
             const node = lexerTreeBuilder.treeBuilder('=(1+3)9') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Error for spell check!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=PI()0.1') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Sum error for spell check!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum(PI()0.1)') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Braces together error!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum({}{})') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Zero braces together error!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum({0}{0})') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Lack braces error!', () => {
+            const node = lexerTreeBuilder.treeBuilder('=sum((1)') as LexerNode;
             expect(node).toStrictEqual(ErrorType.VALUE);
         });
     });
@@ -250,6 +290,10 @@ describe('lexer nodeMaker test', () => {
         it('nest blank function bracket', () => {
             expect(lexerTreeBuilder.checkIfAddBracket('=sum(sum(sum(sum(')).toStrictEqual(4);
         });
+
+        // it('nest one function bracket', () => {
+        //     expect(lexerTreeBuilder.checkIfAddBracket('=sum((1)')).toStrictEqual(1);
+        // });
     });
 
     describe('sequenceNodesBuilder', () => {
@@ -421,6 +465,15 @@ describe('lexer nodeMaker test', () => {
                     token: '100',
                 },
             ]);
+        });
+
+        it('Array format for sequence', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('={"2007/1/1", "2008/1/1"}')).toStrictEqual([{
+                endIndex: 23,
+                nodeType: 5,
+                startIndex: 0,
+                token: '{"2007/1/1", "2008/1/1"}',
+            }]);
         });
     });
 

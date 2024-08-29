@@ -327,14 +327,14 @@ export class NodePositionConvertToCursor {
                 borderBoxPosition = {
                     startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
                     startY,
-                    endX: startX + lastGlyphLeft + lastGlyphWidth,
+                    endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
                     endY: startY + lineHeight - marginTop - marginBottom,
                 };
 
                 contentBoxPosition = {
                     startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
                     startY: startY + paddingTop + asc - anchorGlyph.bBox.ba,
-                    endX: startX + lastGlyphLeft + lastGlyphWidth,
+                    endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
                     endY: startY + paddingTop + asc + anchorGlyph.bBox.bd,
                 };
             } else {

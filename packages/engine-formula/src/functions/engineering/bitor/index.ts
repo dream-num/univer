@@ -26,7 +26,7 @@ export class Bitor extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(number1: BaseValueObject, number2: BaseValueObject) {
+    override calculate(number1: BaseValueObject, number2: BaseValueObject): BaseValueObject {
         if (number1.isError()) {
             return number1;
         }

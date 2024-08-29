@@ -61,21 +61,21 @@ export class Layer extends Disposable {
         this._initialCacheCanvas();
     }
 
-    disableCache() {
+    disableCache(): void {
         this._allowCache = false;
         this._cacheCanvas?.dispose();
         this._cacheCanvas = null;
     }
 
-    isAllowCache() {
+    isAllowCache(): boolean {
         return this._allowCache;
     }
 
     /**
-     * get objects which is visible and not in a group.
-     * @returns BaseObject[]
+     * Get direct visible children in order. (direct means object is not in group), default order is ascending by z-index.
+     * @returns {BaseObject[]} objects
      */
-    getObjectsByOrder() {
+    getObjectsByOrder(): BaseObject[] {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);
         for (const o of this._objects) {
@@ -86,7 +86,11 @@ export class Layer extends Disposable {
         return objects;
     }
 
-    getObjectsByOrderForPick() {
+    /**
+     * Get visible and evented objects.
+     * @returns {BaseObject[]} objects
+     */
+    getObjectsByOrderForPick(): BaseObject[] {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);
         for (const o of this._objects) {
@@ -98,17 +102,16 @@ export class Layer extends Disposable {
         return objects;
     }
 
-    getObjects() {
+    getObjects(): BaseObject[] {
         return this._objects;
     }
 
     /**
-     * insert o to _objects[]
-     * if o is a group, insert all its children and group itself to _objects[]
+     * Insert object to this._objects, if object is a group, insert all its children and group itself to _objects[]
      * @param o
-     * @returns this
+     * @returns {Layer} this
      */
-    addObject(o: BaseObject) {
+    addObject(o: BaseObject): Layer {
         if (o.classType === RENDER_CLASS_TYPE.GROUP) {
             const objects = (o as BaseObject).getObjects();
             for (const object of objects) {
@@ -151,7 +154,12 @@ export class Layer extends Disposable {
         }
     }
 
-    addObjects(objects: BaseObject[]) {
+    /**
+     * Insert objects to this._objects, if object is a group, insert all its children and group itself to _objects[]
+     * @param objects
+     * @returns {Layer} this
+     */
+    addObjects(objects: BaseObject[]): Layer {
         objects.forEach((o: BaseObject) => {
             this.addObject(o);
         });

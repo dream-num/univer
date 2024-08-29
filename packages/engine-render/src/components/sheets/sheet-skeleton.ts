@@ -1886,6 +1886,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                         },
                     },
                 ],
+                sectionBreaks: [{
+                    startIndex: contentLength + 1,
+                }],
             },
             documentStyle: {
                 pageSize: {

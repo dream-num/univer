@@ -39,6 +39,10 @@ const DEFAULT_COLUMN_STYLE = {
     textAlign: 'center',
     textBaseline: 'middle',
 } as const;
+
+/**
+ * Column Header Bar, include a lot of columns header
+ */
 export class ColumnHeaderLayout extends SheetExtension {
     override uKey = UNIQUE_KEY;
     override Z_INDEX = 10;
@@ -60,12 +64,12 @@ export class ColumnHeaderLayout extends SheetExtension {
         }
     }
 
-    configHeaderColumn(cfg: IColumnsHeaderCfgParam) {
+    configHeaderColumn(cfg: IColumnsHeaderCfgParam): void {
         this.columnsCfg = cfg.columnsCfg || [];
         this.headerStyle = { ...this.headerStyle, ...cfg.headerStyle };
     }
 
-    getCfgOfCurrentColumn(colIndex: number) {
+    getCfgOfCurrentColumn(colIndex: number): [IAColumnCfgObj, boolean] {
         let mergeWithSpecCfg;
         let curColSpecCfg;
         const columnsCfg = this.columnsCfg || [];
@@ -83,7 +87,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         return [mergeWithSpecCfg, specStyle] as [IAColumnCfgObj, boolean];
     }
 
-    setStyleToCtx(ctx: UniverRenderingContext, columnStyle: Partial<IColumnStyleCfg>) {
+    setStyleToCtx(ctx: UniverRenderingContext, columnStyle: Partial<IColumnStyleCfg>): void {
         if (columnStyle.textAlign) ctx.textAlign = columnStyle.textAlign;
         if (columnStyle.textBaseline) ctx.textBaseline = columnStyle.textBaseline;
         if (columnStyle.fontColor) ctx.fillStyle = columnStyle.fontColor;
@@ -92,7 +96,7 @@ export class ColumnHeaderLayout extends SheetExtension {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton): void {
         const { rowColumnSegment, columnHeaderHeight = 0 } = spreadsheetSkeleton;
         const { startColumn, endColumn } = rowColumnSegment;
 
@@ -123,6 +127,8 @@ export class ColumnHeaderLayout extends SheetExtension {
         ctx.setLineWidthByPrecision(1);
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
         let preColumnPosition = 0;
+
+        // draw each column header
         for (let c = startColumn - 1; c <= endColumn; c++) {
             if (c < 0 || c > columnWidthAccumulation.length - 1) {
                 continue;

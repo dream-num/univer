@@ -79,6 +79,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * @param enabled
      */
     setSkipLastEnabled(enabled: boolean): void {
+        console.log(`setSkipLastEnabled: ${enabled}`);
         this._skipLastEnabled = enabled;
     }
 
@@ -105,11 +106,13 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initCanvasEventListeners(): IDisposable {
+        const listenerDisposables = new DisposableCollection();
         const sheetObject = this._getSheetObject();
+        if (!sheetObject) return listenerDisposables;
+
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
         const { scene } = this._context;
 
-        const listenerDisposables = new DisposableCollection();
         listenerDisposables.add(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             this._onPointerDown(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
             if (evt.button !== 2) {

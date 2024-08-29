@@ -20,6 +20,7 @@ import type {
     DocumentDataModel,
     ICommandInfo,
     IDisposable,
+    IDocumentBody,
     IRange,
     IRangeWithCoord,
     ITextRun,
@@ -69,6 +70,9 @@ import {
     serializeRange,
     serializeRangeToRefString,
 } from '@univerjs/engine-formula';
+import type {
+    IRender,
+    SpreadsheetSkeleton } from '@univerjs/engine-render';
 import {
     DeviceInputEventType,
     IRenderManagerService,
@@ -137,10 +141,14 @@ const sheetEditorUnitIds = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDI
 export class PromptController extends Disposable {
     private _formulaRefColors: string[] = [];
 
+    /**
+     * SeqenceNodes are content in the formula editor.
+     * previousSequenceNodes are content in the formula editor before the user starts to edit.
+     */
     private _previousSequenceNodes: Nullable<Array<string | ISequenceNode>>;
-
-    private _previousRangesCount: number = 0;
-
+    /**
+     */
+    private _currRangesCount: number = 0;
     private _previousInsertRefStringIndex: Nullable<number>;
     private _currentInsertRefStringIndex: number = -1;
 
@@ -149,15 +157,12 @@ export class PromptController extends Disposable {
     private _isSelectionMovingRefSelections: IRefSelection[] = [];
 
     private _stringColor = '';
-
     private _numberColor = '';
 
     private _insertSelections: ISelectionWithStyle[] = [];
-
     private _inputPanelState: InputPanelState = InputPanelState.InitialState;
 
     private _userCursorMove: boolean = false;
-
     private _previousEditorUnitId: Nullable<string>;
 
     private _existsSequenceNode = false;
@@ -196,10 +201,7 @@ export class PromptController extends Disposable {
         @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
-
         this._initialize();
-
-        window.pc = this;
     }
 
     override dispose(): void {
@@ -207,15 +209,11 @@ export class PromptController extends Disposable {
         this._resetTemp();
     }
 
-    private _resetTemp() {
+    private _resetTemp(): void {
         this._previousSequenceNodes = null;
-
         this._previousInsertRefStringIndex = null;
-
         this._isSelectionMovingRefSelections = [];
-
-        this._previousRangesCount = 0;
-
+        this._currRangesCount = 0;
         this._currentInsertRefStringIndex = -1;
     }
 
@@ -233,7 +231,7 @@ export class PromptController extends Disposable {
         this._initialChangeEditor();
     }
 
-    private _initialFormulaTheme() {
+    private _initialFormulaTheme(): void {
         const style = this._themeService.getCurrentTheme();
 
         this._formulaRefColors = [
@@ -256,7 +254,7 @@ export class PromptController extends Disposable {
         this._stringColor = style.verdancy800;
     }
 
-    private _initialCursorSync() {
+    private _initialCursorSync(): void {
         this.disposeWithMe(
             this._textSelectionManagerService.textSelection$.subscribe((params) => {
                 if (params?.unitId == null) {
@@ -299,7 +297,7 @@ export class PromptController extends Disposable {
         );
     }
 
-    private _initialEditorInputChange() {
+    private _initialEditorInputChange(): void {
         const arrows = [KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.CTRL, KeyCode.SHIFT];
 
         this.disposeWithMe(
@@ -338,7 +336,7 @@ export class PromptController extends Disposable {
         );
     }
 
-    private _closeRangePromptWhenEditorInvisible() {
+    private _closeRangePromptWhenEditorInvisible(): void {
         // NOTE: to be refactored
 
         this.disposeWithMe(this._editorBridgeService.afterVisible$
@@ -356,7 +354,7 @@ export class PromptController extends Disposable {
             }));
     }
 
-    private _initialChangeEditor() {
+    private _initialChangeEditor(): void {
         this.disposeWithMe(
             this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((documentDataModel) => {
                 if (documentDataModel == null) {
@@ -385,7 +383,7 @@ export class PromptController extends Disposable {
         );
     }
 
-    private _closeRangePrompt(editorId: Nullable<string>) {
+    private _closeRangePrompt(editorId: Nullable<string>): void {
         this._insertSelections = [];
         this._refSelectionsService.clear();
 
@@ -429,7 +427,7 @@ export class PromptController extends Disposable {
     /**
      * For interaction with mouse & keyboard shortcuts on spreadsheet. Not in formula editor.
      */
-    private _updateSelecting(selectionsWithStyles: ISelectionWithStyle[], performInsertion: boolean = false) {
+    private _updateSelecting(selectionsWithStyles: ISelectionWithStyle[], performInsertion: boolean = false): void {
         if (selectionsWithStyles.length === 0) return;
         if (this._editorService.selectionChangingState() && !this._formulaPromptService.isLockedSelectionInsert()) return;
 
@@ -437,13 +435,13 @@ export class PromptController extends Disposable {
 
         if (performInsertion) {
             const currentSelection = selectionsWithStyles[selectionsWithStyles.length - 1];
-            this._insertControlSelectionReplace(currentSelection);
+            this._updateAndReplaceRefSelection(currentSelection);
         }
     }
 
     private _currentlyWorkingRefRenderer: Nullable<RefSelectionsRenderService> = null;
     private _selectionsChangeDisposables: Nullable<IDisposable>;
-    private _enableRefSelectionsRenderService() {
+    private _enableRefSelectionsRenderService(): void {
         const d = this._selectionsChangeDisposables = new DisposableCollection();
         this._allSelectionRenderServices.forEach((renderer) => {
             d.add(renderer.enableSelectionChanging());
@@ -477,51 +475,105 @@ export class PromptController extends Disposable {
         this._selectionsChangeDisposables = null;
     }
 
+    /**
+     * Response for ref selection change from refSelectionRenderService.
+     * Get selections from refSelectionRenderService, and set _sequenceNodes in prompt.service.
+     *
+     * @param {ISelectionWithStyle[]} selections from refSelectionRenderService
+     */
     private _insertControlSelections(selections: ISelectionWithStyle[]): void {
         const currentSelection = selections[selections.length - 1];
 
         this._resetSequenceNodes(selections.length);
-
-        if (
-            (selections.length === this._previousRangesCount || this._previousRangesCount === 0) &&
-            this._previousSequenceNodes != null
-        ) {
-            this._insertControlSelectionReplace(currentSelection);
+        // update curr selection sequence:
+        // If ref selection is A1:A6,B7:B9,C10:C11, then selected B7:B9 and delete this range. Then the cursor is between the two commas
+        // mousedown on a cell will start a new ref seleciton --> _addMoreRefSelection
+        // then drag on spreadsheet, would update(replace) curr ref selection --> _insertControlSelectionReplace
+        // Expection: if selections is the first ref selection, --> _insertControlSelectionReplace
+        const isUpdateCurrSelectionSeq = (selections.length === this._currRangesCount || this._currRangesCount === 0) &&
+            this._previousSequenceNodes != null;
+        if (isUpdateCurrSelectionSeq) {
+            this._updateAndReplaceRefSelection(currentSelection);
         } else {
-            // add selection
-
-            let insertNodes = this._formulaPromptService.getSequenceNodes()!;
-
-            const char = this._getCurrentChar()!;
-
-            // To reset the cursor position when resetting the editor's content.
-            if (insertNodes.length === 0 && this._currentInsertRefStringIndex > 0) {
-                this._currentInsertRefStringIndex = -1;
-            }
-
-            this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
-
-            if (!matchRefDrawToken(char) && this._focusIsOnlyRange(selections.length)) {
-                this._formulaPromptService.insertSequenceString(this._currentInsertRefStringIndex, matchToken.COMMA);
-                insertNodes = this._formulaPromptService.getSequenceNodes();
-                this._previousInsertRefStringIndex += 1;
-            }
-
-            this._previousSequenceNodes = Tools.deepClone(insertNodes);
-            console.log('insertControlSelections this._previousSequenceNodes', this._previousSequenceNodes);
-            this._formulaPromptService.setSequenceNodes(insertNodes);
-
-            const refString = this._generateRefString(currentSelection);
-            this._formulaPromptService.insertSequenceRef(this._previousInsertRefStringIndex, refString);
-
-            this._selectionRenderService.setSkipLastEnabled(false);
+            this._addNewRefSelection(selections, currentSelection);
         }
 
         this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
-        this._previousRangesCount = selections.length;
+        this._currRangesCount = selections.length;
     }
 
-    private _initAcceptFormula() {
+    /**
+     * Update(replace) ref selection.
+     * @param currentSelection
+     */
+    private _updateAndReplaceRefSelection(currentSelection: ISelectionWithStyle): void {
+        if (this._previousSequenceNodes == null) {
+            this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
+        }
+
+        if (this._previousInsertRefStringIndex == null) {
+            this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
+        }
+
+        // No new control is added, the current ref string is still modified.
+        const insertNodes = Tools.deepClone(this._previousSequenceNodes);
+        if (insertNodes == null) return;
+
+        const refString = this._generateRefString(currentSelection);
+        this._formulaPromptService.setSequenceNodes(insertNodes);
+        this._formulaPromptService.insertSequenceRef(this._previousInsertRefStringIndex, refString);
+
+        this._syncToEditor(insertNodes, this._previousInsertRefStringIndex + refString.length);
+        const selectionDatas = this._selectionRenderService.getSelectionDataWithStyle();
+
+        this._insertSelections = [];
+        selectionDatas.forEach((currentSelection) => {
+            const range = convertSelectionDataToRange(currentSelection);
+            this._insertSelections.push(range);
+        });
+    }
+
+    /**
+     * Start a new ref selection.
+     * @param selections
+     * @param currentSelection
+     */
+    private _addNewRefSelection(selections: ISelectionWithStyle[], currentSelection: ISelectionWithStyle): void {
+        // add selection
+        let insertNodes = this._formulaPromptService.getSequenceNodes()!;
+        const char = this._getCurrentChar()!;
+
+        // To reset the cursor position when resetting the editor's content.
+        if (insertNodes.length === 0 && this._currentInsertRefStringIndex > 0) {
+            this._currentInsertRefStringIndex = -1;
+        }
+
+        this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
+        if (!matchRefDrawToken(char) && this._focusIsOnlyRange(selections.length)) {
+            this._formulaPromptService.insertSequenceString(this._currentInsertRefStringIndex, matchToken.COMMA);
+            insertNodes = this._formulaPromptService.getSequenceNodes();
+            this._previousInsertRefStringIndex += 1;
+        }
+
+        this._previousSequenceNodes = Tools.deepClone(insertNodes);
+        this._formulaPromptService.setSequenceNodes(insertNodes);
+
+        const refString = this._generateRefString(currentSelection);
+        this._formulaPromptService.insertSequenceRef(this._previousInsertRefStringIndex, refString);
+        this._selectionRenderService.setSkipLastEnabled(false);
+    }
+
+    private get _prevSelectionCount(): number {
+        let selectionLen = 0;
+        this._previousSequenceNodes?.forEach((node) => {
+            if (!(typeof node === 'string')) {
+                selectionLen++;
+            }
+        });
+        return selectionLen;
+    }
+
+    private _initAcceptFormula(): void {
         this.disposeWithMe(
             this._formulaPromptService.acceptFormulaName$.subscribe((formulaString: string) => {
                 const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
@@ -589,7 +641,7 @@ export class PromptController extends Disposable {
         );
     }
 
-    private _changeFunctionPanelState() {
+    private _changeFunctionPanelState(): void {
         const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
         if (activeRange == null) {
@@ -643,7 +695,7 @@ export class PromptController extends Disposable {
         this._changeHelpFunctionPanelState(functionName.toUpperCase(), paramIndex);
     }
 
-    private _changeHelpFunctionPanelState(token: string, paramIndex: number) {
+    private _changeHelpFunctionPanelState(token: string, paramIndex: number): void {
         const functionInfo = this._descriptionService.getFunctionInfo(token);
         this._hideFunctionPanel();
         if (functionInfo == null) {
@@ -658,7 +710,7 @@ export class PromptController extends Disposable {
         });
     }
 
-    private _hideFunctionPanel() {
+    private _hideFunctionPanel(): void {
         this._commandService.executeCommand(SearchFunctionOperation.id, {
             visible: false,
             searchText: '',
@@ -688,7 +740,7 @@ export class PromptController extends Disposable {
      *
      * @returns Return the character under the current cursor in the editor.
      */
-    private _getCurrentChar() {
+    private _getCurrentChar(): Nullable<string> {
         const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
         if (activeRange == null) {
@@ -708,13 +760,13 @@ export class PromptController extends Disposable {
         return dataStream[startOffset - 1 + config.offset];
     }
 
-    private _getCurrentDataStream() {
+    private _getCurrentDataStream(): Nullable<string> {
         const config = this._getCurrentBodyDataStreamAndOffset();
         return config?.dataStream;
     }
 
     private _isSelectingMode = false;
-    private _enterSelectingMode() {
+    private _enterSelectingMode(): void {
         if (this._isSelectingMode) {
             return;
         }
@@ -740,7 +792,7 @@ export class PromptController extends Disposable {
      * Disable the ref string generation mode. In the ref string generation mode,
      * users can select a certain area using the mouse and arrow keys, and convert the area into a ref string.
      */
-    private _quitSelectingMode() {
+    private _quitSelectingMode(): void {
         if (!this._isSelectingMode) {
             return;
         }
@@ -759,17 +811,14 @@ export class PromptController extends Disposable {
         this._isSelectingMode = false;
     }
 
-    private _getCurrentBodyDataStreamAndOffset() {
+    private _getCurrentBodyDataStreamAndOffset(): Nullable<{ dataStream: string; offset: number }> {
         const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-
         if (!documentModel?.getBody()) {
             return;
         }
 
         const unitId = documentModel.getUnitId();
-
         const editor = this._editorService.getEditor(unitId);
-
         const dataStream = documentModel.getBody()?.dataStream ?? '';
 
         if (!editor || !editor.onlyInputRange()) {
@@ -779,7 +828,7 @@ export class PromptController extends Disposable {
         return { dataStream: compareToken.EQUALS + dataStream, offset: 1 };
     }
 
-    private _getFormulaAndCellEditorBody(unitIds: string[]) {
+    private _getFormulaAndCellEditorBody(unitIds: string[]): Nullable<IDocumentBody>[] {
         return unitIds.map((unitId) => {
             const dataModel = this._univerInstanceService.getUniverDocInstance(unitId);
 
@@ -787,7 +836,7 @@ export class PromptController extends Disposable {
         });
     }
 
-    private _editorModelUnitIds() {
+    private _editorModelUnitIds(): string[] {
         const currentDocumentDataModel = this._univerInstanceService.getCurrentUniverDocInstance()!;
         const unitId = currentDocumentDataModel.getUnitId();
 
@@ -802,9 +851,8 @@ export class PromptController extends Disposable {
      * Detect whether the user's input content is a formula. If it is a formula,
      * serialize the current input content into a sequenceNode;
      * otherwise, close the formula panel.
-     * @param currentInputValue The text content entered by the user in the editor.
      */
-    private _contextSwitch() {
+    private _contextSwitch(): void {
         const config = this._getCurrentBodyDataStreamAndOffset();
 
         if (config && isFormulaString(config.dataStream)) {
@@ -823,21 +871,13 @@ export class PromptController extends Disposable {
                     selectionLen++;
                 }
             });
-            this._previousRangesCount = selectionLen;
-            console.log('_contextSwitch', this._previousSequenceNodes);
+            this._currRangesCount = selectionLen;
             this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
-            // if (this._formulaPromptService.getSequenceNodes().length !== this._previousSequenceNodes.length) {
-            //     this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
-            // }
 
             const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
-
-            if (activeRange == null) {
-                return;
-            }
+            if (activeRange == null) return;
 
             const { startOffset } = activeRange;
-
             this._currentInsertRefStringIndex = startOffset - 1 + config.offset;
 
             return;
@@ -848,33 +888,28 @@ export class PromptController extends Disposable {
         this._contextService.setContextValue(UNI_DISABLE_CHANGING_FOCUS_KEY, false);
 
         this._formulaPromptService.disableLockedSelectionChange();
-
         this._formulaPromptService.disableLockedSelectionInsert();
 
         // this._lastSequenceNodes = [];
+        // Must! otherwise ---> range1+cursor+range3 then create a new ref selection, results will be range1+range2range3+
         this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
-        console.log('_contextSwitch clear', this._previousSequenceNodes);
         this._formulaPromptService.clearSequenceNodes();
 
         this._hideFunctionPanel();
     }
 
-    private _getContextState() {
+    private _getContextState(): boolean {
         return this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA);
     }
 
     /**
      * Highlight cell editor and formula bar editor.
      */
-    private _highlightFormula() {
-        if (this._getContextState() === false) {
-            return;
-        }
+    private _highlightFormula(): void {
+        if (this._getContextState() === false) return;
 
         const sequenceNodes = this._formulaPromptService.getSequenceNodes();
-
         const unitIds = this._editorModelUnitIds();
-
         const bodyList = this._getFormulaAndCellEditorBody(unitIds).filter((b) => !!b);
 
         this._refSelectionsService.clear();
@@ -901,7 +936,7 @@ export class PromptController extends Disposable {
      * #
      * Generate styles for formula text, highlighting references, text, numbers, and arrays.
      */
-    private _buildTextRuns(sequenceNodes: Array<ISequenceNode | string>) {
+    private _buildTextRuns(sequenceNodes: Array<ISequenceNode | string>): { textRuns: ITextRun[]; refSelections: IRefSelection[] } {
         const textRuns: ITextRun[] = [];
         const refSelections: IRefSelection[] = [];
         const themeColorMap = new Map<string, string>();
@@ -956,7 +991,7 @@ export class PromptController extends Disposable {
         return { textRuns, refSelections };
     }
 
-    private _exceedCurrentRange(range: IRange, rowCount: number, columnCount: number) {
+    private _exceedCurrentRange(range: IRange, rowCount: number, columnCount: number): boolean {
         const { endRow, endColumn } = range;
         if (endRow > rowCount) {
             return true;
@@ -973,7 +1008,7 @@ export class PromptController extends Disposable {
      * Draw the referenced selection text based on the style and token.
      * @param refSelections
      */
-    private _refreshSelectionForReference(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]) {
+    private _refreshSelectionForReference(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]): void {
         // const [unitId, sheetId] = refSelectionRenderService.getLocation();
         const { unitId, sheetId } = this._editorBridgeService.getEditCellState()!;
         const { unitId: selfUnitId, sheetId: selfSheetId } = this._getCurrentUnitIdAndSheetId();
@@ -1053,7 +1088,7 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _getPrimary(range: IRange, themeColor: string, refIndex: number) {
+    private _getPrimary(range: IRange, themeColor: string, refIndex: number): Nullable<ISelectionWithStyle> {
         const primary = this._insertSelections.find((selection) => {
             const { startRow, startColumn, endRow, endColumn } = selection.range;
             if (
@@ -1107,18 +1142,18 @@ export class PromptController extends Disposable {
         };
     }
 
-    private _getSheetIdByName(unitId: string, sheetName: string) {
+    private _getSheetIdByName(unitId: string, sheetName: string): Nullable<string> {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         return workbook?.getSheetBySheetName(normalizeSheetName(sheetName))?.getSheetId();
     }
 
-    private _getSheetNameById(unitId: string, sheetId: string) {
+    private _getSheetNameById(unitId: string, sheetId: string): string {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const sheetName = workbook?.getSheetBySheetId(sheetId)?.getName() || '';
         return sheetName;
     }
 
-    private _getCurrentUnitIdAndSheetId() {
+    private _getCurrentUnitIdAndSheetId(): { unitId: string; sheetId: string; skeleton: Nullable<SpreadsheetSkeleton> } {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const skeleton = this._renderManagerService.getRenderById(workbook.getUnitId())?.with(SheetSkeletonManagerService)?.getCurrentSkeleton();
@@ -1132,7 +1167,7 @@ export class PromptController extends Disposable {
 
     // FIXME@Jocs: this internal implementations should be exposed to callers.
     // This method should be moved to EditorService.
-    private _getEditorOpenedForSheet() {
+    private _getEditorOpenedForSheet(): { openUnitId: Nullable<string>; openSheetId: Nullable<string> } {
         const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance()!;
         const editorUnitId = documentDataModel.getUnitId();
         const editor = this._editorService.getEditor(editorUnitId);
@@ -1153,7 +1188,7 @@ export class PromptController extends Disposable {
      * Convert the selection range to a ref string for the formula engine, such as A1:B1
      * @param currentSelection
      */
-    private _generateRefString(currentSelection: ISelectionWithStyle) {
+    private _generateRefString(currentSelection: ISelectionWithStyle): string {
         let refUnitId = '';
         let refSheetName = '';
 
@@ -1225,7 +1260,7 @@ export class PromptController extends Disposable {
         editorUnitId?: string,
         canUndo: boolean = true,
         fromSelection = true
-    ) {
+    ): void {
         let dataStream = generateStringWithSequence(sequenceNodes);
         const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
         this._isSelectionMovingRefSelections = refSelections;
@@ -1310,7 +1345,7 @@ export class PromptController extends Disposable {
         }, 0);
     }
 
-    private _fitEditorSize() {
+    private _fitEditorSize(): void {
         const currentDocumentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         const editorUnitId = currentDocumentDataModel!.getUnitId();
         if (this._editorService.isEditor(editorUnitId) && !this._editorService.isSheetEditor(editorUnitId)) {
@@ -1327,7 +1362,7 @@ export class PromptController extends Disposable {
      * @param dataStream
      * @param textRuns
      */
-    private _updateEditorModel(dataStream: string, textRuns: ITextRun[]) {
+    private _updateEditorModel(dataStream: string, textRuns: ITextRun[]): void {
         const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
 
         const editorUnitId = documentDataModel!.getUnitId();
@@ -1356,45 +1391,11 @@ export class PromptController extends Disposable {
         docViewModel.reset(documentDataModel);
     }
 
-    private _insertControlSelectionReplace(currentSelection: ISelectionWithStyle): void {
-        if (this._previousSequenceNodes == null) {
-            this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
-            console.log('_insertControlSelectionReplace _previousSequenceNodes', this._previousSequenceNodes);
-        }
-
-        if (this._previousInsertRefStringIndex == null) {
-            this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
-        }
-
-        // No new control is added, the current ref string is still modified.
-        const insertNodes = Tools.deepClone(this._previousSequenceNodes);
-        if (insertNodes == null) {
-            return;
-        }
-
-        const refString = this._generateRefString(currentSelection);
-
-        this._formulaPromptService.setSequenceNodes(insertNodes);
-
-        this._formulaPromptService.insertSequenceRef(this._previousInsertRefStringIndex, refString);
-
-        this._syncToEditor(insertNodes, this._previousInsertRefStringIndex + refString.length);
-
-        const selectionDatas = this._selectionRenderService.getSelectionDataWithStyle();
-
-        this._insertSelections = [];
-
-        selectionDatas.forEach((currentSelection) => {
-            const range = convertSelectionDataToRange(currentSelection);
-            this._insertSelections.push(range);
-        });
-    }
-
     /**
      * pro/issues/450
      * In range selection mode, certain measures are implemented to ensure that the selection behavior is processed correctly.
      */
-    private _focusIsOnlyRange(selectionCount: number) {
+    private _focusIsOnlyRange(selectionCount: number): boolean {
         const currentEditor = this._editorService.getFocusEditor();
         if (!currentEditor) {
             return true;
@@ -1423,7 +1424,7 @@ export class PromptController extends Disposable {
      * pro/issues/450
      * In range selection mode, certain measures are implemented to ensure that the selection behavior is processed correctly.
      */
-    private _resetSequenceNodes(selectionCount: number) {
+    private _resetSequenceNodes(selectionCount: number): void {
         const currentEditor = this._editorService.getFocusEditor();
         if (!currentEditor) {
             return;
@@ -1440,14 +1441,14 @@ export class PromptController extends Disposable {
         if (this._existsSequenceNode) {
             this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
             this._formulaPromptService.clearSequenceNodes();
-            this._previousRangesCount = 0;
+            this._currRangesCount = 0;
             this._existsSequenceNode = false;
         }
     }
 
     // FIXME: @wzhudev: this method could be merged with `_refreshSelectionForReference`.
 
-    private _updateRefSelectionStyle(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]) {
+    private _updateRefSelectionStyle(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]): void {
         const controls = refSelectionRenderService.getSelectionControls();
         const [unitId, sheetId] = refSelectionRenderService.getLocation();
 
@@ -1510,7 +1511,12 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionShape) {
+    /**
+     * Response for selectionControl change(change by 8 control points and moving selection position).
+     * @param toRange
+     * @param selectionControl
+     */
+    private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionShape): void {
         // FIXME: change here
         const { skeleton } = this._getCurrentUnitIdAndSheetId();
         // const { unitId, sheetId } = toRange;
@@ -1588,7 +1594,7 @@ export class PromptController extends Disposable {
         selectionControl.update(toRange, undefined, undefined, undefined, this._selectionRenderService.attachPrimaryWithCoord(primary));
     }
 
-    private _refreshFormulaAndCellEditor(unitIds: string[]) {
+    private _refreshFormulaAndCellEditor(unitIds: string[]): void {
         for (const unitId of unitIds) {
             const editorObject = getEditorObject(unitId, this._renderManagerService);
 
@@ -1603,7 +1609,7 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _cursorStateListener() {
+    private _cursorStateListener(): void {
         /**
          * The user's operations follow the sequence of opening the editor and then moving the cursor.
          * The logic here predicts the user's first cursor movement behavior based on this rule
@@ -1624,7 +1630,7 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _pressEnter(params: ISelectEditorFormulaOperationParam) {
+    private _pressEnter(params: ISelectEditorFormulaOperationParam): void {
         const { keycode, isSingleEditor = false } = params;
 
         if (this._formulaPromptService.isSearching()) {
@@ -1646,7 +1652,7 @@ export class PromptController extends Disposable {
         });
     }
 
-    private _pressTab(params: ISelectEditorFormulaOperationParam) {
+    private _pressTab(params: ISelectEditorFormulaOperationParam): void {
         const { keycode, isSingleEditor = false } = params;
         if (this._formulaPromptService.isSearching()) {
             this._formulaPromptService.accept(true);
@@ -1665,7 +1671,7 @@ export class PromptController extends Disposable {
         });
     }
 
-    private _pressEsc(params: ISelectEditorFormulaOperationParam) {
+    private _pressEsc(params: ISelectEditorFormulaOperationParam): void {
         const { keycode } = params;
         const focusEditor = this._editorService.getFocusEditor();
         if (!focusEditor || focusEditor?.isSheetEditor() === true) {
@@ -1678,7 +1684,7 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _pressArrowKey(params: ISelectEditorFormulaOperationParam) {
+    private _pressArrowKey(params: ISelectEditorFormulaOperationParam): void {
         const { keycode, metaKey } = params;
         let direction = Direction.DOWN;
         if (keycode === KeyCode.ARROW_DOWN) {
@@ -1713,7 +1719,7 @@ export class PromptController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _commandExecutedListener() {
+    private _commandExecutedListener(): void {
         // Listen to document edits to refresh the size of the editor.
         const updateCommandList = [SelectEditorFormulaOperation.id];
 
@@ -1789,14 +1795,14 @@ export class PromptController extends Disposable {
                     const selectionWithStyles = this._refSelectionsService.getCurrentSelections();
                     const currentSelection = selectionWithStyles[selectionWithStyles.length - 1];
 
-                    this._insertControlSelectionReplace(currentSelection);
+                    this._updateAndReplaceRefSelection(currentSelection);
                     this._highlightFormula();
                 }
             })
         );
     }
 
-    private _moveInEditor(keycode: Nullable<KeyCode>) {
+    private _moveInEditor(keycode: Nullable<KeyCode>): void {
         if (keycode == null) {
             return;
         }
@@ -1814,7 +1820,7 @@ export class PromptController extends Disposable {
         });
     }
 
-    private _userMouseListener() {
+    private _userMouseListener(): void {
         const editorObject = this._getEditorObject();
 
         if (editorObject == null) {
@@ -1834,6 +1840,7 @@ export class PromptController extends Disposable {
      */
     private _inputFormulaListener(): void {
         this.disposeWithMe(
+            // NOT FOR INPUT EVENT in formula editor
             this._editorService.inputFormula$.subscribe((param) => {
                 const { formulaString, editorUnitId } = param;
 
@@ -1851,11 +1858,7 @@ export class PromptController extends Disposable {
                 }
 
                 const lastSequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
-                // Must！
-                this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
-                console.log('_inputFormulaListener this._previousSequenceNodes', this._previousSequenceNodes);
                 this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
-
                 this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId, true, false);
             })
         );
@@ -1864,7 +1867,7 @@ export class PromptController extends Disposable {
     /**
      * Absolute range, triggered by F4
      */
-    private _changeRefString() {
+    private _changeRefString(): void {
         const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
 
         if (activeRange == null) {
@@ -1921,14 +1924,13 @@ export class PromptController extends Disposable {
 
         const difference = finalToken.length - node.token.length;
 
-        this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
-        console.log('change ref string this._previousSequenceNodes', this._previousSequenceNodes);
+        // this._previousSequenceNodes = this._formulaPromptService.getSequenceNodes();
         this._formulaPromptService.updateSequenceRef(nodeIndex, finalToken);
 
         this._syncToEditor(this._formulaPromptService.getSequenceNodes(), strIndex + difference + 1);
     }
 
-    private _changeRangeRef(token: string) {
+    private _changeRangeRef(token: string): string {
         const range = deserializeRangeWithSheet(token).range;
         let resultToken = '';
         if (range.startAbsoluteRefType === AbsoluteRefType.NONE || range.startAbsoluteRefType == null) {
@@ -1942,7 +1944,7 @@ export class PromptController extends Disposable {
         return resultToken;
     }
 
-    private _changeSingleRef(token: string) {
+    private _changeSingleRef(token: string): string {
         const range = deserializeRangeWithSheet(token).range;
         const type = range.startAbsoluteRefType;
         let resultToken = '';
@@ -1964,7 +1966,7 @@ export class PromptController extends Disposable {
         return resultToken;
     }
 
-    private _getEditorObject() {
+    private _getEditorObject(): Nullable<IRender> {
         const editorUnitId = this._univerInstanceService.getCurrentUniverDocInstance()!.getUnitId();
         const editor = this._editorService.getEditor(editorUnitId);
         return editor?.render;

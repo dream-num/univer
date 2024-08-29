@@ -176,96 +176,8 @@ export class SelectionShapeExtension {
     }
 
     /**
-     * Dragging the whole selection and moving (when cursor is crosshair), not for 8 control points.
-     * Now only ref selection can do this.
-     * @param moveOffsetX
-     * @param moveOffsetY
-     */
-    private _controlMoving(moveOffsetX: number, moveOffsetY: number): void {
-        const scene = this._scene;
-
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([moveOffsetX, moveOffsetY]));
-
-        const { scaleX, scaleY } = scene.getAncestorScale();
-
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(
-            moveOffsetX,
-            moveOffsetY,
-            scaleX,
-            scaleY,
-            scrollXY
-        );
-
-        const { row, column } = moveActualSelection;
-
-        const maxRow = this._skeleton.getRowCount() - 1;
-
-        const maxColumn = this._skeleton.getColumnCount() - 1;
-
-        let startRow = row + this._relativeSelectionPositionRow;
-
-        if (startRow < 0) {
-            startRow = 0;
-        }
-
-        let endRow = startRow + this._relativeSelectionRowLength;
-
-        if (endRow > maxRow) {
-            endRow = maxRow;
-
-            if (endRow - startRow < this._relativeSelectionRowLength) {
-                startRow = endRow - this._relativeSelectionRowLength;
-            }
-        }
-
-        let startColumn = column + this._relativeSelectionPositionColumn;
-
-        if (startColumn < 0) {
-            startColumn = 0;
-        }
-
-        let endColumn = startColumn + this._relativeSelectionColumnLength;
-
-        if (endColumn > maxColumn) {
-            endColumn = maxColumn;
-
-            if (endColumn - startColumn < this._relativeSelectionColumnLength) {
-                startColumn = endColumn - this._relativeSelectionColumnLength;
-            }
-        }
-
-        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
-
-        const startY = startCell?.startY || 0;
-        const endY = endCell?.endY || 0;
-        const startX = startCell?.startX || 0;
-        const endX = endCell?.endX || 0;
-
-        this._helperSelection?.transformByState({
-            left: startX,
-            top: startY,
-            width: endX - startX,
-            height: endY - startY,
-        });
-
-        this._targetSelection = {
-            startY,
-            endY,
-            startX,
-            endX,
-            startRow,
-            endRow,
-            startColumn,
-            endColumn,
-        };
-
-        this._control.selectionMoving$.next(this._targetSelection);
-    }
-
-    /**
-     * Pointer down event for whole selectionControl (when cursor turns to crosshair). Not for dragging 8 control points.
-     * Also handle pointermove and pointerup for whole selectionControl.
+     * Pointer down event for entire selectionControl (when cursor becomes move style). Not for dragging 8 control points.
+     * Also handle pointermove and pointerup for entire selectionControl.
      * @param evt
      */
     private _controlEvent(evt: IMouseEvent | IPointerEvent): void {
@@ -376,6 +288,77 @@ export class SelectionShapeExtension {
             // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
             this._selectionHooks.selectionMoveEnd?.();
         });
+    }
+
+    /**
+     * Dragging the entire selection and moving (when cursor becomes move style). Not for 8 control points.
+     * Now only ref selection can do this.
+     * @param moveOffsetX
+     * @param moveOffsetY
+     */
+    private _controlMoving(moveOffsetX: number, moveOffsetY: number): void {
+        const scene = this._scene;
+        const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+            moveOffsetX,
+            moveOffsetY,
+            scaleX,
+            scaleY,
+            scrollXY
+        );
+
+        const { row, column } = moveActualSelection;
+        const maxRow = this._skeleton.getRowCount() - 1;
+        const maxColumn = this._skeleton.getColumnCount() - 1;
+        let startRow = Math.max(row + this._relativeSelectionPositionRow, 0);
+        let startColumn = Math.max(column + this._relativeSelectionPositionColumn, 0);
+        let endRow = startRow + this._relativeSelectionRowLength;
+        let endColumn = startColumn + this._relativeSelectionColumnLength;
+
+        if (endRow > maxRow) {
+            endRow = maxRow;
+            if (endRow - startRow < this._relativeSelectionRowLength) {
+                startRow = endRow - this._relativeSelectionRowLength;
+            }
+        }
+
+        if (endColumn > maxColumn) {
+            endColumn = maxColumn;
+
+            if (endColumn - startColumn < this._relativeSelectionColumnLength) {
+                startColumn = endColumn - this._relativeSelectionColumnLength;
+            }
+        }
+
+        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
+        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
+
+        const startY = startCell?.startY || 0;
+        const endY = endCell?.endY || 0;
+        const startX = startCell?.startX || 0;
+        const endX = endCell?.endX || 0;
+
+        this._helperSelection?.transformByState({
+            left: startX,
+            top: startY,
+            width: endX - startX,
+            height: endY - startY,
+        });
+
+        this._targetSelection = {
+            startY,
+            endY,
+            startX,
+            endX,
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
+        };
+
+        this._control.selectionMoving$.next(this._targetSelection);
     }
 
     private _initialWidget() {

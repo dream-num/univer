@@ -135,6 +135,11 @@ export interface IFormulaPromptService {
 
     updateSequenceRef(nodeIndex: number, refString: string): void;
 
+    /**
+     * Add new node to this._sequenceNodes.
+     * @param {number} index
+     * @param {string} refString
+     */
     insertSequenceRef(index: number, refString: string): void;
 
     insertSequenceString(index: number, content: string): void;
@@ -235,7 +240,6 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
     }
 
     setSequenceNodes(nodes: Array<string | ISequenceNode>) {
-        console.log('setSequenceNodes', nodes);
         this._sequenceNodes = nodes;
     }
 
@@ -286,11 +290,11 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
     }
 
     /**
-     * Synchronize the reference text based on the changes of the selection.
+     * Synchronize the reference text based on the changes of the selection.(change by 8 control points, and selection move)
      * @param nodeIndex
      * @param refString
      */
-    updateSequenceRef(nodeIndex: number, refString: string) {
+    updateSequenceRef(nodeIndex: number, refString: string): void {
         const node = this._sequenceNodes[nodeIndex];
 
         if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
@@ -304,7 +308,6 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
         newNode.token = refString;
 
         newNode.endIndex += difference;
-
         this._sequenceNodes[nodeIndex] = newNode;
 
         for (let i = nodeIndex + 1, len = this._sequenceNodes.length; i < len; i++) {
@@ -317,18 +320,17 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
             newNode.startIndex += difference;
             newNode.endIndex += difference;
-            console.log('this._sequenceNodes[i] ', this._sequenceNodes);
             this._sequenceNodes[i] = newNode;
         }
     }
 
     /**
-     * When the cursor is on the right side of a formula token,
-     * you can add reference text to the formula by drawing a selection.
+     * Add new node to this._sequenceNodes.
+     * When the cursor is on the right side of a formula token, you can add reference text to the formula by drawing a selection.
      * @param index
      * @param refString
      */
-    insertSequenceRef(index: number, refString: string) {
+    insertSequenceRef(index: number, refString: string): void {
         const refStringCount = refString.length;
 
         const nodeIndex = this.getCurrentSequenceNodeIndex(index);
@@ -350,7 +352,6 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
             newNode.startIndex += refStringCount;
             newNode.endIndex += refStringCount;
-            console.log('this._sequenceNodes[i] ', this._sequenceNodes);
             this._sequenceNodes[i] = newNode;
         }
     }
@@ -377,7 +378,6 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
             newNode.startIndex += contentCount;
             newNode.endIndex += contentCount;
-            console.log('this._sequenceNodes[i] ', this._sequenceNodes);
             this._sequenceNodes[i] = newNode;
         }
     }

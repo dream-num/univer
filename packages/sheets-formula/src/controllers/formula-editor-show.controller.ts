@@ -40,7 +40,6 @@ import {
     ISheetSelectionRenderService,
     SELECTION_SHAPE_DEPTH,
     SelectionShape,
-    SelectionShape_DEPTH,
     SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 const REFRESH_ARRAY_SHAPE_MUTATIONS = [

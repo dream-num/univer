@@ -141,6 +141,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // we put the properties here for simplicity
     // Used in the formula selection feature, a new selection string is added by drawing a box with the mouse.
     protected _remainLastEnabled: boolean = false;
+
+    /**
+     * _skipLastEnabled = true means start a new ref selection, false means update last ref selection
+     */
     protected _skipLastEnabled: boolean = false;
     protected _singleSelectionEnabled: boolean = false;
     // #endregion

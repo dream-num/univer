@@ -36,7 +36,7 @@ describe('Test yield function', () => {
             const frequency = NumberValueObject.create(2);
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis);
-            expect(result.getValue()).toStrictEqual(0.08048420029517867);
+            expect(result.getValue()).toStrictEqual(0.08048420029608885);
         });
 
         it('Settlement >= maturity', () => {
@@ -93,11 +93,11 @@ describe('Test yield function', () => {
 
             const frequency2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency2, basis);
-            expect(result2.getValue()).toStrictEqual(0.08044675194849539);
+            expect(result2.getValue()).toStrictEqual(0.08044675194939552);
 
             const frequency3 = NumberValueObject.create(4);
             const result3 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency3, basis);
-            expect(result3.getValue()).toStrictEqual(0.08049213260842468);
+            expect(result3.getValue()).toStrictEqual(0.08049213260932456);
         });
 
         it('Basis value test', () => {
@@ -113,23 +113,23 @@ describe('Test yield function', () => {
 
             const basis2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis2);
-            expect(result2.getValue()).toStrictEqual(0.08048411336266817);
+            expect(result2.getValue()).toStrictEqual(0.08048411336357866);
 
             const basis3 = NumberValueObject.create(2);
             const result3 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis3);
-            expect(result3.getValue()).toStrictEqual(0.08048425764657077);
+            expect(result3.getValue()).toStrictEqual(0.08048425764748052);
 
             const basis4 = NumberValueObject.create(3);
             const result4 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis4);
-            expect(result4.getValue()).toStrictEqual(0.08048411723140103);
+            expect(result4.getValue()).toStrictEqual(0.0804841172323108);
 
             const basis5 = NumberValueObject.create(4);
             const result5 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis5);
-            expect(result5.getValue()).toStrictEqual(0.08048411336266817);
+            expect(result5.getValue()).toStrictEqual(0.08048411336357866);
 
             const basis6 = NullValueObject.create();
             const result6 = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis6);
-            expect(result6.getValue()).toStrictEqual(0.08048411336266817);
+            expect(result6.getValue()).toStrictEqual(0.08048411336357866);
         });
 
         it('Value is error', () => {

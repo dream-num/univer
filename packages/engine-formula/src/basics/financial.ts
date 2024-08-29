@@ -513,11 +513,11 @@ function guessIsNaNorInfinity(guess: number, iterF: IIterFFunctionType): number 
     let xI;
 
     if (Math.abs(fXbegin) < g_Eps) {
-        return fXbegin;
+        return ErrorValueObject.create(ErrorType.NUM);
     }
 
     if (Math.abs(fXend) < g_Eps) {
-        return fXend;
+        return ErrorValueObject.create(ErrorType.NUM);
     }
 
     do {

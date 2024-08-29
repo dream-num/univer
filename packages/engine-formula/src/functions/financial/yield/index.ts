@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { getDateSerialNumberByObject } from '../../../basics/date';
+import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
-import { calculatePrice, validCouppcdIsGte0ByTwoDate } from '../../../basics/financial';
+import { calculateCoupdaybs, calculateCoupdays, calculateCoupnum, calculatePrice, validCouppcdIsGte0ByTwoDate } from '../../../basics/financial';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -103,50 +103,33 @@ export class Yield extends BaseFunction {
         frequency: number,
         basis: number
     ): number | ErrorValueObject {
-        let yield1 = 0;
-        let price1 = calculatePrice(settlementSerialNumber, maturitySerialNumber, rate, yield1, redemption, frequency, basis);
-        let yield2 = 1;
-        let price2 = calculatePrice(settlementSerialNumber, maturitySerialNumber, rate, yield2, redemption, frequency, basis);
-        let yieldN = (yield2 - yield1) * 0.5;
-        let priceN = 0;
+        const N = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency);
 
-        for (let i = 0; i < 100 && priceN !== pr; i++) {
-            priceN = calculatePrice(settlementSerialNumber, maturitySerialNumber, rate, yieldN, redemption, frequency, basis);
+        if (N > 1) {
+            const g_Eps = 1e-7;
 
-            if (pr === price1) {
-                return yield1;
+            let yld = rate || 0.01;
+            let price = calculatePrice(settlementSerialNumber, maturitySerialNumber, rate, yld, redemption, frequency, basis);
+            let eps = price - pr;
+
+            for (let i = 0; i < 100 && Math.abs(eps) > g_Eps; i++) {
+                price = calculatePrice(settlementSerialNumber, maturitySerialNumber, rate, 1.01 * yld, redemption, frequency, basis);
+                yld += -eps / (price - pr - eps) * yld * 0.01;
+
+                const priceN = calculatePrice(settlementSerialNumber, maturitySerialNumber, rate, yld, redemption, frequency, basis);
+                eps = priceN - pr;
             }
 
-            if (pr === price2) {
-                return yield2;
-            }
-
-            if (pr === priceN) {
-                return yieldN;
-            }
-
-            if (pr < price2) {
-                yield2 *= 2;
-                price2 = calculatePrice(settlementSerialNumber, maturitySerialNumber, rate, yield2, redemption, frequency, basis);
-                yieldN = (yield2 - yield1) * 0.5;
-            } else {
-                if (pr < priceN) {
-                    yield1 = yieldN;
-                    price1 = priceN;
-                } else {
-                    yield2 = yieldN;
-                    price2 = priceN;
-                }
-
-                yieldN = yield2 - (yield2 - yield1) * ((pr - price2) / (price1 - price2));
-            }
+            return yld;
         }
 
-        // result not precise enough
-        if (Math.abs(pr - priceN) > pr / 100) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
+        const A = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequency, basis);
+        const E = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequency, basis);
+        const { days: DSR } = getTwoDateDaysByBasis(settlementSerialNumber, maturitySerialNumber, basis);
 
-        return yieldN;
+        const temp = pr / 100 + (A / E * rate / frequency);
+        const result = ((redemption / 100 + rate / frequency) - temp) / temp * frequency * E / DSR;
+
+        return result;
     }
 }

@@ -14,11 +14,24 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import type { IAccessor, ICommand, ITextRange, Workbook } from '@univerjs/core';
+import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocBackScrollRenderController } from '@univerjs/docs-ui';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
+
+function scrollToTop(accessor: IAccessor) {
+    const renderManagerService = accessor.get(IRenderManagerService);
+    const backScrollController = renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocBackScrollRenderController);
+    const textRange = {
+        startOffset: 0,
+        endOffset: 0,
+    };
+    if (backScrollController) {
+        backScrollController.scrollToRange(DOCS_ZEN_EDITOR_UNIT_ID_KEY, textRange as ITextRange);
+    }
+}
 
 export const CancelZenEditCommand: ICommand = {
     id: 'zen-editor.command.cancel-zen-edit',
@@ -39,6 +52,8 @@ export const CancelZenEditCommand: ICommand = {
         }
 
         zenZoneEditorService.close();
+
+        scrollToTop(accessor);
 
         const currentSheetInstance = univerInstanceManager.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (currentSheetInstance) {
@@ -72,6 +87,8 @@ export const ConfirmZenEditCommand: ICommand = {
         }
 
         zenZoneEditorService.close();
+
+        scrollToTop(accessor);
 
         const currentSheetInstance = univerInstanceManager.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (currentSheetInstance) {

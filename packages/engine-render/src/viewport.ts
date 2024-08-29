@@ -1407,6 +1407,7 @@ export class Viewport {
 
         let viewportScrollX = scrollVpPos.viewportScrollX ?? this.viewportScrollX;
         let viewportScrollY = scrollVpPos.viewportScrollY ?? this.viewportScrollY;
+
         const rawScrollXY = this.transViewportScroll2ScrollValue(viewportScrollX, viewportScrollY);
         // const afterLimit = this.limitedScroll(rawScrollXY.x, rawScrollXY.y);
         // const scrollX = afterLimit.scrollX;

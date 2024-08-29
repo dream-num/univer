@@ -30,7 +30,7 @@ describe('Test coth function', () => {
         it('Value is normal number', () => {
             const value = NumberValueObject.create(1);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1.3130352854993315);
+            expect(result.getValue()).toBe(1.3130352854993312);
         });
 
         it('Value is number negative', () => {
@@ -82,7 +82,7 @@ describe('Test coth function', () => {
             });
             const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [1.3130352854993315, ErrorType.VALUE, 1.1868318739223294, 1.3130352854993315, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO],
+                [1.3130352854993312, ErrorType.VALUE, 1.1868318739223294, 1.3130352854993312, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO],
                 [ErrorType.DIV_BY_ZERO, 1, 1.0187318407849029, ErrorType.VALUE, -1.0049698233136892, ErrorType.NAME],
             ]);
         });

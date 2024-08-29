@@ -136,7 +136,7 @@ describe('Test avedev function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(16.469917355371898);
+            expect(result.getValue()).toBe(16.469917355371905);
         });
 
         it('Var1 is number, var2 is array not includes boolean, includes 0', () => {

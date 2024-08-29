@@ -177,5 +177,5 @@ export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetB
 export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
 export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
 export { attachSelectionWithCoord, attachPrimaryWithCoord } from './services/selection/util';
-
+export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 // #endregion

@@ -108,7 +108,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         });
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const filterRangeShape = this._filterRangeShape = new SelectionShape(scene, DEFAULT_Z_INDEX, true, this._themeService);
+        const filterRangeShape = this._filterRangeShape = new SelectionShape(scene, DEFAULT_Z_INDEX, this._themeService, true);
         filterRangeShape.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, {
             hasAutoFill: false,
             fill: 'rgba(0, 0, 0, 0.0)',

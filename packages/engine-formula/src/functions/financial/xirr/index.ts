@@ -21,6 +21,7 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 import { getResultByGuessIterF } from '../../../basics/financial';
+import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 
 interface ICheckErrorType {
     isError: boolean;
@@ -62,9 +63,17 @@ export class Xirr extends BaseFunction {
             _guess = NumberValueObject.create(0.1);
         }
 
-        const guessValue = +_guess.getValue();
+        const { isError: _isError_guess, errorObject: _errorObject_guess, variants } = checkVariantsErrorIsArrayOrBoolean(_guess);
 
-        if (_guess.isArray() || _guess.isBoolean() || Number.isNaN(guessValue)) {
+        if (_isError_guess) {
+            return _errorObject_guess as ErrorValueObject;
+        }
+
+        const [guessObject] = variants as BaseValueObject[];
+
+        const guessValue = +guessObject.getValue();
+
+        if (Number.isNaN(guessValue)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -78,6 +87,10 @@ export class Xirr extends BaseFunction {
 
         if (typeof result !== 'number') {
             return result as ErrorValueObject;
+        }
+
+        if (result < 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         return NumberValueObject.create(result);
@@ -163,6 +176,13 @@ export class Xirr extends BaseFunction {
                 };
             }
 
+            if (_values.length <= 1) {
+                return {
+                    isError: true,
+                    errorObejct: ErrorValueObject.create(ErrorType.NA),
+                };
+            }
+
             return {
                 isError,
                 _values,
@@ -228,6 +248,13 @@ export class Xirr extends BaseFunction {
                 };
             }
 
+            if (_dates.length <= 1) {
+                return {
+                    isError: true,
+                    errorObejct: ErrorValueObject.create(ErrorType.NA),
+                };
+            }
+
             return {
                 isError,
                 _dates,
@@ -277,15 +304,8 @@ export class Xirr extends BaseFunction {
     }
 
     private _iterF(values: number[], dates: number[], rate: number): number {
-        const D_0 = dates[0];
-        const r = rate + 1;
-
-        let res = values[0];
-
-        for (let i = 1; i < values.length; i++) {
-            res += values[i] / (r ** ((dates[i] - D_0) / 365));
-        }
-
-        return res;
+        return values.reduce((total, value, index) => {
+            return total + value / ((1 + rate) ** ((dates[index] - dates[0]) / 365));
+        }, 0);
     }
 }

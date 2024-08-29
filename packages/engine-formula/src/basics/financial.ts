@@ -467,30 +467,28 @@ export function getResultByGuessIterF(guess: number, iterF: IIterFFunctionType):
 
 function guessIsNaNorInfinity(guess: number, iterF: IIterFFunctionType): number | ErrorValueObject {
     const g_Eps = 1e-7;
-    const nIM = 500;
+    const nIM = 60;
 
     const max = Number.MAX_VALUE;
-    const min = -Number.MAX_VALUE;
+    const min = -1;
     const step = 1.6;
 
     let low = guess - 0.01 <= min ? min + g_Eps : guess - 0.01;
     let high = guess + 0.01 >= max ? max - g_Eps : guess + 0.01;
-    let i;
     let xBegin;
     let xEnd;
-    let x;
-    let y;
     let currentIter = 0;
 
     if (guess <= min || guess >= max) {
         return ErrorValueObject.create(ErrorType.NUM);
     }
 
-    for (i = 0; i < nIM; i++) {
+    for (let i = 0; i < nIM; i++) {
         xBegin = low <= min ? min + g_Eps : low;
         xEnd = high >= max ? max - g_Eps : high;
-        x = iterF(xBegin);
-        y = iterF(xEnd);
+
+        const x = iterF(xBegin);
+        const y = iterF(xEnd);
 
         if (x * y <= 0) {
             break;
@@ -500,10 +498,10 @@ function guessIsNaNorInfinity(guess: number, iterF: IIterFFunctionType): number 
         } else {
             return ErrorValueObject.create(ErrorType.NUM);
         }
-    }
 
-    if (i === nIM) {
-        return ErrorValueObject.create(ErrorType.NUM);
+        if (i === nIM) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
     }
 
     xBegin = xBegin as number;

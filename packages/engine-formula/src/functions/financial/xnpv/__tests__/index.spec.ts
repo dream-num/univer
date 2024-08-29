@@ -40,7 +40,7 @@ describe('Test xnpv function', () => {
             const values = ArrayValueObject.create('{10000,2750,4250,3250,2750}');
             const dates = ArrayValueObject.create('{39448,39508,39751,39859,39904}');
             const result = testFunction.calculate(rate, values, dates);
-            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+            expect(result.getValue()).toStrictEqual(21994.510040653262);
         });
 
         it('Value is normal, but values.length !== dates.length', () => {

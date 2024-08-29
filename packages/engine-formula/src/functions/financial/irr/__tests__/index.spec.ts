@@ -57,7 +57,7 @@ describe('Test irr function', () => {
             const values = ArrayValueObject.create('{-700000,120000,150000,180000,210000,260000}');
             const guess = BooleanValueObject.create(true);
             const result = testFunction.calculate(values, guess);
-            expect(result.getValue()).toStrictEqual(0.08663094803656471);
+            expect(result.getValue()).toStrictEqual(0.08663094803650478);
         });
 
         it('Value is normal string', () => {
@@ -103,7 +103,7 @@ describe('Test irr function', () => {
             });
             const result3 = testFunction.calculate(values3, guess3);
             expect(transformToValue(result3.getArrayValue())).toStrictEqual([
-                [0.08663094803651532, ErrorType.VALUE, 0.08663094803656471, 0.08663094803653167, ErrorType.NAME, 0.08663094803653167],
+                [0.08663094803654446, ErrorType.VALUE, 0.08663094803650478, 0.08663094803653167, ErrorType.NAME, 0.08663094803653167],
             ]);
         });
     });

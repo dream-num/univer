@@ -73,9 +73,7 @@ export class Xnpv extends BaseFunction {
         _values = _values as number[];
         _dates = _dates as number[];
 
-        const { positive, negative } = this._checkValues(_values);
-
-        if (rateValue < 0 || !positive || !negative || _values.length !== _dates.length) {
+        if (rateValue < 0 || _values.length !== _dates.length) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
@@ -148,7 +146,7 @@ export class Xnpv extends BaseFunction {
                     return false;
                 }
 
-                if (_valuesObject.isBoolean()) {
+                if (_valuesObject.isNull() || _valuesObject.isBoolean()) {
                     isError = true;
                     errorObejct = ErrorValueObject.create(ErrorType.VALUE);
                     return false;
@@ -172,6 +170,13 @@ export class Xnpv extends BaseFunction {
                 };
             }
 
+            if (_values.length <= 1) {
+                return {
+                    isError: true,
+                    errorObejct: ErrorValueObject.create(ErrorType.NA),
+                };
+            }
+
             return {
                 isError,
                 _values,
@@ -179,7 +184,7 @@ export class Xnpv extends BaseFunction {
         } else {
             const valuesValue = values.getValue();
 
-            if (values.isBoolean() || (values.isString() && !isRealNum(valuesValue))) {
+            if (values.isNull() || values.isBoolean() || (values.isString() && !isRealNum(valuesValue))) {
                 return {
                     isError: true,
                     errorObejct: ErrorValueObject.create(ErrorType.VALUE),
@@ -201,19 +206,21 @@ export class Xnpv extends BaseFunction {
             let errorObejct = ErrorValueObject.create(ErrorType.VALUE);
 
             (dates as ArrayValueObject).iterator((datesObject) => {
-                if (datesObject?.isError()) {
+                const _datesObject = datesObject as BaseValueObject;
+
+                if (_datesObject.isError()) {
                     isError = true;
-                    errorObejct = datesObject as ErrorValueObject;
+                    errorObejct = _datesObject as ErrorValueObject;
                     return false;
                 }
 
-                if (datesObject?.isBoolean()) {
+                if (_datesObject.isNull() || _datesObject.isBoolean()) {
                     isError = true;
                     errorObejct = ErrorValueObject.create(ErrorType.VALUE);
                     return false;
                 }
 
-                const datesValue = +(datesObject as BaseValueObject).getValue();
+                const datesValue = +_datesObject.getValue();
 
                 if (Number.isNaN(datesValue)) {
                     isError = true;
@@ -237,6 +244,13 @@ export class Xnpv extends BaseFunction {
                 };
             }
 
+            if (_dates.length <= 1) {
+                return {
+                    isError: true,
+                    errorObejct: ErrorValueObject.create(ErrorType.NA),
+                };
+            }
+
             return {
                 isError,
                 _dates,
@@ -244,7 +258,7 @@ export class Xnpv extends BaseFunction {
         } else {
             const datesValue = dates.getValue();
 
-            if (dates.isBoolean() || (dates.isString() && !isRealNum(datesValue))) {
+            if (dates.isNull() || dates.isBoolean() || (dates.isString() && !isRealNum(datesValue))) {
                 return {
                     isError: true,
                     errorObejct: ErrorValueObject.create(ErrorType.VALUE),
@@ -263,25 +277,5 @@ export class Xnpv extends BaseFunction {
                 errorObejct: ErrorValueObject.create(ErrorType.NA),
             };
         }
-    }
-
-    private _checkValues(values: number[]): ICheckNumber {
-        let positive = false;
-        let negative = false;
-
-        for (let i = 0; i < values.length; i++) {
-            if (values[i] > 0) {
-                positive = true;
-            }
-
-            if (values[i] < 0) {
-                negative = true;
-            }
-        }
-
-        return {
-            positive,
-            negative,
-        };
     }
 }

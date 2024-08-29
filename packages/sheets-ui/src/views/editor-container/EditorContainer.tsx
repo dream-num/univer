@@ -68,8 +68,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
             sectionBreaks: [
                 {
                     startIndex: 1,
-                }
-            ]
+                },
+            ],
         },
         tableSource: {},
         documentStyle: {

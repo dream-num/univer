@@ -1823,14 +1823,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             documentData.documentStyle = {};
         }
 
-        if (documentData.body.tables == null) {
-            documentData.body.tables = [];
-        }
-
-        if (documentData.tableSource == null) {
-            documentData.tableSource = {};
-        }
-
         // Fix https://github.com/dream-num/univer/issues/1586
         documentData.documentStyle.pageSize = {
             width: Number.POSITIVE_INFINITY,
@@ -1883,7 +1875,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                         ed: contentLength,
                     },
                 ],
-                tables: [],
                 paragraphs: [
                     {
                         startIndex: contentLength,
@@ -1914,7 +1905,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                     cellValueType,
                 },
             },
-            tableSource: {},
             drawings: {},
             drawingsOrder: [],
         };

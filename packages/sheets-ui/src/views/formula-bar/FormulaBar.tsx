@@ -30,7 +30,6 @@ import { DefinedName } from '../defined-name/DefinedName';
 
 import { useActiveWorkbook } from '../../components/hook';
 import styles from './index.module.less';
-import { table } from 'console';
 
 enum ArrowDirection {
     Down,

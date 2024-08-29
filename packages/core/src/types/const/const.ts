@@ -163,3 +163,5 @@ export const DEFAULT_SLIDE = {
         height: 300,
     },
 };
+
+export const UNIVER_INTERNAL = '__univer_internal__';

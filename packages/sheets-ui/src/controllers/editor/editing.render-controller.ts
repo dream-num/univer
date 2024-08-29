@@ -37,6 +37,7 @@ import {
     numfmt,
     toDisposable,
     Tools,
+    UNIVER_INTERNAL,
     UniverInstanceType,
     VerticalAlign,
     WrapStrategy,
@@ -1103,6 +1104,12 @@ export function getCellDataByInput(
             cellData.s = style;
         }
     }
+
+    cellData.custom = {
+        [UNIVER_INTERNAL]: {
+            origin: { ...cellData },
+        },
+    };
 
     return cellData;
 }

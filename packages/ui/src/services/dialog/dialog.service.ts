@@ -24,5 +24,10 @@ export const IDialogService = createIdentifier<IDialogService>('univer.ui.dialog
 export interface IDialogService {
     open(params: IDialogPartMethodOptions): IDisposable;
     close(id: string): void;
+     /**
+      * @description close all dialogs except the specified ones
+      * @param {string[]} [expectIds] The specified dialog ids
+      */
+    closeAll(ids?: string[]): void;
     getDialogs$(): Observable<IDialogPartMethodOptions[]>;
 }

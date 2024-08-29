@@ -37,6 +37,10 @@ describe('Test yield function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, rate, pr, redemption, frequency, basis);
             expect(result.getValue()).toStrictEqual(0.08048420029608885);
+
+            const maturity2 = StringValueObject.create('2009-3-1');
+            const result2 = testFunction.calculate(settlement, maturity2, rate, pr, redemption, frequency, basis);
+            expect(result2.getValue()).toStrictEqual(0.12952250829599993);
         });
 
         it('Settlement >= maturity', () => {

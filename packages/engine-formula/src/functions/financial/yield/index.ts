@@ -87,10 +87,6 @@ export class Yield extends BaseFunction {
 
         const result = this._getResult(settlementSerialNumber, maturitySerialNumber, rateValue, prValue, redemptionValue, frequencyValue, basisValue);
 
-        if (typeof result !== 'number') {
-            return result;
-        }
-
         return NumberValueObject.create(result);
     }
 
@@ -102,7 +98,7 @@ export class Yield extends BaseFunction {
         redemption: number,
         frequency: number,
         basis: number
-    ): number | ErrorValueObject {
+    ): number {
         const N = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequency);
 
         if (N > 1) {

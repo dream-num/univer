@@ -215,6 +215,11 @@ describe('Test xirr function', () => {
             });
             const result7 = testFunction.calculate(values4, dates5, guess);
             expect(result7.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const values5 = ArrayValueObject.create('{-10000}');
+            const dates6 = ArrayValueObject.create('{39448}');
+            const result8 = testFunction.calculate(values5, dates6, guess);
+            expect(result8.getValue()).toStrictEqual(ErrorType.NA);
         });
     });
 });

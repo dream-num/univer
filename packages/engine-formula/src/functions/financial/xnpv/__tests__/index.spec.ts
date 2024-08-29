@@ -228,6 +228,11 @@ describe('Test xnpv function', () => {
             });
             const result8 = testFunction.calculate(rate2, values, dates5);
             expect(result8.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const values5 = ArrayValueObject.create('{-10000}');
+            const dates6 = ArrayValueObject.create('{39448}');
+            const result9 = testFunction.calculate(rate2, values5, dates6);
+            expect(result9.getValue()).toStrictEqual(ErrorType.NA);
         });
     });
 });

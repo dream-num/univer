@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
@@ -80,7 +80,7 @@ export class SheetsSelectionsService extends RxDisposable {
         return this._getCurrentSelections();
     }
 
-    getCurrentLastSelection(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
+    getCurrentLastSelection(): DeepReadonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
         const selectionData = this._getCurrentSelections();
         return selectionData?.[selectionData.length - 1] as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
     }

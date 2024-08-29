@@ -43,8 +43,8 @@ export interface IFormatPainterHook {
     id: string;
     isDefaultHook?: boolean;
     priority?: number;
-    onStatusChange(status: FormatPainterStatus): void;
-    onApply(
+    onStatusChange?(status: FormatPainterStatus): void;
+    onApply?(
         unitId: string,
         subUnitId: string,
         range: IRange,
@@ -52,11 +52,20 @@ export interface IFormatPainterHook {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
+    onBeforeApply?(ctx: IFormatPainterBeforeApplyHookParams): boolean;
 }
 export enum FormatPainterStatus {
     OFF,
     ONCE,
     INFINITE,
+}
+export interface IFormatPainterBeforeApplyHookParams {
+    unitId: string;
+    subUnitId: string;
+    range: IRange;
+    redoMutationsInfo: IMutationInfo[];
+    undoMutationsInfo: IMutationInfo[];
+    format: ISelectionFormatInfo;
 }
 
 export const IFormatPainterService = createIdentifier<IFormatPainterService>('univer.format-painter-service');
@@ -84,7 +93,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         this._selectionFormat = { styles: new ObjectMatrix<IStyleData>(), merges: [] };
     }
 
-    addHook(hook: IFormatPainterHook) {
+    addHook(hook: IFormatPainterHook): void {
         if (hook.isDefaultHook && (hook.priority ?? 0) > (this._defaultHook?.priority ?? -1)) {
             this._defaultHook = hook;
         } else {
@@ -93,16 +102,18 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         }
     }
 
-    getHooks() {
+    getHooks(): IFormatPainterHook[] {
         return this._defaultHook ? [this._defaultHook, ...this._extendHooks] : this._extendHooks;
     }
 
-    setStatus(status: FormatPainterStatus) {
+    setStatus(status: FormatPainterStatus): void {
         this._updateRangeMark(status);
         this._status$.next(status);
         const hooks = this.getHooks();
         hooks.forEach((hook) => {
-            hook.onStatusChange(status);
+            if (hook.onStatusChange !== undefined) {
+                hook.onStatusChange(status);
+            }
         });
     }
 
@@ -110,30 +121,50 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         return this._status$.getValue();
     }
 
-    setSelectionFormat(format: ISelectionFormatInfo) {
+    setSelectionFormat(format: ISelectionFormatInfo): void {
         this._selectionFormat = format;
     }
 
-    getSelectionFormat() {
+    getSelectionFormat(): ISelectionFormatInfo {
         return this._selectionFormat;
     }
 
-    applyFormatPainter(unitId: string, subUnitId: string, range: IRange) {
+    applyFormatPainter(unitId: string, subUnitId: string, range: IRange): boolean {
         const hooks = this.getHooks();
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
         hooks.forEach((h) => {
-            const applyReturn = h.onApply(
-                unitId,
-                subUnitId,
-                range,
-                this._selectionFormat
-            );
-            if (applyReturn) {
-                redoMutationsInfo.push(...applyReturn.redos);
-                undoMutationsInfo.push(...applyReturn.undos);
+            if (h.onApply !== undefined) {
+                const applyReturn = h.onApply(
+                    unitId,
+                    subUnitId,
+                    range,
+                    this._selectionFormat
+                );
+                if (applyReturn) {
+                    redoMutationsInfo.push(...applyReturn.redos);
+                    undoMutationsInfo.push(...applyReturn.undos);
+                }
             }
         });
+
+        for (const beforeHook of hooks) {
+            if (beforeHook.onBeforeApply !== undefined) {
+                // check before apply hook， it can cancel the apply action
+                const result = beforeHook.onBeforeApply({
+                    unitId,
+                    subUnitId,
+                    range,
+                    redoMutationsInfo,
+                    format: this._selectionFormat,
+                    undoMutationsInfo,
+                });
+
+                if (!result) {
+                    return false;
+                }
+            }
+        }
 
         this._logService.log('[FormatPainterService]', 'apply mutations', {
             undoMutationsInfo,
@@ -153,7 +184,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         return result;
     }
 
-    private _updateRangeMark(status: FormatPainterStatus) {
+    private _updateRangeMark(status: FormatPainterStatus): void {
         this._markSelectionService.removeAllShapes();
 
         if (status !== FormatPainterStatus.OFF) {

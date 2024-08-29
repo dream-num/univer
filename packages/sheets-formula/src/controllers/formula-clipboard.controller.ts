@@ -84,32 +84,38 @@ export class FormulaClipboardController extends Disposable {
         payload: ICopyPastePayload,
         isSpecialPaste: boolean
     ) {
-        const pasteType = payload.pasteType;
-
         // Intercept scenarios where formulas do not need to be processed, and only process default paste and paste formulas only
-        if (pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH) {
+        if (
+            [
+                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+            ].includes(payload.pasteType)
+        ) {
             return {
                 undos: [],
                 redos: [],
             };
         }
 
-        const copyInfo = {
-            copyType: payload.copyType || COPY_TYPE.COPY,
-            copyRange: pasteFrom?.range,
-            pasteType: payload.pasteType,
-        };
-        const pastedRange = pasteTo.range;
-        const matrix = data;
         const workbook = this._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = pasteTo.unitId || workbook.getUnitId();
         const subUnitId = pasteTo.subUnitId || workbook.getActiveSheet()?.getSheetId();
+
         if (!unitId || !subUnitId) {
             return {
                 undos: [],
                 redos: [],
             };
         }
+
+        const pastedRange = pasteTo.range;
+        const matrix = data;
+        const copyInfo = {
+            copyType: payload.copyType || COPY_TYPE.COPY,
+            copyRange: pasteFrom?.range,
+            pasteType: payload.pasteType,
+        };
 
         return this._injector.invoke((accessor) => getSetCellFormulaMutations(
             unitId,
@@ -269,6 +275,58 @@ export function getSetCellFormulaMutations(
         undos: undoMutationsInfo,
         redos: redoMutationsInfo,
     };
+}
+
+function getValueMatrix(
+    unitId: string,
+    subUnitId: string,
+    range: IDiscreteRange,
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    accessor: IAccessor,
+    copyInfo: {
+        copyType: COPY_TYPE;
+        copyRange?: IDiscreteRange;
+        pasteType: string;
+    },
+    lexerTreeBuilder: LexerTreeBuilder,
+    formulaDataModel: FormulaDataModel,
+    isSpecialPaste = false,
+    pasteFrom: ISheetDiscreteRangeLocation | null
+) {
+    if (!pasteFrom) {
+        return getValueMatrixOfPasteFromIsNull(matrix);
+    }
+}
+
+function getValueMatrixOfPasteFromIsNull(matrix: ObjectMatrix<ICellDataWithSpanInfo>): ObjectMatrix<ICellData> {
+    const valueMatrix = new ObjectMatrix<ICellData>();
+
+    matrix.forValue((row, col, value) => {
+        if (!isFormulaString(value.v)) {
+            return false;
+        }
+
+        const valueObject: ICellDataWithSpanInfo = {};
+        valueObject.v = null;
+        valueObject.f = `${value.v}`;
+
+        valueMatrix.setValue(row, col, valueObject);
+    });
+
+    return valueMatrix;
+}
+
+function getPasteValueValueMatrix(
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    formulaDataModel: FormulaDataModel,
+    pasteFrom: ISheetDiscreteRangeLocation | null
+) {
+    const valueMatrix = new ObjectMatrix<ICellData>();
+    const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData();
+
+    // matrix.forValue((row, col, value) => {
+
+    // }
 }
 
 function getCellRichText(cell: ICellData) {

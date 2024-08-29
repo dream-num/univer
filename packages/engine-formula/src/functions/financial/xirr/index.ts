@@ -89,10 +89,6 @@ export class Xirr extends BaseFunction {
             return result as ErrorValueObject;
         }
 
-        if (result < 0) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
         return NumberValueObject.create(result);
     }
 

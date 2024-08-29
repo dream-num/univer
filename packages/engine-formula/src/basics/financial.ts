@@ -458,7 +458,7 @@ export function getResultByGuessIterF(guess: number, iterF: IIterFFunctionType):
         x = xN;
     }
 
-    if (Number.isNaN(x) || Infinity === Math.abs(x)) {
+    if (Number.isNaN(x) || Infinity === Math.abs(x) || nMC === nIM) {
         return guessIsNaNorInfinity(guess, iterF);
     }
 
@@ -499,7 +499,7 @@ function guessIsNaNorInfinity(guess: number, iterF: IIterFFunctionType): number 
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        if (i === nIM) {
+        if (i === nIM - 1) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
     }

@@ -172,7 +172,7 @@ export class HtmlToUDMService {
         }
     }
 
-    private _processBeforeTable(node: HTMLElement, doc: Partial<IDocumentData>) {
+    private _processBeforeTable(node: HTMLElement, doc: Partial<IDocumentData>): void {
         const tagName = node.tagName.toUpperCase();
         const body = doc.body!;
 
@@ -180,6 +180,11 @@ export class HtmlToUDMService {
             case 'TABLE': {
                 if (body.dataStream[body.dataStream.length - 1] !== '\r') {
                     body.dataStream += '\r';
+
+                    if (body.paragraphs == null) {
+                        body.paragraphs = [];
+                    }
+
                     body.paragraphs?.push({
                         startIndex: body.dataStream.length - 1,
                     });
@@ -222,7 +227,7 @@ export class HtmlToUDMService {
         }
     }
 
-    private _processAfterTable(node: HTMLElement, doc: Partial<IDocumentData>) {
+    private _processAfterTable(node: HTMLElement, doc: Partial<IDocumentData>): void {
         const tagName = node.tagName.toUpperCase();
         const body = doc.body!;
 

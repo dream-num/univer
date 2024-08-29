@@ -76,10 +76,10 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "0.1.39-alpha.9"
+        "@univerjs/protocol": "0.1.39-alpha.15"
     },
     "devDependencies": {
-        "@types/react": "^18.3.3",
+        "@types/react": "^18.3.4",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/facade": "workspace:*",
@@ -88,10 +88,10 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "less": "^4.2.0",
-        "monaco-editor": "0.50.0",
+        "monaco-editor": "0.51.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.4",
-        "vite": "^5.4.0",
+        "vite": "^5.4.2",
         "vitest": "^2.0.5"
     },
     "univerSpace": {

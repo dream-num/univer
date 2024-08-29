@@ -132,9 +132,14 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     async legacyPaste(html?: string, text?: string): Promise<boolean> {
         const partDocData = this._genDocDataFromHtmlAndText(html, text);
 
-        // Paste in sheet editing mode without paste style
+        // Paste in sheet editing mode without paste style, so we give textRuns empty array;
         if (this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-            delete partDocData.body?.textRuns;
+            if (text) {
+                const textDocData = this._generateBody(text);
+                return this._paste({ body: textDocData });
+            } else {
+                partDocData.body!.textRuns = [];
+            }
         }
 
         return this._paste(partDocData);

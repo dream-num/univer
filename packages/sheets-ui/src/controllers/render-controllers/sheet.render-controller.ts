@@ -309,8 +309,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 this._sheetSkeletonManagerService.reCalculate();
             }
 
-            // @Dushusir Prevent mutations that contain onlyLocal in the formula from rendering. This will be removed after the rpc communication issue is fixed.
-            if (command.type === CommandType.MUTATION && options?.onlyLocal !== true) {
+            // All mutations must be executed. Using reCalculate alone will not trigger a refresh.
+            if (command.type === CommandType.MUTATION) {
                 this._markUnitDirty(workbookId, command);
             }
         }));

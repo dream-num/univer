@@ -151,7 +151,7 @@ export function getSetCellFormulaMutations(
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
 
-    const valueMatrix = getValueMatrix(unitId, subUnitId, range, matrix, copyInfo, lexerTreeBuilder, formulaDataModel, isSpecialPaste, pasteFrom);
+    const valueMatrix = getValueMatrix(unitId, subUnitId, range, matrix, copyInfo, lexerTreeBuilder, formulaDataModel, pasteFrom);
 
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {
@@ -193,21 +193,8 @@ function getValueMatrix(
     },
     lexerTreeBuilder: LexerTreeBuilder,
     formulaDataModel: FormulaDataModel,
-    isSpecialPaste = false,
     pasteFrom: ISheetDiscreteRangeLocation | null
 ): ObjectMatrix<ICellData> {
-    let copyRowLength = 0;
-    let copyColumnLength = 0;
-
-    if (copyInfo && copyInfo.copyRange) {
-        const { copyType, copyRange } = copyInfo;
-
-        if (copyType === COPY_TYPE.COPY && copyRange) {
-            copyRowLength = copyRange.rows.length;
-            copyColumnLength = copyRange.cols.length;
-        }
-    }
-
     if (!pasteFrom) {
         return getValueMatrixOfPasteFromIsNull(unitId, subUnitId, range, matrix, formulaDataModel);
     }
@@ -217,97 +204,10 @@ function getValueMatrix(
     }
 
     if (copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA) {
-        return getPasteFormulaValueMatrix(range, matrix);
+        return getSpecialPasteFormulaValueMatrix(unitId, subUnitId, range, matrix, lexerTreeBuilder, formulaDataModel, pasteFrom);
     }
 
-    const valueMatrix = new ObjectMatrix<ICellData>();
-    const formulaIdMap = new Map<string, string>();
-
-    // eslint-disable-next-line complexity
-    matrix.forValue((row, col, value) => {
-        const originalFormula = value.f || '';
-        const originalFormulaId = value.si || '';
-
-        let valueObject: ICellDataWithSpanInfo = {};
-        // Paste the formula only, you also need to process some regular values, but style information is not needed
-        if (isSpecialPaste) {
-            valueObject = Tools.deepClone(value);
-            valueObject.s = null;
-        }
-
-        if (!copyRowLength || !copyColumnLength) {
-            return;
-        }
-
-        // Directly reuse when there is a formula id
-        if (isFormulaId(originalFormulaId)) {
-            const { unitId: pasteFromUnitId = '', subUnitId: pasteFromSubUnitId = '', range: pasteFromRange } = pasteFrom || {};
-
-            if (((pasteFromUnitId && unitId !== pasteFromUnitId) || (pasteFromSubUnitId && subUnitId !== pasteFromSubUnitId)) && pasteFromRange?.rows && pasteFromRange?.cols) {
-                const formulaString = formulaDataModel.getFormulaStringByCell(pasteFromRange.rows[row], pasteFromRange.cols[col], pasteFromSubUnitId, pasteFromUnitId);
-
-                const rowIndex = row % copyRowLength;
-                const colIndex = col % copyColumnLength;
-
-                const copyX = copyInfo?.copyRange ? copyInfo?.copyRange?.cols[colIndex] : colIndex;
-                const copyY = copyInfo?.copyRange ? copyInfo?.copyRange?.rows[rowIndex] : rowIndex;
-                const offsetX = range.cols[col] - copyX;
-                const offsetY = range.rows[row] - copyY;
-                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(formulaString || '', offsetX, offsetY);
-
-                valueObject.si = null;
-                valueObject.f = shiftedFormula;
-                valueObject.v = null;
-                valueObject.p = null;
-            } else {
-                valueObject.si = originalFormulaId;
-                valueObject.f = null;
-                valueObject.v = null;
-                valueObject.p = null;
-            }
-        } else if (isFormulaString(originalFormula)) {
-            const rowIndex = row % copyRowLength;
-            const colIndex = col % copyColumnLength;
-
-            const index = `${rowIndex}_${colIndex}`;
-            let formulaId = formulaIdMap.get(index);
-
-            if (!formulaId) {
-                formulaId = Tools.generateRandomId(6);
-                formulaIdMap.set(index, formulaId);
-
-                const copyX = copyInfo?.copyRange ? copyInfo?.copyRange?.cols[colIndex] : colIndex;
-                const copyY = copyInfo?.copyRange ? copyInfo?.copyRange?.rows[rowIndex] : rowIndex;
-                const offsetX = range.cols[col] - copyX;
-                const offsetY = range.rows[row] - copyY;
-                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(originalFormula, offsetX, offsetY);
-
-                valueObject.si = formulaId;
-                valueObject.f = shiftedFormula;
-                valueObject.v = null;
-                valueObject.p = null;
-            } else {
-                // At the beginning of the second formula, set formulaId only
-                valueObject.si = formulaId;
-                valueObject.f = null;
-                valueObject.v = null;
-                valueObject.p = null;
-            }
-        }
-
-        // If there is rich text, remove the style
-        if (copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA && value.p) {
-            const richText = getCellRichText(value);
-            if (richText) {
-                valueObject.p = null;
-                valueObject.v = richText;
-            }
-        }
-
-        valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);
-    });
-
-    return valueMatrix;
+    return getDefaultPasteValueMatrix(unitId, subUnitId, range, matrix, lexerTreeBuilder, formulaDataModel, pasteFrom);
 }
 
 function getValueMatrixOfPasteFromIsNull(
@@ -329,14 +229,16 @@ function getValueMatrixOfPasteFromIsNull(
             // If the copy value is a formula
             valueObject.v = null;
             valueObject.f = `${value.v}`;
+            valueObject.si = null;
+            valueObject.p = null;
 
             valueMatrix.setValue(toRow, toCol, valueObject);
         } else if (formulaData?.[toRow]?.[toCol]) {
             // If the paste location is a formula
             valueObject.v = value.v;
             valueObject.f = null;
-            valueObject.f = null;
             valueObject.si = null;
+            valueObject.p = null;
 
             valueMatrix.setValue(toRow, toCol, valueObject);
         }
@@ -354,12 +256,12 @@ function getSpecialPasteValueValueMatrix(
     pasteFrom: ISheetDiscreteRangeLocation
 ): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
-    const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData()?.[unitId]?.[subUnitId];
+    const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData()?.[pasteFrom.unitId]?.[pasteFrom.subUnitId];
     const formulaData = formulaDataModel.getFormulaData()?.[unitId]?.[subUnitId];
 
     matrix.forValue((row, col, value) => {
-        const fromRow = pasteFrom.range.rows[row];
-        const fromCol = pasteFrom.range.cols[col];
+        const fromRow = pasteFrom.range.rows[row % pasteFrom.range.rows.length];
+        const fromCol = pasteFrom.range.cols[col % pasteFrom.range.cols.length];
         const toRow = range.rows[row];
         const toCol = range.cols[col];
         const valueObject: ICellDataWithSpanInfo = {};
@@ -369,6 +271,7 @@ function getSpecialPasteValueValueMatrix(
             valueObject.v = value.v;
             valueObject.f = null;
             valueObject.si = null;
+            valueObject.p = null;
 
             valueMatrix.setValue(toRow, toCol, valueObject);
         } else if (arrayFormulaCellData?.[fromRow]?.[fromCol]) {
@@ -377,6 +280,7 @@ function getSpecialPasteValueValueMatrix(
             valueObject.v = cell.v;
             valueObject.f = null;
             valueObject.si = null;
+            valueObject.p = null;
 
             valueMatrix.setValue(toRow, toCol, valueObject);
         } else if (formulaData?.[toRow]?.[toCol]) {
@@ -384,6 +288,14 @@ function getSpecialPasteValueValueMatrix(
             valueObject.v = value.v;
             valueObject.f = null;
             valueObject.si = null;
+            valueObject.p = null;
+
+            if (value.p) {
+                const richText = getCellRichText(value);
+                if (richText) {
+                    valueObject.v = richText;
+                }
+            }
 
             valueMatrix.setValue(toRow, toCol, valueObject);
         }
@@ -392,22 +304,168 @@ function getSpecialPasteValueValueMatrix(
     return valueMatrix;
 }
 
-function getPasteFormulaValueMatrix(
+function getSpecialPasteFormulaValueMatrix(
+    unitId: string,
+    subUnitId: string,
     range: IDiscreteRange,
-    matrix: ObjectMatrix<ICellDataWithSpanInfo>
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    lexerTreeBuilder: LexerTreeBuilder,
+    formulaDataModel: FormulaDataModel,
+    pasteFrom: ISheetDiscreteRangeLocation
 ): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
+    const formulaIdMap = new Map<string, string>();
 
     matrix.forValue((row, col, value) => {
-        const formulaString = value.f || '';
-        const formulaId = value.si || '';
+        const toRow = range.rows[row];
+        const toCol = range.cols[col];
+        const valueObject: ICellDataWithSpanInfo = {};
 
-        if (isFormulaString(value.f)) {
-            const valueObject: ICellDataWithSpanInfo = {};
+        if (isFormulaId(value.si)) {
+            // If the copy value is a formula
+            if (pasteFrom.unitId !== unitId || pasteFrom.subUnitId !== subUnitId) {
+                const formulaString = formulaDataModel.getFormulaStringByCell(
+                    pasteFrom.range.rows[row % pasteFrom.range.rows.length],
+                    pasteFrom.range.cols[col % pasteFrom.range.cols.length],
+                    pasteFrom.subUnitId,
+                    pasteFrom.unitId
+                );
+                const offsetX = range.cols[col] - pasteFrom.range.cols[col % pasteFrom.range.cols.length];
+                const offsetY = range.rows[row] - pasteFrom.range.rows[row % pasteFrom.range.rows.length];
+                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(formulaString || '', offsetX, offsetY);
+
+                valueObject.si = null;
+                valueObject.f = shiftedFormula;
+            } else {
+                valueObject.si = value.si;
+                valueObject.f = null;
+            }
+
             valueObject.v = null;
-            valueObject.f = value.f;
+            valueObject.p = null;
 
-            valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);
+            valueMatrix.setValue(toRow, toCol, valueObject);
+        } else if (isFormulaString(value.f)) {
+            // If the copy value is a formula
+            const index = `${row % pasteFrom.range.rows.length}_${col % pasteFrom.range.cols.length}`;
+            let formulaId = formulaIdMap.get(index);
+
+            if (!formulaId) {
+                formulaId = Tools.generateRandomId(6);
+                formulaIdMap.set(index, formulaId);
+
+                const offsetX = range.cols[col] - pasteFrom.range.cols[col % pasteFrom.range.cols.length];
+                const offsetY = range.rows[row] - pasteFrom.range.rows[row % pasteFrom.range.rows.length];
+                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(value.f || '', offsetX, offsetY);
+
+                valueObject.si = formulaId;
+                valueObject.f = shiftedFormula;
+            } else {
+                // At the beginning of the second formula, set formulaId only
+                valueObject.si = formulaId;
+                valueObject.f = null;
+            }
+
+            valueObject.v = null;
+            valueObject.p = null;
+
+            valueMatrix.setValue(toRow, toCol, valueObject);
+        } else {
+            // If the paste location is a formula
+            valueObject.v = value.v;
+            valueObject.f = null;
+            valueObject.si = null;
+            valueObject.p = null;
+
+            if (value.p) {
+                const richText = getCellRichText(value);
+                if (richText) {
+                    valueObject.v = richText;
+                }
+            }
+
+            valueMatrix.setValue(toRow, toCol, valueObject);
+        }
+    });
+
+    return valueMatrix;
+}
+
+function getDefaultPasteValueMatrix(
+    unitId: string,
+    subUnitId: string,
+    range: IDiscreteRange,
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    lexerTreeBuilder: LexerTreeBuilder,
+    formulaDataModel: FormulaDataModel,
+    pasteFrom: ISheetDiscreteRangeLocation
+): ObjectMatrix<ICellData> {
+    const valueMatrix = new ObjectMatrix<ICellData>();
+    const formulaIdMap = new Map<string, string>();
+    const formulaData = formulaDataModel.getFormulaData()?.[unitId]?.[subUnitId];
+
+    matrix.forValue((row, col, value) => {
+        const toRow = range.rows[row];
+        const toCol = range.cols[col];
+        const valueObject: ICellDataWithSpanInfo = {};
+
+        if (isFormulaId(value.si)) {
+            // If the copy value is a formula
+            if (pasteFrom.unitId !== unitId || pasteFrom.subUnitId !== subUnitId) {
+                const formulaString = formulaDataModel.getFormulaStringByCell(
+                    pasteFrom.range.rows[row % pasteFrom.range.rows.length],
+                    pasteFrom.range.cols[col % pasteFrom.range.cols.length],
+                    pasteFrom.subUnitId,
+                    pasteFrom.unitId
+                );
+                const offsetX = range.cols[col] - pasteFrom.range.cols[col % pasteFrom.range.cols.length];
+                const offsetY = range.rows[row] - pasteFrom.range.rows[row % pasteFrom.range.rows.length];
+                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(formulaString || '', offsetX, offsetY);
+
+                valueObject.si = null;
+                valueObject.f = shiftedFormula;
+            } else {
+                valueObject.si = value.si;
+                valueObject.f = null;
+            }
+
+            valueObject.v = null;
+            valueObject.p = null;
+
+            valueMatrix.setValue(toRow, toCol, valueObject);
+        } else if (isFormulaString(value.f)) {
+            // If the copy value is a formula
+            const index = `${row % pasteFrom.range.rows.length}_${col % pasteFrom.range.cols.length}`;
+            let formulaId = formulaIdMap.get(index);
+
+            if (!formulaId) {
+                formulaId = Tools.generateRandomId(6);
+                formulaIdMap.set(index, formulaId);
+
+                const offsetX = range.cols[col] - pasteFrom.range.cols[col % pasteFrom.range.cols.length];
+                const offsetY = range.rows[row] - pasteFrom.range.rows[row % pasteFrom.range.rows.length];
+                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(value.f || '', offsetX, offsetY);
+
+                valueObject.si = formulaId;
+                valueObject.f = shiftedFormula;
+            } else {
+                // At the beginning of the second formula, set formulaId only
+                valueObject.si = formulaId;
+                valueObject.f = null;
+            }
+
+            valueObject.v = null;
+            valueObject.p = null;
+
+            valueMatrix.setValue(toRow, toCol, valueObject);
+        } else if (formulaData?.[toRow]?.[toCol]) {
+            // If the paste location is a formula
+            valueObject.v = value.v;
+            valueObject.f = null;
+            valueObject.si = null;
+            valueObject.p = value.p;
+
+            valueMatrix.setValue(toRow, toCol, valueObject);
         }
     });
 

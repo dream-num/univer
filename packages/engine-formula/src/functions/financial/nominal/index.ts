@@ -25,7 +25,7 @@ export class Nominal extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(effectRate: BaseValueObject, npery: BaseValueObject) {
+    override calculate(effectRate: BaseValueObject, npery: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(effectRate, npery);
 
         if (isError) {

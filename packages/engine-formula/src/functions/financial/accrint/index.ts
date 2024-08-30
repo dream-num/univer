@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
+import { excelSerialToDate, getDateSerialNumberByObject, getTwoDateDaysByBasis, lastDayOfMonth } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { calculateCoupdays, calculateCouppcd, getDateSerialNumberByMonths } from '../../../basics/financial';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -35,7 +36,7 @@ export class Accrint extends BaseFunction {
         frequency: BaseValueObject,
         basis?: BaseValueObject,
         calcMethod?: BaseValueObject
-    ) {
+    ): BaseValueObject {
         const _basis = basis ?? NumberValueObject.create(0);
         const _calcMethod = calcMethod ?? BooleanValueObject.create(true);
 
@@ -99,31 +100,72 @@ export class Accrint extends BaseFunction {
         basisValue: number,
         calcMethodValue: number
     ): NumberValueObject {
-        let TwoDateDays;
-
-        if (Math.floor(settlementSerialNumber) >= Math.floor(firstInterestSerialNumber) && !calcMethodValue) {
-            TwoDateDays = getTwoDateDaysByBasis(firstInterestSerialNumber, settlementSerialNumber, basisValue);
-        } else {
-            TwoDateDays = getTwoDateDaysByBasis(issueSerialNumber, settlementSerialNumber, basisValue);
+        let couppcd = calculateCouppcd(issueSerialNumber, firstInterestSerialNumber, frequencyValue);
+        if (couppcd <= 0) {
+            return NumberValueObject.create(0);
         }
+        couppcd = calculateCouppcd(settlementSerialNumber, firstInterestSerialNumber, frequencyValue);
 
-        const { days, yearDays } = TwoDateDays;
+        const numMonths = 12 / frequencyValue;
+        const firstInterestDate = excelSerialToDate(firstInterestSerialNumber);
+        const firstInterestDateYear = firstInterestDate.getUTCFullYear();
+        const firstInterestDateMonth = firstInterestDate.getUTCMonth();
+        const firstInterestDateDay = firstInterestDate.getUTCDate();
+        const lastDayOfMonthF = lastDayOfMonth(firstInterestDateYear, firstInterestDateMonth, firstInterestDateDay);
 
-        const NC = Math.ceil((days / yearDays) * frequencyValue);
-        const NLi = yearDays / frequencyValue;
-
-        let accruedDaysSum = 0;
-        for (let i = 1; i <= NC; i++) {
-            if (i * NLi > days) {
-                const Ai = days - (i - 1) * NLi;
-                accruedDaysSum += Ai / NLi;
-            } else {
-                accruedDaysSum += 1;
+        let coupDateSerialNumber = getDateSerialNumberByMonths(firstInterestSerialNumber, -numMonths, lastDayOfMonthF);
+        if (settlementSerialNumber > firstInterestSerialNumber && calcMethodValue) {
+            coupDateSerialNumber = firstInterestSerialNumber;
+            while (coupDateSerialNumber < settlementSerialNumber) {
+                coupDateSerialNumber = getDateSerialNumberByMonths(coupDateSerialNumber, numMonths, lastDayOfMonthF);
             }
         }
 
-        // TODO: The results are not very accurate now.
-        const result = parValue * (rateValue / frequencyValue) * accruedDaysSum;
+        let firstDateSerialNumber = issueSerialNumber > coupDateSerialNumber ? issueSerialNumber : coupDateSerialNumber;
+
+        let { days } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, basisValue);
+        if (couppcd >= issueSerialNumber) {
+            const { days: DFS } = getTwoDateDaysByBasis(firstDateSerialNumber, settlementSerialNumber, !basisValue ? 0 : 4);
+            days = DFS;
+        }
+        if (settlementSerialNumber < firstDateSerialNumber) {
+            days = -days;
+        }
+
+        let coupdays = calculateCoupdays(coupDateSerialNumber, firstInterestSerialNumber, frequencyValue, basisValue);
+        let accruedDaysSum = days / coupdays;
+        let startDateSerialNumber = coupDateSerialNumber;
+        let endDateSerialNumber = issueSerialNumber;
+
+        while (startDateSerialNumber > issueSerialNumber) {
+            endDateSerialNumber = startDateSerialNumber;
+            startDateSerialNumber = getDateSerialNumberByMonths(startDateSerialNumber, -numMonths, lastDayOfMonthF);
+            firstDateSerialNumber = issueSerialNumber > startDateSerialNumber ? issueSerialNumber : startDateSerialNumber;
+            const { days: DFE } = getTwoDateDaysByBasis(firstDateSerialNumber, endDateSerialNumber, basisValue);
+
+            if (basisValue === 0) {
+                if (endDateSerialNumber >= firstDateSerialNumber || issueSerialNumber <= startDateSerialNumber) {
+                    days = DFE;
+                } else {
+                    days = -DFE;
+                }
+
+                coupdays = calculateCoupdays(startDateSerialNumber, endDateSerialNumber, frequencyValue, basisValue);
+            } else {
+                days = endDateSerialNumber < firstDateSerialNumber ? -DFE : DFE;
+
+                if (basisValue === 3) {
+                    coupdays = 365 / frequencyValue;
+                } else {
+                    const { days: DSE } = getTwoDateDaysByBasis(startDateSerialNumber, endDateSerialNumber, basisValue);
+                    coupdays = endDateSerialNumber < startDateSerialNumber ? -DSE : DSE;
+                }
+            }
+
+            accruedDaysSum += (issueSerialNumber <= startDateSerialNumber) ? (calcMethodValue ? 1 : 0) : days / coupdays;
+        }
+
+        const result = parValue * rateValue / frequencyValue * accruedDaysSum;
 
         return NumberValueObject.create(result);
     }

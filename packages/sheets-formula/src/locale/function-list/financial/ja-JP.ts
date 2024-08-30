@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            coupon: { name: '年利率', detail: '証券の年利を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'キャッシュフロー', detail: '内部収益率を計算する数値を含む配列またはセルへの参照。\n1.内部利益率を計算するには、正の値と負の値が範囲に少なくとも 1 つずつ含まれている必要があります。\n2.IRR 関数では、値の順序がキャッシュ フローの順序であると見なされます。 支払額と収益額を入力する際は、その順序に注意してください。\n3.範囲に文字列、論理値、または空白セルが含まれる場合、これらは無視されます。' },
+            guess: { name: '推測値', detail: 'IRR 関数の計算結果に近いと思われる数値を指定します。' },
         },
     },
     ISPMT: {
@@ -430,8 +434,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            coupon: { name: '年利率', detail: '証券の年利を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     MIRR: {
@@ -444,8 +452,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'キャッシュフロー', detail: '数値を含む配列またはセル参照を指定します。 これらの数値は、定期的に発生する一連の支払い (負の値) とその収益 (正の値) を表しています。\n1.修正内部収益率を計算するには、正の値と負の値が範囲に少なくとも 1 つずつ含まれている必要があります。 そうでない場合は、エラー値 #DIV/0! が返されます。\n2.引数として指定した配列またはセル範囲に文字列、論理値、空白セルが含まれている場合、これらは無視されます。ただし、数値として 0 (ゼロ) を含むセルは計算の対象となります。' },
+            financeRate: { name: '融資利率', detail: '支払額 (負のキャッシュ フロー) に対する利率を指定します。' },
+            reinvestRate: { name: '再投資収益率', detail: '収益額 (正のキャッシュ フロー) に対する利率を指定します。' },
         },
     },
     NOMINAL: {
@@ -489,8 +498,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '割引率', detail: '投資期間を通じて一定の利率を指定します。' },
+            value1: { name: 'キャッシュフロー1', detail: '支払いと収入を表す 1 から 254 の引数。' },
+            value2: { name: 'キャッシュフロー2', detail: '支払いと収入を表す 1 から 254 の引数。' },
         },
     },
     ODDFPRICE: {
@@ -503,8 +513,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            issue: { name: '発行日', detail: '証券の発行日を指定します。' },
+            firstCoupon: { name: '初回利払日', detail: '証券の最初の利払日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。 年 1 回の場合は頻度 = 1、年 2 回の場合は頻度 = 2、四半期ごとの場合は頻度 = 4 を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     ODDFYIELD: {
@@ -517,8 +534,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            issue: { name: '発行日', detail: '証券の発行日を指定します。' },
+            firstCoupon: { name: '初回利払日', detail: '証券の最初の利払日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            pr: { name: '価格', detail: '証券の価格を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。 年 1 回の場合は頻度 = 1、年 2 回の場合は頻度 = 2、四半期ごとの場合は頻度 = 4 を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     ODDLPRICE: {
@@ -531,8 +555,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            lastInterest: { name: '最終利払日', detail: '証券の最後の利払日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。 年 1 回の場合は頻度 = 1、年 2 回の場合は頻度 = 2、四半期ごとの場合は頻度 = 4 を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     ODDLYIELD: {
@@ -545,8 +575,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            lastInterest: { name: '最終利払日', detail: '証券の最後の利払日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            pr: { name: '価格', detail: '証券の価格を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。 年 1 回の場合は頻度 = 1、年 2 回の場合は頻度 = 2、四半期ごとの場合は頻度 = 4 を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     PDURATION: {
@@ -559,8 +595,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '利率は投資の利率を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値を指定します。' },
+            fv: { name: '将来価値', detail: '投資の目標とする将来価値を指定します。' },
         },
     },
     PMT: {
@@ -608,8 +645,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。 年 1 回の場合は頻度 = 1、年 2 回の場合は頻度 = 2、四半期ごとの場合は頻度 = 4 を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     PRICEDISC: {
@@ -622,8 +664,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            discount: { name: '割引率', detail: '証券の割引率を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     PRICEMAT: {
@@ -636,8 +681,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            issue: { name: '発行日', detail: '証券の発行日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            yld: { name: '利回り', detail: '証券の年間配当を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     PV: {
@@ -685,8 +734,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            investment: { name: '投資額', detail: '証券への投資額を指定します。' },
+            discount: { name: '割引率', detail: '証券の割引率を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     RRI: {
@@ -699,8 +751,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '期間', detail: '投資期間の期間数を指定します。' },
+            pv: { name: '現在価値', detail: '投資の現在価値を指定します。' },
+            fv: { name: '将来価値', detail: 'Fvは投資の将来価値です。' },
         },
     },
     SLN: {
@@ -713,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格 (資産の救済価額) を指定します。' },
+            life: { name: '耐用年数', detail: '資産を使用できる年数、つまり償却の対象となる資産の寿命年数を指定します。' },
         },
     },
     SYD: {
@@ -727,8 +781,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格 (資産の救済価額) を指定します。' },
+            life: { name: '耐用年数', detail: '資産を使用できる年数、つまり償却の対象となる資産の寿命年数を指定します。' },
+            per: { name: '期間', detail: '期間 と は、有効期間と同じ単位を使用する必要があります。' },
         },
     },
     TBILLEQ: {
@@ -741,8 +797,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '財務省証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '財務省証券の満期日を指定します。' },
+            discount: { name: '割引率', detail: '財務省証券の割引率を指定します。' },
         },
     },
     TBILLPRICE: {
@@ -755,8 +812,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '財務省証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '財務省証券の満期日を指定します。' },
+            discount: { name: '割引率', detail: '財務省証券の割引率を指定します。' },
         },
     },
     TBILLYIELD: {
@@ -769,8 +827,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '財務省証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '財務省証券の満期日を指定します。' },
+            pr: { name: '価値', detail: '額面 $100 に対する財務省証券の価値を指定します。' },
         },
     },
     VDB: {
@@ -783,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '取得価額', detail: '資産を購入した時点での価格を指定します。' },
+            salvage: { name: '残存価額', detail: '耐用年数が終了した時点での資産の価格 (資産の救済価額) を指定します。' },
+            life: { name: '耐用年数', detail: '資産を使用できる年数 (資産の寿命年数) を指定します。' },
+            startPeriod: { name: '開始期', detail: '減価償却費の計算の対象となる最初の期を指定します。' },
+            endPeriod: { name: '終了期', detail: '減価償却費の計算の対象となる最後の期を指定します。' },
+            factor: { name: '率', detail: '減価償却率を指定します。率を省略すると、2 を指定したと見なされ、倍額定率法で計算が行われます。' },
+            noSwitch: { name: '切り替えなし', detail: '減価償却費が定率法による計算の結果より大きくなったときに、自動的に定額法に切り替えるかどうかを、論理値で指定します。' },
         },
     },
     XIRR: {
@@ -797,8 +861,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'キャッシュフロー', detail: '収支明細表の日付に対応する一覧のキャッシュ フローを指定します。 最初の支払いは投資の最初に発生する原価や支払いに対応し、省略できます。 最初のキャッシュ フローが原価や支払いの場合、負の値を指定する必要があります。 それ以降の支払いは、1 年の日数を 365 日として割り引かれます。 値には、正の値と負の値が少なくとも 1 つずつ含まれている必要があります。' },
+            dates: { name: '日付テーブル', detail: 'キャッシュ フローに対応する一連の支払日を指定します。 指定順序は自由です。' },
+            guess: { name: '推測値', detail: 'XIRR 関数の計算結果に近いと思われる数値を指定します。' },
         },
     },
     XNPV: {
@@ -811,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '割引率', detail: '対象となるキャッシュ フローに適用する割引率を指定します。' },
+            values: { name: 'キャッシュフロー', detail: '収支明細表の日付に対応する一覧のキャッシュ フローを指定します。 最初の支払いは投資の最初に発生する原価や支払いに対応し、省略できます。 最初のキャッシュ フローが原価や支払いの場合、負の値を指定する必要があります。 それ以降の支払いは、1 年の日数を 365 日として割り引かれます。 値には、正の値と負の値が少なくとも 1 つずつ含まれている必要があります。' },
+            dates: { name: '日付テーブル', detail: 'キャッシュ フローに対応する一連の支払日を指定します。 指定順序は自由です。' },
         },
     },
     YIELD: {
@@ -825,8 +891,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            pr: { name: '価格', detail: '額面 $100 に対する証券の価値を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            frequency: { name: '頻度', detail: '年間の利息支払回数を指定します。 年 1 回の場合は頻度 = 1、年 2 回の場合は頻度 = 2、四半期ごとの場合は頻度 = 4 を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     YIELDDISC: {
@@ -839,8 +910,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            pr: { name: '価格', detail: '額面 $100 に対する証券の価値を指定します。' },
+            redemption: { name: '償還価額', detail: '額面 $100 に対する証券の償還額を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
     YIELDMAT: {
@@ -853,8 +927,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '受渡日', detail: '証券の受渡日を指定します。' },
+            maturity: { name: '満期日', detail: '証券の満期日を指定します。' },
+            issue: { name: '発行日', detail: '証券の発行日を指定します。' },
+            rate: { name: '利率', detail: '証券の利率を指定します。' },
+            pr: { name: '価格', detail: '額面 $100 に対する証券の価値を指定します。' },
+            basis: { name: '基準', detail: '計算に使用する基準日数を示す数値を指定します。' },
         },
     },
 };

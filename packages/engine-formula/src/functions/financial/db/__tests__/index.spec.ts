@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Db } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 
@@ -41,7 +41,7 @@ describe('Test db function', () => {
             const salvage = NumberValueObject.create(1000000);
             const life = NumberValueObject.create(6);
             const period = NumberValueObject.create(1);
-            const month = NumberValueObject.create(7);
+            const month = NullValueObject.create();
             const result = testFunction.calculate(cost, salvage, life, period, month);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });
@@ -82,6 +82,14 @@ describe('Test db function', () => {
             const period3 = NumberValueObject.create(7);
             const result3 = testFunction.calculate(cost, salvage, life, period3, month);
             expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const period4 = NumberValueObject.create(0.1);
+            const result4 = testFunction.calculate(cost, salvage, life, period4, month);
+            expect(result4.getValue()).toStrictEqual(1860833.3333333333);
+
+            const period5 = NumberValueObject.create(2);
+            const result5 = testFunction.calculate(cost, salvage, life, period5, month);
+            expect(result5.getValue()).toStrictEqual(2596394.166666667);
         });
 
         it('value is array', () => {

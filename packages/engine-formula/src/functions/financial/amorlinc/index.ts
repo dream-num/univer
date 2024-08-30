@@ -34,7 +34,7 @@ export class Amorlinc extends BaseFunction {
         period: BaseValueObject,
         rate: BaseValueObject,
         basis?: BaseValueObject
-    ) {
+    ): BaseValueObject {
         const _basis = basis ?? NumberValueObject.create(0);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(cost, datePurchased, firstPeriod, salvage, period, rate, _basis);
@@ -104,7 +104,7 @@ export class Amorlinc extends BaseFunction {
         const life = Math.ceil(totalDepreciation / baseDepreciation - firstPeriodYearsFraction);
 
         if (life < 0) {
-            return NumberValueObject.create(costValue);
+            return NumberValueObject.create(0);
         }
 
         let result = baseDepreciation;

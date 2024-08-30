@@ -26,7 +26,7 @@ export class Accrintm extends BaseFunction {
 
     override maxParams = 5;
 
-    override calculate(issue: BaseValueObject, settlement: BaseValueObject, rate: BaseValueObject, par: BaseValueObject, basis?: BaseValueObject) {
+    override calculate(issue: BaseValueObject, settlement: BaseValueObject, rate: BaseValueObject, par: BaseValueObject, basis?: BaseValueObject): BaseValueObject {
         const _basis = basis ?? NumberValueObject.create(0);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(issue, settlement, rate, par, _basis);

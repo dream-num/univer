@@ -26,7 +26,13 @@ export class Intrate extends BaseFunction {
 
     override maxParams = 5;
 
-    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, investment: BaseValueObject, redemption: BaseValueObject, basis?: BaseValueObject) {
+    override calculate(
+        settlement: BaseValueObject,
+        maturity: BaseValueObject,
+        investment: BaseValueObject,
+        redemption: BaseValueObject,
+        basis?: BaseValueObject
+    ): BaseValueObject {
         const _basis = basis ?? NumberValueObject.create(0);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, investment, redemption, _basis);

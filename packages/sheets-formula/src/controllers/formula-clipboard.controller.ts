@@ -132,7 +132,6 @@ export class FormulaClipboardController extends Disposable {
     }
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function getSetCellFormulaMutations(
     unitId: string,
     subUnitId: string,
@@ -151,6 +150,63 @@ export function getSetCellFormulaMutations(
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
+
+    const valueMatrix = getValueMatrix(unitId, subUnitId, range, matrix, copyInfo, lexerTreeBuilder, formulaDataModel, isSpecialPaste, pasteFrom);
+
+    // set cell value and style
+    const setValuesMutation: ISetRangeValuesMutationParams = {
+        unitId,
+        subUnitId,
+        cellValue: valueMatrix.getData(),
+    };
+
+    redoMutationsInfo.push({
+        id: SetRangeValuesMutation.id,
+        params: setValuesMutation,
+    });
+
+    // undo
+    const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+        accessor,
+        setValuesMutation
+    );
+
+    undoMutationsInfo.push({
+        id: SetRangeValuesMutation.id,
+        params: undoSetValuesMutation,
+    });
+    return {
+        undos: undoMutationsInfo,
+        redos: redoMutationsInfo,
+    };
+}
+
+function getValueMatrix(
+    unitId: string,
+    subUnitId: string,
+    range: IDiscreteRange,
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    copyInfo: {
+        copyType: COPY_TYPE;
+        copyRange?: IDiscreteRange;
+        pasteType: string;
+    },
+    lexerTreeBuilder: LexerTreeBuilder,
+    formulaDataModel: FormulaDataModel,
+    isSpecialPaste = false,
+    pasteFrom: ISheetDiscreteRangeLocation | null
+): ObjectMatrix<ICellData> {
+    if (!pasteFrom) {
+        return getValueMatrixOfPasteFromIsNull(matrix, range);
+    }
+
+    if (copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE) {
+        return getPasteValueValueMatrix(unitId, subUnitId, range, matrix, formulaDataModel, pasteFrom);
+    }
+
+    if (copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA) {
+        return getPasteFormulaValueMatrix(range, matrix);
+    }
 
     const valueMatrix = new ObjectMatrix<ICellData>();
     const formulaIdMap = new Map<string, string>();
@@ -249,84 +305,89 @@ export function getSetCellFormulaMutations(
 
         valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);
     });
-    // set cell value and style
-    const setValuesMutation: ISetRangeValuesMutationParams = {
-        unitId,
-        subUnitId,
-        cellValue: valueMatrix.getData(),
-    };
 
-    redoMutationsInfo.push({
-        id: SetRangeValuesMutation.id,
-        params: setValuesMutation,
-    });
-
-    // undo
-    const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-        accessor,
-        setValuesMutation
-    );
-
-    undoMutationsInfo.push({
-        id: SetRangeValuesMutation.id,
-        params: undoSetValuesMutation,
-    });
-    return {
-        undos: undoMutationsInfo,
-        redos: redoMutationsInfo,
-    };
+    return valueMatrix;
 }
 
-function getValueMatrix(
-    unitId: string,
-    subUnitId: string,
-    range: IDiscreteRange,
-    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    accessor: IAccessor,
-    copyInfo: {
-        copyType: COPY_TYPE;
-        copyRange?: IDiscreteRange;
-        pasteType: string;
-    },
-    lexerTreeBuilder: LexerTreeBuilder,
-    formulaDataModel: FormulaDataModel,
-    isSpecialPaste = false,
-    pasteFrom: ISheetDiscreteRangeLocation | null
-) {
-    if (!pasteFrom) {
-        return getValueMatrixOfPasteFromIsNull(matrix);
-    }
-}
-
-function getValueMatrixOfPasteFromIsNull(matrix: ObjectMatrix<ICellDataWithSpanInfo>): ObjectMatrix<ICellData> {
+function getValueMatrixOfPasteFromIsNull(matrix: ObjectMatrix<ICellDataWithSpanInfo>, range: IDiscreteRange): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     matrix.forValue((row, col, value) => {
-        if (!isFormulaString(value.v)) {
-            return false;
-        }
-
         const valueObject: ICellDataWithSpanInfo = {};
-        valueObject.v = null;
-        valueObject.f = `${value.v}`;
+        valueObject.f = null;
 
-        valueMatrix.setValue(row, col, valueObject);
+        if (isFormulaString(value.v)) {
+            valueObject.v = null;
+            valueObject.f = `${value.v}`;
+
+            valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);
+        }
     });
 
     return valueMatrix;
 }
 
 function getPasteValueValueMatrix(
+    unitId: string,
+    subUnitId: string,
+    range: IDiscreteRange,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     formulaDataModel: FormulaDataModel,
-    pasteFrom: ISheetDiscreteRangeLocation | null
-) {
+    pasteFrom: ISheetDiscreteRangeLocation
+): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
-    const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData();
+    const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData()?.[unitId]?.[subUnitId];
 
-    // matrix.forValue((row, col, value) => {
+    matrix.forValue((row, col, value) => {
+        const fromRow = pasteFrom.range.rows[row];
+        const fromCol = pasteFrom.range.cols[col];
+        const toRow = range.rows[row];
+        const toCol = range.cols[col];
 
-    // }
+        const formulaString = value.f || '';
+        const formulaId = value.si || '';
+
+        if (isFormulaString(formulaString) || isFormulaId(formulaId)) {
+            const valueObject: ICellDataWithSpanInfo = {};
+            valueObject.v = value.v;
+            valueObject.f = null;
+            valueObject.si = null;
+
+            valueMatrix.setValue(toRow, toCol, valueObject);
+        } else if (arrayFormulaCellData?.[fromRow]?.[fromCol]) {
+            const cell = arrayFormulaCellData[fromRow][fromCol];
+            const valueObject: ICellDataWithSpanInfo = {};
+            valueObject.v = cell.v;
+            valueObject.f = null;
+            valueObject.si = null;
+
+            valueMatrix.setValue(toRow, toCol, valueObject);
+        }
+    });
+
+    return valueMatrix;
+}
+
+function getPasteFormulaValueMatrix(
+    range: IDiscreteRange,
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>
+): ObjectMatrix<ICellData> {
+    const valueMatrix = new ObjectMatrix<ICellData>();
+
+    matrix.forValue((row, col, value) => {
+        const formulaString = value.f || '';
+        const formulaId = value.si || '';
+
+        if (isFormulaString(value.f)) {
+            const valueObject: ICellDataWithSpanInfo = {};
+            valueObject.v = null;
+            valueObject.f = value.f;
+
+            valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);
+        }
+    });
+
+    return valueMatrix;
 }
 
 function getCellRichText(cell: ICellData) {

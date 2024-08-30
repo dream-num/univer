@@ -72,6 +72,15 @@ export class DesktopDialogService extends Disposable implements IDialogService {
         this._dialogOptions$.next([...this._dialogOptions]);
     }
 
+    closeAll(expectIds?: string[]): void {
+        const expectIdSet = new Set(expectIds);
+        this._dialogOptions = this._dialogOptions.map((item) => ({
+            ...item,
+            visible: expectIdSet.has(item.id) ? item.visible : false,
+        }));
+        this._dialogOptions$.next([...this._dialogOptions]);
+    }
+
     getDialogs$() {
         return this._dialogOptions$.asObservable();
     }

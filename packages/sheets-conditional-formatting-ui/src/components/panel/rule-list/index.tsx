@@ -387,6 +387,7 @@ export const RuleList = (props: IRuleListProps) => {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleDelete(rule);
+                                                    currentRuleRangesSet([]);
                                                 }}
                                             >
                                                 <DeleteSingle />

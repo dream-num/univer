@@ -19,3 +19,8 @@ import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
 export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
 export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
+
+export enum SELECTION_SHAPE_DEPTH {
+    FORMULA_EDITOR_SHOW = 100, // see packages/sheets-formula/src/controllers/formula-editor-show.controller.ts
+    MARK_SELECTION = 10000,
+};

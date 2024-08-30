@@ -223,6 +223,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     const textRun = getFontStyleAtCursor(accessor);
 
                     if (textRun == null) {
+                        subscriber.next(false);
                         return;
                     }
 
@@ -260,6 +261,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     const textRun = getFontStyleAtCursor(accessor);
 
                     if (textRun == null) {
+                        subscriber.next(false);
                         return;
                     }
 
@@ -297,6 +299,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     const textRun = getFontStyleAtCursor(accessor);
 
                     if (textRun == null) {
+                        subscriber.next(false);
                         return;
                     }
 
@@ -334,6 +337,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                     const textRun = getFontStyleAtCursor(accessor);
 
                     if (textRun == null) {
+                        subscriber.next(false);
                         return;
                     }
 
@@ -370,6 +374,7 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     const textRun = getFontStyleAtCursor(accessor);
 
                     if (textRun == null) {
+                        subscriber.next(false);
                         return;
                     }
 
@@ -406,6 +411,7 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                     const textRun = getFontStyleAtCursor(accessor);
 
                     if (textRun == null) {
+                        subscriber.next(false);
                         return;
                     }
 
@@ -452,6 +458,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                     const textRun = getFontStyleAtCursor(accessor);
 
                     if (textRun == null) {
+                        subscriber.next(defaultValue);
                         return;
                     }
 
@@ -497,6 +504,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                     const textRun = getFontStyleAtCursor(accessor);
 
                     if (textRun == null) {
+                        subscriber.next(DEFAULT_SIZE);
                         return;
                     }
 
@@ -910,14 +918,8 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 
     let textRun;
 
-    for (let i = 0; i < textRuns.length; i++) {
+    for (let i = textRuns.length - 1; i >= 0; i--) {
         const curTextRun = textRuns[i];
-        const nextTextRun = textRuns[i + 1];
-
-        if (nextTextRun && nextTextRun.st === nextTextRun.ed && startOffset === nextTextRun.st) {
-            textRun = nextTextRun;
-            break;
-        }
 
         if (curTextRun.st <= startOffset && startOffset <= curTextRun.ed) {
             textRun = curTextRun;

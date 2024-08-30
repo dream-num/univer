@@ -22,11 +22,16 @@ import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { ComponentManager } from '@univerjs/ui';
+import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { FDataValidation } from './f-data-validation';
 import { FFilter } from './f-filter';
-import { covertToColRange, covertToRowRange } from './utils';
+import { FThreadComment } from './f-thread-comment';
+import type { IFICanvasFloatDom } from './f-workbook';
+import { covertToColRange, covertToRowRange, transformComponentKey } from './utils';
 
 export class FWorksheet {
     constructor(
@@ -37,6 +42,22 @@ export class FWorksheet {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         // empty
+    }
+
+    /**
+     * Returns the injector
+     * @returns The injector
+     */
+    getInject(): Injector {
+        return this._injector;
+    }
+
+    /**
+     * Returns the workbook
+     * @returns The workbook
+     */
+    getWorkbook(): Workbook {
+        return this._workbook;
     }
 
     /**
@@ -130,6 +151,48 @@ export class FWorksheet {
 
     // #endregion
 
+    // #region Comment
+    /**
+     * Get all comments in the current sheet
+     * @returns all comments in the current sheet
+     */
+    getComments(): FThreadComment[] {
+        const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
+        const comments = sheetsTheadCommentModel.getSubUnitAll(this._workbook.getUnitId(), this._worksheet.getSheetId());
+        return comments.map((comment) => this._injector.createInstance(FThreadComment, comment));
+    }
+    // #endregion
+
+    /**
+     * add a float dom to position
+     * @param layer float dom config
+     * @param id float dom id, if not given will be auto generated
+     * @returns float dom id and dispose function
+     */
+    addFloatDomToPosition(layer: IFICanvasFloatDom, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const res = floatDomService.addFloatDomToPosition({ ...layer, componentKey: key, unitId, subUnitId }, id);
+
+        if (res) {
+            disposableCollection.add(res.dispose);
+            return {
+                id: res.id,
+                dispose: (): void => {
+                    disposableCollection.dispose();
+                    res.dispose();
+                },
+            };
+        }
+
+        disposableCollection.dispose();
+        return null;
+    }
     // #region Row
 
     /**

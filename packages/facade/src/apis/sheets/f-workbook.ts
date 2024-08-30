@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
+import type { CommandListener, ICommandInfo, IDisposable, IExecutionOptions, IRange, ISheetDataValidationRule, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     ILogService,
@@ -33,10 +33,20 @@ import type {
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
 import { InsertSheetCommand, RemoveSheetCommand, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
-
-import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
-import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
+import type { IAddSheetDataValidationCommandParams, IDataValidationResCache, IRemoveSheetAllDataValidationCommandParams, IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
+import { AddSheetDataValidationCommand, DataValidationModel, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import type { IRuleChange, IValidStatusChange } from '@univerjs/data-validation';
+import type { IUpdateCommandParams } from '@univerjs/docs';
+import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams } from '@univerjs/thread-comment';
+import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { filter } from 'rxjs';
+import type { IFComponentKey } from './utils';
 import { FWorksheet } from './f-worksheet';
+
+export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {
+
+}
 
 export class FWorkbook {
     readonly id: string;
@@ -53,6 +63,14 @@ export class FWorkbook {
 
     ) {
         this.id = this._workbook.getUnitId();
+    }
+
+    private get _dataValidationModel(): DataValidationModel {
+        return this._injector.get(DataValidationModel);
+    }
+
+    private get _threadCommentModel(): ThreadCommentModel {
+        return this._injector.get(ThreadCommentModel);
     }
 
     getId(): string {
@@ -297,4 +315,211 @@ export class FWorkbook {
             this._workbook.getUnitId()
         );
     }
+
+    // region DataValidationHooks
+    /**
+     * The onDataValidationChange event is fired when the data validation rule of this sheet is changed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onDataValidationChange(callback: (ruleChange: IRuleChange<ISheetDataValidationRule>) => void): IDisposable {
+        return toDisposable(this._dataValidationModel.ruleChange$.pipe(filter((change) => change.unitId === this._workbook.getUnitId())).subscribe(callback));
+    }
+
+    /**
+     * The onDataValidationStatusChange event is fired when the data validation status of this sheet is changed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onDataValidationStatusChange(callback: (statusChange: IValidStatusChange) => void): IDisposable {
+        return toDisposable(this._dataValidationModel.validStatusChange$.pipe(filter((change) => change.unitId === this._workbook.getUnitId())).subscribe(callback));
+    }
+
+    /**
+     * The onBeforeAddDataValidation event is fired before the data validation rule is added.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeAddDataValidation(callback: (params: IAddSheetDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
+            const params = commandInfo.params as IAddSheetDataValidationCommandParams;
+            if (commandInfo.id === AddSheetDataValidationCommand.id) {
+                if (params.unitId !== this._workbook.getUnitId()) {
+                    return;
+                }
+                if (callback(params, options) === false) {
+                    throw new Error('Command is stopped by the hook onBeforeAddDataValidation');
+                }
+            }
+        }));
+    }
+
+    /**
+     * The onBeforeUpdateDataValidationCriteria event is fired before the data validation rule is updated.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeUpdateDataValidationCriteria(callback: (params: IUpdateSheetDataValidationSettingCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
+            const params = commandInfo.params as IUpdateSheetDataValidationSettingCommandParams;
+            if (commandInfo.id === UpdateSheetDataValidationSettingCommand.id) {
+                if (params.unitId !== this._workbook.getUnitId()) {
+                    return;
+                }
+
+                if (callback(params, options) === false) {
+                    throw new Error('Command is stopped by the hook onBeforeUpdateDataValidationCriteria');
+                }
+            }
+        }));
+    }
+
+    /**
+     * The onBeforeUpdateDataValidationRange event is fired before the data validation rule is updated.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeUpdateDataValidationRange(callback: (params: IUpdateSheetDataValidationRangeCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
+            const params = commandInfo.params as IUpdateSheetDataValidationRangeCommandParams;
+            if (commandInfo.id === UpdateSheetDataValidationRangeCommand.id) {
+                if (params.unitId !== this._workbook.getUnitId()) {
+                    return;
+                }
+
+                if (callback(params, options) === false) {
+                    throw new Error('Command is stopped by the hook onBeforeUpdateDataValidationRange');
+                }
+            }
+        }));
+    }
+
+    /**
+     * The onBeforeUpdateDataValidationOptions event is fired before the data validation rule is updated.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeUpdateDataValidationOptions(callback: (params: IUpdateSheetDataValidationOptionsCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
+            const params = commandInfo.params as IUpdateSheetDataValidationOptionsCommandParams;
+            if (commandInfo.id === UpdateSheetDataValidationOptionsCommand.id) {
+                if (params.unitId !== this._workbook.getUnitId()) {
+                    return;
+                }
+
+                if (callback(params, options) === false) {
+                    throw new Error('Command is stopped by the hook onBeforeUpdateDataValidationOptions');
+                }
+            }
+        }));
+    }
+
+    /**
+     * The onBeforeDeleteDataValidation event is fired before the data validation rule is deleted.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeDeleteDataValidation(callback: (params: IRemoveSheetDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
+            const params = commandInfo.params as IRemoveSheetDataValidationCommandParams;
+            if (commandInfo.id === RemoveSheetDataValidationCommand.id) {
+                if (params.unitId !== this._workbook.getUnitId()) {
+                    return;
+                }
+                if (callback(params, options) === false) {
+                    throw new Error('Command is stopped by the hook onBeforeDeleteDataValidation');
+                }
+            }
+        }));
+    }
+
+    /**
+     * The onBeforeDeleteAllDataValidation event is fired before delete all data validation rules.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeDeleteAllDataValidation(callback: (params: IRemoveSheetAllDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
+            const params = commandInfo.params as IRemoveSheetAllDataValidationCommandParams;
+            if (commandInfo.id === RemoveSheetAllDataValidationCommand.id) {
+                if (params.unitId !== this._workbook.getUnitId()) {
+                    return;
+                }
+                if (callback(params, options) === false) {
+                    throw new Error('Command is stopped by the hook onBeforeDeleteAllDataValidation');
+                }
+            }
+        }));
+    }
+
+    // endregion
+
+    // region ThreadCommentHooks
+    /**
+     * The onThreadCommentChange event is fired when the thread comment of this sheet is changed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable {
+        return toDisposable(this._threadCommentModel.commentUpdate$.pipe(filter((change) => change.unitId === this._workbook.getUnitId())).subscribe(callback));
+    }
+
+    /**
+     * The onThreadCommentChange event is fired when the thread comment of this sheet is changed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeAddThreadComment(callback: (params: IAddCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
+            const params = commandInfo.params as IAddCommentCommandParams;
+            if (commandInfo.id === AddCommentCommand.id) {
+                if (params.unitId !== this._workbook.getUnitId()) {
+                    return;
+                }
+                if (callback(params, options) === false) {
+                    throw new Error('Command is stopped by the hook onBeforeAddThreadComment');
+                }
+            }
+        }));
+    }
+
+    /**
+     * The onBeforeUpdateThreadComment event is fired before the thread comment is updated.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeUpdateThreadComment(callback: (params: IUpdateCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
+            const params = commandInfo.params as IUpdateCommandParams;
+            if (commandInfo.id === UpdateCommentCommand.id) {
+                if (params.unitId !== this._workbook.getUnitId()) {
+                    return;
+                }
+                if (callback(params, options) === false) {
+                    throw new Error('Command is stopped by the hook onBeforeUpdateThreadComment');
+                }
+            }
+        }));
+    }
+
+    /**
+     * The onBeforeDeleteThreadComment event is fired before the thread comment is deleted.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeDeleteThreadComment(callback: (params: IDeleteCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
+        return toDisposable(this._commandService.beforeCommandExecuted((commandInfo, options) => {
+            const params = commandInfo.params as IDeleteCommentCommandParams;
+            if (commandInfo.id === DeleteCommentCommand.id || commandInfo.id === DeleteCommentTreeCommand.id) {
+                if (params.unitId !== this._workbook.getUnitId()) {
+                    return;
+                }
+                if (callback(params, options) === false) {
+                    throw new Error('Command is stopped by the hook onBeforeDeleteThreadComment');
+                }
+            }
+        }));
+    }
+
+    // endregion
 }

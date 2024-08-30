@@ -53,4 +53,6 @@ export const defaultWorkbookPermissionPoints = [
     UnitAction.Share,
     UnitAction.MoveSheet,
     UnitAction.CopySheet,
+    UnitAction.RecoverHistory,
+    UnitAction.ViewHistory,
 ];

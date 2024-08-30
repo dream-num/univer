@@ -59,7 +59,7 @@ import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, Co
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationModel, SheetDataValidationManager, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { FUniver } from '../facade';
+import { FUniver } from '../../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {
@@ -71,25 +71,23 @@ function getTestWorkbookDataDemo(): IWorkbookData {
                 name: 'sheet1',
                 cellData: {
                     0: {
-                        3: {
-                            f: '=SUM(A1)',
-                            si: '3e4r5t',
+                        0: {
+                            v: 1,
                         },
                     },
                     1: {
-                        3: {
-                            f: '=SUM(A2)',
-                            si: 'OSPtzm',
+                        0: {
+                            v: 2,
                         },
                     },
                     2: {
-                        3: {
-                            si: 'OSPtzm',
+                        0: {
+                            v: 3,
                         },
                     },
                     3: {
-                        3: {
-                            si: 'OSPtzm',
+                        0: {
+                            v: 4,
                         },
                     },
                 },
@@ -118,7 +116,7 @@ export interface ITestBed {
     injector: Injector;
 }
 
-export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 

@@ -171,6 +171,15 @@ describe('Test set row height commands', () => {
         expect(getRowHeight(5)).toBe(77);
     });
 
+    it('Direct change row heights with ranges', async () => {
+        await commandService.executeCommand<ISetRowHeightCommandParams>(SetRowHeightCommand.id, {
+            value: 88,
+            ranges: [{ startRow: 2, endRow: 2, startColumn: 0, endColumn: 0 }],
+        });
+        expect(getRowHeight(2)).toBe(88);
+        expect(getRowIsAutoHeight(2)).toBe(BooleanNumber.FALSE);
+    });
+
     describe('Set fit content in ranges', () => {
         it('Should change all rows ia to true in selections', async () => {
             await commandService.executeCommand(SetWorksheetRowIsAutoHeightCommand.id);

@@ -189,8 +189,12 @@ export const DeltaRowHeightCommand: ICommand = {
 };
 
 export interface ISetRowHeightCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+    ranges?: IRange[]; // For Facade API
     value: number;
 }
+
 export const SetRowHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-height',
@@ -202,12 +206,13 @@ export const SetRowHeightCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        // user can specify the ranges to set row height, if not, use the current selection
+        const selections = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
         }
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
@@ -288,35 +293,25 @@ export const SetRowHeightCommand: ICommand = {
 };
 
 export interface ISetWorksheetRowIsAutoHeightCommandParams {
-    anchorRow?: number;
+    unitId?: string;
+    subUnitId?: string;
+    ranges?: IRange[]; // For Facade API
 }
 
 export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-is-auto-height',
-    handler: async (accessor: IAccessor, params: ISetWorksheetRowIsAutoHeightCommandParams) => {
+    handler: async (accessor: IAccessor, params?: ISetWorksheetRowIsAutoHeightCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
-        const { unitId, subUnitId, worksheet } = target;
-        const { anchorRow } = params ?? {};
-
-        const ranges =
-            anchorRow != null
-                ? [
-                    {
-                        startRow: anchorRow,
-                        endRow: anchorRow,
-                        startColumn: 0,
-                        endColumn: worksheet.getMaxColumns() - 1,
-                    },
-                ]
-                : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        const { unitId, subUnitId } = target;
+        const ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
         if (!ranges?.length) {
             return false;

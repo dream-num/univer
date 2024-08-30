@@ -128,7 +128,7 @@ const dataValidation: IDataValidationRule[] = [
         operator: DataValidationOperator.LESS_THAN_OR_EQUAL,
         formula1: '2024/04/10',
         formula2: '2024/10/10',
-        // errorStyle: DataValidationErrorStyle.STOP,
+        errorStyle: DataValidationErrorStyle.STOP,
     },
     {
         uid: 'xxx-2',

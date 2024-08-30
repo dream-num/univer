@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
-import { CellValueType, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools } from '@univerjs/core';
+import { CellValueType, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools, UNIVER_INTERNAL } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -149,7 +149,18 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: '2', t: CellValueType.NUMBER, f: null, si: null, p: null });
+            const target = { v: '2', t: CellValueType.NUMBER, f: null, si: null, p: null };
+
+            expect(cellData).toEqual({
+                ...target,
+                custom: {
+                    [UNIVER_INTERNAL]: {
+                        origin: {
+                            ...target,
+                        },
+                    },
+                },
+            });
         });
         it('Rich text cell', () => {
             const cell = {
@@ -160,7 +171,17 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: null, f: null, si: null, p: richTextDemo });
+            const target = { v: null, f: null, si: null, p: richTextDemo };
+            expect(cellData).toEqual({
+                ...target,
+                custom: {
+                    [UNIVER_INTERNAL]: {
+                        origin: {
+                            ...target,
+                        },
+                    },
+                },
+            });
         });
         it('Formula cell', () => {
             const cell = {
@@ -171,7 +192,17 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: null, f: '=SUM(1)', si: null, p: null, t: undefined });
+            const target = { v: null, f: '=SUM(1)', si: null, p: null, t: undefined };
+            expect(cellData).toEqual({
+                ...target,
+                custom: {
+                    [UNIVER_INTERNAL]: {
+                        origin: {
+                            ...target,
+                        },
+                    },
+                },
+            });
         });
         it('Clear formula cell', () => {
             const cell = {
@@ -185,7 +216,17 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: '', f: null, si: null, p: null, t: undefined });
+            const target = { v: '', f: null, si: null, p: null, t: undefined };
+            expect(cellData).toEqual({
+                ...target,
+                custom: {
+                    [UNIVER_INTERNAL]: {
+                        origin: {
+                            ...target,
+                        },
+                    },
+                },
+            });
         });
 
         it('Clear formula cell with rich text', () => {
@@ -200,7 +241,17 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            expect(cellData).toEqual({ v: null, f: null, si: null, p: richTextDemo, t: undefined });
+            const target = { v: null, f: null, si: null, p: richTextDemo, t: undefined };
+            expect(cellData).toEqual({
+                ...target,
+                custom: {
+                    [UNIVER_INTERNAL]: {
+                        origin: {
+                            ...target,
+                        },
+                    },
+                },
+            });
         });
 
         it('Input force string, normal string', () => {
@@ -209,13 +260,43 @@ describe('Test EndEditController', () => {
             };
 
             let cellData = getCellDataByInputCell(cell, { v: "'test" });
-            expect(cellData).toEqual({ v: 'test', t: CellValueType.FORCE_STRING, f: null, si: null, p: null });
+            let target = { v: 'test', t: CellValueType.FORCE_STRING, f: null, si: null, p: null };
+            expect(cellData).toEqual({
+                ...target,
+                custom: {
+                    [UNIVER_INTERNAL]: {
+                        origin: {
+                            ...target,
+                        },
+                    },
+                },
+            });
 
             cellData = getCellDataByInputCell(cell, { v: "'1" });
-            expect(cellData).toEqual({ v: '1', t: CellValueType.FORCE_STRING, f: null, si: null, p: null });
+            target = { v: '1', t: CellValueType.FORCE_STRING, f: null, si: null, p: null };
+            expect(cellData).toEqual({
+                ...target,
+                custom: {
+                    [UNIVER_INTERNAL]: {
+                        origin: {
+                            ...target,
+                        },
+                    },
+                },
+            });
 
             cellData = getCellDataByInputCell(cell, { v: "'=SUM" });
-            expect(cellData).toEqual({ v: '=SUM', t: CellValueType.FORCE_STRING, f: null, si: null, p: null });
+            target = { v: '=SUM', t: CellValueType.FORCE_STRING, f: null, si: null, p: null };
+            expect(cellData).toEqual({
+                ...target,
+                custom: {
+                    [UNIVER_INTERNAL]: {
+                        origin: {
+                            ...target,
+                        },
+                    },
+                },
+            });
         });
 
         it('Function normalizeString', () => {

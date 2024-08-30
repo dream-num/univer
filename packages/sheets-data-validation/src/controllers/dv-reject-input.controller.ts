@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationErrorStyle, Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { DataValidationErrorStyle, Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle, UNIVER_INTERNAL } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IDialogService } from '@univerjs/ui';
@@ -58,7 +58,7 @@ export class DataValidationRejectInputController extends Disposable {
                     const success = await validator.validator(
                         {
                             value: getCellValueOrigin(cell),
-                            interceptValue: getCellValueOrigin(cell),
+                            interceptValue: getCellValueOrigin(cell?.custom?.[UNIVER_INTERNAL]?.origin ?? cell),
                             row,
                             column: col,
                             unitId,

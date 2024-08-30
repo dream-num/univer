@@ -20,13 +20,14 @@ import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { CommentSingle } from '@univerjs/icons';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { RangeProtectionPermissionViewPoint, SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
 import { IMarkSelectionService, ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import { debounceTime } from 'rxjs';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
@@ -66,7 +67,8 @@ export class SheetsThreadCommentController extends Disposable {
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
-        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService
+        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
+        @Inject(SheetsSelectionsService) private readonly _sheetSelectionService: SheetsSelectionsService
     ) {
         super();
         this._initMenu();
@@ -75,51 +77,62 @@ export class SheetsThreadCommentController extends Disposable {
         this._initCommandListener();
         this._initPanelListener();
         this._initMarkSelection();
+        this._initSelectionUpdateListener();
     }
 
     private _initShortcut() {
         this._shortcutService.registerShortcut(AddCommentShortcut);
     }
 
-    private _initCommandListener() {
-        this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetSelectionsOperation.id) {
+    private _handleSelectionChange(selections: ISelectionWithStyle[], unitId: string, subUnitId: string) {
+        const range = selections[0]?.range;
+        if (!range) {
+            return;
+        }
+        const rangeType = range.rangeType ?? RANGE_TYPE.NORMAL;
+        if (rangeType !== RANGE_TYPE.NORMAL || range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) {
+            if (this._threadCommentPanelService.activeCommentId) {
+                this._commandService.executeCommand(SetActiveCommentOperation.id);
+            }
+            return;
+        }
+
+        const row = range.startRow;
+        const col = range.startColumn;
+        if (!this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
+            if (this._threadCommentPanelService.activeCommentId) {
+                this._commandService.executeCommand(SetActiveCommentOperation.id);
+            }
+            return;
+        }
+
+        const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
+        if (commentId) {
+            this._commandService.executeCommand(SetActiveCommentOperation.id, {
+                unitId,
+                subUnitId,
+                commentId,
+            });
+        }
+    }
+
+    private _initSelectionUpdateListener() {
+        this.disposeWithMe(
+            this._sheetSelectionService.selectionMoveEnd$.subscribe((selections) => {
                 if (this._isSwitchToCommenting) {
                     return;
                 }
-                const params = commandInfo.params as ISetSelectionsOperationParams;
-                const { unitId, subUnitId, selections, type } = params;
-                if ((type === SelectionMoveType.MOVE_END || type === undefined)) {
-                    const range = selections[0].range;
-                    const rangeType = range.rangeType ?? RANGE_TYPE.NORMAL;
-                    if (rangeType !== RANGE_TYPE.NORMAL || range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) {
-                        if (this._threadCommentPanelService.activeCommentId) {
-                            this._commandService.executeCommand(SetActiveCommentOperation.id);
-                        }
-                        return;
-                    }
-                    if (selections[0]?.primary) {
-                        const row = selections[0].primary.actualRow;
-                        const col = selections[0].primary.actualColumn;
-                        if (!this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
-                            if (this._threadCommentPanelService.activeCommentId) {
-                                this._commandService.executeCommand(SetActiveCommentOperation.id);
-                            }
-                            return;
-                        }
-
-                        const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
-                        if (commentId) {
-                            this._commandService.executeCommand(SetActiveCommentOperation.id, {
-                                unitId,
-                                subUnitId,
-                                commentId,
-                            });
-                        }
-                    }
+                const current = this._sheetSelectionService.currentSelectionParam;
+                if (!current) {
+                    return;
                 }
-            }
+                this._handleSelectionChange(selections, current.unitId, current.sheetId);
+            })
+        );
+    }
 
+    private _initCommandListener() {
+        this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === DeleteCommentMutation.id) {
                 const params = commandInfo.params as IDeleteCommentMutationParams;
                 const active = this._sheetsThreadCommentPopupService.activePopup;
@@ -220,7 +233,7 @@ export class SheetsThreadCommentController extends Disposable {
     }
 
     private _initMarkSelection() {
-        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.subscribe((activeComment) => {
+        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.pipe(debounceTime(100)).subscribe((activeComment) => {
             if (!activeComment) {
                 if (this._selectionShapeInfo) {
                     this._markSelectionService.removeShape(this._selectionShapeInfo.shapeId);
@@ -228,15 +241,13 @@ export class SheetsThreadCommentController extends Disposable {
                 }
                 return;
             }
+
             const { unitId, subUnitId, commentId } = activeComment;
             if (this._selectionShapeInfo) {
-                if (this._selectionShapeInfo.unitId === unitId && this._selectionShapeInfo.subUnitId === subUnitId && this._selectionShapeInfo.commentId === commentId) {
-                    return;
-                }
-
                 this._markSelectionService.removeShape(this._selectionShapeInfo.shapeId);
                 this._selectionShapeInfo = null;
             }
+
             const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
             if (!comment) {
                 return;

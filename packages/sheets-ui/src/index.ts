@@ -97,6 +97,9 @@ export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';
 export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
 export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 
+export { IFormatPainterService } from './services/format-painter/format-painter.service';
+export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
+
 // #region - all commands
 
 export { AddWorksheetMergeCommand, AddWorksheetMergeAllCommand, AddWorksheetMergeVerticalCommand, AddWorksheetMergeHorizontalCommand } from './commands/commands/add-worksheet-merge.command';
@@ -174,5 +177,5 @@ export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetB
 export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
 export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
 export { attachSelectionWithCoord, attachPrimaryWithCoord } from './services/selection/util';
-
+export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 // #endregion

@@ -138,6 +138,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                 offset: [0, 3],
                 excludeOutside: [currentRender?.engine.getCanvasElement()].filter(Boolean) as HTMLElement[],
             }
+
         );
 
         if (!popupDisposable) {

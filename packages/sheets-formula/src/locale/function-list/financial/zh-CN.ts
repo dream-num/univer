@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            coupon: { name: '年息票利率', detail: '有价证券的年息票利率。' },
+            yld: { name: '年收益率', detail: '有价证券的年收益率。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '现金流', detail: '数组或单元格的引用，这些单元格包含用来计算内部收益率的数字。\n1.Values 必须包含至少一个正值和一个负值，以计算返回的内部收益率。\n2.IRR 使用值的顺序来说明现金流的顺序。 一定要按您需要的顺序输入支出值和收益值。\n3.如果数组或引用包含文本、逻辑值或空白单元格，这些数值将被忽略。' },
+            guess: { name: '估计值', detail: '对函数 IRR 计算结果的估计值。' },
         },
     },
     ISPMT: {
@@ -430,8 +434,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            coupon: { name: '年息票利率', detail: '有价证券的年息票利率。' },
+            yld: { name: '年收益率', detail: '有价证券的年收益率。' },
+            frequency: { name: '频次', detail: '年付息次数。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     MIRR: {
@@ -444,8 +452,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '现金流', detail: '数组或对包含数字的单元格的引用。 这些数值代表一系列定期支出（负值）和收益（正值）。\n1.Values 必须至少包含一个正值和一个负值，才能计算修改后的内部回报率。 否则，MIRR 返回 #DIV/0！ 。\n2.如果数组或引用参数包含文本、逻辑值或空白单元格，则这些值将被忽略；但包含零值的单元格将计算在内。' },
+            financeRate: { name: '融资利率', detail: '现金流中使用的资金支付的利率。' },
+            reinvestRate: { name: '再投资收益率', detail: '将现金流再投资的收益率。' },
         },
     },
     NOMINAL: {
@@ -489,8 +498,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '贴现率', detail: '某一期间的贴现率。' },
+            value1: { name: '现金流1', detail: '这些是代表支出及收入的 1 到 254 个参数。' },
+            value2: { name: '现金流2', detail: '这些是代表支出及收入的 1 到 254 个参数。' },
         },
     },
     ODDFPRICE: {
@@ -503,8 +513,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            issue: { name: '发行日', detail: '有价证券的发行日。' },
+            firstCoupon: { name: '首期付息日', detail: '有价证券的首期付息日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            yld: { name: '年收益率', detail: '有价证券的年收益率。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            frequency: { name: '频次', detail: '年付息次数。 如果按年支付，frequency = 1；按半年期支付，frequency = 2；按季支付，frequency = 4。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     ODDFYIELD: {
@@ -517,8 +534,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            issue: { name: '发行日', detail: '有价证券的发行日。' },
+            firstCoupon: { name: '首期付息日', detail: '有价证券的首期付息日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            pr: { name: '价格', detail: '有价证券的价格。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            frequency: { name: '频次', detail: '年付息次数。 如果按年支付，frequency = 1；按半年期支付，frequency = 2；按季支付，frequency = 4。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     ODDLPRICE: {
@@ -531,8 +555,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            lastInterest: { name: '末期付息日', detail: '有价证券的末期付息日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            yld: { name: '年收益率', detail: '有价证券的年收益率。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            frequency: { name: '频次', detail: '年付息次数。 如果按年支付，frequency = 1；按半年期支付，frequency = 2；按季支付，frequency = 4。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     ODDLYIELD: {
@@ -545,8 +575,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            lastInterest: { name: '末期付息日', detail: '有价证券的末期付息日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            pr: { name: '价格', detail: '有价证券的价格。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            frequency: { name: '频次', detail: '年付息次数。 如果按年支付，frequency = 1；按半年期支付，frequency = 2；按季支付，frequency = 4。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     PDURATION: {
@@ -559,8 +595,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '每个周期的利率。' },
+            pv: { name: '现值', detail: '投资的现值。' },
+            fv: { name: '未来价值', detail: '投资的预期未来价值。' },
         },
     },
     PMT: {
@@ -608,8 +645,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            yld: { name: '年收益率', detail: '有价证券的年收益率。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            frequency: { name: '频次', detail: '年付息次数。 如果按年支付，frequency = 1；按半年期支付，frequency = 2；按季支付，frequency = 4。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     PRICEDISC: {
@@ -622,8 +664,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            discount: { name: '贴现率', detail: '有价证券的贴现率。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     PRICEMAT: {
@@ -636,8 +681,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            issue: { name: '发行日', detail: '有价证券的发行日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            yld: { name: '年收益率', detail: '有价证券的年收益率。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     PV: {
@@ -685,8 +734,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            investment: { name: '投资额', detail: '有价证券的投资额。' },
+            discount: { name: '贴现率', detail: '有价证券的贴现率。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     RRI: {
@@ -699,8 +751,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '总期数', detail: '投资的周期数。' },
+            pv: { name: '现值', detail: '投资的现值。' },
+            fv: { name: '未来价值', detail: '投资的未来价值。' },
         },
     },
     SLN: {
@@ -713,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '资产原值', detail: '资产原值。' },
+            salvage: { name: '资产残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '资产使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
         },
     },
     SYD: {
@@ -727,8 +781,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '资产原值', detail: '资产原值。' },
+            salvage: { name: '资产残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '资产使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
+            per: { name: '期间', detail: '期间。' },
         },
     },
     TBILLEQ: {
@@ -741,8 +797,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '国库券的结算日。' },
+            maturity: { name: '到期日', detail: '国库券的到期日。' },
+            discount: { name: '贴现率', detail: '国库券的贴现率。' },
         },
     },
     TBILLPRICE: {
@@ -755,8 +812,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '国库券的结算日。' },
+            maturity: { name: '到期日', detail: '国库券的到期日。' },
+            discount: { name: '贴现率', detail: '国库券的贴现率。' },
         },
     },
     TBILLYIELD: {
@@ -769,8 +827,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '国库券的结算日。' },
+            maturity: { name: '到期日', detail: '国库券的到期日。' },
+            pr: { name: '价格', detail: '面值 ￥100 的国库券的价格。' },
         },
     },
     VDB: {
@@ -783,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '资产原值。' },
+            salvage: { name: '残值', detail: '折旧末尾时的值（有时也称为资产残值）。' },
+            life: { name: '使用寿命', detail: '资产的折旧期数（有时也称作资产的使用寿命）。' },
+            startPeriod: { name: '起始时期', detail: '您要计算折旧的起始时期。' },
+            endPeriod: { name: '终止时期', detail: '您要计算折旧的终止时期。' },
+            factor: { name: '速率', detail: '余额递减速率。如果省略影响因素，则假定为2（双倍余额递减法）。' },
+            noSwitch: { name: '不切换', detail: '逻辑值，指定当折旧值大于余额递减计算值时，是否转用直线折旧法。' },
         },
     },
     XIRR: {
@@ -797,8 +861,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '现金流', detail: '与 dates 中的支付时间相对应的一系列现金流。 首期支付是可选的，并与投资开始时的成本或支付有关。 如果第一个值是成本或支付，则它必须是负值。 所有后续支付都基于 365 天/年贴现。 值系列中必须至少包含一个正值和一个负值。' },
+            dates: { name: '日期表', detail: '与现金流支付相对应的支付日期表。 日期可以按任意顺序出现。' },
+            guess: { name: '估计值', detail: '对函数 XIRR 计算结果的估计值。' },
         },
     },
     XNPV: {
@@ -811,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '贴现率', detail: '应用于现金流的贴现率。' },
+            values: { name: '现金流', detail: '与 dates 中的支付时间相对应的一系列现金流。 首期支付是可选的，并与投资开始时的成本或支付有关。 如果第一个值是成本或支付，则它必须是负值。 所有后续支付都基于 365 天/年贴现。 值系列中必须至少包含一个正值和一个负值。' },
+            dates: { name: '日期表', detail: '与现金流支付相对应的支付日期表。 日期可以按任意顺序出现。' },
         },
     },
     YIELD: {
@@ -825,8 +891,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            pr: { name: '价格', detail: '有价证券的价格（按面值为 ￥100 计算）。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            frequency: { name: '频次', detail: '年付息次数。 如果按年支付，frequency = 1；按半年期支付，frequency = 2；按季支付，frequency = 4。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     YIELDDISC: {
@@ -839,8 +910,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            pr: { name: '价格', detail: '有价证券的价格（按面值为 ￥100 计算）。' },
+            redemption: { name: '清偿价', detail: '面值 ￥100 的有价证券的清偿价值。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
     YIELDMAT: {
@@ -853,8 +927,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '结算日', detail: '有价证券的结算日。' },
+            maturity: { name: '到期日', detail: '有价证券的到期日。' },
+            issue: { name: '发行日', detail: '有价证券的发行日。' },
+            rate: { name: '利率', detail: '有价证券的利率。' },
+            pr: { name: '价格', detail: '有价证券的价格（按面值为 ￥100 计算）。' },
+            basis: { name: '基准', detail: '要使用的日计数基准类型。' },
         },
     },
 };

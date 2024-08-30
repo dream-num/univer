@@ -34,6 +34,17 @@ describe('Test dollarfr function', () => {
             expect(result.getValue()).toStrictEqual(1.0032);
         });
 
+        it('Fraction value test', () => {
+            const fractionalDollar = NumberValueObject.create(1.02);
+            let fraction = NumberValueObject.create(-1);
+            let result = testFunction.calculate(fractionalDollar, fraction);
+            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+
+            fraction = NumberValueObject.create(0.1);
+            result = testFunction.calculate(fractionalDollar, fraction);
+            expect(result.getValue()).toStrictEqual(ErrorType.DIV_BY_ZERO);
+        });
+
         it('Value is error', () => {
             const fractionalDollar = ErrorValueObject.create(ErrorType.NAME);
             const fraction = NumberValueObject.create(16);

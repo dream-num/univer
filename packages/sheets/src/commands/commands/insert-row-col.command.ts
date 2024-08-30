@@ -22,7 +22,6 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    Range,
     RANGE_TYPE,
     sequenceExecute,
     UniverInstanceType,
@@ -44,7 +43,7 @@ import {
 } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
-import { followSelectionOperation } from './utils/selection-utils';
+import { copyRangeStyles, followSelectionOperation } from './utils/selection-utils';
 
 export interface IInsertRowCommandParams {
     unitId: string;
@@ -181,27 +180,23 @@ export const InsertRowBeforeCommand: ICommand = {
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const rowCount = range.endRow - range.startRow + 1;
-        const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
-        Range.foreach(range, (row, col) => {
-            const cell = worksheet.getCell(row, col);
-            if (!cell || !cell.s) {
-                return;
-            }
-            if (!cellValue[row]) {
-                cellValue[row] = {};
-            }
-            cellValue[row][col] = { s: cell.s };
-        });
+
+        const { startRow, endRow } = range;
+        const startColumn = 0;
+        const endColumn = worksheet.getColumnCount() - 1;
+
+        // copy styles from the row above
+        const cellValue = copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, startRow - 1);
+
         const insertRowParams: IInsertRowCommandParams = {
             unitId,
             subUnitId,
             direction: Direction.UP,
             range: {
-                startRow: range.startRow,
-                endRow: range.startRow + rowCount - 1,
-                startColumn: 0,
-                endColumn: worksheet.getColumnCount() - 1,
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
             },
             cellValue,
         };
@@ -241,17 +236,26 @@ export const InsertRowAfterCommand: ICommand = {
         const subUnitId = worksheet.getSheetId();
         const count = range.endRow - range.startRow + 1;
 
+        const startRow = range.endRow + 1;
+        const endRow = range.endRow + count;
+        const startColumn = 0;
+        const endColumn = worksheet.getColumnCount() - 1;
+
+        // copy styles from the row below
+        const cellValue = copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, range.endRow);
+
         const insertRowParams: IInsertRowCommandParams = {
             unitId,
             subUnitId,
             direction: Direction.DOWN,
             range: {
-                startRow: range.endRow + 1,
-                endRow: range.endRow + count,
-                startColumn: 0,
-                endColumn: worksheet.getColumnCount() - 1,
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
                 rangeType: RANGE_TYPE.ROW,
             },
+            cellValue,
         };
 
         return accessor.get(ICommandService).executeCommand(InsertRowCommand.id, insertRowParams);
@@ -375,27 +379,23 @@ export const InsertColBeforeCommand: ICommand = {
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const count = range.endColumn - range.startColumn + 1;
-        const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
-        Range.foreach(range, (row, col) => {
-            const cell = worksheet.getCell(row, col);
-            if (!cell || !cell.s) {
-                return;
-            }
-            if (!cellValue[row]) {
-                cellValue[row] = {};
-            }
-            cellValue[row][col] = { s: cell.s };
-        });
+
+        const { startColumn, endColumn } = range;
+        const startRow = 0;
+        const endRow = worksheet.getRowCount() - 1;
+
+        // copy styles from the column before
+        const cellValue = copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, false, startColumn - 1);
+
         const insertColParams: IInsertColCommandParams = {
             unitId,
             subUnitId,
             direction: Direction.LEFT,
             range: {
-                startColumn: range.startColumn,
-                endColumn: range.startColumn + count - 1,
-                startRow: 0,
-                endRow: worksheet.getRowCount() - 1,
+                startColumn,
+                endColumn,
+                startRow,
+                endRow,
                 rangeType: RANGE_TYPE.COLUMN,
             },
             cellValue,
@@ -434,16 +434,25 @@ export const InsertColAfterCommand: ICommand = {
         const subUnitId = worksheet.getSheetId();
         const count = range.endColumn - range.startColumn + 1;
 
+        const startColumn = range.endColumn + 1;
+        const endColumn = range.endColumn + count;
+        const startRow = 0;
+        const endRow = worksheet.getRowCount() - 1;
+
+        // copy styles from the column after
+        const cellValue = copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, false, range.endColumn);
+
         const insertColParams: IInsertColCommandParams = {
             unitId,
             subUnitId,
             direction: Direction.RIGHT,
             range: {
-                startColumn: range.endColumn + 1,
-                endColumn: range.endColumn + count,
-                startRow: 0,
-                endRow: worksheet.getRowCount() - 1,
+                startColumn,
+                endColumn,
+                startRow,
+                endRow,
             },
+            cellValue,
         };
 
         return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);

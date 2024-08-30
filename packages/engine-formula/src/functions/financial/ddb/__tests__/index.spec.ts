@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
 import { Ddb } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 
@@ -33,7 +33,7 @@ describe('Test ddb function', () => {
             const period = NumberValueObject.create(1);
             const factor = NumberValueObject.create(2);
             const result = testFunction.calculate(cost, salvage, life, period, factor);
-            expect(result.getValue()).toStrictEqual(8000);
+            expect(result.getValue()).toStrictEqual(7999.999999999998);
         });
 
         it('Cost is normal string', () => {
@@ -41,7 +41,7 @@ describe('Test ddb function', () => {
             const salvage = NumberValueObject.create(3000);
             const life = NumberValueObject.create(6);
             const period = NumberValueObject.create(1);
-            const factor = NumberValueObject.create(2);
+            const factor = NullValueObject.create();
             const result = testFunction.calculate(cost, salvage, life, period, factor);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });
@@ -77,7 +77,7 @@ describe('Test ddb function', () => {
 
             const period2 = NumberValueObject.create(6);
             const result2 = testFunction.calculate(cost, salvage, life, period2, factor);
-            expect(result2.getValue()).toStrictEqual(160.49382716049513);
+            expect(result2.getValue()).toStrictEqual(160.49382716049558);
 
             const period3 = NumberValueObject.create(7);
             const result3 = testFunction.calculate(cost, salvage, life, period3, factor);
@@ -102,7 +102,7 @@ describe('Test ddb function', () => {
             const factor = NumberValueObject.create(2);
             const result = testFunction.calculate(cost, salvage, life, period, factor);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [8000, ErrorType.VALUE, 0, 0, ErrorType.NAME, 0],
+                [7999.999999999998, ErrorType.VALUE, 0, 0, ErrorType.NAME, 0],
             ]);
         });
     });

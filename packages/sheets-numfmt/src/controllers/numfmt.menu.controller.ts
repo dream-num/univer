@@ -39,6 +39,7 @@ export class NumfmtMenuController extends Disposable {
         @Inject(Injector) private _injector: Injector,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @Inject(IMenuService) private _menuService: IMenuService
+
     ) {
         super();
         this._initMenu();
@@ -54,16 +55,5 @@ export class NumfmtMenuController extends Disposable {
 
         this.disposeWithMe((this._componentManager.register(MORE_NUMFMT_TYPE_KEY, MoreNumfmtType)));
         this.disposeWithMe((this._componentManager.register(OPTIONS_KEY, Options)));
-    }
-
-    /**
-     * Set the currency symbol by setting the country code.
-     */
-    public setCurrencySymbolByCountryCode(symbol: keyof typeof countryCurrencyMap) {
-        this._currencySymbol$.next(symbol);
-    }
-
-    public getCurrencySymbol() {
-        return this._currencySymbol$.getValue();
     }
 }

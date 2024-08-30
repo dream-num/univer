@@ -48,7 +48,7 @@ describe('Test sech function', () => {
         it('Value is number string', () => {
             const value = StringValueObject.create('1.5');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(0.4250960349422805);
+            expect(result.getValue()).toBe(0.42509603494228054);
         });
 
         it('Value is normal string', () => {
@@ -89,7 +89,7 @@ describe('Test sech function', () => {
             const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [0.6480542736638855, ErrorType.VALUE, 0.5385722606783082, 0.6480542736638855, 1, 1],
-                [1, 7.440151952041671e-44, 0.19088406061175034, ErrorType.VALUE, 0.0993279274194332, ErrorType.NAME],
+                [1, 7.440151952041671e-44, 0.19088406061175034, ErrorType.VALUE, 0.09932792741943322, ErrorType.NAME],
             ]);
         });
     });

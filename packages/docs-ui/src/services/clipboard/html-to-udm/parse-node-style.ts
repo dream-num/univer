@@ -64,7 +64,7 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
 
         switch (cssRule) {
             case 'font-family': {
-                docStyles.ff = cssValue;
+                docStyles.ff = cssValue.replace(/^"/g, '').replace(/"$/g, '');
 
                 break;
             }
@@ -122,12 +122,17 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
             }
 
             case 'color': {
-                const color = new ColorKit(cssValue);
+                try {
+                    const color = new ColorKit(cssValue);
 
-                if (color.isValid) {
-                    docStyles.cl = {
-                        rgb: color.toRgbString(),
-                    };
+                    if (color.isValid) {
+                        docStyles.cl = {
+                            rgb: color.toRgbString(),
+                        };
+                    }
+                // eslint-disable-next-line unused-imports/no-unused-vars
+                } catch (_e) {
+                    // ignore
                 }
 
                 break;

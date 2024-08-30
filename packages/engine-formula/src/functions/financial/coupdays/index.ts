@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
+import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { calculateCoupdays } from '../../../basics/financial';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -26,7 +27,7 @@ export class Coupdays extends BaseFunction {
 
     override maxParams = 4;
 
-    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject) {
+    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject): BaseValueObject {
         const _basis = basis ?? NumberValueObject.create(0);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, frequency, _basis);
@@ -65,40 +66,7 @@ export class Coupdays extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        let result;
-
-        if (basisValue === 1) {
-            const settlementDate = excelSerialToDate(settlementSerialNumber);
-            const coupDate = excelSerialToDate(maturitySerialNumber);
-
-            coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
-
-            if (coupDate < settlementDate) {
-                coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
-            }
-
-            // eslint-disable-next-line
-            while (coupDate > settlementDate) {
-                coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequencyValue);
-            }
-
-            const beforeSettlementDateSerialNumber = excelDateSerial(coupDate);
-
-            coupDate.setUTCMonth(coupDate.getUTCMonth() + 12 / frequencyValue);
-
-            const afterSettlementDateSerialNumber = excelDateSerial(coupDate);
-
-            // special handle for excel
-            if (beforeSettlementDateSerialNumber < 0 && frequencyValue === 1) {
-                result = 365;
-            } else {
-                result = afterSettlementDateSerialNumber - beforeSettlementDateSerialNumber;
-            }
-        } else if (basisValue === 3) {
-            result = 365 / frequencyValue;
-        } else {
-            result = 360 / frequencyValue;
-        }
+        const result = calculateCoupdays(settlementSerialNumber, maturitySerialNumber, frequencyValue, basisValue);
 
         return NumberValueObject.create(result);
     }

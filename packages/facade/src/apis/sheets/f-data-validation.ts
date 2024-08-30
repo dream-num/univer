@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-import type { DataValidationType, IDataValidationRule } from '@univerjs/core';
-import { DataValidationErrorStyle } from '@univerjs/core';
+import type { DataValidationOperator, DataValidationType, IDataValidationRule, IDataValidationRuleOptions, IRange } from '@univerjs/core';
+import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
 
+import { DataValidationModel, getRuleOptions } from '@univerjs/data-validation';
+import type { IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
+import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { FDataValidationBuilder } from './f-data-validation-builder';
+import type { FWorksheet } from './f-worksheet';
+import { FRange } from './f-range';
 
 export class FDataValidation {
     rule: IDataValidationRule;
-    constructor(rule: IDataValidationRule) {
+    private _worksheet: FWorksheet | undefined;
+
+    constructor(rule: IDataValidationRule, worksheet?: FWorksheet) {
         this.rule = rule;
+        this._worksheet = worksheet;
     }
 
     /**
@@ -69,5 +77,167 @@ export class FDataValidation {
      */
     copy(): FDataValidationBuilder {
         return new FDataValidationBuilder(this.rule);
+    }
+
+    /**
+     * Gets whether the data validation rule is applied to the worksheet.
+     *
+     * @returns true if the rule is applied, false otherwise.
+     */
+    getApplied(): boolean {
+        if (!this._worksheet) {
+            return false;
+        }
+
+        const dataValidationModel = this._worksheet.getInject().get(DataValidationModel);
+        const currentRule = dataValidationModel.getRuleById(this._worksheet.getWorkbook().getUnitId(), this._worksheet.getSheetId(), this.rule.uid);
+
+        if (currentRule && currentRule.ranges.length) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Gets the ranges to which the data validation rule is applied.
+     *
+     * @returns An array of IRange objects representing the ranges to which the data validation rule is applied.
+     */
+    getRanges(): FRange[] {
+        if (!this.getAllowInvalid()) {
+            return [];
+        }
+
+        const workbook = this._worksheet?.getWorkbook();
+        const sheetId = this.getSheetId();
+        if (!sheetId) {
+            return [];
+        }
+        const worksheet = workbook?.getSheetBySheetId(sheetId);
+        if (!workbook || !worksheet) {
+            return [];
+        }
+
+        return this.rule.ranges.map((range: IRange) => this._worksheet?.getInject().createInstance(FRange, workbook, worksheet, range));
+    }
+
+    /**
+     * Gets the title of the error message dialog box.
+     *
+     * @returns The title of the error message dialog box.
+     */
+    getUnitId(): string | undefined {
+        return this._worksheet?.getWorkbook().getUnitId();
+    }
+
+    /**
+     * Gets the sheetId of the worksheet.
+     *
+     * @returns The sheetId of the worksheet.
+     */
+    getSheetId(): string | undefined {
+        return this._worksheet?.getSheetId();
+    }
+
+    /**
+     * Set Criteria for the data validation rule.
+     * @param type The type of data validation criteria.
+     * @param values An array containing the operator, formula1, and formula2 values.
+     * @returns true if the criteria is set successfully, false otherwise.
+     */
+    setCriteria(type: DataValidationType, values: [DataValidationOperator, string, string]): boolean {
+        if (this.getApplied()) {
+            const commandService = this._worksheet!.getInject().get(ICommandService);
+            const res = commandService.syncExecuteCommand(UpdateSheetDataValidationSettingCommand.id, {
+                unitId: this.getUnitId(),
+                subUnitId: this.getSheetId(),
+                ruleId: this.rule.uid,
+                setting: {
+                    operator: values[0],
+                    formula1: values[1],
+                    formula2: values[2],
+                    type: this.rule.type,
+                },
+            } as IUpdateSheetDataValidationSettingCommandParams);
+
+            if (!res) {
+                return false;
+            }
+        }
+
+        this.rule.operator = values[0];
+        this.rule.formula1 = values[1];
+        this.rule.formula2 = values[2];
+        this.rule.type = type;
+
+        return true;
+    }
+
+    /**
+     * Set the options for the data validation rule.
+     * @param options An object containing the options to set. `IDataValidationRuleOptions`
+     * @returns true if the options are set successfully, false otherwise.
+     */
+    setOptions(options: Partial<IDataValidationRuleOptions>): boolean {
+        if (this.getApplied()) {
+            const commandService = this._worksheet!.getInject().get(ICommandService);
+            const res = commandService.syncExecuteCommand(UpdateSheetDataValidationOptionsCommand.id, {
+                unitId: this.getUnitId(),
+                subUnitId: this.getSheetId(),
+                ruleId: this.rule.uid,
+                options: {
+                    ...getRuleOptions(this.rule),
+                    ...options,
+                },
+            } as IUpdateSheetDataValidationOptionsCommandParams);
+
+            if (!res) {
+                return false;
+            }
+        }
+
+        Object.assign(this.rule, options);
+        return true;
+    }
+
+    /**
+     * Set the ranges to the data validation rule.
+     * @param ranges new ranges array.
+     * @returns true if the ranges are set successfully, false otherwise.
+     */
+    setRanges(ranges: FRange[]): boolean {
+        if (this.getApplied()) {
+            const commandService = this._worksheet!.getInject().get(ICommandService);
+            const res = commandService.syncExecuteCommand(UpdateSheetDataValidationRangeCommand.id, {
+                unitId: this.getUnitId(),
+                subUnitId: this.getSheetId(),
+                ruleId: this.rule.uid,
+                ranges: ranges.map((range) => range.getRange()),
+            } as IUpdateSheetDataValidationRangeCommandParams);
+
+            if (!res) {
+                return false;
+            }
+        }
+
+        this.rule.ranges = ranges;
+        return true;
+    }
+
+    /**
+     * Delete the data validation rule from the worksheet.
+     * @returns true if the rule is deleted successfully, false otherwise.
+     */
+    delete(): boolean {
+        if (!this.getApplied()) {
+            return false;
+        }
+
+        const commandService = this._worksheet!.getInject().get(ICommandService);
+        return commandService.syncExecuteCommand(RemoveSheetDataValidationCommand.id, {
+            unitId: this.getUnitId(),
+            subUnitId: this.getSheetId(),
+            ruleId: this.rule.uid,
+        } as IRemoveSheetDataValidationCommandParams);
     }
 }

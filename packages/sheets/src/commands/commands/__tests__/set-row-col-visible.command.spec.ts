@@ -153,8 +153,12 @@ describe('Test row col hide/unhine commands', () => {
             await commandService.executeCommand(RedoCommand.id);
             expect(getRowRawVisible(0)).toBeFalsy();
 
-            selectRow(2, 2);
-            await commandService.executeCommand(SetRowHiddenCommand.id);
+            // Specify the parameter ranges as the third row
+            await commandService.executeCommand(SetRowHiddenCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                ranges: [{ startRow: 2, startColumn: 2, endRow: 2, endColumn: 2, rangeType: RANGE_TYPE.ROW }],
+            });
             expect(getRowRawVisible(2)).toBeFalsy();
 
             // select a range and invoke unhide command will unhide all
@@ -212,8 +216,12 @@ describe('Test row col hide/unhine commands', () => {
             await commandService.executeCommand(RedoCommand.id);
             expect(getColVisible(0)).toBeFalsy();
 
-            selectColumn(2, 2);
-            await commandService.executeCommand(SetColHiddenCommand.id);
+            // Specify the parameter ranges as the third column
+            await commandService.executeCommand(SetColHiddenCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                ranges: [{ startRow: 2, startColumn: 2, endRow: 2, endColumn: 2, rangeType: RANGE_TYPE.COLUMN }],
+            });
             expect(getColVisible(2)).toBeFalsy();
 
             // select a range and invoke unhide command will unhide all

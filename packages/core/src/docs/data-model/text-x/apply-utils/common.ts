@@ -548,7 +548,13 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     st: st - startIndex,
                     ed: ed - startIndex,
                 });
-                continue;
+
+                // https://github.com/dream-num/univer-pro/issues/2044.
+                if (startIndex === st) {
+                    textRun.ed = st;
+                } else {
+                    continue;
+                }
             } else if (st <= startIndex && ed >= endIndex) {
                 /**
                  * If the selection range is smaller than the current textRun,

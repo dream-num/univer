@@ -66,6 +66,7 @@ export class SheetsDrawingLoadController extends Disposable {
                 },
                 onLoad: (unitId, value) => {
                     this._sheetDrawingService.registerDrawingData(unitId, value);
+                    this._drawingManagerService.registerDrawingData(unitId, value);
                 },
             })
         );

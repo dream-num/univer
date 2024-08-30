@@ -193,8 +193,7 @@ describe('Test insert and remove rows cols commands', () => {
             // the merged cell should be moved down
             expect(getMergedInfo(3, 2)).toEqual({ startRow: 3, endRow: 4, startColumn: 2, endColumn: 2 });
             // Insert row style
-            expect(getCellStyle(1, 1)).toBe('s2');
-            expect(getCellStyle(2, 1)).toBe('s2');
+            expect(getCellStyle(1, 0)).toBe('s1');
 
             await commandService.executeCommand(UndoCommand.id);
             expect(getRowCount()).toBe(20);
@@ -209,7 +208,7 @@ describe('Test insert and remove rows cols commands', () => {
             expect(getRowCount()).toBe(initRowCount);
             expect(getCellStyle(2, 1)).toBe('s4');
             expect(getMergedInfo(2, 2)).toEqual({ startRow: 2, endRow: 3, startColumn: 2, endColumn: 2 });
-            const result = await commandService.executeCommand(InsertRowBeforeCommand.id);
+            const result = await commandService.executeCommand(InsertRowAfterCommand.id);
             // TODO: expect row height
             expect(result).toBeTruthy();
             expect(getRowCount()).toBe(21);
@@ -222,6 +221,15 @@ describe('Test insert and remove rows cols commands', () => {
             await commandService.executeCommand(RedoCommand.id);
             expect(getRowCount()).toBe(21);
         });
+
+        it("Should 'insert after' work, copy style", async () => {
+            selectRow(0, 0);
+            const result = await commandService.executeCommand(InsertRowAfterCommand.id);
+            expect(result).toBeTruthy();
+
+            // Insert row style
+            expect(getCellStyle(1, 0)).toBe('s1');
+        });
     });
 
     describe('Insert columns', () => {
@@ -233,8 +241,7 @@ describe('Test insert and remove rows cols commands', () => {
             expect(result).toBeTruthy();
             expect(getColCount()).toBe(21);
             // Insert column style
-            expect(getCellStyle(1, 1)).toBe('s2');
-            expect(getCellStyle(1, 2)).toBe('s2');
+            expect(getCellStyle(0, 1)).toBe('s1');
 
             const undoResult = await commandService.executeCommand(UndoCommand.id);
             expect(undoResult).toBeTruthy();
@@ -253,6 +260,16 @@ describe('Test insert and remove rows cols commands', () => {
             // expect a merged cell to expand and a merged cell to move
             expect(getMergedInfo(3, 3)).toEqual({ startRow: 2, endRow: 3, startColumn: 3, endColumn: 3 });
             expect(getMergedInfo(1, 4)).toEqual({ startRow: 1, endRow: 1, startColumn: 3, endColumn: 4 });
+        });
+
+        it("Should 'insert after' work, copy style", async () => {
+            selectColumn(0, 0);
+
+            const result = await commandService.executeCommand(InsertColAfterCommand.id);
+            expect(result).toBeTruthy();
+
+            // Insert column style
+            expect(getCellStyle(0, 1)).toBe('s1');
         });
     });
 
@@ -385,6 +402,7 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
     name: '',
     sheetOrder: [],
     styles: {
+        s1: { bg: { rgb: '#ff0000' } },
         s2: { bl: 0 },
         s3: { bl: 1 },
         s4: { fs: 12 },

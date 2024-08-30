@@ -29,7 +29,7 @@ export class Ppmt extends BaseFunction {
 
     override maxParams = 6;
 
-    override calculate(rate: BaseValueObject, per: BaseValueObject, nper: BaseValueObject, pv: BaseValueObject, fv?: BaseValueObject, type?: BaseValueObject) {
+    override calculate(rate: BaseValueObject, per: BaseValueObject, nper: BaseValueObject, pv: BaseValueObject, fv?: BaseValueObject, type?: BaseValueObject): BaseValueObject {
         const _fv = fv ?? NumberValueObject.create(0);
         const _type = type ?? NumberValueObject.create(0);
 

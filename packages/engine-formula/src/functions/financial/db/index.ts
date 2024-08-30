@@ -27,7 +27,7 @@ export class Db extends BaseFunction {
 
     override maxParams = 5;
 
-    override calculate(cost: BaseValueObject, salvage: BaseValueObject, life: BaseValueObject, period: BaseValueObject, month?: BaseValueObject) {
+    override calculate(cost: BaseValueObject, salvage: BaseValueObject, life: BaseValueObject, period: BaseValueObject, month?: BaseValueObject): BaseValueObject {
         let _month = month ?? NumberValueObject.create(12);
 
         if (_month.isNull()) {

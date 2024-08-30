@@ -58,6 +58,8 @@ import {
     InsertColMutation,
     InsertRowMutation,
     MAX_CELL_PER_SHEET_KEY,
+    RemoveColMutation,
+    RemoveRowMutation,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetWorksheetColWidthMutation,
@@ -132,7 +134,7 @@ export class SheetClipboardController extends RxDisposable {
         });
     }
 
-    private _init() {
+    private _init(): void {
         // register sheet clipboard commands
         [SheetCopyCommand, SheetCutCommand, SheetPasteCommand].forEach((command) =>
             this.disposeWithMe(this._commandService.registerMultipleCommand(command))
@@ -333,20 +335,30 @@ export class SheetClipboardController extends RxDisposable {
                         }
                     });
 
+                    const addRowRange = {
+                        startColumn: range.cols[0],
+                        endColumn: range.cols[range.cols.length - 1],
+                        endRow: range.rows[range.rows.length - 1],
+                        startRow: maxRow,
+                    };
+
                     const addRowMutation: IInsertRowMutationParams = {
                         unitId: unitId!,
                         subUnitId: subUnitId!,
-                        range: {
-                            startColumn: range.cols[0],
-                            endColumn: range.cols[range.cols.length - 1],
-                            endRow: range.rows[range.rows.length - 1],
-                            startRow: maxRow,
-                        },
+                        range: addRowRange,
                         rowInfo,
                     };
                     redoMutations.push({
                         id: InsertRowMutation.id,
                         params: addRowMutation,
+                    });
+                    undoMutations.push({
+                        id: RemoveRowMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            range: addRowRange,
+                        },
                     });
                 }
 
@@ -419,15 +431,16 @@ export class SheetClipboardController extends RxDisposable {
                 const pasteToCols = range.cols;
 
                 if (addingColsCount > 0) {
+                    const addColRange = {
+                        startRow: range.rows[0],
+                        endRow: range.rows[range.rows.length - 1],
+                        endColumn: range.cols[range.cols.length - 1],
+                        startColumn: maxColumn,
+                    };
                     const addColMutation: IInsertColMutationParams = {
                         unitId: unitId!,
                         subUnitId: subUnitId!,
-                        range: {
-                            startRow: range.rows[0],
-                            endRow: range.rows[range.rows.length - 1],
-                            endColumn: range.cols[range.cols.length - 1],
-                            startColumn: maxColumn,
-                        },
+                        range: addColRange,
                         colInfo: colProperties.slice(existingColsCount).map((property, index) => ({
                             w: property.width ? Math.max(+property.width, currentSheet!.getColumnWidth(pasteToCols[index])) : defaultColumnWidth,
                             hd: BooleanNumber.FALSE,
@@ -436,6 +449,14 @@ export class SheetClipboardController extends RxDisposable {
                     redoMutations.push({
                         id: InsertColMutation.id,
                         params: addColMutation,
+                    });
+                    undoMutations.push({
+                        id: RemoveColMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            range: addColRange,
+                        },
                     });
                 }
 

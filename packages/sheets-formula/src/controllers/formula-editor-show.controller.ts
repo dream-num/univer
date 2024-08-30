@@ -15,7 +15,8 @@
  */
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ColorKit, Disposable,
+import {
+    ColorKit, Disposable,
     ICommandService,
     ILogService,
     Inject,
@@ -37,6 +38,7 @@ import { SetColHiddenMutation, SetColVisibleMutation, SetRowHiddenMutation, SetR
 import {
     IEditorBridgeService,
     ISheetSelectionRenderService,
+    SELECTION_SHAPE_DEPTH,
     SelectionShape,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
@@ -257,7 +259,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
         if (!scene || !skeleton) return;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const control = new SelectionShape(scene, 100, false, this._themeService);
+        const control = new SelectionShape(scene, SELECTION_SHAPE_DEPTH.FORMULA_EDITOR_SHOW, this._themeService, false);
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
         control.setEvent(false);
         this._previousShape = control;

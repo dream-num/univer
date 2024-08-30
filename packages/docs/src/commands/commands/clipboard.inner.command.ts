@@ -86,14 +86,14 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor, params: IInnerPasteCommandParams) => {
         const { segmentId, textRanges, doc } = params;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selections = textSelectionManagerService.getCurrentTextRanges();
-        const { body, tableSource } = doc;
+        const { body, tableSource, drawings } = doc;
         if (!Array.isArray(selections) || selections.length === 0 || body == null) {
             return false;
         }
@@ -124,6 +124,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const rawActions: JSONXActions = [];
 
         const hasTable = !!body.tables?.length;
+        const hasCustomBlock = !!body.customBlocks?.length;
 
         // TODO: @JOCS A feature that has not yet been implemented,
         // and it is currently not possible to paste tables in the header and footer.
@@ -157,6 +158,27 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
                     const action = jsonX.insertOp(['tableSource', tableId], table);
                     rawActions.push(action!);
+                }
+            }
+
+            if (hasCustomBlock && drawings) {
+                const drawingLen = docDataModel.getSnapshot().drawingsOrder?.length ?? 0;
+
+                for (const block of cloneBody.customBlocks!) {
+                    const { blockId } = block;
+
+                    const drawingId = Tools.generateRandomId(6);
+
+                    block.blockId = drawingId;
+
+                    const drawing = Tools.deepClone(drawings[blockId]);
+                    drawing.drawingId = drawingId;
+
+                    const action = jsonX.insertOp(['drawings', drawingId], drawing);
+                    const orderAction = jsonX.insertOp(['drawingsOrder', drawingLen], drawingId);
+
+                    rawActions.push(action!);
+                    rawActions.push(orderAction!);
                 }
             }
 

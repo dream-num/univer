@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingSearch, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
@@ -61,7 +61,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
-        this._drawingAddListener();
     }
 
     /**
@@ -354,32 +353,5 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 }
             })
         );
-    }
-
-    private _drawingAddListener() {
-        this.disposeWithMe(
-            this._sheetDrawingService.add$.subscribe((params) => {
-                this._registerDrawing(params);
-            })
-        );
-    }
-
-    private _registerDrawing(params: IDrawingSearch[]) {
-        (params).forEach((param) => {
-            const drawingParam = this._sheetDrawingService.getDrawingByParam(param) as ISheetDrawing;
-
-            if (drawingParam == null || drawingParam.unitId !== this._context.unitId) {
-                return;
-            }
-
-            const { sheetTransform } = drawingParam;
-
-            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._skeletonManagerService);
-        });
-
-        const unitId = params[0].unitId;
-
-        this._drawingManagerService.registerDrawingData(unitId, this._sheetDrawingService.getDrawingDataForUnit(unitId));
-        this._drawingManagerService.initializeNotification(unitId);
     }
 }

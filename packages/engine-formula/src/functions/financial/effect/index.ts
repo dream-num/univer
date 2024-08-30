@@ -25,7 +25,7 @@ export class Effect extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(nominalRate: BaseValueObject, npery: BaseValueObject) {
+    override calculate(nominalRate: BaseValueObject, npery: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(nominalRate, npery);
 
         if (isError) {

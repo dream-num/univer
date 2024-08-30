@@ -25,7 +25,7 @@ export class Dollarfr extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(decimalDollar: BaseValueObject, fraction: BaseValueObject) {
+    override calculate(decimalDollar: BaseValueObject, fraction: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(decimalDollar, fraction);
 
         if (isError) {

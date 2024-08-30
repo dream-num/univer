@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            coupon: { name: 'lãi suất coupon hàng năm.', detail: 'Lãi suất coupon hàng năm của một chứng khoán.' },
+            yld: { name: 'tỷ suất lợi nhuận hàng năm.', detail: 'Tỷ suất lợi nhuận hàng năm của một chứng khoán có thể bán được.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'dòng tiền', detail: 'Tham chiếu đến một mảng hoặc ô chứa các số dùng để tính tỷ suất hoàn vốn nội bộ.\n1.Các giá trị phải chứa ít nhất một giá trị dương và một giá trị âm để tính tỷ suất hoàn vốn nội bộ được trả về.\n2.IRR sử dụng chuỗi giá trị để minh họa chuỗi dòng tiền. Đảm bảo nhập các giá trị chi phí và lợi ích theo thứ tự bạn yêu cầu.\n3.Nếu mảng hoặc tham chiếu chứa văn bản, giá trị logic hoặc ô trống thì các giá trị này sẽ bị bỏ qua.' },
+            guess: { name: 'giá trị ước tính', detail: 'Ước tính tính toán IRR của hàm.' },
         },
     },
     ISPMT: {
@@ -420,6 +424,24 @@ export default {
             pv: { name: 'giá trị hiện tại', detail: 'Giá trị hiện tại.' },
         },
     },
+    MDURATION: {
+        description: 'Trả về thời hạn đã sửa đổi của Macauley cho một chứng khoán có mệnh giá giả định là 100 đô la',
+        abstract: 'Trả về thời hạn đã sửa đổi của Macauley cho một chứng khoán có mệnh giá giả định là 100 đô la',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/mduration-%E5%87%BD%E6%95%B0-7c5ae5c5-e22a-4c6e-bfc5-43c7b41f1974',
+            },
+        ],
+        functionParameter: {
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            coupon: { name: 'lãi suất coupon hàng năm.', detail: 'Lãi suất coupon hàng năm của một chứng khoán.' },
+            yld: { name: 'tỷ suất lợi nhuận hàng năm.', detail: 'Tỷ suất lợi nhuận hàng năm của một chứng khoán có thể bán được.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu lãi hàng năm.' },
+            basis: { name: 'điểm chuẩn', detail: 'Cơ sở năm được dùng.' },
+        },
+    },
     MIRR: {
         description: 'Trả về tỷ lệ hoàn vốn nội bộ điều chỉnh cho các dòng tiền định kỳ, có tính đến chi phí đầu tư và lãi suất của khoản đầu tư',
         abstract: 'Trả về tỷ lệ hoàn vốn nội bộ điều chỉnh cho các dòng tiền định kỳ, có tính đến chi phí đầu tư và lãi suất của khoản đầu tư',
@@ -430,8 +452,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'dòng tiền', detail: 'Một mảng hoặc tham chiếu đến một ô chứa số. Các giá trị này đại diện cho một loạt chi phí định kỳ (giá trị âm) và lợi ích (giá trị dương).\n1.Các giá trị phải chứa ít nhất một giá trị dương và một giá trị âm để tính tỷ suất hoàn vốn nội bộ được sửa đổi. Ngược lại, MIRR trả về #DIV/0! .\n2.Tuy nhiên, nếu mảng hoặc tham số tham chiếu chứa văn bản, giá trị logic hoặc ô trống thì các giá trị đó sẽ bị bỏ qua; tuy nhiên, các ô chứa giá trị 0 sẽ được tính.' },
+            financeRate: { name: 'Lãi suất tài trợ', detail: 'Lãi suất trả cho các khoản tiền được sử dụng trong dòng tiền.' },
+            reinvestRate: { name: 'tỷ suất sinh lợi tái đầu tư', detail: 'Tỷ suất lợi nhuận của dòng tiền tái đầu tư.' },
         },
     },
     NOMINAL: {
@@ -475,8 +498,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'tỷ lệ chiết khấu', detail: 'Tỷ lệ chiết khấu trong một thời gian nhất định.' },
+            value1: { name: 'dòng tiền 1', detail: 'Đây là các tham số từ 1 đến 254 thể hiện chi phí và thu nhập.' },
+            value2: { name: 'dòng tiền 2', detail: 'Đây là các tham số từ 1 đến 254 thể hiện chi phí và thu nhập.' },
         },
     },
     ODDFPRICE: {
@@ -489,8 +513,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            issue: { name: 'ngày phát hành', detail: 'Ngày phát hành chứng khoán.' },
+            firstCoupon: { name: 'ngày phiếu lãi đầu tiên', detail: 'Ngày phát hành phiếu giảm giá đầu tiên của chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            yld: { name: 'lợi suất hàng năm', detail: 'Lợi suất hàng năm của chứng khoán.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu giảm giá mỗi năm. Đối với các khoản thanh toán hàng năm, tần suất = 1; đối với các khoản thanh toán nửa năm, tần suất = 2; đối với các khoản thanh toán hàng quý, tần suất = 4.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     ODDFYIELD: {
@@ -503,8 +534,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            issue: { name: 'ngày phát hành', detail: 'Ngày phát hành chứng khoán.' },
+            firstCoupon: { name: 'ngày phiếu lãi đầu tiên', detail: 'Ngày phát hành phiếu giảm giá đầu tiên của chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            pr: { name: 'giá của', detail: 'Giá của chứng khoán.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu giảm giá mỗi năm. Đối với các khoản thanh toán hàng năm, tần suất = 1; đối với các khoản thanh toán nửa năm, tần suất = 2; đối với các khoản thanh toán hàng quý, tần suất = 4.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     ODDLPRICE: {
@@ -517,8 +555,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            lastInterest: { name: 'ngày thanh toán lãi cuối', detail: 'Ngày thanh toán lãi cuối cùng của chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            yld: { name: 'lợi suất hàng năm', detail: 'Lợi suất hàng năm của chứng khoán.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu giảm giá mỗi năm. Đối với các khoản thanh toán hàng năm, tần suất = 1; đối với các khoản thanh toán nửa năm, tần suất = 2; đối với các khoản thanh toán hàng quý, tần suất = 4.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     ODDLYIELD: {
@@ -531,8 +575,29 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            lastInterest: { name: 'ngày thanh toán lãi cuối', detail: 'Ngày thanh toán lãi cuối cùng của chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            pr: { name: 'giá của', detail: 'Giá của chứng khoán.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu giảm giá mỗi năm. Đối với các khoản thanh toán hàng năm, tần suất = 1; đối với các khoản thanh toán nửa năm, tần suất = 2; đối với các khoản thanh toán hàng quý, tần suất = 4.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
+        },
+    },
+    PDURATION: {
+        description: 'Trả về số kỳ hạn cần thiết để một khoản đầu tư đạt đến giá trị đã xác định.',
+        abstract: 'Trả về số kỳ hạn cần thiết để một khoản đầu tư đạt đến giá trị đã xác định.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/pduration-%E5%87%BD%E6%95%B0-44f33460-5be5-4c90-b857-22308892adaf',
+            },
+        ],
+        functionParameter: {
+            rate: { name: 'lãi suất', detail: 'lãi suất của mỗi kỳ hạn.' },
+            pv: { name: 'giá trị hiện tại', detail: 'giá trị hiện tại của khoản đầu tư.' },
+            fv: { name: 'giá trị tương lai', detail: 'giá trị tương lai được kỳ vọng của khoản đầu tư.' },
         },
     },
     PMT: {
@@ -580,8 +645,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            yld: { name: 'lợi suất hàng năm', detail: 'Lợi suất hàng năm của chứng khoán.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu giảm giá mỗi năm. Đối với các khoản thanh toán hàng năm, tần suất = 1; đối với các khoản thanh toán nửa năm, tần suất = 2; đối với các khoản thanh toán hàng quý, tần suất = 4.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     PRICEDISC: {
@@ -594,8 +664,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            discount: { name: 'lãi suất chiết', detail: 'Lãi suất chiết khấu đối với chứng khoán.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     PRICEMAT: {
@@ -608,8 +681,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            issue: { name: 'ngày phát hành', detail: 'Ngày phát hành chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            yld: { name: 'lợi suất hàng năm', detail: 'Lợi suất hàng năm của chứng khoán.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     PV: {
@@ -657,8 +734,26 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            investment: { name: 'số tiền đầu tư', detail: 'Số tiền đầu tư vào chứng khoán có thể bán được.' },
+            discount: { name: 'lãi suất chiết', detail: 'Lãi suất chiết khấu đối với chứng khoán.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
+        },
+    },
+    RRI: {
+        description: 'Trả về một lãi suất tương đương cho sự tăng trưởng của một khoản đầu tư.',
+        abstract: 'Trả về một lãi suất tương đương cho sự tăng trưởng của một khoản đầu tư.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/rri-%E5%87%BD%E6%95%B0-6f5822d8-7ef1-4233-944c-79e8172930f4',
+            },
+        ],
+        functionParameter: {
+            nper: { name: 'số kỳ hạn của khoản đầu tư.', detail: 'Nper là số kỳ hạn của khoản đầu tư.' },
+            pv: { name: 'giá trị hiện tại', detail: 'Pv là giá trị hiện tại của khoản đầu tư.' },
+            fv: { name: 'giá trị tương lai', detail: 'Fv là giá trị tương lai của khoản đầu tư.' },
         },
     },
     SLN: {
@@ -671,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'giá trị ban đầu của tài sản', detail: 'Giá trị ban đầu của tài sản.' },
+            salvage: { name: 'giá trị còn lại của tài sản', detail: 'Giá trị khi kết thúc khấu hao (đôi khi được gọi là giá trị thu hồi của tài sản).' },
+            life: { name: 'thời gian sử dụng tài sản', detail: 'Số thời gian khấu hao của một tài sản (đôi khi còn được gọi là thời gian sử dụng hữu ích của tài sản).' },
         },
     },
     SYD: {
@@ -685,8 +781,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'giá trị ban đầu của tài sản', detail: 'Giá trị ban đầu của tài sản.' },
+            salvage: { name: 'giá trị còn lại của tài sản', detail: 'Giá trị khi kết thúc khấu hao (đôi khi được gọi là giá trị thu hồi của tài sản).' },
+            life: { name: 'thời gian sử dụng tài sản', detail: 'Số thời gian khấu hao của một tài sản (đôi khi còn được gọi là thời gian sử dụng hữu ích của tài sản).' },
+            per: { name: 'thời kỳ', detail: 'Chu kỳ và phải sử dụng cùng đơn vị với cuộc sống.' },
         },
     },
     TBILLEQ: {
@@ -699,8 +797,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán trái phiếu kho bạc.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của trái phiếu kho bạc.' },
+            discount: { name: 'lãi suất chiết', detail: 'Lãi suất chiết khấu của trái phiếu kho bạc.' },
         },
     },
     TBILLPRICE: {
@@ -713,8 +812,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán trái phiếu kho bạc.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của trái phiếu kho bạc.' },
+            discount: { name: 'lãi suất chiết', detail: 'Lãi suất chiết khấu của trái phiếu kho bạc.' },
         },
     },
     TBILLYIELD: {
@@ -727,8 +827,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán trái phiếu kho bạc.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của trái phiếu kho bạc.' },
+            pr: { name: 'giá', detail: 'Giá trái phiếu kho bạc tính theo mệnh giá 100 đô la.' },
         },
     },
     VDB: {
@@ -741,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'trị giá', detail: 'Chi phí của tài sản.' },
+            salvage: { name: 'giá trị còn lại', detail: 'Giá trị khi kết thúc khấu hao (đôi khi được gọi là giá trị thu hồi của tài sản).' },
+            life: { name: 'tuổi thọ sử dụng', detail: 'Số thời gian khấu hao của một tài sản (đôi khi còn được gọi là thời gian sử dụng hữu ích của tài sản).' },
+            startPeriod: { name: 'kỳ đầu tiên', detail: 'Kỳ đầu tiên mà bạn muốn tính khấu hao.' },
+            endPeriod: { name: 'kỳ kết thúc', detail: 'Kỳ kết thúc mà bạn muốn tính khấu hao.' },
+            factor: { name: 'nhân tố', detail: 'Tỷ lệ suy giảm số dư. Nếu bỏ qua yếu tố ảnh hưởng thì giả định là 2 (phương pháp số dư giảm dần kép).' },
+            noSwitch: { name: 'không chuyển đổi', detail: 'Giá trị logic chỉ định liệu có nên chuyển sang khấu hao theo đường thẳng hay không khi mức khấu hao lớn hơn phép tính số dư giảm dần.' },
         },
     },
     XIRR: {
@@ -755,8 +861,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'dòng tiền', detail: 'Một chuỗi các dòng tiền tương ứng với thời điểm thanh toán theo ngày. Khoản trả trước là tùy chọn và liên quan đến chi phí hoặc khoản thanh toán khi bắt đầu đầu tư. Nếu giá trị đầu tiên là chi phí hoặc khoản thanh toán thì giá trị đó phải âm. Tất cả các khoản thanh toán tiếp theo được chiết khấu trên cơ sở 365 ngày/năm. Chuỗi giá trị phải chứa ít nhất một giá trị dương và một giá trị âm.' },
+            dates: { name: 'bảng ngày tháng', detail: 'Lịch trình ngày thanh toán tương ứng với các khoản thanh toán dòng tiền. Ngày tháng có thể xuất hiện theo bất kỳ thứ tự nào.' },
+            guess: { name: 'giá trị ước tính', detail: 'Ước tính kết quả của phép tính hàm XIRR.' },
         },
     },
     XNPV: {
@@ -769,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'tỷ lệ chiết khấu', detail: 'Tỷ lệ chiết khấu áp dụng cho dòng tiền.' },
+            values: { name: 'dòng tiền', detail: 'Một chuỗi các dòng tiền tương ứng với thời điểm thanh toán theo ngày. Khoản trả trước là tùy chọn và liên quan đến chi phí hoặc khoản thanh toán khi bắt đầu đầu tư. Nếu giá trị đầu tiên là chi phí hoặc khoản thanh toán thì giá trị đó phải âm. Tất cả các khoản thanh toán tiếp theo được chiết khấu trên cơ sở 365 ngày/năm. Chuỗi giá trị phải chứa ít nhất một giá trị dương và một giá trị âm.' },
+            dates: { name: 'bảng ngày tháng', detail: 'Lịch trình ngày thanh toán tương ứng với các khoản thanh toán dòng tiền. Ngày tháng có thể xuất hiện theo bất kỳ thứ tự nào.' },
         },
     },
     YIELD: {
@@ -783,8 +891,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            pr: { name: 'giá', detail: 'Giá chứng khoán tính theo mệnh giá 100 đô la.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            frequency: { name: 'tần số', detail: 'Số lần thanh toán phiếu giảm giá mỗi năm. Đối với các khoản thanh toán hàng năm, tần suất = 1; đối với các khoản thanh toán nửa năm, tần suất = 2; đối với các khoản thanh toán hàng quý, tần suất = 4.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     YIELDDISC: {
@@ -797,8 +910,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            pr: { name: 'giá', detail: 'Giá chứng khoán tính theo mệnh giá 100 đô la.' },
+            redemption: { name: 'giá trị chuộc lại', detail: 'Giá trị hoàn lại của chứng khoán trên mỗi mệnh giá 100 đô la.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
     YIELDMAT: {
@@ -811,8 +927,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'ngày thanh toán', detail: 'Ngày thanh toán chứng khoán.' },
+            maturity: { name: 'ngày đáo hạn', detail: 'Ngày đáo hạn của chứng khoán.' },
+            issue: { name: 'ngày phát hành', detail: 'Ngày phát hành chứng khoán.' },
+            rate: { name: 'lãi suất', detail: 'Lãi suất chứng khoán.' },
+            pr: { name: 'giá', detail: 'Giá chứng khoán tính theo mệnh giá 100 đô la.' },
+            basis: { name: 'cơ sở', detail: 'Loại cơ sở tính ngày cần sử dụng.' },
         },
     },
 };

@@ -343,11 +343,11 @@ export class Scene extends ThinScene {
         return null;
     }
 
-    getLayers() {
+    getLayers(): Layer[] {
         return this._layers;
     }
 
-    getLayer(zIndex: number = 1) {
+    getLayer(zIndex: number = 1): Layer {
         for (const layer of this._layers) {
             if (layer.zIndex === zIndex) {
                 return layer;
@@ -367,11 +367,18 @@ export class Scene extends ThinScene {
         return maxIndex;
     }
 
-    addLayer(...argument: Layer[]) {
+    addLayer(...argument: Layer[]): void {
         this._layers.push(...argument);
     }
 
-    override addObjects(objects: BaseObject[], zIndex: number = 1) {
+    /**
+     * Add objects to Layer( Layer is specfied by zIndex)
+     * If object is a group, insert all its children and group itself to _objects[].
+     * @param objects
+     * @param zIndex
+     * @returns {Scene} this
+     */
+    override addObjects(objects: BaseObject[], zIndex: number = 1): Scene {
         this.getLayer(zIndex)?.addObjects(objects);
         this._addObject$.next(this);
         return this;
@@ -379,21 +386,23 @@ export class Scene extends ThinScene {
 
     /**
      * Add object to Layer (Layer is specified by zIndex).
+     * If object is a group, insert all its children and group itself to _objects[].
      * @param o
      * @param zIndex layer index
-     * @returns scene
+     * @returns {Scene} scene
      */
-    override addObject(o: BaseObject, zIndex: number = 1) {
+    override addObject(o: BaseObject, zIndex: number = 1): Scene {
         this.getLayer(zIndex)?.addObject(o);
         this._addObject$.next(this);
         return this;
     }
 
     /**
-     * make object parent to scene
+     * Set Scene as object parent, if object has no parent.
      * @param o
+     * @returns {void}
      */
-    override setObjectBehavior(o: BaseObject) {
+    override setObjectBehavior(o: BaseObject): void {
         if (!o.parent) {
             o.parent = this;
         }
@@ -403,7 +412,8 @@ export class Scene extends ThinScene {
         o.onIsAddedToParent$.emitEvent(this);
     }
 
-    removeObject(object?: BaseObject | string) {
+    // Why? return values is so strange! removeObject should return true/false, or didn't return anything.
+    removeObject(object?: BaseObject | string): Nullable<Scene> {
         if (object == null) {
             return;
         }
@@ -414,7 +424,7 @@ export class Scene extends ThinScene {
         return this;
     }
 
-    removeObjects(objects?: BaseObject[] | string[]) {
+    removeObjects(objects?: BaseObject[] | string[]): Nullable<Scene> {
         if (objects == null) {
             return;
         }
@@ -439,7 +449,7 @@ export class Scene extends ThinScene {
     //     return this;
     // }
 
-    getObjectsByLayer(zIndex: number) {
+    getObjectsByLayer(zIndex: number): BaseObject[] {
         const objects: BaseObject[] = [];
         this._layers.sort(sortRules);
         for (const layer of this._layers) {
@@ -451,10 +461,23 @@ export class Scene extends ThinScene {
     }
 
     /**
-     * get objects which is visible and not in a group in each layer.
+     * Get all objects of each Layer.
+     * @returns {BaseObject[]} objects
+     */
+    getAllObjects(): BaseObject[] {
+        const objects: BaseObject[] = [];
+        this._layers.sort(sortRules);
+        for (const layer of this._layers) {
+            objects.push(...layer.getObjects());
+        }
+        return objects;
+    }
+
+    /**
+     * Get objects which is visible and not in a group in each layer.
      * @returns BaseObject[]
      */
-    getAllObjects() {
+    getAllObjectsByOrder(): BaseObject[] {
         const objects: BaseObject[] = [];
         this._layers.sort(sortRules);
         for (const layer of this._layers) {
@@ -468,7 +491,7 @@ export class Scene extends ThinScene {
      * @param isDesc
      * @returns BaseObject[]
      */
-    getAllObjectsByOrder(isDesc: boolean = false) {
+    getAllObjectsByDescOrder(isDesc: boolean = false): BaseObject[] {
         const objects: BaseObject[] = [];
         const useSortRules = isDesc ? sortRulesByDesc : sortRules;
         this._layers.sort(useSortRules);
@@ -478,7 +501,12 @@ export class Scene extends ThinScene {
         return objects;
     }
 
-    getAllObjectsByOrderForPick(isDesc: boolean = false) {
+    /**
+     * Get visible and evented objects.
+     * @param isDesc
+     * @returns {BaseObject[]} objects
+     */
+    getAllObjectsByOrderForPick(isDesc: boolean = false): BaseObject[] {
         const objects: BaseObject[] = [];
         const useSortRules = isDesc ? sortRulesByDesc : sortRules;
         this._layers.sort(useSortRules);
@@ -488,7 +516,7 @@ export class Scene extends ThinScene {
         return objects;
     }
 
-    override getObject(oKey: string) {
+    override getObject(oKey: string): Nullable<BaseObject> {
         for (const layer of this._layers) {
             const objects = layer.getObjectsByOrder();
             for (const object of objects) {
@@ -499,7 +527,7 @@ export class Scene extends ThinScene {
         }
     }
 
-    getObjectIncludeInGroup(oKey: string) {
+    getObjectIncludeInGroup(oKey: string): Nullable<BaseObject> {
         for (const layer of this._layers) {
             const objects = layer.getObjects();
             for (const object of objects) {

@@ -76,6 +76,7 @@ function parseStyleByProperty(styles: CSSStyleDeclaration | Record<string, strin
     }
 }
 
+// eslint-disable-next-line complexity
 function handleStyle(cssRule: string, cssValue: string, docStyles: ITextStyle) {
     switch (cssRule) {
         case 'font-family':
@@ -115,9 +116,17 @@ function handleStyle(cssRule: string, cssValue: string, docStyles: ITextStyle) {
             break;
         }
         case 'color': {
-            const color = new ColorKit(cssValue);
-            if (color.isValid) {
-                docStyles.cl = { rgb: color.toRgbString() };
+            try {
+                const color = new ColorKit(cssValue);
+
+                if (color.isValid) {
+                    docStyles.cl = {
+                        rgb: color.toRgbString(),
+                    };
+                }
+            // eslint-disable-next-line unused-imports/no-unused-vars
+            } catch (_e) {
+                // ignore
             }
             break;
         }

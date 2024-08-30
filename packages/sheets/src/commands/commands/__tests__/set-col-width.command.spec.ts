@@ -133,4 +133,12 @@ describe('Test set col width commands', () => {
         expect(getColumnWidth(2)).toBe(40);
         expect(getColumnWidth(5)).toBe(40);
     });
+
+    it('Direct change col widths with ranges', async () => {
+        await commandService.executeCommand<ISetColWidthCommandParams>(SetColWidthCommand.id, {
+            value: 50,
+            ranges: [{ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 }],
+        });
+        expect(getColumnWidth(1)).toBe(50);
+    });
 });

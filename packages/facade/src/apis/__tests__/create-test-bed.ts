@@ -30,7 +30,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { ActiveDirtyManagerService, AstRootNodeFactory, AstTreeBuilder, CalculateController, CalculateFormulaService, DefinedNamesService, DependencyManagerService, FeatureCalculationManagerService, FormulaCurrentConfigService, FormulaDataModel, FormulaDependencyGenerator, FormulaRuntimeService, FunctionNodeFactory, FunctionService, IActiveDirtyManagerService, IDefinedNamesService, IDependencyManagerService, IFeatureCalculationManagerService, IFormulaCurrentConfigService, IFormulaRuntimeService, IFunctionService, Interpreter, IOtherFormulaManagerService, ISuperTableService, LambdaNodeFactory, LambdaParameterNodeFactory, Lexer, LexerTreeBuilder, OperatorNodeFactory, OtherFormulaManagerService, PrefixNodeFactory, ReferenceNodeFactory, SuffixNodeFactory, SuperTableService, UnionNodeFactory, ValueNodeFactory } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
     RangeProtectionRuleModel,
@@ -59,6 +59,8 @@ import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, Co
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationModel, SheetDataValidationManager, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { FUniver } from '../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -145,7 +147,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 },
             ]);
 
-            // injector.add([IFunctionService, { useClass: FunctionService }]);
+            injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
@@ -155,15 +157,13 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([IPlatformService, { useClass: PlatformService }]);
             injector.add([SheetSkeletonManagerService]);
             injector.add([FormulaDataModel]);
-            // injector.add([LexerTreeBuilder]);
+            injector.add([LexerTreeBuilder]);
             injector.add([RefRangeService]);
             injector.add([WorksheetPermissionService]);
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorksheetProtectionRuleModel]);
-
-            registerFormulaDependencies(injector);
 
             const renderManagerService = injector.get(IRenderManagerService);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);
@@ -186,6 +186,10 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 [SheetsDataValidationValidatorService],
 
                 // sheets filter
+                // comment
+                [SheetsThreadCommentModel],
+                [ThreadCommentModel],
+                [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
             ] as Dependency[]).forEach((d) => {
                 injector.add(d);
             });
@@ -235,35 +239,4 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         univerAPI,
         injector,
     };
-}
-
-function registerFormulaDependencies(injector: Injector) {
-    injector.add([CalculateFormulaService]);
-    injector.add([Lexer]);
-    injector.add([LexerTreeBuilder]);
-
-    injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
-    injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
-    injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
-    injector.add([IFunctionService, { useClass: FunctionService }]);
-    injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
-    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-    injector.add([ISuperTableService, { useClass: SuperTableService }]);
-    injector.add([CalculateController]);
-
-    injector.add([IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }]);
-    injector.add([FormulaDependencyGenerator]);
-    injector.add([Interpreter]);
-    injector.add([AstTreeBuilder]);
-
-    injector.add([AstRootNodeFactory]);
-    injector.add([FunctionNodeFactory]);
-    injector.add([LambdaNodeFactory]);
-    injector.add([LambdaParameterNodeFactory]);
-    injector.add([OperatorNodeFactory]);
-    injector.add([PrefixNodeFactory]);
-    injector.add([ReferenceNodeFactory]);
-    injector.add([SuffixNodeFactory]);
-    injector.add([UnionNodeFactory]);
-    injector.add([ValueNodeFactory]);
 }

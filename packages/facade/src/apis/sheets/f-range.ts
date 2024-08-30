@@ -733,7 +733,7 @@ export class FRange {
      * @param popup The popup to attach
      * @returns The disposable object to detach the popup, if the popup is not attached, return `null`.
      */
-    attachPopupToCell(popup: IFCanvasPopup): Nullable<IDisposable> {
+    attachPopup(popup: IFCanvasPopup): Nullable<IDisposable> {
         const { key, disposableCollection } = transformComponentKey(popup, this._injector.get(ComponentManager));
         const sheetsPopupService = this._injector.get(SheetCanvasPopManagerService);
         const disposePopup = sheetsPopupService.attachPopupToCell(
@@ -774,6 +774,11 @@ export class FRange {
         return null;
     }
 
+    /**
+     * Add a comment to the start cell in the current range.
+     * @param content The content of the comment.
+     * @returns Whether the comment is added successfully.
+     */
     addComment(content: IDocumentBody): Promise<boolean> {
         const injector = this._injector;
         const currentComment = this.getComment()?.getCommentData();
@@ -802,6 +807,10 @@ export class FRange {
         });
     }
 
+    /**
+     * Clear the comment of the start cell in the current range.
+     * @returns Whether the comment is cleared successfully.
+     */
     clearComment(): Promise<boolean> {
         const injector = this._injector;
         const currentComment = this.getComment()?.getCommentData();

@@ -39,6 +39,7 @@ import { DataValidationPanelService } from './services/data-validation-panel.ser
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
 import { DataValidationPermissionController } from './controllers/dv-permission.controller';
 import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
+import { DataValidationRemoveSheetController } from './controllers/dv-remove-sheet.controller';
 
 @DependentOn(UniverDataValidationPlugin, UniverSheetsPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {
@@ -81,6 +82,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationCopyPasteController],
             [DataValidationFormulaController],
             [DataValidationRejectInputController],
+            [DataValidationRemoveSheetController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });

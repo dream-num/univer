@@ -22,6 +22,7 @@ import type { IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidatio
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 import type { FWorksheet } from './f-worksheet';
+import { FRange } from './f-range';
 
 export class FDataValidation {
     rule: IDataValidationRule;
@@ -102,8 +103,22 @@ export class FDataValidation {
      *
      * @returns An array of IRange objects representing the ranges to which the data validation rule is applied.
      */
-    getRanges(): IRange[] {
-        return this.rule.ranges;
+    getRanges(): FRange[] {
+        if (!this.getAllowInvalid()) {
+            return [];
+        }
+
+        const workbook = this._worksheet?.getWorkbook();
+        const sheetId = this.getSheetId();
+        if (!sheetId) {
+            return [];
+        }
+        const worksheet = workbook?.getSheetBySheetId(sheetId);
+        if (!workbook || !worksheet) {
+            return [];
+        }
+
+        return this.rule.ranges.map((range: IRange) => this._worksheet?.getInject().createInstance(FRange, workbook, worksheet, range));
     }
 
     /**
@@ -190,14 +205,14 @@ export class FDataValidation {
      * @param ranges new ranges array.
      * @returns true if the ranges are set successfully, false otherwise.
      */
-    setRanges(ranges: IRange[]): boolean {
+    setRanges(ranges: FRange[]): boolean {
         if (this.getApplied()) {
             const commandService = this._worksheet!.getInject().get(ICommandService);
             const res = commandService.syncExecuteCommand(UpdateSheetDataValidationRangeCommand.id, {
                 unitId: this.getUnitId(),
                 subUnitId: this.getSheetId(),
                 ruleId: this.rule.uid,
-                ranges,
+                ranges: ranges.map((range) => range.getRange()),
             } as IUpdateSheetDataValidationRangeCommandParams);
 
             if (!res) {

@@ -538,8 +538,8 @@ export class SheetsFilterController extends Disposable {
                     endRow: newEnd,
                 },
             };
-            redos.unshift({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
-            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+            redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams }, { id: ReCalcSheetsFilterMutation.id, params: { unitId, subUnitId } });
+            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } }, { id: ReCalcSheetsFilterMutation.id, params: { unitId, subUnitId } });
         }
         return {
             redos,

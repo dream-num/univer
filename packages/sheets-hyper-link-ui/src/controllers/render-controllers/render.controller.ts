@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { BooleanNumber, Disposable, Inject, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
+import { Disposable, Inject, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
@@ -81,19 +81,11 @@ export class SheetsHyperLinkRenderManagerController extends Disposable {
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
                         const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
-                        const styleSheet = this._themeService.getCurrentTheme();
 
                         if (link) {
                             return next({
                                 ...cell,
-                                interceptorStyle: {
-                                    ul: {
-                                        s: BooleanNumber.TRUE,
-                                    },
-                                    cl: {
-                                        rgb: styleSheet.blue500,
-                                    },
-                                },
+                                linkUrl: link.payload,
                             });
                         }
 

@@ -39,7 +39,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
 
     private _initHoverListener() {
         this.disposeWithMe(
-            this._hoverManagerService.currentCell$.pipe(debounceTime(200)).subscribe((currentCell) => {
+            this._hoverManagerService.currentCellWithDoc$.pipe(debounceTime(200)).subscribe((currentCell) => {
                 if (!currentCell) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
@@ -91,6 +91,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     col: targetCol,
                     editPermission,
                     copyPermission,
+                    richTextLink: currentCell.customRange,
                 });
             })
         );

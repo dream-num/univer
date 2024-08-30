@@ -44,12 +44,17 @@ export class HoverRenderController extends Disposable implements IRenderModule {
                 return;
             }
 
-            const { mainComponent } = this._context;
-            const subscription = mainComponent?.onPointerMove$.subscribeEvent((evt) => {
-                this._hoverManagerService.onMouseMove(evt.offsetX, evt.offsetY);
-            });
+            const { mainComponent, unitId } = this._context;
+            if (!mainComponent) {
+                return;
+            }
+            disposeSet.add(mainComponent.onPointerMove$.subscribeEvent((evt) => {
+                this._hoverManagerService.triggerMouseMove(unitId, evt.offsetX, evt.offsetY);
+            }));
 
-            subscription && disposeSet.add(subscription);
+            disposeSet.add(mainComponent.onPointerUp$.subscribeEvent((evt) => {
+                this._hoverManagerService.triggerClick(unitId, evt.offsetX, evt.offsetY);
+            }));
         };
 
         handleSkeletonChange(this._sheetSkeletonManagerService.getCurrent());
@@ -59,6 +64,6 @@ export class HoverRenderController extends Disposable implements IRenderModule {
     }
 
     private _initScrollEvent() {
-        this.disposeWithMe(this._scrollManagerService.validViewportScrollInfo$.subscribe(() => this._hoverManagerService.onScroll()));
+        this.disposeWithMe(this._scrollManagerService.validViewportScrollInfo$.subscribe(() => this._hoverManagerService.triggerScroll()));
     }
 }

@@ -63,6 +63,7 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
         right: rect.right + documentOffsetConfig.docsLeft,
     }));
 };
+
 export const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, documents: Documents, skeleton: DocumentSkeleton, pageIndex = -1): IBoundRectNoAngle | undefined => {
     const start = skeleton.findPositionByGlyph(glyph, pageIndex);
     if (!start) {

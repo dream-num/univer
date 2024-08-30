@@ -278,17 +278,18 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                 {
                     handler: (data, context, next) => {
                         if (data?.p) {
+                            // 这个逻辑需要内联到
+                            const dataStream = data.p.body?.dataStream;
                             const range = data.p.body?.customRanges?.find((i) => i.rangeType === CustomRangeType.HYPERLINK);
-                            if (range) {
-                                const url = range.properties?.url;
 
+                            if (range && dataStream && dataStream.length - 3 === range.endIndex && range.startIndex === 0) {
                                 return next({
                                     ...data,
                                     p: null,
                                     v: getPlainTextFormDocument(data.p),
                                     t: CellValueType.STRING,
                                     custom: {
-                                        __link_url: url,
+                                        __link_url: range.properties?.url,
                                     },
                                 });
                             }

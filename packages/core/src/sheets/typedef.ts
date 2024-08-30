@@ -243,6 +243,7 @@ export interface ICellDataForSheetInterceptor extends ICellData {
      * can cell be covered when sibling is overflow
      */
     coverable?: boolean;
+    linkUrl?: string;
 }
 
 export function isICellData(value: any): value is ICellData {

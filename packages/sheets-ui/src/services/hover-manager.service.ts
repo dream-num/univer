@@ -14,37 +14,65 @@
  * limitations under the License.
  */
 
-import type { IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { distinctUntilChanged, Subject } from 'rxjs';
+import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { SheetScrollManagerService } from './scroll-manager.service';
+import { calculateDocSkeletonRects } from './utils/doc-skeleton-util';
 
 export interface IHoverCellPosition {
     position: IPosition;
     location: ISheetLocation;
+    unitId: string;
+    subUnitId: string;
+    /**
+     * active custom range in cell, if cell is rich-text
+     */
+    customRange: Nullable<ICustomRange>;
+    /**
+     * active bullet in cell, if cell is rich-text
+     */
+    bullet: Nullable<IParagraph>;
+    /**
+     * rect of custom-range or bullet
+     */
+    rect: Nullable<IBoundRectNoAngle>;
 }
 
 export class HoverManagerService extends Disposable {
     private _currentCell$ = new Subject<Nullable<IHoverCellPosition>>();
+    private _currentClickedCell$ = new Subject<IHoverCellPosition>();
 
     // Notify when hovering over different cells
-    currentCell$ = this._currentCell$.asObservable().pipe(distinctUntilChanged((
-        (pre, aft) => (
-            pre?.location?.unitId === aft?.location?.unitId
-            && pre?.location?.subUnitId === aft?.location?.subUnitId
-            && pre?.location?.row === aft?.location?.row
-            && pre?.location?.col === aft?.location?.col
+    currentCell$ = this._currentCell$.asObservable().pipe(
+        distinctUntilChanged(
+            (pre, aft) => (
+                pre?.location?.unitId === aft?.location?.unitId
+                && pre?.location?.subUnitId === aft?.location?.subUnitId
+                && pre?.location?.row === aft?.location?.row
+                && pre?.location?.col === aft?.location?.col
+            )
         )
-    )));
+    );
+
+    // Notify when hovering over different cells and different custom range or bullet
+    currentCellWithDoc$ = this.currentCell$.pipe(
+        distinctUntilChanged(
+            (pre, aft) => (
+                pre?.customRange?.rangeId === aft?.customRange?.rangeId
+                && pre?.bullet?.startIndex === aft?.bullet?.startIndex
+            )
+        )
+    );
 
     // Notify when mouse position changes
     currentPosition$ = this._currentCell$.asObservable();
-
-    private _lastPosition: Nullable<{ offsetX: number; offsetY: number }> = null;
+    currentClickedCell$ = this._currentClickedCell$.asObservable();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -59,6 +87,7 @@ export class HoverManagerService extends Disposable {
     override dispose(): void {
         super.dispose();
         this._currentCell$.complete();
+        this._currentClickedCell$.complete();
     }
 
     private _initCellDisposableListener(): void {
@@ -67,11 +96,8 @@ export class HoverManagerService extends Disposable {
         }));
     }
 
-    private _calcActiveCell() {
-        if (!this._lastPosition) return;
-
-        const { offsetX, offsetY } = this._lastPosition;
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    private _calcActiveCell(unitId: string, offsetX: number, offsetY: number) {
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             this._currentCell$.next(null);
             return;
@@ -87,8 +113,9 @@ export class HoverManagerService extends Disposable {
         const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
         const scrollManagerService = currentRender?.with(SheetScrollManagerService);
         const scrollInfo = scrollManagerService?.getCurrentScrollState();
+        const skeleton = skeletonParam?.skeleton;
 
-        if (!skeletonParam || !scrollInfo || !currentRender) return;
+        if (!skeleton || !scrollInfo || !currentRender) return;
 
         const hoverPosition = getHoverCellPosition(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
 
@@ -99,21 +126,49 @@ export class HoverManagerService extends Disposable {
 
         const { location, position } = hoverPosition;
 
-        this._currentCell$.next({
+        const font = skeleton.getFontSkeleton(location.row, location.col);
+
+        let customRange: Nullable<{
+            rects: IBoundRectNoAngle[];
+            range: ICustomRange<Record<string, any>>;
+        }> = null;
+        let bullet: Nullable<{
+            rect: IBoundRectNoAngle;
+            paragraph: IParagraph;
+        }> = null;
+
+        if (font) {
+            const rects = calculateDocSkeletonRects(font);
+            const innerX = offsetX - position.startX;
+            const innerY = offsetY - position.startY;
+            customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && rect.top <= innerY && innerY <= rect.bottom));
+            bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && list.rect.top <= innerY && innerY <= list.rect.bottom);
+        }
+
+        return {
             location,
             position,
-        });
-    }
-
-    onMouseMove(offsetX: number, offsetY: number) {
-        this._lastPosition = {
-            offsetX,
-            offsetY,
+            unitId,
+            subUnitId: worksheet.getSheetId(),
+            customRange: customRange?.range,
+            bullet: bullet?.paragraph,
+            rect: customRange?.rects.pop() ?? bullet?.rect,
         };
-        this._calcActiveCell();
     }
 
-    onScroll() {
+    triggerMouseMove(unitId: string, offsetX: number, offsetY: number) {
+        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
+        this._currentCell$.next(activeCell);
+    }
+
+    triggerClick(unitId: string, offsetX: number, offsetY: number) {
+        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
+        if (activeCell) {
+            this._currentClickedCell$.next(activeCell);
+        }
+    }
+
+    triggerScroll() {
         this._currentCell$.next(null);
     }
 }

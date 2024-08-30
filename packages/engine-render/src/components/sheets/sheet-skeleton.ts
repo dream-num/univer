@@ -19,10 +19,13 @@
 import {
     BooleanNumber,
     CellValueType,
+    CustomRangeType,
+    DataStreamTreeTokenType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
+    generateRandomId,
     getCellInfoInMergeData,
     getColorStyle,
     HorizontalAlign,
@@ -35,6 +38,7 @@ import {
     ObjectMatrix,
     searchArray,
     Tools,
+    updateAttributeByInsert,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -42,6 +46,7 @@ import type {
     BorderStyleTypes,
     IBorderStyleData,
     ICellData,
+    ICellDataForSheetInterceptor,
     IColumnData,
     IColumnRange,
     IDocumentData,
@@ -64,7 +69,6 @@ import type {
     TextDirection,
     Worksheet,
 } from '@univerjs/core';
-
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -85,6 +89,40 @@ import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
+
+function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string): void {
+    const body = documentModel.getBody()!;
+    updateAttributeByInsert(
+        body,
+        {
+            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
+        },
+        1,
+        0
+    );
+
+    updateAttributeByInsert(
+        body,
+        {
+            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_END,
+        },
+        1,
+        documentModel.getBody()!.dataStream.length - 2
+    );
+
+    body.customRanges = [
+        ...body.customRanges ?? [],
+        {
+            startIndex: 0,
+            endIndex: body.dataStream.length - 3,
+            rangeType: CustomRangeType.HYPERLINK,
+            rangeId: generateRandomId(),
+            properties: {
+                url: linkUrl,
+            },
+        },
+    ];
+}
 
 /**
  * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
@@ -389,6 +427,23 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     setMarginTop(top: number): void {
         this._marginTop = top;
+    }
+
+    getFontSkeleton(rowIndex: number, columnIndex: number): Nullable<DocumentSkeleton> {
+        const fontCache = this.stylesCache.font;
+        if (!fontCache) {
+            return null;
+        }
+
+        for (const font in fontCache) {
+            const fontMatrix = fontCache[font];
+            const fontItem = fontMatrix.getValue(rowIndex, columnIndex);
+            if (fontItem) {
+                return fontItem.documentSkeleton;
+            }
+        }
+
+        return null;
     }
 
     calculateSegment(bounds?: IViewportInfo): boolean {
@@ -1088,7 +1143,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     private _getCellDocumentModel(
-        cell: Nullable<ICellData>,
+        cell: Nullable<ICellDataForSheetInterceptor>,
         options: ICellDocumentModelOption = DEFAULT_CELL_DOCUMENT_MODEL_OPTION
     ): Nullable<IDocumentLayoutObject> {
         const { isDeepClone, displayRawFormula, ignoreTextRotation } = {
@@ -1149,6 +1204,10 @@ export class SpreadsheetSkeleton extends Skeleton {
                 textRotation,
                 cellValueType: cell.t!,
             });
+        }
+
+        if (documentModel && cell.linkUrl) {
+            addLinkToDocumentModel(documentModel, cell.linkUrl);
         }
 
         /**

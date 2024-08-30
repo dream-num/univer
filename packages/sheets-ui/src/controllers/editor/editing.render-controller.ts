@@ -900,10 +900,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const finalCell = await this._editorBridgeService.interceptor.fetchThroughInterceptors(
             this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC
         )(Promise.resolve(cell), context);
-
         // remove temp value
         if (finalCell?.custom?.[UNIVER_INTERNAL]?.origin) {
-            finalCell.custom[UNIVER_INTERNAL].origin = null;
+            finalCell.custom[UNIVER_INTERNAL] = null;
         }
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, {

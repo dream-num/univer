@@ -18,8 +18,8 @@ import type { ICommandInfo, IMutationInfo, IRange, Nullable, Workbook } from '@u
 import { Disposable, ICommandService, Inject, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IDrawingJsonUndo1, IDrawingManagerService, type IDrawingParam, type ITransformState } from '@univerjs/drawing';
-import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveRangeCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, MoveRangeCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
@@ -50,6 +50,8 @@ const UPDATE_COMMANDS = [
     SetSpecificRowsVisibleCommand.id,
     SetSpecificColsVisibleCommand.id,
     SetColHiddenCommand.id,
+    MoveColsCommand.id,
+    MoveRowsCommand.id,
     MoveRangeCommand.id,
 ];
 
@@ -95,7 +97,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                     const cId = commandInfo.id;
                     if (cId === InsertRowCommand.id) {
                         return this._moveRowInterceptor(commandInfo.params as IInsertRowCommandParams, 'insert');
-                    } else if (cId === MoveRangeCommand.id) {
+                    } else if ([MoveColsCommand.id, MoveRowsCommand.id, MoveRangeCommand.id].includes(cId)) {
                         return this._moveRangeInterceptor(commandInfo.params as IMoveRangeCommandParams);
                     } else if (cId === InsertColCommand.id) {
                         return this._moveColInterceptor(commandInfo.params as IInsertColCommandParams, 'insert');
@@ -585,7 +587,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
         return { unitId, subUnitId };
     }
 
-    private _moveRangeInterceptor(params: IMoveRangeCommandParams) {
+    private _moveRangeInterceptor(params: IMoveRangeCommandParams | IMoveRowsCommandParams | IMoveColsCommandParams) {
         const { toRange, fromRange } = params;
         const target = getSheetCommandTarget(this._univerInstanceService);
         if (!target) {
@@ -1068,7 +1070,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 };
             }
         } else if (fromRow >= rowStartIndex && fromRow <= rowEndIndex) {
-           // shrink start and end row up, then set fromRowOffset to 0
+            // shrink start and end row up, then set fromRowOffset to 0
             if (fromRow === rowStartIndex) {
                 newTransform = { ...transform, top: (transform.top || 0) - sheetTransform.from.rowOffset };
             } else {

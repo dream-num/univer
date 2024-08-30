@@ -40,7 +40,7 @@ describe('Test accrint function', () => {
 
             const basis = NumberValueObject.create(1);
             result = testFunction.calculate(issue, firstInterest, settlement, rate, par, frequency, basis);
-            expect(result.getValue()).toStrictEqual(16.939890710382514);
+            expect(result.getValue()).toStrictEqual(16.847826086956523);
         });
 
         it('value is normal, endDate < startDate', () => {
@@ -52,6 +52,30 @@ describe('Test accrint function', () => {
             const frequency = NumberValueObject.create(2);
             const result = testFunction.calculate(issue, firstInterest, settlement, rate, par, frequency);
             expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+        });
+
+        it('Issue firstInterest settlement test', () => {
+            const issue = StringValueObject.create('1900/1/29');
+            const firstInterest = StringValueObject.create('2008/8/31');
+            const settlement = StringValueObject.create('2008/5/1');
+            const rate = NumberValueObject.create(0.1);
+            const par = NumberValueObject.create(1000);
+            const frequency = NumberValueObject.create(2);
+            const result = testFunction.calculate(issue, firstInterest, settlement, rate, par, frequency);
+            expect(result.getValue()).toStrictEqual(0);
+
+            const issue2 = StringValueObject.create('2008/2/29');
+            const settlement2 = StringValueObject.create('2008/11/1');
+            const result2 = testFunction.calculate(issue2, firstInterest, settlement2, rate, par, frequency);
+            expect(result2.getValue()).toStrictEqual(66.94444444444446);
+
+            const basis = NumberValueObject.create(3);
+            const result3 = testFunction.calculate(issue2, firstInterest, settlement2, rate, par, frequency, basis);
+            expect(result3.getValue()).toStrictEqual(67.94520547945206);
+
+            const basis2 = NumberValueObject.create(1);
+            const result4 = testFunction.calculate(issue2, firstInterest, settlement2, rate, par, frequency, basis2);
+            expect(result4.getValue()).toStrictEqual(68.20652173913044);
         });
 
         it('value is error', () => {
@@ -90,6 +114,19 @@ describe('Test accrint function', () => {
             const frequency = NumberValueObject.create(2);
             const result = testFunction.calculate(issue, firstInterest, settlement, rate, par, frequency);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const issue2 = StringValueObject.create('2008/2/29');
+            const firstInterest2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(issue2, firstInterest2, settlement, rate, par, frequency);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const settlement2 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(issue2, firstInterest, settlement2, rate, par, frequency);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const rate2 = StringValueObject.create('test');
+            const result4 = testFunction.calculate(issue2, firstInterest, settlement, rate2, par, frequency);
+            expect(result4.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('rate or par value less than or equal to 0', () => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
     ErrorService,
@@ -25,7 +25,6 @@ import {
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
-    UniverInstanceType,
 } from '@univerjs/core';
 
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
@@ -39,10 +38,15 @@ import {
 } from '../mutations/move-rows-cols.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
+import type { ISelectionWithStyle } from '../../basics';
 import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell-util';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IMoveRowsCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+    range?: IRange; // for facade to use, accepting user parameters
     fromRange: IRange;
     toRange: IRange;
 }
@@ -54,13 +58,18 @@ export const MoveRowsCommandId = 'sheet.command.move-rows' as const;
 export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
     id: MoveRowsCommandId,
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
-        const selections = selectionManagerService.getCurrentSelections();
         const {
             fromRange: { startRow: fromRow },
             toRange: { startRow: toRow },
+            range,
         } = params;
+
+        // user can specify the range to move, or use the current selection
+        const selections = range ? [covertRangeToSelection(range)] : selectionManagerService.getCurrentSelections();
+
         const filteredSelections = selections?.filter(
             (selection) =>
                 selection.range.rangeType === RANGE_TYPE.ROW &&
@@ -73,14 +82,11 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return false;
-        }
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return false;
-        }
+
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { workbook, worksheet } = target;
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
@@ -114,33 +120,6 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         };
         const undoMoveRowsParams = MoveRowsMutationUndoFactory(accessor, moveRowsParams);
 
-        // we could just move the merged cells because other situations are not allowed
-        // we should only deal with merged cell that is between the range of the rows to move
-        const movedLength = toRow - fromRow;
-        const moveBackward = movedLength < 0;
-        const count = rangeToMove.endRow - rangeToMove.startRow + 1;
-
-        // deal with selections
-        const destSelection: IRange = moveBackward
-            ? destinationRange
-            : {
-                ...destinationRange,
-                startRow: destinationRange.startRow - count,
-                endRow: destinationRange.endRow - count,
-            };
-        const setSelectionsParam: ISetSelectionsOperationParams = {
-            unitId,
-            subUnitId,
-
-            selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
-        };
-        const undoSetSelectionsParam: ISetSelectionsOperationParams = {
-            unitId,
-            subUnitId,
-
-            selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
-        };
-
         const commandService = accessor.get(ICommandService);
 
         const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveRowsCommand.id, params });
@@ -148,16 +127,49 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const redos = [
             ...(interceptorCommands.preRedos ?? []),
             { id: MoveRowsMutation.id, params: moveRowsParams },
-            { id: SetSelectionsOperation.id, params: setSelectionsParam },
-            ...interceptorCommands.redos,
         ];
 
         const undos = [
             ...(interceptorCommands.preUndos ?? []),
             { id: MoveRowsMutation.id, params: undoMoveRowsParams },
-            { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
-            ...interceptorCommands.undos,
         ];
+
+        // Handle selection in user interaction, not when using the Facade API
+        if (beforePrimary) {
+             // we could just move the merged cells because other situations are not allowed
+            // we should only deal with merged cell that is between the range of the rows to move
+            const movedLength = toRow - fromRow;
+            const moveBackward = movedLength < 0;
+            const count = rangeToMove.endRow - rangeToMove.startRow + 1;
+
+            // deal with selections
+            const destSelection: IRange = moveBackward
+                ? destinationRange
+                : {
+                    ...destinationRange,
+                    startRow: destinationRange.startRow - count,
+                    endRow: destinationRange.endRow - count,
+                };
+
+            const setSelectionsParam: ISetSelectionsOperationParams = {
+                unitId,
+                subUnitId,
+
+                selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
+            };
+            const undoSetSelectionsParam: ISetSelectionsOperationParams = {
+                unitId,
+                subUnitId,
+
+                selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
+            };
+
+            redos.push({ id: SetSelectionsOperation.id, params: setSelectionsParam });
+            undos.push({ id: SetSelectionsOperation.id, params: undoSetSelectionsParam });
+        }
+
+        redos.push(...interceptorCommands.redos);
+        undos.push(...interceptorCommands.undos);
 
         const result = sequenceExecute(redos, commandService);
 
@@ -176,6 +188,9 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
 };
 
 export interface IMoveColsCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+    range?: IRange; // for facade to use, accepting user parameters
     fromRange: IRange;
     toRange: IRange;
 }
@@ -184,13 +199,18 @@ export const MoveColsCommandId = 'sheet.command.move-cols' as const;
 export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
     id: MoveColsCommandId,
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IMoveColsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
-        const selections = selectionManagerService.getCurrentSelections();
         const {
             fromRange: { startColumn: fromCol },
             toRange: { startColumn: toCol },
+            range,
         } = params;
+
+        // user can specify the range to move, or use the current selection
+        const selections = range ? [covertRangeToSelection(range)] : selectionManagerService.getCurrentSelections();
+
         const filteredSelections = selections?.filter(
             (selection) =>
                 selection.range.rangeType === RANGE_TYPE.COLUMN &&
@@ -203,14 +223,11 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return false;
-        }
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return false;
-        }
+
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { workbook, worksheet } = target;
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
@@ -244,33 +261,6 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         };
         const undoMoveColsParams = MoveColsMutationUndoFactory(accessor, moveColsParams);
 
-        // we could just move the merged cells because other situations are not allowed
-        // we should only deal with merged cell that is between the range of the cols to move
-        const count = rangeToMove.endColumn - rangeToMove.startColumn + 1;
-        const movedLength = toCol - fromCol;
-        const moveBackward = movedLength < 0;
-
-        // deal with selections
-        const destSelection: IRange = moveBackward
-            ? destinationRange
-            : {
-                ...destinationRange,
-                startColumn: destinationRange.startColumn - count,
-                endColumn: destinationRange.endColumn - count,
-            };
-        const setSelectionsParam: ISetSelectionsOperationParams = {
-            unitId,
-            subUnitId,
-
-            selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
-        };
-        const undoSetSelectionsParam: ISetSelectionsOperationParams = {
-            unitId,
-            subUnitId,
-
-            selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
-        };
-
         const commandService = accessor.get(ICommandService);
 
         const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveColsCommand.id, params });
@@ -278,16 +268,48 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const redos = [
             ...(interceptorCommands.preRedos ?? []),
             { id: MoveColsMutation.id, params: moveColsParams },
-            { id: SetSelectionsOperation.id, params: setSelectionsParam },
-            ...interceptorCommands.redos,
         ];
 
         const undos = [
             ...(interceptorCommands.preUndos ?? []),
             { id: MoveColsMutation.id, params: undoMoveColsParams },
-            { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
-            ...interceptorCommands.undos,
         ];
+
+        // Handle selection in user interaction, not when using the Facade API
+        if (beforePrimary) {
+            // we could just move the merged cells because other situations are not allowed
+            // we should only deal with merged cell that is between the range of the cols to move
+            const count = rangeToMove.endColumn - rangeToMove.startColumn + 1;
+            const movedLength = toCol - fromCol;
+            const moveBackward = movedLength < 0;
+
+            // deal with selections
+            const destSelection: IRange = moveBackward
+                ? destinationRange
+                : {
+                    ...destinationRange,
+                    startColumn: destinationRange.startColumn - count,
+                    endColumn: destinationRange.endColumn - count,
+                };
+            const setSelectionsParam: ISetSelectionsOperationParams = {
+                unitId,
+                subUnitId,
+
+                selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
+            };
+            const undoSetSelectionsParam: ISetSelectionsOperationParams = {
+                unitId,
+                subUnitId,
+
+                selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
+            };
+
+            redos.push({ id: SetSelectionsOperation.id, params: setSelectionsParam });
+            undos.push({ id: SetSelectionsOperation.id, params: undoSetSelectionsParam });
+        }
+
+        redos.push(...interceptorCommands.redos);
+        undos.push(...interceptorCommands.undos);
 
         const result = sequenceExecute(redos, commandService);
 
@@ -304,3 +326,11 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         return true;
     },
 };
+
+function covertRangeToSelection(range: IRange): ISelectionWithStyle {
+    return {
+        range,
+        primary: null,
+        style: null,
+    };
+}

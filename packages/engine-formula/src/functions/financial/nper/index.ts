@@ -28,7 +28,7 @@ export class Nper extends BaseFunction {
 
     override maxParams = 5;
 
-    override calculate(rate: BaseValueObject, pmt: BaseValueObject, pv: BaseValueObject, fv?: BaseValueObject, type?: BaseValueObject) {
+    override calculate(rate: BaseValueObject, pmt: BaseValueObject, pv: BaseValueObject, fv?: BaseValueObject, type?: BaseValueObject): BaseValueObject {
         const _fv = fv ?? NumberValueObject.create(0);
         const _type = type ?? NumberValueObject.create(0);
 

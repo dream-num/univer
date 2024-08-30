@@ -27,6 +27,7 @@ import type { IUniverSheetsNumfmtConfig } from './controllers/numfmt.menu.contro
 import { DefaultSheetNumfmtConfig, NumfmtMenuController } from './controllers/numfmt.menu.controller';
 import { INumfmtController } from './controllers/type';
 import { UserHabitController } from './controllers/user-habit.controller';
+import { MenuCurrencyService } from './service/menu.currency.service';
 
 @DependentOn(UniverSheetsPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsNumfmtPlugin extends Plugin {
@@ -39,14 +40,12 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
     ) {
         super();
         this._config = Tools.deepMerge({}, DefaultSheetNumfmtConfig, this._config);
-    }
-
-    override onStarting(): void {
         this._injector.add([INumfmtController, { useClass: NumfmtController, lazy: false }]);
         this._injector.add([NumfmtEditorController]);
         this._injector.add([UserHabitController]);
         this._injector.add([SheetsNumfmtCellContentController]);
         this._injector.add([NumfmtI18nController]);
+        this._injector.add([MenuCurrencyService]);
         this._injector.add(
             [
                 NumfmtMenuController,

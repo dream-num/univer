@@ -33,6 +33,7 @@ import {
     Injector,
     IUniverInstanceService,
     Quantity,
+    RedoCommand,
     toDisposable,
     UndoCommand,
     Univer, UniverInstanceType, WrapStrategy,
@@ -71,9 +72,7 @@ export class FUniver {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @ISocketService private readonly _ws: ISocketService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         this._initialize();
     }
@@ -328,7 +327,7 @@ export class FUniver {
      * @returns {Promise<boolean>} redo result
      */
     redo(): Promise<boolean> {
-        return this._commandService.executeCommand(UndoCommand.id);
+        return this._commandService.executeCommand(RedoCommand.id);
     }
 
     // #endregion
@@ -384,7 +383,8 @@ export class FUniver {
      * @returns {ISocket} WebSocket instance
      */
     createSocket(url: string): ISocket {
-        const ws = this._ws.createSocket(url);
+        const wsService = this._injector.get(ISocketService);
+        const ws = wsService.createSocket(url);
 
         if (!ws) {
             throw new Error('[WebSocketService]: failed to create socket!');
@@ -421,7 +421,8 @@ export class FUniver {
      * @returns {Nullable<RenderComponentType>} The render component.
      */
     private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
-        const render = this._renderManagerService.getRenderById(unitId);
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
         if (!render) {
             throw new Error('Render not found');
         }

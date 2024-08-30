@@ -31,6 +31,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { RegisterFunctionMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';
+import { AddCommentCommand, AddCommentMutation, DeleteCommentCommand, DeleteCommentMutation, DeleteCommentTreeCommand, ResolveCommentMutation, UpdateCommentCommand, UpdateCommentMutation, UpdateCommentRefMutation } from '@univerjs/thread-comment';
 import type { FUniver } from '../facade';
 import { createFacadeTestBed } from './create-test-bed';
 import { COLUMN_UNIQUE_KEY, ColumnHeaderCustomExtension, MAIN_UNIQUE_KEY, MainCustomExtension, ROW_UNIQUE_KEY, RowHeaderCustomExtension } from './utils/sheet-extension-util';
@@ -65,6 +66,17 @@ describe('Test FUniver', () => {
         commandService.registerCommand(RegisterFunctionMutation);
         commandService.registerCommand(SetStyleCommand);
         commandService.registerCommand(SetFormulaCalculationStartMutation);
+        [
+            DeleteCommentCommand,
+            DeleteCommentTreeCommand,
+            UpdateCommentCommand,
+            AddCommentCommand,
+            AddCommentMutation,
+            DeleteCommentMutation,
+            ResolveCommentMutation,
+            UpdateCommentMutation,
+            UpdateCommentRefMutation,
+        ].forEach((command) => commandService.registerCommand(command));
 
         getValueByPosition = (
             startRow: number,
@@ -335,5 +347,41 @@ describe('Test FUniver', () => {
 
         vi.advanceTimersByTime(16); // mock time pass by
         expect(spy).toHaveBeenCalled();
+    });
+
+    it('Add Comment', async () => {
+        const worksheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
+
+        const range = worksheet.getRange(1, 1, 1, 1);
+        await range.addComment({
+            dataStream: 'test\r\n',
+        });
+
+        const comment = range.getComment()!;
+        expect(comment).toBeTruthy();
+        expect(comment.getContent().dataStream).toBe('test\r\n');
+        expect(worksheet.getComments().length).toBe(1);
+
+        await range.addComment({
+            dataStream: 'reply\r\n',
+        });
+        const newComment = range.getComment()!;
+        expect(newComment).toBeTruthy();
+        expect(newComment.getContent().dataStream).toBe('test\r\n');
+        expect(newComment.getReplies()?.length).toBe(1);
+
+        await newComment.update({
+            dataStream: 'test updated\r\n',
+        });
+        // expect(worksheet.getComments()).toBe([]);
+        expect(newComment.getContent().dataStream).toBe('test updated\r\n');
+        expect(range.getComment()?.getContent().dataStream).toBe('test updated\r\n');
+
+        await newComment.delete();
+        expect(worksheet.getComments().length).toBe(0);
+        expect(range.getComment()).toBeNull();
     });
 });

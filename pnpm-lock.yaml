@@ -1501,6 +1501,9 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../sheets-drawing-ui
       '@univerjs/sheets-filter':
         specifier: workspace:*
         version: link:../sheets-filter
@@ -1513,9 +1516,18 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
+      '@univerjs/sheets-thread-comment':
+        specifier: workspace:*
+        version: link:../sheets-thread-comment
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../thread-comment-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -2578,6 +2590,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render

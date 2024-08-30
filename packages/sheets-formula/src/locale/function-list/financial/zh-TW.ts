@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            coupon: { name: '年度票息率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '現金流', detail: '這是陣列或儲存格參照，其中包含要計算內部報酬率的數字。\n1.Values 必須至少包含一個正數和一個負數，以計算內部報酬率。\n2.IRR 使用 values 的順序來表示現金流量的順序。 請務必依所要的順序輸入支出及收入的值。\n3.如果陣列或參照引數中包含文字、邏輯值或空白儲存格，則這些值將會略過。' },
+            guess: { name: '猜測值', detail: '這是您猜測接近 IRR 結果的數字。' },
         },
     },
     ISPMT: {
@@ -430,8 +434,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            coupon: { name: '年度票息率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     MIRR: {
@@ -444,8 +452,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '現金流', detail: '這是陣列或儲存格參照，其中包含數字。 這些數字代表定期發生的一系列支出 (負值) 和收入 (正值)。\n1.Values 必須至少包含一個正值和一個負值，以計算經修改的內部報酬率。 否則，MIRR 會傳回 #DIV/0! 的錯誤值。\n2.如果陣列或參照引數包含文字、邏輯值或空白儲存格，則忽略這些數值；但包含零值儲存格。' },
+            financeRate: { name: '融資利率', detail: '這是投入資金的融資利率。' },
+            reinvestRate: { name: '轉投資報酬率', detail: '這是各期收入淨額的轉投資報酬率。' },
         },
     },
     NOMINAL: {
@@ -489,8 +498,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '貼現率', detail: '這是一段期間內的貼現率。' },
+            value1: { name: '現金流1', detail: '這是 1 到 254 個代表支出和收入的引數。' },
+            value2: { name: '現金流2', detail: '這是 1 到 254 個代表支出和收入的引數。' },
         },
     },
     ODDFPRICE: {
@@ -503,8 +513,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            issue: { name: '發行日期', detail: '這是證券的發行日期。' },
+            firstCoupon: { name: '首次付息日期', detail: '這是證券的首次付息日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     ODDFYIELD: {
@@ -512,12 +529,20 @@ export default {
         abstract: '返回第一期為奇數的債券的收益',
         links: [
             {
-                title: '教導', url: 'https://support.microsoft.com/zh-tw/office/oddfyield-%E5%87%BD%E6%95%B0-66bc8b7b-6501-4c93-9ce3-2fd16220fe37',
+                title: '教導',
+                url: 'https://support.microsoft.com/zh-tw/office/oddfyield-%E5%87%BD%E6%95%B0-66bc8b7b-6501-4c93-9ce3-2fd16220fe37',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            issue: { name: '發行日期', detail: '這是證券的發行日期。' },
+            firstCoupon: { name: '首次付息日期', detail: '這是證券的首次付息日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            pr: { name: '價格', detail: '這是證券的價格。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     ODDLPRICE: {
@@ -530,8 +555,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            lastInterest: { name: '最後票息日期', detail: '這是證券的最後票息日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     ODDLYIELD: {
@@ -544,8 +575,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            lastInterest: { name: '最後票息日期', detail: '這是證券的最後票息日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            pr: { name: '價格', detail: '這是證券的價格。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     PDURATION: {
@@ -558,8 +595,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '利率', detail: '每期的利率。' },
+            pv: { name: '現值', detail: '投資的現值。' },
+            fv: { name: '未來價值', detail: '投資所需的未來值。' },
         },
     },
     PMT: {
@@ -607,8 +645,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     PRICEDISC: {
@@ -621,8 +664,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            discount: { name: '貼現率', detail: '這是證券的貼現率。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     PRICEMAT: {
@@ -635,8 +681,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            issue: { name: '發行日期', detail: '這是證券的發行日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            yld: { name: '年收益率', detail: '這是證券的年收益。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     PV: {
@@ -684,8 +734,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            investment: { name: '投資額', detail: '這是證券的投資額。' },
+            discount: { name: '貼現率', detail: '這是證券的貼現率。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     RRI: {
@@ -698,8 +751,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: '總期數', detail: '投資的期數。' },
+            pv: { name: '現值', detail: '投資的現值。' },
+            fv: { name: '未來值', detail: '投資的未來值。' },
         },
     },
     SLN: {
@@ -712,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '資產原始成本', detail: '這是資產的原始成本。' },
+            salvage: { name: '資產殘餘價值', detail: '這是折舊最後的值 (有時稱為資產的殘餘價值)。' },
+            life: { name: '資產使用年限', detail: '這是固定資產折舊的期數 (有時稱為固定資產的使用年限)。' },
         },
     },
     SYD: {
@@ -726,8 +781,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '資產原始成本', detail: '這是資產的原始成本。' },
+            salvage: { name: '資產殘餘價值', detail: '這是折舊最後的值 (有時稱為資產的殘餘價值)。' },
+            life: { name: '資產使用年限', detail: '這是固定資產折舊的期數 (有時稱為固定資產的使用年限)。' },
+            per: { name: '週期', detail: '這是週期。' },
         },
     },
     TBILLEQ: {
@@ -740,8 +797,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是國庫券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是國庫券的到期日期。' },
+            discount: { name: '貼現率', detail: '這是國庫券的貼現率。' },
         },
     },
     TBILLPRICE: {
@@ -754,8 +812,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是國庫券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是國庫券的到期日期。' },
+            discount: { name: '貼現率', detail: '這是國庫券的貼現率。' },
         },
     },
     TBILLYIELD: {
@@ -768,8 +827,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是國庫券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是國庫券的到期日期。' },
+            pr: { name: '價格', detail: '這是國庫債券每 $100 美元面額的價格。' },
         },
     },
     VDB: {
@@ -782,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: '成本', detail: '這是資產的原始成本。' },
+            salvage: { name: '殘值', detail: '這是折舊最後的值 (有時稱為資產的殘餘價值)。' },
+            life: { name: '使用年限', detail: '這是資產折舊的期數 (有時稱為資產的使用年限)。' },
+            startPeriod: { name: '開始期間', detail: '這是要計算折舊的開始期間。' },
+            endPeriod: { name: '結束期間', detail: '這是要計算折舊的結束期間。' },
+            factor: { name: '速率', detail: '這是餘額遞減的速率。如果省略factor，將假設其值為2(倍率遞減法)。' },
+            noSwitch: { name: '不切換', detail: '這是用於指定當折舊大於遞減餘額計算時，是否切換到直線折舊法的邏輯值。' },
         },
     },
     XIRR: {
@@ -796,8 +861,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: '現金流', detail: '這是一系列與 dates 的付款日期對應的現金流。第一次付款是選擇性的，而且與投資開始時的成本和付款對應。如果第一個值是成本或付款，則它必須是負值。而之後的付款都會以一年 365 天為基礎來折算。序列值必須至少包括一個正值和一個負值。' },
+            dates: { name: '日期表', detail: '這是一系列與現金流對應的付款日期。日期可能會以任何順序發生。' },
+            guess: { name: '猜測值', detail: '這是您所猜測接近 XIRR 結果的數字。' },
         },
     },
     XNPV: {
@@ -810,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: '貼現率', detail: '這是要套用到現金流的貼現率。' },
+            values: { name: '現金流', detail: '這是一系列與 dates 的付款日期對應的現金流。第一次付款是選擇性的，而且與投資開始時的成本和付款對應。如果第一個值是成本或付款，則它必須是負值。而之後的付款都會以一年 365 天為基礎來折算。序列值必須至少包括一個正值和一個負值。' },
+            dates: { name: '日期表', detail: '這是一系列與現金流對應的付款日期。日期可能會以任何順序發生。' },
         },
     },
     YIELD: {
@@ -823,8 +890,13 @@ export default {
         },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            pr: { name: '價格', detail: '這是證券每 $100 面額的價格。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            frequency: { name: '頻次', detail: '這是每年票息付款的次數。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     YIELDDISC: {
@@ -837,8 +909,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            pr: { name: '價格', detail: '這是證券每 $100 面額的價格。' },
+            redemption: { name: '贖回價', detail: '這是證券到期時的贖回價值。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
     YIELDMAT: {
@@ -851,8 +926,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: '結算日期', detail: '這是證券的結算日期。' },
+            maturity: { name: '到期日期', detail: '這是證券的到期日期。' },
+            issue: { name: '發行日期', detail: '這是證券的發行日期。' },
+            rate: { name: '利率', detail: '這是證券的年度票息率。' },
+            pr: { name: '價格', detail: '這是證券每 $100 面額的價格。' },
+            basis: { name: '基礎', detail: '這是要使用的日計數基礎類型。' },
         },
     },
 };

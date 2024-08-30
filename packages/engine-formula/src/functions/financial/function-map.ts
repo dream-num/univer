@@ -31,18 +31,44 @@ import { Ddb } from './ddb';
 import { Disc } from './disc';
 import { Dollarde } from './dollarde';
 import { Dollarfr } from './dollarfr';
+import { Duration } from './duration';
 import { Effect } from './effect';
 import { Fv } from './fv';
 import { Fvschedule } from './fvschedule';
 import { Intrate } from './intrate';
 import { Ipmt } from './ipmt';
+import { Irr } from './irr';
 import { Ispmt } from './ispmt';
+import { Mduration } from './mduration';
+import { Mirr } from './mirr';
 import { Nominal } from './nominal';
 import { Nper } from './nper';
+import { Npv } from './npv';
+import { Oddfprice } from './oddfprice';
+import { Oddfyield } from './oddfyield';
+import { Oddlprice } from './oddlprice';
+import { Oddlyield } from './oddlyield';
+import { Pduration } from './pduration';
 import { Pmt } from './pmt';
 import { Ppmt } from './ppmt';
+import { Price } from './price';
+import { Pricedisc } from './pricedisc';
+import { Pricemat } from './pricemat';
 import { Pv } from './pv';
 import { Rate } from './rate';
+import { Received } from './received';
+import { Rri } from './rri';
+import { Sln } from './sln';
+import { Syd } from './syd';
+import { Tbilleq } from './tbilleq';
+import { Tbillprice } from './tbillprice';
+import { Tbillyield } from './tbillyield';
+import { Vdb } from './vdb';
+import { Xirr } from './xirr';
+import { Xnpv } from './xnpv';
+import { Yield } from './yield';
+import { Yielddisc } from './yielddisc';
+import { Yieldmat } from './yieldmat';
 
 export const functionFinancial = [
     [Accrint, FUNCTION_NAMES_FINANCIAL.ACCRINT],
@@ -61,16 +87,42 @@ export const functionFinancial = [
     [Disc, FUNCTION_NAMES_FINANCIAL.DISC],
     [Dollarde, FUNCTION_NAMES_FINANCIAL.DOLLARDE],
     [Dollarfr, FUNCTION_NAMES_FINANCIAL.DOLLARFR],
+    [Duration, FUNCTION_NAMES_FINANCIAL.DURATION],
     [Effect, FUNCTION_NAMES_FINANCIAL.EFFECT],
     [Fv, FUNCTION_NAMES_FINANCIAL.FV],
     [Fvschedule, FUNCTION_NAMES_FINANCIAL.FVSCHEDULE],
     [Intrate, FUNCTION_NAMES_FINANCIAL.INTRATE],
     [Ipmt, FUNCTION_NAMES_FINANCIAL.IPMT],
+    [Irr, FUNCTION_NAMES_FINANCIAL.IRR],
     [Ispmt, FUNCTION_NAMES_FINANCIAL.ISPMT],
+    [Mduration, FUNCTION_NAMES_FINANCIAL.MDURATION],
+    [Mirr, FUNCTION_NAMES_FINANCIAL.MIRR],
     [Nominal, FUNCTION_NAMES_FINANCIAL.NOMINAL],
     [Nper, FUNCTION_NAMES_FINANCIAL.NPER],
+    [Npv, FUNCTION_NAMES_FINANCIAL.NPV],
+    [Oddfprice, FUNCTION_NAMES_FINANCIAL.ODDFPRICE],
+    [Oddfyield, FUNCTION_NAMES_FINANCIAL.ODDFYIELD],
+    [Oddlprice, FUNCTION_NAMES_FINANCIAL.ODDLPRICE],
+    [Oddlyield, FUNCTION_NAMES_FINANCIAL.ODDLYIELD],
+    [Pduration, FUNCTION_NAMES_FINANCIAL.PDURATION],
     [Pmt, FUNCTION_NAMES_FINANCIAL.PMT],
     [Ppmt, FUNCTION_NAMES_FINANCIAL.PPMT],
+    [Price, FUNCTION_NAMES_FINANCIAL.PRICE],
+    [Pricedisc, FUNCTION_NAMES_FINANCIAL.PRICEDISC],
+    [Pricemat, FUNCTION_NAMES_FINANCIAL.PRICEMAT],
     [Pv, FUNCTION_NAMES_FINANCIAL.PV],
     [Rate, FUNCTION_NAMES_FINANCIAL.RATE],
+    [Received, FUNCTION_NAMES_FINANCIAL.RECEIVED],
+    [Rri, FUNCTION_NAMES_FINANCIAL.RRI],
+    [Sln, FUNCTION_NAMES_FINANCIAL.SLN],
+    [Syd, FUNCTION_NAMES_FINANCIAL.SYD],
+    [Tbilleq, FUNCTION_NAMES_FINANCIAL.TBILLEQ],
+    [Tbillprice, FUNCTION_NAMES_FINANCIAL.TBILLPRICE],
+    [Tbillyield, FUNCTION_NAMES_FINANCIAL.TBILLYIELD],
+    [Vdb, FUNCTION_NAMES_FINANCIAL.VDB],
+    [Xirr, FUNCTION_NAMES_FINANCIAL.XIRR],
+    [Xnpv, FUNCTION_NAMES_FINANCIAL.XNPV],
+    [Yield, FUNCTION_NAMES_FINANCIAL.YIELD],
+    [Yielddisc, FUNCTION_NAMES_FINANCIAL.YIELDDISC],
+    [Yieldmat, FUNCTION_NAMES_FINANCIAL.YIELDMAT],
 ];

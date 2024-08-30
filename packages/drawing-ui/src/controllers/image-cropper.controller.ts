@@ -269,7 +269,7 @@ export class ImageCropperController extends Disposable {
     }
 
     private _searchCropObject(scene: Scene) {
-        const objects = scene.getAllObjects();
+        const objects = scene.getAllObjectsByOrder();
 
         for (const object of objects) {
             if (object instanceof ImageCropperObject) {

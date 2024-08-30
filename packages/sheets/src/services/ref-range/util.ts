@@ -28,6 +28,8 @@ import type { SheetsSelectionsService } from '../selections/selection-manager.se
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
 import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
+import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
+import { InsertRangeMoveRightCommandId } from '../../commands/commands/insert-range-move-right.command';
 import type {
     EffectRefRangeParams,
     IDeleteRangeMoveLeftCommand,
@@ -1059,7 +1061,7 @@ export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRang
 };
 
 export const handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SheetsSelectionsService }) => {
-    const skipCommands = [DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id];
+    const skipCommands = [DeleteRangeMoveLeftCommand.id, DeleteRangeMoveUpCommand.id, InsertRangeMoveDownCommand.id, InsertRangeMoveRightCommandId];
     if (skipCommands.includes(commandInfo.id)) {
         return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
     }

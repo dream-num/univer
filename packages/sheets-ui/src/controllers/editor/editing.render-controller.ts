@@ -65,7 +65,7 @@ import {
 } from '@univerjs/engine-render';
 import { IEditorService, ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import type { WorkbookSelections } from '@univerjs/sheets';
-import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 
@@ -769,6 +769,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
             }
         }));
 
+        d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id === SetRangeValuesMutation.id) {
+                this._editorBridgeService.refreshEditCellState();
+            }
+        }));
+
         const closeEditorOperation = [SetCellEditVisibleArrowOperation.id];
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (closeEditorOperation.includes(command.id)) {
@@ -900,6 +906,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const finalCell = await this._editorBridgeService.interceptor.fetchThroughInterceptors(
             this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC
         )(Promise.resolve(cell), context);
+        // remove temp value
+        if (finalCell?.custom?.[UNIVER_INTERNAL]?.origin) {
+            finalCell.custom[UNIVER_INTERNAL] = null;
+        }
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,

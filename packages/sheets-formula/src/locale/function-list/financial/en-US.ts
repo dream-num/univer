@@ -306,8 +306,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            coupon: { name: 'coupon', detail: "The security's annual coupon rate." },
+            yld: { name: 'yld', detail: "The security's annual yield." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     EFFECT: {
@@ -400,8 +404,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'values', detail: 'An array or a reference to cells that contain numbers for which you want to calculate the internal rate of return.\n1.Values must contain at least one positive value and one negative value to calculate the internal rate of return.\n2.IRR uses the order of values to interpret the order of cash flows. Be sure to enter your payment and income values in the sequence you want.\n3.If an array or reference argument contains text, logical values, or empty cells, those values are ignored.' },
+            guess: { name: 'guess', detail: 'A number that you guess is close to the result of IRR.' },
         },
     },
     ISPMT: {
@@ -430,8 +434,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            coupon: { name: 'coupon', detail: "The security's annual coupon rate." },
+            yld: { name: 'yld', detail: "The security's annual yield." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     MIRR: {
@@ -444,8 +452,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'values', detail: 'An array or a reference to cells that contain numbers. These numbers represent a series of payments (negative values) and income (positive values) occurring at regular periods.\n1.Values must contain at least one positive value and one negative value to calculate the modified internal rate of return. Otherwise, MIRR returns the #DIV/0! error value.\n2.If an array or reference argument contains text, logical values, or empty cells, those values are ignored; however, cells with the value zero are included.' },
+            financeRate: { name: 'finance_rate', detail: 'The interest rate you pay on the money used in the cash flows.' },
+            reinvestRate: { name: 'reinvest_rate', detail: 'The interest rate you receive on the cash flows as you reinvest them.' },
         },
     },
     NOMINAL: {
@@ -489,8 +498,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The rate of discount over the length of one period.' },
+            value1: { name: 'value1', detail: '1 to 254 arguments representing the payments and income.' },
+            value2: { name: 'value2', detail: '1 to 254 arguments representing the payments and income.' },
         },
     },
     ODDFPRICE: {
@@ -503,8 +513,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            issue: { name: 'issue', detail: "The security's issue date." },
+            firstCoupon: { name: 'first_coupon', detail: "The security's first coupon date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            yld: { name: 'yld', detail: "The security's annual yield." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year. For annual payments, frequency = 1; for semiannual, frequency = 2; for quarterly, frequency = 4.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     ODDFYIELD: {
@@ -517,8 +534,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            issue: { name: 'issue', detail: "The security's issue date." },
+            firstCoupon: { name: 'first_coupon', detail: "The security's first coupon date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            pr: { name: 'pr', detail: "The security's price." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year. For annual payments, frequency = 1; for semiannual, frequency = 2; for quarterly, frequency = 4.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     ODDLPRICE: {
@@ -531,8 +555,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            lastInterest: { name: 'last_interest', detail: "The security's last coupon date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            yld: { name: 'yld', detail: "The security's annual yield." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year. For annual payments, frequency = 1; for semiannual, frequency = 2; for quarterly, frequency = 4.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     ODDLYIELD: {
@@ -545,8 +575,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            lastInterest: { name: 'last_interest', detail: "The security's last coupon date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            pr: { name: 'pr', detail: "The security's price." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year. For annual payments, frequency = 1; for semiannual, frequency = 2; for quarterly, frequency = 4.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     PDURATION: {
@@ -559,8 +595,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'Rate is the interest rate per period.' },
+            pv: { name: 'pv', detail: 'Pv is the present value of the investment.' },
+            fv: { name: 'fv', detail: 'Fv is the desired future value of the investment.' },
         },
     },
     PMT: {
@@ -608,8 +645,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            yld: { name: 'yld', detail: "The security's annual yield." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year. For annual payments, frequency = 1; for semiannual, frequency = 2; for quarterly, frequency = 4.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     PRICEDISC: {
@@ -622,8 +664,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            discount: { name: 'discount', detail: "The security's discount rate." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     PRICEMAT: {
@@ -636,8 +681,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            issue: { name: 'issue', detail: "The security's issue date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            yld: { name: 'yld', detail: "The security's annual yield." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     PV: {
@@ -685,8 +734,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            investment: { name: 'investment', detail: 'The amount invested in the security.' },
+            discount: { name: 'discount', detail: "The security's discount rate." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     RRI: {
@@ -699,8 +751,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            nper: { name: 'nper', detail: 'Nper is the number of periods for the investment.' },
+            pv: { name: 'pv', detail: 'Pv is the present value of the investment.' },
+            fv: { name: 'fv', detail: 'Fv is the future value of the investment.' },
         },
     },
     SLN: {
@@ -713,8 +766,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The initial cost of the asset.' },
+            salvage: { name: 'salvage', detail: 'The value at the end of the depreciation (sometimes called the salvage value of the asset).' },
+            life: { name: 'life', detail: 'The number of periods over which the asset is depreciated (sometimes called the useful life of the asset).' },
         },
     },
     SYD: {
@@ -727,8 +781,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The initial cost of the asset.' },
+            salvage: { name: 'salvage', detail: 'The value at the end of the depreciation (sometimes called the salvage value of the asset).' },
+            life: { name: 'life', detail: 'The number of periods over which the asset is depreciated (sometimes called the useful life of the asset).' },
+            per: { name: 'per', detail: 'The period and must use the same units as life.' },
         },
     },
     TBILLEQ: {
@@ -741,8 +797,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The Treasury bill's settlement date." },
+            maturity: { name: 'maturity', detail: "The Treasury bill's maturity date." },
+            discount: { name: 'discount', detail: "The Treasury bill's discount rate." },
         },
     },
     TBILLPRICE: {
@@ -755,8 +812,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The Treasury bill's settlement date." },
+            maturity: { name: 'maturity', detail: "The Treasury bill's maturity date." },
+            discount: { name: 'discount', detail: "The Treasury bill's discount rate." },
         },
     },
     TBILLYIELD: {
@@ -769,8 +827,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The Treasury bill's settlement date." },
+            maturity: { name: 'maturity', detail: "The Treasury bill's maturity date." },
+            pr: { name: 'pr', detail: "The Treasury bill's price per $100 face value." },
         },
     },
     VDB: {
@@ -783,8 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            cost: { name: 'cost', detail: 'The initial cost of the asset.' },
+            salvage: { name: 'salvage', detail: 'The value at the end of the depreciation (sometimes called the salvage value of the asset).' },
+            life: { name: 'life', detail: 'The number of periods over which the asset is being depreciated (sometimes called the useful life of the asset).' },
+            startPeriod: { name: 'start_period', detail: 'The starting period for which you want to calculate the depreciation.' },
+            endPeriod: { name: 'end_period', detail: 'The ending period for which you want to calculate the depreciation.' },
+            factor: { name: 'factor', detail: 'The rate at which the balance declines. If factor is omitted, it is assumed to be 2 (the double-declining balance method).' },
+            noSwitch: { name: 'no_switch', detail: 'A logical value specifying whether to switch to straight-line depreciation when depreciation is greater than the declining balance calculation.' },
         },
     },
     XIRR: {
@@ -797,8 +861,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            values: { name: 'values', detail: 'A series of cash flows that corresponds to a schedule of payments in dates. The first payment is optional and corresponds to a cost or payment that occurs at the beginning of the investment. If the first value is a cost or payment, it must be a negative value. All succeeding payments are discounted based on a 365-day year. The series of values must contain at least one positive and one negative value.' },
+            dates: { name: 'dates', detail: 'A schedule of payment dates that corresponds to the cash flow payments. Dates may occur in any order.' },
+            guess: { name: 'guess', detail: 'A number that you guess is close to the result of XIRR.' },
         },
     },
     XNPV: {
@@ -811,8 +876,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rate: { name: 'rate', detail: 'The discount rate to apply to the cash flows.' },
+            values: { name: 'values', detail: 'A series of cash flows that corresponds to a schedule of payments in dates. The first payment is optional and corresponds to a cost or payment that occurs at the beginning of the investment. If the first value is a cost or payment, it must be a negative value. All succeeding payments are discounted based on a 365-day year. The series of values must contain at least one positive and one negative value.' },
+            dates: { name: 'dates', detail: 'A schedule of payment dates that corresponds to the cash flow payments. Dates may occur in any order.' },
         },
     },
     YIELD: {
@@ -825,8 +891,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            pr: { name: 'pr', detail: "The security's price per $100 face value." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            frequency: { name: 'frequency', detail: 'The number of coupon payments per year. For annual payments, frequency = 1; for semiannual, frequency = 2; for quarterly, frequency = 4.' },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     YIELDDISC: {
@@ -839,8 +910,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            pr: { name: 'pr', detail: "The security's price per $100 face value." },
+            redemption: { name: 'redemption', detail: "The security's redemption value per $100 face value." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
     YIELDMAT: {
@@ -853,8 +927,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            settlement: { name: 'settlement', detail: "The security's settlement date." },
+            maturity: { name: 'maturity', detail: "The security's maturity date." },
+            issue: { name: 'issue', detail: "The security's issue date." },
+            rate: { name: 'rate', detail: "The security's interest rate." },
+            pr: { name: 'pr', detail: "The security's price per $100 face value." },
+            basis: { name: 'basis', detail: 'The type of day count basis to use.' },
         },
     },
 };

@@ -39,12 +39,12 @@ import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.pane
 import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../components/more-numfmt-type/MoreNumfmtType';
 import { isPatternEqualWithoutDecimal } from '../utils/decimal';
 import { SetPercentCommand } from '../commands/commands/set-percent.command';
-import { NumfmtMenuController } from '../controllers/numfmt.menu.controller';
+import { MenuCurrencyService } from '../service/menu.currency.service';
 
 export const CurrencyMenuItem = (accessor: IAccessor) => {
     return {
         icon: new Observable<string>((subscribe) => {
-            const numfmtMenuController = accessor.get(NumfmtMenuController);
+            const menuCurrencyService = accessor.get(MenuCurrencyService);
             function getIconKey(symbol: string) {
                 const iconMap: Record<string, string> = {
                     [countryCurrencyMap.US]: 'DollarSingle',
@@ -54,9 +54,9 @@ export const CurrencyMenuItem = (accessor: IAccessor) => {
                 };
                 return iconMap[symbol] || 'DollarSingle';
             }
-            const symbol = countryCurrencyMap[numfmtMenuController.getCurrencySymbol()] || '$';
+            const symbol = countryCurrencyMap[menuCurrencyService.getCurrencySymbol()] || '$';
             subscribe.next(getIconKey(symbol));
-            return numfmtMenuController.currencySymbol$.subscribe((code) => {
+            return menuCurrencyService.currencySymbol$.subscribe((code) => {
                 const symbol = countryCurrencyMap[code] || '$';
                 subscribe.next(getIconKey(symbol));
             });

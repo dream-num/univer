@@ -196,12 +196,24 @@ function getValueMatrix(
     isSpecialPaste = false,
     pasteFrom: ISheetDiscreteRangeLocation | null
 ): ObjectMatrix<ICellData> {
+    let copyRowLength = 0;
+    let copyColumnLength = 0;
+
+    if (copyInfo && copyInfo.copyRange) {
+        const { copyType, copyRange } = copyInfo;
+
+        if (copyType === COPY_TYPE.COPY && copyRange) {
+            copyRowLength = copyRange.rows.length;
+            copyColumnLength = copyRange.cols.length;
+        }
+    }
+
     if (!pasteFrom) {
-        return getValueMatrixOfPasteFromIsNull(matrix, range);
+        return getValueMatrixOfPasteFromIsNull(unitId, subUnitId, range, matrix, formulaDataModel);
     }
 
     if (copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE) {
-        return getPasteValueValueMatrix(unitId, subUnitId, range, matrix, formulaDataModel, pasteFrom);
+        return getSpecialPasteValueValueMatrix(unitId, subUnitId, range, matrix, formulaDataModel, pasteFrom);
     }
 
     if (copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA) {
@@ -210,17 +222,6 @@ function getValueMatrix(
 
     const valueMatrix = new ObjectMatrix<ICellData>();
     const formulaIdMap = new Map<string, string>();
-
-    let copyRowLength = 0;
-    let copyColumnLength = 0;
-
-    if (copyInfo && copyInfo.copyRange) {
-        const { copyType, copyRange } = copyInfo;
-        if (copyType === COPY_TYPE.COPY && copyRange) {
-            copyRowLength = copyRange.rows.length;
-            copyColumnLength = copyRange.cols.length;
-        }
-    }
 
     // eslint-disable-next-line complexity
     matrix.forValue((row, col, value) => {
@@ -309,25 +310,42 @@ function getValueMatrix(
     return valueMatrix;
 }
 
-function getValueMatrixOfPasteFromIsNull(matrix: ObjectMatrix<ICellDataWithSpanInfo>, range: IDiscreteRange): ObjectMatrix<ICellData> {
+function getValueMatrixOfPasteFromIsNull(
+    unitId: string,
+    subUnitId: string,
+    range: IDiscreteRange,
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    formulaDataModel: FormulaDataModel
+): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
+    const formulaData = formulaDataModel.getFormulaData()?.[unitId]?.[subUnitId];
 
     matrix.forValue((row, col, value) => {
+        const toRow = range.rows[row];
+        const toCol = range.cols[col];
         const valueObject: ICellDataWithSpanInfo = {};
-        valueObject.f = null;
 
         if (isFormulaString(value.v)) {
+            // If the copy value is a formula
             valueObject.v = null;
             valueObject.f = `${value.v}`;
 
-            valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);
+            valueMatrix.setValue(toRow, toCol, valueObject);
+        } else if (formulaData?.[toRow]?.[toCol]) {
+            // If the paste location is a formula
+            valueObject.v = value.v;
+            valueObject.f = null;
+            valueObject.f = null;
+            valueObject.si = null;
+
+            valueMatrix.setValue(toRow, toCol, valueObject);
         }
     });
 
     return valueMatrix;
 }
 
-function getPasteValueValueMatrix(
+function getSpecialPasteValueValueMatrix(
     unitId: string,
     subUnitId: string,
     range: IDiscreteRange,
@@ -337,27 +355,33 @@ function getPasteValueValueMatrix(
 ): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
     const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData()?.[unitId]?.[subUnitId];
+    const formulaData = formulaDataModel.getFormulaData()?.[unitId]?.[subUnitId];
 
     matrix.forValue((row, col, value) => {
         const fromRow = pasteFrom.range.rows[row];
         const fromCol = pasteFrom.range.cols[col];
         const toRow = range.rows[row];
         const toCol = range.cols[col];
+        const valueObject: ICellDataWithSpanInfo = {};
 
-        const formulaString = value.f || '';
-        const formulaId = value.si || '';
-
-        if (isFormulaString(formulaString) || isFormulaId(formulaId)) {
-            const valueObject: ICellDataWithSpanInfo = {};
+        if (isFormulaString(value.f) || isFormulaId(value.si)) {
+            // If the copy value is a formula
             valueObject.v = value.v;
             valueObject.f = null;
             valueObject.si = null;
 
             valueMatrix.setValue(toRow, toCol, valueObject);
         } else if (arrayFormulaCellData?.[fromRow]?.[fromCol]) {
+            // If the copy value is an array formula
             const cell = arrayFormulaCellData[fromRow][fromCol];
-            const valueObject: ICellDataWithSpanInfo = {};
             valueObject.v = cell.v;
+            valueObject.f = null;
+            valueObject.si = null;
+
+            valueMatrix.setValue(toRow, toCol, valueObject);
+        } else if (formulaData?.[toRow]?.[toCol]) {
+            // If the paste location is a formula
+            valueObject.v = value.v;
             valueObject.f = null;
             valueObject.si = null;
 

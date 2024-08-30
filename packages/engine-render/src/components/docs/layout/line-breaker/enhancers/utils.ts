@@ -14,20 +14,30 @@
  * limitations under the License.
  */
 
-export enum BreakPointType {
-    // Just a normal opportunity (e.g. after a space).
-    Normal = 'Normal',
-    // A mandatory breakpoint (after '\n' or at the end of the text).
-    Mandatory = 'Mandatory',
-    // An opportunity for hyphenating.
-    Hyphen = 'Hyphen',
-    // An opportunity for breaking in a link. *Hyphen is not allowed in a link*.
-    Link = 'Link',
+export function isLetter(char: string) {
+    return char.length > 0 && !/\s|(?![\'])[\!-\@\[-\`\{-\~\u2013-\u203C]/.test(char);
 }
 
-export class Break {
-    constructor(
-        public position: number,
-        public type = BreakPointType.Normal
-    ) {}
+export function getWord(str: string): string {
+    let word = '';
+
+    for (let i = 0; i < str.length; i++) {
+        if (isLetter(str[i])) {
+            word += str[i];
+        } else {
+            break;
+        }
+    }
+
+    return word;
+}
+
+export function getSlicePosition(lastPos: number, hyphenSlice: string[], index: number): number {
+    let position = lastPos;
+
+    for (let i = 0; i <= index; i++) {
+        position += hyphenSlice[i].length;
+    }
+
+    return position;
 }

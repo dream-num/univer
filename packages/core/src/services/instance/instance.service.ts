@@ -47,6 +47,11 @@ export interface ICreateUnitOptions {
  * It also manages the focused univer instance.
  */
 export interface IUniverInstanceService {
+    /** A set of callbacks that will be called before a new unit is added. */
+    beforeUnitAddCallbacks: Set<(unit: UnitModel) => boolean | void>;
+    /** A set of callbacks that will be called before a unit is disposed. */
+    beforeUnitDisposeCallbacks: Set<(unit: UnitModel) => boolean | void>;
+
     /** Omits value when a new UnitModel is created. */
     unitAdded$: Observable<UnitModel>;
     /** Subscribe to curtain type of units' creation. */
@@ -104,10 +109,16 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         super();
     }
 
+    beforeUnitDisposeCallbacks = new Set<(unit: UnitModel) => boolean | void>();
+
+    beforeUnitAddCallbacks = new Set<(unit: UnitModel) => boolean | void>();
+
     override dispose(): void {
         super.dispose();
 
         this._focused$.complete();
+        this.beforeUnitAddCallbacks.clear();
+        this.beforeUnitDisposeCallbacks.clear();
     }
 
     private _createHandler!: (
@@ -171,6 +182,15 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
      */
     __addUnit(unit: UnitModel, options?: ICreateUnitOptions): void {
         const type = unit.type;
+
+        if (this.beforeUnitAddCallbacks.size > 0) {
+            for (const callback of this.beforeUnitAddCallbacks) {
+                if (callback(unit) === false) {
+                    // if not use throw error, the createUnit returns null
+                    throw new Error('[UniverInstanceService]: cannot add unit with user callback.');
+                }
+            }
+        }
 
         if (!this._unitsByType.has(type)) {
             this._unitsByType.set(type, []);
@@ -282,6 +302,12 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     disposeUnit(unitId: string): boolean {
         const result = this._getUnitById(unitId);
         if (!result) return false;
+
+        for (const callback of this.beforeUnitDisposeCallbacks) {
+            if (callback(result[0]) === false) {
+                return false;
+            }
+        }
 
         const [unit, type] = result;
         const units = this._unitsByType.get(type)!;

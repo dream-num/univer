@@ -240,3 +240,21 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         injector,
     };
 }
+
+export function createUnitTestBed(): {
+    univer: Univer;
+    get: Injector['get'];
+    univerAPI: FUniver;
+    injector: Injector;
+} {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+    const univerAPI = FUniver.newAPI(injector);
+
+    return {
+        univer,
+        get: injector.get.bind(injector),
+        univerAPI,
+        injector,
+    };
+}

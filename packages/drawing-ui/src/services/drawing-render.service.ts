@@ -80,6 +80,11 @@ export class DrawingRenderService {
                 shouldBeCache = true;
             }
 
+            if (scene.getObject(imageShapeKey)) {
+                // The image maybe already added  in the time we are getting  the source of the image
+                continue;
+            }
+
             imageConfig.printable = true;
             const image = new Image(imageShapeKey, imageConfig);
             if (shouldBeCache) {

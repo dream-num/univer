@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-import { createIdentifier, type IDisposable } from '@wendellhu/redi';
-import posthog from 'posthog-js';
+import { createIdentifier } from '@wendellhu/redi';
 // Enum for telemetry event names
 export enum TelemetryEventNames {
     /** space */
@@ -42,45 +40,3 @@ export interface ITelemetryService {
 };
 
 export const ITelemetryService = createIdentifier<ITelemetryService>('telemetry.service');
-
-export class PosthogTelemetryService extends Disposable implements ITelemetryService, IDisposable {
-    constructor() {
-        super();
-        this._init();
-    }
-
-    private _init() {
-        const whiteHost = 'univer';
-        const isSiteWithMetry = window.location.host.includes(whiteHost);
-        // eslint-disable-next-line node/prefer-global/process
-        const isDev = process.env.NODE_ENV === 'development';
-        const isBrowser = typeof window !== 'undefined';
-        const onMetry = isBrowser && isSiteWithMetry && !isDev;
-        if (onMetry) {
-            posthog.init('phc_57fDHywG9pssGGW4JSHpc3Pq8hQ9puPnoWHoM6x30T7', {
-                api_host: 'https://us.i.posthog.com',
-                person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well
-                capture_pageleave: true,
-                loaded(_posthod) {
-                    if (isDev) {
-                        _posthod.debug();
-                    }
-                },
-            });
-        }
-    }
-
-    identify(id: string, params?: Record<string, any>) {
-        posthog.identify(id, params);
-    }
-
-    capture(eventName: string, params?: Record<string, any> | undefined) {
-        posthog.capture(eventName, params);
-    }
-
-    onPageView(url: string) {
-        posthog.capture('$pageview', {
-            $current_url: url,
-        });
-    }
-}

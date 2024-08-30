@@ -15,6 +15,3 @@
  */
 
 export * from './services/telemetry-service';
-export * from './controllers/telemetry.controller';
-export * from './plugin';
-export * from './hooks';

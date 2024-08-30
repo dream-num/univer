@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, IRange, Workbook, Worksheet } from '@univerjs/core';
-import { CommandType, FOCUSING_SHEET, ICommandService, IContextService, Inject, Rectangle, RxDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
+import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { CommandType, FOCUSING_SHEET, ICommandService, IContextService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     PointerInput,
     Rect,
@@ -200,7 +200,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const elapsedTimeToStart = filteredFrameInfo[filteredFrameInfo.length - 1].elapsedTime;
         const sheetId = this._context.unit.getActiveSheet().getSheetId();
         const unitId = this._context.unit.getUnitId();
-        this._telemetryService.capture(TelemetryEventNames.sheet_render_cost, { sheetId, unitId, elapsedTimeToStart, ...summaryFrameStats });
+        const telemetryData = { sheetId, unitId, elapsedTimeToStart, ...summaryFrameStats };
+        this._telemetryService.capture(TelemetryEventNames.sheet_render_cost, telemetryData);
     }
 
     private _addComponent(workbook: Workbook) {

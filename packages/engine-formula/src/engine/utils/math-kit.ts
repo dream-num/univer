@@ -20,20 +20,22 @@
  Reference https://en.wikipedia.org/wiki/Numeric_precision_in_Microsoft_Excel
  */
 
+import Decimal from 'decimal.js';
+
 export function plus(a: number, b: number): number {
-    return a + b;
+    return new Decimal(a).add(b).toNumber();
 }
 
 export function minus(a: number, b: number): number {
-    return a - b;
+    return new Decimal(a).sub(b).toNumber();
 }
 
 export function multiply(a: number, b: number): number {
-    return a * b;
+    return new Decimal(a).mul(b).toNumber();
 }
 
 export function divide(a: number, b: number): number {
-    return a / b;
+    return new Decimal(a).div(b).toNumber();
 }
 
 /**

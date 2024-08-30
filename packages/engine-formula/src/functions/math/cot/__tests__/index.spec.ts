@@ -89,7 +89,7 @@ describe('Test cot function', () => {
             const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [0.6420926159343306, ErrorType.VALUE, 0.3546331016766021, 0.6420926159343306, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO],
-                [ErrorType.DIV_BY_ZERO, -1.702956919426469, -0.9681244414101432, ErrorType.VALUE, 7.015252551434534, ErrorType.NAME],
+                [ErrorType.DIV_BY_ZERO, -1.702956919426469, -0.9681244414101433, ErrorType.VALUE, 7.015252551434534, ErrorType.NAME],
             ]);
         });
     });

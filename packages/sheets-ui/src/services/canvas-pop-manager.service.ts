@@ -165,7 +165,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        if (unitId !== _unitId || subUnitId !== _subUnitId) {
+        if ((_unitId && unitId !== _unitId) || (_subUnitId && subUnitId !== _subUnitId)) {
             return null;
         }
         const currentRender = this._renderManagerService.getRenderById(unitId);

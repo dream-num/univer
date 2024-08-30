@@ -30,7 +30,7 @@ describe('Test sec function', () => {
         it('Value is normal number', () => {
             const value = NumberValueObject.create(1);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1.8508157176809255);
+            expect(result.getValue()).toBe(1.8508157176809252);
         });
 
         it('Value is number 2**27', () => {
@@ -48,7 +48,7 @@ describe('Test sec function', () => {
         it('Value is number string', () => {
             const value = StringValueObject.create('1.5');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(14.136832902969903);
+            expect(result.getValue()).toBe(14.136832902969905);
         });
 
         it('Value is normal string', () => {
@@ -60,7 +60,7 @@ describe('Test sec function', () => {
         it('Value is boolean', () => {
             const value = BooleanValueObject.create(true);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1.8508157176809255);
+            expect(result.getValue()).toBe(1.8508157176809252);
         });
         it('Value is blank cell', () => {
             const value = NullValueObject.create();
@@ -88,7 +88,7 @@ describe('Test sec function', () => {
             });
             const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [1.8508157176809255, ErrorType.VALUE, 2.991882480183043, 1.8508157176809255, 1, 1],
+                [1.8508157176809252, ErrorType.VALUE, 2.991882480183043, 1.8508157176809252, 1, 1],
                 [1, 1.1596638229046938, -1.4376836183776793, ErrorType.VALUE, -1.0101086659079939, ErrorType.NAME],
             ]);
         });

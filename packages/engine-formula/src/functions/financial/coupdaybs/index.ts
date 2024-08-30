@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject, getTwoDateDaysByBasis } from '../../../basics/date';
+import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { calculateCoupdaybs } from '../../../basics/financial';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -26,7 +27,7 @@ export class Coupdaybs extends BaseFunction {
 
     override maxParams = 4;
 
-    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject) {
+    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject): BaseValueObject {
         const _basis = basis ?? NumberValueObject.create(0);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, frequency, _basis);
@@ -65,29 +66,8 @@ export class Coupdaybs extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const settlementDate = excelSerialToDate(settlementSerialNumber);
-        const coupDate = excelSerialToDate(maturitySerialNumber);
+        const result = calculateCoupdaybs(settlementSerialNumber, maturitySerialNumber, frequencyValue, basisValue);
 
-        coupDate.setUTCFullYear(settlementDate.getUTCFullYear());
-
-        if (coupDate < settlementDate) {
-            coupDate.setUTCFullYear(coupDate.getUTCFullYear() + 1);
-        }
-
-        // eslint-disable-next-line
-        while (coupDate > settlementDate) {
-            coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequencyValue);
-        }
-
-        let coupDateSerialNumber = excelDateSerial(coupDate);
-
-        // special handle for excel
-        if (coupDateSerialNumber < 0) {
-            coupDateSerialNumber = 0;
-        }
-
-        const { days } = getTwoDateDaysByBasis(coupDateSerialNumber, settlementSerialNumber, basisValue);
-
-        return NumberValueObject.create(days);
+        return NumberValueObject.create(result);
     }
 }

@@ -499,7 +499,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         this._commandService.executeCommand<ISetWorksheetRowIsAutoHeightCommandParams>(
                             SetWorksheetRowIsAutoHeightCommand.id,
                             {
-                                anchorRow: this._currentRow,
+                                ranges: [{ startRow: this._currentRow, endRow: this._currentRow, startColumn: 0, endColumn: this._sheetSkeletonManagerService.getCurrent()?.skeleton.worksheet.getColumnCount() || 0 }],
                             }
                         );
 

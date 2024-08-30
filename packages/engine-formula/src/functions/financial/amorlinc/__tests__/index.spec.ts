@@ -38,6 +38,18 @@ describe('Test amorlinc function', () => {
             expect(result.getValue()).toStrictEqual(360);
         });
 
+        it('Value is normal, life < 0', () => {
+            const cost = NumberValueObject.create(2400);
+            const datePurchased = StringValueObject.create('2008/8/19');
+            const firstPeriod = StringValueObject.create('2009/12/31');
+            const salvage = NumberValueObject.create(2100);
+            const period = NumberValueObject.create(1);
+            const rate = NumberValueObject.create(0.6);
+            const basis = NumberValueObject.create(0);
+            const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
+            expect(result.getValue()).toStrictEqual(0);
+        });
+
         it('Cost is normal string', () => {
             const cost = StringValueObject.create('test');
             const datePurchased = StringValueObject.create('2008/8/19');
@@ -48,6 +60,15 @@ describe('Test amorlinc function', () => {
             const basis = NumberValueObject.create(0);
             const result = testFunction.calculate(cost, datePurchased, firstPeriod, salvage, period, rate, basis);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const cost2 = NumberValueObject.create(2400);
+            const datePurchased2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(cost2, datePurchased2, firstPeriod, salvage, period, rate, basis);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const firstPeriod2 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(cost2, datePurchased, firstPeriod2, salvage, period, rate, basis);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Cost <= 0 or salvage < 0 or cost < salvage', () => {

@@ -217,6 +217,30 @@ describe('Test move rows cols', () => {
             });
         });
 
+        it('Should move forward works with range', async () => {
+            selectRow(2, 2);
+
+            const result = await commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
+                fromRange: { ...cellToRange(18, 1), endRow: 19 },
+                toRange: { ...cellToRange(1, 1), endRow: 2 },
+                range: { startRow: 18, startColumn: 0, endRow: 19, endColumn: 19, rangeType: RANGE_TYPE.ROW },
+            });
+            expect(result).toEqual(true);
+            expect(getCellInfo(0, 0)?.v).toEqual('A1');
+            expect(getCellInfo(3, 1)?.v).toEqual('B2');
+            expect(getMergedInfo(3, 1)).toEqual({ startRow: 3, endRow: 3, startColumn: 1, endColumn: 2 });
+            expect(getMergedInfo(4, 1)).toEqual({ startRow: 4, endRow: 5, startColumn: 1, endColumn: 1 });
+            expect(getRowHeight(1)).toBe(24);
+            expect(getRowHeight(3)).toBe(30);
+            expect(getCurrentSelection()).toEqual({
+                startRow: 2,
+                endRow: 2,
+                startColumn: 0,
+                endColumn: 19,
+                rangeType: RANGE_TYPE.ROW,
+            });
+        });
+
         it('Should forbidding moving when parts of merged cells are selected', async () => {
             selectRow(2, 2);
 
@@ -294,6 +318,30 @@ describe('Test move rows cols', () => {
                 startRow: 0,
                 endRow: 19,
                 startColumn: 1,
+                endColumn: 2,
+                rangeType: RANGE_TYPE.COLUMN,
+            });
+        });
+
+        it('Should move forward works with range', async () => {
+            selectColumn(2, 2);
+
+            const result = await commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
+                fromRange: { ...cellToRange(1, 18), endColumn: 19 },
+                toRange: { ...cellToRange(1, 1), endColumn: 2 },
+                range: { startRow: 0, startColumn: 18, endRow: 19, endColumn: 19, rangeType: RANGE_TYPE.COLUMN },
+            });
+            expect(result).toEqual(true);
+            expect(getCellInfo(0, 0)?.v).toEqual('A1');
+            expect(getCellInfo(1, 3)?.v).toEqual('B2');
+            expect(getMergedInfo(1, 3)).toEqual({ startRow: 1, endRow: 1, startColumn: 3, endColumn: 4 });
+            expect(getMergedInfo(2, 3)).toEqual({ startRow: 2, endRow: 3, startColumn: 3, endColumn: 3 });
+            expect(getColWidth(1)).toBe(88);
+            expect(getColWidth(3)).toBe(30);
+            expect(getCurrentSelection()).toEqual({
+                startRow: 0,
+                endRow: 19,
+                startColumn: 2,
                 endColumn: 2,
                 rangeType: RANGE_TYPE.COLUMN,
             });

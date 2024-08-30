@@ -66,6 +66,50 @@ export function checkVariantsErrorIsArrayOrBoolean(...variants: BaseValueObject[
     };
 }
 
+// All variants cannot be null.
+export function checkVariantsErrorIsNullorArrayOrBoolean(...variants: BaseValueObject[]) {
+    for (let i = 0; i < variants.length; i++) {
+        let variant = variants[i];
+
+        if (variant.isError()) {
+            return {
+                isError: true,
+                errorObject: variant,
+            };
+        }
+
+        if (variant.isNull()) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.NA),
+            };
+        }
+
+        variant = checkVariantErrorIsArray(variants[i]);
+
+        if (variant.isError()) {
+            return {
+                isError: true,
+                errorObject: variant,
+            };
+        }
+
+        if (variant.isBoolean()) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.VALUE),
+            };
+        }
+
+        variants[i] = variant;
+    }
+
+    return {
+        isError: false,
+        variants,
+    };
+}
+
 export function checkVariantsErrorIsStringToNumber(...variants: BaseValueObject[]) {
     for (let i = 0; i < variants.length; i++) {
         let variant = variants[i];

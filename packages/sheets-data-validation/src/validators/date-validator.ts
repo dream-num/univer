@@ -86,7 +86,11 @@ export class DateValidator extends BaseDataValidator<number> {
     }
 
     override async isValidType(info: IValidatorCellInfo): Promise<boolean> {
-        const { interceptValue } = info;
+        const { interceptValue, value } = info;
+        if (typeof value === 'number' && typeof interceptValue === 'string') {
+            return true;
+        }
+
         if (typeof interceptValue === 'string') {
             return Boolean(numfmt.parseDate(interceptValue));
         }

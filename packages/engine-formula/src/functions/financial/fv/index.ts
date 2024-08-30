@@ -29,7 +29,7 @@ export class Fv extends BaseFunction {
 
     override maxParams = 5;
 
-    override calculate(rate: BaseValueObject, nper: BaseValueObject, pmt: BaseValueObject, pv?: BaseValueObject, type?: BaseValueObject) {
+    override calculate(rate: BaseValueObject, nper: BaseValueObject, pmt: BaseValueObject, pv?: BaseValueObject, type?: BaseValueObject): BaseValueObject {
         const _pv = pv ?? NumberValueObject.create(0);
         const _type = type ?? NumberValueObject.create(0);
 

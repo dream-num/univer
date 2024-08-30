@@ -96,8 +96,6 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                     if (cId === InsertRowCommand.id) {
                         return this._moveRowInterceptor(commandInfo.params as IInsertRowCommandParams, 'insert');
                     } else if (cId === MoveRangeCommand.id) {
-                        // console.log('command', commandInfo)
-                        // return { redos: [], undos: [] };
                         return this._moveRangeInterceptor(commandInfo.params as IMoveRangeCommandParams);
                     } else if (cId === InsertColCommand.id) {
                         return this._moveColInterceptor(commandInfo.params as IInsertColCommandParams, 'insert');
@@ -712,7 +710,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 const { from, to } = sheetTransform;
                 const { row: fromRow } = from;
                 const { row: toRow } = to;
-                if (fromRow >= rowStartIndex && toRow <= rowEndIndex) {
+                if (anchorType === SheetDrawingAnchorType.Both && fromRow >= rowStartIndex && toRow <= rowEndIndex) {
                     // delete drawing
                     deleteDrawings.push({ unitId, subUnitId, drawingId });
                 } else {
@@ -792,7 +790,7 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 const { from, to } = sheetTransform;
                 const { column: fromColumn } = from;
                 const { column: toColumn } = to;
-                if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
+                if (anchorType === SheetDrawingAnchorType.Both && fromColumn >= colStartIndex && toColumn <= colEndIndex) {
                     // delete drawing
                     deleteDrawings.push({ unitId, subUnitId, drawingId });
                 } else {

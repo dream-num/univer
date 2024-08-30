@@ -174,14 +174,8 @@ export interface INodePosition extends INodeSearch {
 }
 
 export interface IAfterRender$Info {
-    // renderFrameMetric: IRenderFrameMetric;
     frameTimeMetric: Record<string, number | number[]>;
     tags: { scrolling: boolean } & Record<string, any>;
 }
 
 export type ITimeMetric = [string, number];
-
-export interface IRenderFrameMetric {
-    timeMetric: Record<string, number>;
-    tags: { scrolling: boolean } & Record<string, any>;
-}

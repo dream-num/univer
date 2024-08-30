@@ -16,7 +16,6 @@
 
 import { Disposable } from '@univerjs/core';
 import type { Nullable } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 
 export const DEFAULT_FRAME_SAMPLE_SIZE = 60;
 
@@ -54,32 +53,25 @@ export class PerformanceMonitor extends Disposable {
     private _enabled: boolean = true;
 
     private _rollingFrameTime!: RollingAverage;
-
     private _lastFrameTimeMs: Nullable<number>;
 
     /**
-     * for counting frame in a second.
+     * Counting frame in a second.
+     */
+    private _frameCountInLastSecond: number = 0;
+    /**
+     *  The millisecond value of the last second. For counting frame in a second.
      */
     private _lastSecondTimeMs: Nullable<number>;
-
-    private _frameCountInLastSecond: number = 0;
-
+    /**
+     * The FPS values recorded in the past 1 second.
+     */
     private _recFPSValueLastSecond: number = 60;
 
-    private _frameCount: number = 0; // number of all frames in whole life time.
+    // private _frameCount: number = 0; // number of all frames in whole life time.
 
     /**
-     * frameTime list in past second
-     */
-    private _frameTimeListPastSec: Partial<IBasicFrameInfo>[] = [];
-    lastSecondFramesList$ = new BehaviorSubject<Partial<IBasicFrameInfo>[]>([]);
-
-    private _frameTimeDetail: Nullable<Record<string, any>> = null;
-    // frameTime$: BehaviorSubject<Nullable<Record<string, any>>> = new BehaviorSubject<Nullable<Record<string, any>>>(null);
-
-    /**
-     * constructor
-     * @param frameSampleSize The number of samples required to saturate the sliding window
+     * @param {number} frameSampleSize The number of samples required to saturate the sliding window
      */
     constructor(frameSampleSize: number = DEFAULT_FRAME_SAMPLE_SIZE) {
         super();
@@ -88,9 +80,6 @@ export class PerformanceMonitor extends Disposable {
 
     override dispose(): void {
         super.dispose();
-        this.lastSecondFramesList$.complete();
-        // this.frameTime$.complete();
-        this._frameTimeListPastSec = [];
     }
 
     /**
@@ -108,7 +97,7 @@ export class PerformanceMonitor extends Disposable {
     }
 
     /**
-     * Returns the frame time of the last recent frame
+     * Returns the frame time of the last recent frame.
      */
     get instantaneousFrameTime(): number {
         return this._rollingFrameTime.history(0);
@@ -141,10 +130,6 @@ export class PerformanceMonitor extends Disposable {
         return this._rollingFrameTime.isSaturated();
     }
 
-    clearFrameDetail() {
-        this._frameTimeDetail = null;
-    }
-
     /**
      * Returns true if sampling is enabled
      */
@@ -163,10 +148,11 @@ export class PerformanceMonitor extends Disposable {
         }
 
         //#region FPS
-        this._frameCount++;
+        // this._frameCount++;
         this._frameCountInLastSecond++;
         if (this._lastSecondTimeMs != null) {
             const oneSecPassed = this._lastSecondTimeMs <= timestamp - DEFAULT_ONE_SEC_MS;
+            // const halfSecPassed = this._lastSecondTimeMs <= timestamp - DEFAULT_ONE_SEC_MS / 2;
             if (oneSecPassed) {
                 const passedTime = timestamp - this._lastSecondTimeMs;
                 this._recFPSValueLastSecond = Math.round(this._frameCountInLastSecond / passedTime * DEFAULT_ONE_SEC_MS);
@@ -188,6 +174,7 @@ export class PerformanceMonitor extends Disposable {
     }
 
     endFrame(timestamp: number) {
+        this.sampleFrame(timestamp);
         this._lastFrameTimeMs = timestamp;
     }
 
@@ -242,7 +229,6 @@ export class RollingAverage {
      * Current variance
      */
     variance: number = 0;
-
     protected _samples: number[] = [];
 
     /**
@@ -250,9 +236,7 @@ export class RollingAverage {
      * max value of _sampleCount is length of _samples
      */
     protected _sampleCount: number = 0;
-
     protected _pos: number = 0;
-
     protected _m2: number = 0; // sum of squares of differences from the (current) mean
 
     /**
@@ -264,6 +248,9 @@ export class RollingAverage {
         this.reset();
     }
 
+    /**
+     * Calc average frameTime and variance.
+     */
     calcAverageFrameTime() {
         const frameDuration = this.history(0);
         let delta: number;

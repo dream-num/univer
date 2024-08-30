@@ -186,8 +186,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
 
                 acc[key] = {
-                    max,
-                    min,
+                    max: Math.round(max * 100) / 100,
+                    min: Math.round(min * 100) / 100,
                     avg: Math.round(avg * 100) / 100,
                 };
 
@@ -550,9 +550,9 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     // mouse scroll
-
     private _initMouseWheel(scene: Scene, viewMain: Viewport) {
         this.disposeWithMe(
+            // eslint-disable-next-line complexity
             scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
                 if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
                     return;

@@ -159,10 +159,6 @@ export class Engine extends ThinEngine<Scene> {
         return Tools.now() - this._renderStartTime;
     }
 
-    get frameList$() {
-        return this._performanceMonitor.lastSecondFramesList$;
-    }
-
     override get width() {
         return this.getCanvas().getWidth();
     }
@@ -181,18 +177,6 @@ export class Engine extends ThinEngine<Scene> {
     get frameId(): number {
         return this._frameId;
     }
-
-    // afterRenderMetric$: Subject<IAfterRender$Info> = new Subject<IAfterRender$Info>();
-
-    // addRenderFrameTimeMetric$: Subject<ITimeMetric> = new Subject<ITimeMetric>();
-    // _initPerformanceMonitor() {
-    //     this._performanceMonitor = new PerformanceMonitor();
-
-    //     const _renderFrameTimeMetric: Nullable<Record<string, number[]>> = null;
-    //     const _renderFrameTags: Record<string, any> = {};
-
-    //     this.addRenderFrameTimeMetric$.subscribe()
-    // }
 
     override setCanvasCursor(val: CURSOR_TYPE) {
         const canvasEl = this.getCanvas().getCanvasEle();
@@ -388,8 +372,6 @@ export class Engine extends ThinEngine<Scene> {
      * End the current frame
      */
     _endFrame(timestamp: number): void {
-        // this._measureFps(timestamp);
-        this._performanceMonitor.sampleFrame(timestamp);
         this._performanceMonitor.endFrame(timestamp);
         this._fps = this._performanceMonitor.averageFPS;
         this._deltaTime = this._performanceMonitor.instantaneousFrameTime || 0;
@@ -477,15 +459,6 @@ export class Engine extends ThinEngine<Scene> {
         } else {
             this._renderingQueueLaunched = false;
         }
-    }
-
-    /**
-     * Measure FPS and delta time each frame
-     */
-    private _measureFps(timestamp: number): void {
-        this._performanceMonitor.sampleFrame(timestamp);
-        this._fps = this._performanceMonitor.averageFPS;
-        this._deltaTime = this._performanceMonitor.instantaneousFrameTime || 0;
     }
 
     private _handleKeyboardAction() {

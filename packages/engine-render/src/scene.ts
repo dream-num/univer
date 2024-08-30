@@ -34,7 +34,6 @@ import { Transformer } from './scene.transformer';
 import type { ThinEngine } from './thin-engine';
 import { ThinScene } from './thin-scene';
 import type { Viewport } from './viewport';
-import type { ITransformerConfig } from './basics/transformer-config';
 import type { Engine } from './engine';
 
 export class Scene extends ThinScene {
@@ -354,16 +353,17 @@ export class Scene extends ThinScene {
                 return layer;
             }
         }
+        return this._createDefaultLayer(zIndex);
     }
 
-    findLayerByZIndex(zIndex: number = 1) {
+    findLayerByZIndex(zIndex: number = 1): Nullable<Layer> {
         for (const layer of this.getLayers()) {
             if (layer.zIndex === zIndex) {
                 return layer;
             }
         }
     }
-        
+
     getLayerMaxZIndex(): number {
         let maxIndex = Number.MIN_VALUE;
         for (let i = 0; i < this._layers.length; i++) {

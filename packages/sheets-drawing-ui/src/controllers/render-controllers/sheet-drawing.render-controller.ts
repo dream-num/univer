@@ -15,6 +15,7 @@
  */
 
 import { Disposable, Inject, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { filter, first } from 'rxjs';
@@ -23,6 +24,7 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
     constructor(
         private _context: IRenderContext,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(LifecycleService) private _lifecycleService: LifecycleService
     ) {
         super();
@@ -38,6 +40,7 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
         this._lifecycleService.lifecycle$.pipe(filter((e) => e === LifecycleStages.Steady), first()).subscribe(() => {
             if (this._context.type === UniverInstanceType.UNIVER_SHEET) {
                 this._sheetDrawingService.initializeNotification(this._context.unitId);
+                this._drawingManagerService.initializeNotification(this._context.unitId);
             }
         });
     }

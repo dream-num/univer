@@ -77,13 +77,18 @@ export class ZenEditorController extends RxDisposable {
             body: {
                 dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
                 textRuns: [],
+                tables: [],
                 customBlocks: [],
                 paragraphs: [
                     {
                         startIndex: 0,
                     },
                 ],
+                sectionBreaks: [{
+                    startIndex: 1,
+                }],
             },
+            tableSource: {},
             documentStyle: {
                 pageSize: {
                     width: 595,
@@ -184,7 +189,7 @@ export class ZenEditorController extends RxDisposable {
             },
         ];
 
-        this._textSelectionManagerService.replaceTextRanges(textRanges);
+        this._textSelectionManagerService.replaceTextRanges(textRanges, false);
     }
 
     private _editorSyncHandler(param: IEditorBridgeServiceParam) {

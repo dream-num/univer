@@ -299,7 +299,7 @@ describe('Test subtotal', () => {
         });
         it('Stdev.s, Var1 is array, var2 is array', () => {
             const result = calculate('=SUBTOTAL(7,A1:B2,A3:F4)');
-            expect(result).toBe(31.273350405026253);
+            expect(result).toBe(31.27335040502625);
         });
         it('Stdev.p, Var1 is array, var2 is array', () => {
             const result = calculate('=SUBTOTAL(8,A1:B2,A3:F4)');

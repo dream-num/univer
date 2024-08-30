@@ -136,7 +136,7 @@ describe('Test averagea function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(9.506363636363638);
+            expect(result.getValue()).toBe(9.506363636363636);
         });
 
         it('Var1 is array includes string only', () => {

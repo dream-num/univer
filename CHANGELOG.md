@@ -1,5 +1,13 @@
 
 
+## [0.2.11](https://github.com/dream-num/univer/compare/v0.2.10...v0.2.11) (2024-08-31)
+
+
+### Bug Fixes
+
+* **sheet:** render after every mutation executed ([#3258](https://github.com/dream-num/univer/issues/3258)) ([91217dc](https://github.com/dream-num/univer/commit/91217dc661a5dfd2573497d43dc508cfc76121ed))
+* **sheets-data-validation:** cant resume data-validation on undo remove-sheet ([#3260](https://github.com/dream-num/univer/issues/3260)) ([7e9e69f](https://github.com/dream-num/univer/commit/7e9e69f986947281906b2ae71a47a9c2661be1fd))
+
 ## [0.2.10](https://github.com/dream-num/univer/compare/v0.2.9...v0.2.10) (2024-08-30)
 
 

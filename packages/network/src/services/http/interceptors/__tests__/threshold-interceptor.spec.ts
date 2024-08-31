@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Injector } from '@univerjs/core';
 import { HTTPService } from '../../http.service';
 import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
@@ -22,7 +22,7 @@ import { IHTTPImplementation } from '../../implementations/implementation';
 import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION } from '../../request';
 import { ThresholdInterceptorFactory } from '../threshold-interceptor';
 import { HTTPHeaders } from '../../headers';
-import { HTTPResponse } from '../../response';
+import { HTTPResponse, HTTPResponseError } from '../../response';
 
 describe('test "HTTPThresholdInterceptor"', () => {
     let httpService: HTTPService;
@@ -33,16 +33,12 @@ describe('test "HTTPThresholdInterceptor"', () => {
         injector = createHTTPTestBed().injector;
         httpService = injector.get(HTTPService);
         httpImplementation = injector.get(IHTTPImplementation) as MockHTTPImplementation;
-
-        vitest.useFakeTimers();
     });
 
     afterEach(() => {
         injector.dispose();
 
         __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION();
-
-        vitest.useRealTimers();
     });
 
     function emitSuccess(uid: number) {
@@ -56,50 +52,87 @@ describe('test "HTTPThresholdInterceptor"', () => {
         }));
     }
 
-    it('should control parallel requests', () => {
+    function emitError(uid: number) {
+        httpImplementation.getHandler(uid).emitError(new HTTPResponseError({
+            headers: new HTTPHeaders(),
+            status: 400,
+            statusText: 'Request Failed',
+            error: 'Failed',
+        }));
+    }
+
+    it('should control parallel requests', async () => {
         httpService.registerHTTPInterceptor({
             priority: 20,
             interceptor: ThresholdInterceptorFactory(),
         });
 
-        const _request1 = httpService.get('http://example.com');
-        const _request2 = httpService.get('http://example.com');
+        const request0 = httpService.get('http://example.com');
+        const request1 = httpService.get('http://example.com');
 
-        // due to threshold, the second request should not be sent
-        const _handler1 = httpImplementation.getHandler(0);
-        expect(() => httpImplementation.getHandler(1)).toThrowError();
+        expect(httpImplementation.getHandler(0)).toBeDefined();
+        expect(() => httpImplementation.getHandler(1)).toThrowError(); // due to threshold, the second request should not be sent
 
-        // when the first request is completed, the second request should be sent
-        emitSuccess(0);
-        const _handler2 = httpImplementation.getHandler(1);
+        emitSuccess(0); // when the first request is completed, the second request should be sent
+        expect((await request0 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
+        expect(httpImplementation.getHandler(1)).toBeDefined();
+        emitSuccess(1); // let the second request get completed
+        expect((await request1 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
 
-        // let the second request get completed
-        emitSuccess(1);
-
-        // when the third request is sent, it should not be threshold
-        const _request3 = httpService.get('http://example.com');
-        const _handler3 = httpImplementation.getHandler(2);
+        const request2 = httpService.get('http://example.com'); // when the third request is sent, it should not be threshold
+        expect(httpImplementation.getHandler(2)).toBeDefined();
         emitSuccess(2);
+        expect((await request2 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
     });
 
-    it('should support threshold params', () => {
+    it('should support threshold params', async () => {
         httpService.registerHTTPInterceptor({
             priority: 20,
             interceptor: ThresholdInterceptorFactory({ maxParallel: 2 }),
         });
 
-        const _request1 = httpService.get('http://example.com');
-        const _request2 = httpService.get('http://example.com');
+        const request0 = httpService.get('http://example.com');
+        const request1 = httpService.get('http://example.com');
 
         // since the threshold is 2, the second should be sent simultaneously
-        const _handler1 = httpImplementation.getHandler(0);
-        const _handler2 = httpImplementation.getHandler(1);
+        const handler0 = httpImplementation.getHandler(0);
+        const handler1 = httpImplementation.getHandler(1);
+        expect(handler0).toBeDefined();
+        expect(handler1).toBeDefined();
 
         emitSuccess(0);
         emitSuccess(1);
+        expect((await request0 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
+        expect((await request1 as HTTPResponse<{ text: string }>).body.text).toBe('Succeeded');
+    });
+
+    it('should support threshold params with errors', async () => {
+        httpService.registerHTTPInterceptor({
+            priority: 20,
+            interceptor: ThresholdInterceptorFactory({ maxParallel: 2 }),
+        });
+
+        let errored = false;
+        const _request0 = httpService.get('http://example.com').catch(() => {
+            errored = true;
+        });
+
+        const request1 = httpService.get('http://example.com');
+
+        const handler0 = httpImplementation.getHandler(0);
+        const handler1 = httpImplementation.getHandler(1);
+        expect(handler0).toBeDefined();
+        expect(handler1).toBeDefined();
+
+        emitError(0);
+        await timer();
+        expect(errored).toBe(true);
+
+        emitSuccess(1);
+        expect(await request1).toBeDefined();
     });
 });
 
-it('should work', () => {
-    expect(1).toBe(1);
-});
+function timer() {
+    return new Promise((resolve) => setTimeout(resolve, 200));
+}

@@ -101,6 +101,15 @@ describe('Test paste with formula', () => {
                 pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
             };
 
+            const pasteFrom = {
+                unitId,
+                subUnitId,
+                range: {
+                    rows: [0],
+                    cols: [2, 3],
+                },
+            };
+
             const result = {
                 undos: [
                     {
@@ -110,15 +119,6 @@ describe('Test paste with formula', () => {
                             subUnitId,
                             cellValue: {
                                 12: {
-                                    2: {
-                                        custom: null,
-                                        s: null,
-                                        f: null,
-                                        si: null,
-                                        p: null,
-                                        v: null,
-                                        t: null,
-                                    },
                                     3: {
                                         custom: null,
                                         s: null,
@@ -142,7 +142,6 @@ describe('Test paste with formula', () => {
                             subUnitId,
                             cellValue: {
                                 12: {
-                                    2: {},
                                     3: {
                                         f: null,
                                         si: '3e4r5t',
@@ -166,7 +165,7 @@ describe('Test paste with formula', () => {
                 lexerTreeBuilder,
                 formulaDataModel,
                 false,
-                null
+                pasteFrom
             );
 
             expect(redoUndoList).toStrictEqual(result);
@@ -330,6 +329,15 @@ describe('Test paste with formula', () => {
                     cols: [5, 6, 7, 8],
                 },
                 pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
+            };
+
+            const pasteFrom = {
+                unitId,
+                subUnitId,
+                range: {
+                    rows: [0, 1, 2, 3],
+                    cols: [5, 6, 7, 8],
+                },
             };
 
             const result = {
@@ -624,7 +632,7 @@ describe('Test paste with formula', () => {
                 lexerTreeBuilder,
                 formulaDataModel,
                 false,
-                null
+                pasteFrom
             );
 
             // Randomly generated id, no comparison is made

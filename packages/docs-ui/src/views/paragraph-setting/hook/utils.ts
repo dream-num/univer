@@ -23,15 +23,25 @@ import { BehaviorSubject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import type { IDocParagraphSettingCommandParams } from '../../../commands/commands/doc-paragraph-setting.command';
 import { DocParagraphSettingCommand } from '../../../commands/commands/doc-paragraph-setting.command';
+import { DocParagraphSettingController } from '../../../controllers/doc-paragraph-setting.controller';
 
 const useDocRanges = () => {
     const textSelectionManagerService = useDependency(TextSelectionManagerService);
+    const docParagraphSettingController = useDependency(DocParagraphSettingController);
+
     // The `getDocRanges` function internally needs to use `range.position` to obtain the offset.
     // However, when the form control changes and triggers the `getDocRanges` function, the `Skeleton` has already been updated.
     // The information of `range.position` in the textSelectionManagerService does not match the `Skeleton`, causing errors in value retrieval.
     // To address this issue, adding useMemo here to only retrieve the range information for the first time to avoid mismatches between the `Skeleton` and `position`.
     // TODO@GGGPOUND, the business side should not be aware of the timing issue with getDocRanges.
     const docRanges = useMemo(() => textSelectionManagerService.getDocRanges(), []);
+
+    useEffect(() => {
+        if (!docRanges.length) {
+            docParagraphSettingController.closePanel();
+        }
+    }, [docRanges]);
+
     return docRanges;
 };
 

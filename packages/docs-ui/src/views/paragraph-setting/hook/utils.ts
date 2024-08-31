@@ -225,6 +225,7 @@ export const useFirstParagraphSpaceBelow = (paragraph: IParagraph[]) => {
     return [spaceBelow, spaceBelowSet] as const;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
     const commandService = useDependency(ICommandService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -260,7 +261,7 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
 
     const lineSpacingSet = async (v: number) => {
         _lineSpacingSet(v);
-        stateChange$.next({ lineSpacing: v });
+        stateChange$.next({ lineSpacing: v, spacingRule });
     };
 
     const spacingRuleSet = async (v: SpacingRule) => {
@@ -282,14 +283,18 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
     };
 
     useEffect(() => {
-        const dispose = stateChange$.pipe(filter((obj) => !!Object.keys(obj).length), bufferTime(16), filter((list) => !!list.length), map((list) => {
-            return list.reduce((a, b) => {
-                Object.keys(b).forEach((key) => {
-                    a[key as 'spacingRule'] = b[key as 'spacingRule'];
-                });
-                return a;
-            }, {} as { spacingRule?: SpacingRule; lineSpacing?: number });
-        })).subscribe((v) => {
+        const dispose = stateChange$.pipe(
+            filter((obj) => !!Object.keys(obj).length),
+            bufferTime(16),
+            filter((list) => !!list.length),
+            map((list) => {
+                return list.reduce((a, b) => {
+                    Object.keys(b).forEach((key) => {
+                        a[key as 'spacingRule'] = b[key as 'spacingRule'];
+                    });
+                    return a;
+                }, {} as { spacingRule?: SpacingRule; lineSpacing?: number });
+            })).subscribe((v) => {
             return commandService.executeCommand(DocParagraphSettingCommand.id, {
                 paragraph: { ...v },
             } as IDocParagraphSettingCommandParams);

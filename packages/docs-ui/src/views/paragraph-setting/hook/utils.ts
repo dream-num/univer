@@ -274,6 +274,13 @@ export const useFirstParagraphLineSpacing = (paragraph: IParagraph[]) => {
                 if (lineNode?.contentHeight !== undefined) {
                     cache = Math.max(lineNode.contentHeight, cache);
                 }
+            } else {
+                // If the paragraph is set to fixed-spacing by default,
+                // the first time you enter the panel,
+                // you will set the fixed-spacing value to the initial value of multiple-spacing
+                if (cache > 5) {
+                    cache = 2;
+                }
             }
             lineSpacingCache.current = lineSpacing;
             lineSpacingSet(cache);

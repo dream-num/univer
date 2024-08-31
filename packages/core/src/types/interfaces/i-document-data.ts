@@ -760,9 +760,19 @@ export enum NamedStyleType {
 
 export enum SpacingRule {
     // 17.18.48 ST_LineSpacingRule (Line Spacing Rule)
-    AUTO, // Specifies that the line spacing of the parent object shall be automatically determined by the size of its contents, with no predetermined minimum or maximum size.
-    AT_LEAST, // Specifies that the height of the line shall be at least the value specified, but might be expanded to fit its content as needed.
-    EXACT, // Specifies that the height of the line shall be exactly the value specified, regardless of the size of the contents of the contents.
+
+    /**
+     * Specifies that the line spacing of the parent object shall be automatically determined by the size of its contents, with no predetermined minimum or maximum size.
+     */
+    AUTO,
+    /**
+     * Specifies that the height of the line shall be at least the value specified, but might be expanded to fit its content as needed.
+     */
+    AT_LEAST,
+    /**
+     * Specifies that the height of the line shall be exactly the value specified, regardless of the size of the contents of the contents.
+     */
+    EXACT,
 }
 
 /**

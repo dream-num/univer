@@ -85,13 +85,7 @@ export class FormulaClipboardController extends Disposable {
         isSpecialPaste: boolean
     ) {
         // Intercept scenarios where formulas do not need to be processed, and only process default paste and paste formulas only
-        if (
-            [
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
-            ].includes(payload.pasteType)
-        ) {
+        if ([PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH].includes(payload.pasteType)) {
             return {
                 undos: [],
                 redos: [],

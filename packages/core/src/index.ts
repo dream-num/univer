@@ -92,6 +92,7 @@ export {
     IPermissionService,
     PermissionStatus,
 } from './services/permission/type';
+export { IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 export type { IPermissionParam } from './services/permission/type';
 export type { IPermissionPoint } from './services/permission/type';
 export { IResourceLoaderService } from './services/resource-loader/type';

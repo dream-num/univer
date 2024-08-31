@@ -748,17 +748,15 @@ export function inRowViewRanges(ranges: IRange[], rowIndex: number) {
  * @param ranges
  */
 export function mergeRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) {
+    const intersects = [];
     for (const mainRange of mainRanges) {
         for (const range of ranges) {
             if (Rectangle.intersects(mainRange, range)) {
-                mainRange.startRow = Math.min(mainRange.startRow, range.startRow);
-                mainRange.endRow = Math.max(mainRange.endRow, range.endRow);
-                mainRange.startColumn = Math.min(mainRange.startColumn, range.startColumn);
-                mainRange.endColumn = Math.max(mainRange.endColumn, range.endColumn);
+                intersects.push(range);
             }
         }
     }
-    return mainRanges;
+    return [...mainRanges, ...intersects];
 }
 
 export function clampRanges(range: IRange) {

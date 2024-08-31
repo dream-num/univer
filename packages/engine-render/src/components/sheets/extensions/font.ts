@@ -129,7 +129,7 @@ export class Font extends SheetExtension {
                 // But at this moment, we cannot assume that it is not within the viewRanges and exit, because there may still be horizontal overflow.
                 // At this moment, we can only exclude the cells that are not within the current row.
                 const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
-                const combineWithMergeRanges = mergeRangeIfIntersects(mergeTo, [mergeInfo]);
+                const combineWithMergeRanges = mergeRangeIfIntersects([...mergeTo], [mergeInfo]);
                 if (!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
                     return true;
                 }
@@ -279,6 +279,7 @@ export class Font extends SheetExtension {
                 }
                 ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
                 this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
+
                 ctx.closePath();
                 ctx.restore();
             });

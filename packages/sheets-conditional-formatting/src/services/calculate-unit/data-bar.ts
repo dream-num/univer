@@ -26,6 +26,7 @@ import { EMPTY_STYLE } from './type';
 
 export const dataBarCellCalculateUnit: ICalculateUnit = {
     type: CFRuleType.dataBar,
+    // eslint-disable-next-line max-lines-per-function
     handle: async (rule: IConditionFormattingRule, context) => {
         const ruleConfig = rule.rule as IDataBar;
         const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
@@ -69,8 +70,9 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
         if (_max.status === FormulaResultStatus.WAIT) {
             return conditionalFormattingFormulaService.getCache(context.unitId, context.subUnitId, rule.cfId) || computeResult;
         } else if (_max.status === FormulaResultStatus.SUCCESS) {
-            const v = Number(_max.result);
-            max = Number.isNaN(v) ? 0 : v;
+            const v = Number.isNaN(Number(_max.result)) ? 0 : Number(_max.result);
+            max = Math.max(v, min);
+            min = Math.min(v, min);
         } else {
             return computeResult;
         }

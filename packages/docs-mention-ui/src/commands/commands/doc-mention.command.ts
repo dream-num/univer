@@ -15,11 +15,9 @@
  */
 
 import type { ICommand, IDocumentBody } from '@univerjs/core';
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, ICommandService, sequenceExecute } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, ICommandService } from '@univerjs/core';
 import { deleteCustomRangeFactory, replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
 import type { IDocMention } from '../../types/interfaces/i-mention';
-import { AddDocMentionMutation } from '../mutations/doc-mention.mutation';
-import { DocMentionModel } from '../../models/doc-mention.model';
 
 export interface IAddDocMentionCommandParams {
     mention: IDocMention;
@@ -51,6 +49,9 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
                 rangeId: mention.id,
                 rangeType: CustomRangeType.MENTION,
                 wholeEntity: true,
+                properties: {
+                    mention,
+                },
             }],
         };
 
@@ -68,18 +69,10 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         );
 
         if (doMutation) {
-            const commentMutation = {
-                id: AddDocMentionMutation.id,
-                params: {
-                    unitId,
-                    mention,
-                },
-            };
-
-            return (await sequenceExecute([commentMutation, doMutation], commandService)).result;
+            return commandService.executeCommand(doMutation.id, doMutation.params);
         }
 
-        return true;
+        return false;
     },
 };
 
@@ -97,13 +90,8 @@ export const DeleteDocMentionCommand: ICommand<IDeleteDocMentionCommandParams> =
         }
         const { unitId, mentionId } = params;
         const commandService = accessor.get(ICommandService);
-        const docMentionModel = accessor.get(DocMentionModel);
-        const mention = docMentionModel.getMention(unitId, mentionId);
-        if (!mention) {
-            return false;
-        }
 
-        const doMutation = deleteCustomRangeFactory(accessor, { unitId, rangeId: mention.id });
+        const doMutation = deleteCustomRangeFactory(accessor, { unitId, rangeId: mentionId });
         if (!doMutation) {
             return false;
         }

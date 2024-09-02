@@ -17,9 +17,11 @@
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import {
     ICommandService,
+    IResourceManagerService,
     IUniverInstanceService,
     RedoCommand,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { InsertCommand } from '@univerjs/docs';
 
@@ -29,7 +31,8 @@ export class FDocument {
     constructor(
         private readonly _documentDataModel: DocumentDataModel,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService
     ) {
         this.id = this._documentDataModel.getUnitId();
     }
@@ -43,7 +46,10 @@ export class FDocument {
     }
 
     getSnapshot(): IDocumentData {
-        return this._documentDataModel.getSnapshot() as IDocumentData;
+        const resources = this._resourceManagerService.getResourcesByType(this.id, UniverInstanceType.UNIVER_DOC);
+        const snapshot = this._documentDataModel.getSnapshot() as IDocumentData;
+        snapshot.resources = resources;
+        return snapshot;
     }
 
     undo(): Promise<boolean> {

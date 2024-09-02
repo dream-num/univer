@@ -87,7 +87,14 @@ function addCustomRangeTextX(param: IAddCustomRangeParam, body: IDocumentBody) {
     return textX;
 }
 
-export function addCustomRangeFactory(param: IAddCustomRangeParam, body: IDocumentBody) {
+export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRangeParam, body: IDocumentBody) {
+    const { unitId, segmentId } = param;
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+    if (!documentDataModel) {
+        return false;
+    }
+
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
@@ -101,7 +108,9 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam, body: IDocume
     if (!textX) {
         return false;
     }
-    doMutation.params.actions = jsonX.editOp(textX.serialize());
+
+    const path = getRichTextEditPath(documentDataModel, segmentId);
+    doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
     return doMutation;
 }
 
@@ -109,11 +118,12 @@ interface IAddCustomRangeFactoryParam {
     rangeId: string;
     rangeType: CustomRangeType;
     wholeEntity?: boolean;
+    properties?: Record<string, any>;
 }
 
 // eslint-disable-next-line max-lines-per-function
 export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAddCustomRangeFactoryParam) {
-    const { rangeId, rangeType, wholeEntity } = param;
+    const { rangeId, rangeType, wholeEntity, properties } = param;
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -217,6 +227,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
                     startIndex: -(range.endOffset - range.startOffset - deletes.length + 1),
                     endIndex: 0,
                     wholeEntity,
+                    properties,
                 },
             ],
         },

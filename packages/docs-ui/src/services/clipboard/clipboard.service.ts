@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
-import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
+import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
-import { CutContentCommand, DocCustomRangeService, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
+import { copyCustomRange, CutContentCommand, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
 import type { RectRange, TextRange } from '@univerjs/engine-render';
 import { DOC_RANGE_TYPE } from '@univerjs/engine-render';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
@@ -93,8 +93,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocCustomRangeService) private readonly _docCustomRangeService: DocCustomRangeService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
     }
@@ -220,7 +219,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 body = hook.onBeforePaste(body);
             }
         });
-        body.customRanges = body.customRanges?.map((range) => this._docCustomRangeService.copyCustomRange(unitId, range));
+
+        // copy custom ranges
+        body.customRanges = body.customRanges?.map(copyCustomRange);
 
         const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
@@ -323,7 +324,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _getDocumentBodyInRanges(sliceType: SliceBodyType): Nullable<{
         bodyList: IDocumentBody[];
         needCache: boolean;
@@ -379,26 +379,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 continue;
             }
 
-            // TODO: @zhangwei, should be delete?
-            if (docBody.customRanges) {
-                const deleteRange: ICustomRange[] = [];
-                docBody.customRanges.forEach((range) => {
-                    // should be delete
-                    if (range.startIndex === range.endIndex) {
-                        deleteRange.push(range);
-                    }
-                });
-                docBody.customRanges = docBody.customRanges.filter((range) => deleteRange.indexOf(range) === -1);
-                let text = '';
-                let cursor = 0;
-                deleteRange.forEach((range) => {
-                    text += docBody.dataStream.slice(cursor, range.endIndex);
-                    cursor = range.endIndex + 1;
-                });
-                text += docBody.dataStream.slice(cursor, docBody.dataStream.length);
-                docBody.dataStream = text;
-            }
-
             results.push(docBody);
         }
 
@@ -437,19 +417,17 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const dataStream = text.replace(/\n/g, '\r');
 
         if (!text.includes('\r') && Tools.isLegalUrl(text)) {
-            const id = Tools.generateRandomId();
-            const docDataModel = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)!;
+            const id = generateRandomId();
             const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${dataStream}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-            const range = this._docCustomRangeService.copyCustomRange(
-                docDataModel.getUnitId(),
-                {
-                    startIndex: 0,
-                    endIndex: urlText.length - 1,
-                    rangeId: id,
-                    rangeType: CustomRangeType.HYPERLINK,
-                    data: text,
-                }
-            );
+            const range: ICustomRange = {
+                startIndex: 0,
+                endIndex: urlText.length - 1,
+                rangeId: id,
+                rangeType: CustomRangeType.HYPERLINK,
+                properties: {
+                    url: text,
+                },
+            };
 
             return {
                 dataStream: urlText,

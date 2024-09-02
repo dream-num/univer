@@ -26,7 +26,7 @@ const enUS: typeof zhCN = {
             placeholder: 'Please input a link url',
             addressError: 'Url is illegal!',
             label: 'Label',
-            LabelError: 'Please input label of link',
+            labelError: 'Please input label of link',
         },
         info: {
             copy: 'Copy',

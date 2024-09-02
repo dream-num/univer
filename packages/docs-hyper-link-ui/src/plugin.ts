@@ -16,16 +16,14 @@
 
 import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
 import type { IDocHyperLinkUIConfig } from './controllers/ui.controller';
 import { DocHyperLinkUIController } from './controllers/ui.controller';
 import { DocHyperLinkPopupService } from './services/hyper-link-popup.service';
 import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
 import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
-import { DocHyperLinkClipboardController } from './controllers/doc-hyper-link-clipboard.controller';
-import { DocHyperLinkCustomRangeController } from './controllers/doc-hyper-link-custom-range.controller';
 import { DocHyperLinkEventRenderController } from './controllers/render-controllers/hyper-link-event.render-controller';
 
 @DependentOn(UniverDocsHyperLinkPlugin)
@@ -50,8 +48,6 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
                 },
             ],
             [DocHyperLinkSelectionController],
-            [DocHyperLinkClipboardController],
-            [DocHyperLinkCustomRangeController],
         ];
 
         deps.forEach((dep) => {

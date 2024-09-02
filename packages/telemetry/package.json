@@ -1,10 +1,9 @@
 {
-    "name": "@univerjs/docs-mention",
-    "version": "0.2.11",
+    "name": "@univerjs/telemetry",
+    "version": "0.2.1",
     "private": true,
-    "description": "Univer normal ui-plugin-docs",
+    "description": "",
     "author": "DreamNum <developer@univer.ai>",
-    "license": "Apache-2.0",
     "funding": {
         "type": "opencollective",
         "url": "https://opencollective.com/univer"
@@ -17,12 +16,7 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [
-        "univer"
-    ],
-    "sideEffects": [
-        "**/*.css"
-    ],
+    "keywords": [],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -59,24 +53,21 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build",
-        "sync:cnpm": "cnpm sync"
+        "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/docs": "workspace:*",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
-        "@types/react": "^18.3.4",
         "@univerjs/core": "workspace:*",
-        "@univerjs/docs": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
+        "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.4",
-        "vite": "^5.4.2",
-        "vitest": "^2.0.5"
+        "typescript": "^5.5.3",
+        "vite": "^5.3.4",
+        "vitest": "^2.0.3"
     },
     "univerSpace": {
         ".": {
@@ -88,6 +79,17 @@
             "import": "./lib/es/*",
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*"
+    },
+    "univer": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "types": "./src/index.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "types": "./src/index.ts"
         },
         "./lib/*": "./lib/*"
     }

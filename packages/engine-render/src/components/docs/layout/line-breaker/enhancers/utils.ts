@@ -14,22 +14,30 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
-import { DocHyperLinkModel } from '../../models/hyper-link.model';
-
-export interface IDeleteDocHyperLinkMutationParams {
-    unitId: string;
-    linkId: string;
+export function isLetter(char: string) {
+    return char.length > 0 && !/\s|(?![\'])[\!-\@\[-\`\{-\~\u2013-\u203C]/.test(char);
 }
 
-export const DeleteDocHyperLinkMutation: ICommand<IDeleteDocHyperLinkMutationParams> = {
-    type: CommandType.MUTATION,
-    id: 'docs.mutation.delete-hyper-link',
-    handler(accessor, params) {
-        if (!params) {
-            return false;
+export function getWord(str: string): string {
+    let word = '';
+
+    for (let i = 0; i < str.length; i++) {
+        if (isLetter(str[i])) {
+            word += str[i];
+        } else {
+            break;
         }
-        const docHyperLinkModel = accessor.get(DocHyperLinkModel);
-        return docHyperLinkModel.deleteLink(params.unitId, params.linkId);
-    },
-};
+    }
+
+    return word;
+}
+
+export function getSlicePosition(lastPos: number, hyphenSlice: string[], index: number): number {
+    let position = lastPos;
+
+    for (let i = 0; i <= index; i++) {
+        position += hyphenSlice[i].length;
+    }
+
+    return position;
+}

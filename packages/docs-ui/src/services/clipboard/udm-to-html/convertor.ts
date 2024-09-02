@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, DataStreamTreeNodeType, Tools } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, Tools } from '@univerjs/core';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
@@ -81,8 +81,9 @@ export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): stri
     return style.length ? `<span style="${style.join('; ')};">${html}</span>` : html;
 }
 
-export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endIndex: number) {
+function getBodyInlineSlice(body: IDocumentBody, startIndex: number, endIndex: number) {
     const { dataStream, textRuns = [] } = body;
+
     let cursorIndex = startIndex;
     const spanList: string[] = [];
 
@@ -113,6 +114,35 @@ export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endInd
     }
 
     return spanList.join('');
+}
+
+export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endIndex: number) {
+    const { customRanges = [] } = body;
+    const customRangesInRange = customRanges.filter((range) => range.startIndex >= startIndex && range.endIndex <= endIndex);
+
+    let cursorIndex = startIndex;
+    let html = '';
+    customRangesInRange.forEach((range) => {
+        const { startIndex, endIndex, rangeType, rangeId } = range;
+        const preHtml = getBodyInlineSlice(body, cursorIndex, startIndex);
+        html += preHtml;
+        const sliceHtml = getBodyInlineSlice(body, startIndex + 1, endIndex);
+        switch (rangeType) {
+            case CustomRangeType.HYPERLINK: {
+                html += `<a data-rangeid="${rangeId}" href="${range.properties?.url ?? ''}">${sliceHtml}</a>`;
+                break;
+            }
+
+            default: {
+                html += sliceHtml;
+                break;
+            }
+        }
+        cursorIndex = endIndex + 1;
+    });
+    const endHtml = getBodyInlineSlice(body, cursorIndex, endIndex);
+    html += endHtml;
+    return html;
 }
 
 interface IHtmlResult {

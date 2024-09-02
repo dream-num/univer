@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export const DOC_HYPER_LINK_PLUGIN = 'DOC_HYPER_LINK_PLUGIN';
+export * from './services/telemetry-service';

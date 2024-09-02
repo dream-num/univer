@@ -18,6 +18,7 @@ import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, I
 import {
     CommandType,
     DataStreamTreeTokenType,
+    generateRandomId,
     getCustomDecorationSlice,
     getCustomRangeSlice,
     ICommandService,
@@ -26,6 +27,7 @@ import {
     PositionedObjectLayoutType,
     TextX,
     TextXActionType,
+    Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 import type { IActiveTextRange, ITextRangeWithStyle, RectRange, TextRange } from '@univerjs/engine-render';
@@ -37,7 +39,6 @@ import type { IRichTextEditingMutationParams } from '../mutations/core-editing.m
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getDeleteSelection } from '../../basics/selection';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
-import { DocCustomRangeService } from '../../services/doc-custom-range.service';
 import { DeleteDirection } from '../../types/enums/delete-direction';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
@@ -661,11 +662,13 @@ function getParagraphBody(
 ): IDocumentBody {
     const { textRuns: originTextRuns = [], customBlocks: originCustomBlocks = [] } = body;
     const dataStream = body.dataStream.substring(start, end);
-    const customRangeService = accessor.get(DocCustomRangeService);
 
     const bodySlice: IDocumentBody = {
         dataStream,
-        customRanges: getCustomRangeSlice(body, start, end).customRanges.map((range) => customRangeService.copyCustomRange(unitId, range)),
+        customRanges: getCustomRangeSlice(body, start, end).customRanges.map((range) => ({
+            ...Tools.deepClone(range),
+            rangeId: generateRandomId(),
+        })),
         customDecorations: getCustomDecorationSlice(body, start, end),
     };
 

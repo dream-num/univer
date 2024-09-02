@@ -21,6 +21,8 @@ export enum BreakPointType {
     Mandatory = 'Mandatory',
     // An opportunity for hyphenating.
     Hyphen = 'Hyphen',
+    // An opportunity for breaking in a link. *Hyphen is not allowed in a link*.
+    Link = 'Link',
 }
 
 export class Break {

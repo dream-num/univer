@@ -17,7 +17,6 @@
 import type { DocumentDataModel, IAccessor, ICommand, ITextRange } from '@univerjs/core';
 import { CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getCustomRangesInterestsWithRange, TextSelectionManagerService } from '@univerjs/docs';
-import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
@@ -101,20 +100,22 @@ export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IShowDocHyperLinkInf
     },
 };
 
-export const ClickDocHyperLinkOperation: ICommand<{ unitId: string; linkId: string }> = {
+export const ClickDocHyperLinkOperation: ICommand<{ unitId: string; linkId: string; segmentId?: string }> = {
     type: CommandType.OPERATION,
     id: 'doc.operation.click-hyper-link',
     handler(accessor, params) {
         if (!params) {
             return false;
         }
-        const { unitId, linkId } = params;
-        const docLinkModel = accessor.get(DocHyperLinkModel);
-        const link = docLinkModel.getLink(unitId, linkId);
-        if (!link) {
-            return false;
+        const { unitId, linkId, segmentId } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const body = doc?.getSelfOrHeaderFooterModel(segmentId).getBody();
+        const link = body?.customRanges?.find((range) => range.rangeId === linkId && range.rangeType === CustomRangeType.HYPERLINK)?.properties?.url;
+
+        if (link) {
+            window.open(link, '_blank', 'noopener noreferrer');
         }
-        window.open(link.payload, '_blank', 'noopener noreferrer');
         return true;
     },
 };

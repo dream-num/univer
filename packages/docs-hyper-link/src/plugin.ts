@@ -16,10 +16,7 @@
 
 import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { DOC_HYPER_LINK_PLUGIN } from './types/const';
-import { DocHyperLinkModel } from './models/hyper-link.model';
-import { DocHyperLinkController } from './controllers/hyper-link.controller';
-import { DocHyperLinkResourceController } from './controllers/resource.controller';
+import { DOC_HYPER_LINK_PLUGIN, DocHyperLinkResourceController } from './controllers/resource.controller';
 
 export class UniverDocsHyperLinkPlugin extends Plugin {
     static override pluginName = DOC_HYPER_LINK_PLUGIN;
@@ -34,8 +31,6 @@ export class UniverDocsHyperLinkPlugin extends Plugin {
 
     override onStarting(): void {
         const deps: Dependency[] = [
-            [DocHyperLinkModel],
-            [DocHyperLinkController],
             [DocHyperLinkResourceController],
         ];
 

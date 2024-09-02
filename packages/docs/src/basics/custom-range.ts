@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange, ITextRange } from '@univerjs/core';
-import { DataStreamTreeTokenType } from '@univerjs/core';
+import { DataStreamTreeTokenType, generateRandomId, Tools } from '@univerjs/core';
 
 export function isCustomRangeSplitSymbol(text: string) {
     return text === DataStreamTreeTokenType.CUSTOM_RANGE_END || text === DataStreamTreeTokenType.CUSTOM_RANGE_START;
@@ -70,4 +70,11 @@ export function getCustomRangesInterestsWithRange(range: ITextRange, customRange
     }
 
     return result;
+}
+
+export function copyCustomRange(range: ICustomRange) {
+    return {
+        ...Tools.deepClone(range),
+        rangeId: generateRandomId(),
+    };
 }

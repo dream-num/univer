@@ -33,7 +33,7 @@ export interface IUniverTelemetryPluginConfig {
  * you need to provide a implementation via this plugin's config.
  */
 export class UniverTelemetryPlugin extends Plugin {
-    static id = UniverTelemetryPluginID;
+    static override pluginName = UniverTelemetryPluginID;
 
     constructor(
         private _config: IUniverTelemetryPluginConfig,

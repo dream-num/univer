@@ -120,6 +120,6 @@ export class UniverSheetsPlugin extends Plugin {
 
         this._injector.get(SheetInterceptorService);
         this._injector.get(RangeProtectionService);
-        this._injector.get(ExclusiveRangeService);
+        this._injector.get(IExclusiveRangeService);
     }
 }

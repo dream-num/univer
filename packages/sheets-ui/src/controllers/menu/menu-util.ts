@@ -85,6 +85,12 @@ export function getCurrentExclusiveRangeDisable$(accessor: IAccessor, disableGro
     );
 }
 
+export function getCurrentRangeDisableWithExclusiveRange$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}, disableGroupSet?: Set<FeatureGroupIdEnum>) {
+    return combineLatest([getCurrentRangeDisable$(accessor, permissionTypes), getCurrentExclusiveRangeDisable$(accessor, disableGroupSet)]).pipe(
+        map(([rangeDisable, exclusiveRangeDisable]) => rangeDisable || exclusiveRangeDisable)
+    );
+}
+
 export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);

@@ -19,7 +19,7 @@ import { createIdentifier, Disposable, Rectangle } from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../basics/selection';
 
 interface IFeatureRange {
-    groupId: FeatureGroupIdEnum;
+    groupId: string;
     range: IRange;
 }
 
@@ -34,7 +34,7 @@ export interface IExclusiveRangeService {
      * @param {string} feature The feature of the exclusive range
      * @param {IFeatureRange} range The exclusive range
      */
-    addExclusiveRange(unitId: string, sheetId: string, feature: string, ranges: IFeatureRange[]): void;
+    addExclusiveRange(unitId: string, sheetId: string, feature: FeatureGroupIdEnum, ranges: IFeatureRange[]): void;
     /**
      * @description Get the exclusive ranges
      * @param {string} unitId The unitId of the exclusive range
@@ -42,14 +42,14 @@ export interface IExclusiveRangeService {
      * @param {string} feature The feature of the exclusive range
      * @returns {undefined | IFeatureRange[]} The exclusive ranges
      */
-    getExclusiveRanges(unitId: string, sheetId: string, feature: string): undefined | IFeatureRange[];
+    getExclusiveRanges(unitId: string, sheetId: string, feature: FeatureGroupIdEnum): undefined | IFeatureRange[];
     /**
      * @description Clear the exclusive ranges
      * @param {string} unitId The unitId of the exclusive range
      * @param {string} sheetId The sheetId of the exclusive range
      * @param {string} feature The feature of the exclusive range
      */
-    clearExclusiveRanges(unitId: string, sheetId: string, feature: string): void;
+    clearExclusiveRanges(unitId: string, sheetId: string, feature: FeatureGroupIdEnum): void;
 
     /**
      * @description Clear the exclusive ranges by groupId
@@ -58,7 +58,7 @@ export interface IExclusiveRangeService {
      * @param {string} feature The feature of the exclusive range
      * @param {string} groupId The groupId of the exclusive range
      */
-    clearExclusiveRangesByGroupId(unitId: string, sheetId: string, feature: string, groupId: string): void;
+    clearExclusiveRangesByGroupId(unitId: string, sheetId: string, feature: FeatureGroupIdEnum, groupId: string): void;
     /**
      * Check the interest group id of the giving selection
      * @param {ISelectionWithStyle[]} selections The selections to check
@@ -71,7 +71,7 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
     /**
      * Exclusive range data structure is as follows: unitId -> sheetId -> feature -> range
      */
-    private _exclusiveRanges: Map<string, Map<string, Map<string, IFeatureRange[]>>> = new Map();
+    private _exclusiveRanges: Map<string, Map<string, Map<FeatureGroupIdEnum, IFeatureRange[]>>> = new Map();
 
     constructor(
     ) {
@@ -93,7 +93,7 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
         return unitMap.get(sheetId)!;
     }
 
-    private _ensureFeature(unitId: string, sheetId: string, feature: string) {
+    private _ensureFeature(unitId: string, sheetId: string, feature: FeatureGroupIdEnum) {
         const subunitMap = this._ensureSubunitMap(unitId, sheetId);
         if (!subunitMap.has(feature)) {
             subunitMap.set(feature, []);
@@ -101,21 +101,21 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
         return subunitMap.get(feature)!;
     }
 
-    public addExclusiveRange(unitId: string, sheetId: string, feature: string, ranges: IFeatureRange[]) {
+    public addExclusiveRange(unitId: string, sheetId: string, feature: FeatureGroupIdEnum, ranges: IFeatureRange[]) {
         const featureMap = this._ensureFeature(unitId, sheetId, feature);
         featureMap.push(...ranges);
     }
 
-    public getExclusiveRanges(unitId: string, sheetId: string, feature: string): undefined | IFeatureRange[] {
+    public getExclusiveRanges(unitId: string, sheetId: string, feature: FeatureGroupIdEnum): undefined | IFeatureRange[] {
         return this._exclusiveRanges.get(unitId)?.get(sheetId)?.get(feature);
     }
 
-    public clearExclusiveRanges(unitId: string, sheetId: string, feature: string) {
+    public clearExclusiveRanges(unitId: string, sheetId: string, feature: FeatureGroupIdEnum) {
         this._ensureFeature(unitId, sheetId, feature);
         this._exclusiveRanges.get(unitId)!.get(sheetId)!.set(feature, []);
     }
 
-    public clearExclusiveRangesByGroupId(unitId: string, sheetId: string, feature: string, groupId: string) {
+    public clearExclusiveRangesByGroupId(unitId: string, sheetId: string, feature: FeatureGroupIdEnum, groupId: string) {
         const featureMap = this.getExclusiveRanges(unitId, sheetId, feature);
         if (featureMap) {
             const newFeatureMap = featureMap.filter((item) => item.groupId !== groupId);
@@ -128,16 +128,21 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
         for (const unitId of this._exclusiveRanges.keys()) {
             for (const sheetId of this._exclusiveRanges.get(unitId)!.keys()) {
                 for (const feature of this._exclusiveRanges.get(unitId)!.get(sheetId)!.keys()) {
-                    const featureMap = this.getExclusiveRanges(unitId, sheetId, feature);
-                    if (featureMap) {
-                        featureMap.forEach((item) => {
+                    const featureMapRanges = this.getExclusiveRanges(unitId, sheetId, feature);
+                    if (featureMapRanges) {
+                        for (const featureMapRange of featureMapRanges) {
+                            let isIntersect = false;
                             for (const selection of selections) {
-                                if (Rectangle.intersects(selection.range, item.range)) {
-                                    interestGroupId.push(item.groupId);
+                                if (Rectangle.intersects(selection.range, featureMapRange.range)) {
+                                    interestGroupId.push(feature);
+                                    isIntersect = true;
                                     break;
                                 }
                             }
-                        });
+                            if (isIntersect) {
+                                break;
+                            }
+                        }
                     }
                 }
             }

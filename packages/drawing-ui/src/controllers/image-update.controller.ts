@@ -23,6 +23,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import type { Image, Scene } from '@univerjs/engine-render';
@@ -77,6 +78,10 @@ export class ImageUpdateController extends Disposable {
         const { unitId: currentUnitId, subUnitId: currentSubUnitId, current } = info;
 
         if (current.type === UniverInstanceType.UNIVER_DOC) {
+            return;
+        }
+
+        if (current.type === UniverInstanceType.UNIVER_SHEET) {
             return;
         }
 

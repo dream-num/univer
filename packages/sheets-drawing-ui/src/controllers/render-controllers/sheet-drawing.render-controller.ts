@@ -19,13 +19,17 @@ import { IDrawingManagerService } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { filter, first } from 'rxjs';
+import { drawingPositionToTransform } from '../../basics/transform-position';
+import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export class SheetsDrawingRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @Inject(LifecycleService) private _lifecycleService: LifecycleService
+        @Inject(LifecycleService) private _lifecycleService: LifecycleService,
+        @Inject(ISheetSelectionRenderService) private _sheetSelectionRenderService: ISheetSelectionRenderService,
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -40,6 +44,16 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
         this._lifecycleService.lifecycle$.pipe(filter((e) => e === LifecycleStages.Steady), first()).subscribe(() => {
             if (this._context.type === UniverInstanceType.UNIVER_SHEET) {
                 this._sheetDrawingService.initializeNotification(this._context.unitId);
+                const data = this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId);
+                for (let subUnit in data) {
+                    const subUnitData = data[subUnit];
+                    for (let drawingId in subUnitData.data) {
+                        const drawingData = subUnitData.data[drawingId];
+                        drawingData.transform = drawingPositionToTransform(drawingData.sheetTransform, this._sheetSelectionRenderService, this._sheetSkeletonManagerService)
+                    }
+                }
+
+                this._drawingManagerService.registerDrawingData(this._context.unitId, this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId));
                 this._drawingManagerService.initializeNotification(this._context.unitId);
             }
         });

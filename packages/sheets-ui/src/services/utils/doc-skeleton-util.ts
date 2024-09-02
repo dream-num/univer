@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IParagraph, ITextRangeParam } from '@univerjs/core';
-import { CustomRangeType, PresetListType } from '@univerjs/core';
+import type { ICustomRange, Injector, IParagraph, ITextRangeParam, Workbook } from '@univerjs/core';
+import { CustomRangeType, IUniverInstanceService, PresetListType, UniverInstanceType } from '@univerjs/core';
 import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
-import { getLineBounding, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 const calcDocRangePositions = (range: ITextRangeParam, skeleton: DocumentSkeleton): IBoundRectNoAngle[] | undefined => {
     const pageIndex = -1;
@@ -127,5 +128,50 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton) => {
     return {
         links: hyperLinks.map((link) => calcLinkPosition(docSkeleton, link)!).filter(Boolean),
         checkLists: checkLists.map((list) => calcBulletPosition(docSkeleton, list)!).filter(Boolean),
+    };
+};
+
+export const getCustomRangePosition = (injector: Injector, unitId: string, subUnitId: string, row: number, col: number, rangeId: string) => {
+    const univerInstanceService = injector.get(IUniverInstanceService);
+    const renderManagerService = injector.get(IRenderManagerService);
+    const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+    if (!workbook) {
+        return null;
+    }
+
+    const worksheet = workbook.getSheetBySheetId(subUnitId);
+    if (!worksheet) {
+        return null;
+    }
+
+    const currentRender = renderManagerService.getRenderById(workbook.getUnitId());
+    const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
+
+    const skeleton = skeletonParam?.skeleton;
+
+    if (!skeleton || !currentRender) return;
+
+    const font = skeleton.getFontSkeleton(row, col);
+
+    if (!font) {
+        return null;
+    }
+    const customRange = font.getViewModel().getBody()?.customRanges?.find((range) => range.rangeId === rangeId);
+    if (!customRange) {
+        return null;
+    }
+
+    const PADDING = 4;
+    const rects = calcDocRangePositions({ startOffset: customRange.startIndex, endOffset: customRange.endIndex, collapsed: false }, font);
+    const cell = skeleton.getCellByIndex(row, col);
+    return {
+        rects: rects?.map((rect) => ({
+            top: rect.top + cell.startY - PADDING,
+            bottom: rect.bottom + cell.startY + PADDING,
+            left: rect.left + cell.startX,
+            right: rect.right + cell.startX,
+        })),
+        customRange,
+        label: font.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
     };
 };

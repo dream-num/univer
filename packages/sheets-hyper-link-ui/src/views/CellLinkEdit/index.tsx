@@ -20,7 +20,7 @@ import { createInternalEditorID, ICommandService, isValidRange, IUniverInstanceS
 import type { IUnitRangeWithName, Workbook } from '@univerjs/core';
 import { RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { ERROR_RANGE, HyperLinkModel } from '@univerjs/sheets-hyper-link';
+import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
@@ -42,11 +42,11 @@ export const CellLinkEdit = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const editing = useObservable(popupService.currentEditing$);
-    const hyperLinkModel = useDependency(HyperLinkModel);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const commandService = useDependency(ICommandService);
     const sidePanelService = useDependency(SheetsHyperLinkSidePanelService);
     const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
+
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -58,8 +58,15 @@ export const CellLinkEdit = () => {
     const setByPayload = useRef(false);
 
     useEffect(() => {
-        if (editing?.row !== undefined && editing.column !== undefined) {
-            const link = hyperLinkModel.getHyperLinkByLocationSync(editing.unitId, editing.subUnitId, editing.row, editing.column);
+        if (editing?.row !== undefined && editing.col !== undefined) {
+            const { label, customRangeId, customRange, row, col } = editing;
+            const link = {
+                id: customRangeId,
+                display: label,
+                payload: customRange.properties?.url ?? '',
+                row,
+                column: col,
+            };
 
             if (link) {
                 setId(link.id);
@@ -71,6 +78,7 @@ export const CellLinkEdit = () => {
                     setDisplay(customLinkInfo.display);
                     return;
                 }
+
                 setDisplay(link.display);
                 const linkInfo = resolverService.parseHyperLink(link.payload);
                 if (linkInfo.type === 'outer') {
@@ -120,7 +128,7 @@ export const CellLinkEdit = () => {
             }
             const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId);
             const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
-            const cell = worksheet?.getCellRaw(editing.row, editing.column);
+            const cell = worksheet?.getCellRaw(editing.row, editing.col);
 
             const cellValue = getCellValueOrigin(cell);
             setType(LinkType.link);
@@ -134,7 +142,7 @@ export const CellLinkEdit = () => {
         setPayload('');
         setDisplay('');
         setId('');
-    }, [editing, hyperLinkModel, resolverService, univerInstanceService]);
+    }, [editing, resolverService, sidePanelService, univerInstanceService]);
 
     const payloadInitial = useMemo(() => payload, [type]);
 
@@ -224,7 +232,7 @@ export const CellLinkEdit = () => {
                     link: {
                         id: Tools.generateRandomId(),
                         row: editing.row,
-                        column: editing.column,
+                        column: editing.col,
                         payload: formatUrl(type, payload),
                         display,
                     },
@@ -242,8 +250,8 @@ export const CellLinkEdit = () => {
                 range: {
                     startRow: Math.max(editing.row - GAP, 0),
                     endRow: editing.row + GAP,
-                    startColumn: Math.max(editing.column - GAP, 0),
-                    endColumn: editing.column + GAP,
+                    startColumn: Math.max(editing.col - GAP, 0),
+                    endColumn: editing.col + GAP,
                 },
             });
         }
@@ -252,7 +260,7 @@ export const CellLinkEdit = () => {
     };
 
     return (
-        <div>
+        <div className={styles.cellLinkEdit}>
             <FormLayout
                 label={localeService.t('hyperLink.form.label')}
                 error={showError && !display ? localeService.t('hyperLink.form.inputError') : ''}

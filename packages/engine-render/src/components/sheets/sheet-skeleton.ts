@@ -92,6 +92,10 @@ import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 
 function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string): void {
     const body = documentModel.getBody()!;
+    if (body.customRanges?.some((range) => range.rangeType === CustomRangeType.HYPERLINK)) {
+        return;
+    }
+
     updateAttributeByInsert(
         body,
         {
@@ -1205,7 +1209,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                 cellValueType: cell.t!,
             });
         }
-
         if (documentModel && cell.linkUrl) {
             addLinkToDocumentModel(documentModel, cell.linkUrl);
         }

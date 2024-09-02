@@ -32,7 +32,6 @@ export const AddHyperLinkMutation: ICommand<IAddHyperLinkMutationParams> = {
         if (!params) {
             return false;
         }
-
         const model = accessor.get(HyperLinkModel);
         const { unitId, subUnitId, link } = params;
         return model.addHyperLink(unitId, subUnitId, link);

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
-import { SheetInterceptorService } from '@univerjs/sheets';
+import type { ICommand, IDocumentData, IMutationInfo } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
 import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
-import { AddHyperLinkMutation, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import { RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 
 export interface IAddHyperLinkCommandParams {
     unitId: string;
@@ -35,17 +37,45 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         if (!params) {
             return false;
         }
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const renderManagerService = accessor.get(IRenderManagerService);
         const { unitId, subUnitId, link } = params;
-        const { redos, undos } = sheetInterceptorService.onCommandExecute({
-            id: AddHyperLinkCommand.id,
-            params,
-        });
+        const { payload, display, row, column } = link;
+
+        const rangeValue: IDocumentData = {
+            id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            documentStyle: {
+
+            },
+            body: {
+                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${link.display}${DataStreamTreeTokenType.CUSTOM_RANGE_END}\r\n`,
+                customRanges: [{
+                    rangeId: generateRandomId(),
+                    startIndex: 0,
+                    endIndex: link.display!.length + 1,
+                    rangeType: CustomRangeType.HYPERLINK,
+                    properties: {
+                        url: link.payload,
+                    },
+                }],
+            },
+        };
+        const redoParams: ISetRangeValuesMutationParams = {
+            unitId,
+            subUnitId,
+            cellValue: {
+                [link.row]: {
+                    [link.column]: {
+                        p: rangeValue,
+                    },
+                },
+            },
+        };
+
         const redo: IMutationInfo = {
-            id: AddHyperLinkMutation.id,
-            params,
+            id: SetRangeValuesMutation.id,
+            params: redoParams,
         };
         const undo: IMutationInfo = {
             id: RemoveHyperLinkMutation.id,
@@ -55,11 +85,11 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
                 id: link.id,
             },
         };
-        const res = await sequenceExecuteAsync([redo, ...redos], commandService);
+        const res = await sequenceExecuteAsync([redo], commandService);
         if (res.result) {
             undoRedoService.pushUndoRedo({
-                redoMutations: [redo, ...redos],
-                undoMutations: [undo, ...undos],
+                redoMutations: [redo],
+                undoMutations: [undo],
                 unitID: unitId,
             });
             return true;

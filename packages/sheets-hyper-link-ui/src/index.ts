@@ -24,10 +24,10 @@ export type { IUrlHandler, IUniverSheetsHyperLinkUIConfig } from './types/interf
 
 // #region - all commands
 export {
-    OpenHyperLinkSidebarOperation,
+    OpenHyperLinkEditPanelOperation,
     InsertHyperLinkOperation,
     CloseHyperLinkSidebarOperation,
-    type IOpenHyperLinkSidebarOperationParams,
+    type IOpenHyperLinkEditPanelOperationParams,
 } from './commands/operations/sidebar.operations';
 
 export { AddHyperLinkCommand, type IAddHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';

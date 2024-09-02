@@ -40,6 +40,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
     private _initHoverListener() {
         this.disposeWithMe(
             this._hoverManagerService.currentCellWithDoc$.pipe(debounceTime(200)).subscribe((currentCell) => {
+                // console.log('===currentCell===', currentCell);
                 if (!currentCell) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
@@ -69,6 +70,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     worksheetTypes: [WorksheetViewPermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],
                 }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
+
                 if (!viewPermission) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
@@ -91,7 +93,8 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     col: targetCol,
                     editPermission,
                     copyPermission,
-                    richTextLink: currentCell.customRange,
+                    customRange: currentCell.customRange,
+                    customRangeRect: currentCell.rect,
                 });
             })
         );

@@ -22,8 +22,6 @@ import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { getPlainTextFormDocument } from '@univerjs/docs';
 import { isLegalLink, serializeUrl } from '../common/util';
-import type { IAddHyperLinkCommandParams } from '../commands/commands/add-hyper-link.command';
-import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
 import type { IUpdateHyperLinkCommandParams } from '../commands/commands/update-hyper-link.command';
 import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 
@@ -43,7 +41,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
     }
 
     private _initCommandInterceptor() {
-        this._initAddHyperLinkCommandInterceptor();
+        // this._initAddHyperLinkCommandInterceptor();
         this._initSetRangeValuesCommandInterceptor();
         this._initUpdateHyperLinkCommandInterceptor();
         this._initClearSelectionCommandInterceptor();
@@ -54,49 +52,49 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId)?.getCell(row, col);
     }
 
-    private _initAddHyperLinkCommandInterceptor() {
-        this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
+    // private _initAddHyperLinkCommandInterceptor() {
+    //     this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
 
-            getMutations: (command) => {
-                if (command.id === AddHyperLinkCommand.id) {
-                    const params = command.params as IAddHyperLinkCommandParams;
-                    const { unitId, subUnitId, link } = params;
-                    const currentCell = this._getCurrentCell(unitId, subUnitId, link.row, link.column);
-                    const redoParams: ISetRangeValuesMutationParams = {
-                        unitId,
-                        subUnitId,
-                        cellValue: {
-                            [link.row]: {
-                                [link.column]: {
-                                    v: link.display,
-                                    // t: CellValueType.STRING, // Setting a link to a number is still a number
-                                    p: null,
-                                    t: currentCell?.t ?? undefined, // Keep force string type
-                                },
-                            },
-                        },
-                    };
+    //         getMutations: (command) => {
+    //             if (command.id === AddHyperLinkCommand.id) {
+    //                 const params = command.params as IAddHyperLinkCommandParams;
+    //                 const { unitId, subUnitId, link } = params;
+    //                 const currentCell = this._getCurrentCell(unitId, subUnitId, link.row, link.column);
+    //                 const redoParams: ISetRangeValuesMutationParams = {
+    //                     unitId,
+    //                     subUnitId,
+    //                     cellValue: {
+    //                         [link.row]: {
+    //                             [link.column]: {
+    //                                 v: link.display,
+    //                                 // t: CellValueType.STRING, // Setting a link to a number is still a number
+    //                                 p: null,
+    //                                 t: currentCell?.t ?? undefined, // Keep force string type
+    //                             },
+    //                         },
+    //                     },
+    //                 };
 
-                    return {
-                        redos: [{
-                            id: SetRangeValuesMutation.id,
-                            params: redoParams,
-                        }],
-                        undos: [{
-                            id: SetRangeValuesMutation.id,
-                            params: SetRangeValuesUndoMutationFactory(this._injector, redoParams),
+    //                 return {
+    //                     redos: [{
+    //                         id: SetRangeValuesMutation.id,
+    //                         params: redoParams,
+    //                     }],
+    //                     undos: [{
+    //                         id: SetRangeValuesMutation.id,
+    //                         params: SetRangeValuesUndoMutationFactory(this._injector, redoParams),
 
-                        }],
-                    };
-                }
+    //                     }],
+    //                 };
+    //             }
 
-                return {
-                    redos: [],
-                    undos: [],
-                };
-            },
-        }));
-    }
+    //             return {
+    //                 redos: [],
+    //                 undos: [],
+    //             };
+    //         },
+    //     }));
+    // }
 
     private _initUpdateHyperLinkCommandInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
@@ -144,7 +142,6 @@ export class SheetHyperLinkSetRangeController extends Disposable {
 
     private _initSetRangeValuesCommandInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
-
             getMutations: (command) => {
                 if (command.id === SetRangeValuesCommand.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
@@ -153,7 +150,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     const undos: IMutationInfo[] = [];
                     if (params.cellValue) {
                         new ObjectMatrix(params.cellValue).forValue((row, col, cell) => {
-                            const cellValueRaw = cell?.v ?? cell?.p?.body?.dataStream.slice(0, -2);
+                            const cellValueRaw = cell?.v;
                             const cellValue = (cellValueRaw ?? '').toString();
                             const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
                             if (!link) {
@@ -186,23 +183,27 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                 return;
                             }
 
-                            if (cellValueRaw === '' || cell?.custom?.__link_url === '') {
-                                redos.push({
-                                    id: RemoveHyperLinkMutation.id,
-                                    params: {
-                                        unitId,
-                                        subUnitId,
-                                        id: link.id,
-                                    },
-                                });
-                                undos.push({
-                                    id: AddHyperLinkMutation.id,
-                                    params: {
-                                        unitId,
-                                        subUnitId,
-                                        link,
-                                    },
-                                });
+                            if (link) {
+                                // rich-text can store link in custom-range, don't save to link model
+                                if (cellValueRaw === '' || cell?.custom?.__link_url === '' || cell?.p) {
+                                    redos.push({
+                                        id: RemoveHyperLinkMutation.id,
+                                        params: {
+                                            unitId,
+                                            subUnitId,
+                                            id: link.id,
+                                        },
+                                    });
+
+                                    undos.push({
+                                        id: AddHyperLinkMutation.id,
+                                        params: {
+                                            unitId,
+                                            subUnitId,
+                                            link,
+                                        },
+                                    });
+                                }
                             }
                         });
                     }

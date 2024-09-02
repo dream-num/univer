@@ -16,39 +16,25 @@
 
 import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
-import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import { ISidebarService } from '@univerjs/ui';
-import { CellLinkEdit } from '../../views/CellLinkEdit';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 
-export interface IOpenHyperLinkSidebarOperationParams extends ISheetCommandSharedParams {
+export interface IOpenHyperLinkEditPanelOperationParams extends ISheetCommandSharedParams {
     row: number;
-    column: number;
+    col: number;
+    customRangeId: string;
 }
 
-export const OpenHyperLinkSidebarOperation: ICommand<IOpenHyperLinkSidebarOperationParams> = {
+export const OpenHyperLinkEditPanelOperation: ICommand<IOpenHyperLinkEditPanelOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'sheet.operation.open-hyper-link-sidebar',
+    id: 'sheet.operation.open-hyper-link-edit-panel',
     handler(accessor, params) {
         if (!params) {
             return false;
         }
 
-        const { unitId, subUnitId, row, column } = params;
-        const hyperLinkModel = accessor.get(HyperLinkModel);
-        const sidebarService = accessor.get(ISidebarService);
         const popupService = accessor.get(SheetsHyperLinkPopupService);
-        const currentLink = hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, column);
         popupService.startEditing(params);
-
-        sidebarService.open({
-            header: {
-                title: !currentLink ? 'hyperLink.form.addTitle' : 'hyperLink.form.editTitle',
-            },
-            children: {
-                label: CellLinkEdit.componentKey,
-            },
-        });
 
         return true;
     },
@@ -85,7 +71,7 @@ export const InsertHyperLinkOperation: ICommand = {
 
         const row = selection.primary.startRow;
         const column = selection.primary.startColumn;
-        return commandService.executeCommand(OpenHyperLinkSidebarOperation.id, {
+        return commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
             unitId: target.unitId,
             subUnitId: target.subUnitId,
             row,

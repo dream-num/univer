@@ -53,16 +53,20 @@ export class SheetCanvasPopManagerService extends Disposable {
         worksheet: Worksheet
     ) {
         const calc = () => {
-            const { scene } = currentRender;
+            const { scene, engine } = currentRender;
+
+            const canvas = engine.getCanvasElement();
+            const canvasBound = canvas.getBoundingClientRect();
 
             const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
 
             const position = {
-                left: offsetBound.left,
-                right: offsetBound.right,
-                top: offsetBound.top,
-                bottom: offsetBound.bottom,
+                left: offsetBound.left + canvasBound.left,
+                right: offsetBound.right + canvasBound.left,
+                top: offsetBound.top + canvasBound.top,
+                bottom: offsetBound.bottom + canvasBound.top,
             };
+
             return position;
         };
 

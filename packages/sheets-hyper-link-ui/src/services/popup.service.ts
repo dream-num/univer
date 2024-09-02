@@ -15,41 +15,57 @@
  */
 
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
-import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import type { IDisposable } from '@univerjs/core';
-import { Disposable, Inject } from '@univerjs/core';
+import { getCustomRangePosition, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import type { ICustomRange, IDisposable, Nullable } from '@univerjs/core';
+import { Disposable, Inject, Injector } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { CellLinkPopup } from '../views/CellLinkPopup';
+import { CellLinkEdit } from '../views/CellLinkEdit';
 
 export interface IHyperLinkPopup {
     unitId: string;
     subUnitId: string;
-    id: string;
     disposable?: IDisposable;
     row: number;
     col: number;
     editPermission: boolean;
     copyPermission: boolean;
+    customRange: ICustomRange;
 }
 
 interface IHyperLinkEditing {
     unitId: string;
     subUnitId: string;
     row: number;
-    column: number;
+    col: number;
+    customRangeId: string;
 }
 
-const isEqualLink = (a: ISheetLocationBase, b: ISheetLocationBase) => {
-    return a.unitId === b.unitId && a.subUnitId === b.subUnitId && a.row === b.row && a.col === b.col;
+const isEqualLink = (a: IHyperLinkPopupOptions, b: IHyperLinkPopup) => {
+    return (
+        a.unitId === b.unitId
+        && a.subUnitId === b.subUnitId
+        && a.row === b.row
+        && a.col === b.col
+        && a.customRange?.rangeId === b.customRange?.rangeId
+    );
 };
+
+interface IHyperLinkPopupOptions extends ISheetLocationBase {
+    editPermission?: boolean;
+    copyPermission?: boolean;
+    customRange?: Nullable<ICustomRange>;
+    customRangeRect?: Nullable<IBoundRectNoAngle>;
+}
 
 export class SheetsHyperLinkPopupService extends Disposable {
     private _currentPopup: IHyperLinkPopup | null = null;
     private _currentPopup$ = new Subject<IHyperLinkPopup | null>();
     currentPopup$ = this._currentPopup$.asObservable();
+    private _currentEditingPopup: Nullable<IDisposable> = null;
 
-    private _currentEditing$ = new BehaviorSubject<IHyperLinkEditing | null>(null);
+    private _currentEditing$ = new BehaviorSubject<(IHyperLinkEditing & { customRange: ICustomRange; label: string }) | null>(null);
     currentEditing$ = this._currentEditing$.asObservable();
 
     get currentPopup() {
@@ -61,8 +77,8 @@ export class SheetsHyperLinkPopupService extends Disposable {
     }
 
     constructor(
-        @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
-        @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopManagerService: SheetCanvasPopManagerService
+        @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopManagerService: SheetCanvasPopManagerService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
@@ -75,37 +91,38 @@ export class SheetsHyperLinkPopupService extends Disposable {
         });
     }
 
-    showPopup(location: ISheetLocationBase & { editPermission?: boolean; copyPermission?: boolean }) {
+    showPopup(location: IHyperLinkPopupOptions) {
         if (this._currentPopup && isEqualLink(location, this._currentPopup)) {
             return;
         }
 
         this.hideCurrentPopup();
-        const { unitId, subUnitId, row, col } = location;
-
-        const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
-        if (!link) {
+        const { unitId, subUnitId, row, col, customRangeRect, customRange } = location;
+        if (!customRangeRect || !customRange) {
             return;
         }
 
-        const disposable = this._sheetCanvasPopManagerService.attachPopupToCell(row, col, {
-            componentKey: CellLinkPopup.componentKey,
-            direction: 'bottom',
-            closeOnSelfTarget: true,
-            onClickOutside: () => {
-                this.hideCurrentPopup();
-            },
-        });
+        const disposable = this._sheetCanvasPopManagerService.attachPopupByPosition(
+            customRangeRect,
+            {
+                componentKey: CellLinkPopup.componentKey,
+                direction: 'bottom',
+                closeOnSelfTarget: true,
+                onClickOutside: () => {
+                    this.hideCurrentPopup();
+                },
+            });
+
         if (disposable) {
             this._currentPopup = {
                 unitId,
                 subUnitId,
-                id: link.id,
                 disposable,
                 row,
                 col,
                 editPermission: !!location.editPermission,
                 copyPermission: !!location.copyPermission,
+                customRange,
             };
             this._currentPopup$.next(this._currentPopup);
         }
@@ -120,10 +137,35 @@ export class SheetsHyperLinkPopupService extends Disposable {
     }
 
     startEditing(link: IHyperLinkEditing) {
-        this._currentEditing$.next(link);
+        this._currentEditingPopup?.dispose();
+        const customRangeInfo = getCustomRangePosition(this._injector, link.unitId, link.subUnitId, link.row, link.col, link.customRangeId);
+        if (!customRangeInfo) {
+            return;
+        }
+
+        const { rects, customRange, label } = customRangeInfo;
+        if (rects?.length) {
+            this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupByPosition(
+                rects.pop()!,
+                {
+                    componentKey: CellLinkEdit.componentKey,
+                    direction: 'bottom',
+                    closeOnSelfTarget: true,
+                    onClickOutside: () => {
+                        this.hideCurrentPopup();
+                    },
+                }
+            );
+            this._currentEditing$.next({
+                ...link,
+                customRange,
+                label,
+            });
+        }
     }
 
     endEditing() {
+        this._currentEditingPopup?.dispose();
         this._currentEditing$.next(null);
     }
 }

@@ -15,7 +15,6 @@
  */
 
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import React, { useEffect, useState } from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import cs from 'clsx';
@@ -24,7 +23,7 @@ import { IMessageService } from '@univerjs/ui';
 import type { IHyperLinkPopup } from '../../services/popup.service';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
-import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
+import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/sidebar.operations';
 import { CancelHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
 import styles from './index.module.less';
 
@@ -40,7 +39,6 @@ const iconsMap = {
 
 export const CellLinkPopup = () => {
     const popupService = useDependency(SheetsHyperLinkPopupService);
-    const hyperLinkModel = useDependency(HyperLinkModel);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);
@@ -60,12 +58,13 @@ export const CellLinkPopup = () => {
     if (!currentPopup) {
         return null;
     }
-    const { unitId, subUnitId, id } = currentPopup;
-    const link = hyperLinkModel.getHyperLink(unitId, subUnitId, id);
-    if (!link) {
+
+    const { unitId, subUnitId, customRange, row, col } = currentPopup;
+    if (!customRange.properties?.url) {
         return null;
     }
-    const linkObj = resolverService.parseHyperLink(link.payload);
+
+    const linkObj = resolverService.parseHyperLink(customRange.properties.url);
     const isError = linkObj.type.indexOf('error') > -1;
 
     return (
@@ -110,11 +109,12 @@ export const CellLinkPopup = () => {
                         <div
                             className={styles.cellLinkOperation}
                             onClick={() => {
-                                commandService.executeCommand(OpenHyperLinkSidebarOperation.id, {
+                                commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
                                     unitId,
                                     subUnitId,
-                                    row: link.row,
-                                    column: link.column,
+                                    row,
+                                    col,
+                                    customRangeId: customRange.rangeId,
                                 });
                             }}
                         >
@@ -128,7 +128,9 @@ export const CellLinkPopup = () => {
                                 commandService.executeCommand(CancelHyperLinkCommand.id, {
                                     unitId,
                                     subUnitId,
-                                    id: link.id,
+                                    id: customRange.rangeId,
+                                    row,
+                                    col,
                                 });
                             }}
                         >

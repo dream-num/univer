@@ -20,7 +20,7 @@ import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { LinkSingle } from '@univerjs/icons';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
-import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkSidebarOperation } from '../commands/operations/sidebar.operations';
+import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/sidebar.operations';
 import type { IUniverSheetsHyperLinkUIConfig } from '../types/interfaces/i-config';
 import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
@@ -58,7 +58,7 @@ export class SheetsHyperLinkUIController extends Disposable {
 
     private _initCommands() {
         [
-            OpenHyperLinkSidebarOperation,
+            OpenHyperLinkEditPanelOperation,
             CloseHyperLinkSidebarOperation,
             InsertHyperLinkOperation,
             InsertHyperLinkToolbarOperation,

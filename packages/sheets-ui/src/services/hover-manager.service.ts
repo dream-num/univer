@@ -61,10 +61,15 @@ export class HoverManagerService extends Disposable {
     );
 
     // Notify when hovering over different cells and different custom range or bullet
-    currentCellWithDoc$ = this.currentCell$.pipe(
+    currentCellWithDoc$ = this._currentCell$.pipe(
         distinctUntilChanged(
+            // eslint-disable-next-line complexity
             (pre, aft) => (
-                pre?.customRange?.rangeId === aft?.customRange?.rangeId
+                pre?.location?.unitId === aft?.location?.unitId
+                && pre?.location?.subUnitId === aft?.location?.subUnitId
+                && pre?.location?.row === aft?.location?.row
+                && pre?.location?.col === aft?.location?.col
+                && pre?.customRange?.rangeId === aft?.customRange?.rangeId
                 && pre?.bullet?.startIndex === aft?.bullet?.startIndex
             )
         )
@@ -99,14 +104,12 @@ export class HoverManagerService extends Disposable {
     private _calcActiveCell(unitId: string, offsetX: number, offsetY: number) {
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
-            this._currentCell$.next(null);
-            return;
+            return null;
         }
 
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
-            this._currentCell$.next(null);
-            return;
+            return null;
         }
 
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
@@ -120,8 +123,7 @@ export class HoverManagerService extends Disposable {
         const hoverPosition = getHoverCellPosition(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
 
         if (!hoverPosition) {
-            this._currentCell$.next(null);
-            return;
+            return null;
         }
 
         const { location, position } = hoverPosition;
@@ -137,13 +139,16 @@ export class HoverManagerService extends Disposable {
             paragraph: IParagraph;
         }> = null;
 
+        const PADDING = 4;
         if (font) {
             const rects = calculateDocSkeletonRects(font);
             const innerX = offsetX - position.startX;
             const innerY = offsetY - position.startY;
-            customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && rect.top <= innerY && innerY <= rect.bottom));
-            bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && list.rect.top <= innerY && innerY <= list.rect.bottom);
+            customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && (rect.top - PADDING) <= innerY && innerY <= (rect.bottom + PADDING)));
+            bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && (list.rect.top - PADDING) <= innerY && innerY <= (list.rect.bottom + PADDING));
         }
+        const cell = skeleton.getCellByIndex(location.row, location.col);
+        const rect = customRange?.rects.pop() ?? bullet?.rect;
 
         return {
             location,
@@ -152,7 +157,12 @@ export class HoverManagerService extends Disposable {
             subUnitId: worksheet.getSheetId(),
             customRange: customRange?.range,
             bullet: bullet?.paragraph,
-            rect: customRange?.rects.pop() ?? bullet?.rect,
+            rect: rect && {
+                top: rect.top + cell.startY - PADDING,
+                bottom: rect.bottom + cell.startY + PADDING,
+                left: rect.left + cell.startX,
+                right: rect.right + cell.startX,
+            },
         };
     }
 

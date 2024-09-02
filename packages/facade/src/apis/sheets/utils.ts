@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable } from '@univerjs/core';
+import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable, Worksheet } from '@univerjs/core';
 import {
+    DisposableCollection,
+    generateRandomId,
     HorizontalAlign,
     isCellV,
     isFormulaString,
     isICellData,
     ObjectMatrix,
+    RANGE_TYPE,
     Tools,
     VerticalAlign,
 } from '@univerjs/core';
+import type { ComponentManager, ComponentType } from '@univerjs/ui';
 
 export type FHorizontalAlignment = 'left' | 'center' | 'normal';
 export type FVerticalAlignment = 'top' | 'middle' | 'bottom';
@@ -149,4 +153,54 @@ export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange): boolean
         && mergeInfo.endColumn === range.endColumn
         && mergeInfo.startRow === range.startRow
         && mergeInfo.endRow === range.endRow;
+}
+
+export interface IFComponentKey {
+    /**
+     * The key of the component to be rendered in the popup.
+     * if key is a string, it will be query from the component registry.
+     * if key is a React or Vue3 component, it will be rendered directly.
+     */
+    componentKey: string | ComponentType;
+    /**
+     * If componentKey is a Vue3 component, this must be set to true
+     */
+    isVue3?: boolean;
+}
+
+export function transformComponentKey(component: IFComponentKey, componentManager: ComponentManager): { key: string; disposableCollection: DisposableCollection } {
+    const { componentKey, isVue3 } = component;
+    let key: string;
+    const disposableCollection = new DisposableCollection();
+    if (typeof componentKey === 'string') {
+        key = componentKey;
+    } else {
+        key = componentManager.getKey(componentKey) ?? `External_${generateRandomId(6)}`;
+        disposableCollection.add(componentManager.register(key, componentKey, { framework: isVue3 ? 'vue3' : 'react' }));
+    }
+
+    return {
+        key,
+        disposableCollection,
+    };
+}
+
+export function covertToRowRange(range: IRange, worksheet: Worksheet): IRange {
+    return {
+        startRow: range.startRow,
+        endRow: range.endRow,
+        startColumn: 0,
+        endColumn: worksheet.getColumnCount() - 1,
+        rangeType: RANGE_TYPE.ROW,
+    };
+}
+
+export function covertToColRange(range: IRange, worksheet: Worksheet): IRange {
+    return {
+        startRow: 0,
+        endRow: worksheet.getRowCount() - 1,
+        startColumn: range.startColumn,
+        endColumn: range.endColumn,
+        rangeType: RANGE_TYPE.COLUMN,
+    };
 }

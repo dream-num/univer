@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, moveMatrixArray, Rectangle } from '@univerjs/core';
 import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
@@ -26,6 +26,7 @@ import type { FilterColumn } from '../models/filter-model';
 import { mergeSetFilterCriteria } from '../utils';
 
 export class SheetsFilterController extends Disposable {
+    private _disposableCollection: DisposableCollection = new DisposableCollection();
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
@@ -51,64 +52,10 @@ export class SheetsFilterController extends Disposable {
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initInterceptors(): void {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => this._getUpdateFilter(command),
         }));
-
-        const disposableCollection = new DisposableCollection();
-        const registerRefRange = (unitId: string, subUnitId: string) => {
-            const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-            if (!workbook) return;
-
-            const workSheet = workbook?.getSheetBySheetId(subUnitId);
-            if (!workSheet) return;
-
-            disposableCollection.dispose();
-            const range = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
-            const handler = (config: EffectRefRangeParams) => {
-                switch (config.id) {
-                    case InsertRowCommand.id: {
-                        const params = config.params as IInsertRowCommandParams;
-                        const _unitId = params.unitId || unitId;
-                        const _subUnitId = params.subUnitId || subUnitId;
-                        return this._handleInsertRowCommand(params, _unitId, _subUnitId);
-                    }
-                    case InsertColCommand.id: {
-                        const params = config.params as IInsertColCommandParams;
-                        const _unitId = params.unitId || unitId;
-                        const _subUnitId = params.subUnitId || subUnitId;
-                        return this._handleInsertColCommand(params, _unitId, _subUnitId);
-                    }
-                    case RemoveColCommand.id: {
-                        const params = config.params as IRemoveColMutationParams;
-                        return this._handleRemoveColCommand(params, unitId, subUnitId);
-                    }
-                    case RemoveRowCommand.id: {
-                        const params = config.params as IRemoveRowsMutationParams;
-                        return this._handleRemoveRowCommand(params, unitId, subUnitId);
-                    }
-                    case EffectRefRangId.MoveColsCommandId: {
-                        const params = config.params as IMoveColsCommandParams;
-                        return this._handleMoveColsCommand(params, unitId, subUnitId);
-                    }
-                    case EffectRefRangId.MoveRowsCommandId: {
-                        const params = config.params as IMoveRowsCommandParams;
-                        return this._handleMoveRowsCommand(params, unitId, subUnitId);
-                    }
-                    case MoveRangeCommand.id: {
-                        const params = config.params as IMoveRangeCommandParams;
-                        return this._handleMoveRangeCommand(params, unitId, subUnitId);
-                    }
-                }
-                return { redos: [], undos: [] };
-            };
-
-            if (range) {
-                disposableCollection.add(this._refRangeService.registerRefRange(range, handler, unitId, subUnitId));
-            }
-        };
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetActivateCommand.id) {
                 const params = commandInfo.params as ISetWorksheetActivateCommandParams;
@@ -117,7 +64,7 @@ export class SheetsFilterController extends Disposable {
                 if (!sheetId || !unitId) {
                     return;
                 }
-                registerRefRange(unitId, sheetId);
+                this._registerRefRange(unitId, sheetId);
             }
             if (commandInfo.id === SetSheetsFilterRangeMutation.id) {
                 const params = commandInfo.params as IAddWorksheetMergeMutationParams;
@@ -126,7 +73,7 @@ export class SheetsFilterController extends Disposable {
                 if (!sheetId || !unitId) {
                     return;
                 }
-                registerRefRange(params.unitId, params.subUnitId);
+                this._registerRefRange(params.unitId, params.subUnitId);
             }
         }));
 
@@ -135,10 +82,59 @@ export class SheetsFilterController extends Disposable {
                 const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
                 const sheet = workbook?.getActiveSheet();
                 if (sheet) {
-                    registerRefRange(unitId, sheet.getSheetId());
+                    this._registerRefRange(unitId, sheet.getSheetId());
                 }
             }
         }));
+    }
+
+    private _registerRefRange(unitId: string, subUnitId: string): void {
+        this._disposableCollection.dispose();
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workSheet = workbook?.getSheetBySheetId(subUnitId);
+        if (!workbook || !workSheet) return;
+        const range = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
+        const handler = (config: EffectRefRangeParams) => {
+            switch (config.id) {
+                case InsertRowCommand.id: {
+                    const params = config.params as IInsertRowCommandParams;
+                    const _unitId = params.unitId || unitId;
+                    const _subUnitId = params.subUnitId || subUnitId;
+                    return this._handleInsertRowCommand(params, _unitId, _subUnitId);
+                }
+                case InsertColCommand.id: {
+                    const params = config.params as IInsertColCommandParams;
+                    const _unitId = params.unitId || unitId;
+                    const _subUnitId = params.subUnitId || subUnitId;
+                    return this._handleInsertColCommand(params, _unitId, _subUnitId);
+                }
+                case RemoveColCommand.id: {
+                    const params = config.params as IRemoveColMutationParams;
+                    return this._handleRemoveColCommand(params, unitId, subUnitId);
+                }
+                case RemoveRowCommand.id: {
+                    const params = config.params as IRemoveRowsMutationParams;
+                    return this._handleRemoveRowCommand(params, unitId, subUnitId);
+                }
+                case EffectRefRangId.MoveColsCommandId: {
+                    const params = config.params as IMoveColsCommandParams;
+                    return this._handleMoveColsCommand(params, unitId, subUnitId);
+                }
+                case EffectRefRangId.MoveRowsCommandId: {
+                    const params = config.params as IMoveRowsCommandParams;
+                    return this._handleMoveRowsCommand(params, unitId, subUnitId);
+                }
+                case MoveRangeCommand.id: {
+                    const params = config.params as IMoveRangeCommandParams;
+                    return this._handleMoveRangeCommand(params, unitId, subUnitId);
+                }
+            }
+            return { redos: [], undos: [] };
+        };
+
+        if (range) {
+            this._disposableCollection.add(this._refRangeService.registerRefRange(range, handler, unitId, subUnitId));
+        }
     }
 
     private _getUpdateFilter(command: ICommandInfo) {
@@ -449,8 +445,17 @@ export class SheetsFilterController extends Disposable {
                         col: newColIndex,
                         criteria: { ...filter.serialize(), colId: newColIndex },
                     };
+
+                    const undoSetCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
+                        unitId,
+                        subUnitId,
+                        col: newColIndex,
+                        criteria: filterModel.getFilterColumn(newColIndex) ?
+                            { ...filterModel.getFilterColumn(newColIndex)?.serialize(), colId: newColIndex }
+                            : null,
+                    };
                     redos.push({ id: SetSheetsFilterCriteriaMutation.id, params: setCriteriaMutationParams });
-                    undos.push({ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId, col: newColIndex, criteria: { ...filterModel.getFilterColumn(newColIndex)?.serialize(), colId: newColIndex } } });
+                    undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: undoSetCriteriaMutationParams });
                 }
                 if (!filterCol[oldColIndex]?.filter) {
                     const setCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
@@ -476,7 +481,7 @@ export class SheetsFilterController extends Disposable {
                 },
             };
             redos.unshift({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
-            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+            undos.unshift({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
         }
 
         return {
@@ -533,8 +538,8 @@ export class SheetsFilterController extends Disposable {
                     endRow: newEnd,
                 },
             };
-            redos.unshift({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
-            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+            redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams }, { id: ReCalcSheetsFilterMutation.id, params: { unitId, subUnitId } });
+            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } }, { id: ReCalcSheetsFilterMutation.id, params: { unitId, subUnitId } });
         }
         return {
             redos,
@@ -743,7 +748,7 @@ export class SheetsFilterController extends Disposable {
                     if (cellValue) {
                         for (let col = extendRegion.startColumn; col <= extendRegion.endColumn; col++) {
                             const cell = cellValue?.[extendRegion.startRow]?.[col];
-                            if (cell && Object.keys(cell).length !== 0) {
+                            if (cell && this._cellHasValue(cell)) {
                                 const worksheet = (this._univerInstanceService.getUnit(unitId) as Workbook)?.getSheetBySheetId(subUnitId);
                                 if (worksheet) {
                                     const extendedRange = expandToContinuousRange(extendRegion, { down: true }, worksheet);
@@ -753,6 +758,7 @@ export class SheetsFilterController extends Disposable {
                                         ...filterRange,
                                         endRow: extendedRange.endRow,
                                     });
+                                    this._registerRefRange(unitId, subUnitId);
                                 }
                             }
                         }
@@ -800,11 +806,20 @@ export class SheetsFilterController extends Disposable {
             const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
             if (!filterModel) return;
             const filterRange = filterModel.getRange();
-            if (command.id === MoveRowsCommand.id && params.fromRange.startRow <= filterRange.startRow && params.fromRange.endRow < filterRange.endRow) {
+            if (command.id === MoveRowsCommand.id && params.fromRange.startRow <= filterRange.startRow && params.fromRange.endRow < filterRange.endRow && params.fromRange.endRow >= filterRange.startRow) {
                 this._sheetsFilterService.setFilterErrorMsg('sheets-filter.msg.filter-header-forbidden');
                 throw new Error('[SheetsFilterController]: Cannot move header row of filter');
             }
         }));
+    }
+
+    private _cellHasValue(cell: ICellData): boolean {
+        const values = Object.values(cell);
+        if (values.length === 0 || values.every((v) => v == null)) {
+            return false;
+        }
+
+        return true;
     }
 }
 

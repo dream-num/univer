@@ -163,3 +163,8 @@ export const DEFAULT_SLIDE = {
         height: 300,
     },
 };
+
+/**
+ * Univer internal key on cellData.custom to save some internal values
+ */
+export const UNIVER_INTERNAL = '__univer_internal__';

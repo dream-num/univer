@@ -41,6 +41,16 @@ describe('Test fv function', () => {
             expect(result2.getValue()).toStrictEqual(2581.4033740601362);
         });
 
+        it('Result is NaN', () => {
+            const rate = NumberValueObject.create(-1);
+            const nper = NumberValueObject.create(0);
+            const pmt = NumberValueObject.create(-200);
+            const pv = NumberValueObject.create(-500);
+            const type = NumberValueObject.create(0);
+            const result = testFunction.calculate(rate, nper, pmt, pv, type);
+            expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+        });
+
         it('Value is error', () => {
             const rate = ErrorValueObject.create(ErrorType.NAME);
             const nper = NumberValueObject.create(10);

@@ -124,7 +124,7 @@ export class Spreadsheet extends SheetComponent {
 
         const diffRanges = this._refreshIncrementalState && viewportInfo?.diffBounds
             ? viewportInfo?.diffBounds?.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
-            : undefined;
+            : [];
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)

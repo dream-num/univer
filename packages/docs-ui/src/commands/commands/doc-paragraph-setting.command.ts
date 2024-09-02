@@ -19,7 +19,10 @@ import { CommandType, ICommandService, IUniverInstanceService, JSONX, MemoryCurs
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getParagraphsInRanges, getRichTextEditPath, RichTextEditingMutation, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
 
-export type IDocParagraphSettingCommandParams = Partial<Pick<IParagraphStyle, 'hanging' | 'horizontalAlign' | 'spaceBelow' | 'spaceAbove' | 'indentEnd' | 'indentStart' | 'lineSpacing' | 'indentFirstLine'>>;
+export interface IDocParagraphSettingCommandParams {
+    paragraph: Partial<Pick<IParagraphStyle, 'hanging' | 'horizontalAlign' | 'spaceBelow' | 'spaceAbove' | 'indentEnd' | 'indentStart' | 'lineSpacing' | 'indentFirstLine' | 'snapToGrid' | 'spacingRule'>>;
+    sections?: Record<string, any>;
+};
 export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandParams> = {
     id: 'doc-paragraph-setting.command',
     type: CommandType.COMMAND,
@@ -70,7 +73,7 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
             // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
             const paragraphStyle: IParagraphStyle = {
                 ...paragraph.paragraphStyle,
-                ...config,
+                ...config.paragraph,
             };
             textX.push({
                 t: TextXActionType.RETAIN,

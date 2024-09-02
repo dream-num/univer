@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
+import { getDateSerialNumberByObject } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { calculateCoupnum, calculateCouppcd } from '../../../basics/financial';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -26,7 +27,7 @@ export class Coupnum extends BaseFunction {
 
     override maxParams = 4;
 
-    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject) {
+    override calculate(settlement: BaseValueObject, maturity: BaseValueObject, frequency: BaseValueObject, basis?: BaseValueObject): BaseValueObject {
         const _basis = basis ?? NumberValueObject.create(0);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(settlement, maturity, frequency, _basis);
@@ -65,23 +66,14 @@ export class Coupnum extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        let result = 0;
-
-        const settlementDate = excelSerialToDate(settlementSerialNumber);
-        const coupDate = excelSerialToDate(maturitySerialNumber);
-
-        // eslint-disable-next-line
-        while (coupDate > settlementDate) {
-            coupDate.setUTCMonth(coupDate.getUTCMonth() - 12 / frequencyValue);
-            result++;
-        }
-
-        const coupDateSerialNumber = excelDateSerial(coupDate);
+        const coupDateSerialNumber = calculateCouppcd(settlementSerialNumber, maturitySerialNumber, frequencyValue);
 
         // special handle for excel
         if (coupDateSerialNumber < 0) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
+
+        const result = calculateCoupnum(settlementSerialNumber, maturitySerialNumber, frequencyValue);
 
         return NumberValueObject.create(result);
     }

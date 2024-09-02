@@ -141,10 +141,16 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
     },
 };
 
-export const SetRowHiddenCommand: ICommand = {
+export interface ISetRowHiddenCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+    ranges?: IRange[];
+}
+
+export const SetRowHiddenCommand: ICommand<ISetRowHiddenCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-rows-hidden',
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params?: ISetRowHiddenCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -152,10 +158,10 @@ export const SetRowHiddenCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         // Ranges should be divided by already hidden rows.
-        let ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
+        let ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
         if (!ranges?.length) return false;
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         ranges = divideRangesByHiddenRows(target.worksheet, ranges);

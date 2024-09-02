@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IRange, IScale } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IScale } from '@univerjs/core';
 import { Range } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { SheetExtension } from '@univerjs/engine-render';
@@ -51,8 +51,7 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
-        spreadsheetSkeleton: SpreadsheetSkeleton,
-        _diffRanges?: IRange[]
+        spreadsheetSkeleton: SpreadsheetSkeleton
     ) {
         const { rowHeightAccumulation, columnWidthAccumulation, worksheet, dataMergeCache } =
             spreadsheetSkeleton;

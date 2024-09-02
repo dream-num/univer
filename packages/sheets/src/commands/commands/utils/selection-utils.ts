@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
 
 import type { ISetSelectionsOperationParams } from '../../operations/selection.operation';
@@ -232,4 +232,40 @@ export function createRangeIteratorWithSkipFilteredRows(sheet: Worksheet) {
     return {
         forOperableEach,
     };
+}
+
+/**
+ * Copy the styles of a range of cells to another range. Used for insert row and insert column.
+ * @param worksheet
+ * @param startRow
+ * @param endRow
+ * @param startColumn
+ * @param endColumn
+ * @param isRow
+ * @param styleRowOrColumn
+ * @returns
+ */
+export function copyRangeStyles(
+    worksheet: Worksheet,
+    startRow: number,
+    endRow: number,
+    startColumn: number,
+    endColumn: number,
+    isRow: boolean,
+    styleRowOrColumn: number
+): IObjectMatrixPrimitiveType<ICellData> {
+    const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
+    for (let row = startRow; row <= endRow; row++) {
+        for (let column = startColumn; column <= endColumn; column++) {
+            const cell = isRow ? worksheet.getCell(styleRowOrColumn, column) : worksheet.getCell(row, styleRowOrColumn);
+            if (!cell || !cell.s) {
+                continue;
+            }
+            if (!cellValue[row]) {
+                cellValue[row] = {};
+            }
+            cellValue[row][column] = { s: cell.s };
+        }
+    }
+    return cellValue;
 }

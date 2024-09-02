@@ -27,7 +27,7 @@ export class Cumprinc extends BaseFunction {
 
     override maxParams = 6;
 
-    override calculate(rate: BaseValueObject, nper: BaseValueObject, pv: BaseValueObject, startPeriod: BaseValueObject, endPeriod: BaseValueObject, type: BaseValueObject) {
+    override calculate(rate: BaseValueObject, nper: BaseValueObject, pv: BaseValueObject, startPeriod: BaseValueObject, endPeriod: BaseValueObject, type: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(rate, nper, pv, startPeriod, endPeriod, type);
 
         if (isError) {

@@ -20,7 +20,7 @@ import { SheetsSelectionsService } from '@univerjs/sheets';
 
 import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
 import { countryCurrencyMap } from '../../base/const/CURRENCY-SYMBOLS';
-import { NumfmtMenuController } from '../../controllers/numfmt.menu.controller';
+import { MenuCurrencyService } from '../../service/menu.currency.service';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { SetNumfmtCommand } from './set-numfmt.command';
 
@@ -30,15 +30,15 @@ export const SetCurrencyCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
-        const numfmtMenuController = accessor.get(NumfmtMenuController);
-        const symbol = countryCurrencyMap[numfmtMenuController.getCurrencySymbol()] || '$';
+        const menuCurrencyService = accessor.get(MenuCurrencyService);
+        const symbol = countryCurrencyMap[menuCurrencyService.getCurrencySymbol()] || '$';
         const selections = selectionManagerService.getCurrentSelections();
         if (!selections || !selections.length) {
             return false;
         }
         const values: ISetNumfmtCommandParams['values'] = [];
 
-        const suffix = CURRENCYFORMAT[0].suffix(symbol);
+        const suffix = CURRENCYFORMAT[4].suffix(symbol);
 
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {

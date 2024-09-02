@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, IRange, Workbook, Worksheet } from '@univerjs/core';
 import { CommandType, FOCUSING_SHEET, ICommandService, IContextService, Inject, Rectangle, RxDisposable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
@@ -273,7 +273,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _initCommandListener(): void {
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
             const { unit: workbook, unitId: workbookId } = this._context;
             const { id: commandId } = command;
 
@@ -309,6 +309,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 this._sheetSkeletonManagerService.reCalculate();
             }
 
+            // All mutations must be executed. Using reCalculate alone will not trigger a refresh.
             if (command.type === CommandType.MUTATION) {
                 this._markUnitDirty(workbookId, command);
             }

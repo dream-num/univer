@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
+import type { IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { SheetExtension } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
@@ -41,8 +41,7 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
-        spreadsheetSkeleton: SpreadsheetSkeleton,
-        _diffRanges?: IRange[]
+        spreadsheetSkeleton: SpreadsheetSkeleton
     ) {
         const { rowHeightAccumulation, columnWidthAccumulation, worksheet, dataMergeCache } =
             spreadsheetSkeleton;

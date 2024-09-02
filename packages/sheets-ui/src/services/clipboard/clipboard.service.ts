@@ -475,6 +475,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return res;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private async _pasteInternal(copyId: string, pasteType: string): Promise<boolean> {
         // const target = this._getPastingTarget();
         // const { selection, unitId, subUnitId } = target;
@@ -806,6 +807,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
      * @param cellMatrix
      * @param range
      */
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _transformPastedData(
         rowCount: number,
         colCount: number,

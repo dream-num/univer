@@ -16,7 +16,7 @@
 
 export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryService, DataValidatorRegistryScope } from './services/data-validator-registry.service';
-export { DataValidationModel, type DataValidationChangeSource } from './models/data-validation-model';
+export { DataValidationModel, type DataValidationChangeSource, type IRuleChange, type IValidStatusChange } from './models/data-validation-model';
 
 export {
     createDefaultNewRule,
@@ -63,3 +63,4 @@ export {
 } from './commands/mutations/data-validation.mutation';
 
 // #endregion
+

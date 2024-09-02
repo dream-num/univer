@@ -101,6 +101,15 @@ describe('Test disc function', () => {
             const basis = NumberValueObject.create(1);
             const result = testFunction.calculate(settlement, maturity, pr, redemption, basis);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const settlement2 = StringValueObject.create('2018-7-1');
+            const maturity2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(settlement2, maturity2, pr, redemption, basis);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const basis2 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(settlement2, maturity, pr, redemption, basis2);
+            expect(result3.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is array', () => {

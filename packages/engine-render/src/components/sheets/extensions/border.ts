@@ -37,24 +37,12 @@ export class Border extends SheetExtension {
     // eslint-disable-next-line max-lines-per-function
     override draw(
         ctx: UniverRenderingContext,
-        parentScale: IScale,
+        _parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        diffRanges?: IRange[]
+        diffRanges: IRange[]
     ) {
-        const { dataMergeCache, stylesCache, overflowCache } = spreadsheetSkeleton;
-        const { border } = stylesCache;
-        if (!spreadsheetSkeleton) {
-            return;
-        }
-
-        const { worksheet } = spreadsheetSkeleton;
-        if (!worksheet) {
-            return;
-        }
-
-        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
-            spreadsheetSkeleton;
-
+        const { dataMergeCache, stylesCache, overflowCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
+        if (!worksheet) return;
         if (
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
@@ -71,6 +59,7 @@ export class Border extends SheetExtension {
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const precisionScale = this._getScale(ctx.getScale());
+        const { border } = stylesCache;
 
         // eslint-disable-next-line max-lines-per-function
         border?.forValue((rowIndex, columnIndex, borderCaches) => {

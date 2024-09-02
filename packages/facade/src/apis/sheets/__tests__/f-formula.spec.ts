@@ -21,7 +21,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 import type { FUniver } from '../../facade';
-import { createFacadeTestBed } from '../../__tests__/create-test-bed';
+import { createFormulaTestBed } from './create-formula-test-bed';
 
 describe('Test FFormula', () => {
     let get: Injector['get'];
@@ -41,7 +41,7 @@ describe('Test FFormula', () => {
     ) => Nullable<IStyleData>;
 
     beforeEach(() => {
-        const testBed = createFacadeTestBed();
+        const testBed = createFormulaTestBed();
         get = testBed.get;
         univerAPI = testBed.univerAPI;
 

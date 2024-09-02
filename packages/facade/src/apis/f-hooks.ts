@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { Inject, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import { Inject, Injector, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
 import { filter } from 'rxjs';
+import { FUndoRedoHooks } from './hooks/f-undoredo-hooks';
 
 export class FHooks {
     constructor(
+        @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
     ) {
         // empty
@@ -60,4 +62,32 @@ export class FHooks {
     onSteady(callback: () => void): IDisposable {
         return toDisposable(this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Steady)).subscribe(callback));
     }
+
+    /**
+     * Hook that fires before an undo operation is executed.
+     * @param callback Function to be called when the event is triggered
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeUndo = FUndoRedoHooks.beforeUndo.bind(this);
+
+    /**
+     * Hook that fires after an undo operation is executed.
+     * @param callback Function to be called when the event is triggered
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onUndo = FUndoRedoHooks.afterUndo.bind(this);
+
+    /**
+     * Hook that fires before a redo operation is executed.
+     * @param callback Function to be called when the event is triggered
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeRedo = FUndoRedoHooks.beforeRedo.bind(this);
+
+    /**
+     * Hook that fires after a redo operation is executed.
+     * @param callback Function to be called when the event is triggered
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onRedo = FUndoRedoHooks.afterRedo.bind(this);
 }

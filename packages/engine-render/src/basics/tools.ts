@@ -744,21 +744,20 @@ export function inRowViewRanges(ranges: IRange[], rowIndex: number) {
 }
 
 /**
- * 如果 range 有相交, 那么扩展到第一组 range 中.
- * @param ranges
+ * If there is an intersection in ranges to the mainRanges, extend it to the first set of ranges.
+ * @param {IRange[]} mainRanges target ranges
+ * @param {IRange[]} ranges
  */
-export function mergeRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) {
+export function expandRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) {
+    const intersects = [];
     for (const mainRange of mainRanges) {
         for (const range of ranges) {
             if (Rectangle.intersects(mainRange, range)) {
-                mainRange.startRow = Math.min(mainRange.startRow, range.startRow);
-                mainRange.endRow = Math.max(mainRange.endRow, range.endRow);
-                mainRange.startColumn = Math.min(mainRange.startColumn, range.startColumn);
-                mainRange.endColumn = Math.max(mainRange.endColumn, range.endColumn);
+                intersects.push(range);
             }
         }
     }
-    return mainRanges;
+    return [...mainRanges, ...intersects];
 }
 
 export function clampRanges(range: IRange) {

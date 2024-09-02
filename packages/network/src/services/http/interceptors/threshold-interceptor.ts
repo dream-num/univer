@@ -44,7 +44,7 @@ export const ThresholdInterceptorFactory: HTTPInterceptorFnFactory<[Nullable<ITh
         return new Observable((observer) => {
             const handler = () => next(request).subscribe({
                 next: (event) => observer.next(event),
-                error: (err) => observer.next(err),
+                error: (err) => observer.error(err),
                 complete: () => observer.complete(),
             });
 

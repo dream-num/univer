@@ -387,7 +387,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
      * @param rangeType
      * @returns
      */
-    override newSelectionControl(scene: Scene, rangeType: RANGE_TYPE) {
+    override newSelectionControl(scene: Scene, rangeType: RANGE_TYPE): MobileSelectionControl {
         const selectionControls = this.getSelectionControls();
 
         const control = new MobileSelectionControl(scene, selectionControls.length, this._isHeaderHighlight, this._themeService, rangeType);
@@ -686,7 +686,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         }
     }
 
-    private _updateControlPointWhenScrolling() {
+    private _updateControlPointWhenScrolling(): void {
         const { scene } = this._context;
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (!viewportMain) return;

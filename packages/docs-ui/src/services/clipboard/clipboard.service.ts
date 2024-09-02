@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph } from '@univerjs/core';
-import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
+import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
 import { copyCustomRange, CutContentCommand, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
@@ -99,9 +99,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     async copy(sliceType: SliceBodyType = SliceBodyType.copy): Promise<boolean> {
-        const { bodyList, needCache } = this._getDocumentBodyInRanges(sliceType);
+        const { bodyList = [], needCache = false, snapshot } = this._getDocumentBodyInRanges(sliceType) ?? {};
 
-        if (bodyList.length === 0) {
+        if (bodyList.length === 0 || snapshot == null) {
             return false;
         }
 
@@ -109,7 +109,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
             const isCopyInHeaderFooter = !!activeRange?.segmentId;
 
-            this._setClipboardData(bodyList, !isCopyInHeaderFooter && needCache);
+            this._setClipboardData(bodyList, snapshot, !isCopyInHeaderFooter && needCache);
         } catch (e) {
             this._logService.error('[DocClipboardService] copy failed', e);
             return false;
@@ -130,6 +130,16 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     async legacyPaste(html?: string, text?: string): Promise<boolean> {
         const partDocData = this._genDocDataFromHtmlAndText(html, text);
+
+        // Paste in sheet editing mode without paste style, so we give textRuns empty array;
+        if (this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+            if (text) {
+                const textDocData = this._generateBody(text);
+                return this._paste({ body: textDocData });
+            } else {
+                partDocData.body!.textRuns = [];
+            }
+        }
 
         return this._paste(partDocData);
     }
@@ -183,7 +193,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             ];
 
             return this._commandService.executeCommand(CutContentCommand.id, { segmentId, textRanges: newTextRanges });
-        // eslint-disable-next-line unused-imports/no-unused-vars
+            // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (_e) {
             this._logService.error('[DocClipboardController] cut content failed');
             return false;
@@ -256,13 +266,13 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 segmentId,
                 textRanges,
             });
-        } catch (_e) {
+        } catch (_) {
             this._logService.error('[DocClipboardController]', 'clipboard is empty.');
             return false;
         }
     }
 
-    private async _setClipboardData(documentBodyList: IDocumentBody[], needCache = true): Promise<void> {
+    private async _setClipboardData(documentBodyList: IDocumentBody[], snapshot: IDocumentData, needCache = true): Promise<void> {
         const copyId = genId();
         const text =
             documentBodyList.length > 1
@@ -273,7 +283,30 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         // Only cache copy content when the range is 1.
         if (documentBodyList.length === 1 && needCache) {
             html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
-            copyContentCache.set(copyId, { body: documentBodyList[0] });
+            const body = documentBodyList[0];
+            const cache: Partial<IDocumentData> = { body };
+
+            if (body.customBlocks?.length) {
+                cache.drawings = {};
+
+                for (const block of body.customBlocks) {
+                    const { blockId } = block;
+                    const drawing = snapshot.drawings?.[blockId];
+
+                    if (drawing) {
+                        const id = Tools.generateRandomId(6);
+
+                        block.blockId = id;
+
+                        cache.drawings[id] = {
+                            ...Tools.deepClone(drawing),
+                            drawingId: id,
+                        };
+                    }
+                }
+            }
+
+            copyContentCache.set(copyId, cache);
         }
 
         return this._clipboardInterfaceService.write(text, html);
@@ -291,10 +324,11 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
     }
 
-    private _getDocumentBodyInRanges(sliceType: SliceBodyType): {
+    private _getDocumentBodyInRanges(sliceType: SliceBodyType): Nullable<{
         bodyList: IDocumentBody[];
         needCache: boolean;
-    } {
+        snapshot: IDocumentData;
+    }> {
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         const allRanges = this._textSelectionManagerService.getDocRanges();
 
@@ -302,21 +336,17 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         let needCache = true;
 
         if (docDataModel == null || allRanges.length === 0) {
-            return {
-                bodyList: results,
-                needCache,
-            };
+            return;
         }
 
         const segmentId = allRanges[0].segmentId;
 
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId)?.getBody();
 
+        const snapshot = docDataModel.getSnapshot();
+
         if (body == null) {
-            return {
-                bodyList: results,
-                needCache,
-            };
+            return;
         }
 
         for (const range of allRanges) {
@@ -355,6 +385,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         return {
             bodyList: results,
             needCache,
+            snapshot,
         };
     }
 

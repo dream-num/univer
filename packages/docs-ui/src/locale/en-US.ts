@@ -92,6 +92,8 @@ const locale: typeof zhCN = {
             before: 'Before',
             after: 'After',
             lineSpace: 'Line Space',
+            multiSpace: 'Multi Space',
+            fixedValue: 'Fixed Value(px)',
         },
     },
 };

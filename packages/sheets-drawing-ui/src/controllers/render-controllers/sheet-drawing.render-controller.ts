@@ -41,21 +41,19 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
     }
 
     private _drawingInitializeListener() {
-        this._lifecycleService.lifecycle$.pipe(filter((e) => e === LifecycleStages.Steady), first()).subscribe(() => {
-            if (this._context.type === UniverInstanceType.UNIVER_SHEET) {
-                this._sheetDrawingService.initializeNotification(this._context.unitId);
-                const data = this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId);
-                for (let subUnit in data) {
-                    const subUnitData = data[subUnit];
-                    for (let drawingId in subUnitData.data) {
-                        const drawingData = subUnitData.data[drawingId];
-                        drawingData.transform = drawingPositionToTransform(drawingData.sheetTransform, this._sheetSelectionRenderService, this._sheetSkeletonManagerService)
-                    }
+        if (this._context.type === UniverInstanceType.UNIVER_SHEET) {
+            this._sheetDrawingService.initializeNotification(this._context.unitId);
+            const data = this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId);
+            for (let subUnit in data) {
+                const subUnitData = data[subUnit];
+                for (let drawingId in subUnitData.data) {
+                    const drawingData = subUnitData.data[drawingId];
+                    drawingData.transform = drawingPositionToTransform(drawingData.sheetTransform, this._sheetSelectionRenderService, this._sheetSkeletonManagerService)
                 }
-
-                this._drawingManagerService.registerDrawingData(this._context.unitId, this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId));
-                this._drawingManagerService.initializeNotification(this._context.unitId);
             }
-        });
+
+            this._drawingManagerService.registerDrawingData(this._context.unitId, this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId));
+            this._drawingManagerService.initializeNotification(this._context.unitId);
+        }
     }
 }

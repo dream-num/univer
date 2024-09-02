@@ -119,11 +119,12 @@ interface IAddCustomRangeFactoryParam {
     rangeType: CustomRangeType;
     wholeEntity?: boolean;
     properties?: Record<string, any>;
+    unitId: string;
 }
 
 // eslint-disable-next-line max-lines-per-function
 export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAddCustomRangeFactoryParam) {
-    const { rangeId, rangeType, wholeEntity, properties } = param;
+    const { rangeId, rangeType, wholeEntity, properties, unitId } = param;
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -133,12 +134,12 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
         return false;
     }
 
-    const documentDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
     if (!documentDataModel) {
         return false;
     }
     const body = documentDataModel.getSelfOrHeaderFooterModel(selection.segmentId).getBody();
-    const unitId = documentDataModel.getUnitId();
+    // const unitId = documentDataModel.getUnitId();
     if (!body) {
         return false;
     }
@@ -250,19 +251,13 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
 }
 
 export interface IDeleteCustomRangeParam {
-    unitId: string;
     rangeId: string;
     segmentId?: string;
+    documentDataModel: DocumentDataModel;
 }
 
-function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
-    const { unitId, rangeId, segmentId } = params;
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-
-    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
-    if (!documentDataModel) {
-        return false;
-    }
+export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
+    const { rangeId, segmentId, documentDataModel } = params;
 
     const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
     if (!range) {
@@ -307,7 +302,11 @@ function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeP
     return textX;
 }
 
-export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeParam) {
+export function deleteCustomRangeFactory(accessor: IAccessor, params: {
+    rangeId: string;
+    segmentId?: string;
+    unitId: string;
+}) {
     const { unitId, segmentId } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -322,11 +321,15 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
             actions: [],
             textRanges: undefined,
             segmentId,
+
         },
     };
 
     const jsonX = JSONX.getInstance();
-    const textX = deleteCustomRangeTextX(accessor, params);
+    const textX = deleteCustomRangeTextX(accessor, {
+        documentDataModel,
+        rangeId: params.rangeId,
+    });
     if (!textX) {
         return false;
     }

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
-import { SheetInterceptorService } from '@univerjs/sheets';
-import type { ICellHyperLink, ICellLinkContent } from '@univerjs/sheets-hyper-link';
-import { HyperLinkModel, UpdateHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import type { DocumentDataModel, ICommand, Workbook } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, UniverInstanceType } from '@univerjs/core';
+import { replaceSelectionFactory } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
+import type { ICellLinkContent } from '@univerjs/sheets-hyper-link';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface IUpdateHyperLinkCommandParams {
     unitId: string;
@@ -27,58 +29,164 @@ export interface IUpdateHyperLinkCommandParams {
     payload: ICellLinkContent;
     row: number;
     column: number;
-
-}
-
-function getHyperLinkContent(link: ICellHyperLink) {
-    const { row, column, id, ...content } = link;
-    return content;
 }
 
 export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.update-hyper-link',
+    // eslint-disable-next-line max-lines-per-function
     async handler(accessor, params) {
         if (!params) {
             return false;
         }
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const model = accessor.get(HyperLinkModel);
-        const { unitId, subUnitId, id } = params;
-        const link = model.getHyperLink(unitId, subUnitId, id);
-        if (!link) {
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const { unitId, subUnitId, payload: link, row, column, id } = params;
+        const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        const currentRender = renderManagerService.getRenderById(unitId);
+        if (!currentRender || !workbook) {
             return false;
         }
-        const { redos, undos } = sheetInterceptorService.onCommandExecute({
-            id: UpdateHyperLinkCommand.id,
-            params,
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
+        const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
+        const skeleton = skeletonManagerService.getCurrent()?.skeleton;
+        if (!worksheet || !skeleton) {
+            return false;
+        }
+        const { payload, display = '' } = link;
+        const cellData = worksheet.getCellRaw(row, column);
+        if (!cellData) {
+            return false;
+        }
+        const doc = skeleton.getCellDocumentModelWithFormula(cellData);
+        if (!doc?.documentModel) {
+            return false;
+        }
+        const snapshot = doc.documentModel.getSnapshot();
+
+        const range = snapshot.body?.customRanges?.find((range) => range.rangeId === id);
+        if (!range) {
+            return false;
+        }
+
+        const newId = generateRandomId();
+        const replaceSelection = replaceSelectionFactory(accessor, {
+            unitId,
+            body: {
+                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${display}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                customRanges: [{
+                    rangeId: newId,
+                    rangeType: CustomRangeType.HYPERLINK,
+                    startIndex: 0,
+                    endIndex: display.length + 1,
+                    properties: {
+                        url: payload,
+                    },
+                }],
+            },
+            selection: {
+                startOffset: range.startIndex,
+                endOffset: range.endIndex,
+                collapsed: false,
+            },
         });
-        const redo: IMutationInfo = {
-            id: UpdateHyperLinkMutation.id,
-            params,
-        };
-        const undo: IMutationInfo = {
-            id: UpdateHyperLinkMutation.id,
+        if (!replaceSelection) {
+            return false;
+        }
+        const newBody = TextX.apply(snapshot.body!, replaceSelection.textX.serialize());
+
+        const redo = {
+            id: SetRangeValuesMutation.id,
             params: {
                 unitId,
                 subUnitId,
-                id,
-                payload: getHyperLinkContent(link),
+                cellValue: {
+                    [row]: {
+                        [column]: {
+                            p: {
+                                ...snapshot,
+                                body: newBody,
+                            },
+                        },
+                    },
+                },
             },
         };
+        const undoParams = SetRangeValuesUndoMutationFactory(accessor, redo.params);
 
-        const res = await sequenceExecuteAsync([redo, ...redos], commandService);
-        if (res.result) {
+        const undo = {
+            id: SetRangeValuesMutation.id,
+            params: undoParams,
+        };
+
+        const res = commandService.syncExecuteCommand(redo.id, redo.params);
+        if (res) {
             undoRedoService.pushUndoRedo({
-                redoMutations: [redo, ...redos],
-                undoMutations: [undo, ...undos],
+                redoMutations: [redo],
+                undoMutations: [undo],
                 unitID: unitId,
             });
             return true;
         }
-
         return false;
+    },
+};
+
+export interface IUpdateRichHyperLinkCommandParams {
+    documentId: string;
+    rangeId: string;
+    payload: ICellLinkContent;
+}
+
+export const UpdateRichHyperLinkCommand: ICommand<IUpdateRichHyperLinkCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheets.command.update-rich-hyper-link',
+    handler: (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+        const { documentId: unitId, payload, rangeId } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!doc) {
+            return false;
+        }
+        const range = doc.getBody()?.customRanges?.find((range) => range.rangeId === rangeId);
+        if (!range) {
+            return false;
+        }
+
+        const display = params.payload.display ?? '';
+        const newId = generateRandomId();
+        const replaceSelection = replaceSelectionFactory(accessor, {
+            unitId,
+            body: {
+                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${display}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                customRanges: [{
+                    rangeId: newId,
+                    rangeType: CustomRangeType.HYPERLINK,
+                    startIndex: 0,
+                    endIndex: display.length + 1,
+                    properties: {
+                        url: payload,
+                    },
+                }],
+            },
+            selection: {
+                startOffset: range.startIndex,
+                endOffset: range.endIndex,
+                collapsed: false,
+            },
+        });
+
+        if (!replaceSelection) {
+            return false;
+        }
+
+        return commandService.syncExecuteCommand(replaceSelection.id, replaceSelection.params);
     },
 };

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, IDeleteAction, IDocumentBody, IMutationInfo, IRetainAction, ITextRange, ITextRangeParam } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, IDeleteAction, IDocumentBody, IMutationInfo, IRetainAction, ITextRange, ITextRangeParam, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
@@ -123,12 +123,17 @@ export interface IReplaceSelectionFactoryParams {
     body: IDocumentBody; // Do not contain `\r\n` at the end.
 
     textRanges?: ITextRangeWithStyle[];
+
+    doc?: DocumentDataModel;
 }
 
 export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSelectionFactoryParams) {
-    const { unitId, originBody, body: insertBody } = params;
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+    const { unitId, originBody, body: insertBody, doc } = params;
+    let docDataModel: Nullable<DocumentDataModel> = doc;
+    if (!docDataModel) {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+    }
 
     if (!docDataModel) {
         return false;
@@ -154,8 +159,8 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
         collapsed: true,
         segmentId,
     }];
-
-    const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+    const textX = new TextX();
+    const doMutation: IMutationInfo<IRichTextEditingMutationParams> & { textX: TextX } = {
         id: RichTextEditingMutation.id,
         params: {
             unitId,
@@ -164,9 +169,9 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
             debounce: true,
             segmentId,
         },
+        textX,
     };
 
-    const textX = new TextX();
     const jsonX = JSONX.getInstance();
         // delete
     textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, body, segmentId));

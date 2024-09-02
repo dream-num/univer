@@ -41,6 +41,7 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
                 properties: {
                     url: payload,
                 },
+                unitId,
             }
         );
         if (doMutation) {

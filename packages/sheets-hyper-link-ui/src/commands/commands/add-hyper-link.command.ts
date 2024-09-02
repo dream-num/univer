@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentData, IMutationInfo, ITextRange, Workbook } from '@univerjs/core';
+import type { ICommand, IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
 import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface IAddHyperLinkCommandParams {
     unitId: string;
@@ -42,9 +43,6 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const editorBridgeService = accessor.get(IEditorBridgeService);
-
-        const state = editorBridgeService.getEditCellState();
 
         const { unitId, subUnitId, link } = params;
         const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
@@ -117,30 +115,38 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
 };
 
 export interface IAddInlineHyperLinkCommandParams {
-    unitId: string;
-    subUnitId: string;
-    /**
-     * row of link
-     */
-    row: number;
-    /**
-     * col of link
-     */
-    column: number;
     /**
      * url of link
      */
     url: string;
-    /**
-     * text selection
-     */
-    textSelection: ITextRange;
+    documentId: string;
 }
 
-export const AddInlineHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
+export const AddInlineHyperLinkCommand: ICommand<IAddInlineHyperLinkCommandParams> = {
     id: 'sheets.command.add-inline-hyper-link',
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+        const { documentId, url } = params;
+        const commandService = accessor.get(ICommandService);
+        const id = generateRandomId();
+        const doMutation = addCustomRangeBySelectionFactory(
+            accessor,
+            {
+                rangeId: id,
+                rangeType: CustomRangeType.HYPERLINK,
+                properties: {
+                    url,
+                },
+                unitId: documentId,
+            }
+        );
+        if (doMutation) {
+            return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
+        }
+
         return false;
     },
 };

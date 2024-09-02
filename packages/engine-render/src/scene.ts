@@ -24,16 +24,16 @@ import type { IObjectFullState, ISceneTransformState, ITransformChangeState } fr
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
+import type { ITransformerConfig } from './basics/transformer-config';
 import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import { Layer } from './layer';
-import { Transformer } from './scene.transformer';
-import { InputManager } from './scene.input-manager';
 import type { SceneViewer } from './scene-viewer';
+import { InputManager } from './scene.input-manager';
+import { Transformer } from './scene.transformer';
 import type { ThinEngine } from './thin-engine';
 import { ThinScene } from './thin-scene';
 import type { Viewport } from './viewport';
-import type { ITransformerConfig } from './basics/transformer-config';
 import type { Engine } from './engine';
 
 export class Scene extends ThinScene {
@@ -356,6 +356,14 @@ export class Scene extends ThinScene {
         return this._createDefaultLayer(zIndex);
     }
 
+    findLayerByZIndex(zIndex: number = 1): Nullable<Layer> {
+        for (const layer of this.getLayers()) {
+            if (layer.zIndex === zIndex) {
+                return layer;
+            }
+        }
+    }
+
     getLayerMaxZIndex(): number {
         let maxIndex = Number.MIN_VALUE;
         for (let i = 0; i < this._layers.length; i++) {
@@ -587,14 +595,13 @@ export class Scene extends ThinScene {
         !parentCtx && this.getEngine()?.clearCanvas();
 
         const layers = this._layers.sort(sortRules);
-
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1);
         }
     }
 
     async requestRender(parentCtx?: UniverRenderingContext) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _reject) => {
             this.render(parentCtx);
             requestNewFrame(resolve);
         });

@@ -2547,6 +2547,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -2704,6 +2707,33 @@ importers:
         version: 5.4.2(@types/node@22.5.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.5.1)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
+  packages/telemetry:
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@wendellhu/redi':
+        specifier: 0.16.1
+        version: 0.16.1
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.5.3
+        version: 5.5.4
+      vite:
+        specifier: ^5.3.4
+        version: 5.4.2(@types/node@22.5.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.0.3
         version: 2.0.5(@types/node@22.5.1)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/thread-comment:
@@ -4641,7 +4671,7 @@ packages:
     resolution: {integrity: sha512-j9ednRT81vYJ9OfVuXG6ERSTdEL1xVsNgqpkxMsbIabzSo3goCjDIveeGv5d03om39ML71RdmrGNjG5SReBP/Q==}
 
   '@protobufjs/fetch@1.1.0':
-    resolution: {integrity: sha1-upn7WYYUr2VwDBYZ/wbUVLDYTEU=}
+    resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
 
   '@protobufjs/float@1.0.2':
     resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}

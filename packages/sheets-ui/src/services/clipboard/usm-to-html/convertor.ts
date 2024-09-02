@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, ObjectMatrix } from '@univerjs/core';
 
 import type { ICellDataWithSpanInfo, IClipboardPropertyItem, ISheetClipboardHook } from '../type';
+import type { IDiscreteRange } from '../../../controllers/utils/range-tools';
 
 /**
  *
@@ -130,28 +131,20 @@ export class USMToHtmlService {
                 colSpan?: number | undefined;
             }
         >,
-        range: IRange,
+        range: IDiscreteRange,
         hooks: ISheetClipboardHook[]
     ): string {
-        const { startColumn, endColumn } = range;
-        const colStyles = getColStyle(getArrayFromTo(startColumn, endColumn), hooks);
+        const { cols, rows } = range;
+        if (!cols.length) {
+            return '';
+        }
+        const colStyles = getColStyle(cols, hooks);
         // row styles and table contents
         const rowContents: string[] = [];
         const mergeSet = new Set<string>();
-
-        const {
-            startRow: dataStartRow,
-            endRow: dataEndRow,
-            startColumn: dataStartColumn,
-            endColumn: dataEndColumn,
-        } = matrix.getDataRange();
-        for (let row = dataStartRow; row <= dataEndRow; row++) {
-            const cols = Array.from(
-                { length: dataEndColumn - dataStartColumn + 1 },
-                (_, index) => dataStartColumn + index
-            );
+        rows.forEach((row) => {
             rowContents.push(getRowContent(row, cols, hooks, matrix, mergeSet));
-        }
+        });
 
         const html = `<google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
 <tbody>${rowContents.join('')}</tbody></table>`;

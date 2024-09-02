@@ -2,18 +2,26 @@
 
 ## Introduction
 
-`@univerjs/docs-hyper-link` provides the base link function of Univer Docs.
+`@univerjs/docs-hyper-link` provides the link function of Univer Docs.
 
 ## Usage
 
 ### Installation
 
 ```shell
-# Use npm
+# Using npm
 npm install @univerjs/docs-hyper-link
 
-# Use pnpm
+# Using pnpm
 pnpm add @univerjs/docs-hyper-link
+```
+
+### Register the plugin
+
+```typescript
+import { UniverDocsHyperLinkUIPlugin} from '@univerjs/docs-hyper-link';
+
+univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 ```
 
 <!-- Links -->

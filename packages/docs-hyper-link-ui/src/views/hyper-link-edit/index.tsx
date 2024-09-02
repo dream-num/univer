@@ -17,7 +17,6 @@
 import { Button, FormLayout, Input } from '@univerjs/design';
 import React, { useEffect, useState } from 'react';
 import { getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
-import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { DocumentDataModel } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { getPlainTextFormBody, TextSelectionManagerService } from '@univerjs/docs';
@@ -44,7 +43,6 @@ function transformUrl(urlStr: string) {
 export const DocHyperLinkEdit = () => {
     const hyperLinkService = useDependency(DocHyperLinkPopupService);
     const localeService = useDependency(LocaleService);
-    const hyperLinkModel = useDependency(DocHyperLinkModel);
     const editing = useObservable(hyperLinkService.editingLink$);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -65,11 +63,10 @@ export const DocHyperLinkEdit = () => {
         }
 
         if (editing) {
-            const linkDetail = editing ? hyperLinkModel.getLink(editing.unitId, editing.linkId) : null;
-            setLink(linkDetail?.payload ?? '');
             const body = doc?.getSelfOrHeaderFooterModel(editing.segmentId)?.getBody();
-            const matchedRange = body?.customRanges?.find((i) => linkDetail?.id === i.rangeId);
+            const matchedRange = body?.customRanges?.find((i) => editing?.linkId === i.rangeId);
             if (doc && matchedRange) {
+                setLink(matchedRange.properties?.url ?? '');
                 setLabel(getPlainTextFormBody(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex)));
             }
             return;
@@ -77,10 +74,9 @@ export const DocHyperLinkEdit = () => {
 
         const matchedRange = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody()?.customRanges?.find((i) => Math.max(activeRange.startOffset, i.startIndex) <= Math.min(activeRange.endOffset - 1, i.endIndex));
         if (doc && matchedRange) {
-            const linkDetail = hyperLinkModel.getLink(doc.getUnitId(), matchedRange.rangeId);
-            setLink(linkDetail?.payload ?? '');
+            setLink(matchedRange?.properties?.url ?? '');
         }
-    }, [doc, editing, hyperLinkModel, textSelectionManagerService, univerInstanceService]);
+    }, [doc, editing, textSelectionManagerService, univerInstanceService]);
 
     useEffect(() => {
         textSelectionRenderManager.blurEditor();
@@ -131,7 +127,7 @@ export const DocHyperLinkEdit = () => {
                     ? (
                         <FormLayout
                             label={localeService.t('docLink.edit.label')}
-                            error={showError && !isLegal ? localeService.t('docLink.edit.labelError') : ''}
+                            error={showError && !label ? localeService.t('docLink.edit.labelError') : ''}
                         >
                             <Input
                                 value={label}

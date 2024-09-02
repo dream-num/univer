@@ -18,6 +18,7 @@ import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } fro
 import { ComponentManager } from '@univerjs/ui';
 import { CloseMentionEditPopupOperation, CloseMentionInfoPopupOperation, ShowMentionEditPopupOperation, ShowMentionInfoPopupOperation } from '../commands/operations/mention-popup.operation';
 import { MentionEditPopup } from '../views/mention-edit-popup';
+import { AddDocMentionCommand, DeleteDocMentionCommand } from '../commands/commands/doc-mention.command';
 
 @OnLifecycle(LifecycleStages.Starting, DocMentionUIController)
 export class DocMentionUIController extends Disposable {
@@ -37,6 +38,8 @@ export class DocMentionUIController extends Disposable {
             CloseMentionInfoPopupOperation,
             ShowMentionEditPopupOperation,
             CloseMentionEditPopupOperation,
+            AddDocMentionCommand,
+            DeleteDocMentionCommand,
         ].forEach((operation) => {
             this.disposeWithMe(this._commandService.registerCommand(operation));
         });

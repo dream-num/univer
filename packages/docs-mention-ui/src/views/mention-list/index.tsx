@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IMention } from '@univerjs/docs-mention';
 import React, { useEffect, useRef, useState } from 'react';
 import cs from 'clsx';
 import { KeyCode } from '@univerjs/ui';
+import type { IMention } from '../../types/interfaces/i-mention';
 import styles from './index.module.less';
 
 export interface IMentionListProps {

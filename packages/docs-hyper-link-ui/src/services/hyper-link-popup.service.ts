@@ -19,7 +19,6 @@ import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject } from 'rxjs';
-import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { DocLinkPopup } from '../views/hyper-link-popup';
 
@@ -47,7 +46,6 @@ export class DocHyperLinkPopupService extends Disposable {
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
@@ -124,9 +122,8 @@ export class DocHyperLinkPopupService extends Disposable {
         if (this._infoPopup) {
             this._infoPopup.dispose();
         }
-        const link = this._docHyperLinkModel.getLink(unitId, linkId);
         const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        if (!doc || !link) {
+        if (!doc) {
             return;
         }
         const range = doc.getSelfOrHeaderFooterModel(info.segmentId).getBody()?.customRanges?.find((i) => i.rangeId === linkId);
@@ -145,7 +142,8 @@ export class DocHyperLinkPopupService extends Disposable {
             },
             {
                 componentKey: DocLinkPopup.componentKey,
-                direction: 'top',
+                direction: 'top-center',
+                multipleDirection: 'top',
                 closeOnSelfTarget: true,
                 onClickOutside: () => {
                     this.hideInfoPopup();

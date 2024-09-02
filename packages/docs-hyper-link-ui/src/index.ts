@@ -15,5 +15,3 @@
  */
 
 export { UniverDocsHyperLinkUIPlugin } from './plugin';
-
-// export {} from './'

@@ -20,7 +20,6 @@ import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { DOC_HYPER_LINK_PLUGIN } from '@univerjs/docs-hyper-link';
 import { getPlainTextFormDocument } from '@univerjs/docs';
 import { isLegalLink, serializeUrl } from '../common/util';
 import type { IAddHyperLinkCommandParams } from '../commands/commands/add-hyper-link.command';
@@ -280,10 +279,8 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     handler: (data, context, next) => {
                         if (data?.p) {
                             const range = data.p.body?.customRanges?.find((i) => i.rangeType === CustomRangeType.HYPERLINK);
-                            const resource = data.p.resources?.find((i) => i.name === DOC_HYPER_LINK_PLUGIN);
-                            if (range && resource) {
-                                const rangeId = range.rangeId;
-                                const url = JSON.parse(resource.data)?.links?.find((i: { id: string; payload: string }) => i.id === rangeId)?.payload;
+                            if (range) {
+                                const url = range.properties?.url;
 
                                 return next({
                                     ...data,

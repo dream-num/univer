@@ -82,6 +82,7 @@ export function transformOffset2Bound(offsetX: number, offsetY: number, scene: S
 export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
+    multipleDirection?: IPopup['direction'];
 }
 
 export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
@@ -258,7 +259,7 @@ export class DocCanvasPopManagerService extends Disposable {
     attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup): IDisposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
         const unitId = workbook.getUnitId();
-        const { direction = 'top' } = popup;
+        const { direction = 'top', multipleDirection } = popup;
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             return {
@@ -269,16 +270,19 @@ export class DocCanvasPopManagerService extends Disposable {
         }
 
         const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
-        const position$ = bounds$.pipe(map((bounds) => direction === 'top' ? bounds[0] : bounds[bounds.length - 1]));
+        const position$ = bounds$.pipe(map((bounds) => direction.includes('top') ? bounds[0] : bounds[bounds.length - 1]));
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId: 'default',
-            anchorRect: direction === 'top' ? bounds[0] : bounds[bounds.length - 1],
+            anchorRect: direction.includes('top') ? bounds[0] : bounds[bounds.length - 1],
             anchorRect$: position$,
             excludeRects: bounds,
             excludeRects$: bounds$,
-            direction: direction === 'top' ? 'top' : 'bottom',
+            direction:
+                (direction.includes('top') || direction.includes('bottom')) ?
+                    bounds.length > 1 ? multipleDirection : direction
+                    : 'bottom',
             canvasElement: currentRender.engine.getCanvasElement(),
         });
 

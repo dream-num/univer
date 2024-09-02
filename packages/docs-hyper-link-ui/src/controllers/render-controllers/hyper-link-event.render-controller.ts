@@ -17,8 +17,8 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DocEventManagerService } from '@univerjs/docs-ui';
-import { DocumentEditArea, type IRenderContext, type IRenderModule } from '@univerjs/engine-render';
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { ClickDocHyperLinkOperation, ToggleDocHyperLinkInfoPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
@@ -32,7 +32,8 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocHyperLinkPopupService) private readonly _hyperLinkPopupService: DocHyperLinkPopupService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -52,8 +53,9 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         this.disposeWithMe(
             this._docEventManagerService.hoverCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
-                const editArea = this._skeleton.getViewModel().getEditArea();
-                if ((link?.segmentId && editArea === DocumentEditArea.BODY) || (!link?.segmentId && editArea !== DocumentEditArea.BODY)) {
+                const activeRanges = this._textSelectionManagerService.getCurrentTextRanges();
+                const currentSegmentId = activeRanges?.[0].segmentId;
+                if ((link?.segmentId ?? '') !== currentSegmentId) {
                     this._hideInfoPopup();
                     return;
                 }
@@ -86,6 +88,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                         {
                             unitId: this._context.unitId,
                             linkId: link.rangeId,
+                            segmentId: range.segmentId,
                         }
                     );
                 }

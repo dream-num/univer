@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
+import type { DocumentDataModel, ICustomRange } from '@univerjs/core';
 import { CustomRangeType, Disposable, Inject, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { DOC_HYPER_LINK_PLUGIN } from '../types/const';
-import { DocHyperLinkModel } from '../models/hyper-link.model';
-import type { IDocHyperLink } from '../types/interfaces/i-doc-hyper-link';
+
+export const DOC_HYPER_LINK_PLUGIN = 'DOC_HYPER_LINK_PLUGIN';
 
 interface IDocHyperLinkJSON {
-    links: IDocHyperLink[];
+    links: { id: string; payload: string }[];
 }
 
 @OnLifecycle(LifecycleStages.Starting, DocHyperLinkResourceController)
 export class DocHyperLinkResourceController extends Disposable {
     constructor(
         @Inject(IResourceManagerService) private readonly _resourceManagerService: IResourceManagerService,
-        @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
@@ -40,22 +38,64 @@ export class DocHyperLinkResourceController extends Disposable {
             pluginName: DOC_HYPER_LINK_PLUGIN,
             businesses: [UniverInstanceType.UNIVER_DOC],
             onLoad: (unitID: string, resource: IDocHyperLinkJSON) => {
-                resource.links.forEach((link) => {
-                    this._docHyperLinkModel.addLink(unitID, link);
-                });
-            },
-            onUnLoad: (unitID: string) => {
-                this._docHyperLinkModel.deleteUnit(unitID);
-            },
-            toJson: (unitID: string) => {
-                const links = this._docHyperLinkModel.getUnit(unitID);
                 const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitID, UniverInstanceType.UNIVER_DOC);
-                const customRanges = doc?.getBody()?.customRanges;
-                const set = new Set(customRanges?.filter((i) => i.rangeType === CustomRangeType.HYPERLINK).map((i) => i.rangeId));
+                if (!doc) {
+                    return;
+                }
 
-                return JSON.stringify({
-                    links: links.filter((link) => set.has(link.id)),
+                const customRangeMap = new Map<string, ICustomRange>();
+
+                const handleDoc = (model: DocumentDataModel) => {
+                    model.getBody()?.customRanges?.forEach((customRange) => {
+                        if (customRange.rangeType === CustomRangeType.HYPERLINK) {
+                            customRangeMap.set(customRange.rangeId, customRange);
+                        }
+                    });
+                    return customRangeMap;
+                };
+                doc.headerModelMap.forEach((headerModel) => {
+                    handleDoc(headerModel);
                 });
+                doc.footerModelMap.forEach((footerModel) => {
+                    handleDoc(footerModel);
+                });
+                handleDoc(doc);
+
+                resource.links.forEach((link) => {
+                    const customRange = customRangeMap.get(link.id);
+                    if (customRange) {
+                        customRange.properties = {
+                            ...customRange.properties,
+                            url: link.payload,
+                        };
+                    }
+                });
+            },
+            onUnLoad: (unitID: string) => {},
+            toJson: (unitID: string) => {
+                const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitID, UniverInstanceType.UNIVER_DOC);
+                const links: { id: string; payload: string }[] = [];
+                if (doc) {
+                    const handleDoc = (model: DocumentDataModel) => {
+                        model.getBody()?.customRanges?.forEach((customRange) => {
+                            if (customRange.rangeType === CustomRangeType.HYPERLINK) {
+                                links.push({
+                                    id: customRange.rangeId,
+                                    payload: customRange.properties?.url || '',
+                                });
+                            }
+                        });
+                    };
+                    doc.headerModelMap.forEach((headerModel) => {
+                        handleDoc(headerModel);
+                    });
+                    doc.footerModelMap.forEach((footerModel) => {
+                        handleDoc(footerModel);
+                    });
+                    handleDoc(doc);
+                }
+
+                return JSON.stringify({ links });
             },
             parseJson(bytes: string): IDocHyperLinkJSON {
                 return JSON.parse(bytes);

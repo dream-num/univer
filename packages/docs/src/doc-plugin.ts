@@ -56,7 +56,6 @@ import { IMEInputManagerService } from './services/ime-input-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
-import { DocCustomRangeService } from './services/doc-custom-range.service';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
@@ -166,7 +165,6 @@ export class UniverDocsPlugin extends Plugin {
                     },
                 ],
                 [TextSelectionManagerService],
-                [DocCustomRangeService],
                 [DocAutoFormatService],
 
                 // controllers

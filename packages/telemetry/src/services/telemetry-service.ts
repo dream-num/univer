@@ -32,12 +32,20 @@ export enum TelemetryEventNames {
     sheet_ai_completion_requesting = 'ai_completion_requesting',
 
     sheet_render_cost = 'sheet_render_timecost',
+    performance_function_time_cost = 'performance_function_time_cost',
 };
 
 // Base interface for telemetry service
 export interface ITelemetryService {
     identify: (id: string, params?: Record<string, any>) => void;
-    capture: (eventName: TelemetryEventNames, params?: Record<string, any>) => void;
+    capture: (eventName: string, params?: Record<string, any>) => void;
+    startTime: (functionName: string) => void;
+    endTime: (functionName: string) => void;
+    trackPerformance: (params: {
+        duration: number;
+        functionName: string;
+        [prop: string]: any;
+    }) => void;
     onPageView: (url: string) => void;
 };
 

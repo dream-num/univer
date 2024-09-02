@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, LifecycleService, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { filter, first } from 'rxjs';
-import { drawingPositionToTransform } from '../../basics/transform-position';
 import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { drawingPositionToTransform } from '../../basics/transform-position';
 
 export class SheetsDrawingRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -44,11 +43,11 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
         if (this._context.type === UniverInstanceType.UNIVER_SHEET) {
             this._sheetDrawingService.initializeNotification(this._context.unitId);
             const data = this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId);
-            for (let subUnit in data) {
+            for (const subUnit in data) {
                 const subUnitData = data[subUnit];
-                for (let drawingId in subUnitData.data) {
+                for (const drawingId in subUnitData.data) {
                     const drawingData = subUnitData.data[drawingId];
-                    drawingData.transform = drawingPositionToTransform(drawingData.sheetTransform, this._sheetSelectionRenderService, this._sheetSkeletonManagerService)
+                    drawingData.transform = drawingPositionToTransform(drawingData.sheetTransform, this._sheetSelectionRenderService, this._sheetSkeletonManagerService);
                 }
             }
 

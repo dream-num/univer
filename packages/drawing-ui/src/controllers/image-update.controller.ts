@@ -23,7 +23,6 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import type { Image, Scene } from '@univerjs/engine-render';

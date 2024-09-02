@@ -18,8 +18,8 @@ import type { IAccessor, ICellDataForSheetInterceptor, IPermissionTypes, IRange,
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 
-import type { ICellPermission } from '@univerjs/sheets';
-import { RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import type { FeatureGroupIdEnum, ICellPermission } from '@univerjs/sheets';
+import { IExclusiveRangeService, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
 
@@ -43,6 +43,46 @@ export function deriveStateFromActiveSheet$<T>(univerInstanceService: IUniverIns
         if (!active) return of(defaultValue);
         return callback(active);
     }));
+}
+
+/**
+ * @description Get the current exclusive range disable status
+ * @param accessor The accessor
+ * @param {Set<string>} [disableGroupSet] The disable group set, if provided, check if the interestGroupIds contains any of the disableGroupSet, otherwise check if the interestGroupIds is not empty
+ * @returns {Observable<boolean>} The current exclusive range disable status
+ */
+export function getCurrentExclusiveRangeDisable$(accessor: IAccessor, disableGroupSet?: Set<FeatureGroupIdEnum>) {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const exclusiveRangeService = accessor.get(IExclusiveRangeService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
+    const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    return workbook$.pipe(
+        switchMap((workbook) => {
+            if (!workbook) {
+                return of(false);
+            }
+            return combineLatest([selectionManagerService.selectionMoveEnd$, workbook.activeSheet$]).pipe(
+                switchMap(([selections, worksheet]) => {
+                    if (!worksheet) {
+                        return of(false);
+                    }
+                    if (selections.length === 0) {
+                        return of(false);
+                    }
+
+                    const interestGroupIds = exclusiveRangeService.getInterestGroupId(selections);
+                    // if disableGroupSet is provided, check if the interestGroupIds contains any of the disableGroupSet
+                    if (disableGroupSet) {
+                        const disableGroup = interestGroupIds.filter((groupId) => disableGroupSet.has(groupId));
+                        return of(disableGroup.length > 0);
+                    } else {
+                        return of(interestGroupIds.length > 0);
+                    }
+                })
+            );
+        })
+    );
 }
 
 export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}) {

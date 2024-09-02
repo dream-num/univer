@@ -15,11 +15,11 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { createIdentifier, Disposable, Inject, Rectangle } from '@univerjs/core';
-import { SheetsSelectionsService } from '../selections/selection-manager.service';
+import { createIdentifier, Disposable, Rectangle } from '@univerjs/core';
+import type { ISelectionWithStyle } from '../../basics/selection';
 
 interface IFeatureRange {
-    groupId: string;
+    groupId: FeatureGroupIdEnum;
     range: IRange;
 }
 
@@ -60,10 +60,10 @@ export interface IExclusiveRangeService {
      */
     clearExclusiveRangesByGroupId(unitId: string, sheetId: string, feature: string, groupId: string): void;
     /**
-     * @description Get the interest group id
-     * @returns {string[]} The interest group id
+     * Check the interest group id of the giving selection
+     * @param {ISelectionWithStyle[]} selections The selections to check
      */
-    getInterestGroupId(): string[];
+    getInterestGroupId(selections: ISelectionWithStyle[]): FeatureGroupIdEnum[];
 }
 export const IExclusiveRangeService = createIdentifier<IExclusiveRangeService>('univer.exclusive-range-service');
 
@@ -73,12 +73,9 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
      */
     private _exclusiveRanges: Map<string, Map<string, Map<string, IFeatureRange[]>>> = new Map();
 
-    private _interestGroupId: string[] = [];
     constructor(
-        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
     ) {
         super();
-        this._listenToSelections();
     }
 
     private _ensureUnitMap(unitId: string) {
@@ -126,29 +123,25 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
         }
     }
 
-    private _listenToSelections() {
-        this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-            for (const unitId of this._exclusiveRanges.keys()) {
-                for (const sheetId of this._exclusiveRanges.get(unitId)!.keys()) {
-                    for (const feature of this._exclusiveRanges.get(unitId)!.get(sheetId)!.keys()) {
-                        const featureMap = this.getExclusiveRanges(unitId, sheetId, feature);
-                        if (featureMap) {
-                            featureMap.forEach((item) => {
-                                for (const selection of selections) {
-                                    if (Rectangle.intersects(selection.range, item.range)) {
-                                        this._interestGroupId.push(item.groupId);
-                                        break;
-                                    }
+    public getInterestGroupId(selections: ISelectionWithStyle[]): FeatureGroupIdEnum[] {
+        const interestGroupId: FeatureGroupIdEnum[] = [];
+        for (const unitId of this._exclusiveRanges.keys()) {
+            for (const sheetId of this._exclusiveRanges.get(unitId)!.keys()) {
+                for (const feature of this._exclusiveRanges.get(unitId)!.get(sheetId)!.keys()) {
+                    const featureMap = this.getExclusiveRanges(unitId, sheetId, feature);
+                    if (featureMap) {
+                        featureMap.forEach((item) => {
+                            for (const selection of selections) {
+                                if (Rectangle.intersects(selection.range, item.range)) {
+                                    interestGroupId.push(item.groupId);
+                                    break;
                                 }
-                            });
-                        }
+                            }
+                        });
                     }
                 }
             }
-        }));
-    }
-
-    public getInterestGroupId(): string[] {
-        return this._interestGroupId;
+        }
+        return interestGroupId;
     }
 }

@@ -104,7 +104,7 @@ export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperation
 export type { FormatType } from './services/numfmt/type';
 export { expandToContinuousRange } from './basics/expand-range';
 
-export { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
+export { ExclusiveRangeService, IExclusiveRangeService, FeatureGroupIdEnum } from './services/exclusive-range/exclusive-range-service';
 
 // permission
 export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './services/permission';

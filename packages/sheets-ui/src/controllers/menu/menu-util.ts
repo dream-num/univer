@@ -18,7 +18,7 @@ import type { IAccessor, ICellDataForSheetInterceptor, IPermissionTypes, IRange,
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 
-import type { FeatureGroupIdEnum, ICellPermission } from '@univerjs/sheets';
+import type { ICellPermission } from '@univerjs/sheets';
 import { IExclusiveRangeService, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
@@ -51,7 +51,7 @@ export function deriveStateFromActiveSheet$<T>(univerInstanceService: IUniverIns
  * @param {Set<string>} [disableGroupSet] The disable group set, if provided, check if the interestGroupIds contains any of the disableGroupSet, otherwise check if the interestGroupIds is not empty
  * @returns {Observable<boolean>} The current exclusive range disable status
  */
-export function getCurrentExclusiveRangeInterest$(accessor: IAccessor, disableGroupSet?: Set<FeatureGroupIdEnum>) {
+export function getCurrentExclusiveRangeInterest$(accessor: IAccessor, disableGroupSet?: Set<string>) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const exclusiveRangeService = accessor.get(IExclusiveRangeService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -85,9 +85,16 @@ export function getCurrentExclusiveRangeInterest$(accessor: IAccessor, disableGr
     );
 }
 
-export function getCurrentRangeDisableWithExclusiveRange$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}, disableGroupSet?: Set<FeatureGroupIdEnum>) {
-    return combineLatest([getCurrentRangeDisable$(accessor, permissionTypes), getCurrentExclusiveRangeInterest$(accessor, disableGroupSet)]).pipe(
-        map(([rangeDisable, exclusiveRangeDisable]) => rangeDisable || exclusiveRangeDisable)
+/**
+ * Get the observable combine with exclusive range
+ * @param accessor The accessor
+ * @param {Observable<boolean>} observable$
+ * @param {Set<string>} [disableGroupSet] The disable group set, if provided, check if the interestGroupIds contains any of the disableGroupSet, otherwise check if the interestGroupIds is not empty
+ * @returns {Observable<boolean>} The observable combine with exclusive range
+ */
+export function getObservableWithExclusiveRange$(accessor: IAccessor, observable$: Observable<boolean>, disableGroupSet?: Set<string>): Observable<boolean> {
+    return combineLatest([observable$, getCurrentExclusiveRangeInterest$(accessor, disableGroupSet)]).pipe(
+        map(([observable, exclusiveRangeDisable]) => observable || exclusiveRangeDisable)
     );
 }
 

@@ -18,7 +18,7 @@ export { SheetsUIPart } from './consts/ui-name';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { getEditorObject } from './basics/editor/get-editor-object';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
-export { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getCurrentRangeDisableWithExclusiveRange$, getCurrentExclusiveRangeInterest$ } from './controllers/menu/menu-util';
+export { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getObservableWithExclusiveRange$, getCurrentExclusiveRangeInterest$ } from './controllers/menu/menu-util';
 export { SheetsRenderService } from './services/sheets-render.service';
 
 export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';

@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import { Disposable } from '../../shared';
-import type { IRange } from '../../sheets/typedef';
-import { createIdentifier } from '../../common/di';
+import type { IRange } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, Rectangle } from '@univerjs/core';
+import { SheetsSelectionsService } from '../selections/selection-manager.service';
 
 interface IFeatureRange {
     groupId: string;
     range: IRange;
+}
+
+export enum FeatureGroupIdEnum {
+    pivotTable = 'SHEET_PIVOT_EXCLUSIVE_ID',
 }
 export interface IExclusiveRangeService {
     /**
@@ -55,6 +59,11 @@ export interface IExclusiveRangeService {
      * @param {string} groupId The groupId of the exclusive range
      */
     clearExclusiveRangesByGroupId(unitId: string, sheetId: string, feature: string, groupId: string): void;
+    /**
+     * @description Get the interest group id
+     * @returns {string[]} The interest group id
+     */
+    getInterestGroupId(): string[];
 }
 export const IExclusiveRangeService = createIdentifier<IExclusiveRangeService>('univer.exclusive-range-service');
 
@@ -63,8 +72,13 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
      * Exclusive range data structure is as follows: unitId -> sheetId -> feature -> range
      */
     private _exclusiveRanges: Map<string, Map<string, Map<string, IFeatureRange[]>>> = new Map();
-    constructor() {
+
+    private _interestGroupId: string[] = [];
+    constructor(
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
+    ) {
         super();
+        this._listenToSelections();
     }
 
     private _ensureUnitMap(unitId: string) {
@@ -110,5 +124,31 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
             const newFeatureMap = featureMap.filter((item) => item.groupId !== groupId);
             this._exclusiveRanges.get(unitId)!.get(sheetId)!.set(feature, newFeatureMap);
         }
+    }
+
+    private _listenToSelections() {
+        this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
+            for (const unitId of this._exclusiveRanges.keys()) {
+                for (const sheetId of this._exclusiveRanges.get(unitId)!.keys()) {
+                    for (const feature of this._exclusiveRanges.get(unitId)!.get(sheetId)!.keys()) {
+                        const featureMap = this.getExclusiveRanges(unitId, sheetId, feature);
+                        if (featureMap) {
+                            featureMap.forEach((item) => {
+                                for (const selection of selections) {
+                                    if (Rectangle.intersects(selection.range, item.range)) {
+                                        this._interestGroupId.push(item.groupId);
+                                        break;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }));
+    }
+
+    public getInterestGroupId(): string[] {
+        return this._interestGroupId;
     }
 }

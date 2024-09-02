@@ -53,7 +53,6 @@ import { AuthzIoLocalService } from './services/authz-io/authz-io-local.service'
 import { IAuthzIoService } from './services/authz-io/type';
 import type { ILocales } from './shared';
 import type { IWorkbookData } from './sheets/typedef';
-import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 
 export interface IUniverConfig {
     theme: IStyleSheet;
@@ -193,7 +192,6 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
         [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
         [IAuthzIoService, { useClass: AuthzIoLocalService, lazy: true }],
-        [IExclusiveRangeService, { useClass: ExclusiveRangeService }],
     ], override);
 
     return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);

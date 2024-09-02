@@ -38,7 +38,7 @@ export const SetCurrencyCommand: ICommand = {
         }
         const values: ISetNumfmtCommandParams['values'] = [];
 
-        const suffix = CURRENCYFORMAT[0].suffix(symbol);
+        const suffix = CURRENCYFORMAT[4].suffix(symbol);
 
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {

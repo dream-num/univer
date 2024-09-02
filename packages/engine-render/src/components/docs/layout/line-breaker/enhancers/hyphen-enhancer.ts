@@ -19,34 +19,7 @@ import { Break, BreakPointType } from '../break';
 import type { IBreakPoints, LineBreaker } from '../line-breaker';
 import type { Hyphen } from '../../hyphenation/hyphen';
 import type { Lang } from '../../hyphenation/lang';
-
-export function isLetter(char: string) {
-    return char.length > 0 && !/\s|(?![\'])[\!-\@\[-\`\{-\~\u2013-\u203C]/.test(char);
-}
-
-function getWord(str: string): string {
-    let word = '';
-
-    for (let i = 0; i < str.length; i++) {
-        if (isLetter(str[i])) {
-            word += str[i];
-        } else {
-            break;
-        }
-    }
-
-    return word;
-}
-
-function getHyphenPosition(lastPos: number, hyphenSlice: string[], index: number): number {
-    let hyphenPos = lastPos;
-
-    for (let i = 0; i <= index; i++) {
-        hyphenPos += hyphenSlice[i].length;
-    }
-
-    return hyphenPos;
-}
+import { getSlicePosition, getWord } from './utils';
 
 function isUpperCase(word: string) {
     return word.length > 0 && word === word.toUpperCase();
@@ -65,7 +38,7 @@ export class LineBreakerHyphenEnhancer implements IBreakPoints {
 
     private _hyphenSlice: string[] = [];
 
-    private _content = '';
+    public content = '';
 
     constructor(
         private _lineBreaker: LineBreaker,
@@ -73,7 +46,7 @@ export class LineBreakerHyphenEnhancer implements IBreakPoints {
         private _lang: Lang,
         private _doNotHyphenateCaps = false
     ) {
-        this._content = _lineBreaker.content;
+        this.content = _lineBreaker.content;
     }
 
     nextBreakPoint(): Nullable<Break> {
@@ -86,9 +59,9 @@ export class LineBreakerHyphenEnhancer implements IBreakPoints {
                 return null;
             }
             // Check if next break is in word.
-            const word = getWord(this._content.slice(this._curBreak.position, this._nextBreak.position));
+            const word = getWord(this.content.slice(this._curBreak.position, this._nextBreak.position));
 
-            if (word.length && !(isUpperCase(word) && this._doNotHyphenateCaps)) {
+            if (word.length && !(isUpperCase(word) && this._doNotHyphenateCaps) && this._nextBreak.type !== BreakPointType.Link) {
                 this._isInWord = true;
                 this._word = word;
                 // hyphenation.
@@ -101,7 +74,7 @@ export class LineBreakerHyphenEnhancer implements IBreakPoints {
         } else {
             // No need to add `-` to last hyphen slice, so use length - 1.
             if (this._hyphenIndex < this._hyphenSlice.length - 1) {
-                const position = getHyphenPosition(this._curBreak!.position, this._hyphenSlice, this._hyphenIndex);
+                const position = getSlicePosition(this._curBreak!.position, this._hyphenSlice, this._hyphenIndex);
 
                 this._hyphenIndex++;
 

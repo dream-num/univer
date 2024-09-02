@@ -24,7 +24,7 @@ import { BreakPointType } from '../../line-breaker/break';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { ISectionBreakConfig } from '../../../../../basics';
-import { isLetter } from '../../line-breaker/enhancers/hyphen-enhancer';
+import { isLetter } from '../../line-breaker/enhancers/utils';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:

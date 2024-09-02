@@ -51,7 +51,7 @@ export function deriveStateFromActiveSheet$<T>(univerInstanceService: IUniverIns
  * @param {Set<string>} [disableGroupSet] The disable group set, if provided, check if the interestGroupIds contains any of the disableGroupSet, otherwise check if the interestGroupIds is not empty
  * @returns {Observable<boolean>} The current exclusive range disable status
  */
-export function getCurrentExclusiveRangeDisable$(accessor: IAccessor, disableGroupSet?: Set<FeatureGroupIdEnum>) {
+export function getCurrentExclusiveRangeInterest$(accessor: IAccessor, disableGroupSet?: Set<FeatureGroupIdEnum>) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const exclusiveRangeService = accessor.get(IExclusiveRangeService);
     const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -86,7 +86,7 @@ export function getCurrentExclusiveRangeDisable$(accessor: IAccessor, disableGro
 }
 
 export function getCurrentRangeDisableWithExclusiveRange$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}, disableGroupSet?: Set<FeatureGroupIdEnum>) {
-    return combineLatest([getCurrentRangeDisable$(accessor, permissionTypes), getCurrentExclusiveRangeDisable$(accessor, disableGroupSet)]).pipe(
+    return combineLatest([getCurrentRangeDisable$(accessor, permissionTypes), getCurrentExclusiveRangeInterest$(accessor, disableGroupSet)]).pipe(
         map(([rangeDisable, exclusiveRangeDisable]) => rangeDisable || exclusiveRangeDisable)
     );
 }

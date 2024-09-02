@@ -56,7 +56,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Optional(ITelemetryService) private readonly _telemetryService: ITelemetryService
+        @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService
     ) {
         super();
         this._addNewRender();
@@ -83,9 +83,10 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _renderFrameTimeMetric: Nullable<Record<string, number[]>> = null;
     private _renderFrameTags: Record<string, any> = {};
 
-    afterRenderMetric$: Subject<IAfterRender$Info> = new Subject<IAfterRender$Info>();
+    private _afterRenderMetric$: Subject<IAfterRender$Info> = new Subject<IAfterRender$Info>();
     private _initRenderMetricSubscriber() {
         if (!this._telemetryService) return;
+
         const { engine } = this._context;
 
         engine.beginFrame$.subscribe(() => {
@@ -98,7 +99,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             Object.keys(this._renderFrameTimeMetric).filter((key) => key.startsWith(SHEET_EXTENSION_PREFIX)).length > 0;
 
             if (validRenderInfo) {
-                this.afterRenderMetric$.next({
+                this._afterRenderMetric$.next({
                     frameTimeMetric: this._renderFrameTimeMetric,
                     tags: this._renderFrameTags,
                 } as IAfterRender$Info);
@@ -119,27 +120,24 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         });
 
         const frameInfoList: IExtendFrameInfo[] = [];
-        this.afterRenderMetric$.pipe(
-            withLatestFrom(engine.endFrame$)
-        ).subscribe(([sceneRenderDetail, basicFrameTimeInfo]: [IAfterRender$Info, IBasicFrameInfo ]) => {
+        this._afterRenderMetric$.pipe(withLatestFrom(engine.endFrame$)).subscribe(([sceneRenderDetail, basicFrameTimeInfo]: [IAfterRender$Info, IBasicFrameInfo ]) => {
             frameInfoList.push({
                 ...{
                     FPS: basicFrameTimeInfo.FPS,
                     elapsedTime: basicFrameTimeInfo.elapsedTime,
                     frameTime: Math.round(basicFrameTimeInfo.frameTime * 100) / 100,
-
                 },
                 ...sceneRenderDetail.frameTimeMetric,
                 ...sceneRenderDetail.tags,
             });
             if (frameInfoList.length > FRAME_STACK_THRESHOLD) {
-                this._renderMetryCapture(frameInfoList);
+                this._renderMetricCapture(frameInfoList);
                 frameInfoList.length = 0;
             }
         });
     }
 
-    private _renderMetryCapture(frameInfoList: IExtendFrameInfo[]) {
+    private _renderMetricCapture(frameInfoList: IExtendFrameInfo[]) {
         const filteredFrameInfo = frameInfoList;//.filter((info) => info.scrolling);
         if (filteredFrameInfo.length === 0) return;
 
@@ -201,7 +199,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const sheetId = this._context.unit.getActiveSheet().getSheetId();
         const unitId = this._context.unit.getUnitId();
         const telemetryData = { sheetId, unitId, elapsedTimeToStart, ...summaryFrameStats };
-        this._telemetryService.capture(TelemetryEventNames.sheet_render_cost, telemetryData);
+        this._telemetryService!.capture(TelemetryEventNames.sheet_render_cost, telemetryData);
     }
 
     private _addComponent(workbook: Workbook) {

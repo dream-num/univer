@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@univerjs/core';
+
 // Enum for telemetry event names
 export enum TelemetryEventNames {
     /** space */
@@ -32,6 +33,7 @@ export enum TelemetryEventNames {
 
     sheet_render_cost = 'sheet_render_timecost',
 };
+
 // Base interface for telemetry service
 export interface ITelemetryService {
     identify: (id: string, params?: Record<string, any>) => void;

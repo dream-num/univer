@@ -16,7 +16,7 @@
 
 import type { ICellData, Injector, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { FUniver } from '../../facade';
@@ -83,6 +83,12 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(SetColVisibleMutation);
         commandService.registerCommand(SetColWidthCommand);
         commandService.registerCommand(SetWorksheetColWidthMutation);
+
+        // merge cells
+        commandService.registerCommand(AddWorksheetMergeCommand);
+        commandService.registerCommand(AddWorksheetMergeMutation);
+        commandService.registerCommand(RemoveWorksheetMergeCommand);
+        commandService.registerCommand(RemoveWorksheetMergeMutation);
 
         getValueByPosition = (
             startRow: number,
@@ -481,5 +487,25 @@ describe('Test FWorksheet', () => {
         expect(currentColWidth2).toBe(100);
     });
 
+    // #endregion
+
+    // #region Merge Cells
+    it('Worksheet mergeCells', async () => {
+        let hasError = false;
+        try {
+            const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
+            let sheet = await activeSheet?.addMergeCell([{ startRow: 0, endRow: 5, startColumn: 0, endColumn: 5 }]);
+            expect(sheet).toBeDefined();
+            expect(activeSheet?.getMergeCells()?.length).toBe(1);
+            sheet = await activeSheet?.addMergeCell([{ startRow: 6, endRow: 7, startColumn: 6, endColumn: 10 }]);
+            expect(activeSheet?.getMergeCells()?.length).toBe(2);
+            sheet = await activeSheet?.removeMergeCell([{ startRow: 0, endRow: 5, startColumn: 0, endColumn: 5 }]);
+            expect(activeSheet?.getMergeCells()?.length).toBe(1);
+            sheet = await activeSheet?.addMergeCell([{ startRow: 0, endRow: 10, startColumn: 0, endColumn: 10 }]);
+        } catch (error) {
+            hasError = true;
+        }
+        expect(hasError).toBe(true);
+    });
     // #endregion
 });

@@ -16,65 +16,27 @@
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
-import { SheetInterceptorService } from '@univerjs/sheets';
 import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 
-export interface IRemoveHyperLinkCommandParams {
+export interface ICancelHyperLinkCommandParams {
     unitId: string;
     subUnitId: string;
     /**
      * id of link
      */
     id: string;
+    /**
+     * row of cell
+     */
+    row: number;
+    /**
+     * column of cell
+     */
+    col: number;
 }
 
-export const RemoveHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
-    type: CommandType.COMMAND,
-    id: 'sheets.command.remove-hyper-link',
-    async handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const model = accessor.get(HyperLinkModel);
-        const { unitId, subUnitId, id } = params;
-        const link = model.getHyperLink(unitId, subUnitId, id);
-        const { redos, undos } = sheetInterceptorService.onCommandExecute({
-            id: RemoveHyperLinkCommand.id,
-            params,
-        });
-
-        const redo: IMutationInfo = {
-            id: RemoveHyperLinkMutation.id,
-            params,
-        };
-        const undo: IMutationInfo = {
-            id: AddHyperLinkMutation.id,
-            params: {
-                unitId,
-                subUnitId,
-                link,
-            } as IAddHyperLinkMutationParams,
-        };
-
-        const res = await sequenceExecuteAsync([redo, ...redos], commandService);
-        if (res.result) {
-            undoRedoService.pushUndoRedo({
-                redoMutations: [redo, ...redos],
-                undoMutations: [undo, ...undos],
-                unitID: unitId,
-            });
-            return true;
-        }
-
-        return false;
-    },
-};
-
-export const CancelHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
+export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.cancel-hyper-link',
     async handler(accessor, params) {

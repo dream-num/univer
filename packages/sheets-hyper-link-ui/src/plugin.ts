@@ -18,6 +18,7 @@ import type { Dependency, Nullable } from '@univerjs/core';
 import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRenderController, SheetsHyperLinkRenderManagerController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkPopupService } from './services/popup.service';
@@ -33,7 +34,7 @@ import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-pe
 import { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
 import type { IUniverSheetsHyperLinkUIConfig } from './types/interfaces/i-config';
 
-@DependentOn(UniverSheetsHyperLinkPlugin)
+@DependentOn(UniverSheetsHyperLinkPlugin, UniverDocsUIPlugin)
 export class UniverSheetsHyperLinkUIPlugin extends Plugin {
     static override pluginName: string = SHEET_HYPER_LINK_UI_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;

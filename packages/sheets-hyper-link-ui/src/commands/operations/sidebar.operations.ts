@@ -18,11 +18,13 @@ import { CommandType, type ICommand, ICommandService, IUniverInstanceService } f
 import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISidebarService } from '@univerjs/ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
+import type { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 
 export interface IOpenHyperLinkEditPanelOperationParams extends ISheetCommandSharedParams {
     row: number;
     col: number;
     customRangeId: string;
+    type: HyperLinkEditSourceType;
 }
 
 export const OpenHyperLinkEditPanelOperation: ICommand<IOpenHyperLinkEditPanelOperationParams> = {

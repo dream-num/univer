@@ -20,7 +20,7 @@ export { getEditorObject } from './basics/editor/get-editor-object';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from './controllers/menu/menu-util';
 export { SheetsRenderService } from './services/sheets-render.service';
-export { getCustomRangePosition, calculateDocSkeletonRects } from './services/utils/doc-skeleton-util';
+export { getCustomRangePosition, calculateDocSkeletonRects, getEditingCustomRangePosition } from './services/utils/doc-skeleton-util';
 export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';

@@ -115,6 +115,7 @@ export const CellLinkPopup = () => {
                                     row,
                                     col,
                                     customRangeId: customRange.rangeId,
+                                    type: currentPopup.type,
                                 });
                             }}
                         >

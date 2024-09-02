@@ -31,6 +31,6 @@ export {
 } from './commands/operations/sidebar.operations';
 
 export { AddHyperLinkCommand, type IAddHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
-export { RemoveHyperLinkCommand, CancelHyperLinkCommand, type IRemoveHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
+export { CancelHyperLinkCommand, type ICancelHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
 export { UpdateHyperLinkCommand, type IUpdateHyperLinkCommandParams } from './commands/commands/update-hyper-link.command';
 // #endregion

@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
-import { HoverManagerService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { debounceTime } from 'rxjs';
+import type { Nullable } from '@univerjs/core';
+import { CustomRangeType, Disposable, ICommandService, Inject, Injector, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { Subscription } from 'rxjs';
+import { debounceTime, map, mergeMap } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookViewPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { DocEventManagerService } from '@univerjs/docs-ui';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
+import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPopupController)
 export class SheetsHyperLinkPopupController extends Disposable {
@@ -29,25 +34,60 @@ export class SheetsHyperLinkPopupController extends Disposable {
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
         @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
         @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
         this._initHoverListener();
         this._initCommandListener();
+        this._initHoverEditingListener();
+    }
+
+    private _getLinkPermission(location: ISheetLocationBase) {
+        const { unitId, subUnitId, row: currentRow, col: currentCol } = location;
+        const viewPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+            workbookTypes: [WorkbookViewPermission],
+            worksheetTypes: [WorksheetViewPermission],
+            rangeTypes: [RangeProtectionPermissionViewPoint],
+        }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
+
+        const editPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+            workbookTypes: [WorkbookEditablePermission],
+            worksheetTypes: [WorksheetEditPermission, WorksheetInsertHyperlinkPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
+
+        const copyPermission = this._permissionService.composePermission([new WorkbookCopyPermission(unitId).id, new WorksheetCopyPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+
+        return {
+            viewPermission,
+            editPermission,
+            copyPermission,
+        };
     }
 
     private _initHoverListener() {
         this.disposeWithMe(
+            // hover over not editing cell
             this._hoverManagerService.currentCellWithDoc$.pipe(debounceTime(200)).subscribe((currentCell) => {
-                // console.log('===currentCell===', currentCell);
                 if (!currentCell) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
                 }
 
-                const skeleton = this._renderManagerService.getRenderById(currentCell.location.unitId)
-                    ?.with(SheetSkeletonManagerService)
+                const renderer = this._renderManagerService.getRenderById(currentCell.location.unitId);
+                if (!renderer) {
+                    return;
+                }
+                const hoverRenderController = renderer.with(HoverRenderController);
+                if (!hoverRenderController.active) {
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.VIEWING);
+                    return;
+                }
+
+                const skeleton = renderer?.with(SheetSkeletonManagerService)
                     .getWorksheetSkeleton(currentCell.location.subUnitId)
                     ?.skeleton;
 
@@ -65,27 +105,12 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     });
                 }
 
-                const viewPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
-                    workbookTypes: [WorkbookViewPermission],
-                    worksheetTypes: [WorksheetViewPermission],
-                    rangeTypes: [RangeProtectionPermissionViewPoint],
-                }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
+                const { viewPermission, editPermission, copyPermission } = this._getLinkPermission(currentCell.location);
 
-                if (!viewPermission) {
+                if (!viewPermission || !currentCell.customRange) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
                 }
-
-                const editPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
-                    workbookTypes: [WorkbookEditablePermission],
-                    worksheetTypes: [WorksheetEditPermission, WorksheetInsertHyperlinkPermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
-                }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
-
-                const unitId = currentCell.location.unitId;
-                const subUnitId = currentCell.location.subUnitId;
-
-                const copyPermission = this._permissionService.composePermission([new WorkbookCopyPermission(unitId).id, new WorksheetCopyPermission(unitId, subUnitId).id]).every((permission) => permission.value);
 
                 this._sheetsHyperLinkPopupService.showPopup({
                     ...currentCell.location,
@@ -95,9 +120,78 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     copyPermission,
                     customRange: currentCell.customRange,
                     customRangeRect: currentCell.rect,
+                    type: HyperLinkEditSourceType.VIEWING,
                 });
             })
         );
+    }
+
+    private _initHoverEditingListener() {
+        let subscribe: Nullable<Subscription> = null;
+        this.disposeWithMe(
+            this._editorBridgeService.currentEditCellState$
+                .pipe(mergeMap((state) => this._editorBridgeService.visible$.pipe(map((visible) => ({ visible, state })))))
+                .subscribe(({ visible, state }) => {
+                    if (!state) {
+                        return;
+                    }
+
+                    if (!visible.visible) {
+                        subscribe?.unsubscribe();
+                        this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.EDITING);
+                        this._sheetsHyperLinkPopupService.endEditing();
+                        return;
+                    }
+                    const { editorUnitId, unitId, sheetId, row, column } = state;
+                    const renderer = this._renderManagerService.getRenderById(editorUnitId);
+                    if (!renderer) {
+                        return;
+                    }
+                    const { editPermission, viewPermission, copyPermission } = this._getLinkPermission({ unitId, subUnitId: sheetId, row, col: column });
+                    const docEventService = renderer.with(DocEventManagerService);
+                    if (!viewPermission) {
+                        return;
+                    }
+                    subscribe?.unsubscribe();
+                    subscribe = docEventService.hoverCustomRanges$.pipe(debounceTime(200)).subscribe((customRanges) => {
+                        const customRange = customRanges.find((customRange) => customRange.range.rangeType === CustomRangeType.HYPERLINK);
+                        if (!customRange) {
+                            this._sheetsHyperLinkPopupService.hideCurrentPopup();
+                            return;
+                        }
+                        const rect = customRange.rects[customRange.rects.length - 1];
+                        const skeleton = this._renderManagerService.getRenderById(unitId)
+                            ?.with(SheetSkeletonManagerService)
+                            .getWorksheetSkeleton(sheetId)
+                            ?.skeleton;
+                        if (!skeleton || !rect) {
+                            return;
+                        }
+                        const canvasClientRect = renderer.engine.getCanvasElement().getBoundingClientRect();
+
+                        this._sheetsHyperLinkPopupService.showPopup({
+                            unitId,
+                            subUnitId: sheetId,
+                            row,
+                            col: column,
+                            customRange: customRange.range,
+                            customRangeRect: {
+                                left: rect.left + canvasClientRect.left,
+                                top: rect.top + canvasClientRect.top,
+                                bottom: rect.bottom + canvasClientRect.top,
+                                right: rect.right + canvasClientRect.left,
+                            },
+                            editPermission,
+                            copyPermission,
+                            type: HyperLinkEditSourceType.EDITING,
+                        });
+                    });
+                })
+        );
+
+        this.disposeWithMe(() => {
+            subscribe?.unsubscribe();
+        });
     }
 
     private _initCommandListener() {

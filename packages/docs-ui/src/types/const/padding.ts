@@ -14,11 +14,4 @@
  * limitations under the License.
  */
 
-export * from './i-document-data';
-export * from './i-document-data-interceptor';
-export * from './i-image-properties';
-export * from './i-placeholder';
-export * from './i-shape-properties';
-export * from './i-slide-data';
-export * from './i-style-data';
-export * from './i-need-check-disposable';
+export const DOC_VERTICAL_PADDING = 4;

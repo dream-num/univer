@@ -23,6 +23,12 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 import { SheetScrollManagerService } from '../services/scroll-manager.service';
 
 export class HoverRenderController extends Disposable implements IRenderModule {
+    private _active = false;
+
+    get active() {
+        return this._active;
+    }
+
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
@@ -48,12 +54,23 @@ export class HoverRenderController extends Disposable implements IRenderModule {
             if (!mainComponent) {
                 return;
             }
+
+            disposeSet.add(mainComponent.onPointerEnter$.subscribeEvent((evt) => {
+                this._active = true;
+            }));
+
             disposeSet.add(mainComponent.onPointerMove$.subscribeEvent((evt) => {
+                this._active = true;
                 this._hoverManagerService.triggerMouseMove(unitId, evt.offsetX, evt.offsetY);
             }));
 
             disposeSet.add(mainComponent.onPointerUp$.subscribeEvent((evt) => {
                 this._hoverManagerService.triggerClick(unitId, evt.offsetX, evt.offsetY);
+            }));
+
+            disposeSet.add(mainComponent.onPointerLeave$.subscribeEvent(() => {
+                // this._hoverManagerService.triggerMouseLeave(unitId);
+                this._active = false;
             }));
         };
 

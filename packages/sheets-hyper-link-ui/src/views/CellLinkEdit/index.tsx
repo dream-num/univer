@@ -39,6 +39,7 @@ export const CellLinkEdit = () => {
     const [payload, setPayload] = useState('');
     const localeService = useDependency(LocaleService);
     const definedNameService = useDependency(IDefinedNamesService);
+    // const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const editing = useObservable(popupService.currentEditing$);

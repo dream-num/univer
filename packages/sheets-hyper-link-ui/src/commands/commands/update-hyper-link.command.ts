@@ -25,6 +25,9 @@ export interface IUpdateHyperLinkCommandParams {
     subUnitId: string;
     id: string;
     payload: ICellLinkContent;
+    row: number;
+    column: number;
+
 }
 
 function getHyperLinkContent(link: ICellHyperLink) {

@@ -26,6 +26,7 @@ export { DocCanvasPopManagerService } from './services/doc-popup-manager.service
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
 export { DocEventManagerService } from './services/doc-event-manager.service';
 export { DocUIController } from './controllers/doc-ui.controller';
+export { DOC_VERTICAL_PADDING } from './types/const/padding';
 // #region - all commands
 
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';

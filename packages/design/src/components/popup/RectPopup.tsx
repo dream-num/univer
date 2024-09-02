@@ -43,6 +43,8 @@ export interface IRectPopupProps {
     onClickOutside?: (e: MouseEvent) => void;
     excludeOutside?: HTMLElement[];
 
+    onPinterEnter?: (e: React.PointerEvent<HTMLElement>) => void;
+    onPointerLeave?: (e: React.PointerEvent<HTMLElement>) => void;
     // #endregion
 }
 
@@ -100,7 +102,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, excludeRects } = props;
+    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPinterEnter, onPointerLeave } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
@@ -169,6 +171,8 @@ function RectPopup(props: IRectPopupProps) {
 
     return (
         <section
+            onPointerEnter={onPinterEnter}
+            onPointerLeave={onPointerLeave}
             ref={nodeRef}
             style={style}
             className={styles.popupAbsolute}

@@ -15,23 +15,26 @@
  */
 
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import { getCustomRangePosition, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import type { ICustomRange, IDisposable, Nullable } from '@univerjs/core';
+import type { ICanvasPopup } from '@univerjs/sheets-ui';
+import { getCustomRangePosition, getEditingCustomRangePosition, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import type { ICustomRange, IDisposable, INeedCheckDisposable, Nullable } from '@univerjs/core';
 import { Disposable, Inject, Injector } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
+import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
 export interface IHyperLinkPopup {
     unitId: string;
     subUnitId: string;
-    disposable?: IDisposable;
+    disposable: INeedCheckDisposable;
     row: number;
     col: number;
-    editPermission: boolean;
-    copyPermission: boolean;
+    editPermission?: boolean;
+    copyPermission?: boolean;
     customRange: ICustomRange;
+    type: HyperLinkEditSourceType;
 }
 
 interface IHyperLinkEditing {
@@ -40,15 +43,17 @@ interface IHyperLinkEditing {
     row: number;
     col: number;
     customRangeId: string;
+    type: HyperLinkEditSourceType;
 }
 
-const isEqualLink = (a: IHyperLinkPopupOptions, b: IHyperLinkPopup) => {
+const isEqualLink = (a: IHyperLinkPopupOptions, b: Omit<IHyperLinkPopup, 'disposable' | 'editPermission'>) => {
     return (
         a.unitId === b.unitId
         && a.subUnitId === b.subUnitId
         && a.row === b.row
         && a.col === b.col
         && a.customRange?.rangeId === b.customRange?.rangeId
+        && a.type === b.type
     );
 };
 
@@ -57,6 +62,7 @@ interface IHyperLinkPopupOptions extends ISheetLocationBase {
     copyPermission?: boolean;
     customRange?: Nullable<ICustomRange>;
     customRangeRect?: Nullable<IBoundRectNoAngle>;
+    type: HyperLinkEditSourceType;
 }
 
 export class SheetsHyperLinkPopupService extends Disposable {
@@ -96,22 +102,36 @@ export class SheetsHyperLinkPopupService extends Disposable {
             return;
         }
 
-        this.hideCurrentPopup();
+        this.hideCurrentPopup(undefined, true);
+        const currentEditing = this._currentEditing$.getValue();
+        if (currentEditing && isEqualLink(location, currentEditing)) {
+            return;
+        }
+
         const { unitId, subUnitId, row, col, customRangeRect, customRange } = location;
         if (!customRangeRect || !customRange) {
             return;
         }
-
-        const disposable = this._sheetCanvasPopManagerService.attachPopupByPosition(
-            customRangeRect,
-            {
-                componentKey: CellLinkPopup.componentKey,
-                direction: 'bottom',
-                closeOnSelfTarget: true,
-                onClickOutside: () => {
-                    this.hideCurrentPopup();
-                },
-            });
+        let disposable;
+        const popup: ICanvasPopup = {
+            componentKey: CellLinkPopup.componentKey,
+            direction: 'bottom',
+            closeOnSelfTarget: true,
+            onClickOutside: () => {
+                this.hideCurrentPopup();
+            },
+        };
+        if (location.type === HyperLinkEditSourceType.EDITING) {
+            disposable = this._sheetCanvasPopManagerService.attachPopupToAbsolutePosition(
+                customRangeRect,
+                popup
+            );
+        } else {
+            disposable = this._sheetCanvasPopManagerService.attachPopupByPosition(
+                customRangeRect,
+                popup
+            );
+        }
 
         if (disposable) {
             this._currentPopup = {
@@ -123,14 +143,19 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 editPermission: !!location.editPermission,
                 copyPermission: !!location.copyPermission,
                 customRange,
+                type: location.type,
             };
             this._currentPopup$.next(this._currentPopup);
         }
     }
 
-    hideCurrentPopup() {
-        if (this._currentPopup) {
-            this._currentPopup.disposable?.dispose();
+    hideCurrentPopup(type?: HyperLinkEditSourceType, force?: boolean) {
+        if (!this._currentPopup) {
+            return;
+        }
+
+        if (((!type || type === this._currentPopup.type) && this._currentPopup.disposable.canDispose()) || force) {
+            this._currentPopup?.disposable?.dispose();
             this._currentPopup = null;
             this._currentPopup$.next(null);
         }
@@ -138,24 +163,44 @@ export class SheetsHyperLinkPopupService extends Disposable {
 
     startEditing(link: IHyperLinkEditing) {
         this._currentEditingPopup?.dispose();
-        const customRangeInfo = getCustomRangePosition(this._injector, link.unitId, link.subUnitId, link.row, link.col, link.customRangeId);
+        this.hideCurrentPopup(undefined, true);
+
+        let customRangeInfo;
+        if (link.type === HyperLinkEditSourceType.EDITING) {
+            customRangeInfo = getEditingCustomRangePosition(this._injector, link.unitId, link.subUnitId, link.row, link.col, link.customRangeId);
+        } else {
+            customRangeInfo = getCustomRangePosition(this._injector, link.unitId, link.subUnitId, link.row, link.col, link.customRangeId);
+        }
         if (!customRangeInfo) {
             return;
         }
 
+        const { unitId, subUnitId } = link;
         const { rects, customRange, label } = customRangeInfo;
         if (rects?.length) {
-            this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupByPosition(
-                rects.pop()!,
-                {
-                    componentKey: CellLinkEdit.componentKey,
-                    direction: 'bottom',
-                    closeOnSelfTarget: true,
-                    onClickOutside: () => {
-                        this.hideCurrentPopup();
-                    },
-                }
-            );
+            const popup: ICanvasPopup = {
+                componentKey: CellLinkEdit.componentKey,
+                direction: 'bottom',
+                closeOnSelfTarget: true,
+                onClickOutside: () => {
+                    this.hideCurrentPopup();
+                },
+            };
+            if (link.type === HyperLinkEditSourceType.EDITING) {
+                this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToAbsolutePosition(
+                    rects.pop()!,
+                    popup,
+                    unitId,
+                    subUnitId
+                );
+            } else {
+                this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupByPosition(
+                    rects.pop()!,
+                    popup,
+                    unitId,
+                    subUnitId
+                );
+            }
             this._currentEditing$.next({
                 ...link,
                 customRange,
@@ -164,8 +209,11 @@ export class SheetsHyperLinkPopupService extends Disposable {
         }
     }
 
-    endEditing() {
-        this._currentEditingPopup?.dispose();
-        this._currentEditing$.next(null);
+    endEditing(type?: HyperLinkEditSourceType) {
+        const current = this._currentEditing$.getValue();
+        if (current && (!type || type === current.type)) {
+            this._currentEditingPopup?.dispose();
+            this._currentEditing$.next(null);
+        }
     }
 }

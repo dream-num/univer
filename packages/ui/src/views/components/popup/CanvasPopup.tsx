@@ -77,6 +77,8 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
             excludeOutside={popup.excludeOutside}
             excludeRects={excludeRects}
             closeOnSelfTarget={popup.closeOnSelfTarget}
+            onPinterEnter={popup.onPointerEnter}
+            onPointerLeave={popup.onPointerLeave}
         >
             {children}
         </RectPopup>

@@ -17,7 +17,7 @@
 import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { distinctUntilChanged, Subject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, Subject } from 'rxjs';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
@@ -45,7 +45,7 @@ export interface IHoverCellPosition {
 }
 
 export class HoverManagerService extends Disposable {
-    private _currentCell$ = new Subject<Nullable<IHoverCellPosition>>();
+    private _currentCell$ = new BehaviorSubject<Nullable<IHoverCellPosition>>(null);
     private _currentClickedCell$ = new Subject<IHoverCellPosition>();
 
     // Notify when hovering over different cells
@@ -170,6 +170,12 @@ export class HoverManagerService extends Disposable {
         const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
         this._currentCell$.next(activeCell);
     }
+
+    // triggerMouseLeave(unitId: string) {
+    //     if (this._currentCell$.getValue()?.unitId === unitId) {
+    //         this._currentCell$.next(null);
+    //     }
+    // }
 
     triggerClick(unitId: string, offsetX: number, offsetY: number) {
         const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);

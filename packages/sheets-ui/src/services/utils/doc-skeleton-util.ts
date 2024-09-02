@@ -18,7 +18,10 @@ import type { ICustomRange, Injector, IParagraph, ITextRangeParam, Workbook } fr
 import { CustomRangeType, IUniverInstanceService, PresetListType, UniverInstanceType } from '@univerjs/core';
 import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
 import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DOC_VERTICAL_PADDING } from '@univerjs/docs-ui';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { IEditorBridgeService } from '../editor-bridge.service';
 
 const calcDocRangePositions = (range: ITextRangeParam, skeleton: DocumentSkeleton): IBoundRectNoAngle[] | undefined => {
     const pageIndex = -1;
@@ -161,7 +164,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
         return null;
     }
 
-    const PADDING = 4;
+    const PADDING = DOC_VERTICAL_PADDING;
     const rects = calcDocRangePositions({ startOffset: customRange.startIndex, endOffset: customRange.endIndex, collapsed: false }, font);
     const cell = skeleton.getCellByIndex(row, col);
     return {
@@ -173,5 +176,56 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
         })),
         customRange,
         label: font.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
+    };
+};
+
+export const getEditingCustomRangePosition = (injector: Injector, unitId: string, subUnitId: string, row: number, col: number, rangeId: string) => {
+    const editorBridgeService = injector.get(IEditorBridgeService);
+
+    const state = editorBridgeService.getEditCellState();
+    if (!state) {
+        return null;
+    }
+    const visible = editorBridgeService.isVisible();
+    if (!visible.visible) {
+        return null;
+    }
+    const { editorUnitId, unitId: editingUnitId, sheetId, row: editRow, column: editCol } = state;
+    if (unitId !== editingUnitId || subUnitId !== sheetId || editRow !== row || editCol !== col) {
+        return null;
+    }
+
+    const renderManagerService = injector.get(IRenderManagerService);
+    const renderer = renderManagerService.getRenderById(editorUnitId);
+    const sheetRenderer = renderManagerService.getRenderById(unitId);
+    if (!renderer || !sheetRenderer) {
+        return null;
+    }
+
+    const docSkeleton = renderer.with(DocSkeletonManagerService).getSkeleton();
+    const sheetSkeleton = sheetRenderer.with(SheetSkeletonManagerService).getWorksheetSkeleton(sheetId)?.skeleton;
+
+    if (!docSkeleton || !sheetSkeleton) {
+        return null;
+    }
+
+    const customRange = docSkeleton.getViewModel().getBody()?.customRanges?.find((range) => range.rangeId === rangeId);
+    if (!customRange) {
+        return null;
+    }
+
+    const PADDING = 4;
+    const rects = calcDocRangePositions({ startOffset: customRange.startIndex, endOffset: customRange.endIndex, collapsed: false }, docSkeleton);
+    const canvasClientRect = renderer.engine.getCanvasElement().getBoundingClientRect();
+
+    return {
+        rects: rects?.map((rect) => ({
+            top: rect.top + canvasClientRect.top - PADDING,
+            bottom: rect.bottom + canvasClientRect.top + PADDING,
+            left: rect.left + canvasClientRect.left,
+            right: rect.right + canvasClientRect.left,
+        })),
+        customRange,
+        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
     };
 };

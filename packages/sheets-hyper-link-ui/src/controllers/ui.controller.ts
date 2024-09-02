@@ -24,7 +24,7 @@ import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, InsertHyperLi
 import type { IUniverSheetsHyperLinkUIConfig } from '../types/interfaces/i-config';
 import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
-import { CancelHyperLinkCommand, RemoveHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
+import { CancelHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
 import { insertLinkMenuFactory, insertLinkMenuToolbarFactory, InsertLinkShortcut } from './menu';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkUIController)
@@ -65,7 +65,6 @@ export class SheetsHyperLinkUIController extends Disposable {
 
             AddHyperLinkCommand,
             UpdateHyperLinkCommand,
-            RemoveHyperLinkCommand,
             CancelHyperLinkCommand,
         ].forEach((command) => {
             this._commandService.registerCommand(command);

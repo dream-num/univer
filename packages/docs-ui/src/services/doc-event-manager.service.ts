@@ -19,7 +19,8 @@ import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CURSOR_TYPE, getLineBounding, NodePositionConvertToCursor, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { distinctUntilChanged, filter, map, mergeMap, Subject, take, throttleTime } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, map, mergeMap, Subject, take, throttleTime } from 'rxjs';
+import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { transformOffset2Bound } from './doc-popup-manager.service';
 
 interface ICustomRangeBound {
@@ -57,8 +58,8 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
     const bounds = getLineBounding(borderBoxPointGroup);
 
     return bounds.map((rect) => ({
-        top: rect.top + documentOffsetConfig.docsTop,
-        bottom: rect.bottom + documentOffsetConfig.docsTop,
+        top: rect.top + documentOffsetConfig.docsTop - DOC_VERTICAL_PADDING,
+        bottom: rect.bottom + documentOffsetConfig.docsTop + DOC_VERTICAL_PADDING,
         left: rect.left + documentOffsetConfig.docsLeft,
         right: rect.right + documentOffsetConfig.docsLeft,
     }));
@@ -86,15 +87,21 @@ export const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, documents: D
 };
 
 interface ICustomRangeActive {
-    range: ICustomRange; segmentId?: string; segmentPageIndex: number;
+    range: ICustomRange;
+    segmentId?: string;
+    segmentPageIndex: number;
+    rects: IBoundRectNoAngle[];
 }
 
 interface IBulletActive {
-    paragraph: IParagraph; segmentId?: string; segmentPageIndex: number;
+    paragraph: IParagraph;
+    segmentId?: string;
+    segmentPageIndex: number;
+    rect: IBoundRectNoAngle;
 }
 
 export class DocEventManagerService extends Disposable implements IRenderModule {
-    private readonly _hoverCustomRanges$ = new Subject<ICustomRangeActive[]>();
+    private readonly _hoverCustomRanges$ = new BehaviorSubject<ICustomRangeActive[]>([]);
     readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex)));
 
     private readonly _clickCustomRanges$ = new Subject<ICustomRangeActive>();
@@ -182,6 +189,10 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 this._calcActiveBullet(evt)
             );
         }));
+        this.disposeWithMe(this._context.scene.onPointerEnter$.subscribeEvent(() => {
+            this._hoverBullet$.next(null);
+            this._hoverCustomRanges$.next([]);
+        }));
 
         const onPointerDown$ = fromEventSubject(this._context.mainComponent!.onPointerDown$);
         const onPointerUp$ = fromEventSubject(this._context.scene!.onPointerUp$);
@@ -268,12 +279,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 return false;
             });
         });
-
         return matchedRanges.map(
             (range) => ({
                 segmentId: range.segmentId,
                 range: range.customRange,
                 segmentPageIndex: range.segmentPageIndex,
+                rects: range.rects,
             })
         );
     }

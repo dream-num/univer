@@ -145,7 +145,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     /**
      * _skipLastEnabled = true means start a new ref selection, false means update last ref selection
      */
-    protected _skipLastEnabled: boolean = false;
+    protected _startNewSelection: boolean = false;
     protected _singleSelectionEnabled: boolean = false;
     // #endregion
 
@@ -492,7 +492,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const remainLastEnable = this._remainLastEnabled &&
             !evt.ctrlKey &&
             !evt.shiftKey &&
-            !this._skipLastEnabled &&
+            !this._startNewSelection &&
             !this._singleSelectionEnabled;
 
         //#region update selection control

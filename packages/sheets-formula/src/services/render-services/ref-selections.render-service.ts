@@ -61,8 +61,6 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         this._setSelectionStyle(getDefaultRefSelectionStyle(this._themeService));
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
-
-        window.fsrs = this;
     }
 
     getLocation(): [string, string] {
@@ -79,8 +77,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * @param enabled
      */
     setSkipLastEnabled(enabled: boolean): void {
-        console.log(`setSkipLastEnabled: ${enabled}`);
-        this._skipLastEnabled = enabled;
+        this._startNewSelection = enabled;
     }
 
     clearLastSelection(): void {

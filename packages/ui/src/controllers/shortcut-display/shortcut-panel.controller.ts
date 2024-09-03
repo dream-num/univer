@@ -21,13 +21,11 @@ import {
     ToggleShortcutPanelOperation,
 } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { ComponentManager } from '../../common/component-manager';
-import { IMenuService } from '../../services/menu/menu.service';
 import { ShortcutPanel } from '../../views/components/shortcut-panel/ShortcutPanel';
 import type { IShortcutItem } from '../../services/shortcut/shortcut.service';
 import { IShortcutService } from '../../services/shortcut/shortcut.service';
 import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
-import type { IUniverUIConfig } from '../ui/ui.controller';
-import { ShortcutPanelMenuItemFactory } from './menu';
+import { IMenu2Service } from '../../services/menu/menu2.service';
 
 const ToggleShortcutPanelShortcut: IShortcutItem = {
     id: ToggleShortcutPanelOperation.id,
@@ -42,19 +40,13 @@ const ToggleShortcutPanelShortcut: IShortcutItem = {
 @OnLifecycle(LifecycleStages.Steady, ShortcutPanelController)
 export class ShortcutPanelController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverUIConfig>,
         @Inject(Injector) injector: Injector,
         @Inject(ComponentManager) componentManager: ComponentManager,
         @IShortcutService shortcutService: IShortcutService,
-        @IMenuService menuService: IMenuService,
+        @IMenu2Service private readonly _menu2Service: IMenu2Service,
         @ICommandService commandService: ICommandService
     ) {
         super();
-
-        const { menu = {} } = this._config;
-
-        // register the menu item
-        this.disposeWithMe(menuService.addMenuItem(injector.invoke(ShortcutPanelMenuItemFactory), menu));
 
         // register the panel
         this.disposeWithMe(componentManager.register(ShortcutPanelComponentName, ShortcutPanel));

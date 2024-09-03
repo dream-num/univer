@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { DependentOn, IConfigService, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 
@@ -26,7 +26,6 @@ import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
-import type { IUniverUIConfig } from './controllers/ui/ui.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
@@ -55,6 +54,9 @@ import { IRangeSelectorService, RangeSelectorService } from './services/range-se
 import { IProgressService, ProgressService } from './services/progress/progress.service';
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+import { IMenu2Service, Menu2Service } from './services/menu/menu2.service';
+import type { IUniverUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export const UNIVER_UI_PLUGIN_NAME = 'UNIVER_UI_PLUGIN';
 
@@ -68,16 +70,22 @@ export class UniverUIPlugin extends Plugin {
     static override pluginName = UNIVER_UI_PLUGIN_NAME;
 
     constructor(
-        private _config: Partial<IUniverUIConfig> = {},
+        private readonly _config: Partial<IUniverUIConfig> = defaultPluginConfig,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(Injector) protected readonly _injector: Injector
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, this._config);
-        if (this._config.disableAutoFocus) {
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (rest.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
         }
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -91,6 +99,7 @@ export class UniverUIPlugin extends Plugin {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [IMenuService, { useClass: MenuService }],
+            [IMenu2Service, { useClass: Menu2Service }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
@@ -112,13 +121,9 @@ export class UniverUIPlugin extends Plugin {
                 deps: [Injector],
             },
             ],
-            [SharedController, {
-                useFactory: () => this._injector.createInstance(SharedController, this._config),
-            }],
+            [SharedController],
             [ErrorController],
-            [ShortcutPanelController, {
-                useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
-            }],
+            [ShortcutPanelController],
         ], this._config.override);
         dependencies.forEach((dependency) => this._injector.add(dependency));
     }

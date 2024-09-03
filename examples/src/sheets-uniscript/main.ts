@@ -50,9 +50,7 @@ univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
 });
 
-univer.registerPlugin(UniverDocsPlugin, {
-    hasScroll: false,
-});
+univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin);
 
 univer.registerPlugin(UniverSheetsPlugin);

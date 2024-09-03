@@ -47,6 +47,7 @@ import {
     IGlobalZoneService,
     ILayoutService,
     ILeftSidebarService,
+    IMenu2Service,
     IMenuService,
     IMessageService,
     INotificationService,
@@ -58,6 +59,7 @@ import {
     IUIController,
     IUIPartsService,
     IZenZoneService,
+    Menu2Service,
     MenuService,
     PlatformService,
     ProgressService,
@@ -89,7 +91,7 @@ export class UniverUniUIPlugin extends Plugin {
     static override pluginName: string = UNIVER_UI_PLUGIN_NAME;
 
     constructor(
-        private _config: Partial<IUniverUIConfig> = {},
+        private readonly _config: Partial<IUniverUIConfig> = {},
         @Inject(Injector) protected readonly _injector: Injector,
         @IContextService private readonly _contextService: IContextService
     ) {
@@ -114,6 +116,7 @@ export class UniverUniUIPlugin extends Plugin {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [IMenuService, { useClass: MenuService }],
+            [IMenu2Service, { useClass: Menu2Service }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
@@ -134,13 +137,9 @@ export class UniverUniUIPlugin extends Plugin {
             [IUIController, {
                 useFactory: () => this._injector.createInstance(UniverUniUIController, this._config),
             }],
-            [SharedController, {
-                useFactory: () => this._injector.createInstance(SharedController, this._config),
-            }],
+            [SharedController],
             [ErrorController],
-            [ShortcutPanelController, {
-                useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
-            }],
+            [ShortcutPanelController],
             [UniuiLeftSidebarController],
             [UniuiToolbarController],
             [UniuiFlowController],

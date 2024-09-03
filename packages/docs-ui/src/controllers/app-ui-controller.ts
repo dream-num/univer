@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-import type { LocaleType } from '@univerjs/core';
-import { Inject, Injector, LocaleService, Optional, RxDisposable } from '@univerjs/core';
+import { Inject, Injector, Optional, RxDisposable } from '@univerjs/core';
 import { ILayoutService } from '@univerjs/ui';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 
-import type { IUniverDocsUIConfig } from '../basics';
 import { DocContainerUIController } from './doc-container-ui-controller';
 
 export class AppUIController extends RxDisposable {
     private _docContainerController: DocContainerUIController;
 
     constructor(
-        _config: IUniverDocsUIConfig,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _injector: Injector,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
-        this._docContainerController = this._injector.createInstance(DocContainerUIController, _config);
+
+        this._docContainerController = this._injector.createInstance(DocContainerUIController);
         this._registerContainer();
     }
 
@@ -44,20 +41,5 @@ export class AppUIController extends RxDisposable {
                 this._layoutService.registerContainerElement(this._textSelectionRenderManager.__getEditorContainer())
             );
         }
-    }
-
-    /**
-     * Change language
-     * @param {string} locale new language
-     *
-     * e: {target: HTMLSelectElement } reference from  https://stackoverflow.com/a/48443771
-     *
-     */
-    changeLocale = (locale: string) => {
-        this._localeService.setLocale(locale as LocaleType);
-    };
-
-    getDocContainerController() {
-        return this._docContainerController;
     }
 }

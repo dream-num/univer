@@ -28,7 +28,8 @@ export {
     SharedController,
     UndoShortcutItem,
 } from './controllers/shared-shortcut.controller';
-export { UI_CONFIG_KEY, IUIController, type IWorkbenchOptions, type IUniverUIConfig } from './controllers/ui/ui.controller';
+export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
+export { type IUniverUIConfig } from './controllers/config.schema';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { IUIPartsService, BuiltInUIPart, UIPartsService } from './services/parts/parts.service';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
@@ -88,7 +89,7 @@ export { IEditorService, EditorService, Editor } from './services/editor/editor.
 export { TextEditor } from './components/editor/TextEditor';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
-export { type IMenuGroup, useSimpleToolbarGroups, useToolbarGroups, useToolbarItemStatus, useToolbarCollapseObserver } from './views/components/doc-bars/hook';
+export { type IMenuGroup, useSimpleToolbarGroups, useToolbarGroups, useToolbarItemStatus } from './views/components/ribbon/hook';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
@@ -100,6 +101,21 @@ export { ErrorController } from './controllers/error/error.controller';
 export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
+
+export { IMenu2Service, type IMenu2Item, Menu2Service } from './services/menu/menu2.service';
+export {
+
+    Menu2Position,
+    RibbonPosition,
+    RibbonStartGroup,
+    RibbonInsertGroup,
+    RibbonFormulasGroup,
+    RibbonDataGroup,
+    RibbonViewGroup,
+    RibbonOthersGroup,
+    ContextMenuGroup,
+    ContextMenuPosition,
+} from './services/menu/types';
 
 // #region - workbench components
 
@@ -113,9 +129,9 @@ export { CanvasPopup } from './views/components/popup/CanvasPopup';
 export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
 export { FloatDom } from './views/components/dom/FloatDom';
 export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
-export { Toolbar } from './views/components/doc-bars/Toolbar';
-export { ToolbarItem } from './views/components/doc-bars/ToolbarItem';
-export { ToolbarButton } from './views/components/doc-bars/Button/ToolbarButton';
+export { Ribbon } from './views/components/ribbon/Ribbon';
+export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
+export { ToolbarButton } from './views/components/ribbon/Button/ToolbarButton';
 // #endregion
 
 // #region - all commands

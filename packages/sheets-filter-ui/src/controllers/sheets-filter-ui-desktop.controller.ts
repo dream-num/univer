@@ -16,8 +16,7 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import { ICommandService, IContextService, Inject, Injector, LocaleService } from '@univerjs/core';
-import { ComponentManager, IMenuService, IMessageService, IShortcutService } from '@univerjs/ui';
-import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
+import { ComponentManager, IMenu2Service, IMessageService, IShortcutService } from '@univerjs/ui';
 
 import { distinctUntilChanged } from 'rxjs';
 import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
@@ -31,16 +30,8 @@ import { FilterPanel } from '../views/components/SheetsFilterPanel';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
-import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory, SmartToggleFilterMenuItemFactory } from './sheets-filter.menu';
 import { SheetsFilterUIMobileController } from './sheets-filter-ui-mobile.controller';
-
-export interface IUniverSheetsFilterUIConfig {
-    menu: MenuConfig;
-
-    useRemoteFilterValuesGenerator?: boolean;
-}
-
-export const DefaultSheetFilterUiConfig = {};
+import { menuSchema } from './menu.schema';
 
 export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 
@@ -49,7 +40,6 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
  */
 export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileController {
     constructor(
-        private readonly _config: Partial<IUniverSheetsFilterUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
@@ -58,7 +48,7 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
         @Inject(LocaleService) private _localeService: LocaleService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenu2Service private readonly _menu2Service: IMenu2Service,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(SheetsRenderService) sheetsRenderService: SheetsRenderService,
@@ -103,15 +93,7 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     }
 
     private _initMenuItems(): void {
-        const { menu = {} } = this._config;
-
-        ([
-            SmartToggleFilterMenuItemFactory,
-            ClearFilterCriteriaMenuItemFactory,
-            ReCalcFilterMenuItemFactory,
-        ] as IMenuItemFactory[]).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
-        });
+        this._menu2Service.mergeMenu(menuSchema);
     }
 
     private _initUI(): void {

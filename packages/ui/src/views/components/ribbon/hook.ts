@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { combineLatest, map, Observable } from 'rxjs';
 import { useDependency } from '@univerjs/core';
@@ -159,63 +159,4 @@ export function useToolbarItemStatus(menuItem: IDisplayMenuItem<IMenuItem>): ITo
     }, [activated$, disabled$, hidden$, value$]);
 
     return { disabled, value, activated, hidden };
-}
-
-export function useToolbarCollapseObserver(visibleItems: IToolbarRenderHookHandler['visibleItems']) {
-    const toolbarItemRefs = useRef<Record<string, {
-        el: HTMLDivElement;
-        key: string;
-    }>>({});
-
-    const toolbarRef = useRef<HTMLDivElement>(null);
-    const [collapsedId, setCollapsedId] = useState<string[]>([]);
-
-    // Deal with toolbar collapsing.
-    useEffect(() => {
-        function resize() {
-            const wrapperWidth = toolbarRef.current?.clientWidth ?? 0;
-            let GAP = 0;
-            if (toolbarRef.current) {
-                // firstElementChild is toolbar container
-                const gapValue = Number.parseInt(getComputedStyle(toolbarRef.current.firstElementChild!).gap, 10);
-                GAP = Number.isNaN(gapValue) ? 0 : gapValue;
-            }
-
-            const itemWidths = Object.entries(toolbarItemRefs.current)
-                .filter(([_, ref]) => ref.el && ref.key && visibleItems.find((item) => item.id === ref.key))
-                .map(([_, ref]) => ({
-                    key: ref.key,
-                    width: ref.el?.clientWidth + GAP,
-                }));
-
-            const collapsedId: string[] = [];
-
-            let currentWidth = 182;
-            for (const item of itemWidths) {
-                currentWidth += item.width;
-
-                if (currentWidth > wrapperWidth) {
-                    collapsedId.push(item.key);
-                }
-            }
-
-            setCollapsedId(collapsedId);
-        }
-
-        resize();
-        const observer = new ResizeObserver(() => resize());
-
-        const toolbarDom = toolbarRef.current;
-        toolbarDom && observer.observe(toolbarDom);
-
-        return () => {
-            toolbarDom && observer.unobserve(toolbarDom);
-        };
-    }, [visibleItems]);
-
-    return {
-        toolbarRef,
-        toolbarItemRefs,
-        collapsedId,
-    };
 }

@@ -15,8 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { ComponentManager, IMenu2Service } from '@univerjs/ui';
 
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
@@ -38,46 +37,21 @@ import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ImageDemo } from '../components/Image';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
-import {
-    ChangeUserMenuItemFactory,
-    ConfirmMenuItemFactory,
-    CreateEmptySheetMenuItemFactory,
-    CreateFloatDOMMenuItemFactory,
-    DialogMenuItemFactory,
-    DisposeCurrentUnitMenuItemFactory,
-    DisposeUniverItemFactory,
-    FloatDomMenuItemFactory,
-    LocaleMenuItemFactory,
-    MessageMenuItemFactory,
-    NotificationMenuItemFactory,
-    SaveSnapshotSetEditableMenuItemFactory,
-    SetEditableMenuItemFactory,
-    ShowCellContentMenuItemFactory,
-    SidebarMenuItemFactory,
-    ThemeMenuItemFactory,
-    UnitMenuItemFactory,
-} from './menu';
 import { RecordController } from './local-save/record.controller';
 import { ExportController } from './local-save/export.controller';
-
-export interface IUniverDebuggerConfig {
-    menu: MenuConfig;
-}
-
-export const DefaultDebuggerConfig = {};
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, DebuggerController)
 export class DebuggerController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverDebuggerConfig>,
         @Inject(Injector) private readonly _injector: Injector,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenu2Service private readonly _menu2Service: IMenu2Service,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
 
-        this._initializeContextMenu();
+        this._initializeMenu();
         this._initCustomComponents();
 
         [
@@ -102,30 +76,8 @@ export class DebuggerController extends Disposable {
         this._injector.add([RecordController]);
     }
 
-    private _initializeContextMenu() {
-        const { menu = {} } = this._config;
-
-        ([
-            LocaleMenuItemFactory,
-            ThemeMenuItemFactory,
-            NotificationMenuItemFactory,
-            MessageMenuItemFactory,
-            DialogMenuItemFactory,
-            ConfirmMenuItemFactory,
-            SidebarMenuItemFactory,
-            SetEditableMenuItemFactory,
-            SaveSnapshotSetEditableMenuItemFactory,
-            UnitMenuItemFactory,
-            DisposeUniverItemFactory,
-            DisposeCurrentUnitMenuItemFactory,
-            CreateEmptySheetMenuItemFactory,
-            FloatDomMenuItemFactory,
-            CreateFloatDOMMenuItemFactory,
-            ChangeUserMenuItemFactory,
-            ShowCellContentMenuItemFactory,
-        ] as IMenuItemFactory[]).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
-        });
+    private _initializeMenu() {
+        this._menu2Service.mergeMenu(menuSchema);
     }
 
     private _initCustomComponents(): void {

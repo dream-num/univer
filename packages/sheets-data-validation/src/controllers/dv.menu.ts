@@ -23,7 +23,7 @@ import { AddSheetDataValidationAndOpenCommand } from '../commands/commands/data-
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
 
 export const DataValidationIcon = 'data-validation-single';
-const DATA_VALIDATION_MENU_ID = 'sheet.menu.data-validation';
+export const DATA_VALIDATION_MENU_ID = 'sheet.menu.data-validation';
 
 export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem {
     return {

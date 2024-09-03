@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    IConfigService,
+    Inject,
+    Injector,
+    Plugin,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { SheetsSortUIService } from './services/sheets-sort-ui.service';
-import type { IUniverSheetsSortUIConfig } from './controllers/sheets-sort-ui.controller';
-import { DefaultSheetsSortUIConfig, SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
+import { SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
+import type { IUniverSheetsSortUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const NAME = 'UNIVER_SHEETS_SORT_UI_PLUGIN';
 @DependentOn(UniverSheetsSortPlugin)
@@ -29,21 +37,21 @@ export class UniverSheetsSortUIPlugin extends Plugin {
     static override pluginName = NAME;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsSortUIConfig> = {},
+        private readonly _config: Partial<IUniverSheetsSortUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultSheetsSortUIConfig, this._config);
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         ([
             [SheetsSortUIService],
-            [SheetsSortUIController, {
-                useFactory: () => this._injector.createInstance(SheetsSortUIController, this._config),
-            }],
+            [SheetsSortUIController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }
 }

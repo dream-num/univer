@@ -16,8 +16,8 @@
 
 import { connectInjector, ICommandService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
 
-import type { MenuConfig, UIPartsService } from '@univerjs/ui';
-import { ComponentManager, IDialogService, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
+import type { UIPartsService } from '@univerjs/ui';
+import { ComponentManager, IDialogService, ILayoutService, IMenu2Service, IUIPartsService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { serializeRange } from '@univerjs/engine-formula';
 import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSingle, ExpandDescendingSingle } from '@univerjs/icons';
@@ -28,14 +28,8 @@ import { CustomSortPanel } from '../views/CustomSortPanel';
 import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 import EmbedSortBtn from '../views/EmbedSortBtn';
-import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON, SHEETS_SORT_DESC_EXT_ICON, SHEETS_SORT_DESC_ICON, sortRangeAscCtxMenuFactory, sortRangeAscExtCtxMenuFactory, sortRangeAscExtMenuFactory, sortRangeAscMenuFactory, sortRangeCtxMenuFactory, sortRangeCustomCtxMenuFactory, sortRangeCustomMenuFactory, sortRangeDescCtxMenuFactory, sortRangeDescExtCtxMenuFactory, sortRangeDescExtMenuFactory, sortRangeDescMenuFactory, sortRangeMenuFactory } from './sheets-sort.menu';
-
-export interface IUniverSheetsSortUIConfig {
-    menu: MenuConfig;
-}
-export const DefaultSheetsSortUIConfig = {
-    menu: {},
-};
+import { menuSchema } from './menu.schema';
+import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON, SHEETS_SORT_DESC_EXT_ICON, SHEETS_SORT_DESC_ICON } from './sheets-sort.menu';
 
 const CUSTOM_SORT_DIALOG_ID = 'custom-sort-dialog';
 const CUSTOM_SORT_PANEL_WIDTH = 560;
@@ -43,9 +37,8 @@ const CUSTOM_SORT_PANEL_WIDTH = 560;
 @OnLifecycle(LifecycleStages.Ready, SheetsSortUIController)
 export class SheetsSortUIController extends RxDisposable {
     constructor(
-        private readonly _config: Partial<IUniverSheetsSortUIConfig>,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenu2Service private readonly _menu2Service: IMenu2Service,
         @IDialogService private readonly _dialogService: IDialogService,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IUIPartsService private readonly _uiPartsService: UIPartsService,
@@ -62,27 +55,7 @@ export class SheetsSortUIController extends RxDisposable {
     }
 
     private _initMenu() {
-        const { menu = {} } = this._config;
-        [
-            sortRangeMenuFactory,
-            sortRangeAscMenuFactory,
-            sortRangeDescMenuFactory,
-            sortRangeAscExtMenuFactory,
-            sortRangeDescExtMenuFactory,
-            sortRangeCustomMenuFactory,
-            sortRangeCtxMenuFactory,
-            sortRangeAscCtxMenuFactory,
-            sortRangeDescCtxMenuFactory,
-            sortRangeAscExtCtxMenuFactory,
-            sortRangeDescExtCtxMenuFactory,
-            sortRangeCustomCtxMenuFactory,
-        ].forEach((factory) => {
-            this.disposeWithMe(
-                this._menuService.addMenuItem(
-                    this._injector.invoke(factory), menu
-                )
-            );
-        });
+        this._menu2Service.mergeMenu(menuSchema);
     }
 
     private _initCommands(): void {

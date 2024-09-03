@@ -67,7 +67,7 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);
 
-univer.registerPlugin(UniverDocsPlugin, { hasScroll: false });
+univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, { container: 'app' });
 univer.registerPlugin(UniverDocsUIPlugin);
@@ -91,7 +91,6 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // drawing
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
-// univer.registerPlugin(UniverDocsDrawingUIPlugin);
 
 const mockUser = {
     userID: 'Owner_qxVnhPbQ',

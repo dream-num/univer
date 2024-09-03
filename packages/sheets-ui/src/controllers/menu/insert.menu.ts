@@ -34,7 +34,7 @@ import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/inse
 import { SheetMenuPosition } from './menu';
 import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
 
-const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
+export const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
 export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: COL_INSERT_MENU_ID,
@@ -48,7 +48,7 @@ export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     };
 }
 
-const ROW_INSERT_MENU_ID = 'sheet.menu.row-insert';
+export const ROW_INSERT_MENU_ID = 'sheet.menu.row-insert';
 export function RowInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: ROW_INSERT_MENU_ID,
@@ -62,7 +62,7 @@ export function RowInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     };
 }
 
-const CELL_INSERT_MENU_ID = 'sheet.menu.cell-insert';
+export const CELL_INSERT_MENU_ID = 'sheet.menu.cell-insert';
 export function CellInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: CELL_INSERT_MENU_ID,

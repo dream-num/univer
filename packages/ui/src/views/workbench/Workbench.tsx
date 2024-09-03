@@ -25,7 +25,7 @@ import { IMessageService } from '../../services/message/message.service';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
-import { Toolbar } from '../components/doc-bars/Toolbar';
+import { Ribbon } from '../components/ribbon/Ribbon';
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { ZenZone } from '../components/zen-zone/ZenZone';
 import { builtInGlobalComponents } from '../parts';
@@ -112,7 +112,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                 {/* header */}
                 {header && toolbar && (
                     <header className={styles.workbenchContainerHeader}>
-                        <Toolbar headerMenuComponents={headerMenuComponents} />
+                        <Ribbon headerMenuComponents={headerMenuComponents} />
                     </header>
                 )}
 

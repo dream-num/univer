@@ -15,11 +15,10 @@
  */
 
 import type { Dependency, SlideDataModel } from '@univerjs/core';
-import { Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 
-import type { IUniverSlidesDrawingConfig } from './controllers/slide-ui.controller';
 import { SlidesUIController } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
 import { SlidePopupMenuController } from './controllers/popup-menu.controller';
@@ -30,6 +29,8 @@ import { ISlideEditorManagerService, SlideEditorManagerService } from './service
 import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
 import { SlideRenderService } from './services/slide-render.service';
 import { CanvasView } from './controllers/canvas-view';
+import type { IUniverSlidesUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
@@ -38,12 +39,20 @@ export class UniverSlidesUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SLIDE;
 
     constructor(
-        private readonly _config: Partial<IUniverSlidesDrawingConfig> = {},
+        private readonly _config: Partial<IUniverSlidesUIConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -74,9 +83,7 @@ export class UniverSlidesUIPlugin extends Plugin {
 
             // SlidesUIController controller should be registered in Ready stage.
             // SlidesUIController controller would add a new RenderUnit (__INTERNAL_EDITOR__DOCS_NORMAL)
-            [SlidesUIController, {
-                useFactory: () => this._injector.createInstance(SlidesUIController, this._config),
-            }], // editor service was create in renderManagerService
+            [SlidesUIController], // editor service was create in renderManagerService
             [SlideRenderController],
             [SlidePopupMenuController],
         ] as Dependency[], this._config.override).forEach((m) => {

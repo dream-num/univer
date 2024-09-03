@@ -76,7 +76,7 @@ export function DesktopContextMenu() {
             <section ref={contentRef}>
                 {menuType && (
                     <Menu
-                        menuType={[menuType]}
+                        menuType={menuType}
                         onOptionSelect={(params) => {
                             const { label: id, commandId, value } = params;
                             commandService && commandService.executeCommand(commandId ?? id as string, { value });

@@ -21,12 +21,17 @@ import { BehaviorSubject } from 'rxjs';
 
 import { IShortcutService } from '../shortcut/shortcut.service';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
-import type { IDisplayMenuItem, IMenuItem, MenuConfig, MenuPosition } from './menu';
+import type { IDisplayMenuItem, IMenuItem, MenuConfig } from './menu';
+import { MenuPosition } from './menu';
+import { IMenu2Service } from './menu2.service';
+import { ContextMenuGroup, RibbonOthersGroup } from './types';
 
+/** @deprecated */
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 
 /**
  * Breaking changes to IMenuService are expected in the next version. Use with caution. by @jikkai
+ * @deprecated
  */
 export interface IMenuService {
     menuChanged$: Observable<void>;
@@ -44,6 +49,7 @@ export interface IMenuService {
     getMenuItem(id: string): IMenuItem | null;
 }
 
+/** @deprecated */
 export class MenuService extends Disposable implements IMenuService {
     /** @deprecated */
     private readonly _menuItemMap = new Map<string, IMenuItem>();
@@ -58,7 +64,10 @@ export class MenuService extends Disposable implements IMenuService {
 
     menuChanged$: Observable<void> = this._menuChanged$.asObservable();
 
-    constructor(@IShortcutService private readonly _shortcutService: IShortcutService) {
+    constructor(
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @IMenu2Service private readonly _menu2Service: IMenu2Service
+    ) {
         super();
     }
 
@@ -82,6 +91,45 @@ export class MenuService extends Disposable implements IMenuService {
         } else {
             this._appendMenuToPosition(item, item.positions);
         }
+
+        // TODO: Compatible with old menu service
+        [
+            MenuPosition.TOOLBAR_START,
+            MenuPosition.TOOLBAR_INSERT,
+            MenuPosition.TOOLBAR_FORMULAS,
+            MenuPosition.TOOLBAR_DATA,
+            MenuPosition.TOOLBAR_VIEW,
+            MenuPosition.TOOLBAR_OTHERS,
+            MenuPosition.CONTEXT_MENU,
+        ].forEach((position) => {
+            if (position !== MenuPosition.CONTEXT_MENU) {
+                const menus = this.getMenuItems(position);
+                menus.forEach((menu) => {
+                    this._menu2Service.mergeMenu({
+                        [position]: {
+                            [menu.group ?? RibbonOthersGroup.OTHERS]: {
+                                [menu.id]: {
+                                    menuItemFactory: () => menu,
+                                },
+                            },
+                        },
+                    });
+                });
+            } else {
+                const menus = this.getMenuItems(position);
+                menus.forEach((menu) => {
+                    this._menu2Service.mergeMenu({
+                        [position]: {
+                            [menu.group ?? ContextMenuGroup.OTHERS]: {
+                                [menu.id]: {
+                                    menuItemFactory: () => menu,
+                                },
+                            },
+                        },
+                    });
+                });
+            }
+        });
 
         this._menuChanged$.next();
 

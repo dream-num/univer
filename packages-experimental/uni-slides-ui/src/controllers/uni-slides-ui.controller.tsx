@@ -17,25 +17,24 @@
 import React from 'react';
 import type { SlideDataModel } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { IUniverSlidesDrawingConfig } from '@univerjs/slides-ui';
 import { IMAGE_MENU_ID, SHAPE_MENU_ID, SlideAddTextCommand, SlideEditorContainer, SlidesUIController } from '@univerjs/slides-ui';
-import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IMenu2Service, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, UniSlidesUIController)
 export class UniSlidesUIController extends SlidesUIController {
     constructor(
-        _config: Partial<IUniverSlidesDrawingConfig>,
         @Inject(Injector) _injector: Injector,
-        @IMenuService _menuService: IMenuService,
+        @IMenu2Service _menu2Service: IMenu2Service,
         @Inject(ComponentManager) _componentManager: ComponentManager,
         @IUIPartsService _uiPartsService: IUIPartsService,
         @ICommandService _commandService: ICommandService,
         @IShortcutService _shortcutService: IShortcutService,
         @Inject(UniToolbarService) private readonly _toolbarService: UniToolbarService
     ) {
-        super(_config, _injector, _menuService, _componentManager, _uiPartsService, _commandService, _shortcutService);
+        super(_injector, _menu2Service, _componentManager, _uiPartsService, _commandService, _shortcutService);
         this._initUniMenus();
     }
 
@@ -48,6 +47,8 @@ export class UniSlidesUIController extends SlidesUIController {
     }
 
     private _initUniMenus(): void {
+        this._menu2Service.appendRootMenu(menuSchema);
+
         ([
             [BuiltinUniToolbarItemId.IMAGE, IMAGE_MENU_ID],
             [BuiltinUniToolbarItemId.FONT_GROUP, SHAPE_MENU_ID],

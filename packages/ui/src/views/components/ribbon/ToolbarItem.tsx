@@ -15,13 +15,13 @@
  */
 
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { Dropdown, Tooltip } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
+import type { IDropdownProps } from '@univerjs/design';
 import type { Ref } from 'react';
-import React, { forwardRef, useMemo, useState } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
-
 import clsx from 'clsx';
+
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { useObservable } from '../../../components/hooks/observable';
@@ -30,36 +30,24 @@ import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } fro
 import { MenuItemType } from '../../../services/menu/menu';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { ToolbarButton } from './Button/ToolbarButton';
-import styles from './index.module.less';
 import { useToolbarItemStatus } from './hook';
+import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
+import styles from './index.module.less';
 
-export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: Ref<any>) => {
+export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { align?: IDropdownProps['align'] }, ref: Ref<any>) => {
+    const { align } = props;
+
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
     const componentManager = useDependency(ComponentManager);
 
-    const [tooltipVisible, setTooltipVisible] = useState(false);
-    const [dropdownVisible, setDropdownVisible] = useState(false);
-
     const { value, hidden, disabled, activated } = useToolbarItemStatus(props);
 
-    const executeCommand = (commandId: string, params?: Record<string, any>) => {
+    const executeCommand = (commandId: string, params?: Record<string, unknown>) => {
         layoutService.focus();
         commandService.executeCommand(commandId, params);
     };
-
-    function handleVisibleChange(visible: boolean) {
-        setTooltipVisible(visible);
-    }
-
-    function handleDropdownVisibleChange(visible: boolean) {
-        setDropdownVisible(visible);
-
-        if (!visible) {
-            setTooltipVisible(false);
-        }
-    }
 
     const { tooltip, shortcut, icon, title, label, id, commandId } = props;
 
@@ -119,9 +107,8 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
             }
         }
 
-        return menuType === MenuItemType.BUTTON_SELECTOR
-            ? (
-                // Button Selector
+        if (menuType === MenuItemType.BUTTON_SELECTOR) {
+            return (
                 <div
                     className={clsx(styles.toolbarItemSelectButton, {
                         [styles.toolbarItemSelectButtonDisabled]: disabled,
@@ -138,12 +125,19 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                             onChange={handleSelectionsValueChange}
                         />
                     </div>
-                    <Dropdown
+                    <DropdownWrapper
+                        align={align ?? {
+                            targetOffset: [32, -12],
+                        }}
                         overlay={(
-                            <Menu overViewport="scroll" menuType={id} options={options} onOptionSelect={handleSelect} value={value} />
+                            <Menu
+                                overViewport="scroll"
+                                menuType={id}
+                                options={options}
+                                onOptionSelect={handleSelect}
+                                value={value}
+                            />
                         )}
-                        onVisibleChange={handleDropdownVisibleChange}
-                        disabled={disabled}
                     >
                         <div
                             className={clsx(styles.toolbarItemSelectButtonArrow, {
@@ -151,29 +145,30 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                                 [styles.toolbarItemSelectButtonArrowActivated]: activated,
                             })}
                             data-disabled={disabled}
-                            onClick={(e) => e.stopPropagation()}
                         >
-                            <MoreDownSingle />
+                            <MoreDownSingle style={{ height: '100%' }} />
                         </div>
-                    </Dropdown>
-
+                    </DropdownWrapper>
                 </div>
-            )
-            : (
-                // Selector
-                <Dropdown
+            );
+        } else {
+            return (
+                <DropdownWrapper
                     overlay={(
-                        <Menu overViewport="scroll" menuType={id} options={options} onOptionSelect={handleSelect} value={value} />
+                        <Menu
+                            overViewport="scroll"
+                            menuType={id}
+                            options={options}
+                            onOptionSelect={handleSelect}
+                            value={value}
+                        />
                     )}
-                    onVisibleChange={handleDropdownVisibleChange}
-                    disabled={disabled}
                 >
                     <div
                         className={clsx(styles.toolbarItemSelect, {
                             [styles.toolbarItemSelectDisabled]: disabled,
                             [styles.toolbarItemSelectActivated]: activated,
                         })}
-                        onClick={(e) => e.stopPropagation()}
                     >
                         <CustomLabel
                             icon={iconToDisplay}
@@ -190,29 +185,32 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                             <MoreDownSingle />
                         </div>
                     </div>
-                </Dropdown>
+                </DropdownWrapper>
             );
+        }
     }
 
     function renderButtonType() {
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
 
         return (
-            <ToolbarButton
-                className={styles.toolbarItemTextButton}
-                active={activated}
-                disabled={disabled}
-                onClick={() => executeCommand(props.commandId ?? props.id)}
-                onDoubleClick={() => props.subId && executeCommand(props.subId)}
-            >
-                {isCustomComponent
-                    ? (
-                        <CustomLabel title={title!} value={value} label={label} />
-                    )
-                    : (
-                        <CustomLabel icon={icon} />
-                    )}
-            </ToolbarButton>
+            <span>
+                <ToolbarButton
+                    className={styles.toolbarItemTextButton}
+                    active={activated}
+                    disabled={disabled}
+                    onClick={() => executeCommand(props.commandId ?? props.id)}
+                    onDoubleClick={() => props.subId && executeCommand(props.subId)}
+                >
+                    {isCustomComponent
+                        ? (
+                            <CustomLabel title={title!} value={value} label={label} />
+                        )
+                        : (
+                            <CustomLabel icon={icon} />
+                        )}
+                </ToolbarButton>
+            </span>
         );
     }
 
@@ -228,20 +226,9 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
         }
     }
 
-    // ref component
-    return hidden
-        ? null
-        : (
-            <Tooltip
-                ref={ref}
-                visible={dropdownVisible ? false : tooltipVisible}
-                title={tooltipTitle}
-                placement="bottom"
-                onVisibleChange={handleVisibleChange}
-            >
-                <div>
-                    {renderItem()}
-                </div>
-            </Tooltip>
-        );
+    return !hidden && (
+        <TooltipWrapper ref={ref} title={tooltipTitle} placement="bottom">
+            {renderItem()}
+        </TooltipWrapper>
+    );
 });

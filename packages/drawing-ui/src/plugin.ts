@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, LocaleService, Plugin } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { DrawingUpdateController } from './controllers/drawing-update.controller';
 import { DrawingUIController } from './controllers/drawing-ui.controller';
 import { ImageCropperController } from './controllers/image-cropper.controller';
 import { ImageUpdateController } from './controllers/image-update.controller';
 import { DrawingRenderService } from './services/drawing-render.service';
+import type { IUniverDrawingUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'DRAWING_UI_PLUGIN';
 
@@ -28,11 +30,18 @@ export class UniverDrawingUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        config: undefined,
+        private readonly _config: Partial<IUniverDrawingUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

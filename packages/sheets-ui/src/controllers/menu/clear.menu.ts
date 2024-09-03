@@ -23,7 +23,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import { SheetMenuPosition } from './menu';
 import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 
-const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
+export const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: CLEAR_SELECTION_MENU_ID,

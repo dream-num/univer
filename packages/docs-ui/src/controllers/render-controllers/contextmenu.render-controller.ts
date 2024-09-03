@@ -26,7 +26,7 @@ import {
 } from '@univerjs/core';
 import { RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { Documents, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { IContextMenuService, MenuPosition } from '@univerjs/ui';
+import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 
 const SKIP_UNIT_IDS = [
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -59,7 +59,7 @@ export class DocContextMenuRenderController extends Disposable implements IRende
         // Content range context menu
         const documentsSubscription = documentsPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
-                this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
+                this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.MAIN_AREA);
             }
         });
         this.disposeWithMe(documentsSubscription);

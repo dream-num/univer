@@ -15,18 +15,26 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsCrosshairHighlightController } from './controllers/crosshair.controller';
 import { SheetsCrosshairHighlightService } from './services/crosshair.service';
 import { SheetCrosshairHighlightRenderController } from './views/widgets/crosshair-highlight.render-controller';
+import type { IUniverSheetsCrosshairHighlightConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
     constructor(
+        private readonly _config: Partial<IUniverSheetsCrosshairHighlightConfig> = defaultPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

@@ -15,7 +15,7 @@
  */
 
 import type { Dependency, Workbook } from '@univerjs/core';
-import { DependentOn, Inject, Injector, IUniverInstanceService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
 import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -29,8 +29,6 @@ import { HeaderFreezeRenderController } from './controllers/render-controllers/f
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SheetsRenderService } from './services/sheets-render.service';
-import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
-import { DefaultSheetUiConfig } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
@@ -70,6 +68,8 @@ import { SheetRenderController } from './controllers/render-controllers/sheet.re
 import { MobileSheetsSelectionRenderService } from './services/selection/mobile-selection-render.service';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 import { SelectAllService } from './services/select-all/select-all.service';
+import type { IUniverSheetsUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig } from './controllers/config.schema';
 
 /**
  * @ignore
@@ -80,14 +80,12 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsUIConfig> = {},
+        private readonly _config: Partial<IUniverSheetsUIConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
-
-        this._config = Tools.deepMerge({}, DefaultSheetUiConfig, this._config);
     }
 
     override onStarting(): void {
@@ -112,9 +110,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [AutoHeightController],
                 [SheetClipboardController],
                 [SheetsRenderService],
-                [SheetUIMobileController, {
-                    useFactory: (): SheetUIMobileController => this._injector.createInstance(SheetUIMobileController, this._config),
-                }],
+                [SheetUIMobileController],
                 [StatusBarController],
 
                 // permission

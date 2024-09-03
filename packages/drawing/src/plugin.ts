@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyOverride } from '@univerjs/core';
-import { Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
+import { IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 
 import { ImageIoService } from './services/image-io-impl.service';
 import { DrawingManagerService } from './services/drawing-manager-impl.service';
 import { IImageIoService } from './services/image-io.service';
 import { IDrawingManagerService } from './services/drawing-manager.service';
+import type { IUniverDrawingConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'DRAWING_PLUGIN';
 
@@ -28,10 +30,15 @@ export class UniverDrawingPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        private _config: { override?: DependencyOverride },
-        @Inject(Injector) protected _injector: Injector
+        private readonly _config: Partial<IUniverDrawingConfig> = defaultPluginConfig,
+        @Inject(Injector) protected _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

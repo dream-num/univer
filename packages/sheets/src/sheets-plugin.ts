@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyOverride } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 import { DependentOn, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -39,19 +39,10 @@ import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/confi
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
 import { SheetsSelectionsService } from './services/selections/selection-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
+import type { IUniverSheetsConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
-
-export interface IUniverSheetsConfig {
-    notExecuteFormula?: boolean;
-    override?: DependencyOverride;
-
-    /**
-     * Only register the mutations related to the formula calculation. Especially useful for the
-     * web worker environment or server-side-calculation.
-     */
-    onlyRegisterFormulaRelatedMutations?: true;
-}
 
 @DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsPlugin extends Plugin {
@@ -59,11 +50,15 @@ export class UniverSheetsPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private _config: IUniverSheetsConfig | undefined,
-        @IConfigService private readonly _configService: IConfigService,
-        @Inject(Injector) override readonly _injector: Injector
+        private readonly _config: Partial<IUniverSheetsConfig> = defaultPluginConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
 
         this._initConfig();
         this._initDependencies(_injector);

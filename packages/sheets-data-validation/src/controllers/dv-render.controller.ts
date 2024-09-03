@@ -15,10 +15,9 @@
  */
 
 import type { ICellDataForSheetInterceptor, ICellRenderContext, IRange, Workbook } from '@univerjs/core';
-import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { IMenu2Service } from '@univerjs/ui';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -28,14 +27,7 @@ import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { ListValidator } from '../validators';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
-import { addDataValidationMenuFactory, dataValidationMenuFactory, openDataValidationMenuFactory } from './dv.menu';
-
-export interface IUniverSheetsDataValidation {
-    menu?: MenuConfig;
-}
-
-export const DefaultSheetsDataValidation = {
-};
+import { menuSchema } from './menu.schema';
 
 const INVALID_MARK = {
     tr: {
@@ -47,17 +39,14 @@ const INVALID_MARK = {
 @OnLifecycle(LifecycleStages.Rendered, SheetsDataValidationRenderController)
 export class SheetsDataValidationRenderController extends RxDisposable {
     constructor(
-        private readonly _config: Partial<IUniverSheetsDataValidation>,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenuService private _menuService: IMenuService,
+        @IMenu2Service private readonly _menu2Service: IMenu2Service,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
         @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Optional(IEditorBridgeService) private readonly _editorBridgeService?: IEditorBridgeService
     ) {
@@ -71,17 +60,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
     }
 
     private _initMenu() {
-        const { menu = {} } = this._config;
-
-        [
-            dataValidationMenuFactory,
-            openDataValidationMenuFactory,
-            addDataValidationMenuFactory,
-        ].forEach((factory) => {
-            this.disposeWithMe(
-                this._menuService.addMenuItem(factory(this._injector), menu)
-            );
-        });
+        this._menu2Service.mergeMenu(menuSchema);
     }
 
     private _initDropdown() {
@@ -342,7 +321,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 @OnLifecycle(LifecycleStages.Rendered, SheetsDataValidationMobileRenderController)
 export class SheetsDataValidationMobileRenderController extends RxDisposable {
     constructor(
-        private readonly _config: Partial<IUniverSheetsDataValidation>,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

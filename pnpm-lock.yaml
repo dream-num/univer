@@ -663,6 +663,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
+      '@univerjs/uniui':
+        specifier: workspace:*
+        version: 'link:'
       '@xyflow/react':
         specifier: ^12.2.0
         version: 12.2.0(@types/react@18.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1765,7 +1768,7 @@ importers:
         version: link:../engine-render
       '@univerjs/icons-svg':
         specifier: ^0.1.74
-        version: 0.1.74
+        version: 0.1.76
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -5494,6 +5497,9 @@ packages:
 
   '@univerjs/icons-svg@0.1.74':
     resolution: {integrity: sha512-XLvM4AnZpHXMC9yNj2EJMea3fZ2PhuHq4cIsxmIgW4kWdCCGHlVTu/Xj3fAxYpvb4PgyPKA8KoRbKM+xh4WfGw==}
+
+  '@univerjs/icons-svg@0.1.76':
+    resolution: {integrity: sha512-bEHVTcfH1ucyWzOZC5wWAWcWX22ymrLz/NRK6IHzcUVW7I68N4v4MGd7pBX0AvtIwfH4cdu6h78NBB+W2ArIKw==}
 
   '@univerjs/icons@0.1.77':
     resolution: {integrity: sha512-ADkX1PkXG+rptU+OJzrPX+asVawRVKF6v+Ce3DYq/pVKOnKm8qPbKsbVmCMyxPOCq9N5Cd0TAkjJavyft+XsEw==}
@@ -13683,7 +13689,7 @@ snapshots:
 
   '@types/lodash.get@4.4.9':
     dependencies:
-      '@types/lodash': 4.17.5
+      '@types/lodash': 4.17.7
 
   '@types/lodash.mergewith@4.6.9':
     dependencies:
@@ -13691,7 +13697,7 @@ snapshots:
 
   '@types/lodash.set@4.3.9':
     dependencies:
-      '@types/lodash': 4.17.5
+      '@types/lodash': 4.17.7
 
   '@types/lodash@4.17.5': {}
 
@@ -13867,6 +13873,8 @@ snapshots:
   '@ungap/structured-clone@1.2.0': {}
 
   '@univerjs/icons-svg@0.1.74': {}
+
+  '@univerjs/icons-svg@0.1.76': {}
 
   '@univerjs/icons@0.1.77(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:

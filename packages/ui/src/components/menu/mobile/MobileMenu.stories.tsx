@@ -25,6 +25,7 @@ import { IPlatformService, PlatformService } from '../../../services/platform/pl
 import type { IMenuButtonItem } from '../../../services/menu/menu';
 import { MenuItemType, MenuPosition } from '../../../services/menu/menu';
 import { ComponentManager } from '../../../common';
+import { ContextMenuPosition } from '../../../services/menu/types';
 import { MobileMenu } from './MobileMenu';
 
 const meta: Meta = {
@@ -121,7 +122,7 @@ export const Playground = {
 
         return (
             <RediContext.Provider value={{ injector: bed.injector }}>
-                <MobileMenu menuType={MenuPosition.CONTEXT_MENU} />
+                <MobileMenu menuType={ContextMenuPosition.MAIN_AREA} />
             </RediContext.Provider>
         );
     },

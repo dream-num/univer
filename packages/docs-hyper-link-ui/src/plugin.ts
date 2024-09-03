@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
 import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
-import type { IDocHyperLinkUIConfig } from './controllers/ui.controller';
 import { DocHyperLinkUIController } from './controllers/ui.controller';
 import { DocHyperLinkPopupService } from './services/hyper-link-popup.service';
 import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
 import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { DocHyperLinkEventRenderController } from './controllers/render-controllers/hyper-link-event.render-controller';
+import type { IUniverDocsHyperLinkUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverDocsHyperLinkPlugin)
 export class UniverDocsHyperLinkUIPlugin extends Plugin {
@@ -32,21 +33,25 @@ export class UniverDocsHyperLinkUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        private _config: IDocHyperLinkUIConfig = { menu: {} },
+        private readonly _config: Partial<IUniverDocsHyperLinkUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         const deps: Dependency[] = [
             [DocHyperLinkPopupService],
-            [DocHyperLinkUIController,
-                {
-                    useFactory: () => this._injector.createInstance(DocHyperLinkUIController, this._config),
-                },
-            ],
+            [DocHyperLinkUIController],
             [DocHyperLinkSelectionController],
         ];
 

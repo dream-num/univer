@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import { DependentOn, ICommandService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    ICommandService,
+    IConfigService,
+    Plugin,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import type { IUniverSheetsDataValidation } from './controllers/dv-render.controller';
-import { DefaultSheetsDataValidation, SheetsDataValidationRenderController } from './controllers/dv-render.controller';
+import { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
 import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from './commands/commands/data-validation.command';
@@ -39,6 +44,8 @@ import { DataValidationPanelService } from './services/data-validation-panel.ser
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
 import { DataValidationPermissionController } from './controllers/dv-permission.controller';
 import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
+import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverDataValidationPlugin, UniverSheetsPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {
@@ -46,14 +53,19 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private _config: Partial<IUniverSheetsDataValidation> = {},
+        private readonly _config: Partial<IUniverSheetsDataValidationConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultSheetsDataValidation, this._config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting() {
@@ -68,12 +80,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             // controller
             [DataValidationModelController],
             [DataValidationController],
-            [
-                SheetsDataValidationRenderController,
-                {
-                    useFactory: () => this._injector.createInstance(SheetsDataValidationRenderController, this._config),
-                },
-            ],
+            [SheetsDataValidationRenderController],
             [DataValidationAlertController],
             [DataValidationRefRangeController],
             [DataValidationPermissionController],

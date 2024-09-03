@@ -28,7 +28,7 @@ import {
 import { SheetMenuPosition } from './menu';
 import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getDeleteMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
 
-const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
+export const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
 export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: DELETE_RANGE_MENU_ID,

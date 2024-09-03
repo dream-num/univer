@@ -68,7 +68,7 @@ export function MobileContextMenu() {
                 {menuType && (
                     // TODO@wzhudev: change to mobile menu
                     <MobileMenu
-                        menuType={[menuType]}
+                        menuType={menuType}
                         onOptionSelect={(params) => {
                             const { label: id, value, commandId } = params;
                             commandService && commandService.executeCommand(commandId ?? id as string, { value });

@@ -24,7 +24,7 @@ import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
-import type { IUniverUIConfig } from './controllers/ui/ui.controller';
+import type { IUniverUIConfig } from './controllers/config.schema';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
@@ -53,6 +53,7 @@ import { IProgressService, ProgressService } from './services/progress/progress.
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { MobileUIController } from './controllers/ui/ui-mobile.controller';
+import { IMenu2Service, Menu2Service } from './services/menu/menu2.service';
 
 export const UNIVER_MOBILE_UI_PLUGIN_NAME = 'UNIVER_MOBILE_UI_PLUGIN';
 
@@ -64,7 +65,7 @@ export class UniverMobileUIPlugin extends Plugin {
     static override pluginName = UNIVER_MOBILE_UI_PLUGIN_NAME;
 
     constructor(
-        private _config: IUniverUIConfig,
+        private readonly _config: IUniverUIConfig,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
@@ -82,6 +83,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [IMenuService, { useClass: MenuService }],
+            [IMenu2Service, { useClass: Menu2Service }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
@@ -106,12 +108,7 @@ export class UniverMobileUIPlugin extends Plugin {
                     deps: [Injector],
                 },
             ],
-            [
-                SharedController,
-                {
-                    useFactory: () => this._injector.createInstance(SharedController, this._config),
-                },
-            ],
+            [SharedController],
             [ErrorController],
         ], this._config.override);
 

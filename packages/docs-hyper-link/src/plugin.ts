@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { DOC_HYPER_LINK_PLUGIN, DocHyperLinkResourceController } from './controllers/resource.controller';
+import type { IUniverDocsHyperLinkConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverDocsHyperLinkPlugin extends Plugin {
     static override pluginName = DOC_HYPER_LINK_PLUGIN;
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        private _config: unknown,
-        @Inject(Injector) protected override _injector: Injector
+        private readonly _config: Partial<IUniverDocsHyperLinkConfig> = defaultPluginConfig,
+        @Inject(Injector) protected override _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

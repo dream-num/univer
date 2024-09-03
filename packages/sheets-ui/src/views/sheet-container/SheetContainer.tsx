@@ -17,7 +17,7 @@
 import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
 import React, { useMemo } from 'react';
-import { ToolbarItem, useObservable, useSimpleToolbarGroups } from '@univerjs/ui';
+import { ContextMenuPosition, IMenu2Service, ToolbarItem, useObservable } from '@univerjs/ui';
 
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
@@ -26,19 +26,29 @@ import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
 import { useActiveWorkbook } from '../../components/hook';
-import { SheetMenuPosition } from '../../controllers/menu/menu';
 import styles from './index.module.less';
 
 export function RenderSheetFooter() {
+    const menu2Service = useDependency(IMenu2Service);
     const workbook = useActiveWorkbook();
-    const footerMenus = useSimpleToolbarGroups(SheetMenuPosition.SHEET_FOOTER);
+    const footerMenus = menu2Service.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
 
     if (!workbook) return null;
     return (
         <section className={styles.sheetContainer} data-range-selector>
             <SheetBar />
-            {footerMenus.map((item) => <ToolbarItem key={item.id} {...item} />)}
             <StatusBar />
+            {footerMenus.map((item) => item.children?.map((child) => (
+                child?.item && (
+                    <ToolbarItem
+                        key={child.key}
+                        align={{
+                            offset: [-32, 18],
+                        }}
+                        {...child.item}
+                    />
+                )
+            )))}
             <CountBar />
         </section>
     );

@@ -48,7 +48,7 @@ import { Tools } from '@univerjs/core';
             return `    ${dep.replace(/(@univerjs\/|\-)/g, '')}${formattedLocale}`;
         }).join(',\n');
 
-        acc += `export const ${formattedLocale} = Tools.deepMerge(\n${depStatements}\n);\n`;
+        acc += `export const ${formattedLocale} = Tools.deepMerge(\n    {},\n${depStatements}\n);\n`;
         return acc;
     }, '');
 

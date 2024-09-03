@@ -313,7 +313,7 @@ export class PromptController extends Disposable {
                 this._previousSequenceNodes = null;
                 this._previousInsertRefStringIndex = null;
 
-                this._selectionRenderService.setSkipLastEnabled(true);
+                this._selectionRenderService.setStartNewSelection(true);
 
                 const event = param?.event as KeyboardEvent;
                 if (!event) return;
@@ -567,7 +567,7 @@ export class PromptController extends Disposable {
 
         const refString = this._generateRefString(currentSelection);
         this._formulaPromptService.insertSequenceRef(this._previousInsertRefStringIndex, refString);
-        this._selectionRenderService.setSkipLastEnabled(false);
+        this._selectionRenderService.setStartNewSelection(false);
     }
 
     private get _prevSelectionCount(): number {
@@ -827,7 +827,6 @@ export class PromptController extends Disposable {
         const unitId = documentModel.getUnitId();
         const editor = this._editorService.getEditor(unitId);
         const dataStream = documentModel.getBody()?.dataStream ?? '';
-
         if (!editor || !editor.onlyInputRange()) {
             return { dataStream, offset: 0 };
         }

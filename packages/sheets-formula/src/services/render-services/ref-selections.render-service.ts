@@ -76,7 +76,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * _skipLastEnabled = true means start a new ref selection
      * @param enabled
      */
-    setSkipLastEnabled(enabled: boolean): void {
+    setStartNewSelection(enabled: boolean): void {
         this._startNewSelection = enabled;
     }
 

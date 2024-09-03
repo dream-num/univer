@@ -28,21 +28,26 @@ export class Isformula extends BaseFunction {
 
     override needsReferenceObject = true;
 
-    override calculate(reference: FunctionVariantType) {
+    override calculate(reference: FunctionVariantType): BaseValueObject {
         if (reference.isError()) {
-            return reference;
+            return reference as ErrorValueObject;
         }
 
         if (!reference.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
+        const cellDataMatrix = (reference as BaseReferenceObject).getCurrentActiveSheetData()?.cellData.getMatrix();
+        const { startRow, startColumn } = (reference as BaseReferenceObject).getRangePosition();
+
         const _reference = (reference as BaseReferenceObject).toArrayValueObject();
 
-        const resultArray = _reference.mapValue((valueObject) => {
-            // if (valueObject.isFormula()) {
-            //     return BooleanValueObject.create(true);
-            // }
+        const resultArray = _reference.mapValue((valueObject, rowIndex, columnIndex) => {
+            const cellData = cellDataMatrix?.[startRow + rowIndex]?.[startColumn + columnIndex];
+
+            if (cellData?.f || cellData?.si) {
+                return BooleanValueObject.create(true);
+            }
 
             return BooleanValueObject.create(false);
         });

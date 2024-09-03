@@ -29,6 +29,8 @@ import { Isnumber } from './isnumber';
 import { Isodd } from './isodd/isodd';
 import { Isref } from './isref';
 import { Istext } from './istext';
+import { N } from './n';
+import { Na } from './na';
 import { Type } from './type';
 
 export const functionInformation = [
@@ -46,5 +48,7 @@ export const functionInformation = [
     [Isodd, FUNCTION_NAMES_INFORMATION.ISODD],
     [Isref, FUNCTION_NAMES_INFORMATION.ISREF],
     [Istext, FUNCTION_NAMES_INFORMATION.ISTEXT],
+    [N, FUNCTION_NAMES_INFORMATION.N],
+    [Na, FUNCTION_NAMES_INFORMATION.NA],
     [Type, FUNCTION_NAMES_INFORMATION.TYPE],
 ];

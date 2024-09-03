@@ -78,6 +78,7 @@ export class SheetPermissionInitController extends Disposable {
             });
 
             if (!allAllowedParams.length) {
+                this._rangeProtectionRuleModel.changeRuleInitState(true);
                 return;
             }
 
@@ -95,6 +96,7 @@ export class SheetPermissionInitController extends Disposable {
                         });
                     }
                 });
+                this._rangeProtectionRuleModel.changeRuleInitState(true);
             });
         };
 
@@ -261,6 +263,7 @@ export class SheetPermissionInitController extends Disposable {
             });
 
             if (!allAllowedParams.length) {
+                this._worksheetProtectionRuleModel.changeRuleInitState(true);
                 return;
             }
 
@@ -278,6 +281,7 @@ export class SheetPermissionInitController extends Disposable {
                         });
                     }
                 });
+                this._worksheetProtectionRuleModel.changeRuleInitState(true);
             });
         };
 

@@ -63,7 +63,7 @@ export const CellLinkPopup = () => {
     }
 
     const { unitId, subUnitId, customRange, row, col } = currentPopup;
-    if (!customRange.properties?.url) {
+    if (!customRange?.properties?.url) {
         return null;
     }
 

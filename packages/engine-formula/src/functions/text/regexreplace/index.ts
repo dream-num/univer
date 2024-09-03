@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArray } from '../../../engine/utils/check-variant-error';
-import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { handleRegExp } from '../../../engine/utils/regexp-check';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -69,20 +72,14 @@ export class Regexreplace extends BaseFunction {
 
         replacementValue = `${replacementValue}`;
 
-        if (regularExpressionValue === '') {
-            const result = replacementValue + textValue.split('').join(replacementValue) + replacementValue;
+        const { isError: isError_regExp, regExp } = handleRegExp(regularExpressionValue, true);
 
-            return StringValueObject.create(result);
+        if (isError_regExp) {
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
-        try {
-            const regex = new RegExp(regularExpressionValue, 'g');
+        const result = textValue.replace(regExp as RegExp, replacementValue);
 
-            const result = textValue.replace(regex, replacementValue);
-
-            return StringValueObject.create(result);
-        } catch (error) {
-            throw new Error(`Invalid regular expression: ${regularExpressionValue}. \n${error}`);
-        }
+        return StringValueObject.create(result);
     }
 }

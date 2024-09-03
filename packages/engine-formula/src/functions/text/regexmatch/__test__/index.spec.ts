@@ -34,6 +34,13 @@ describe('Test regexmatch function', () => {
             expect(result.getValue()).toStrictEqual(true);
         });
 
+        it('RegularExpression is maybe backtrace', () => {
+            const text = StringValueObject.create('https://www.example.com');
+            const regularExpression = StringValueObject.create('^(https?://)?([a-z0-9.-]+).*');
+            const result = testFunction.calculate(text, regularExpression);
+            expect(result.getValue()).toStrictEqual(ErrorType.REF);
+        });
+
         it('Value is boolean', () => {
             const text = BooleanValueObject.create(true);
             const regularExpression = StringValueObject.create('c.*f');

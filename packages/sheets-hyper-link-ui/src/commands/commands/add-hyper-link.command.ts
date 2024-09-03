@@ -15,8 +15,8 @@
  */
 
 import type { ICommand, IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
+import { CommandType, CustomRangeType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, UniverInstanceType } from '@univerjs/core';
+import { addCustomRangeBySelectionFactory, addCustomRangeTextX, TextSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -35,6 +35,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.add-hyper-link',
 
+    // eslint-disable-next-line max-lines-per-function
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -56,25 +57,34 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         if (!worksheet || !skeleton) {
             return false;
         }
-        const { payload, display, row, column } = link;
+        const { payload, display, row, column, id } = link;
         const cellData = worksheet.getCellRaw(row, column);
         const doc = skeleton.getBlankCellDocumentModel(cellData);
         const snapshot = doc.documentModel!.getSnapshot();
+        const body = snapshot.body;
+        if (!body) {
+            return false;
+        }
 
+        const textX = addCustomRangeTextX({
+            body,
+            range: { startOffset: 0, endOffset: body.dataStream.length - 2, collapsed: false },
+            rangeId: id,
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: payload,
+                refId: id,
+            },
+        });
+
+        if (!textX) {
+            return false;
+        }
+
+        const newBody = TextX.apply(body, textX.serialize());
         const rangeValue: IDocumentData = {
             ...snapshot,
-            body: {
-                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${display}${DataStreamTreeTokenType.CUSTOM_RANGE_END}\r\n`,
-                customRanges: [{
-                    rangeId: generateRandomId(),
-                    startIndex: 0,
-                    endIndex: display!.length + 1,
-                    rangeType: CustomRangeType.HYPERLINK,
-                    properties: {
-                        url: payload,
-                    },
-                }],
-            },
+            body: newBody,
         };
 
         const redoParams: ISetRangeValuesMutationParams = {
@@ -118,8 +128,8 @@ export interface IAddRichHyperLinkCommandParams {
     /**
      * url of link
      */
-    url: string;
     documentId: string;
+    link: ICellHyperLink;
 }
 
 export const AddRichHyperLinkCommand: ICommand<IAddRichHyperLinkCommandParams> = {
@@ -129,22 +139,27 @@ export const AddRichHyperLinkCommand: ICommand<IAddRichHyperLinkCommandParams> =
         if (!params) {
             return false;
         }
-        const { documentId, url } = params;
+        const { documentId, link } = params;
         const commandService = accessor.get(ICommandService);
-        const id = generateRandomId();
-        const doMutation = addCustomRangeBySelectionFactory(
-            accessor,
-            {
-                rangeId: id,
-                rangeType: CustomRangeType.HYPERLINK,
-                properties: {
-                    url,
-                },
-                unitId: documentId,
-            }
-        );
-        if (doMutation) {
-            return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
+        const textSelectionService = accessor.get(TextSelectionManagerService);
+        const newId = generateRandomId();
+        const { payload } = link;
+        const range = textSelectionService.getActiveTextRangeWithStyle();
+        if (!range) {
+            return false;
+        }
+        const replaceSelection = addCustomRangeBySelectionFactory(accessor, {
+            unitId: documentId,
+            rangeId: newId,
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: payload,
+                refId: newId,
+            },
+        });
+
+        if (replaceSelection) {
+            return commandService.syncExecuteCommand(replaceSelection.id, replaceSelection.params);
         }
 
         return false;

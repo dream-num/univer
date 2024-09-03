@@ -78,3 +78,29 @@ export function copyCustomRange(range: ICustomRange) {
         rangeId: generateRandomId(),
     };
 }
+
+export function excludePonintsFromRange(range: [number, number], points: number[]): [number, number][] {
+    // 将 range 和 points 排序
+
+    const newRanges = [];
+    let start = range[0];
+
+    for (let i = 0; i < points.length; i++) {
+        const end = points[i];
+
+      // 如果 start 小于 end，说明存在一个新的 range
+        if (start < end) {
+            newRanges.push([start, end - 1] as [number, number]);
+        }
+
+      // 更新 start 为下一个 range 的起始
+        start = end + 1;
+    }
+
+    // 处理最后一个 range
+    if (start <= range[1]) {
+        newRanges.push([start, range[1]] as [number, number]);
+    }
+
+    return newRanges;
+}

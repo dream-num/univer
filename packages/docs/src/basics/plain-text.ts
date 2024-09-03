@@ -17,6 +17,12 @@
 import type { IDocumentBody, IDocumentData } from '@univerjs/core';
 import { DataStreamTreeTokenType } from '@univerjs/core';
 
+export const getPlainText = (text: string) => {
+    return text.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '')
+        .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '')
+        .replaceAll(DataStreamTreeTokenType.PARAGRAPH, '');
+};
+
 /**
  * get plain text from rich-text
  */
@@ -26,7 +32,7 @@ export const getPlainTextFormBody = (body: IDocumentBody) => {
         str = body.dataStream.slice(0, -2);
     }
 
-    return str.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
+    return getPlainText(str);
 };
 
 /**
@@ -38,3 +44,4 @@ export const getPlainTextFormDocument = (data: IDocumentData) => {
     }
     return getPlainTextFormBody(data.body);
 };
+

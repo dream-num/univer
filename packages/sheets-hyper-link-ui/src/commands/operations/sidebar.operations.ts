@@ -17,6 +17,7 @@
 import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISidebarService } from '@univerjs/ui';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 
@@ -36,7 +37,11 @@ export const OpenHyperLinkEditPanelOperation: ICommand<IOpenHyperLinkEditPanelOp
         }
 
         const popupService = accessor.get(SheetsHyperLinkPopupService);
-        popupService.startEditing(params);
+        if (!params.customRangeId) {
+            popupService.startAddEditing(params);
+        } else {
+            popupService.startEditing(params as Required<IOpenHyperLinkEditPanelOperationParams>);
+        }
         return true;
     },
 };
@@ -60,6 +65,7 @@ export const InsertHyperLinkOperation: ICommand = {
     handler(accessor) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
+        const editorBridgeService = accessor.get(IEditorBridgeService);
         if (!target) {
             return false;
         }
@@ -72,12 +78,13 @@ export const InsertHyperLinkOperation: ICommand = {
 
         const row = selection.primary.startRow;
         const col = selection.primary.startColumn;
+        const visible = editorBridgeService.isVisible();
         return commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
             unitId: target.unitId,
             subUnitId: target.subUnitId,
             row,
             col,
-            type: HyperLinkEditSourceType.VIEWING,
+            type: visible.visible ? HyperLinkEditSourceType.EDITING : HyperLinkEditSourceType.VIEWING,
         });
     },
 };

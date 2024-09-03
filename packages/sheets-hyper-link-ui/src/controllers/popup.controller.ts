@@ -15,14 +15,28 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
 import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Subscription } from 'rxjs';
 import { debounceTime, map, mergeMap } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookViewPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import {
+    ClearSelectionAllCommand,
+    ClearSelectionContentCommand,
+    ClearSelectionFormatCommand,
+    RangeProtectionPermissionEditPoint,
+    RangeProtectionPermissionViewPoint,
+    WorkbookCopyPermission,
+    WorkbookEditablePermission,
+    WorkbookViewPermission,
+    WorksheetCopyPermission,
+    WorksheetEditPermission,
+    WorksheetInsertHyperlinkPermission,
+    WorksheetViewPermission,
+} from '@univerjs/sheets';
 import { DocEventManagerService } from '@univerjs/docs-ui';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
@@ -36,13 +50,14 @@ export class SheetsHyperLinkPopupController extends Disposable {
         @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
         this._initHoverListener();
         this._initCommandListener();
         this._initHoverEditingListener();
+        this._initTextSelectionListener();
     }
 
     private _getLinkPermission(location: ISheetLocationBase) {
@@ -135,7 +150,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     if (!state) {
                         return;
                     }
-                    if (state.unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    if (state.editorUnitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
                         return;
                     }
 
@@ -195,6 +210,18 @@ export class SheetsHyperLinkPopupController extends Disposable {
         this.disposeWithMe(() => {
             subscribe?.unsubscribe();
         });
+    }
+
+    private _initTextSelectionListener() {
+        this.disposeWithMe(
+            this._textSelectionManagerService.textSelection$.subscribe((selection) => {
+                if (!selection || selection.unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    return;
+                }
+
+                this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.EDITING);
+            })
+        );
     }
 
     private _initCommandListener() {

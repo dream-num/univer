@@ -43,7 +43,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             }
             return unit.activeSheet$;
         }),
-        mergeMap((sheet) => sheetSelectionService.selectionMoveEnd$.pipe(map((selections) => sheet ? { selections, sheet } : null))),
+        mergeMap((sheet) => sheetSelectionService.selectionMoveEnd$.pipe(map((selections) => sheet && { selections, sheet }))),
         map((sheetWithSelection) => {
             if (!sheetWithSelection) {
                 return true;
@@ -55,6 +55,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             if (cell?.f || cell?.si) {
                 return true;
             }
+
             return false;
         })
     );

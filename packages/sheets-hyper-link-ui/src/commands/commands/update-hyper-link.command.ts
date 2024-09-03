@@ -182,6 +182,7 @@ export const UpdateRichHyperLinkCommand: ICommand<IUpdateRichHyperLinkCommandPar
                 endOffset: range.endIndex,
                 collapsed: false,
             },
+            doc,
         });
 
         if (!replaceSelection) {

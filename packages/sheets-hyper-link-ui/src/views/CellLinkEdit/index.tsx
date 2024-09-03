@@ -54,6 +54,7 @@ export const CellLinkEdit = () => {
         }
         return sidePanelService.getCustomHyperLink(type);
     }, [sidePanelService, type]);
+
     const [showError, setShowError] = useState(false);
 
     const setByPayload = useRef(false);
@@ -241,8 +242,8 @@ export const CellLinkEdit = () => {
                         column: editing.col,
                         payload: formatUrl(type, payload),
                         display,
-                        documentId: editorBridgeService.getCurrentEditorId(),
                     },
+                    documentId: editorBridgeService.getCurrentEditorId(),
                 });
             }
         }

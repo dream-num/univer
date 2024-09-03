@@ -159,6 +159,7 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
         collapsed: true,
         segmentId,
     }];
+
     const textX = new TextX();
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> & { textX: TextX } = {
         id: RichTextEditingMutation.id,

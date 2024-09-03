@@ -17,6 +17,7 @@
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArray } from '../../../engine/utils/check-variant-error';
 import { handleRegExp } from '../../../engine/utils/regexp-check';
+import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -69,6 +70,24 @@ export class Regexextract extends BaseFunction {
 
         if (result === null) {
             return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        if (result.length > 1) {
+            const resultArray = result.slice(1).map((item) => StringValueObject.create(item));
+
+            if (resultArray.length > 1) {
+                return ArrayValueObject.create({
+                    calculateValueList: [resultArray],
+                    rowCount: 1,
+                    columnCount: resultArray.length,
+                    unitId: this.unitId as string,
+                    sheetId: this.subUnitId as string,
+                    row: this.row,
+                    column: this.column,
+                });
+            }
+
+            return resultArray[0];
         }
 
         return StringValueObject.create(result[0]);

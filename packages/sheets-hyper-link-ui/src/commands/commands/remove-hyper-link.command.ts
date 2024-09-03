@@ -118,8 +118,6 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
 };
 
 export interface ICancelInlineHyperLinkCommandParams {
-    unitId: string;
-    subUnitId: string;
     /**
      * id of link
      */

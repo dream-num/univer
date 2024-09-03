@@ -38,6 +38,7 @@ import { RangeProtectionService } from './services/permission/range-permission/r
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
 import { SheetsSelectionsService } from './services/selections/selection-manager.service';
+import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -103,6 +104,10 @@ export class UniverSheetsPlugin extends Plugin {
             [RangeProtectionRuleModel],
             [RangeProtectionRefRangeService],
             [RangeProtectionService],
+            [IExclusiveRangeService, {
+                useClass: ExclusiveRangeService,
+                deps: [SheetsSelectionsService],
+            }],
         ];
 
         if (!this._config?.notExecuteFormula) {
@@ -115,5 +120,6 @@ export class UniverSheetsPlugin extends Plugin {
 
         this._injector.get(SheetInterceptorService);
         this._injector.get(RangeProtectionService);
+        this._injector.get(IExclusiveRangeService);
     }
 }

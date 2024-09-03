@@ -32,17 +32,21 @@ import type { ISetRangeValuesMutationParams } from '../mutations/set-range-value
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
+interface IRemoveWorksheetMergeCommandParams {
+    ranges?: IRange[];
+}
+
 export const RemoveWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-worksheet-merge',
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params: IRemoveWorksheetMergeCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        const selections = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService);

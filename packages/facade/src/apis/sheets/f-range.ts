@@ -30,7 +30,7 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import { BooleanNumber, ICommandService, Inject, Injector, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, Dimension, ICommandService, Inject, Injector, Rectangle, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
 import type {
     ISetHorizontalTextAlignCommandParams,
     ISetStyleCommandParams,
@@ -39,6 +39,9 @@ import type {
     IStyleTypeValue,
 } from '@univerjs/sheets';
 import {
+    addMergeCellsUtil,
+    getAddMergeMutationRangeByType,
+    RemoveWorksheetMergeCommand,
     SetHorizontalTextAlignCommand,
     SetRangeValuesCommand,
     SetStyleCommand,
@@ -829,4 +832,66 @@ export class FRange {
 
         return Promise.resolve(true);
     }
+
+    //#region Merge cell
+
+    /**
+     * Merge cells in a range into one merged cell
+     * @returns This range, for chaining
+     */
+    async merge(): Promise<FRange> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        await addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range]);
+
+        return this;
+    }
+
+    /**
+     * Merges cells in a range horizontally.
+     * @returns This range, for chaining
+     */
+    async mergeAcross(): Promise<FRange> {
+        const ranges = getAddMergeMutationRangeByType([this._range], Dimension.ROWS);
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges);
+
+        return this;
+    }
+
+    /**
+     * Merges cells in a range vertically.
+     * @returns This range, for chaining
+     */
+    async mergeVertically(): Promise<FRange> {
+        const ranges = getAddMergeMutationRangeByType([this._range], Dimension.COLUMNS);
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges);
+
+        return this;
+    }
+
+    /**
+     * Returns true if cells in the current range overlap a merged cell.
+     * @returns {boolean} is overlap with a merged cell
+     */
+    ifPartOfMerge(): boolean {
+        const mergeData = this._worksheet.getMergeData();
+        return mergeData.some((merge) => Rectangle.intersects(this._range, merge));
+    }
+
+    /**
+     * Unmerge cells in the range
+     * @returns This range, for chaining
+     */
+    breakApart(): FRange {
+        this._commandService.executeCommand(RemoveWorksheetMergeCommand.id, { ranges: [this._range] });
+        return this;
+    }
+    //#endregion
 }

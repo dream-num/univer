@@ -15,8 +15,8 @@
  */
 
 import type { IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, RemoveWorksheetMergeCommand, SetColHiddenCommand, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { Direction, ICommandService, Inject, Injector, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { Direction, ICommandService, Inject, Injector, RANGE_TYPE } from '@univerjs/core';
 
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
@@ -25,7 +25,6 @@ import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { ComponentManager } from '@univerjs/ui';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
-import { AddWorksheetMergeCommand } from '@univerjs/sheets-ui';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { FDataValidation } from './f-data-validation';
@@ -826,49 +825,6 @@ export class FWorksheet {
     // #endregion
 
     // #region merge cells
-
-    /**
-     * Set merge cells for the ranges
-     * @param ranges
-     * @returns This sheet, for chaining.
-     */
-    async addMergeCell(ranges: IRange[]): Promise<FWorksheet> {
-        const unitId = this._workbook.getUnitId();
-        const subUnitId = this._worksheet.getSheetId();
-        const mergeData = this._worksheet.getMergeData();
-        const overlap = mergeData.some((mergeRange) => {
-            return ranges.some((range) => {
-                return Rectangle.intersects(range, mergeRange);
-            });
-        });
-        if (overlap) {
-            throw new Error('The ranges to be merged overlap with the existing merged cells');
-        }
-        await this._commandService.executeCommand(AddWorksheetMergeCommand.id, {
-            unitId,
-            subUnitId,
-            selections: ranges,
-        });
-
-        return this;
-    }
-
-    /**
-     * Cancel the merged cells in the ranges area
-     * @param ranges
-     * @returns This sheet, for chaining.
-     */
-    removeMergeCell(ranges: IRange[]): FWorksheet {
-        const unitId = this._workbook.getUnitId();
-        const subUnitId = this._worksheet.getSheetId();
-        this._commandService.executeCommand(RemoveWorksheetMergeCommand.id, {
-            unitId,
-            subUnitId,
-            ranges,
-        });
-
-        return this;
-    }
 
     /**
      * Get all merged cells in the current sheet

@@ -488,24 +488,4 @@ describe('Test FWorksheet', () => {
     });
 
     // #endregion
-
-    // #region Merge Cells
-    it('Worksheet mergeCells', async () => {
-        let hasError = false;
-        try {
-            const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
-            let sheet = await activeSheet?.addMergeCell([{ startRow: 0, endRow: 5, startColumn: 0, endColumn: 5 }]);
-            expect(sheet).toBeDefined();
-            expect(activeSheet?.getMergeCells()?.length).toBe(1);
-            sheet = await activeSheet?.addMergeCell([{ startRow: 6, endRow: 7, startColumn: 6, endColumn: 10 }]);
-            expect(activeSheet?.getMergeCells()?.length).toBe(2);
-            sheet = await activeSheet?.removeMergeCell([{ startRow: 0, endRow: 5, startColumn: 0, endColumn: 5 }]);
-            expect(activeSheet?.getMergeCells()?.length).toBe(1);
-            sheet = await activeSheet?.addMergeCell([{ startRow: 0, endRow: 10, startColumn: 0, endColumn: 10 }]);
-        } catch (error) {
-            hasError = true;
-        }
-        expect(hasError).toBe(true);
-    });
-    // #endregion
 });

@@ -70,11 +70,6 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
      */
     private _exclusiveRanges: Map<string, Map<string, Map<string, IFeatureRange[]>>> = new Map();
 
-    constructor(
-    ) {
-        super();
-    }
-
     private _ensureUnitMap(unitId: string) {
         if (!this._exclusiveRanges.has(unitId)) {
             this._exclusiveRanges.set(unitId, new Map());

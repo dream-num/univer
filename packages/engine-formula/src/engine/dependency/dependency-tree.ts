@@ -386,11 +386,7 @@ export class FormulaDependencyTreeCache extends Disposable {
         this._cacheItems.delete(token);
     }
 
-    /**
-     * Determine whether range is dependent on other trees.
-     * @param dependenceTree
-     */
-    dependency(dependenceTree: FormulaDependencyTree) {
+    dependencyWithBlock(dependenceTree: FormulaDependencyTree) {
         const dependenceTreeRanges = dependenceTree.rangeList;
         for (const dependenceRange of dependenceTreeRanges) {
             const { unitId, sheetId, range } = dependenceRange.gridRange;
@@ -434,5 +430,30 @@ export class FormulaDependencyTreeCache extends Disposable {
         //         });
         //     }
         // });
+    }
+
+    /**
+     * Determine whether range is dependent on other trees.
+     * @param dependenceTree
+     */
+    dependency(dependenceTree: FormulaDependencyTree) {
+        this._cacheItems.forEach((cacheItem) => {
+            const { unitRangeWithToken, treeList } = cacheItem;
+            const { gridRange } = unitRangeWithToken;
+            const { unitId, sheetId, range } = gridRange;
+
+            if (
+                dependenceTree.unitId === unitId &&
+                dependenceTree.subUnitId === sheetId &&
+                dependenceTree.inRangeData(range)
+            ) {
+                treeList.forEach((tree) => {
+                    if (tree === dependenceTree || tree.children.includes(dependenceTree)) {
+                        return true;
+                    }
+                    tree.pushChildren(dependenceTree);
+                });
+            }
+        });
     }
 }

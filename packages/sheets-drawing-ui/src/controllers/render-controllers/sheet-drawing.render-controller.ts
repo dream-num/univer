@@ -40,6 +40,7 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
     }
 
     private _drawingInitializeListener() {
+        // initialize drawing data and add to sheet canvas
         if (this._context.type === UniverInstanceType.UNIVER_SHEET) {
             this._sheetDrawingService.initializeNotification(this._context.unitId);
             const data = this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId);

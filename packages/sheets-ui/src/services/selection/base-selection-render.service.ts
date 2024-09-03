@@ -543,7 +543,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * Init pointer move listener, bind in each pointer down, unbind in each pointer up
+     * Init pointer move listener in each pointer down, unbind in each pointer up.
+     * Both cell selections and row-column selections are supported by this method.
      * @param viewportMain
      * @param activeSelectionControl
      * @param rangeType
@@ -582,6 +583,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             let scrollOffsetX = newMoveOffsetX;
             let scrollOffsetY = newMoveOffsetY;
 
+            //#region selection cross freezing line
             const currentSelection = this.getActiveSelectionControl();
             const freeze = this._getFreeze();
 
@@ -590,14 +592,27 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY])) ??
                 this._getViewportByCell(selection?.endRow, selection?.endColumn);
 
-            if (startViewport && endViewport && viewportMain) {
+            const isCrossableViewports = () => {
+                if (!startViewport || !endViewport || !viewportMain) {
+                    return false;
+                }
+                const crossableViewports = [SHEET_VIEWPORT_KEY.VIEW_MAIN,
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP,
+                    SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT] as string[];
+                return crossableViewports.includes(startViewport.viewportKey) && crossableViewports.includes(endViewport.viewportKey);
+            };
+            if (isCrossableViewports()) {
+                if (!startViewport || !endViewport || !viewportMain) {
+                    return false;
+                }
+
                 const isCrossingX =
                     (lastX < viewportMain.left && newMoveOffsetX > viewportMain.left) ||
                     (lastX > viewportMain.left && newMoveOffsetX < viewportMain.left);
                 const isCrossingY =
                     (lastY < viewportMain.top && newMoveOffsetY > viewportMain.top) ||
                     (lastY > viewportMain.top && newMoveOffsetY < viewportMain.top);
-
                 if (isCrossingX) {
                     xCrossTime += 1;
                 }
@@ -696,10 +711,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 lastX = newMoveOffsetX;
                 lastY = newMoveOffsetY;
             }
+            //#endregion
 
+            //#region auto scrolling
             this._scrollTimer.scrolling(scrollOffsetX, scrollOffsetY, () => {
                 this._movingHandler(newMoveOffsetX, newMoveOffsetY, activeSelectionControl, rangeType);
             });
+            //#endregion
         });
         // #endregion
     }

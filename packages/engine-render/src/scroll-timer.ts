@@ -32,21 +32,16 @@ export enum ScrollTimerType {
 
 export class ScrollTimer {
     private _requestNewFrameNumber: number = -1;
-
     private _viewport: Nullable<any>;
-
     private _offsetX: number = 0;
-
     private _offsetY: number = 0;
-
     private _moveX: number = 0;
-
     private _moveY: number = 0;
-
     private _scrollX: number = 0;
-
     private _scrollY: number = 0;
-
+    /**
+     * Custmize scroll function.
+     */
     private _scrollFunction: Nullable<(x?: number, y?: number) => void>;
 
     constructor(
@@ -97,7 +92,8 @@ export class ScrollTimer {
         this._runRenderLoop();
     }
 
-    private _scroll(viewport: Nullable<Viewport>) {
+    //eslint-disable-next-line complexity
+    private _autoScroll(viewport: Nullable<Viewport>) {
         const topBounding = viewport?.top || 0;
         const bottomBounding = topBounding + (viewport?.height || 0);
         const leftBounding = viewport?.left || 0;
@@ -156,7 +152,7 @@ export class ScrollTimer {
             const ancestorScene = this._findAncestorScene(viewport?.scene);
             const newViewport = this.getViewportByCoord(ancestorScene);
             if (newViewport) {
-                this._scroll(newViewport);
+                this._autoScroll(newViewport);
             }
         }
     }
@@ -185,8 +181,10 @@ export class ScrollTimer {
     }
 
     private _runRenderLoop() {
-        this._scroll(this._viewport);
-        this._scrollFunction && this._scrollFunction(this._scrollX, this._scrollY);
+        this._autoScroll(this._viewport);
+        if (this._scrollFunction) {
+            this._scrollFunction(this._scrollX, this._scrollY);
+        }
         this._requestNewFrameNumber = requestNewFrame(this._runRenderLoop.bind(this));
     }
 

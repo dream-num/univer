@@ -32,7 +32,7 @@ import type { IAccessor } from '@univerjs/core';
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
 import { SheetMenuPosition } from './menu';
-import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$ } from './menu-util';
+import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
 
 const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
 export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
@@ -71,7 +71,7 @@ export function CellInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         title: 'rightClick.insert',
         icon: 'Insert',
         positions: [MenuPosition.CONTEXT_MENU],
-        hidden$: getBaseRangeMenuHidden$(accessor),
+        hidden$: getObservableWithExclusiveRange$(accessor, getBaseRangeMenuHidden$(accessor)),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }

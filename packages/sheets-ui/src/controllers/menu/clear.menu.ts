@@ -21,7 +21,7 @@ import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { SheetMenuPosition } from './menu';
-import { getCurrentRangeDisable$ } from './menu-util';
+import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 
 const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
@@ -46,7 +46,7 @@ export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenu
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearContent',
         positions: [CLEAR_SELECTION_MENU_ID],
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission], rangeTypes: [RangeProtectionPermissionEditPoint] })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -66,7 +66,7 @@ export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButt
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearAll',
         positions: [CLEAR_SELECTION_MENU_ID],
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

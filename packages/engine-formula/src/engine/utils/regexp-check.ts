@@ -359,19 +359,19 @@ function tokenizer(regExpString: string) {
                 break;
             case '(':
             {
-                    // 初始化一个对象来表示捕获组
+                // 初始化一个对象来表示捕获组
                 const group: IToken = {
                     type: CharTypes.GROUP,
                     stack: [],
                     remember: true, // 默认情况下，捕获组是需要记住（捕获）的
                 };
 
-                    // 检查是否存在 '?' 来指定组的特殊行为
+                // 检查是否存在 '?' 来指定组的特殊行为
                 if (strChars[i] === '?') {
                     const nextChar = strChars[i + 1]; // 获取 '?' 后面的字符
                     i += 2; // 跳过 '?' 和后面的字符
 
-                        // 根据后面的字符确定组的类型
+                    // 根据后面的字符确定组的类型
                     if (nextChar === '=') {
                         group.followedBy = true; // 正向前瞻
                     } else if (nextChar === '!') {
@@ -385,10 +385,10 @@ function tokenizer(regExpString: string) {
                     captureCount += 1; // 增加捕获组的计数
                 }
 
-                    // 将捕获组对象添加到主栈中
+                // 将捕获组对象添加到主栈中
                 stack.push(group);
 
-                    // 保存当前状态并开始新的栈用于捕获组
+                // 保存当前状态并开始新的栈用于捕获组
                 groups.push(currentScope);
                 currentScope = group;
                 stack = group.stack as IToken[];
@@ -546,13 +546,13 @@ function tokenizeClass(input: string, pattern: string): [Array<CharRange | IChar
         }
 
         if (!token) {
-            throw new SyntaxError(`Invalid regular expression: /${pattern}/: Unterminated character class`);
+            return [tokens, regex.lastIndex];
         }
 
         tokens.push(token as CharRange | ICharSet);
     }
 
-    return [tokens, regex.lastIndex];
+    throw new SyntaxError(`Invalid regular expression: /${pattern}/: Unterminated character class`);
 };
 
 function strToChars(str: string): string {

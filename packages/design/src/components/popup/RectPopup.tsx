@@ -38,13 +38,12 @@ export interface IRectPopupProps {
     direction?: 'vertical' | 'horizontal' | 'left' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
 
     // #region closing behavior
-
-    closeOnSelfTarget?: boolean;
     onClickOutside?: (e: MouseEvent) => void;
     excludeOutside?: HTMLElement[];
 
     onPinterEnter?: (e: React.PointerEvent<HTMLElement>) => void;
     onPointerLeave?: (e: React.PointerEvent<HTMLElement>) => void;
+    onClick?: (e: React.MouseEvent<HTMLElement>) => void;
     // #endregion
 }
 
@@ -102,7 +101,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPinterEnter, onPointerLeave } = props;
+    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPinterEnter, onPointerLeave, onClick } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
@@ -177,6 +176,7 @@ function RectPopup(props: IRectPopupProps) {
             style={style}
             className={styles.popupAbsolute}
             onPointerDown={(e) => e.stopPropagation()}
+            onClick={onClick}
         >
             <RectPopupContext.Provider value={anchorRect}>
                 {children}

@@ -29,7 +29,7 @@ import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.ope
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 
-export interface ICanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
+export interface ICanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
 }

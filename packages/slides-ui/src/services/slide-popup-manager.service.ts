@@ -24,7 +24,7 @@ import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 
 export interface ISlideCanvasPopup extends Pick<IPopup,
-    'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'
+    'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'
 > {
     mask?: boolean;
     extraProps?: Record<string, any>;

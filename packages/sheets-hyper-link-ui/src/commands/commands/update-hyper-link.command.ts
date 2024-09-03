@@ -173,7 +173,7 @@ export const UpdateRichHyperLinkCommand: ICommand<IUpdateRichHyperLinkCommandPar
                     startIndex: 0,
                     endIndex: display.length + 1,
                     properties: {
-                        url: payload,
+                        url: payload.payload,
                     },
                 }],
             },

@@ -157,9 +157,10 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     if (!visible.visible) {
                         subscribe?.unsubscribe();
                         this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.EDITING);
-                        this._sheetsHyperLinkPopupService.endEditing();
+                        this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.EDITING);
                         return;
                     }
+
                     const { editorUnitId, unitId, sheetId, row, column } = state;
                     const renderer = this._renderManagerService.getRenderById(editorUnitId);
                     if (!renderer) {

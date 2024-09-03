@@ -66,8 +66,7 @@ export const CellLinkPopup = () => {
     if (!customRange?.properties?.url) {
         return null;
     }
-
-    const linkObj = resolverService.parseHyperLink(customRange.properties.url);
+    const linkObj = resolverService.parseHyperLink(customRange.properties.url ?? '');
     const isError = linkObj.type.indexOf('error') > -1;
 
     return (

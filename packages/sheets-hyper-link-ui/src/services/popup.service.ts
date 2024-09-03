@@ -120,7 +120,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
         const popup: ICanvasPopup = {
             componentKey: CellLinkPopup.componentKey,
             direction: 'bottom',
-            closeOnSelfTarget: true,
             onClickOutside: () => {
                 this.hideCurrentPopup();
             },
@@ -204,10 +203,9 @@ export class SheetsHyperLinkPopupService extends Disposable {
         const popup: ICanvasPopup = {
             componentKey: CellLinkEdit.componentKey,
             direction: 'bottom',
-            closeOnSelfTarget: true,
-            onClickOutside: () => {
-                this.hideCurrentPopup();
-            },
+            // onClickOutside: () => {
+            //     this.hideCurrentPopup();
+            // },
         };
         return popup;
     }
@@ -294,6 +292,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
     }
 
     endEditing(type?: HyperLinkEditSourceType) {
+        // console.trace('===endEdit', type);
         const current = this._currentEditing$.getValue();
         if (current && (!type || type === current.type)) {
             this._currentEditingPopup?.dispose();

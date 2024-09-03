@@ -21,7 +21,7 @@ import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-export interface IPopup extends Pick<IRectPopupProps, 'closeOnSelfTarget' | 'direction' | 'excludeOutside' | 'onClickOutside' > {
+export interface IPopup extends Pick<IRectPopupProps, 'direction' | 'excludeOutside' | 'onClickOutside' > {
     anchorRect: Nullable<IBoundRectNoAngle>;
     anchorRect$: Observable<IBoundRectNoAngle>;
     excludeRects?: IBoundRectNoAngle[];
@@ -36,6 +36,7 @@ export interface IPopup extends Pick<IRectPopupProps, 'closeOnSelfTarget' | 'dir
     hideOnInvisible?: boolean;
     onPointerEnter?: () => void;
     onPointerLeave?: () => void;
+    onClick?: () => void;
 }
 
 export interface ICanvasPopupService {

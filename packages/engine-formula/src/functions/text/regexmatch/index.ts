@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArray } from '../../../engine/utils/check-variant-error';
-import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { handleRegExp } from '../../../engine/utils/regexp-check';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -48,7 +51,7 @@ export class Regexmatch extends BaseFunction {
         let regularExpressionValue = regularExpressionObject.getValue();
 
         if (regularExpressionObject.isNull()) {
-            return BooleanValueObject.create(true);
+            regularExpressionValue = '';
         }
 
         if (regularExpressionObject.isBoolean()) {
@@ -57,18 +60,18 @@ export class Regexmatch extends BaseFunction {
 
         regularExpressionValue = `${regularExpressionValue}`;
 
-        try {
-            const regex = new RegExp(regularExpressionValue, 'g');
+        const { isError: isError_regExp, regExp } = handleRegExp(regularExpressionValue, false);
 
-            const result = textValue.match(regex);
-
-            if (result === null) {
-                return BooleanValueObject.create(false);
-            }
-
-            return BooleanValueObject.create(true);
-        } catch (error) {
-            throw new Error(`Invalid regular expression: ${regularExpressionValue}. \n${error}`);
+        if (isError_regExp) {
+            return ErrorValueObject.create(ErrorType.REF);
         }
+
+        const result = textValue.match(regExp as RegExp);
+
+        if (result === null) {
+            return BooleanValueObject.create(false);
+        }
+
+        return BooleanValueObject.create(true);
     }
 }

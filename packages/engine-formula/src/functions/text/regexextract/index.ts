@@ -16,6 +16,7 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArray } from '../../../engine/utils/check-variant-error';
+import { handleRegExp } from '../../../engine/utils/regexp-check';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -49,7 +50,7 @@ export class Regexextract extends BaseFunction {
         let regularExpressionValue = regularExpressionObject.getValue();
 
         if (regularExpressionObject.isNull()) {
-            return StringValueObject.create('');
+            regularExpressionValue = '';
         }
 
         if (regularExpressionObject.isBoolean()) {
@@ -58,18 +59,18 @@ export class Regexextract extends BaseFunction {
 
         regularExpressionValue = `${regularExpressionValue}`;
 
-        try {
-            const regex = new RegExp(regularExpressionValue, 'g');
+        const { isError: isError_regExp, regExp } = handleRegExp(regularExpressionValue, false);
 
-            const result = textValue.match(regex);
-
-            if (result === null) {
-                return ErrorValueObject.create(ErrorType.NA);
-            }
-
-            return StringValueObject.create(result[0]);
-        } catch (error) {
-            throw new Error(`Invalid regular expression: ${regularExpressionValue}. \n${error}`);
+        if (isError_regExp) {
+            return ErrorValueObject.create(ErrorType.REF);
         }
+
+        const result = textValue.match(regExp as RegExp);
+
+        if (result === null) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        return StringValueObject.create(result[0]);
     }
 }

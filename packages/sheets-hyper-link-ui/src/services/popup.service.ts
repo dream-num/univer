@@ -17,8 +17,8 @@
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
 import { getCustomRangePosition, getEditingCustomRangePosition, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import type { ICustomRange, IDisposable, INeedCheckDisposable, Nullable } from '@univerjs/core';
-import { Disposable, Inject, Injector } from '@univerjs/core';
+import type { ICustomRange, IDisposable, INeedCheckDisposable, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { CellLinkPopup } from '../views/CellLinkPopup';
@@ -33,7 +33,7 @@ export interface IHyperLinkPopup {
     col: number;
     editPermission?: boolean;
     copyPermission?: boolean;
-    customRange: ICustomRange;
+    customRange?: ICustomRange;
     type: HyperLinkEditSourceType;
 }
 
@@ -42,7 +42,7 @@ interface IHyperLinkEditing {
     subUnitId: string;
     row: number;
     col: number;
-    customRangeId: string;
+    customRangeId?: string;
     type: HyperLinkEditSourceType;
 }
 
@@ -71,7 +71,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
     currentPopup$ = this._currentPopup$.asObservable();
     private _currentEditingPopup: Nullable<IDisposable> = null;
 
-    private _currentEditing$ = new BehaviorSubject<(IHyperLinkEditing & { customRange: ICustomRange; label: string }) | null>(null);
+    private _currentEditing$ = new BehaviorSubject<(IHyperLinkEditing & { customRange?: ICustomRange; label?: string }) | null>(null);
     currentEditing$ = this._currentEditing$.asObservable();
 
     get currentPopup() {
@@ -84,7 +84,8 @@ export class SheetsHyperLinkPopupService extends Disposable {
 
     constructor(
         @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopManagerService: SheetCanvasPopManagerService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -165,27 +166,46 @@ export class SheetsHyperLinkPopupService extends Disposable {
         this._currentEditingPopup?.dispose();
         this.hideCurrentPopup(undefined, true);
 
+        const { unitId, subUnitId } = link;
+        const popup: ICanvasPopup = {
+            componentKey: CellLinkEdit.componentKey,
+            direction: 'bottom',
+            closeOnSelfTarget: true,
+            onClickOutside: () => {
+                this.hideCurrentPopup();
+            },
+        };
+
         let customRangeInfo;
-        if (link.type === HyperLinkEditSourceType.EDITING) {
+        if (!link.customRangeId) {
+            customRangeInfo = {};
+            this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToCell(
+                link.row,
+                link.col,
+                popup,
+                unitId,
+                subUnitId
+            );
+            const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getSheetBySheetId(subUnitId);
+            const cell = worksheet?.getCellRaw(link.row, link.col);
+            this._currentEditing$.next({
+                ...link,
+                label: (cell?.v ?? '').toString(),
+            });
+        } else if (link.type === HyperLinkEditSourceType.EDITING) {
             customRangeInfo = getEditingCustomRangePosition(this._injector, link.unitId, link.subUnitId, link.row, link.col, link.customRangeId);
         } else {
             customRangeInfo = getCustomRangePosition(this._injector, link.unitId, link.subUnitId, link.row, link.col, link.customRangeId);
         }
+
         if (!customRangeInfo) {
             return;
         }
 
-        const { unitId, subUnitId } = link;
         const { rects, customRange, label } = customRangeInfo;
+
         if (rects?.length) {
-            const popup: ICanvasPopup = {
-                componentKey: CellLinkEdit.componentKey,
-                direction: 'bottom',
-                closeOnSelfTarget: true,
-                onClickOutside: () => {
-                    this.hideCurrentPopup();
-                },
-            };
             if (link.type === HyperLinkEditSourceType.EDITING) {
                 this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToAbsolutePosition(
                     rects.pop()!,

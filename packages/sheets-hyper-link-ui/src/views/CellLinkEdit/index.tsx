@@ -48,7 +48,6 @@ export const CellLinkEdit = () => {
     const commandService = useDependency(ICommandService);
     const sidePanelService = useDependency(SheetsHyperLinkSidePanelService);
     const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
-
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -63,9 +62,9 @@ export const CellLinkEdit = () => {
         if (editing?.row !== undefined && editing.col !== undefined) {
             const { label, customRange, row, col } = editing;
             const link = {
-                id: customRange.rangeId,
-                display: label,
-                payload: customRange.properties?.url ?? '',
+                id: customRange?.rangeId ?? '',
+                display: label ?? '',
+                payload: customRange?.properties?.url ?? '',
                 row,
                 column: col,
             };

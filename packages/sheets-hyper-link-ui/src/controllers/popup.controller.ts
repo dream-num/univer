@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { CustomRangeType, Disposable, ICommandService, Inject, Injector, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
 import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Subscription } from 'rxjs';
 import { debounceTime, map, mergeMap } from 'rxjs';
@@ -133,6 +133,9 @@ export class SheetsHyperLinkPopupController extends Disposable {
                 .pipe(mergeMap((state) => this._editorBridgeService.visible$.pipe(map((visible) => ({ visible, state })))))
                 .subscribe(({ visible, state }) => {
                     if (!state) {
+                        return;
+                    }
+                    if (state.unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
                         return;
                     }
 

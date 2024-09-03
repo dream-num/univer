@@ -15,12 +15,11 @@
  */
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
-import { CellValueType, CustomRangeType, Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { getPlainTextFormDocument } from '@univerjs/docs';
 import { isLegalLink, serializeUrl } from '../common/util';
 // import type { IUpdateHyperLinkCommandParams } from '../commands/commands/update-hyper-link.command';
 // import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
@@ -45,7 +44,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         this._initSetRangeValuesCommandInterceptor();
         // this._initUpdateHyperLinkCommandInterceptor();
         this._initClearSelectionCommandInterceptor();
-        this._initRichTextEditorInterceptor();
+        // this._initRichTextEditorInterceptor();
     }
 
     private _getCurrentCell(unitId: string, subUnitId: string, row: number, col: number) {
@@ -272,34 +271,34 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         }));
     }
 
-    private _initRichTextEditorInterceptor() {
-        this.disposeWithMe(
-            this._editorBridgeService.interceptor.intercept(
-                this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT,
-                {
-                    handler: (data, context, next) => {
-                        if (data?.p) {
-                            // 这个逻辑需要内联到
-                            const dataStream = data.p.body?.dataStream;
-                            const range = data.p.body?.customRanges?.find((i) => i.rangeType === CustomRangeType.HYPERLINK);
+    // private _initRichTextEditorInterceptor() {
+    //     this.disposeWithMe(
+    //         this._editorBridgeService.interceptor.intercept(
+    //             this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT,
+    //             {
+    //                 handler: (data, context, next) => {
+    //                     if (data?.p) {
+    //                         // 这个逻辑需要内联到
+    //                         const dataStream = data.p.body?.dataStream;
+    //                         const range = data.p.body?.customRanges?.find((i) => i.rangeType === CustomRangeType.HYPERLINK);
 
-                            if (range && dataStream && dataStream.length - 3 === range.endIndex && range.startIndex === 0) {
-                                return next({
-                                    ...data,
-                                    p: null,
-                                    v: getPlainTextFormDocument(data.p),
-                                    t: CellValueType.STRING,
-                                    custom: {
-                                        __link_url: range.properties?.url,
-                                    },
-                                });
-                            }
-                        }
+    //                         if (range && dataStream && dataStream.length - 3 === range.endIndex && range.startIndex === 0) {
+    //                             return next({
+    //                                 ...data,
+    //                                 p: null,
+    //                                 v: getPlainTextFormDocument(data.p),
+    //                                 t: CellValueType.STRING,
+    //                                 custom: {
+    //                                     __link_url: range.properties?.url,
+    //                                 },
+    //                             });
+    //                         }
+    //                     }
 
-                        return next(data);
-                    },
-                }
-            )
-        );
-    }
+    //                     return next(data);
+    //                 },
+    //             }
+    //         )
+    //     );
+    // }
 }

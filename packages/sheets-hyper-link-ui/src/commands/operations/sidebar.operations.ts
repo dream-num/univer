@@ -18,12 +18,12 @@ import { CommandType, type ICommand, ICommandService, IUniverInstanceService } f
 import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISidebarService } from '@univerjs/ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
-import type { HyperLinkEditSourceType } from '../../types/enums/edit-source';
+import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 
 export interface IOpenHyperLinkEditPanelOperationParams extends ISheetCommandSharedParams {
     row: number;
     col: number;
-    customRangeId: string;
+    customRangeId?: string;
     type: HyperLinkEditSourceType;
 }
 
@@ -72,12 +72,13 @@ export const InsertHyperLinkOperation: ICommand = {
         }
 
         const row = selection.primary.startRow;
-        const column = selection.primary.startColumn;
+        const col = selection.primary.startColumn;
         return commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
             unitId: target.unitId,
             subUnitId: target.subUnitId,
             row,
-            column,
+            col,
+            type: HyperLinkEditSourceType.VIEWING,
         });
     },
 };

@@ -37,7 +37,6 @@ export const OpenHyperLinkEditPanelOperation: ICommand<IOpenHyperLinkEditPanelOp
 
         const popupService = accessor.get(SheetsHyperLinkPopupService);
         popupService.startEditing(params);
-
         return true;
     },
 };

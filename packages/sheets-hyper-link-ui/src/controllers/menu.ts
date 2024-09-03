@@ -26,7 +26,8 @@ import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../co
 const getLinkDisable$ = (accessor: IAccessor) => {
     const disableRange$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] });
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    univerInstanceService.focused$.pipe(
+    const sheetSelectionService = accessor.get(SheetsSelectionsService);
+    const disableCell$ = univerInstanceService.focused$.pipe(
         map((focused) => {
             if (!focused) {
                 return null;
@@ -41,20 +42,24 @@ const getLinkDisable$ = (accessor: IAccessor) => {
                 });
             }
             return unit.activeSheet$;
-        })
-    ).subscribe((v) => {});
-
-    const sheetSelectionService = accessor.get(SheetsSelectionsService);
-    sheetSelectionService.selectionMoveEnd$.subscribe((seleciton) => {
-        if (seleciton.length !== 1) {
-            const range = seleciton[0].range;
-            if (range.endRow > range.startRow || range.endColumn > range.startColumn) {
-                return null;
+        }),
+        mergeMap((sheet) => sheetSelectionService.selectionMoveEnd$.pipe(map((selections) => sheet ? { selections, sheet } : null))),
+        map((sheetWithSelection) => {
+            if (!sheetWithSelection) {
+                return true;
             }
-            return null;
-        }
-        // const cell =
-    });
+            const { selections, sheet } = sheetWithSelection;
+            const row = selections[0].range.startRow;
+            const col = selections[0].range.startColumn;
+            const cell = sheet.getCellRaw(row, col);
+            if (cell?.f || cell?.si) {
+                return true;
+            }
+            return false;
+        })
+    );
+
+    return disableRange$.pipe(mergeMap(((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell)))));
 };
 
 export const insertLinkMenuFactory = (accessor: IAccessor) => {
@@ -65,7 +70,7 @@ export const insertLinkMenuFactory = (accessor: IAccessor) => {
         title: 'hyperLink.menu.add',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         icon: 'LinkSingle',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getLinkDisable$(accessor),
     } as IMenuItem;
 };
 
@@ -78,7 +83,7 @@ export const insertLinkMenuToolbarFactory = (accessor: IAccessor) => {
         type: MenuItemType.BUTTON,
         icon: 'LinkSingle',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getLinkDisable$(accessor),
 
     };
 };

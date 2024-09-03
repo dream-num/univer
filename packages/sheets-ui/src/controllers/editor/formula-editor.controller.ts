@@ -45,7 +45,7 @@ import {
 import type { DocumentViewModel, RenderComponentType } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
+import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { takeUntil } from 'rxjs';
 
 import { SetEditorResizeOperation } from '@univerjs/ui';
@@ -66,7 +66,9 @@ export class FormulaEditorController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
+        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel
     ) {
         super();
 
@@ -245,7 +247,13 @@ export class FormulaEditorController extends RxDisposable {
     // Sync cell content to formula editor bar when sheet selection changed.
     private _syncFormulaEditorContent() {
         this._editorBridgeService.currentEditCellState$.pipe(takeUntil(this.dispose$)).subscribe((editCellState) => {
-            if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
+            if (
+                editCellState == null
+                || this._editorBridgeService.isForceKeepVisible()
+                // If permissions are not initialized, data synchronization will not be performed.
+                || !this._rangeProtectionRuleModel.getRangeRuleInitState()
+                || !this._worksheetProtectionRuleModel.getSheetRuleInitState()
+            ) {
                 return;
             }
 

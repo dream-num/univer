@@ -53,8 +53,8 @@ export class SheetPermissionInitController extends Disposable {
         this._initViewModelBySheetInterceptor();
     }
 
-    private _initRangePermissionFromSnapshot() {
-        const initRangePermissionFunc = (workbook: Workbook) => {
+    private async _initRangePermissionFromSnapshot() {
+        const initRangePermissionFunc = async (workbook: Workbook) => {
             const allAllowedParams: {
                 objectID: string;
                 unitID: string;
@@ -100,9 +100,8 @@ export class SheetPermissionInitController extends Disposable {
             });
         };
 
-        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
-            initRangePermissionFunc(workbook);
-        });
+        await Promise.all(this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).map((workbook) => initRangePermissionFunc(workbook)));
+        this._rangeProtectionRuleModel.changeRuleInitState(true);
     }
 
     private _initRangePermissionChange() {
@@ -146,7 +145,7 @@ export class SheetPermissionInitController extends Disposable {
         );
     }
 
-    public initWorkbookPermissionChange(_unitId?: string) {
+    public async initWorkbookPermissionChange(_unitId?: string) {
         const unitId = _unitId || this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
         if (!unitId) {
             return;
@@ -168,10 +167,8 @@ export class SheetPermissionInitController extends Disposable {
         });
     }
 
-    private _initWorkbookPermissionFromSnapshot() {
-        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
-            this.initWorkbookPermissionChange(workbook.getUnitId());
-        });
+    private async _initWorkbookPermissionFromSnapshot() {
+        await Promise.all(this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).map((workbook) => this.initWorkbookPermissionChange(workbook.getUnitId())));
     }
 
     private _initWorksheetPermissionChange() {
@@ -226,8 +223,8 @@ export class SheetPermissionInitController extends Disposable {
         );
     }
 
-    private _initWorksheetPermissionFromSnapshot() {
-        const initSheetPermissionFunc = (workbook: Workbook) => {
+    private async _initWorksheetPermissionFromSnapshot() {
+        const initSheetPermissionFunc = async (workbook: Workbook) => {
             const allAllowedParams: {
                 objectID: string;
                 unitID: string;
@@ -285,9 +282,8 @@ export class SheetPermissionInitController extends Disposable {
             });
         };
 
-        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
-            initSheetPermissionFunc(workbook);
-        });
+        await Promise.all(this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).map((workbook) => initSheetPermissionFunc(workbook)));
+        this._worksheetProtectionRuleModel.changeRuleInitState(true);
     }
 
     private _initUserChange() {

@@ -171,7 +171,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         }
         for (let i = 0; i < allTrees.length; i++) {
             const tree = allTrees[i];
-            cache.dependency(tree);
+            cache.dependencyWithBlock(tree);
         }
         this._buildReverseDependency(allTrees, dependencyTrees);
     }
@@ -202,7 +202,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         }
         if (dependencyTrees) {
             for (const dependencyTree of dependencyTrees) {
-                allTreesCache.dependency(dependencyTree);
+                allTreesCache.dependencyWithBlock(dependencyTree);
             }
         }
         allTreesCache.dispose();

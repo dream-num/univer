@@ -86,6 +86,7 @@ export class SheetsHyperLinkRenderManagerController extends Disposable {
                             return next({
                                 ...cell,
                                 linkUrl: link.payload,
+                                linkId: link.id,
                             });
                         }
 

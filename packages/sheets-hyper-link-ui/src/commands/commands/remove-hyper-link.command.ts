@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, UniverInstanceType } from '@univerjs/core';
+import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { deleteCustomRangeFactory, deleteCustomRangeTextX } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
+import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface ICancelHyperLinkCommandParams {
@@ -36,7 +38,8 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.cancel-hyper-link',
 
-    async handler(accessor, params) {
+    // eslint-disable-next-line max-lines-per-function
+    handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -44,6 +47,7 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const hyperLinkModel = accessor.get(HyperLinkModel);
 
         const { unitId, subUnitId, row, column, id } = params;
         const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
@@ -57,7 +61,7 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
         if (!worksheet || !skeleton) {
             return false;
         }
-        const cellData = worksheet.getCellRaw(row, column);
+        const cellData = worksheet.getCell(row, column);
         if (!cellData) {
             return false;
         }
@@ -65,7 +69,7 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
         if (!doc?.documentModel) {
             return false;
         }
-        const snapshot = doc.documentModel!.getSnapshot();
+        const snapshot = Tools.deepClone(doc.documentModel!.getSnapshot());
 
         const range = snapshot.body?.customRanges?.find((range) => range.rangeId === id);
         if (!range) {
@@ -79,36 +83,64 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
         }
 
         const newBody = TextX.apply(snapshot.body!, textX.serialize());
-
-        const redo = {
-            id: SetRangeValuesMutation.id,
-            params: {
-                unitId,
-                subUnitId,
-                cellValue: {
-                    [row]: {
-                        [column]: {
-                            p: {
-                                ...snapshot,
-                                body: newBody,
-                            },
+        Object.freeze(newBody);
+        const redos: IMutationInfo[] = [];
+        const undos: IMutationInfo[] = [];
+        const setRangeParams = {
+            unitId,
+            subUnitId,
+            cellValue: {
+                [row]: {
+                    [column]: {
+                        p: {
+                            ...snapshot,
+                            body: newBody,
                         },
                     },
                 },
             },
         };
-        const undoParams = SetRangeValuesUndoMutationFactory(accessor, redo.params);
 
-        const undo = {
+        redos.push({
+            id: SetRangeValuesMutation.id,
+            params: setRangeParams,
+        });
+
+        const undoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeParams);
+
+        undos.push({
             id: SetRangeValuesMutation.id,
             params: undoParams,
-        };
+        });
 
-        const res = commandService.syncExecuteCommand(redo.id, redo.params);
+        const link = hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, column);
+        if (link) {
+            redos.push({
+                id: RemoveHyperLinkMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    id,
+                },
+            });
+            undos.push({
+                id: AddHyperLinkMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    link: {
+                        ...link,
+                    },
+                } as IAddHyperLinkMutationParams,
+            });
+        }
+
+        const res = sequenceExecute(redos, commandService).result;
+
         if (res) {
             undoRedoService.pushUndoRedo({
-                redoMutations: [redo],
-                undoMutations: [undo],
+                redoMutations: redos,
+                undoMutations: undos,
                 unitID: unitId,
             });
             return true;
@@ -117,7 +149,7 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
     },
 };
 
-export interface ICancelInlineHyperLinkCommandParams {
+export interface ICancelRichHyperLinkCommandParams {
     /**
      * id of link
      */
@@ -128,9 +160,9 @@ export interface ICancelInlineHyperLinkCommandParams {
     documentId: string;
 }
 
-export const CancelInlineHyperLinkCommand: ICommand<ICancelInlineHyperLinkCommandParams> = {
+export const CancelRichHyperLinkCommand: ICommand<ICancelRichHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.cancel-inline-hyper-link',
+    id: 'sheets.command.cancel-rich-hyper-link',
     handler(accessor, params) {
         if (!params) {
             return false;

@@ -244,6 +244,7 @@ export interface ICellDataForSheetInterceptor extends ICellData {
      */
     coverable?: boolean;
     linkUrl?: string;
+    linkId?: string;
 }
 
 export function isICellData(value: any): value is ICellData {

@@ -16,20 +16,21 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
-import { createInternalEditorID, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { createInternalEditorID, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IUnitRangeWithName, Workbook } from '@univerjs/core';
 import { RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
 import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
 import { LinkType, SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
-import { AddHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
-import { UpdateHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
+import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
+import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
+import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
 
 export const CellLinkEdit = () => {
@@ -39,7 +40,7 @@ export const CellLinkEdit = () => {
     const [payload, setPayload] = useState('');
     const localeService = useDependency(LocaleService);
     const definedNameService = useDependency(IDefinedNamesService);
-    // const editorBridgeService = useDependency(IEditorBridgeService);
+    const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const editing = useObservable(popupService.currentEditing$);
@@ -60,9 +61,9 @@ export const CellLinkEdit = () => {
 
     useEffect(() => {
         if (editing?.row !== undefined && editing.col !== undefined) {
-            const { label, customRangeId, customRange, row, col } = editing;
+            const { label, customRange, row, col } = editing;
             const link = {
-                id: customRangeId,
+                id: customRange.rangeId,
                 display: label,
                 payload: customRange.properties?.url ?? '',
                 row,
@@ -217,7 +218,8 @@ export const CellLinkEdit = () => {
     const handleSubmit = async () => {
         if (editing) {
             if (id) {
-                await commandService.executeCommand(UpdateHyperLinkCommand.id, {
+                const commandId = editing.type === HyperLinkEditSourceType.EDITING ? UpdateRichHyperLinkCommand.id : UpdateHyperLinkCommand.id;
+                await commandService.executeCommand(commandId, {
                     unitId: editing.unitId,
                     subUnitId: editing.subUnitId,
                     id,
@@ -225,17 +227,22 @@ export const CellLinkEdit = () => {
                         display,
                         payload: formatUrl(type, payload),
                     },
+                    row: editing.row,
+                    column: editing.col,
+                    documentId: editorBridgeService.getCurrentEditorId(),
                 });
             } else {
-                await commandService.executeCommand(AddHyperLinkCommand.id, {
+                const commandId = editing.type === HyperLinkEditSourceType.EDITING ? AddRichHyperLinkCommand.id : AddHyperLinkCommand.id;
+                await commandService.executeCommand(commandId, {
                     unitId: editing.unitId,
                     subUnitId: editing.subUnitId,
                     link: {
-                        id: Tools.generateRandomId(),
+                        id: generateRandomId(),
                         row: editing.row,
                         column: editing.col,
                         payload: formatUrl(type, payload),
                         display,
+                        documentId: editorBridgeService.getCurrentEditorId(),
                     },
                 });
             }

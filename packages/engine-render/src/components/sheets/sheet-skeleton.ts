@@ -25,7 +25,6 @@ import {
     DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
-    generateRandomId,
     getCellInfoInMergeData,
     getColorStyle,
     HorizontalAlign,
@@ -90,7 +89,7 @@ import { Skeleton } from '../skeleton';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 
-function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string): void {
+function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
     const body = documentModel.getBody()!;
     if (body.customRanges?.some((range) => range.rangeType === CustomRangeType.HYPERLINK)) {
         return;
@@ -120,7 +119,7 @@ function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: strin
             startIndex: 0,
             endIndex: body.dataStream.length - 3,
             rangeType: CustomRangeType.HYPERLINK,
-            rangeId: generateRandomId(),
+            rangeId: linkId,
             properties: {
                 url: linkUrl,
             },
@@ -1146,6 +1145,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         });
     }
 
+    // eslint-disable-next-line complexity
     private _getCellDocumentModel(
         cell: Nullable<ICellDataForSheetInterceptor>,
         options: ICellDocumentModelOption = DEFAULT_CELL_DOCUMENT_MODEL_OPTION
@@ -1209,8 +1209,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                 cellValueType: cell.t!,
             });
         }
-        if (documentModel && cell.linkUrl) {
-            addLinkToDocumentModel(documentModel, cell.linkUrl);
+        if (documentModel && cell.linkUrl && cell.linkId) {
+            addLinkToDocumentModel(documentModel, cell.linkUrl, cell.linkId);
         }
 
         /**

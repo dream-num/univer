@@ -20,11 +20,13 @@ import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xls
 import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { IMessageService } from '@univerjs/ui';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import type { IHyperLinkPopup } from '../../services/popup.service';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/sidebar.operations';
-import { CancelHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
+import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
+import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
 
 const iconsMap = {
@@ -44,6 +46,7 @@ export const CellLinkPopup = () => {
     const localeService = useDependency(LocaleService);
     const [currentPopup, setCurrentPopup] = useState<IHyperLinkPopup | null>(null);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
+    const editorBridgeService = useDependency(IEditorBridgeService);
 
     useEffect(() => {
         setCurrentPopup(popupService.currentPopup);
@@ -126,13 +129,17 @@ export const CellLinkPopup = () => {
                         <div
                             className={styles.cellLinkOperation}
                             onClick={() => {
-                                commandService.executeCommand(CancelHyperLinkCommand.id, {
+                                const commandId = currentPopup.type === HyperLinkEditSourceType.EDITING ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
+                                if (commandService.syncExecuteCommand(commandId, {
                                     unitId,
                                     subUnitId,
                                     id: customRange.rangeId,
                                     row,
-                                    col,
-                                });
+                                    column: col,
+                                    documentId: editorBridgeService.getCurrentEditorId(),
+                                })) {
+                                    popupService.hideCurrentPopup(undefined, true);
+                                }
                             }}
                         >
                             <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.cancel')}>

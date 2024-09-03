@@ -114,7 +114,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
     },
 };
 
-export interface IAddInlineHyperLinkCommandParams {
+export interface IAddRichHyperLinkCommandParams {
     /**
      * url of link
      */
@@ -122,8 +122,8 @@ export interface IAddInlineHyperLinkCommandParams {
     documentId: string;
 }
 
-export const AddInlineHyperLinkCommand: ICommand<IAddInlineHyperLinkCommandParams> = {
-    id: 'sheets.command.add-inline-hyper-link',
+export const AddRichHyperLinkCommand: ICommand<IAddRichHyperLinkCommandParams> = {
+    id: 'sheets.command.add-rich-hyper-link',
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         if (!params) {

@@ -57,7 +57,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
             return false;
         }
         const { payload, display = '' } = link;
-        const cellData = worksheet.getCellRaw(row, column);
+        const cellData = worksheet.getCell(row, column);
         if (!cellData) {
             return false;
         }
@@ -92,6 +92,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
                 endOffset: range.endIndex,
                 collapsed: false,
             },
+            doc: doc.documentModel,
         });
         if (!replaceSelection) {
             return false;
@@ -137,7 +138,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
 
 export interface IUpdateRichHyperLinkCommandParams {
     documentId: string;
-    rangeId: string;
+    id: string;
     payload: ICellLinkContent;
 }
 
@@ -148,7 +149,7 @@ export const UpdateRichHyperLinkCommand: ICommand<IUpdateRichHyperLinkCommandPar
         if (!params) {
             return false;
         }
-        const { documentId: unitId, payload, rangeId } = params;
+        const { documentId: unitId, payload, id: rangeId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);

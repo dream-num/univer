@@ -22,9 +22,9 @@ import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/sidebar.operations';
 import type { IUniverSheetsHyperLinkUIConfig } from '../types/interfaces/i-config';
-import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
-import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
-import { CancelHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
+import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
+import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
+import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
 import { insertLinkMenuFactory, insertLinkMenuToolbarFactory, InsertLinkShortcut } from './menu';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkUIController)
@@ -66,6 +66,9 @@ export class SheetsHyperLinkUIController extends Disposable {
             AddHyperLinkCommand,
             UpdateHyperLinkCommand,
             CancelHyperLinkCommand,
+            UpdateRichHyperLinkCommand,
+            CancelRichHyperLinkCommand,
+            AddRichHyperLinkCommand,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

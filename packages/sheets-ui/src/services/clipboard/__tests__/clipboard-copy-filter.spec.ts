@@ -156,12 +156,17 @@ describe('Test clipboard', () => {
                 ],
             })).toBeTruthy();
 
+            // clear cache will use html content
+            sheetClipboardService.copyContentCache().clear();
+
             expect(await commandService.executeCommand(SheetPasteCommand.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
             })).toBeTruthy();
 
-            expect(getValues(10, 0, 12, 0)).toEqual([[1], [2], [4]]);
+            expect(getValues(10, 0, 10, 0)?.[0]?.[0]?.v).toEqual(1);
+            expect(getValues(11, 0, 11, 0)?.[0]?.[0]?.v).toEqual(2);
+            expect(getValues(12, 0, 12, 0)?.[0]?.[0]?.v).toEqual(4);
         });
     });
 });

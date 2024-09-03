@@ -367,6 +367,7 @@ export class FormulaDependencyTreeCache extends Disposable {
 
     clear() {
         this._cacheItems.clear();
+        this._map.clear();
     }
 
     remove(token: string, tree: FormulaDependencyTree) {

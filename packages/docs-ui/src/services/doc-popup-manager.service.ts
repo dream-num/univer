@@ -256,9 +256,16 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
-    attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup): IDisposable {
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
-        const unitId = workbook.getUnitId();
+    attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup, propUnitId?: string): IDisposable {
+        const doc = propUnitId ? this._univerInstanceService.getUnit(propUnitId) : this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+        if (!doc) {
+            return {
+                dispose: () => {
+                    // empty
+                },
+            };
+        }
+        const unitId = doc.getUnitId();
         const { direction = 'top', multipleDirection } = popup;
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {

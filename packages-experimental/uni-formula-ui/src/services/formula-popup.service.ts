@@ -104,11 +104,15 @@ export class UniFormulaPopupService extends Disposable {
             ? this._uniFormulaService.getDocFormula(unitId, position.rangeId)?.f ?? '='
             : '=';
 
-        const disposable = this._docCanvasPopupManagerService.attachPopupToRange(makeSelection(startIndex), {
-            componentKey: DOC_FORMULA_POPUP_KEY,
-            onClickOutside: () => this.closePopup(), // user may update ref range selections
-            direction: 'top',
-        });
+        const disposable = this._docCanvasPopupManagerService.attachPopupToRange(
+            makeSelection(startIndex),
+            {
+                componentKey: DOC_FORMULA_POPUP_KEY,
+                onClickOutside: () => this.closePopup(), // user may update ref range selections
+                direction: 'top',
+            },
+            unitId
+        );
 
         this._popupInfo$.next({ unitId, disposable, type, f, startIndex, position });
         return true;

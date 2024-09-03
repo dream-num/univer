@@ -41,7 +41,7 @@ type ICheckPermissionCommandParams = IEditorBridgeServiceVisibleParam | IMoveRow
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetPermissionInterceptorBaseController)
+@OnLifecycle(LifecycleStages.Ready, SheetPermissionInterceptorBaseController)
 export class SheetPermissionInterceptorBaseController extends Disposable {
     disposableCollection = new DisposableCollection();
 

@@ -21,11 +21,3 @@ body:
           description: Please describe the problem you are trying to solve here.
       validations:
           required: true
-
-    - type: textarea
-      id: solution
-      attributes:
-          label: Solution
-          description: What should happen? Please describe the desired behavior.
-      validations:
-          required: true

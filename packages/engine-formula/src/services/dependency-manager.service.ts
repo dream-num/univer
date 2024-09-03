@@ -157,21 +157,22 @@ export class DependencyManagerService extends Disposable implements IDependencyM
      * @param shouldBeBuildTrees  FormulaDependencyTree[] | FormulaDependencyTreeCache
      */
     private _buildDependencyTree(allTrees: FormulaDependencyTree[], shouldBeBuildTrees: FormulaDependencyTree[] | FormulaDependencyTreeCache, dependencyTrees: FormulaDependencyTree[]) {
-        allTrees.forEach((tree) => {
-            if (shouldBeBuildTrees instanceof FormulaDependencyTreeCache) {
-                shouldBeBuildTrees.dependency(tree);
-            } else {
-                shouldBeBuildTrees.forEach((shouldBeBuildTree) => {
-                    if (tree === shouldBeBuildTree || shouldBeBuildTree.children.includes(tree)) {
-                        return true;
-                    }
-
-                    if (shouldBeBuildTree.dependency(tree)) {
-                        shouldBeBuildTree.pushChildren(tree);
-                    }
-                });
+        let cache: FormulaDependencyTreeCache;
+        if (shouldBeBuildTrees instanceof FormulaDependencyTreeCache) {
+            cache = shouldBeBuildTrees;
+        } else {
+            cache = new FormulaDependencyTreeCache();
+            for (const tree of shouldBeBuildTrees) {
+                const rangeList = tree.rangeList;
+                for (const range of rangeList) {
+                    cache.add(range, tree);
+                }
             }
-        });
+        }
+        for (let i = 0; i < allTrees.length; i++) {
+            const tree = allTrees[i];
+            cache.dependency(tree);
+        }
         this._buildReverseDependency(allTrees, dependencyTrees);
     }
 
@@ -181,17 +182,32 @@ export class DependencyManagerService extends Disposable implements IDependencyM
      * @param dependencyTrees
      */
     private _buildReverseDependency(allTrees: FormulaDependencyTree[], dependencyTrees?: FormulaDependencyTree[]) {
-        allTrees.forEach((tree) => {
-            dependencyTrees?.forEach((dependencyTree) => {
-                if (tree === dependencyTree || tree.children.includes(dependencyTree)) {
-                    return true;
-                }
+        // allTrees.forEach((tree) => {
+        //     dependencyTrees?.forEach((dependencyTree) => {
+        //         if (tree === dependencyTree || tree.children.includes(dependencyTree)) {
+        //             return true;
+        //         }
 
-                if (tree.dependency(dependencyTree)) {
-                    tree.pushChildren(dependencyTree);
+        //         if (tree.dependency(dependencyTree)) {
+        //             tree.pushChildren(dependencyTree);
+        //         }
+        //     });
+        // });
+        for (let i = 0; i < allTrees.length; i++) {
+            const tree = allTrees[i];
+            if (dependencyTrees) {
+                for (let j = 0; j < dependencyTrees.length; j++) {
+                    const dependencyTree = dependencyTrees[j];
+                    if (tree === dependencyTree || tree.children.includes(dependencyTree)) {
+                        continue;
+                    }
+
+                    if (tree.dependency(dependencyTree)) {
+                        tree.pushChildren(dependencyTree);
+                    }
                 }
-            });
-        });
+            }
+        }
     }
 
     /**

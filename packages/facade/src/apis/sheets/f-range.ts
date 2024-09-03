@@ -880,7 +880,7 @@ export class FRange {
      * Returns true if cells in the current range overlap a merged cell.
      * @returns {boolean} is overlap with a merged cell
      */
-    ifPartOfMerge(): boolean {
+    isPartOfMerge(): boolean {
         const mergeData = this._worksheet.getMergeData();
         return mergeData.some((merge) => Rectangle.intersects(this._range, merge));
     }

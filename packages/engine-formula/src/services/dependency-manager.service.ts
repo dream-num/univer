@@ -193,21 +193,21 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         //         }
         //     });
         // });
-        for (let i = 0; i < allTrees.length; i++) {
-            const tree = allTrees[i];
-            if (dependencyTrees) {
-                for (let j = 0; j < dependencyTrees.length; j++) {
-                    const dependencyTree = dependencyTrees[j];
-                    if (tree === dependencyTree || tree.children.includes(dependencyTree)) {
-                        continue;
-                    }
-
-                    if (tree.dependency(dependencyTree)) {
-                        tree.pushChildren(dependencyTree);
-                    }
-                }
+        let allTreesCache = new FormulaDependencyTreeCache();
+        for (const tree of allTrees) {
+            const rangeList = tree.rangeList;
+            for (const range of rangeList) {
+                allTreesCache.add(range, tree);
             }
         }
+        if (dependencyTrees) {
+            for (const dependencyTree of dependencyTrees) {
+                allTreesCache.dependency(dependencyTree);
+            }
+        }
+        allTreesCache.dispose();
+        // @ts-ignore
+        allTreesCache = null;
     }
 
     /**

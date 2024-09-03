@@ -14,13 +14,48 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
+import type { IAccessor, Workbook } from '@univerjs/core';
 import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { map, mergeMap, Observable } from 'rxjs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/sidebar.operations';
+
+const getLinkDisable$ = (accessor: IAccessor) => {
+    const disableRange$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] });
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    univerInstanceService.focused$.pipe(
+        map((focused) => {
+            if (!focused) {
+                return null;
+            }
+            const unit = univerInstanceService.getUnit<Workbook>(focused, UniverInstanceType.UNIVER_SHEET);
+            return unit;
+        }),
+        mergeMap((unit) => {
+            if (!unit) {
+                return new Observable<null>((sub) => {
+                    sub.next(null);
+                });
+            }
+            return unit.activeSheet$;
+        })
+    ).subscribe((v) => {});
+
+    const sheetSelectionService = accessor.get(SheetsSelectionsService);
+    sheetSelectionService.selectionMoveEnd$.subscribe((seleciton) => {
+        if (seleciton.length !== 1) {
+            const range = seleciton[0].range;
+            if (range.endRow > range.startRow || range.endColumn > range.startColumn) {
+                return null;
+            }
+            return null;
+        }
+        // const cell =
+    });
+};
 
 export const insertLinkMenuFactory = (accessor: IAccessor) => {
     return {

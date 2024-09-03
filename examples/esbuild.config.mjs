@@ -109,6 +109,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
         'process.env.BUILD_TIME': `"${new Date().toISOString()}"`,
         'process.env.IS_E2E': isE2E ? 'true' : 'false',
     },
+
 });
 
 if (args.watch) {

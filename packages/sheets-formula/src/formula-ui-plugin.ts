@@ -42,16 +42,18 @@ import { RefSelectionsRenderService } from './services/render-services/ref-selec
 import { PromptController } from './controllers/prompt.controller';
 import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService, RemoteRegisterFunctionServiceName } from './services/remote/remote-register-function.service';
 import type {
-    IUniverSheetsFormulaBaseConfig, IUniverSheetsFormulaMobileConfig,
-    IUniverSheetsFormulaRemoteConfig } from './controllers/config.schema';
+    IUniverSheetsFormulaBaseConfig,
+    IUniverSheetsFormulaMobileConfig,
+    IUniverSheetsFormulaRemoteConfig,
+} from './controllers/config.schema';
 import {
-    defaultPluginBaseConfig, defaultPluginMobileConfig,
-
-    defaultPluginRemoteConfig
-    , PLUGIN_CONFIG_KEY_BASE,
-
+    defaultPluginBaseConfig,
+    defaultPluginMobileConfig,
+    defaultPluginRemoteConfig,
+    PLUGIN_CONFIG_KEY_BASE,
     PLUGIN_CONFIG_KEY_MOBILE,
-    PLUGIN_CONFIG_KEY_REMOTE } from './controllers/config.schema';
+    PLUGIN_CONFIG_KEY_REMOTE,
+} from './controllers/config.schema';
 
 @DependentOn(UniverFormulaEnginePlugin)
 export class UniverRemoteSheetsFormulaPlugin extends Plugin {

@@ -68,7 +68,7 @@ export function Ribbon(props: IRibbonProps) {
             const toolbarWidth = toolbar.clientWidth;
             const toolbarItems = Object.values(toolbarItemRefs.current);
             const collapsedIds: string[] = [];
-            let totalWidth = 58;
+            let totalWidth = 90;
 
             for (const { el, key } of toolbarItems) {
                 if (!el) continue;

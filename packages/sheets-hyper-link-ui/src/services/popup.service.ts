@@ -123,6 +123,9 @@ export class SheetsHyperLinkPopupService extends Disposable {
             onClickOutside: () => {
                 this.hideCurrentPopup();
             },
+            onClick: () => {
+                this.hideCurrentPopup(location.type, true);
+            },
         };
         if (location.type === HyperLinkEditSourceType.EDITING) {
             disposable = this._sheetCanvasPopManagerService.attachPopupToAbsolutePosition(
@@ -203,9 +206,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
         const popup: ICanvasPopup = {
             componentKey: CellLinkEdit.componentKey,
             direction: 'bottom',
-            // onClickOutside: () => {
-            //     this.hideCurrentPopup();
-            // },
         };
         return popup;
     }

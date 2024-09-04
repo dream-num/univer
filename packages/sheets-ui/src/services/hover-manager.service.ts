@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ICustomRange, IParagraph, IPosition, ISelectionCellWithMergeInfo, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, HorizontalAlign, IUniverInstanceService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { BehaviorSubject, distinctUntilChanged, Subject } from 'rxjs';
-import type { IBoundRectNoAngle } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, IFontCacheItem } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
@@ -42,6 +42,43 @@ export interface IHoverCellPosition {
      * rect of custom-range or bullet
      */
     rect: Nullable<IBoundRectNoAngle>;
+}
+
+function calcPadding(cell: ISelectionCellWithMergeInfo, font: IFontCacheItem) {
+    const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
+    const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
+    const vt = font.verticalAlign;
+    const ht = font.horizontalAlign;
+
+    let paddingTop = 0;
+    switch (vt) {
+        case VerticalAlign.UNSPECIFIED:
+        case VerticalAlign.BOTTOM:
+            paddingTop = cell.mergeInfo.endY - cell.mergeInfo.startY - height;
+            break;
+        case VerticalAlign.MIDDLE:
+            paddingTop = (cell.mergeInfo.endY - cell.mergeInfo.startX - height) / 2;
+            break;
+        default:
+            break;
+    }
+
+    let paddingLeft = 0;
+    switch (ht) {
+        case HorizontalAlign.RIGHT:
+            paddingLeft = cell.mergeInfo.endX - cell.mergeInfo.startX - width;
+            break;
+        case HorizontalAlign.CENTER:
+            paddingLeft = (cell.mergeInfo.endX - cell.mergeInfo.startX - width) / 2;
+            break;
+        default:
+            break;
+    }
+
+    return {
+        paddingLeft,
+        paddingTop,
+    };
 }
 
 export class HoverManagerService extends Disposable {
@@ -128,7 +165,7 @@ export class HoverManagerService extends Disposable {
 
         const { location, position } = hoverPosition;
 
-        const font = skeleton.getFontSkeleton(location.row, location.col);
+        const font = skeleton.getFont(location.row, location.col);
 
         let customRange: Nullable<{
             rects: IBoundRectNoAngle[];
@@ -140,14 +177,16 @@ export class HoverManagerService extends Disposable {
         }> = null;
 
         const PADDING = 4;
+        const cell = skeleton.getCellByIndex(location.row, location.col);
         if (font) {
-            const rects = calculateDocSkeletonRects(font);
+            const { paddingLeft, paddingTop } = calcPadding(cell, font);
+            const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
             const innerX = offsetX - position.startX;
             const innerY = offsetY - position.startY;
             customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && (rect.top - PADDING) <= innerY && innerY <= (rect.bottom + PADDING)));
             bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && (list.rect.top - PADDING) <= innerY && innerY <= (list.rect.bottom + PADDING));
         }
-        const cell = skeleton.getCellByIndex(location.row, location.col);
+
         const rect = customRange?.rects.pop() ?? bullet?.rect;
 
         return {
@@ -158,10 +197,10 @@ export class HoverManagerService extends Disposable {
             customRange: customRange?.range,
             bullet: bullet?.paragraph,
             rect: rect && {
-                top: rect.top + cell.startY - PADDING,
-                bottom: rect.bottom + cell.startY + PADDING,
-                left: rect.left + cell.startX,
-                right: rect.right + cell.startX,
+                top: rect.top + cell.mergeInfo.startY - PADDING,
+                bottom: rect.bottom + cell.mergeInfo.startY + PADDING,
+                left: rect.left + cell.mergeInfo.startX,
+                right: rect.right + cell.mergeInfo.startX,
             },
         };
     }

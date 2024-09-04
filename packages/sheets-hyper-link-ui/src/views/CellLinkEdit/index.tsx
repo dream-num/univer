@@ -16,7 +16,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
-import { createInternalEditorID, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { createInternalEditorID, CustomRangeType, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IUnitRangeWithName, Workbook } from '@univerjs/core';
 import { RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -33,9 +33,12 @@ import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../comman
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
 
+function resolveSheetLink() {}
+
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
     const [display, setDisplay] = useState('');
+    const [showLabel, setShowLabel] = useState(true);
     const [type, setType] = useState<LinkType | string>(LinkType.link);
     const [payload, setPayload] = useState('');
     const localeService = useDependency(LocaleService);
@@ -62,13 +65,15 @@ export const CellLinkEdit = () => {
     useEffect(() => {
         if (editing?.row !== undefined && editing.col !== undefined) {
             const { label, customRange, row, col } = editing;
-            const link = {
-                id: customRange?.rangeId ?? '',
-                display: label ?? '',
-                payload: customRange?.properties?.url ?? '',
-                row,
-                column: col,
-            };
+            const link = customRange
+                ? {
+                    id: customRange?.rangeId ?? '',
+                    display: label ?? '',
+                    payload: customRange?.properties?.url ?? '',
+                    row,
+                    column: col,
+                }
+                : null;
 
             if (link) {
                 setId(link.id);
@@ -131,10 +136,11 @@ export const CellLinkEdit = () => {
             const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId);
             const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
             const cell = worksheet?.getCellRaw(editing.row, editing.col);
-
+            const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
             const cellValue = getCellValueOrigin(cell);
             setType(LinkType.link);
-            setPayload('');
+            setPayload(range?.properties?.url ?? '');
+            setShowLabel(!cellValue);
             setDisplay((cellValue ?? '').toString());
             setId('');
             return;
@@ -269,19 +275,23 @@ export const CellLinkEdit = () => {
 
     return (
         <div className={styles.cellLinkEdit}>
-            <FormLayout
-                label={localeService.t('hyperLink.form.label')}
-                error={showError && !display ? localeService.t('hyperLink.form.inputError') : ''}
-            >
-                <Input
-                    value={display}
-                    onChange={(v) => {
-                        setDisplay(v);
-                        setByPayload.current = false;
-                    }}
-                    placeholder={localeService.t('hyperLink.form.labelPlaceholder')}
-                />
-            </FormLayout>
+            {showLabel
+                ? (
+                    <FormLayout
+                        label={localeService.t('hyperLink.form.label')}
+                        error={showError && !display ? localeService.t('hyperLink.form.inputError') : ''}
+                    >
+                        <Input
+                            value={display}
+                            onChange={(v) => {
+                                setDisplay(v);
+                                setByPayload.current = false;
+                            }}
+                            placeholder={localeService.t('hyperLink.form.labelPlaceholder')}
+                        />
+                    </FormLayout>
+                )
+                : null}
             <FormLayout label={localeService.t('hyperLink.form.type')}>
                 <Select
                     options={linkTypeOptions}

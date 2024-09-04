@@ -83,17 +83,22 @@ const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, skeleton: DocumentS
     };
 };
 
-const calcLinkPosition = (skeleton: DocumentSkeleton, range: ICustomRange) => {
+const calcLinkPosition = (skeleton: DocumentSkeleton, range: ICustomRange, paddingLeft = 0, paddingTop = 0) => {
     const rects = calcDocRangePositions({ startOffset: range.startIndex, endOffset: range.endIndex + 1, collapsed: false }, skeleton);
     if (rects) {
         return {
-            rects,
+            rects: rects.map((rect) => ({
+                top: rect.top + paddingTop,
+                bottom: rect.bottom + paddingTop,
+                left: rect.left + paddingLeft,
+                right: rect.right + paddingLeft,
+            })),
             range,
         };
     }
 };
 
-const calcBulletPosition = (skeleton: DocumentSkeleton, paragraph: IParagraph) => {
+const calcBulletPosition = (skeleton: DocumentSkeleton, paragraph: IParagraph, paddingLeft = 0, paddingTop = 0) => {
     const node = skeleton.findNodeByCharIndex(paragraph.startIndex);
     const divide = node?.parent;
     const line = divide?.parent;
@@ -116,21 +121,26 @@ const calcBulletPosition = (skeleton: DocumentSkeleton, paragraph: IParagraph) =
     }
 
     return {
-        rect,
+        rect: {
+            top: rect.top + paddingTop,
+            bottom: rect.bottom + paddingTop,
+            left: rect.left + paddingLeft,
+            right: rect.right + paddingLeft,
+        },
         segmentId: undefined,
         segmentPageIndex: -1,
         paragraph,
     };
 };
 
-export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton) => {
+export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, paddingLeft = 0, paddingTop = 0) => {
     const docModel = docSkeleton.getViewModel().getDataModel();
     const hyperLinks = docModel.getBody()?.customRanges?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK) ?? [];
     const checkLists = docModel.getBody()?.paragraphs?.filter((p) => p.bullet?.listType.indexOf(PresetListType.CHECK_LIST) === 0) ?? [];
 
     return {
-        links: hyperLinks.map((link) => calcLinkPosition(docSkeleton, link)!).filter(Boolean),
-        checkLists: checkLists.map((list) => calcBulletPosition(docSkeleton, list)!).filter(Boolean),
+        links: hyperLinks.map((link) => calcLinkPosition(docSkeleton, link, paddingLeft, paddingTop)!).filter(Boolean),
+        checkLists: checkLists.map((list) => calcBulletPosition(docSkeleton, list, paddingLeft, paddingTop)!).filter(Boolean),
     };
 };
 
@@ -154,7 +164,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
 
     if (!skeleton || !currentRender) return;
 
-    const font = skeleton.getFontSkeleton(row, col);
+    const font = skeleton.getFont(row, col)?.documentSkeleton;
 
     if (!font) {
         return null;

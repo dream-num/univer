@@ -29,14 +29,12 @@ import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.ope
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 
-export interface ICanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
+export interface ICanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible' | 'onClick'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
 }
 
 export class SheetCanvasPopManagerService extends Disposable {
-    private _activePopup: Nullable<string> = null;
-
     constructor(
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,

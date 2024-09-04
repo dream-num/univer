@@ -432,7 +432,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._marginTop = top;
     }
 
-    getFontSkeleton(rowIndex: number, columnIndex: number): Nullable<DocumentSkeleton> {
+    getFont(rowIndex: number, columnIndex: number): Nullable<IFontCacheItem> {
         const fontCache = this.stylesCache.font;
         if (!fontCache) {
             return null;
@@ -442,7 +442,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const fontMatrix = fontCache[font];
             const fontItem = fontMatrix.getValue(rowIndex, columnIndex);
             if (fontItem) {
-                return fontItem.documentSkeleton;
+                return fontItem;
             }
         }
 

@@ -229,27 +229,34 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
         return null;
     }
 
-    const { row, col, mergeCell, actualCol, actualRow } = cellIndex;
+    let { actualCol, actualRow } = cellIndex;
+    skeleton.overflowCache.forValue((r, c, range) => {
+        if (range.startRow <= actualRow && range.endRow >= actualRow && range.startColumn <= actualCol && range.endColumn >= actualCol) {
+            actualCol = c;
+            actualRow = r;
+        }
+    });
 
+    const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
     const location: ISheetLocation = {
         unitId,
         subUnitId: sheetId,
         workbook,
         worksheet,
-        row: actualRow,
-        col: actualCol,
+        row: actualCell.actualRow,
+        col: actualCell.actualColumn,
     };
 
     let anchorCell: IRange;
 
-    if (mergeCell) {
-        anchorCell = mergeCell;
+    if (actualCell.mergeInfo) {
+        anchorCell = actualCell.mergeInfo;
     } else {
         anchorCell = {
-            startRow: row,
-            endRow: row,
-            startColumn: col,
-            endColumn: col,
+            startRow: location.row,
+            endRow: location.row,
+            startColumn: location.col,
+            endColumn: location.col,
         };
     }
 

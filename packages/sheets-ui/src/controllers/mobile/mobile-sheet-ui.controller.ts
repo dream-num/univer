@@ -23,7 +23,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenu2Service, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
 import {
     AddWorksheetMergeAllCommand,
@@ -162,7 +162,7 @@ export class SheetUIMobileController extends Disposable {
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IMenu2Service protected readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService
     ) {
         super();
@@ -272,7 +272,7 @@ export class SheetUIMobileController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initShortcuts(): void {

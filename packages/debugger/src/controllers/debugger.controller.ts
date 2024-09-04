@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenu2Service } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
@@ -45,7 +45,7 @@ import { menuSchema } from './menu.schema';
 export class DebuggerController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -77,7 +77,7 @@ export class DebuggerController extends Disposable {
     }
 
     private _initializeMenu() {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initCustomComponents(): void {

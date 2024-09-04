@@ -15,7 +15,7 @@
  */
 
 import { ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { ComponentManager, ILayoutService, IMenu2Service, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService } from '@univerjs/uniui';
 import { DocCreateTableOperation, DocUIController } from '@univerjs/docs-ui';
 import { BulletListCommand, OrderListCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
@@ -30,7 +30,7 @@ export class UniDocsUIController extends DocUIController {
         @Inject(ComponentManager) componentManager: ComponentManager,
         @ICommandService commandService: ICommandService,
         @ILayoutService layoutService: ILayoutService,
-        @IMenu2Service menu2Service: IMenu2Service,
+        @IMenuManagerService menuManagerService: IMenuManagerService,
         @IUIPartsService uiPartsService: IUIPartsService,
         @IUniverInstanceService univerInstanceService: IUniverInstanceService,
         @IShortcutService shortcutService: IShortcutService,
@@ -42,7 +42,7 @@ export class UniDocsUIController extends DocUIController {
             componentManager,
             commandService,
             layoutService,
-            menu2Service,
+            menuManagerService,
             uiPartsService,
             univerInstanceService,
             shortcutService,
@@ -53,7 +53,7 @@ export class UniDocsUIController extends DocUIController {
     }
 
     private _initUniMenus(): void {
-        this._menu2Service.appendRootMenu(menuSchema);
+        this._menuManagerService.appendRootMenu(menuSchema);
 
         ([
             [BuiltinUniToolbarItemId.FONT_FAMILY, SetInlineFormatFontFamilyCommand.id],

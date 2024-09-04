@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 import { UniscriptMenuItemFactory } from './menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.OTHERS]: {
         [ToggleScriptPanelOperation.id]: {
             order: 5,

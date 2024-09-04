@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { SlideAddTextCommand } from '../commands/operations/insert-text.operation';
 import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
@@ -23,7 +23,7 @@ import { SlideAddTextMenuItemFactory } from './text.menu';
 import { IMAGE_MENU_ID, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
 import { SHAPE_MENU_ID, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {
         [SlideAddTextCommand.id]: {
             order: 0,

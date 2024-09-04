@@ -16,7 +16,7 @@
 
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
-import { BuiltInUIPart, ComponentManager, IMenu2Service, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
@@ -46,7 +46,7 @@ import { menuSchema } from './menu.schema';
 export class SlidesUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
-        @IMenu2Service protected readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @ICommandService protected readonly _commandService: ICommandService,
@@ -62,7 +62,7 @@ export class SlidesUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initCustomComponents(): void {

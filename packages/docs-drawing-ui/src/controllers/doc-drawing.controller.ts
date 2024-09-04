@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenu2Service, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 
 import { AddImageSingle } from '@univerjs/icons';
 import { UploadFileMenu } from '../views/upload-component/UploadFile';
@@ -44,7 +44,7 @@ export class DocDrawingUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
@@ -61,7 +61,7 @@ export class DocDrawingUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initCommands() {

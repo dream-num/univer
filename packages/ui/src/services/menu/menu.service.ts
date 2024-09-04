@@ -23,7 +23,7 @@ import { IShortcutService } from '../shortcut/shortcut.service';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
 import type { IDisplayMenuItem, IMenuItem, MenuConfig } from './menu';
 import { MenuPosition } from './menu';
-import { IMenu2Service } from './menu2.service';
+import { IMenuManagerService } from './menu-manager.service';
 import { ContextMenuGroup, RibbonOthersGroup } from './types';
 
 /** @deprecated */
@@ -66,7 +66,7 @@ export class MenuService extends Disposable implements IMenuService {
 
     constructor(
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
     }
@@ -105,7 +105,7 @@ export class MenuService extends Disposable implements IMenuService {
             if (position !== MenuPosition.CONTEXT_MENU) {
                 const menus = this.getMenuItems(position);
                 menus.forEach((menu) => {
-                    this._menu2Service.mergeMenu({
+                    this._menuManagerService.mergeMenu({
                         [position]: {
                             [menu.group ?? RibbonOthersGroup.OTHERS]: {
                                 [menu.id]: {
@@ -118,7 +118,7 @@ export class MenuService extends Disposable implements IMenuService {
             } else {
                 const menus = this.getMenuItems(position);
                 menus.forEach((menu) => {
-                    this._menu2Service.mergeMenu({
+                    this._menuManagerService.mergeMenu({
                         [position]: {
                             [menu.group ?? ContextMenuGroup.OTHERS]: {
                                 [menu.id]: {

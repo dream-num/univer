@@ -20,39 +20,39 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { IMenuItem } from '../menu/menu';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
-import { ContextMenuGroup, ContextMenuPosition, Menu2Position, RibbonDataGroup, RibbonFormulasGroup, RibbonInsertGroup, RibbonOthersGroup, RibbonPosition, RibbonStartGroup, RibbonViewGroup } from './types';
+import { ContextMenuGroup, ContextMenuPosition, MenuManagerPosition, RibbonDataGroup, RibbonFormulasGroup, RibbonInsertGroup, RibbonOthersGroup, RibbonPosition, RibbonStartGroup, RibbonViewGroup } from './types';
 
-export const IMenu2Service = createIdentifier<IMenu2Service>('univer.menu2-service');
+export const IMenuManagerService = createIdentifier<IMenuManagerService>('univer.menu-manager-service');
 
-export interface IMenu2Schema {
+export interface IMenuSchema {
     key: string;
     order: number;
     item?: IMenuItem;
-    children?: IMenu2Schema[];
+    children?: IMenuSchema[];
 }
 
-export interface IMenu2Service {
+export interface IMenuManagerService {
     readonly menuChanged$: Observable<void>;
 
-    mergeMenu(source: IMenu2Item, target?: IMenu2Item): void;
+    mergeMenu(source: MenuSchemaType, target?: MenuSchemaType): void;
 
-    appendRootMenu(source: IMenu2Item): void;
+    appendRootMenu(source: MenuSchemaType): void;
 
-    getMenuByPositionKey(position: string): IMenu2Schema[];
+    getMenuByPositionKey(position: string): IMenuSchema[];
 }
 
-export type IMenu2Item = {
+export type MenuSchemaType = {
     order?: number;
     menuItemFactory?: (accessor: IAccessor) => IMenuItem;
 } | {
-    [key: string]: IMenu2Item;
+    [key: string]: MenuSchemaType;
 };
 
-export class Menu2Service extends Disposable implements IMenu2Service {
+export class MenuManagerService extends Disposable implements IMenuManagerService {
     readonly menuChanged$ = new Subject<void>();
 
-    private _menu: IMenu2Item = {
-        [Menu2Position.RIBBON]: {
+    private _menu: MenuSchemaType = {
+        [MenuManagerPosition.RIBBON]: {
             [RibbonPosition.START]: {
                 order: 0,
                 [RibbonStartGroup.HISTORY]: {
@@ -108,7 +108,7 @@ export class Menu2Service extends Disposable implements IMenu2Service {
                 },
             },
         },
-        [Menu2Position.CONTEXT_MENU]: {
+        [MenuManagerPosition.CONTEXT_MENU]: {
             [ContextMenuPosition.MAIN_AREA]: {
                 order: 0,
                 [ContextMenuGroup.FORMAT]: {
@@ -194,12 +194,12 @@ export class Menu2Service extends Disposable implements IMenu2Service {
      * @param source
      * @param target default is root menu
      */
-    mergeMenu(source: IMenu2Item, target?: IMenu2Item): void {
+    mergeMenu(source: MenuSchemaType, target?: MenuSchemaType): void {
         const _target = target ?? this._menu;
 
         for (const [key, value] of Object.entries(_target)) {
             if (key in source) {
-                const _key = key as keyof IMenu2Item;
+                const _key = key as keyof MenuSchemaType;
                 Tools.deepMerge(_target[_key], source[_key]);
 
                 this.menuChanged$.next();
@@ -209,16 +209,16 @@ export class Menu2Service extends Disposable implements IMenu2Service {
         }
     }
 
-    appendRootMenu(source: IMenu2Item): void {
+    appendRootMenu(source: MenuSchemaType): void {
         Tools.deepMerge(this._menu, source);
         this.menuChanged$.next();
     }
 
-    private _buildMenuSchema(data: IMenu2Item): IMenu2Schema[] {
-        const result: IMenu2Schema[] = [];
+    private _buildMenuSchema(data: MenuSchemaType): IMenuSchema[] {
+        const result: IMenuSchema[] = [];
 
         for (const [key, value] of Object.entries(data)) {
-            const menuItem: Partial<IMenu2Schema> = {
+            const menuItem: Partial<IMenuSchema> = {
                 key,
                 order: value.order,
             };
@@ -244,7 +244,7 @@ export class Menu2Service extends Disposable implements IMenu2Service {
             }
 
             if (menuItem.item || menuItem.children) {
-                result.push(menuItem as IMenu2Schema); // 使用类型断言补充缺失字段
+                result.push(menuItem as IMenuSchema); // 使用类型断言补充缺失字段
             }
         }
 
@@ -256,7 +256,7 @@ export class Menu2Service extends Disposable implements IMenu2Service {
      * @param key
      * @returns Menu schema array or empty array if not found
      */
-    getMenuByPositionKey(key: string): IMenu2Schema[] {
+    getMenuByPositionKey(key: string): IMenuSchema[] {
         const findKey = (obj: any): any => {
             if (key in obj) {
                 return this._buildMenuSchema(obj[key]);

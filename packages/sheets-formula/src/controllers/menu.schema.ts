@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
@@ -22,7 +22,7 @@ import { MoreFunctionsOperation } from '../commands/operations/more-functions.op
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory } from './menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMULAS_INSERT]: {
         [InsertFunctionOperation.id]: {
             order: 1,

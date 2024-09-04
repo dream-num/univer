@@ -40,7 +40,7 @@ import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useObservable } from '../../hooks/observable';
 import { useScrollYOverContainer } from '../../hooks/layout';
 import { ILayoutService } from '../../../services/layout/layout.service';
-import { IMenu2Service } from '../../../services/menu/menu2.service';
+import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import styles from './index.module.less';
 
 // TODO: @jikkai disabled and hidden are not working
@@ -62,12 +62,12 @@ export interface IBaseMenuProps {
 function MenuWrapper(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
 
-    const menu2Service = useDependency(IMenu2Service);
+    const menuManagerService = useDependency(IMenuManagerService);
 
     if (!menuType) {
         return null;
     };
-    const menuItems = menu2Service.getMenuByPositionKey(menuType);
+    const menuItems = menuManagerService.getMenuByPositionKey(menuType);
 
     return menuItems && menuItems.map((item) => item.item
         ? (
@@ -171,7 +171,7 @@ interface IMenuItemProps {
 }
 
 function MenuItem({ menuItem, onClick }: IMenuItemProps) {
-    const menu2Service = useDependency(IMenu2Service);
+    const menuManagerService = useDependency(IMenuManagerService);
 
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);
@@ -271,7 +271,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
         );
     };
 
-    const subMenuItems = menuItem.id ? menu2Service.getMenuByPositionKey(menuItem.id) : [];
+    const subMenuItems = menuItem.id ? menuManagerService.getMenuByPositionKey(menuItem.id) : [];
 
     const renderSubItemsType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;

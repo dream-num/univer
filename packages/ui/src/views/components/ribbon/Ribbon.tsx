@@ -20,11 +20,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { MoreFunctionSingle } from '@univerjs/icons';
 
-import type { IMenu2Schema } from '../../../services/menu/menu2.service';
-import { IMenu2Service } from '../../../services/menu/menu2.service';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarButton } from '../ribbon/Button/ToolbarButton';
-import { Menu2Position, RibbonPosition } from '../../../services/menu/types';
+import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
 import { ToolbarItem } from './ToolbarItem';
 import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 import styles from './index.module.less';
@@ -36,30 +36,30 @@ interface IRibbonProps {
 export function Ribbon(props: IRibbonProps) {
     const { headerMenuComponents } = props;
 
-    const menu2Service = useDependency(IMenu2Service);
+    const menuManagerService = useDependency(IMenuManagerService);
     const localeService = useDependency(LocaleService);
 
     const toolbarRef = useRef<HTMLDivElement>(null);
     const toolbarItemRefs = useRef<Record<string, { el: HTMLDivElement;key: string }>>({});
 
-    const [ribbon, setRibbon] = useState<IMenu2Schema[]>([]);
+    const [ribbon, setRibbon] = useState<IMenuSchema[]>([]);
     const [category, setCategory] = useState<string>(RibbonPosition.START);
     const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
 
     // subscribe to menu changes
     useEffect(() => {
         function getRibbon(): void {
-            const ribbon = menu2Service.getMenuByPositionKey(Menu2Position.RIBBON);
+            const ribbon = menuManagerService.getMenuByPositionKey(MenuManagerPosition.RIBBON);
             setRibbon(ribbon);
         }
         getRibbon();
 
-        const subscription = menu2Service.menuChanged$.subscribe(getRibbon);
+        const subscription = menuManagerService.menuChanged$.subscribe(getRibbon);
 
         return () => {
             subscription.unsubscribe();
         };
-    }, [menu2Service]);
+    }, [menuManagerService]);
 
     // resize observer
     useEffect(() => {
@@ -96,8 +96,8 @@ export function Ribbon(props: IRibbonProps) {
 
     const activeGroup = useMemo(() => {
         const allGroups = ribbon.find((group) => group.key === category)?.children ?? [];
-        const visibleGroups: IMenu2Schema[] = [];
-        const hiddenGroups: IMenu2Schema[] = [];
+        const visibleGroups: IMenuSchema[] = [];
+        const hiddenGroups: IMenuSchema[] = [];
 
         for (const item of allGroups) {
             if (item.children) {

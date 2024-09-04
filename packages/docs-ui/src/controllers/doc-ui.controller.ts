@@ -26,7 +26,7 @@ import {
     OnLifecycle,
     UniverInstanceType,
 } from '@univerjs/core';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenu2Service, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { TodoList } from '@univerjs/icons';
@@ -69,7 +69,7 @@ export class DocUIController extends Disposable {
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
         @ICommandService protected readonly _commandService: ICommandService,
         @ILayoutService protected readonly _layoutService: ILayoutService,
-        @IMenu2Service protected readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
@@ -101,7 +101,7 @@ export class DocUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initShortCut() {

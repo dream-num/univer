@@ -17,7 +17,7 @@
 import { connectInjector, ICommandService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
 
 import type { UIPartsService } from '@univerjs/ui';
-import { ComponentManager, IDialogService, ILayoutService, IMenu2Service, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { serializeRange } from '@univerjs/engine-formula';
 import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSingle, ExpandDescendingSingle } from '@univerjs/icons';
@@ -38,7 +38,7 @@ const CUSTOM_SORT_PANEL_WIDTH = 560;
 export class SheetsSortUIController extends RxDisposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IDialogService private readonly _dialogService: IDialogService,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IUIPartsService private readonly _uiPartsService: UIPartsService,
@@ -55,7 +55,7 @@ export class SheetsSortUIController extends RxDisposable {
     }
 
     private _initMenu() {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initCommands(): void {

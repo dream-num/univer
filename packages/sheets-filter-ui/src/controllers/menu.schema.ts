@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import {
     ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand,
@@ -26,7 +26,7 @@ import {
     SmartToggleFilterMenuItemFactory,
 } from './sheets-filter.menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMULAS_INSERT]: {
         [SmartToggleSheetsFilterCommand.id]: {
             order: 10,

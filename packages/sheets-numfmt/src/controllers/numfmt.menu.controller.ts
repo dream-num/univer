@@ -15,7 +15,7 @@
  */
 
 import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenu2Service } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 
 import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../components/more-numfmt-type/MoreNumfmtType';
 import { menuSchema } from './menu.schema';
@@ -25,14 +25,14 @@ export class NumfmtMenuController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
         this._initMenu();
     }
 
     private _initMenu() {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
 
         this.disposeWithMe((this._componentManager.register(MORE_NUMFMT_TYPE_KEY, MoreNumfmtType)));
         this.disposeWithMe((this._componentManager.register(OPTIONS_KEY, Options)));

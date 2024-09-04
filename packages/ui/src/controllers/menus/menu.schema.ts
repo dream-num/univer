@@ -15,13 +15,13 @@
  */
 
 import { RedoCommand, UndoCommand } from '@univerjs/core';
-import type { IMenu2Item } from '../../services/menu/menu2.service';
+import type { MenuSchemaType } from '../../services/menu/menu-manager.service';
 import { RibbonStartGroup } from '../../services/menu/types';
 import { ToggleShortcutPanelOperation } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { ShortcutPanelMenuItemFactory } from '../shortcut-display/menu';
 import { RedoMenuItemFactory, UndoMenuItemFactory } from './menus';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.HISTORY]: {
         [UndoCommand.id]: {
             order: 0,

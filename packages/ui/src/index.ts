@@ -102,10 +102,10 @@ export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.serv
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
 
-export { IMenu2Service, type IMenu2Item, Menu2Service } from './services/menu/menu2.service';
+export { IMenuManagerService, type MenuSchemaType, MenuManagerService } from './services/menu/menu-manager.service';
 export {
 
-    Menu2Position,
+    MenuManagerPosition,
     RibbonPosition,
     RibbonStartGroup,
     RibbonInsertGroup,

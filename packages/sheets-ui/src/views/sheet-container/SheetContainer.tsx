@@ -17,7 +17,7 @@
 import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
 import React, { useMemo } from 'react';
-import { ContextMenuPosition, IMenu2Service, ToolbarItem, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useObservable } from '@univerjs/ui';
 
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
@@ -29,9 +29,9 @@ import { useActiveWorkbook } from '../../components/hook';
 import styles from './index.module.less';
 
 export function RenderSheetFooter() {
-    const menu2Service = useDependency(IMenu2Service);
+    const menuManagerService = useDependency(IMenuManagerService);
     const workbook = useActiveWorkbook();
-    const footerMenus = menu2Service.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
+    const footerMenus = menuManagerService.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
 
     if (!workbook) return null;
     return (

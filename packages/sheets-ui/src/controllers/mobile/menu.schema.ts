@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import {
     SheetCopyCommand,
 } from '../../commands/commands/clipboard.command';
 import { CopyMenuItemFactory } from '../menu/menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [ContextMenuPosition.MAIN_AREA]: {
         [ContextMenuGroup.FORMAT]: {
             [SheetCopyCommand.name]: {

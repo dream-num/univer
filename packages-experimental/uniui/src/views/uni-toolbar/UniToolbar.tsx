@@ -15,7 +15,7 @@
  */
 
 import { IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
-import { IMenu2Service, ToolbarItem } from '@univerjs/ui';
+import { IMenuManagerService, ToolbarItem } from '@univerjs/ui';
 import type { ComponentType } from 'react';
 import React from 'react';
 import { useWorkbooks } from '@univerjs/sheets-ui';
@@ -32,11 +32,11 @@ export function UniToolbar() {
     const uniToolbarService = useDependency(UniToolbarService);
     const instanceService = useDependency(IUniverInstanceService);
     const focusedUnit = useObservable(instanceService.focused$);
-    const menu2Service = useDependency(IMenu2Service);
+    const menuManagerService = useDependency(IMenuManagerService);
 
     const type = focusedUnit ? (instanceService.getUnit(focusedUnit)?.type ?? UniverInstanceType.UNIVER_UNKNOWN) : UniverInstanceType.UNIVER_UNKNOWN;
 
-    const menus = menu2Service.getMenuByPositionKey(UNI_MENU_POSITIONS.TOOLBAR_MAIN);
+    const menus = menuManagerService.getMenuByPositionKey(UNI_MENU_POSITIONS.TOOLBAR_MAIN);
 
     const toolbarItems = uniToolbarService.getItems();
 

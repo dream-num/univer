@@ -32,7 +32,7 @@ import { SearchSingle16 } from '@univerjs/icons';
 import { ComponentManager,
     IDialogService,
     ILayoutService,
-    IMenu2Service,
+    IMenuManagerService,
     IShortcutService,
 } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
@@ -65,7 +65,7 @@ const FIND_REPLACE_PANEL_TOP_PADDING = -90;
 export class FindReplaceController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IFindReplaceService private readonly _findReplaceService: IFindReplaceService,
@@ -116,7 +116,7 @@ export class FindReplaceController extends RxDisposable {
         this.disposeWithMe(this._componentManager.register('FindReplaceDialog', FindReplaceDialog));
         this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle16));
 
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
 
         // this controller is also responsible for toggling the FindReplaceDialog
         this._findReplaceService.stateUpdates$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {

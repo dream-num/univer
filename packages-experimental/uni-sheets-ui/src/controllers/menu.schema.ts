@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type IMenu2Item, RibbonStartGroup } from '@univerjs/ui';
+import { type MenuSchemaType, RibbonStartGroup } from '@univerjs/ui';
 import { FONT_GROUP_MENU_ID, UNI_MENU_POSITIONS } from '@univerjs/uniui';
 import { menuSchema as sheetsUIMenuSchema } from '@univerjs/sheets-ui';
 import {
@@ -28,7 +28,7 @@ import {
     SheetUnderlineMenuItemFactory,
 } from './menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: (sheetsUIMenuSchema as any)[RibbonStartGroup.FORMAT],
     [FONT_GROUP_MENU_ID]: {
         [SHEET_BOLD_MUTATION_ID]: {

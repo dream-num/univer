@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type IMenu2Item, RibbonOthersGroup } from '@univerjs/ui';
+import { type MenuSchemaType, RibbonOthersGroup } from '@univerjs/ui';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import {
     ChangeUserMenuItemFactory,
@@ -50,7 +50,7 @@ import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonOthersGroup.OTHERS]: {
         [LocaleOperation.id]: {
             order: 0,

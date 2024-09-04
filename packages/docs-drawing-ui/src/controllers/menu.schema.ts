@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import {
     IMAGE_MENU_ID,
@@ -23,7 +23,7 @@ import {
     UploadFloatImageMenuFactory,
 } from '../views/menu/image.menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.LAYOUT]: {
         [IMAGE_MENU_ID]: {
             order: 0,

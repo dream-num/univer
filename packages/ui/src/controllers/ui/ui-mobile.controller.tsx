@@ -26,7 +26,7 @@ import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { MobileApp } from '../../views/MobileApp';
 import type { IUniverUIConfig } from '../config.schema';
-import { IMenu2Service } from '../../services/menu/menu2.service';
+import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { menuSchema } from '../menus/menu.schema';
 import type { IUIController, IWorkbenchOptions } from './ui.controller';
 
@@ -40,7 +40,7 @@ export class MobileUIController extends Disposable implements IUIController {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
@@ -51,7 +51,7 @@ export class MobileUIController extends Disposable implements IUIController {
     }
 
     private _initMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _bootstrapWorkbench(): void {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export enum Menu2Position {
+export enum MenuManagerPosition {
     RIBBON = 'ribbon',
     CONTEXT_MENU = 'contextMenu',
 }

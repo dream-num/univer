@@ -16,7 +16,7 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { ComponentManager, IMenu2Service, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { CommentSingle } from '@univerjs/icons';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -47,7 +47,7 @@ export class SheetsThreadCommentController extends Disposable {
     private _selectionShapeInfo: Nullable<ISelectionShapeInfo> = null;
 
     constructor(
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ICommandService private readonly _commandService: ICommandService,
@@ -138,7 +138,7 @@ export class SheetsThreadCommentController extends Disposable {
     }
 
     private _initMenu() {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initComponent() {

@@ -468,8 +468,8 @@ export class SelectionControl extends Disposable {
 
         this._updateWidgets(selectionStyle);
 
-        this.selectionShape.show();
-        this.selectionShape.translate(startX, startY);
+        this.selectionShapeGroup.show();
+        this.selectionShapeGroup.translate(startX, startY);
 
         // this._selectionStyle = selectionStyle;
 
@@ -477,7 +477,7 @@ export class SelectionControl extends Disposable {
 
         // this._columnHeaderHeight = columnHeaderHeight || 0;
 
-        this.selectionShape.makeDirtyNoDebounce(true);
+        this.selectionShapeGroup.makeDirtyNoDebounce(true);
     }
 
     updateStyle(style: ISelectionStyle): void {
